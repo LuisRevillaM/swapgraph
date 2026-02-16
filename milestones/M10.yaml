@@ -1,0 +1,17 @@
+name: M10
+commands:
+  - cmd: "npm run verify:m10"
+artifacts:
+  - artifact: "docs/prd/M10.md"
+  - artifact: "docs/spec/schemas/SettlementTimeline.schema.json"
+  - artifact: "docs/spec/examples/SettlementTimeline.example.json"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/api/manifest.v1.json"
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+  - artifact: "docs/spec/examples/api/settlement.instructions.response.json"
+  - artifact: "docs/spec/examples/api/settlement.status.response.json"
+  - artifact: "docs/spec/examples/api/receipts.get.response.json"
+  - artifact: "artifacts/milestones/M10/latest/schema_validation.json"
+  - artifact: "artifacts/milestones/M10/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M10/latest/assertions.json"
+  - artifact: "artifacts/milestones/M10/latest/commands.log"

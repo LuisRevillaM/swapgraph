@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/SettlementStatusGetResponse.schema.json",
+  "title": "SettlementStatusGetResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["timeline"],
+  "properties": {
+    "timeline": { "$ref": "SettlementTimeline.schema.json" }
+  }
+}

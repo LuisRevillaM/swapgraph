@@ -41,6 +41,20 @@
       "file": "commits.get.response.json",
       "schema": "CommitGetResponse.schema.json"
     },
+
+    {
+      "file": "settlement.instructions.response.json",
+      "schema": "SettlementInstructionsGetResponse.schema.json"
+    },
+    {
+      "file": "settlement.status.response.json",
+      "schema": "SettlementStatusGetResponse.schema.json"
+    },
+    {
+      "file": "receipts.get.response.json",
+      "schema": "SwapReceiptGetResponse.schema.json"
+    },
+
     {
       "file": "error.example.json",
       "schema": "ErrorResponse.schema.json"

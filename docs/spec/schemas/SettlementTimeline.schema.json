@@ -4,7 +4,7 @@
   "title": "SettlementTimeline",
   "type": "object",
   "additionalProperties": false,
-  "required": ["cycle_id", "state", "updated_at"],
+  "required": ["cycle_id", "state", "legs", "updated_at"],
   "properties": {
     "cycle_id": { "type": "string", "minLength": 1 },
     "state": {
@@ -23,7 +23,34 @@
       "type": "array",
       "items": {
         "type": "object",
-        "additionalProperties": true
+        "additionalProperties": false,
+        "required": [
+          "leg_id",
+          "intent_id",
+          "from_actor",
+          "to_actor",
+          "assets",
+          "status",
+          "deposit_deadline_at"
+        ],
+        "properties": {
+          "leg_id": { "type": "string", "minLength": 1 },
+          "intent_id": { "type": "string", "minLength": 1 },
+          "from_actor": { "$ref": "ActorRef.schema.json" },
+          "to_actor": { "$ref": "ActorRef.schema.json" },
+          "assets": { "type": "array", "minItems": 1, "items": { "$ref": "AssetRef.schema.json" } },
+          "status": { "type": "string", "enum": ["pending", "deposited", "released", "refunded"] },
+
+          "deposit_deadline_at": { "type": "string", "format": "date-time" },
+          "deposit_ref": { "type": "string" },
+          "deposited_at": { "type": "string", "format": "date-time" },
+
+          "release_ref": { "type": "string" },
+          "released_at": { "type": "string", "format": "date-time" },
+
+          "refund_ref": { "type": "string" },
+          "refunded_at": { "type": "string", "format": "date-time" }
+        }
       }
     },
     "updated_at": { "type": "string", "format": "date-time" }

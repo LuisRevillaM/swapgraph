@@ -1,0 +1,12 @@
+{
+  "receipt": {
+    "id": "receipt_1",
+    "cycle_id": "cycle_456",
+    "final_state": "completed",
+    "intent_ids": ["intent_a", "intent_b"],
+    "asset_ids": ["assetA", "assetB"],
+    "fees": [{ "actor": { "type": "user", "id": "u1" }, "fee_usd": 1.25 }],
+    "created_at": "2026-02-16T00:05:00Z",
+    "signature": { "key_id": "dev-k1", "alg": "ed25519", "sig": "BASE64_SIGNATURE" }
+  }
+}

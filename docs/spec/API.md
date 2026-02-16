@@ -39,6 +39,13 @@ Commit endpoints:
 - `POST /cycle-proposals/{id}/decline`
 - `GET /commits/{id}`
 
+Settlement endpoints:
+- `GET /settlement/{cycle_id}/instructions`
+- `GET /settlement/{cycle_id}/status`
+
+Receipt endpoints:
+- `GET /receipts/{cycle_id}`
+
 (Implementation is fixtures-first; server transport comes later.)
 
 ## Webhooks (v1)

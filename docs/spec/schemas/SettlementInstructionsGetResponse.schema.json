@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/SettlementInstructionsGetResponse.schema.json",
+  "title": "SettlementInstructionsGetResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["timeline"],
+  "properties": {
+    "timeline": { "$ref": "SettlementTimeline.schema.json" },
+    "instructions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    }
+  }
+}

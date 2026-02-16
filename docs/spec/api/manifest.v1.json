@@ -78,6 +78,28 @@
       "operation_id": "commits.get",
       "idempotency_required": false,
       "response_schema": "CommitGetResponse.schema.json"
+    },
+
+    {
+      "method": "GET",
+      "path": "/settlement/{cycle_id}/instructions",
+      "operation_id": "settlement.instructions",
+      "idempotency_required": false,
+      "response_schema": "SettlementInstructionsGetResponse.schema.json"
+    },
+    {
+      "method": "GET",
+      "path": "/settlement/{cycle_id}/status",
+      "operation_id": "settlement.status",
+      "idempotency_required": false,
+      "response_schema": "SettlementStatusGetResponse.schema.json"
+    },
+    {
+      "method": "GET",
+      "path": "/receipts/{cycle_id}",
+      "operation_id": "receipts.get",
+      "idempotency_required": false,
+      "response_schema": "SwapReceiptGetResponse.schema.json"
     }
   ],
   "webhooks": {
