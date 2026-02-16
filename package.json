@@ -1,0 +1,10 @@
+{
+  "name": "swapgraph",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "verify:m0": "bash verify/m0.sh",
+    "test": "node --test"
+  }
+}

@@ -1,0 +1,8 @@
+name: M0
+commands:
+  - cmd: "npm run verify:m0"
+artifacts:
+  - artifact: "docs/prd/M0.md"
+  - artifact: "docs/spec/GAPS.md"
+  - artifact: "artifacts/milestones/M0/latest/assertions.json"
+  - artifact: "artifacts/milestones/M0/latest/commands.log"

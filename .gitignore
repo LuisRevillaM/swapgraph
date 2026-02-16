@@ -1,0 +1,17 @@
+# Node
+node_modules/
+
+# Env
+.env
+.env.*
+
+# Logs
+*.log
+
+# Artifacts (keep directory placeholders)
+artifacts/**
+!artifacts/.gitkeep
+!artifacts/milestones/.gitkeep
+
+# OS
+.DS_Store

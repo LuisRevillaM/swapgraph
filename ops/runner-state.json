@@ -1,0 +1,12 @@
+{
+  "status": "planning",
+  "milestone": "M0",
+  "phase": "init",
+  "attempt": 0,
+  "starting_head": null,
+  "ending_head": null,
+  "last_commit": null,
+  "last_heartbeat_at": null,
+  "lease_expires_at": null,
+  "notes": "Initialized from scratch. PLAN not yet approved."
+}
