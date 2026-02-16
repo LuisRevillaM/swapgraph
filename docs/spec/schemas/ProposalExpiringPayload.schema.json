@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/ProposalExpiringPayload.schema.json",
+  "title": "ProposalExpiringPayload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["proposal_id", "expires_at"],
+  "properties": {
+    "proposal_id": { "type": "string", "minLength": 1 },
+    "expires_at": { "type": "string", "format": "date-time" }
+  }
+}

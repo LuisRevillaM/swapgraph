@@ -1,0 +1,20 @@
+{
+  "intents": {
+    "intent_a": { "reserved": false, "cycle_id": "cycle_456" },
+    "intent_b": { "reserved": false, "cycle_id": "cycle_456" },
+    "intent_c": { "reserved": false, "cycle_id": "cycle_456" }
+  },
+  "proposals": {
+    "cycle_456": { "expires_at": "2026-02-17T12:00:00Z" }
+  },
+  "cycles": {
+    "cycle_456": { "state": "accepted" }
+  },
+  "receipts": {
+    "receipt_1": { "cycle_id": "cycle_456", "final_state": "completed" }
+  },
+  "stats": {
+    "events_total": 10,
+    "events_deduped": 9
+  }
+}

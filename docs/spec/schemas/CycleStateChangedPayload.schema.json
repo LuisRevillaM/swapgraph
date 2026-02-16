@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/CycleStateChangedPayload.schema.json",
+  "title": "CycleStateChangedPayload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["cycle_id", "to_state"],
+  "properties": {
+    "cycle_id": { "type": "string", "minLength": 1 },
+    "from_state": { "type": "string" },
+    "to_state": {
+      "type": "string",
+      "enum": [
+        "proposed",
+        "accepted",
+        "escrow.pending",
+        "escrow.ready",
+        "executing",
+        "completed",
+        "failed"
+      ]
+    },
+    "reason_code": { "type": "string" }
+  }
+}

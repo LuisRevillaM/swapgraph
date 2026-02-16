@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/ProposalCreatedPayload.schema.json",
+  "title": "ProposalCreatedPayload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["proposal"],
+  "properties": {
+    "proposal": { "$ref": "CycleProposal.schema.json" }
+  }
+}

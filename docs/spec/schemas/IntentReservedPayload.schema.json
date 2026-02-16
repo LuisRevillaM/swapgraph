@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/IntentReservedPayload.schema.json",
+  "title": "IntentReservedPayload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["intent_id", "cycle_id"],
+  "properties": {
+    "intent_id": { "type": "string", "minLength": 1 },
+    "cycle_id": { "type": "string", "minLength": 1 },
+    "reserved_until": { "type": "string", "format": "date-time" }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "id": "swapgraph-events-v1",
+  "event_envelope_schema": "EventEnvelope.schema.json",
+  "event_types": [
+    { "type": "proposal.created", "payload_schema": "ProposalCreatedPayload.schema.json" },
+    { "type": "proposal.expiring", "payload_schema": "ProposalExpiringPayload.schema.json" },
+    { "type": "intent.reserved", "payload_schema": "IntentReservedPayload.schema.json" },
+    { "type": "intent.unreserved", "payload_schema": "IntentUnreservedPayload.schema.json" },
+    { "type": "cycle.state_changed", "payload_schema": "CycleStateChangedPayload.schema.json" },
+    { "type": "receipt.created", "payload_schema": "ReceiptCreatedPayload.schema.json" }
+  ],
+  "checkpoint": {
+    "format": { "last_event_id": "<event_id>" }
+  }
+}

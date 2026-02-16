@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/ReceiptCreatedPayload.schema.json",
+  "title": "ReceiptCreatedPayload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["receipt"],
+  "properties": {
+    "receipt": { "$ref": "SwapReceipt.schema.json" }
+  }
+}
