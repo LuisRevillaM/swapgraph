@@ -1,0 +1,17 @@
+name: M11
+commands:
+  - cmd: "npm run verify:m11"
+artifacts:
+  - artifact: "docs/prd/M11.md"
+  - artifact: "docs/spec/EVENTS.md"
+  - artifact: "docs/spec/events/manifest.v1.json"
+  - artifact: "docs/spec/schemas/SettlementDepositRequiredPayload.schema.json"
+  - artifact: "docs/spec/schemas/SettlementDepositConfirmedPayload.schema.json"
+  - artifact: "docs/spec/schemas/SettlementExecutingPayload.schema.json"
+  - artifact: "fixtures/settlement/m11_scenario.json"
+  - artifact: "fixtures/settlement/m11_expected.json"
+  - artifact: "artifacts/milestones/M11/latest/settlement_events_output.json"
+  - artifact: "artifacts/milestones/M11/latest/events_outbox.ndjson"
+  - artifact: "artifacts/milestones/M11/latest/events_validation.json"
+  - artifact: "artifacts/milestones/M11/latest/assertions.json"
+  - artifact: "artifacts/milestones/M11/latest/commands.log"

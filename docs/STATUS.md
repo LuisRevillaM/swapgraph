@@ -19,10 +19,10 @@ Last updated: 2026-02-16
 - M8: ✅ accept-window expiry (cancel accept-phase commit after proposal expiry + release reservations)
 - M9: ✅ settlement timeline simulator (deposit → escrow.ready → executing → receipt, plus deposit-timeout unwind)
 - M10: ✅ settlement + receipts REST contract endpoints + strict SettlementTimeline legs schema
+- M11: ✅ settlement event types (deposit_required / deposit_confirmed / executing) + payload schemas + verifier
 
 ## Next
-- M11: settlement event types (deposit_required / deposit_confirmed / executing) + payload schemas + verifier
-  - align with plan section 11.3 (webhooks/streams) while keeping events append-only + replayable
+- M12: event replay v2 (extend replay harness to include settlement/receipt summaries + checkpoint demo)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.

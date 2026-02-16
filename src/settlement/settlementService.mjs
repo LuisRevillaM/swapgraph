@@ -32,6 +32,57 @@ function buildCycleStateChangedEvent({ cycleId, fromState, toState, reasonCode, 
   };
 }
 
+function buildSettlementDepositRequiredEvent({ cycleId, depositDeadlineAt, actor, occurredAt }) {
+  const type = 'settlement.deposit_required';
+  const correlationId = `corr_${cycleId}`;
+  const event_id = stableEventId({ type, correlationId, key: `deposit_required|${depositDeadlineAt}` });
+  return {
+    event_id,
+    type,
+    occurred_at: occurredAt,
+    correlation_id: correlationId,
+    actor,
+    payload: {
+      cycle_id: cycleId,
+      deposit_deadline_at: depositDeadlineAt
+    }
+  };
+}
+
+function buildSettlementDepositConfirmedEvent({ cycleId, intentId, depositRef, actor, occurredAt }) {
+  const type = 'settlement.deposit_confirmed';
+  const correlationId = `corr_${cycleId}`;
+  const event_id = stableEventId({ type, correlationId, key: `${intentId}|${depositRef}` });
+  return {
+    event_id,
+    type,
+    occurred_at: occurredAt,
+    correlation_id: correlationId,
+    actor,
+    payload: {
+      cycle_id: cycleId,
+      intent_id: intentId,
+      deposit_ref: depositRef
+    }
+  };
+}
+
+function buildSettlementExecutingEvent({ cycleId, actor, occurredAt }) {
+  const type = 'settlement.executing';
+  const correlationId = `corr_${cycleId}`;
+  const event_id = stableEventId({ type, correlationId, key: 'executing' });
+  return {
+    event_id,
+    type,
+    occurred_at: occurredAt,
+    correlation_id: correlationId,
+    actor,
+    payload: {
+      cycle_id: cycleId
+    }
+  };
+}
+
 function buildIntentUnreservedEvent({ intentId, cycleId, reason, actor, occurredAt }) {
   const type = 'intent.unreserved';
   const correlationId = `corr_${cycleId}`;
@@ -128,6 +179,13 @@ export class SettlementService {
       occurredAt
     }));
 
+    this.store.state.events.push(buildSettlementDepositRequiredEvent({
+      cycleId: proposal.id,
+      depositDeadlineAt,
+      actor,
+      occurredAt
+    }));
+
     return { ok: true, timeline, replayed: false };
   }
 
@@ -147,6 +205,14 @@ export class SettlementService {
       leg.deposit_ref = depositRef;
       leg.deposited_at = occurredAt;
       timeline.updated_at = occurredAt;
+
+      this.store.state.events.push(buildSettlementDepositConfirmedEvent({
+        cycleId,
+        intentId: leg.intent_id,
+        depositRef,
+        actor,
+        occurredAt
+      }));
     } else if (leg.status === 'deposited') {
       if (leg.deposit_ref !== depositRef) {
         return { ok: false, error: { code: 'CONFLICT', message: 'deposit already confirmed with a different reference', details: { cycle_id: cycleId, actor, existing_ref: leg.deposit_ref, new_ref: depositRef } } };
@@ -190,6 +256,8 @@ export class SettlementService {
       actor,
       occurredAt
     }));
+
+    this.store.state.events.push(buildSettlementExecutingEvent({ cycleId, actor, occurredAt }));
 
     return { ok: true, timeline };
   }

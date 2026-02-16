@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/SettlementDepositRequiredPayload.schema.json",
+  "title": "SettlementDepositRequiredPayload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["cycle_id", "deposit_deadline_at"],
+  "properties": {
+    "cycle_id": { "type": "string", "minLength": 1 },
+    "deposit_deadline_at": { "type": "string", "format": "date-time" }
+  }
+}

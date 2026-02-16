@@ -8,6 +8,11 @@
     { "type": "intent.reserved", "payload_schema": "IntentReservedPayload.schema.json" },
     { "type": "intent.unreserved", "payload_schema": "IntentUnreservedPayload.schema.json" },
     { "type": "cycle.state_changed", "payload_schema": "CycleStateChangedPayload.schema.json" },
+
+    { "type": "settlement.deposit_required", "payload_schema": "SettlementDepositRequiredPayload.schema.json" },
+    { "type": "settlement.deposit_confirmed", "payload_schema": "SettlementDepositConfirmedPayload.schema.json" },
+    { "type": "settlement.executing", "payload_schema": "SettlementExecutingPayload.schema.json" },
+
     { "type": "receipt.created", "payload_schema": "ReceiptCreatedPayload.schema.json" }
   ],
   "checkpoint": {

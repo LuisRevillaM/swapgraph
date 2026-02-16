@@ -23,9 +23,16 @@ Every event is wrapped in an envelope with:
 - `proposal.created`
 - `proposal.expiring`
 - `cycle.state_changed`
-- `receipt.created`
 - `intent.reserved`
 - `intent.unreserved`
+
+Settlement-specific (additive; emitted alongside `cycle.state_changed`):
+- `settlement.deposit_required`
+- `settlement.deposit_confirmed`
+- `settlement.executing`
+
+Terminal receipt:
+- `receipt.created`
 
 ## Verification
 - M3 produces an append-only event log and demonstrates replay into a reconstructed state.

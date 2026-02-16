@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/SettlementDepositConfirmedPayload.schema.json",
+  "title": "SettlementDepositConfirmedPayload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["cycle_id", "intent_id", "deposit_ref"],
+  "properties": {
+    "cycle_id": { "type": "string", "minLength": 1 },
+    "intent_id": { "type": "string", "minLength": 1 },
+    "deposit_ref": { "type": "string", "minLength": 1 }
+  }
+}

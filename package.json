@@ -15,6 +15,7 @@
     "verify:m8": "bash verify/m8.sh",
     "verify:m9": "bash verify/m9.sh",
     "verify:m10": "bash verify/m10.sh",
+    "verify:m11": "bash verify/m11.sh",
     "test": "node --test"
   },
   "devDependencies": {

@@ -1,0 +1,181 @@
+{
+  "operations": [
+    {
+      "commit_phase": "accept",
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.accept",
+      "proposal_id": "cycle_4f27eb196224",
+      "replayed": false
+    },
+    {
+      "commit_phase": "accept",
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.accept",
+      "proposal_id": "cycle_4f27eb196224",
+      "replayed": false
+    },
+    {
+      "commit_phase": "ready",
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.accept",
+      "proposal_id": "cycle_4f27eb196224",
+      "replayed": false
+    },
+    {
+      "commit_phase": "accept",
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.accept",
+      "proposal_id": "cycle_961f2288e6f7",
+      "replayed": false
+    },
+    {
+      "commit_phase": "ready",
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.accept",
+      "proposal_id": "cycle_961f2288e6f7",
+      "replayed": false
+    },
+    {
+      "cycle_id": "cycle_4f27eb196224",
+      "ok": true,
+      "op": "settlement.start",
+      "replayed": false,
+      "timeline_state": "escrow.pending"
+    },
+    {
+      "cycle_id": "cycle_4f27eb196224",
+      "ok": true,
+      "op": "settlement.start",
+      "replayed": true,
+      "timeline_state": "escrow.pending"
+    },
+    {
+      "cycle_id": "cycle_4f27eb196224",
+      "ok": true,
+      "op": "settlement.deposit_confirmed",
+      "replayed": false,
+      "timeline_state": "escrow.pending"
+    },
+    {
+      "cycle_id": "cycle_4f27eb196224",
+      "ok": true,
+      "op": "settlement.deposit_confirmed",
+      "replayed": true,
+      "timeline_state": "escrow.pending"
+    },
+    {
+      "cycle_id": "cycle_4f27eb196224",
+      "ok": true,
+      "op": "settlement.deposit_confirmed",
+      "replayed": false,
+      "timeline_state": "escrow.pending"
+    },
+    {
+      "cycle_id": "cycle_4f27eb196224",
+      "ok": true,
+      "op": "settlement.deposit_confirmed",
+      "replayed": false,
+      "timeline_state": "escrow.ready"
+    },
+    {
+      "cycle_id": "cycle_4f27eb196224",
+      "ok": true,
+      "op": "settlement.begin_execution",
+      "timeline_state": "executing"
+    },
+    {
+      "cycle_id": "cycle_4f27eb196224",
+      "final_state": "completed",
+      "ok": true,
+      "op": "settlement.complete",
+      "receipt_id": "receipt_02cce1dcc083",
+      "timeline_state": "completed"
+    },
+    {
+      "cycle_id": "cycle_961f2288e6f7",
+      "ok": true,
+      "op": "settlement.start",
+      "replayed": false,
+      "timeline_state": "escrow.pending"
+    },
+    {
+      "cycle_id": "cycle_961f2288e6f7",
+      "ok": true,
+      "op": "settlement.deposit_confirmed",
+      "replayed": false,
+      "timeline_state": "escrow.pending"
+    },
+    {
+      "cycle_id": "cycle_961f2288e6f7",
+      "final_state": "failed",
+      "ok": true,
+      "op": "settlement.expire_deposit_window",
+      "receipt_id": "receipt_d74f010588e8",
+      "timeline_state": "failed"
+    }
+  ],
+  "settlement_events": {
+    "deposit_confirmed": [
+      {
+        "cycle_id": "cycle_4f27eb196224",
+        "deposit_ref": "dep_u1_p3",
+        "event_id": "evt_634e6327e4f2",
+        "intent_id": "intent_a"
+      },
+      {
+        "cycle_id": "cycle_4f27eb196224",
+        "deposit_ref": "dep_u2_p3",
+        "event_id": "evt_ef3ca735d082",
+        "intent_id": "intent_b"
+      },
+      {
+        "cycle_id": "cycle_4f27eb196224",
+        "deposit_ref": "dep_u3_p3",
+        "event_id": "evt_21286a9f8e1b",
+        "intent_id": "intent_c"
+      },
+      {
+        "cycle_id": "cycle_961f2288e6f7",
+        "deposit_ref": "dep_u5_p2",
+        "event_id": "evt_9b29ed55df39",
+        "intent_id": "intent_d"
+      }
+    ],
+    "deposit_required": [
+      {
+        "cycle_id": "cycle_4f27eb196224",
+        "deposit_deadline_at": "2026-02-17T00:00:00Z",
+        "event_id": "evt_b934f65d69f8"
+      },
+      {
+        "cycle_id": "cycle_961f2288e6f7",
+        "deposit_deadline_at": "2026-02-16T00:03:30Z",
+        "event_id": "evt_0f40ca9cfc36"
+      }
+    ],
+    "executing": [
+      {
+        "cycle_id": "cycle_4f27eb196224",
+        "event_id": "evt_9400845a60d0"
+      }
+    ]
+  },
+  "stats": {
+    "by_type": {
+      "cycle.state_changed": 8,
+      "intent.reserved": 5,
+      "intent.unreserved": 5,
+      "receipt.created": 2,
+      "settlement.deposit_confirmed": 4,
+      "settlement.deposit_required": 2,
+      "settlement.executing": 1
+    },
+    "events_total": 27,
+    "events_unique": 27
+  }
+}
