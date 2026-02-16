@@ -13,9 +13,10 @@ Last updated: 2026-02-16
 - M3: ✅ events contract (manifest + payload schemas) + replay proof
 - M4: ✅ SwapIntent ingestion core (create/update/cancel/get/list) + idempotency + persistence proof
 - M5: ✅ matching engine v1 (2–3 party cycles) + deterministic disjoint selection + schema-validated CycleProposals
+- M6: ✅ proposal delivery fixtures (polling payload + webhook event outbox using M3 envelopes; includes duplicate event_id)
 
 ## Next
-- M6: proposal delivery contract + fixtures (polling responses + webhook event emission using M3 envelopes)
+- M7: Commit handshake v1 (accept/decline + reservation locks + idempotency scenarios)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.
