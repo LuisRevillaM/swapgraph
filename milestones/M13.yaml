@@ -1,0 +1,10 @@
+name: M13
+commands:
+  - cmd: "npm run verify:m13"
+artifacts:
+  - artifact: "docs/prd/M13.md"
+  - artifact: "fixtures/settlement/m13_scenario.json"
+  - artifact: "fixtures/settlement/m13_expected.json"
+  - artifact: "artifacts/milestones/M13/latest/settlement_read_output.json"
+  - artifact: "artifacts/milestones/M13/latest/assertions.json"
+  - artifact: "artifacts/milestones/M13/latest/commands.log"
