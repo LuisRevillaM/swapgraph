@@ -36,4 +36,4 @@ We still store `tradable_at` / `trade_hold_days` so we can add a “slow lane”
 - [ ] M8 — Monetization surfaces: fee breakdown + Pro entitlements + boost guardrails
 
 ## Source
-- `docs/source/SwapGraph_System_Plan_v1.3_Feb2026.md`
+- `docs/source/LATEST.md` (currently v2.0)

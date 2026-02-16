@@ -7,7 +7,7 @@ Last updated: 2026-02-16
 - Next milestone: M0 (repo bootstrap)
 
 ## Links
-- System plan: `docs/source/SwapGraph_System_Plan_v1.3_Feb2026.md`
+- System plan: `docs/source/LATEST.md` (currently v2.0)
 
 ## Notes
 - Starting from scratch in this workspace.

@@ -3,7 +3,7 @@
 Multi-reciprocity swap platform for digital items (Steam-first wedge) using multi-party cycle matching + escrow-based settlement.
 
 ## Source spec
-- `docs/source/SwapGraph_System_Plan_v1.3_Feb2026.md`
+- `docs/source/LATEST.md`
 
 ## Quickstart
 ```bash
