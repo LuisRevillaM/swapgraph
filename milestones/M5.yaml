@@ -1,0 +1,10 @@
+name: M5
+commands:
+  - cmd: "npm run verify:m5"
+artifacts:
+  - artifact: "docs/prd/M5.md"
+  - artifact: "fixtures/matching/m5_input.json"
+  - artifact: "fixtures/matching/m5_expected.json"
+  - artifact: "artifacts/milestones/M5/latest/matching_output.json"
+  - artifact: "artifacts/milestones/M5/latest/assertions.json"
+  - artifact: "artifacts/milestones/M5/latest/commands.log"

@@ -1,0 +1,79 @@
+{
+  "asset_values_usd": {
+    "assetA": 100,
+    "assetB": 101,
+    "assetC": 99,
+    "assetD": 50,
+    "assetE": 51,
+    "assetF": 130
+  },
+  "intents": [
+    {
+      "id": "intent_a",
+      "actor": { "type": "user", "id": "u1" },
+      "offer": [{ "platform": "steam", "asset_id": "assetA" }],
+      "want_spec": { "type": "set", "any_of": [{ "type": "specific_asset", "platform": "steam", "asset_key": "steam:assetB" }] },
+      "value_band": { "min_usd": 90, "max_usd": 120, "pricing_source": "fixture" },
+      "trust_constraints": { "max_cycle_length": 3, "min_counterparty_reliability": 0 },
+      "time_constraints": { "expires_at": "2026-03-01T00:00:00Z", "urgency": "normal" },
+      "settlement_preferences": { "require_escrow": true }
+    },
+    {
+      "id": "intent_b",
+      "actor": { "type": "user", "id": "u2" },
+      "offer": [{ "platform": "steam", "asset_id": "assetB" }],
+      "want_spec": {
+        "type": "set",
+        "any_of": [
+          { "type": "specific_asset", "platform": "steam", "asset_key": "steam:assetC" },
+          { "type": "specific_asset", "platform": "steam", "asset_key": "steam:assetF" }
+        ]
+      },
+      "value_band": { "min_usd": 90, "max_usd": 140, "pricing_source": "fixture" },
+      "trust_constraints": { "max_cycle_length": 3, "min_counterparty_reliability": 0 },
+      "time_constraints": { "expires_at": "2026-03-01T00:00:00Z", "urgency": "normal" },
+      "settlement_preferences": { "require_escrow": true }
+    },
+    {
+      "id": "intent_c",
+      "actor": { "type": "user", "id": "u3" },
+      "offer": [{ "platform": "steam", "asset_id": "assetC" }],
+      "want_spec": { "type": "set", "any_of": [{ "type": "specific_asset", "platform": "steam", "asset_key": "steam:assetA" }] },
+      "value_band": { "min_usd": 90, "max_usd": 120, "pricing_source": "fixture" },
+      "trust_constraints": { "max_cycle_length": 3, "min_counterparty_reliability": 0 },
+      "time_constraints": { "expires_at": "2026-03-01T00:00:00Z", "urgency": "normal" },
+      "settlement_preferences": { "require_escrow": true }
+    },
+    {
+      "id": "intent_f",
+      "actor": { "type": "user", "id": "u4" },
+      "offer": [{ "platform": "steam", "asset_id": "assetF" }],
+      "want_spec": { "type": "set", "any_of": [{ "type": "specific_asset", "platform": "steam", "asset_key": "steam:assetA" }] },
+      "value_band": { "min_usd": 90, "max_usd": 120, "pricing_source": "fixture" },
+      "trust_constraints": { "max_cycle_length": 3, "min_counterparty_reliability": 0 },
+      "time_constraints": { "expires_at": "2026-03-01T00:00:00Z", "urgency": "normal" },
+      "settlement_preferences": { "require_escrow": true }
+    },
+
+    {
+      "id": "intent_d",
+      "actor": { "type": "user", "id": "u5" },
+      "offer": [{ "platform": "steam", "asset_id": "assetD" }],
+      "want_spec": { "type": "set", "any_of": [{ "type": "specific_asset", "platform": "steam", "asset_key": "steam:assetE" }] },
+      "value_band": { "min_usd": 40, "max_usd": 60, "pricing_source": "fixture" },
+      "trust_constraints": { "max_cycle_length": 2, "min_counterparty_reliability": 0 },
+      "time_constraints": { "expires_at": "2026-03-01T00:00:00Z", "urgency": "normal" },
+      "settlement_preferences": { "require_escrow": true }
+    },
+    {
+      "id": "intent_e",
+      "actor": { "type": "user", "id": "u6" },
+      "offer": [{ "platform": "steam", "asset_id": "assetE" }],
+      "want_spec": { "type": "set", "any_of": [{ "type": "specific_asset", "platform": "steam", "asset_key": "steam:assetD" }] },
+      "value_band": { "min_usd": 40, "max_usd": 60, "pricing_source": "fixture" },
+      "trust_constraints": { "max_cycle_length": 2, "min_counterparty_reliability": 0 },
+      "time_constraints": { "expires_at": "2026-03-01T00:00:00Z", "urgency": "normal" },
+      "settlement_preferences": { "require_escrow": true }
+    }
+  ]
+}

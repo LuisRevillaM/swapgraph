@@ -1,0 +1,207 @@
+{
+  "proposals": [
+    {
+      "id": "cycle_961f2288e6f7",
+      "expires_at": "2026-03-01T00:00:00Z",
+      "participants": [
+        {
+          "intent_id": "intent_d",
+          "actor": {
+            "type": "user",
+            "id": "u5"
+          },
+          "give": [
+            {
+              "platform": "steam",
+              "asset_id": "assetD"
+            }
+          ],
+          "get": [
+            {
+              "platform": "steam",
+              "asset_id": "assetE"
+            }
+          ]
+        },
+        {
+          "intent_id": "intent_e",
+          "actor": {
+            "type": "user",
+            "id": "u6"
+          },
+          "give": [
+            {
+              "platform": "steam",
+              "asset_id": "assetE"
+            }
+          ],
+          "get": [
+            {
+              "platform": "steam",
+              "asset_id": "assetD"
+            }
+          ]
+        }
+      ],
+      "confidence_score": 0.8804,
+      "value_spread": 0.0196,
+      "fee_breakdown": [
+        {
+          "actor": {
+            "type": "user",
+            "id": "u5"
+          },
+          "fee_usd": 0.51
+        },
+        {
+          "actor": {
+            "type": "user",
+            "id": "u6"
+          },
+          "fee_usd": 0.5
+        }
+      ],
+      "explainability": [
+        "All wants satisfied within explicit constraints",
+        "cycle_length=2",
+        "value_spread=0.0196",
+        "confidence_score=0.8804"
+      ]
+    },
+    {
+      "id": "cycle_4f27eb196224",
+      "expires_at": "2026-03-01T00:00:00Z",
+      "participants": [
+        {
+          "intent_id": "intent_a",
+          "actor": {
+            "type": "user",
+            "id": "u1"
+          },
+          "give": [
+            {
+              "platform": "steam",
+              "asset_id": "assetA"
+            }
+          ],
+          "get": [
+            {
+              "platform": "steam",
+              "asset_id": "assetB"
+            }
+          ]
+        },
+        {
+          "intent_id": "intent_b",
+          "actor": {
+            "type": "user",
+            "id": "u2"
+          },
+          "give": [
+            {
+              "platform": "steam",
+              "asset_id": "assetB"
+            }
+          ],
+          "get": [
+            {
+              "platform": "steam",
+              "asset_id": "assetC"
+            }
+          ]
+        },
+        {
+          "intent_id": "intent_c",
+          "actor": {
+            "type": "user",
+            "id": "u3"
+          },
+          "give": [
+            {
+              "platform": "steam",
+              "asset_id": "assetC"
+            }
+          ],
+          "get": [
+            {
+              "platform": "steam",
+              "asset_id": "assetA"
+            }
+          ]
+        }
+      ],
+      "confidence_score": 0.8302,
+      "value_spread": 0.0198,
+      "fee_breakdown": [
+        {
+          "actor": {
+            "type": "user",
+            "id": "u1"
+          },
+          "fee_usd": 1.01
+        },
+        {
+          "actor": {
+            "type": "user",
+            "id": "u2"
+          },
+          "fee_usd": 0.99
+        },
+        {
+          "actor": {
+            "type": "user",
+            "id": "u3"
+          },
+          "fee_usd": 1
+        }
+      ],
+      "explainability": [
+        "All wants satisfied within explicit constraints",
+        "cycle_length=3",
+        "value_spread=0.0198",
+        "confidence_score=0.8302"
+      ]
+    }
+  ],
+  "trace": [
+    {
+      "cycle": [
+        "intent_d",
+        "intent_e"
+      ],
+      "proposal_id": "cycle_961f2288e6f7",
+      "score": 0.8804,
+      "selected": true,
+      "reason": "picked"
+    },
+    {
+      "cycle": [
+        "intent_a",
+        "intent_b",
+        "intent_c"
+      ],
+      "proposal_id": "cycle_4f27eb196224",
+      "score": 0.8302,
+      "selected": true,
+      "reason": "picked"
+    },
+    {
+      "cycle": [
+        "intent_a",
+        "intent_b",
+        "intent_f"
+      ],
+      "proposal_id": "cycle_61c867eba088",
+      "score": 0.6192,
+      "selected": false,
+      "reason": "conflict_shared_intent"
+    }
+  ],
+  "stats": {
+    "intents_active": 6,
+    "edges": 7,
+    "candidate_cycles": 3,
+    "candidate_proposals": 3,
+    "selected_proposals": 2
+  }
+}
