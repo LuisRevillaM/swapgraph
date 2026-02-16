@@ -1,0 +1,13 @@
+name: M7
+commands:
+  - cmd: "npm run verify:m7"
+artifacts:
+  - artifact: "docs/prd/M7.md"
+  - artifact: "docs/spec/COMMIT.md"
+  - artifact: "fixtures/commit/m7_scenario.json"
+  - artifact: "fixtures/commit/m7_expected.json"
+  - artifact: "artifacts/milestones/M7/latest/commit_output.json"
+  - artifact: "artifacts/milestones/M7/latest/events_outbox.ndjson"
+  - artifact: "artifacts/milestones/M7/latest/events_validation.json"
+  - artifact: "artifacts/milestones/M7/latest/assertions.json"
+  - artifact: "artifacts/milestones/M7/latest/commands.log"

@@ -54,6 +54,30 @@
       "operation_id": "cycleProposals.get",
       "idempotency_required": false,
       "response_schema": "CycleProposalGetResponse.schema.json"
+    },
+
+    {
+      "method": "POST",
+      "path": "/cycle-proposals/{id}/accept",
+      "operation_id": "cycleProposals.accept",
+      "idempotency_required": true,
+      "request_schema": "CommitAcceptRequest.schema.json",
+      "response_schema": "CommitResponse.schema.json"
+    },
+    {
+      "method": "POST",
+      "path": "/cycle-proposals/{id}/decline",
+      "operation_id": "cycleProposals.decline",
+      "idempotency_required": true,
+      "request_schema": "CommitDeclineRequest.schema.json",
+      "response_schema": "CommitResponse.schema.json"
+    },
+    {
+      "method": "GET",
+      "path": "/commits/{id}",
+      "operation_id": "commits.get",
+      "idempotency_required": false,
+      "response_schema": "CommitGetResponse.schema.json"
     }
   ],
   "webhooks": {

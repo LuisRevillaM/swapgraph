@@ -1,0 +1,13 @@
+{
+  "commit": {
+    "id": "commit_1",
+    "cycle_id": "cycle_456",
+    "phase": "cancelled",
+    "participants": [
+      { "actor": { "type": "user", "id": "u1" }, "status": "declined" },
+      { "actor": { "type": "user", "id": "u2" }, "status": "pending" }
+    ],
+    "created_at": "2026-02-16T00:00:00Z",
+    "updated_at": "2026-02-16T00:00:00Z"
+  }
+}

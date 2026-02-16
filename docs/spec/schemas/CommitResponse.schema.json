@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/CommitResponse.schema.json",
+  "title": "CommitResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["commit"],
+  "properties": {
+    "commit": { "$ref": "Commit.schema.json" }
+  }
+}

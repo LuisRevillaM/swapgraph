@@ -34,7 +34,12 @@ This doc defines the **contract** for the REST API and webhook delivery.
   - `GET /cycle-proposals` (list)
   - `GET /cycle-proposals/{id}`
 
-Commit endpoints are introduced in the commit milestone.
+Commit endpoints:
+- `POST /cycle-proposals/{id}/accept`
+- `POST /cycle-proposals/{id}/decline`
+- `GET /commits/{id}`
+
+(Implementation is fixtures-first; server transport comes later.)
 
 ## Webhooks (v1)
 Partners can receive:

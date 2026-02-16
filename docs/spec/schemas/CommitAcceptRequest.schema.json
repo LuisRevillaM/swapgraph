@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/CommitAcceptRequest.schema.json",
+  "title": "CommitAcceptRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["proposal_id"],
+  "properties": {
+    "proposal_id": { "type": "string", "minLength": 1 }
+  }
+}

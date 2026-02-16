@@ -11,6 +11,7 @@
     "verify:m4": "bash verify/m4.sh",
     "verify:m5": "bash verify/m5.sh",
     "verify:m6": "bash verify/m6.sh",
+    "verify:m7": "bash verify/m7.sh",
     "test": "node --test"
   },
   "devDependencies": {
@@ -18,4 +19,3 @@
     "ajv-formats": "3.0.1"
   }
 }
-

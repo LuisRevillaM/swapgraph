@@ -22,6 +22,26 @@
       "schema": "CycleProposalListResponse.schema.json"
     },
     {
+      "file": "cycle_proposals.accept.request.json",
+      "schema": "CommitAcceptRequest.schema.json"
+    },
+    {
+      "file": "cycle_proposals.accept.response.json",
+      "schema": "CommitResponse.schema.json"
+    },
+    {
+      "file": "cycle_proposals.decline.request.json",
+      "schema": "CommitDeclineRequest.schema.json"
+    },
+    {
+      "file": "cycle_proposals.decline.response.json",
+      "schema": "CommitResponse.schema.json"
+    },
+    {
+      "file": "commits.get.response.json",
+      "schema": "CommitGetResponse.schema.json"
+    },
+    {
       "file": "error.example.json",
       "schema": "ErrorResponse.schema.json"
     }

@@ -9,17 +9,20 @@ export class JsonStateStore {
   constructor({ filePath }) {
     if (!filePath) throw new Error('filePath is required');
     this.filePath = filePath;
-    this.state = { intents: {}, idempotency: {} };
+    this.state = { intents: {}, commits: {}, reservations: {}, events: [], idempotency: {} };
   }
 
   load() {
     if (!existsSync(this.filePath)) {
-      this.state = { intents: {}, idempotency: {} };
+      this.state = { intents: {}, commits: {}, reservations: {}, events: [], idempotency: {} };
       return;
     }
     const raw = readFileSync(this.filePath, 'utf8');
     this.state = JSON.parse(raw);
     this.state.intents ||= {};
+    this.state.commits ||= {};
+    this.state.reservations ||= {};
+    this.state.events ||= [];
     this.state.idempotency ||= {};
   }
 

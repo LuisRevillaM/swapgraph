@@ -14,9 +14,11 @@ Last updated: 2026-02-16
 - M4: ✅ SwapIntent ingestion core (create/update/cancel/get/list) + idempotency + persistence proof
 - M5: ✅ matching engine v1 (2–3 party cycles) + deterministic disjoint selection + schema-validated CycleProposals
 - M6: ✅ proposal delivery fixtures (polling payload + webhook event outbox using M3 envelopes; includes duplicate event_id)
+- M7: ✅ commit handshake v1 (accept/decline → ready) + reservation locks + idempotency replay + events outbox
 
 ## Next
-- M7: Commit handshake v1 (accept/decline + reservation locks + idempotency scenarios)
+- M8: Commit expiry/timeouts + proposal expiry semantics (and reservation release on expiry)
+  - this is the last “commit correctness” milestone before we start settlement simulation
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.
