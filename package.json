@@ -7,6 +7,10 @@
     "verify:m0": "bash verify/m0.sh",
     "verify:m1": "bash verify/m1.sh",
     "test": "node --test"
+  },
+  "devDependencies": {
+    "ajv": "8.18.0",
+    "ajv-formats": "3.0.1"
   }
 }
 
