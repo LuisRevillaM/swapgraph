@@ -1,0 +1,13 @@
+name: M6
+commands:
+  - cmd: "npm run verify:m6"
+artifacts:
+  - artifact: "docs/prd/M6.md"
+  - artifact: "fixtures/delivery/m6_input.json"
+  - artifact: "fixtures/delivery/m6_expected.json"
+  - artifact: "artifacts/milestones/M6/latest/polling_response.json"
+  - artifact: "artifacts/milestones/M6/latest/webhook_events.ndjson"
+  - artifact: "artifacts/milestones/M6/latest/delivery_output.json"
+  - artifact: "artifacts/milestones/M6/latest/delivery_validation.json"
+  - artifact: "artifacts/milestones/M6/latest/assertions.json"
+  - artifact: "artifacts/milestones/M6/latest/commands.log"

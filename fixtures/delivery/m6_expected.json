@@ -1,0 +1,467 @@
+{
+  "polling_response": {
+    "proposals": [
+      {
+        "id": "cycle_961f2288e6f7",
+        "expires_at": "2026-03-01T00:00:00Z",
+        "participants": [
+          {
+            "intent_id": "intent_d",
+            "actor": {
+              "type": "user",
+              "id": "u5"
+            },
+            "give": [
+              {
+                "platform": "steam",
+                "asset_id": "assetD"
+              }
+            ],
+            "get": [
+              {
+                "platform": "steam",
+                "asset_id": "assetE"
+              }
+            ]
+          },
+          {
+            "intent_id": "intent_e",
+            "actor": {
+              "type": "user",
+              "id": "u6"
+            },
+            "give": [
+              {
+                "platform": "steam",
+                "asset_id": "assetE"
+              }
+            ],
+            "get": [
+              {
+                "platform": "steam",
+                "asset_id": "assetD"
+              }
+            ]
+          }
+        ],
+        "confidence_score": 0.8804,
+        "value_spread": 0.0196,
+        "fee_breakdown": [
+          {
+            "actor": {
+              "type": "user",
+              "id": "u5"
+            },
+            "fee_usd": 0.51
+          },
+          {
+            "actor": {
+              "type": "user",
+              "id": "u6"
+            },
+            "fee_usd": 0.5
+          }
+        ],
+        "explainability": [
+          "All wants satisfied within explicit constraints",
+          "cycle_length=2",
+          "value_spread=0.0196",
+          "confidence_score=0.8804"
+        ]
+      },
+      {
+        "id": "cycle_4f27eb196224",
+        "expires_at": "2026-03-01T00:00:00Z",
+        "participants": [
+          {
+            "intent_id": "intent_a",
+            "actor": {
+              "type": "user",
+              "id": "u1"
+            },
+            "give": [
+              {
+                "platform": "steam",
+                "asset_id": "assetA"
+              }
+            ],
+            "get": [
+              {
+                "platform": "steam",
+                "asset_id": "assetB"
+              }
+            ]
+          },
+          {
+            "intent_id": "intent_b",
+            "actor": {
+              "type": "user",
+              "id": "u2"
+            },
+            "give": [
+              {
+                "platform": "steam",
+                "asset_id": "assetB"
+              }
+            ],
+            "get": [
+              {
+                "platform": "steam",
+                "asset_id": "assetC"
+              }
+            ]
+          },
+          {
+            "intent_id": "intent_c",
+            "actor": {
+              "type": "user",
+              "id": "u3"
+            },
+            "give": [
+              {
+                "platform": "steam",
+                "asset_id": "assetC"
+              }
+            ],
+            "get": [
+              {
+                "platform": "steam",
+                "asset_id": "assetA"
+              }
+            ]
+          }
+        ],
+        "confidence_score": 0.8302,
+        "value_spread": 0.0198,
+        "fee_breakdown": [
+          {
+            "actor": {
+              "type": "user",
+              "id": "u1"
+            },
+            "fee_usd": 1.01
+          },
+          {
+            "actor": {
+              "type": "user",
+              "id": "u2"
+            },
+            "fee_usd": 0.99
+          },
+          {
+            "actor": {
+              "type": "user",
+              "id": "u3"
+            },
+            "fee_usd": 1
+          }
+        ],
+        "explainability": [
+          "All wants satisfied within explicit constraints",
+          "cycle_length=3",
+          "value_spread=0.0198",
+          "confidence_score=0.8302"
+        ]
+      }
+    ]
+  },
+  "webhook_events": [
+    {
+      "event_id": "evt_3b99b0e3463a",
+      "type": "proposal.created",
+      "occurred_at": "2026-02-16T00:00:00Z",
+      "correlation_id": "corr_cycle_4f27eb196224",
+      "actor": {
+        "type": "partner",
+        "id": "swapgraph"
+      },
+      "payload": {
+        "proposal": {
+          "id": "cycle_4f27eb196224",
+          "expires_at": "2026-03-01T00:00:00Z",
+          "participants": [
+            {
+              "intent_id": "intent_a",
+              "actor": {
+                "type": "user",
+                "id": "u1"
+              },
+              "give": [
+                {
+                  "platform": "steam",
+                  "asset_id": "assetA"
+                }
+              ],
+              "get": [
+                {
+                  "platform": "steam",
+                  "asset_id": "assetB"
+                }
+              ]
+            },
+            {
+              "intent_id": "intent_b",
+              "actor": {
+                "type": "user",
+                "id": "u2"
+              },
+              "give": [
+                {
+                  "platform": "steam",
+                  "asset_id": "assetB"
+                }
+              ],
+              "get": [
+                {
+                  "platform": "steam",
+                  "asset_id": "assetC"
+                }
+              ]
+            },
+            {
+              "intent_id": "intent_c",
+              "actor": {
+                "type": "user",
+                "id": "u3"
+              },
+              "give": [
+                {
+                  "platform": "steam",
+                  "asset_id": "assetC"
+                }
+              ],
+              "get": [
+                {
+                  "platform": "steam",
+                  "asset_id": "assetA"
+                }
+              ]
+            }
+          ],
+          "confidence_score": 0.8302,
+          "value_spread": 0.0198,
+          "fee_breakdown": [
+            {
+              "actor": {
+                "type": "user",
+                "id": "u1"
+              },
+              "fee_usd": 1.01
+            },
+            {
+              "actor": {
+                "type": "user",
+                "id": "u2"
+              },
+              "fee_usd": 0.99
+            },
+            {
+              "actor": {
+                "type": "user",
+                "id": "u3"
+              },
+              "fee_usd": 1
+            }
+          ],
+          "explainability": [
+            "All wants satisfied within explicit constraints",
+            "cycle_length=3",
+            "value_spread=0.0198",
+            "confidence_score=0.8302"
+          ]
+        }
+      }
+    },
+    {
+      "event_id": "evt_d1092004fb8e",
+      "type": "proposal.created",
+      "occurred_at": "2026-02-16T00:00:00Z",
+      "correlation_id": "corr_cycle_961f2288e6f7",
+      "actor": {
+        "type": "partner",
+        "id": "swapgraph"
+      },
+      "payload": {
+        "proposal": {
+          "id": "cycle_961f2288e6f7",
+          "expires_at": "2026-03-01T00:00:00Z",
+          "participants": [
+            {
+              "intent_id": "intent_d",
+              "actor": {
+                "type": "user",
+                "id": "u5"
+              },
+              "give": [
+                {
+                  "platform": "steam",
+                  "asset_id": "assetD"
+                }
+              ],
+              "get": [
+                {
+                  "platform": "steam",
+                  "asset_id": "assetE"
+                }
+              ]
+            },
+            {
+              "intent_id": "intent_e",
+              "actor": {
+                "type": "user",
+                "id": "u6"
+              },
+              "give": [
+                {
+                  "platform": "steam",
+                  "asset_id": "assetE"
+                }
+              ],
+              "get": [
+                {
+                  "platform": "steam",
+                  "asset_id": "assetD"
+                }
+              ]
+            }
+          ],
+          "confidence_score": 0.8804,
+          "value_spread": 0.0196,
+          "fee_breakdown": [
+            {
+              "actor": {
+                "type": "user",
+                "id": "u5"
+              },
+              "fee_usd": 0.51
+            },
+            {
+              "actor": {
+                "type": "user",
+                "id": "u6"
+              },
+              "fee_usd": 0.5
+            }
+          ],
+          "explainability": [
+            "All wants satisfied within explicit constraints",
+            "cycle_length=2",
+            "value_spread=0.0196",
+            "confidence_score=0.8804"
+          ]
+        }
+      }
+    },
+    {
+      "event_id": "evt_3b99b0e3463a",
+      "type": "proposal.created",
+      "occurred_at": "2026-02-16T00:00:00Z",
+      "correlation_id": "corr_cycle_4f27eb196224",
+      "actor": {
+        "type": "partner",
+        "id": "swapgraph"
+      },
+      "payload": {
+        "proposal": {
+          "id": "cycle_4f27eb196224",
+          "expires_at": "2026-03-01T00:00:00Z",
+          "participants": [
+            {
+              "intent_id": "intent_a",
+              "actor": {
+                "type": "user",
+                "id": "u1"
+              },
+              "give": [
+                {
+                  "platform": "steam",
+                  "asset_id": "assetA"
+                }
+              ],
+              "get": [
+                {
+                  "platform": "steam",
+                  "asset_id": "assetB"
+                }
+              ]
+            },
+            {
+              "intent_id": "intent_b",
+              "actor": {
+                "type": "user",
+                "id": "u2"
+              },
+              "give": [
+                {
+                  "platform": "steam",
+                  "asset_id": "assetB"
+                }
+              ],
+              "get": [
+                {
+                  "platform": "steam",
+                  "asset_id": "assetC"
+                }
+              ]
+            },
+            {
+              "intent_id": "intent_c",
+              "actor": {
+                "type": "user",
+                "id": "u3"
+              },
+              "give": [
+                {
+                  "platform": "steam",
+                  "asset_id": "assetC"
+                }
+              ],
+              "get": [
+                {
+                  "platform": "steam",
+                  "asset_id": "assetA"
+                }
+              ]
+            }
+          ],
+          "confidence_score": 0.8302,
+          "value_spread": 0.0198,
+          "fee_breakdown": [
+            {
+              "actor": {
+                "type": "user",
+                "id": "u1"
+              },
+              "fee_usd": 1.01
+            },
+            {
+              "actor": {
+                "type": "user",
+                "id": "u2"
+              },
+              "fee_usd": 0.99
+            },
+            {
+              "actor": {
+                "type": "user",
+                "id": "u3"
+              },
+              "fee_usd": 1
+            }
+          ],
+          "explainability": [
+            "All wants satisfied within explicit constraints",
+            "cycle_length=3",
+            "value_spread=0.0198",
+            "confidence_score=0.8302"
+          ]
+        }
+      }
+    }
+  ],
+  "stats": {
+    "proposals": 2,
+    "events_total": 3,
+    "events_unique": 2
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "occurred_at": "2026-02-16T00:00:00Z",
+  "actor": { "type": "partner", "id": "swapgraph" },
+  "emit_duplicates": true,
+  "emit_expiring": false,
+  "proposals": []
+}
