@@ -16,9 +16,10 @@ Last updated: 2026-02-16
 - M6: ✅ proposal delivery fixtures (polling payload + webhook event outbox using M3 envelopes; includes duplicate event_id)
 - M7: ✅ commit handshake v1 (accept/decline → ready) + reservation locks + idempotency replay + events outbox
 
+- M8: ✅ accept-window expiry (cancel accept-phase commit after proposal expiry + release reservations)
+
 ## Next
-- M8: Commit expiry/timeouts + proposal expiry semantics (and reservation release on expiry)
-  - this is the last “commit correctness” milestone before we start settlement simulation
+- M9: settlement timeline simulator (escrow.pending→ready→executing + unwind reason codes)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.

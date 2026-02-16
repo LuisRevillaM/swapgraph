@@ -1,0 +1,13 @@
+name: M8
+commands:
+  - cmd: "npm run verify:m8"
+artifacts:
+  - artifact: "docs/prd/M8.md"
+  - artifact: "docs/spec/COMMIT.md"
+  - artifact: "fixtures/commit/m8_scenario.json"
+  - artifact: "fixtures/commit/m8_expected.json"
+  - artifact: "artifacts/milestones/M8/latest/expiry_output.json"
+  - artifact: "artifacts/milestones/M8/latest/events_outbox.ndjson"
+  - artifact: "artifacts/milestones/M8/latest/events_validation.json"
+  - artifact: "artifacts/milestones/M8/latest/assertions.json"
+  - artifact: "artifacts/milestones/M8/latest/commands.log"

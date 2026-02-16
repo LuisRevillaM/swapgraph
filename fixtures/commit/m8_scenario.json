@@ -1,0 +1,15 @@
+{
+  "p3_expires_at": "2026-02-17T00:00:00Z",
+  "p2_expires_at": "2026-03-01T00:00:00Z",
+  "expire_now": "2026-02-18T00:00:00Z",
+  "actor_system": { "type": "partner", "id": "swapgraph" },
+  "operations": [
+    { "op": "cycleProposals.accept", "proposal_ref": "p3", "actor": {"type":"user","id":"u1"}, "idempotency_key": "a1", "occurred_at": "2026-02-16T00:00:10Z" },
+    { "op": "cycleProposals.accept", "proposal_ref": "p3", "actor": {"type":"user","id":"u2"}, "idempotency_key": "a2", "occurred_at": "2026-02-16T00:00:11Z" },
+
+    { "op": "cycleProposals.accept", "proposal_ref": "p2", "actor": {"type":"user","id":"u5"}, "idempotency_key": "b1", "occurred_at": "2026-02-16T00:00:12Z" },
+    { "op": "cycleProposals.accept", "proposal_ref": "p2", "actor": {"type":"user","id":"u6"}, "idempotency_key": "b2", "occurred_at": "2026-02-16T00:00:13Z" },
+
+    { "op": "expire.accept_window" }
+  ]
+}

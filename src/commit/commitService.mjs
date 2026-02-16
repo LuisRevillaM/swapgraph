@@ -52,21 +52,23 @@ function buildIntentUnreservedEvent({ intentId, cycleId, reason, actor, occurred
   };
 }
 
-function buildCycleStateChangedEvent({ cycleId, fromState, toState, actor, occurredAt }) {
+function buildCycleStateChangedEvent({ cycleId, fromState, toState, reasonCode, actor, occurredAt }) {
   const type = 'cycle.state_changed';
   const correlationId = `corr_${cycleId}`;
   const event_id = stableEventId({ type, correlationId, key: `${fromState}->${toState}` });
+  const payload = {
+    cycle_id: cycleId,
+    from_state: fromState,
+    to_state: toState
+  };
+  if (reasonCode) payload.reason_code = reasonCode;
   return {
     event_id,
     type,
     occurred_at: occurredAt,
     correlation_id: correlationId,
     actor,
-    payload: {
-      cycle_id: cycleId,
-      from_state: fromState,
-      to_state: toState
-    }
+    payload
   };
 }
 
@@ -289,6 +291,43 @@ export class CommitService {
         return { ok: true, body: { commit } };
       }
     });
+  }
+
+  expireAcceptPhase({ proposals, nowIso, actor }) {
+    if (!nowIso) throw new Error('nowIso is required');
+    const nowMs = Date.parse(nowIso);
+    if (!Number.isFinite(nowMs)) throw new Error('nowIso must be ISO date-time');
+
+    const expired = [];
+
+    for (const proposal of proposals ?? []) {
+      const expMs = Date.parse(proposal.expires_at);
+      if (!Number.isFinite(expMs)) throw new Error(`invalid proposal.expires_at for ${proposal.id}`);
+      if (nowMs <= expMs) continue;
+
+      const commitId = commitIdForProposalId(proposal.id);
+      const commit = this.store.state.commits[commitId];
+      if (!commit) continue;
+      if (commit.phase !== 'accept') continue; // accept window only
+
+      commit.phase = 'cancelled';
+      commit.updated_at = nowIso;
+
+      this._unreserveIntents({ commitId: commit.id, proposal, actorForEvent: actor, occurredAt: nowIso, reason: 'expired' });
+
+      this.store.state.events.push(buildCycleStateChangedEvent({
+        cycleId: proposal.id,
+        fromState: 'proposed',
+        toState: 'failed',
+        reasonCode: 'proposal_expired',
+        actor,
+        occurredAt: nowIso
+      }));
+
+      expired.push(commitId);
+    }
+
+    return { ok: true, expired_commit_ids: expired };
   }
 
   get({ actor, commitId }) {
