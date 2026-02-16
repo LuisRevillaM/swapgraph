@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/AssetRef.schema.json",
+  "title": "AssetRef",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["platform", "asset_id"],
+  "properties": {
+    "platform": { "type": "string", "enum": ["steam"] },
+    "app_id": { "type": "integer", "minimum": 0 },
+    "context_id": { "type": "integer", "minimum": 0 },
+
+    "asset_id": { "type": "string", "minLength": 1 },
+    "class_id": { "type": "string" },
+    "instance_id": { "type": "string" },
+
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    },
+
+    "proof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["inventory_snapshot_id", "verified_at"],
+      "properties": {
+        "inventory_snapshot_id": { "type": "string", "minLength": 1 },
+        "verified_at": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}

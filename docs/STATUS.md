@@ -3,12 +3,13 @@
 Last updated: 2026-02-16
 
 ## Autopilot
-- Status: planning (not approved)
-- Next milestone: M0 (repo bootstrap)
+- Status: **spec hardening** (not approved)
+- Canonical plan: `docs/source/LATEST.md` (v2.0)
 
-## Links
-- System plan: `docs/source/LATEST.md` (currently v2.0)
+## Current milestone
+- M0 is implemented (bootstrap + verification harness) and passes locally.
+- Next: M1–M3 spec+contracts so execution can be run as: implement → verify → artifact → repeat.
 
 ## Notes
-- Starting from scratch in this workspace.
-- Steam-first MVP; cross-ecosystem is architecture-only until a compliant Tier-2 adapter is selected.
+- We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.
+- Real Steam settlement is an operator-gated integration milestone (`INTEGRATION_ENABLED=1`).

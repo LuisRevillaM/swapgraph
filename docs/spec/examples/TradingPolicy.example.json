@@ -1,0 +1,8 @@
+{
+  "max_value_per_swap_usd": 100,
+  "max_value_per_day_usd": 250,
+  "min_confidence_score": 0.8,
+  "max_cycle_length": 3,
+  "require_escrow": true,
+  "quiet_hours": { "start": "22:00", "end": "07:00", "tz": "America/New_York" }
+}

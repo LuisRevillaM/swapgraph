@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/Commit.schema.json",
+  "title": "Commit",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "cycle_id", "phase", "participants", "created_at", "updated_at"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "cycle_id": { "type": "string", "minLength": 1 },
+    "phase": { "type": "string", "enum": ["accept", "ready", "cancelled"] },
+    "participants": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["actor", "status"],
+        "properties": {
+          "actor": { "$ref": "ActorRef.schema.json" },
+          "status": { "type": "string", "enum": ["pending", "accepted", "declined"] },
+          "commit_token": { "type": "string" }
+        }
+      }
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" }
+  }
+}

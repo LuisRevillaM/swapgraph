@@ -1,92 +1,128 @@
-# SwapGraph — Spec gaps / decisions log
+# SwapGraph v2.0 — Spec gaps / decisions log
 
-This document converts the v1.3 plan into a **decision list**. Items here should become:
-- explicit spec text (docs/spec/*), and/or
-- milestone acceptance criteria (docs/prd/Mx.md), and/or
-- automated verification (verify/mx.* + artifacts).
-
-## P0 (must decide before we build real Steam settlement)
-
-1) **Steam auth & inventory access reality check**
-- Plan says “Steam OAuth”. In practice we likely use Steam **OpenID** for login + a **Steam Web API key** (or other mechanism) for inventory.
-- Spec needed: exact auth flow, token storage, refresh/expiry, and what “verification_health” means.
-
-2) **Escrow operations model**
-- Single escrow identity vs multiple escrow bots (scaling + blast radius).
-- 2FA / mobile confirmations operational handling.
-- Rate limits, device isolation, incident playbooks, and key rotation expectations.
-
-3) **Atomicity semantics (define what we promise)**
-- “Everyone trades or nobody trades” must be translated into *protocol guarantees* vs *platform realities*.
-- Spec needed: what constitutes “partial release”, how we detect it, and the exact unwind + dispute escalation.
-
-4) **Trade holds / locks policy for MVP**
-- Plan: exclude OR support with longer timelines.
-- If we exclude: define exactly how we detect holds and which items are disallowed.
-- If we include: define UI + timeouts + how it affects cycle scoring/confidence.
-
-5) **Pricing sources & confidence**
-- Spec needed: pricing sources (Steam market? third-party?), refresh cadence, and “confidence_score” meaning.
-- Define how pricing affects: cycle scoring, UI spread disclosure, and fraud detection.
-
-## P1 (must decide before matching engine becomes “real”) 
-
-6) **Want Spec JSON schema (v1)**
-- Category taxonomy for CS2/Dota/TF2 (what’s a “knife finish”?), attribute constraints (wear/float/pattern/stickers), and exact validation rules.
-
-7) **Bundles**
-- Listing supports `offer_items[]` (multi-item bundles). Decide whether MVP supports bundles or restrict to single-asset listings.
-
-8) **Cycle length policy**
-- MVP says max length=3. Confirm whether we *only* propose 3-cycles, or allow 2-cycles when available.
-
-9) **Reservation/exclusivity semantics**
-- Plan describes reserving listings during proposal windows.
-- Spec needed: reservation TTL, collision handling, and idempotency keys for accept/decline.
-
-10) **Determinism and fairness**
-- Define the seeded ordering rules and the “age bonus” function.
-- Verification target: deterministic cycle selection given the same inputs.
-
-## P2 (should decide for trust/safety + monetization correctness)
-
-11) **Reliability score formula & tiers**
-- Plan lists ingredients; spec needs: formula, decay windows, and thresholds for risk tiers.
-
-12) **Dispute evidence requirements**
-- Define required receipt artifacts, log retention, and what counts as “platform proof”.
-
-13) **Limits and compliance boundaries**
-- Define caps (max value, daily swaps) and escalation conditions.
-- Decide whether/when stronger verification (KYC-like) is needed (jurisdiction-dependent).
-
-14) **Fees & fee allocation**
-- How are fees computed? per cycle vs per leg? who pays? rounding/min fee.
-
-15) **Boost semantics guardrails**
-- How boosts interact with fairness + anti-pay-to-win; hard constraints boosts cannot override.
-
-16) **Notification defaults & preferences**
-- Email defaults vs opt-in; Discord bot integration scope; frequency caps.
-
-## “Spec-able UX” gaps (to keep delight intact)
-
-17) **Wireframe-grade field specs**
-- For each MVP screen: exact fields, empty states, error states, and required copy.
-
-18) **Copy deck**
-- Canonical microcopy for each cycle state, especially failure/unwind.
-
-19) **Receipts as shareable proof**
-- Define what is shareable by default vs opt-in, and redaction rules.
+This file converts the **v2.0 plan** into a **decision list**.
+Each item here must become at least one of:
+- explicit spec text (`docs/spec/*.md` and/or `docs/spec/schemas/*.json`),
+- milestone acceptance criteria (`docs/prd/Mx.md`),
+- automated verification (`verify/mx.*` + required artifacts).
 
 ---
 
-## Verification mapping idea (how we make this real)
+## P0 — must resolve to make the agent-loop reliable (M1–M3)
 
-For each milestone Mx we will require:
-- `docs/prd/Mx.md` (what we’re building + acceptance)
-- `milestones/Mx.yaml` (commands + required artifacts)
-- `verify/mx.sh` (creates `artifacts/milestones/Mx/latest/*`)
+1) **Schema versioning strategy**
+- Plan says “stable object schemas” + versioned, backward compatible.
+- Decide: how we version (field `schema_version`? OpenAPI versioning? JSON Schema `$id` only?).
+- Verification target: examples validate; breaking changes require a new version file.
 
-Integration-required milestones will exit non-zero unless `INTEGRATION_ENABLED=1` (operator proof gate), matching the pattern we used elsewhere in this workspace.
+2) **Canonical primitives completeness (what’s in v1)**
+- v2.0 names: `SwapIntent`, `CycleProposal`, `Commit`, `SettlementTimeline`, `SwapReceipt`.
+- Decide if v1 also includes: `ActorRef`, `TradingPolicy`, `EventEnvelope`, `ErrorResponse`.
+- Verification target: a “schema manifest” listing required primitives exists and is enforced.
+
+3) **Idempotency semantics (exact)**
+- Plan requires idempotency keys for all mutations.
+- Decide:
+  - idempotency key scope (per actor? per endpoint? per day?),
+  - response replay rules,
+  - error behavior when key reused with different payload.
+- Verification target: deterministic scenario tests for accept/decline + intent create.
+
+4) **Event model for webhooks + streams**
+- Plan includes webhooks, streams, and replay from checkpoints.
+- Decide:
+  - event envelope fields (event_id, type, occurred_at, correlation_id, actor, payload, signature),
+  - ordering guarantees (none vs per-cycle),
+  - replay checkpoint format.
+- Verification target: generated event logs can be replayed to reconstruct state.
+
+5) **Structured errors + reason codes**
+- We need stable errors for partners and for the agent’s own verification.
+- Decide error codes for:
+  - schema invalid,
+  - constraint violation,
+  - reservation conflict,
+  - proposal expired,
+  - idempotency conflict,
+  - settlement blocked,
+  - integration-required.
+
+6) **Two-phase commit contract (exact state machine)**
+- Plan: Accept → Ready once all participants accept.
+- Decide:
+  - can a participant cancel after accept?
+  - how/when reservations are acquired + released,
+  - timeouts and expiry semantics.
+- Verification target: scenario suite that asserts “one active reservation per intent” + release on decline/expiry.
+
+7) **Receipt signatures (v1 crypto scope)**
+- Plan: signed receipts + public key set endpoint; rotation/revocation.
+- Decide what “v1 crypto” actually means:
+  - simple Ed25519 signing in-app (dev) vs HSM-backed (later),
+  - how we publish verification keys (JWKS-like JSON),
+  - what fields are signed.
+- Verification target: `verify:m4` can create + verify a receipt offline.
+
+---
+
+## P1 — matching + pricing + confidence (needed before M2 is “real”)
+
+8) **WantSpec schema taxonomy (Steam-first)**
+- Plan wants sets, categories, attributes (wear/float/pattern/stickers).
+- Decide the v1 schema for `want_spec` and what attributes exist.
+
+9) **Pricing sources + confidence score definition**
+- Decide pricing sources used in v1 (even if stubbed) and how to compute `confidence_score`.
+- Verification target: a matching run produces proposals with explainability + confidence inputs recorded.
+
+10) **Cycle selection fairness + determinism**
+- Plan: disjoint selection, anti-starvation, deterministic runs.
+- Decide seeded ordering rules and age bonus.
+
+---
+
+## P2 — settlement/custody (needed before M4–M6)
+
+11) **Steam auth & inventory verification reality check**
+- Plan mentions OAuth in places; Steam is typically OpenID (login) + Web API key / inventory endpoints.
+- Decide what goes into `InventorySnapshot.verification_method` and what “snapshot trust score” is.
+
+12) **Trade holds / cooldown policy**
+- Decide:
+  - excluded entirely from v1 matching?
+  - allowed but reduces confidence / changes timeouts?
+  - vault eligibility gates.
+
+13) **Escrow ops model (single vs multiple escrow identities)**
+- Decide blast radius, rate limits, incident response, and audit controls.
+
+14) **Partial failure containment and protected recovery**
+- Define “protected recovery mode” thresholds and reason codes.
+
+15) **Proof-of-custody scope**
+- Decide cadence, snapshot schema, Merkle root publication schedule, and inclusion proof format.
+
+---
+
+## P3 — partner/agent platform hardening (needed before M7–M8)
+
+16) **Partner auth model + scopes**
+- API keys vs OAuth client creds; per-partner quotas; least privilege.
+
+17) **Webhook signing + replay protection**
+- HMAC vs asymmetric; rotation; nonce/timestamp window.
+
+18) **Agent delegation tokens + TradingPolicy enforcement**
+- Policy schema (max value/day, confidence threshold, quiet hours), token TTL/refresh, revocation model.
+
+---
+
+## Verification mapping rule (non-negotiable)
+
+For each milestone `Mx` we will require:
+- `docs/prd/Mx.md`
+- `milestones/Mx.yaml`
+- `verify/mx.sh` (or equivalent)
+- proof artifacts under `artifacts/milestones/Mx/latest/*`
+
+Integration-required milestones must exit non-zero unless `INTEGRATION_ENABLED=1`.

@@ -1,0 +1,11 @@
+name: M1
+commands:
+  - cmd: "npm run verify:m1"
+artifacts:
+  - artifact: "docs/prd/M1.md"
+  - artifact: "docs/spec/PRIMITIVES.md"
+  - artifact: "docs/spec/IDEMPOTENCY.md"
+  - artifact: "docs/spec/EVENTS.md"
+  - artifact: "docs/spec/ERRORS.md"
+  - artifact: "artifacts/milestones/M1/latest/schema_validation.json"
+  - artifact: "artifacts/milestones/M1/latest/commands.log"

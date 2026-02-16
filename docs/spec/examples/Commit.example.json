@@ -1,0 +1,12 @@
+{
+  "id": "commit_1",
+  "cycle_id": "cycle_456",
+  "phase": "accept",
+  "participants": [
+    { "actor": { "type": "user", "id": "u1" }, "status": "accepted", "commit_token": "tok_u1" },
+    { "actor": { "type": "user", "id": "u2" }, "status": "pending" },
+    { "actor": { "type": "user", "id": "u3" }, "status": "pending" }
+  ],
+  "created_at": "2026-02-16T00:00:00Z",
+  "updated_at": "2026-02-16T00:00:00Z"
+}

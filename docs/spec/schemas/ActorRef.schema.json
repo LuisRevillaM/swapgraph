@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/ActorRef.schema.json",
+  "title": "ActorRef",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "id"],
+  "properties": {
+    "type": { "type": "string", "enum": ["user", "partner", "agent"] },
+    "id": { "type": "string", "minLength": 1 }
+  }
+}

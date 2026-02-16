@@ -4,36 +4,53 @@ PROJECT_KEY: swapgraph
 REPO_PATH: /workspace/projects/swapgraph
 
 ## Goal
-Ship a **Steam-only MVP** that can:
-- sync inventory,
-- create listings with structured want specs + value tolerance bands,
-- propose **3-cycles** with explainability,
-- execute via **escrow deposit → batch release**,
-- generate receipts + dispute artifacts,
-while preserving the product pillars (certainty, fairness, safety, trader-native UX).
+Implement **SwapGraph v2.0** as an **API-first multi-reciprocity swap clearing network**:
+- partners/marketplaces/agents can submit **SwapIntents** ("I have X, I want Y, under constraints")
+- SwapGraph returns **CycleProposals** (2–3 party initially)
+- SwapGraph coordinates **commit → custody/settlement → receipts** where rails exist (Steam-first)
+- the web marketplace + native iOS client are **reference clients** built on the same primitives
 
-## Key constraints (hard)
-- **Official rails only**. No account swaps, no credential transfers beyond platform auth.
-- **No fiat custody / cash-out** in MVP.
-- Cross-ecosystem support is adapter-based and **compliance-gated**.
+## Hard constraints
+- Official transfer rails only. **No account swapping** / credential-transfer workflows.
+- **No cash-out rails in v1** (no fiat balances, no withdrawals).
+- Ecosystems without legitimate transfer primitives are **partnership-gated + legally reviewed**.
 
-## MVP decision: trade holds / locked items
-Plan v1.3 states (Steam-first escrow section):
-> Items with trade holds/locks excluded in MVP (or require explicit longer timeline).
+## Delivery rule (spec-first)
+Every milestone must have:
+- a crisp spec (`docs/prd/Mx.md`)
+- a contract (`milestones/Mx.yaml`)
+- a verifier (`npm run verify:mx`) that produces artifacts under `artifacts/milestones/Mx/latest/*`
 
-**Default for MVP implementation (recommended):** exclude holds/locks from being listable/executable.
-We still store `tradable_at` / `trade_hold_days` so we can add a “slow lane” later if we choose.
+No milestone is “done” unless `node verify/runner.ts milestones/Mx.yaml` passes.
 
-## Milestones (draft)
+## Milestones (aligned to plan v2.0)
 - [ ] M0 — Repo bootstrap + verification harness + plan imported
-- [ ] M1 — Steam adapter v0: connect + inventory sync + tradability checks (no settlement)
-- [ ] M2 — Listings: want_spec schema + CRUD + validation
-- [ ] M3 — Matching: edge build + cycle detection (len<=3) + scoring + explainability blob
-- [ ] M4 — Cycle inbox: propose/reserve/accept/decline + expiration
-- [ ] M5 — Settlement simulator: escrow.pending→ready→executing + unwind rules (no Steam integration)
-- [ ] M6 — Steam escrow integration proof gate (operator run required)
-- [ ] M7 — Trust/Safety: reliability score + limits + disputes + admin minimum
-- [ ] M8 — Monetization surfaces: fee breakdown + Pro entitlements + boost guardrails
+- [ ] M1 — One platform API (internal dogfood)
+  - canonical schemas for SwapIntent/CycleProposal/Commit/Receipt/etc.
+  - idempotency rules + structured errors
+  - event envelope + webhook/stream event taxonomy (spec + fixtures)
+- [ ] M2 — Developer Preview: intents in, proposals out
+  - ingest intents (fixtures first)
+  - matching worker produces 2–3 party CycleProposals + explainability + fee preview stub
+  - proposal delivery contract (polling + webhook payloads)
+- [ ] M3 — Commit handshake + reservation locks
+  - two-phase commit semantics (accept/decline → ready)
+  - conflict-free reservations (one active reservation per intent)
+  - idempotent mutations + auditable logs
+- [ ] M4 — Steam-first settlement (Tier 1) — simulation-first
+  - settlement timeline state machine + unwind rules
+  - signed receipts + transparency log scaffolding (verifiable)
+- [ ] M5 — Steam-first settlement (Tier 1) — operator integration proof gate
+  - real Steam trade-offer based deposit-per-swap escrow flow
+  - requires `INTEGRATION_ENABLED=1`
+- [ ] M6 — Vault + proof-of-custody
+  - optional Vault deposits + instant settlement eligibility
+  - proof-of-custody snapshots + inclusion proofs (initial version)
+- [ ] M7 — Partner program (commercial + SLA)
+  - partner auth/scopes/quotas
+  - webhook signing + replay + dashboards (minimum)
+- [ ] M8 — Cross-ecosystem pilot (adapter-gated)
+  - 2nd ecosystem adapter (Tier 2) + cross-adapter proposal semantics
 
 ## Source
 - `docs/source/LATEST.md` (currently v2.0)

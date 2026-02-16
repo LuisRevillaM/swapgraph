@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/CycleProposal.schema.json",
+  "title": "CycleProposal",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "expires_at",
+    "participants",
+    "confidence_score",
+    "value_spread",
+    "fee_breakdown",
+    "explainability"
+  ],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "expires_at": { "type": "string", "format": "date-time" },
+
+    "participants": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["intent_id", "actor", "give", "get"],
+        "properties": {
+          "intent_id": { "type": "string", "minLength": 1 },
+          "actor": { "$ref": "ActorRef.schema.json" },
+          "give": { "type": "array", "minItems": 1, "items": { "$ref": "AssetRef.schema.json" } },
+          "get": { "type": "array", "minItems": 1, "items": { "$ref": "AssetRef.schema.json" } }
+        }
+      }
+    },
+
+    "confidence_score": { "type": "number", "minimum": 0, "maximum": 1 },
+    "value_spread": { "type": "number", "minimum": 0, "maximum": 1 },
+
+    "fee_breakdown": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["actor", "fee_usd"],
+        "properties": {
+          "actor": { "$ref": "ActorRef.schema.json" },
+          "fee_usd": { "type": "number", "minimum": 0 }
+        }
+      }
+    },
+
+    "explainability": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    }
+  }
+}

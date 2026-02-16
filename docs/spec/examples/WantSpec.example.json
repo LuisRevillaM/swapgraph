@@ -1,0 +1,15 @@
+{
+  "type": "set",
+  "any_of": [
+    {
+      "type": "category",
+      "platform": "steam",
+      "app_id": 730,
+      "category": "knife",
+      "constraints": {
+        "min_condition": "FT",
+        "max_condition": "MW"
+      }
+    }
+  ]
+}

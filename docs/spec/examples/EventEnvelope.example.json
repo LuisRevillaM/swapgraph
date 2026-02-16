@@ -1,0 +1,10 @@
+{
+  "event_id": "evt_1",
+  "type": "proposal.created",
+  "occurred_at": "2026-02-16T00:00:00Z",
+  "correlation_id": "corr_1",
+  "actor": { "type": "partner", "id": "p1" },
+  "payload": {
+    "proposal_id": "cycle_456"
+  }
+}

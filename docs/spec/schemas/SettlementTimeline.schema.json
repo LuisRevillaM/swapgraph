@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/SettlementTimeline.schema.json",
+  "title": "SettlementTimeline",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["cycle_id", "state", "updated_at"],
+  "properties": {
+    "cycle_id": { "type": "string", "minLength": 1 },
+    "state": {
+      "type": "string",
+      "enum": [
+        "proposed",
+        "accepted",
+        "escrow.pending",
+        "escrow.ready",
+        "executing",
+        "completed",
+        "failed"
+      ]
+    },
+    "legs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "updated_at": { "type": "string", "format": "date-time" }
+  }
+}

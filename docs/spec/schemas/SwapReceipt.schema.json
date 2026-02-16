@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/SwapReceipt.schema.json",
+  "title": "SwapReceipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "cycle_id", "final_state", "created_at", "signature"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "cycle_id": { "type": "string", "minLength": 1 },
+    "final_state": { "type": "string", "enum": ["completed", "failed"] },
+    "intent_ids": { "type": "array", "items": { "type": "string" } },
+    "asset_ids": { "type": "array", "items": { "type": "string" } },
+    "fees": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["actor", "fee_usd"],
+        "properties": {
+          "actor": { "$ref": "ActorRef.schema.json" },
+          "fee_usd": { "type": "number", "minimum": 0 }
+        }
+      }
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key_id", "alg", "sig"],
+      "properties": {
+        "key_id": { "type": "string", "minLength": 1 },
+        "alg": { "type": "string", "minLength": 1 },
+        "sig": { "type": "string", "minLength": 1 }
+      }
+    },
+    "transparency": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

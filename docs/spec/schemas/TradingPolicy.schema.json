@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/TradingPolicy.schema.json",
+  "title": "TradingPolicy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["max_value_per_swap_usd", "min_confidence_score"],
+  "properties": {
+    "max_value_per_swap_usd": { "type": "number", "minimum": 0 },
+    "max_value_per_day_usd": { "type": "number", "minimum": 0 },
+    "min_confidence_score": { "type": "number", "minimum": 0, "maximum": 1 },
+    "max_cycle_length": { "type": "integer", "minimum": 2, "maximum": 6 },
+    "require_escrow": { "type": "boolean" },
+    "quiet_hours": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "start": { "type": "string" },
+        "end": { "type": "string" },
+        "tz": { "type": "string" }
+      }
+    }
+  }
+}

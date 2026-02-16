@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "verify:m0": "bash verify/m0.sh",
+    "verify:m1": "bash verify/m1.sh",
     "test": "node --test"
   }
 }
+

@@ -1,17 +1,16 @@
 # SwapGraph
 
-Multi-reciprocity swap platform for digital items (Steam-first wedge) using multi-party cycle matching + escrow-based settlement.
+API-first multi-reciprocity swap clearing network (Steam-first initial settlement adapter).
 
-## Source spec
+## Canonical spec
 - `docs/source/LATEST.md`
+
+## Repo rules
+- This repo is **spec-first**: every milestone must have `docs/prd/Mx.md` + `milestones/Mx.yaml` + `verify/mx.sh`.
+- A milestone is only done when `node verify/runner.ts milestones/Mx.yaml` passes.
 
 ## Quickstart
 ```bash
 npm i
 npm run verify:m0
 ```
-
-## Guardrails (from plan)
-- Official rails only (no account swaps / ToS workarounds).
-- No fiat custody / cash-out in MVP.
-- Steam-first (CS2/Dota 2/TF2) to prove matching + settlement + trust.
