@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/CycleProposalListResponse.schema.json",
+  "title": "CycleProposalListResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["proposals"],
+  "properties": {
+    "proposals": {
+      "type": "array",
+      "items": { "$ref": "CycleProposal.schema.json" }
+    },
+    "next_cursor": { "type": "string" }
+  }
+}

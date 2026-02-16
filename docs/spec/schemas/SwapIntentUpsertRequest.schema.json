@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/SwapIntentUpsertRequest.schema.json",
+  "title": "SwapIntentUpsertRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["intent"],
+  "properties": {
+    "intent": { "$ref": "SwapIntent.schema.json" }
+  }
+}

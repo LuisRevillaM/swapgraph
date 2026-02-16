@@ -1,0 +1,10 @@
+name: M2
+commands:
+  - cmd: "npm run verify:m2"
+artifacts:
+  - artifact: "docs/prd/M2.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/api/manifest.v1.json"
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+  - artifact: "artifacts/milestones/M2/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M2/latest/commands.log"

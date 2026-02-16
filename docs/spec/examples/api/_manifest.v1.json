@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "examples": [
+    {
+      "file": "swap_intents.create.request.json",
+      "schema": "SwapIntentUpsertRequest.schema.json"
+    },
+    {
+      "file": "swap_intents.create.response.json",
+      "schema": "SwapIntentUpsertResponse.schema.json"
+    },
+    {
+      "file": "swap_intents.cancel.request.json",
+      "schema": "SwapIntentCancelRequest.schema.json"
+    },
+    {
+      "file": "swap_intents.cancel.response.json",
+      "schema": "SwapIntentCancelResponse.schema.json"
+    },
+    {
+      "file": "cycle_proposals.list.response.json",
+      "schema": "CycleProposalListResponse.schema.json"
+    },
+    {
+      "file": "error.example.json",
+      "schema": "ErrorResponse.schema.json"
+    }
+  ]
+}

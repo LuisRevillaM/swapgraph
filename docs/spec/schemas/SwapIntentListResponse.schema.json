@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/SwapIntentListResponse.schema.json",
+  "title": "SwapIntentListResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["intents"],
+  "properties": {
+    "intents": {
+      "type": "array",
+      "items": { "$ref": "SwapIntent.schema.json" }
+    },
+    "next_cursor": { "type": "string" }
+  }
+}

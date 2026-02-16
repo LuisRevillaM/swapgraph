@@ -1,0 +1,16 @@
+{
+  "proposals": [
+    {
+      "id": "cycle_456",
+      "expires_at": "2026-02-17T12:00:00Z",
+      "participants": [
+        { "intent_id": "intent_a", "actor": { "type": "user", "id": "u1" }, "give": [{ "platform": "steam", "asset_id": "assetA" }], "get": [{ "platform": "steam", "asset_id": "assetB" }] },
+        { "intent_id": "intent_b", "actor": { "type": "user", "id": "u2" }, "give": [{ "platform": "steam", "asset_id": "assetB" }], "get": [{ "platform": "steam", "asset_id": "assetC" }] }
+      ],
+      "confidence_score": 0.6,
+      "value_spread": 0.1,
+      "fee_breakdown": [{ "actor": { "type": "user", "id": "u1" }, "fee_usd": 1 }],
+      "explainability": ["Example proposal"]
+    }
+  ]
+}

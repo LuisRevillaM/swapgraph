@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "id": "swapgraph-api-v1",
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "/swap-intents",
+      "operation_id": "swapIntents.create",
+      "idempotency_required": true,
+      "request_schema": "SwapIntentUpsertRequest.schema.json",
+      "response_schema": "SwapIntentUpsertResponse.schema.json"
+    },
+    {
+      "method": "PATCH",
+      "path": "/swap-intents/{id}",
+      "operation_id": "swapIntents.update",
+      "idempotency_required": true,
+      "request_schema": "SwapIntentUpsertRequest.schema.json",
+      "response_schema": "SwapIntentUpsertResponse.schema.json"
+    },
+    {
+      "method": "POST",
+      "path": "/swap-intents/{id}/cancel",
+      "operation_id": "swapIntents.cancel",
+      "idempotency_required": true,
+      "request_schema": "SwapIntentCancelRequest.schema.json",
+      "response_schema": "SwapIntentCancelResponse.schema.json"
+    },
+    {
+      "method": "GET",
+      "path": "/swap-intents/{id}",
+      "operation_id": "swapIntents.get",
+      "idempotency_required": false,
+      "response_schema": "SwapIntentGetResponse.schema.json"
+    },
+    {
+      "method": "GET",
+      "path": "/swap-intents",
+      "operation_id": "swapIntents.list",
+      "idempotency_required": false,
+      "response_schema": "SwapIntentListResponse.schema.json"
+    },
+
+    {
+      "method": "GET",
+      "path": "/cycle-proposals",
+      "operation_id": "cycleProposals.list",
+      "idempotency_required": false,
+      "response_schema": "CycleProposalListResponse.schema.json"
+    },
+    {
+      "method": "GET",
+      "path": "/cycle-proposals/{id}",
+      "operation_id": "cycleProposals.get",
+      "idempotency_required": false,
+      "response_schema": "CycleProposalGetResponse.schema.json"
+    }
+  ],
+  "webhooks": {
+    "event_types": [
+      "proposal.created",
+      "proposal.expiring",
+      "cycle.state_changed",
+      "receipt.created"
+    ]
+  }
+}

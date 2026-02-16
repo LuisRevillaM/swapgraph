@@ -1,0 +1,28 @@
+{
+  "intent": {
+    "id": "intent_123",
+    "actor": { "type": "partner", "id": "p1" },
+    "offer": [
+      {
+        "platform": "steam",
+        "app_id": 730,
+        "context_id": 2,
+        "asset_id": "123",
+        "class_id": "456",
+        "instance_id": "0",
+        "metadata": { "float": 0.12 },
+        "proof": { "inventory_snapshot_id": "snap_789", "verified_at": "2026-02-16T18:22:00Z" }
+      }
+    ],
+    "want_spec": {
+      "type": "set",
+      "any_of": [
+        { "type": "category", "platform": "steam", "app_id": 730, "category": "knife", "constraints": { "min_condition": "FT" } }
+      ]
+    },
+    "value_band": { "min_usd": 10, "max_usd": 100, "pricing_source": "market_median" },
+    "trust_constraints": { "max_cycle_length": 3, "min_counterparty_reliability": 0 },
+    "time_constraints": { "expires_at": "2026-02-20T00:00:00Z", "urgency": "normal" },
+    "settlement_preferences": { "require_escrow": true }
+  }
+}

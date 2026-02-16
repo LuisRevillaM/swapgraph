@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "SCHEMA_INVALID",
+    "message": "Request body failed schema validation",
+    "details": { "field": "want_spec" }
+  }
+}
