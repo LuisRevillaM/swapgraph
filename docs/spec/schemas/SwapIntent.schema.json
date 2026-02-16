@@ -16,6 +16,7 @@
   ],
   "properties": {
     "id": { "type": "string", "minLength": 1 },
+    "status": { "type": "string", "enum": ["active", "cancelled"] },
     "actor": { "$ref": "ActorRef.schema.json" },
 
     "offer": {

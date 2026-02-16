@@ -1,0 +1,31 @@
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import path from 'node:path';
+import { canonicalize } from '../util/canonicalJson.mjs';
+
+export class JsonStateStore {
+  /**
+   * @param {{ filePath: string }} opts
+   */
+  constructor({ filePath }) {
+    if (!filePath) throw new Error('filePath is required');
+    this.filePath = filePath;
+    this.state = { intents: {}, idempotency: {} };
+  }
+
+  load() {
+    if (!existsSync(this.filePath)) {
+      this.state = { intents: {}, idempotency: {} };
+      return;
+    }
+    const raw = readFileSync(this.filePath, 'utf8');
+    this.state = JSON.parse(raw);
+    this.state.intents ||= {};
+    this.state.idempotency ||= {};
+  }
+
+  save() {
+    mkdirSync(path.dirname(this.filePath), { recursive: true });
+    const pretty = JSON.stringify(canonicalize(this.state), null, 2);
+    writeFileSync(this.filePath, pretty);
+  }
+}

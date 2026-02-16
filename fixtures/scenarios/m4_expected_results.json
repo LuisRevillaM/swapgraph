@@ -1,0 +1,39 @@
+{
+  "operations": [
+    {
+      "op": "swapIntents.create",
+      "ok": true,
+      "replayed": false
+    },
+    {
+      "op": "swapIntents.create",
+      "ok": true,
+      "replayed": true
+    },
+    {
+      "op": "swapIntents.create",
+      "ok": false,
+      "replayed": false,
+      "error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    },
+    {
+      "op": "swapIntents.update",
+      "ok": true,
+      "replayed": false
+    },
+    {
+      "op": "swapIntents.cancel",
+      "ok": true,
+      "replayed": false
+    },
+    {
+      "op": "swapIntents.get",
+      "ok": true
+    },
+    {
+      "op": "swapIntents.list",
+      "ok": true
+    }
+  ],
+  "final_intent_status": "cancelled"
+}
