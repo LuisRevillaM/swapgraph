@@ -1,0 +1,12 @@
+name: M12
+commands:
+  - cmd: "npm run verify:m12"
+artifacts:
+  - artifact: "docs/prd/M12.md"
+  - artifact: "fixtures/events/event_log.v2.ndjson"
+  - artifact: "fixtures/events/checkpoint.v1.json"
+  - artifact: "fixtures/events/replay_expected_v2.json"
+  - artifact: "artifacts/milestones/M12/latest/replay_output.json"
+  - artifact: "artifacts/milestones/M12/latest/events_validation.json"
+  - artifact: "artifacts/milestones/M12/latest/assertions.json"
+  - artifact: "artifacts/milestones/M12/latest/commands.log"

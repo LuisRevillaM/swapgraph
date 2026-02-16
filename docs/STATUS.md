@@ -20,9 +20,10 @@ Last updated: 2026-02-16
 - M9: ✅ settlement timeline simulator (deposit → escrow.ready → executing → receipt, plus deposit-timeout unwind)
 - M10: ✅ settlement + receipts REST contract endpoints + strict SettlementTimeline legs schema
 - M11: ✅ settlement event types (deposit_required / deposit_confirmed / executing) + payload schemas + verifier
+- M12: ✅ event replay v2 (settlement + receipts summaries + checkpoint resume proof)
 
 ## Next
-- M12: event replay v2 (extend replay harness to include settlement/receipt summaries + checkpoint demo)
+- M13: settlement read APIs fixture scenario (instructions/status/receipts) driven from store state + schema validation
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.

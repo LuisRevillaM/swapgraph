@@ -1,0 +1,117 @@
+{
+  "checkpoint": {
+    "deduped_index": 8,
+    "events_after": 18,
+    "file": "fixtures/events/checkpoint.v1.json",
+    "last_event_id": "evt_b934f65d69f8"
+  },
+  "checkpoint_state": {
+    "cycles": {
+      "cycle_4f27eb196224": {
+        "state": "escrow.pending"
+      },
+      "cycle_961f2288e6f7": {
+        "state": "accepted"
+      }
+    },
+    "intents": {
+      "intent_a": {
+        "cycle_id": "cycle_4f27eb196224",
+        "reserved": true
+      },
+      "intent_b": {
+        "cycle_id": "cycle_4f27eb196224",
+        "reserved": true
+      },
+      "intent_c": {
+        "cycle_id": "cycle_4f27eb196224",
+        "reserved": true
+      },
+      "intent_d": {
+        "cycle_id": "cycle_961f2288e6f7",
+        "reserved": true
+      },
+      "intent_e": {
+        "cycle_id": "cycle_961f2288e6f7",
+        "reserved": true
+      }
+    },
+    "proposals": {},
+    "receipts": {},
+    "settlement": {
+      "cycle_4f27eb196224": {
+        "deposit_deadline_at": "2026-02-17T00:00:00Z",
+        "deposits": {},
+        "executing": false
+      }
+    }
+  },
+  "full_state": {
+    "cycles": {
+      "cycle_4f27eb196224": {
+        "state": "completed"
+      },
+      "cycle_961f2288e6f7": {
+        "state": "failed"
+      }
+    },
+    "intents": {
+      "intent_a": {
+        "cycle_id": "cycle_4f27eb196224",
+        "reserved": false
+      },
+      "intent_b": {
+        "cycle_id": "cycle_4f27eb196224",
+        "reserved": false
+      },
+      "intent_c": {
+        "cycle_id": "cycle_4f27eb196224",
+        "reserved": false
+      },
+      "intent_d": {
+        "cycle_id": "cycle_961f2288e6f7",
+        "reserved": false
+      },
+      "intent_e": {
+        "cycle_id": "cycle_961f2288e6f7",
+        "reserved": false
+      }
+    },
+    "proposals": {},
+    "receipts": {
+      "cycle_4f27eb196224": {
+        "final_state": "completed",
+        "receipt_id": "receipt_02cce1dcc083"
+      },
+      "cycle_961f2288e6f7": {
+        "final_state": "failed",
+        "receipt_id": "receipt_d74f010588e8"
+      }
+    },
+    "settlement": {
+      "cycle_4f27eb196224": {
+        "deposit_deadline_at": "2026-02-17T00:00:00Z",
+        "deposits": {
+          "intent_a": "dep_u1_p3",
+          "intent_b": "dep_u2_p3",
+          "intent_c": "dep_u3_p3"
+        },
+        "executing": true
+      },
+      "cycle_961f2288e6f7": {
+        "deposit_deadline_at": "2026-02-16T00:03:30Z",
+        "deposits": {
+          "intent_d": "dep_u5_p2"
+        },
+        "executing": false
+      }
+    }
+  },
+  "log": {
+    "duplicates": 1,
+    "events_deduped": 27,
+    "events_total": 28,
+    "file": "fixtures/events/event_log.v2.ndjson"
+  },
+  "manifest": "swapgraph-events-v1"
+}
