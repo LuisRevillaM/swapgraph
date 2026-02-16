@@ -1,0 +1,12 @@
+name: M9
+commands:
+  - cmd: "npm run verify:m9"
+artifacts:
+  - artifact: "docs/prd/M9.md"
+  - artifact: "fixtures/settlement/m9_scenario.json"
+  - artifact: "fixtures/settlement/m9_expected.json"
+  - artifact: "artifacts/milestones/M9/latest/settlement_output.json"
+  - artifact: "artifacts/milestones/M9/latest/events_outbox.ndjson"
+  - artifact: "artifacts/milestones/M9/latest/events_validation.json"
+  - artifact: "artifacts/milestones/M9/latest/assertions.json"
+  - artifact: "artifacts/milestones/M9/latest/commands.log"

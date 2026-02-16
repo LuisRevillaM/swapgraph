@@ -17,9 +17,10 @@ Last updated: 2026-02-16
 - M7: ✅ commit handshake v1 (accept/decline → ready) + reservation locks + idempotency replay + events outbox
 
 - M8: ✅ accept-window expiry (cancel accept-phase commit after proposal expiry + release reservations)
+- M9: ✅ settlement timeline simulator (deposit → escrow.ready → executing → receipt, plus deposit-timeout unwind)
 
 ## Next
-- M9: settlement timeline simulator (escrow.pending→ready→executing + unwind reason codes)
+- M10: tighten SettlementTimeline legs schema + add REST contract endpoints for settlement + receipts (manifest + examples + verifier)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.
