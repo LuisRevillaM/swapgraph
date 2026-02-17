@@ -32,9 +32,10 @@ Last updated: 2026-02-17
 - M19: ✅ proposal delivery persistence + partner scoping (polling + webhook ingestion, dedupe-by-event_id)
 - M20: ✅ commit APIs backed by stored proposals (accept/decline loads proposal from store + idempotency + reservation locks)
 - M21: ✅ settlement.start loads commit+proposal from store + enforces partner proposal scoping
+- M22: ✅ settlement actions via API service (deposit_confirmed/begin_execution/complete; store-backed + partner-scoped)
 
 ## Next
-- M22: settlement.deposit_confirmed/begin_execution/complete via API service (store-backed, partner-scoped)
+- M23: settlement failure path via API service (deposit timeout unwind + scoped receipt)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.

@@ -1,0 +1,14 @@
+name: M22
+commands:
+  - cmd: "npm run verify:m22"
+artifacts:
+  - artifact: "docs/prd/M22.md"
+  - artifact: "fixtures/settlement/m22_scenario.json"
+  - artifact: "fixtures/settlement/m22_expected.json"
+
+  - artifact: "src/service/settlementActionsService.mjs"
+  - artifact: "scripts/run-m22-settlement-actions-from-store-scenario.mjs"
+
+  - artifact: "artifacts/milestones/M22/latest/settlement_actions_output.json"
+  - artifact: "artifacts/milestones/M22/latest/assertions.json"
+  - artifact: "artifacts/milestones/M22/latest/commands.log"
