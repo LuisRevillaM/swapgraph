@@ -411,6 +411,7 @@
     },
     {
       "body": {
+        "correlation_id": "corr_cycle_4f27eb196224",
         "error": {
           "code": "NOT_FOUND",
           "details": {

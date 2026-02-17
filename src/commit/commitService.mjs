@@ -12,8 +12,12 @@ function correlationIdForCycleId(cycleId) {
 
 // Note: commit timestamps are provided by the caller (fixtures-first, deterministic verification).
 
-function errorResponse(code, message, details = {}) {
-  return { error: { code, message, details } };
+function errorResponse(correlationId, code, message, details = {}) {
+  return { correlation_id: correlationId, error: { code, message, details } };
+}
+
+function correlationIdForCommitId(commitId) {
+  return `corr_${commitId}`;
 }
 
 function participantKey(p) {
@@ -85,7 +89,7 @@ export class CommitService {
     this.store = store;
   }
 
-  _withIdempotency({ actor, operationId, idempotencyKey, requestBody, handler }) {
+  _withIdempotency({ actor, operationId, idempotencyKey, requestBody, correlationId, handler }) {
     const scopeKey = idempotencyScopeKey({ actor, operationId, idempotencyKey });
     const h = payloadHash(requestBody);
 
@@ -99,6 +103,7 @@ export class CommitService {
         result: {
           ok: false,
           body: errorResponse(
+            correlationId,
             'IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH',
             'Idempotency key reused with a different payload',
             { scope_key: scopeKey, original_hash: existing.payload_hash, new_hash: h }
@@ -150,7 +155,7 @@ export class CommitService {
       if (existing && existing.commit_id !== commitId) {
         return {
           ok: false,
-          body: errorResponse('RESERVATION_CONFLICT', 'intent already reserved', { intent_id: iid, existing_commit_id: existing.commit_id })
+          body: errorResponse(correlationIdForCycleId(cycleId), 'RESERVATION_CONFLICT', 'intent already reserved', { intent_id: iid, existing_commit_id: existing.commit_id })
         };
       }
     }
@@ -195,17 +200,29 @@ export class CommitService {
       operationId: 'cycleProposals.accept',
       idempotencyKey,
       requestBody,
+      correlationId: correlationIdForCycleId(proposal.id),
       handler: () => {
         if (!occurredAt) throw new Error('occurredAt is required');
 
         if (requestBody.proposal_id !== proposal.id) {
-          return { ok: false, body: errorResponse('CONSTRAINT_VIOLATION', 'proposal_id must match path id', { proposal_id: requestBody.proposal_id, path_id: proposal.id }) };
+          return {
+            ok: false,
+            body: errorResponse(
+              correlationIdForCycleId(proposal.id),
+              'CONSTRAINT_VIOLATION',
+              'proposal_id must match path id',
+              { proposal_id: requestBody.proposal_id, path_id: proposal.id }
+            )
+          };
         }
 
         // Ensure actor is a participant.
         const isParticipant = proposal.participants.some(p => participantKey(p) === actorKey(actor));
         if (!isParticipant) {
-          return { ok: false, body: errorResponse('FORBIDDEN', 'actor not in proposal', { proposal_id: proposal.id }) };
+          return {
+            ok: false,
+            body: errorResponse(correlationIdForCycleId(proposal.id), 'FORBIDDEN', 'actor not in proposal', { proposal_id: proposal.id })
+          };
         }
 
         const commitId = commitIdForProposalId(proposal.id);
@@ -219,7 +236,10 @@ export class CommitService {
         }
 
         if (commit.phase === 'cancelled') {
-          return { ok: false, body: errorResponse('CONFLICT', 'commit is cancelled', { commit_id: commit.id }) };
+          return {
+            ok: false,
+            body: errorResponse(correlationIdForCycleId(proposal.id), 'CONFLICT', 'commit is cancelled', { commit_id: commit.id })
+          };
         }
 
         // Mark this participant accepted.
@@ -255,11 +275,20 @@ export class CommitService {
       operationId: 'cycleProposals.decline',
       idempotencyKey,
       requestBody,
+      correlationId: correlationIdForCycleId(proposal.id),
       handler: () => {
         if (!occurredAt) throw new Error('occurredAt is required');
 
         if (requestBody.proposal_id !== proposal.id) {
-          return { ok: false, body: errorResponse('CONSTRAINT_VIOLATION', 'proposal_id must match path id', { proposal_id: requestBody.proposal_id, path_id: proposal.id }) };
+          return {
+            ok: false,
+            body: errorResponse(
+              correlationIdForCycleId(proposal.id),
+              'CONSTRAINT_VIOLATION',
+              'proposal_id must match path id',
+              { proposal_id: requestBody.proposal_id, path_id: proposal.id }
+            )
+          };
         }
 
         const commitId = commitIdForProposalId(proposal.id);
@@ -277,7 +306,10 @@ export class CommitService {
 
         const isParticipant = commit.participants.some(p => participantKey(p) === actorKey(actor));
         if (!isParticipant) {
-          return { ok: false, body: errorResponse('FORBIDDEN', 'actor not in proposal', { proposal_id: proposal.id }) };
+          return {
+            ok: false,
+            body: errorResponse(correlationIdForCycleId(proposal.id), 'FORBIDDEN', 'actor not in proposal', { proposal_id: proposal.id })
+          };
         }
 
         for (const p of commit.participants) {
@@ -336,11 +368,21 @@ export class CommitService {
 
   get({ actor, commitId }) {
     const commit = this.store.state.commits[commitId];
-    if (!commit) return { ok: false, body: errorResponse('NOT_FOUND', 'commit not found', { commit_id: commitId }) };
+    if (!commit) {
+      return {
+        ok: false,
+        body: errorResponse(correlationIdForCommitId(commitId), 'NOT_FOUND', 'commit not found', { commit_id: commitId })
+      };
+    }
 
     // v1: only participants can view.
     const allowed = commit.participants.some(p => participantKey(p) === actorKey(actor));
-    if (!allowed) return { ok: false, body: errorResponse('FORBIDDEN', 'actor cannot access this commit', { commit_id: commitId }) };
+    if (!allowed) {
+      return {
+        ok: false,
+        body: errorResponse(correlationIdForCycleId(commit.cycle_id), 'FORBIDDEN', 'actor cannot access this commit', { commit_id: commitId })
+      };
+    }
 
     return { ok: true, body: { correlation_id: correlationIdForCycleId(commit.cycle_id), commit } };
   }

@@ -21,8 +21,12 @@ function readJson(p) {
   return JSON.parse(readFileSync(p, 'utf8'));
 }
 
-function errorResponse(code, message, details = {}) {
-  return { error: { code, message, details } };
+function errorResponse(correlationId, code, message, details = {}) {
+  return { correlation_id: correlationId, error: { code, message, details } };
+}
+
+function correlationIdForCycleId(cycleId) {
+  return `corr_${cycleId}`;
 }
 
 // ---- Load API manifest for response schema mapping ----
@@ -67,7 +71,9 @@ function buildDepositInstructions(timeline) {
 
 function settlementInstructionsGet({ store, cycleId }) {
   const timeline = store.state.timelines[cycleId];
-  if (!timeline) return { ok: false, body: errorResponse('NOT_FOUND', 'settlement timeline not found', { cycle_id: cycleId }) };
+  if (!timeline) {
+    return { ok: false, body: errorResponse(correlationIdForCycleId(cycleId), 'NOT_FOUND', 'settlement timeline not found', { cycle_id: cycleId }) };
+  }
   const instructions = buildDepositInstructions(timeline);
   const correlation_id = `corr_${cycleId}`;
   return { ok: true, body: { correlation_id, timeline, instructions } };
@@ -75,14 +81,18 @@ function settlementInstructionsGet({ store, cycleId }) {
 
 function settlementStatusGet({ store, cycleId }) {
   const timeline = store.state.timelines[cycleId];
-  if (!timeline) return { ok: false, body: errorResponse('NOT_FOUND', 'settlement timeline not found', { cycle_id: cycleId }) };
+  if (!timeline) {
+    return { ok: false, body: errorResponse(correlationIdForCycleId(cycleId), 'NOT_FOUND', 'settlement timeline not found', { cycle_id: cycleId }) };
+  }
   const correlation_id = `corr_${cycleId}`;
   return { ok: true, body: { correlation_id, timeline } };
 }
 
 function receiptGet({ store, cycleId }) {
   const receipt = store.state.receipts[cycleId];
-  if (!receipt) return { ok: false, body: errorResponse('NOT_FOUND', 'receipt not found', { cycle_id: cycleId }) };
+  if (!receipt) {
+    return { ok: false, body: errorResponse(correlationIdForCycleId(cycleId), 'NOT_FOUND', 'receipt not found', { cycle_id: cycleId }) };
+  }
   const correlation_id = `corr_${cycleId}`;
   return { ok: true, body: { correlation_id, receipt } };
 }

@@ -1,5 +1,9 @@
-function errorResponse(code, message, details = {}) {
-  return { error: { code, message, details } };
+function errorResponse(correlationId, code, message, details = {}) {
+  return { correlation_id: correlationId, error: { code, message, details } };
+}
+
+function correlationIdForCycleId(cycleId) {
+  return `corr_${cycleId}`;
 }
 
 function actorKey(actor) {
@@ -107,10 +111,17 @@ export class SettlementReadService {
 
   status({ actor, cycleId }) {
     const timeline = this.store.state.timelines[cycleId];
-    if (!timeline) return { ok: false, body: errorResponse('NOT_FOUND', 'settlement timeline not found', { cycle_id: cycleId }) };
+    if (!timeline) {
+      return { ok: false, body: errorResponse(correlationIdForCycleId(cycleId), 'NOT_FOUND', 'settlement timeline not found', { cycle_id: cycleId }) };
+    }
 
     const authz = authorizeRead({ actor, timeline, store: this.store, cycleId });
-    if (!authz.ok) return { ok: false, body: errorResponse(authz.code, authz.message, { ...authz.details, cycle_id: cycleId }) };
+    if (!authz.ok) {
+      return {
+        ok: false,
+        body: errorResponse(correlationIdForCycleId(cycleId), authz.code, authz.message, { ...authz.details, cycle_id: cycleId })
+      };
+    }
 
     const viewTimeline = isPartner(actor) ? timeline : redactTimeline({ timeline, viewer: actor });
     const correlation_id = `corr_${cycleId}`;
@@ -119,10 +130,17 @@ export class SettlementReadService {
 
   instructions({ actor, cycleId }) {
     const timeline = this.store.state.timelines[cycleId];
-    if (!timeline) return { ok: false, body: errorResponse('NOT_FOUND', 'settlement timeline not found', { cycle_id: cycleId }) };
+    if (!timeline) {
+      return { ok: false, body: errorResponse(correlationIdForCycleId(cycleId), 'NOT_FOUND', 'settlement timeline not found', { cycle_id: cycleId }) };
+    }
 
     const authz = authorizeRead({ actor, timeline, store: this.store, cycleId });
-    if (!authz.ok) return { ok: false, body: errorResponse(authz.code, authz.message, { ...authz.details, cycle_id: cycleId }) };
+    if (!authz.ok) {
+      return {
+        ok: false,
+        body: errorResponse(correlationIdForCycleId(cycleId), authz.code, authz.message, { ...authz.details, cycle_id: cycleId })
+      };
+    }
 
     const mode = isPartner(actor) ? 'partner' : 'participant';
     const instructions = buildDepositInstructions({ timeline, mode, viewer: actor });
@@ -134,12 +152,19 @@ export class SettlementReadService {
 
   receipt({ actor, cycleId }) {
     const receipt = this.store.state.receipts[cycleId];
-    if (!receipt) return { ok: false, body: errorResponse('NOT_FOUND', 'receipt not found', { cycle_id: cycleId }) };
+    if (!receipt) {
+      return { ok: false, body: errorResponse(correlationIdForCycleId(cycleId), 'NOT_FOUND', 'receipt not found', { cycle_id: cycleId }) };
+    }
 
     // Use timeline for participant check when available.
     const timeline = this.store.state.timelines[cycleId] ?? { legs: [] };
     const authz = authorizeRead({ actor, timeline, store: this.store, cycleId });
-    if (!authz.ok) return { ok: false, body: errorResponse(authz.code, authz.message, { ...authz.details, cycle_id: cycleId }) };
+    if (!authz.ok) {
+      return {
+        ok: false,
+        body: errorResponse(correlationIdForCycleId(cycleId), authz.code, authz.message, { ...authz.details, cycle_id: cycleId })
+      };
+    }
 
     const correlation_id = `corr_${cycleId}`;
     return { ok: true, body: { correlation_id, receipt } };

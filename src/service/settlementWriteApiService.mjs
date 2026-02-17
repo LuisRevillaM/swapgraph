@@ -1,8 +1,8 @@
 import { SettlementStartService } from './settlementStartService.mjs';
 import { SettlementActionsService } from './settlementActionsService.mjs';
 
-function errorResponse(code, message, details = {}) {
-  return { error: { code, message, details } };
+function errorResponse(correlationId, code, message, details = {}) {
+  return { correlation_id: correlationId, error: { code, message, details } };
 }
 
 function correlationIdForCycleId(cycleId) {
@@ -26,7 +26,10 @@ export class SettlementWriteApiService {
     const r = this.startSvc.start({ actor, cycleId, occurredAt, depositDeadlineAt });
 
     if (!r.ok) {
-      return { ok: false, body: errorResponse(r.error.code, r.error.message, r.error.details) };
+      return {
+        ok: false,
+        body: errorResponse(correlationIdForCycleId(cycleId), r.error.code, r.error.message, r.error.details)
+      };
     }
 
     return {
@@ -43,7 +46,10 @@ export class SettlementWriteApiService {
     const r = this.actionsSvc.confirmDeposit({ actor, cycleId, depositRef, occurredAt });
 
     if (!r.ok) {
-      return { ok: false, body: errorResponse(r.error.code, r.error.message, r.error.details) };
+      return {
+        ok: false,
+        body: errorResponse(correlationIdForCycleId(cycleId), r.error.code, r.error.message, r.error.details)
+      };
     }
 
     return {
@@ -62,7 +68,10 @@ export class SettlementWriteApiService {
     const r = this.actionsSvc.beginExecution({ actor, cycleId, occurredAt });
 
     if (!r.ok) {
-      return { ok: false, body: errorResponse(r.error.code, r.error.message, r.error.details) };
+      return {
+        ok: false,
+        body: errorResponse(correlationIdForCycleId(cycleId), r.error.code, r.error.message, r.error.details)
+      };
     }
 
     return {
@@ -81,7 +90,10 @@ export class SettlementWriteApiService {
     const r = this.actionsSvc.complete({ actor, cycleId, occurredAt });
 
     if (!r.ok) {
-      return { ok: false, body: errorResponse(r.error.code, r.error.message, r.error.details) };
+      return {
+        ok: false,
+        body: errorResponse(correlationIdForCycleId(cycleId), r.error.code, r.error.message, r.error.details)
+      };
     }
 
     return {
@@ -99,7 +111,10 @@ export class SettlementWriteApiService {
     const r = this.actionsSvc.expireDepositWindow({ actor, cycleId, nowIso });
 
     if (!r.ok) {
-      return { ok: false, body: errorResponse(r.error.code, r.error.message, r.error.details) };
+      return {
+        ok: false,
+        body: errorResponse(correlationIdForCycleId(cycleId), r.error.code, r.error.message, r.error.details)
+      };
     }
 
     if (r.no_op) {

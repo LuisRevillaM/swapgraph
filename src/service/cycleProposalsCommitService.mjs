@@ -1,7 +1,11 @@
 import { CommitService } from '../commit/commitService.mjs';
 
-function errorResponse(code, message, details = {}) {
-  return { error: { code, message, details } };
+function errorResponse(correlationId, code, message, details = {}) {
+  return { correlation_id: correlationId, error: { code, message, details } };
+}
+
+function correlationIdForCycleId(cycleId) {
+  return `corr_${cycleId}`;
 }
 
 export class CycleProposalsCommitService {
@@ -21,7 +25,7 @@ export class CycleProposalsCommitService {
         replayed: false,
         result: {
           ok: false,
-          body: errorResponse('NOT_FOUND', 'cycle proposal not found', { proposal_id: proposalId })
+          body: errorResponse(correlationIdForCycleId(proposalId), 'NOT_FOUND', 'cycle proposal not found', { proposal_id: proposalId })
         }
       };
     }
@@ -36,7 +40,7 @@ export class CycleProposalsCommitService {
         replayed: false,
         result: {
           ok: false,
-          body: errorResponse('NOT_FOUND', 'cycle proposal not found', { proposal_id: proposalId })
+          body: errorResponse(correlationIdForCycleId(proposalId), 'NOT_FOUND', 'cycle proposal not found', { proposal_id: proposalId })
         }
       };
     }

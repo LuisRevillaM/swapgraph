@@ -1,5 +1,5 @@
-function errorResponse(code, message, details = {}) {
-  return { error: { code, message, details } };
+function errorResponse(correlationId, code, message, details = {}) {
+  return { correlation_id: correlationId, error: { code, message, details } };
 }
 
 function correlationIdForProposalId(proposalId) {
@@ -67,7 +67,7 @@ export class CycleProposalsReadService {
 
   list({ actor }) {
     if (actor?.type === 'agent') {
-      return { ok: false, body: errorResponse('FORBIDDEN', 'agent access requires delegation (not implemented)', { actor }) };
+      return { ok: false, body: errorResponse(correlationIdForCycleProposalsList(actor), 'FORBIDDEN', 'agent access requires delegation (not implemented)', { actor }) };
     }
 
     const all = Object.values(this.store.state.proposals ?? {});
@@ -78,7 +78,7 @@ export class CycleProposalsReadService {
     } else if (actor?.type === 'user') {
       proposals = all.filter(p => isUserParticipant({ actor, proposal: p }));
     } else {
-      return { ok: false, body: errorResponse('FORBIDDEN', 'actor type is not allowed', { actor }) };
+      return { ok: false, body: errorResponse(correlationIdForCycleProposalsList(actor), 'FORBIDDEN', 'actor type is not allowed', { actor }) };
     }
 
     proposals.sort((a, b) => a.id.localeCompare(b.id));
@@ -87,10 +87,10 @@ export class CycleProposalsReadService {
 
   get({ actor, proposalId }) {
     const proposal = this.store.state.proposals?.[proposalId];
-    if (!proposal) return { ok: false, body: errorResponse('NOT_FOUND', 'cycle proposal not found', { proposal_id: proposalId }) };
+    if (!proposal) return { ok: false, body: errorResponse(correlationIdForProposalId(proposalId), 'NOT_FOUND', 'cycle proposal not found', { proposal_id: proposalId }) };
 
     const authz = authorizeRead({ actor, proposal, store: this.store });
-    if (!authz.ok) return { ok: false, body: errorResponse(authz.code, authz.message, { ...authz.details, proposal_id: proposalId }) };
+    if (!authz.ok) return { ok: false, body: errorResponse(correlationIdForProposalId(proposalId), authz.code, authz.message, { ...authz.details, proposal_id: proposalId }) };
 
     return { ok: true, body: { correlation_id: correlationIdForProposalId(proposalId), proposal } };
   }

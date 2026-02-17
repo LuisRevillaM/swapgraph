@@ -21,8 +21,12 @@ function readJson(p) {
   return JSON.parse(readFileSync(p, 'utf8'));
 }
 
-function errorResponse(code, message, details = {}) {
-  return { error: { code, message, details } };
+function errorResponse(correlationId, code, message, details = {}) {
+  return { correlation_id: correlationId, error: { code, message, details } };
+}
+
+function correlationIdForCycleId(cycleId) {
+  return `corr_${cycleId}`;
 }
 
 function actorKey(actor) {
@@ -87,10 +91,17 @@ function buildDepositInstructions(timeline) {
 
 function settlementInstructionsGet({ store, cycleId, actor }) {
   const timeline = store.state.timelines[cycleId];
-  if (!timeline) return { ok: false, body: errorResponse('NOT_FOUND', 'settlement timeline not found', { cycle_id: cycleId }) };
+  if (!timeline) {
+    return { ok: false, body: errorResponse(correlationIdForCycleId(cycleId), 'NOT_FOUND', 'settlement timeline not found', { cycle_id: cycleId }) };
+  }
 
   const authz = authorizeRead({ actor, timeline });
-  if (!authz.ok) return { ok: false, body: errorResponse(authz.code, authz.message, { ...authz.details, cycle_id: cycleId }) };
+  if (!authz.ok) {
+    return {
+      ok: false,
+      body: errorResponse(correlationIdForCycleId(cycleId), authz.code, authz.message, { ...authz.details, cycle_id: cycleId })
+    };
+  }
 
   const instructions = buildDepositInstructions(timeline);
   const correlation_id = `corr_${cycleId}`;
@@ -99,10 +110,17 @@ function settlementInstructionsGet({ store, cycleId, actor }) {
 
 function settlementStatusGet({ store, cycleId, actor }) {
   const timeline = store.state.timelines[cycleId];
-  if (!timeline) return { ok: false, body: errorResponse('NOT_FOUND', 'settlement timeline not found', { cycle_id: cycleId }) };
+  if (!timeline) {
+    return { ok: false, body: errorResponse(correlationIdForCycleId(cycleId), 'NOT_FOUND', 'settlement timeline not found', { cycle_id: cycleId }) };
+  }
 
   const authz = authorizeRead({ actor, timeline });
-  if (!authz.ok) return { ok: false, body: errorResponse(authz.code, authz.message, { ...authz.details, cycle_id: cycleId }) };
+  if (!authz.ok) {
+    return {
+      ok: false,
+      body: errorResponse(correlationIdForCycleId(cycleId), authz.code, authz.message, { ...authz.details, cycle_id: cycleId })
+    };
+  }
 
   const correlation_id = `corr_${cycleId}`;
   return { ok: true, body: { correlation_id, timeline } };
@@ -110,12 +128,19 @@ function settlementStatusGet({ store, cycleId, actor }) {
 
 function receiptGet({ store, cycleId, actor }) {
   const receipt = store.state.receipts[cycleId];
-  if (!receipt) return { ok: false, body: errorResponse('NOT_FOUND', 'receipt not found', { cycle_id: cycleId }) };
+  if (!receipt) {
+    return { ok: false, body: errorResponse(correlationIdForCycleId(cycleId), 'NOT_FOUND', 'receipt not found', { cycle_id: cycleId }) };
+  }
 
   // Determine participant set from timeline if present.
   const timeline = store.state.timelines[cycleId] ?? { legs: [] };
   const authz = authorizeRead({ actor, timeline });
-  if (!authz.ok) return { ok: false, body: errorResponse(authz.code, authz.message, { ...authz.details, cycle_id: cycleId }) };
+  if (!authz.ok) {
+    return {
+      ok: false,
+      body: errorResponse(correlationIdForCycleId(cycleId), authz.code, authz.message, { ...authz.details, cycle_id: cycleId })
+    };
+  }
 
   const correlation_id = `corr_${cycleId}`;
   return { ok: true, body: { correlation_id, receipt } };

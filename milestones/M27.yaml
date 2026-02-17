@@ -1,0 +1,50 @@
+name: M27
+commands:
+  - cmd: "npm run verify:m27"
+artifacts:
+  - artifact: "docs/prd/M27.md"
+
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/ERRORS.md"
+  - artifact: "docs/spec/schemas/ErrorResponse.schema.json"
+  - artifact: "docs/spec/examples/api/error.example.json"
+
+  - artifact: "docs/spec/api/manifest.v1.json"
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+
+  - artifact: "src/service/swapIntentsService.mjs"
+  - artifact: "src/read/cycleProposalsReadService.mjs"
+  - artifact: "src/commit/commitService.mjs"
+  - artifact: "src/service/cycleProposalsCommitService.mjs"
+  - artifact: "src/read/settlementReadService.mjs"
+  - artifact: "src/service/settlementWriteApiService.mjs"
+
+  - artifact: "scripts/validate-api-contract.mjs"
+  - artifact: "verify/m27.sh"
+
+  - artifact: "artifacts/milestones/M27/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M27/latest/assertions.json"
+  - artifact: "artifacts/milestones/M27/latest/commands.log"
+
+  - artifact: "artifacts/milestones/M27/latest/m4/intent_ingestion_results.json"
+  - artifact: "artifacts/milestones/M27/latest/m4/intents_store_snapshot.json"
+  - artifact: "artifacts/milestones/M27/latest/m4/assertions.json"
+
+  - artifact: "artifacts/milestones/M27/latest/m7/commit_output.json"
+  - artifact: "artifacts/milestones/M27/latest/m7/events_outbox.ndjson"
+  - artifact: "artifacts/milestones/M27/latest/m7/events_validation.json"
+  - artifact: "artifacts/milestones/M27/latest/m7/assertions.json"
+
+  - artifact: "artifacts/milestones/M27/latest/m13/settlement_read_output.json"
+  - artifact: "artifacts/milestones/M27/latest/m13/assertions.json"
+
+  - artifact: "artifacts/milestones/M27/latest/m18/proposals_read_output.json"
+  - artifact: "artifacts/milestones/M27/latest/m18/assertions.json"
+
+  - artifact: "artifacts/milestones/M27/latest/m20/commit_output.json"
+  - artifact: "artifacts/milestones/M27/latest/m20/events_outbox.ndjson"
+  - artifact: "artifacts/milestones/M27/latest/m20/events_validation.json"
+  - artifact: "artifacts/milestones/M27/latest/m20/assertions.json"
+
+  - artifact: "artifacts/milestones/M27/latest/m25/settlement_write_output.json"
+  - artifact: "artifacts/milestones/M27/latest/m25/assertions.json"

@@ -4,8 +4,9 @@ function actorKey(actor) {
   return `${actor.type}:${actor.id}`;
 }
 
-function errorResponse(code, message, details = {}) {
+function errorResponse(correlationId, code, message, details = {}) {
   return {
+    correlation_id: correlationId,
     error: {
       code,
       message,
@@ -34,9 +35,9 @@ export class SwapIntentsService {
   }
 
   /**
-   * @param {{ actor: any, operationId: string, idempotencyKey: string, requestBody: any, handler: () => any }} params
+   * @param {{ actor: any, operationId: string, idempotencyKey: string, requestBody: any, correlationId: string, handler: () => any }} params
    */
-  _withIdempotency({ actor, operationId, idempotencyKey, requestBody, handler }) {
+  _withIdempotency({ actor, operationId, idempotencyKey, requestBody, correlationId, handler }) {
     const scopeKey = idempotencyScopeKey({ actor, operationId, idempotencyKey });
     const h = payloadHash(requestBody);
 
@@ -50,6 +51,7 @@ export class SwapIntentsService {
         result: {
           ok: false,
           body: errorResponse(
+            correlationId,
             'IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH',
             'Idempotency key reused with a different payload',
             { scope_key: scopeKey, original_hash: existing.payload_hash, new_hash: h }
@@ -70,6 +72,7 @@ export class SwapIntentsService {
       operationId: 'swapIntents.create',
       idempotencyKey,
       requestBody,
+      correlationId: correlationIdForIntentId(requestBody?.intent?.id ?? 'unknown'),
       handler: () => {
         const intent = requestBody.intent;
         const stored = { ...intent, status: intent.status ?? 'active' };
@@ -85,10 +88,11 @@ export class SwapIntentsService {
       operationId: 'swapIntents.update',
       idempotencyKey,
       requestBody,
+      correlationId: correlationIdForIntentId(id),
       handler: () => {
         const intent = requestBody.intent;
         if (intent.id !== id) {
-          return { ok: false, body: errorResponse('CONSTRAINT_VIOLATION', 'intent.id must match path id', { id, intent_id: intent.id }) };
+          return { ok: false, body: errorResponse(correlationIdForIntentId(id), 'CONSTRAINT_VIOLATION', 'intent.id must match path id', { id, intent_id: intent.id }) };
         }
         const prev = this.store.state.intents[id];
         const status = prev?.status ?? intent.status ?? 'active';
@@ -105,11 +109,12 @@ export class SwapIntentsService {
       operationId: 'swapIntents.cancel',
       idempotencyKey,
       requestBody,
+      correlationId: correlationIdForIntentId(requestBody?.id ?? 'unknown'),
       handler: () => {
         const id = requestBody.id;
         const prev = this.store.state.intents[id];
         if (!prev) {
-          return { ok: false, body: errorResponse('NOT_FOUND', 'intent not found', { id }) };
+          return { ok: false, body: errorResponse(correlationIdForIntentId(id), 'NOT_FOUND', 'intent not found', { id }) };
         }
         this.store.state.intents[id] = { ...prev, status: 'cancelled' };
         return { ok: true, body: { correlation_id: correlationIdForIntentId(id), id, status: 'cancelled' } };
@@ -120,9 +125,9 @@ export class SwapIntentsService {
   get({ actor, id }) {
     // v1: auth not implemented; we still restrict list/get to the same actor.
     const intent = this.store.state.intents[id];
-    if (!intent) return { ok: false, body: errorResponse('NOT_FOUND', 'intent not found', { id }) };
+    if (!intent) return { ok: false, body: errorResponse(correlationIdForIntentId(id), 'NOT_FOUND', 'intent not found', { id }) };
     if (actorKey(intent.actor) !== actorKey(actor)) {
-      return { ok: false, body: errorResponse('FORBIDDEN', 'actor cannot access this intent', { id }) };
+      return { ok: false, body: errorResponse(correlationIdForIntentId(id), 'FORBIDDEN', 'actor cannot access this intent', { id }) };
     }
     return { ok: true, body: { correlation_id: correlationIdForIntentId(id), intent } };
   }

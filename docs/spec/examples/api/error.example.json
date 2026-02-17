@@ -1,4 +1,5 @@
 {
+  "correlation_id": "corr_schema_invalid",
   "error": {
     "code": "SCHEMA_INVALID",
     "message": "Request body failed schema validation",

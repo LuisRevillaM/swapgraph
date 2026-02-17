@@ -5,6 +5,7 @@ Structured errors are part of the public contract.
 ## Shape
 ```json
 {
+  "correlation_id": "...",
   "error": {
     "code": "...",
     "message": "...",
@@ -12,6 +13,10 @@ Structured errors are part of the public contract.
   }
 }
 ```
+
+Notes:
+- In production, `correlation_id` is provided via the `X-Correlation-Id` response header.
+- In fixtures-first verification (no HTTP layer yet), we include `correlation_id` in the JSON body as a stand-in for that header.
 
 ## Core codes
 - `SCHEMA_INVALID`

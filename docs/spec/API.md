@@ -23,7 +23,7 @@ This doc defines the **contract** for the REST API and webhook delivery.
 ## Headers
 - `Idempotency-Key` (required for mutating endpoints)
 - `X-Correlation-Id` (optional on request; always present in responses)
-  - Note: in fixtures-first verification (no HTTP layer yet), **success** responses also include `correlation_id` in the JSON body as a stand-in for the response header.
+  - Note: in fixtures-first verification (no HTTP layer yet), responses also include `correlation_id` in the JSON body as a stand-in for the response header.
 
 ## Resources (v1)
 - `SwapIntent`
