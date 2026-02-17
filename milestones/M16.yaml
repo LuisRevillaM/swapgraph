@@ -1,0 +1,12 @@
+name: M16
+commands:
+  - cmd: "npm run verify:m16"
+artifacts:
+  - artifact: "docs/prd/M16.md"
+  - artifact: "fixtures/settlement/m16_scenario.json"
+  - artifact: "fixtures/settlement/m16_expected.json"
+  - artifact: "src/read/settlementReadService.mjs"
+  - artifact: "src/settlement/settlementService.mjs"
+  - artifact: "artifacts/milestones/M16/latest/tenancy_output.json"
+  - artifact: "artifacts/milestones/M16/latest/assertions.json"
+  - artifact: "artifacts/milestones/M16/latest/commands.log"

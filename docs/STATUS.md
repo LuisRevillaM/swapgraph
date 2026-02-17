@@ -26,8 +26,10 @@ Last updated: 2026-02-17
 
 - M15: ✅ read-side redaction + filtering (partner vs participant views)
 
+- M16: ✅ partner scoping (multi-tenant) — partner reads limited to their own cycles
+
 ## Next
-- M16: partner scoping (multi-tenant) — ensure partner reads are limited to their own users/cycles
+- M17: add partner_id to API auth model + propagate correlation IDs in read responses (contract + verifier)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.

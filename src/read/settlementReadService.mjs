@@ -16,8 +16,31 @@ function isUserParticipant({ actor, timeline }) {
   return participants.has(actorKey(actor));
 }
 
-function authorizeRead({ actor, timeline }) {
-  if (isPartner(actor)) return { ok: true };
+function cyclePartnerId({ store, cycleId }) {
+  return store?.state?.tenancy?.cycles?.[cycleId]?.partner_id ?? null;
+}
+
+function authorizeRead({ actor, timeline, store, cycleId }) {
+  if (isPartner(actor)) {
+    const pid = cyclePartnerId({ store, cycleId });
+    if (!pid) {
+      return {
+        ok: false,
+        code: 'FORBIDDEN',
+        message: 'cycle is not scoped to a partner',
+        details: { actor, cycle_partner_id: null }
+      };
+    }
+    if (pid !== actor.id) {
+      return {
+        ok: false,
+        code: 'FORBIDDEN',
+        message: 'partner cannot access this cycle',
+        details: { actor, cycle_partner_id: pid }
+      };
+    }
+    return { ok: true };
+  }
   if (actor?.type === 'agent') return { ok: false, code: 'FORBIDDEN', message: 'agent access requires delegation (not implemented)', details: { actor } };
   if (isUserParticipant({ actor, timeline })) return { ok: true };
   return { ok: false, code: 'FORBIDDEN', message: 'actor cannot access this cycle', details: { actor } };
@@ -86,7 +109,7 @@ export class SettlementReadService {
     const timeline = this.store.state.timelines[cycleId];
     if (!timeline) return { ok: false, body: errorResponse('NOT_FOUND', 'settlement timeline not found', { cycle_id: cycleId }) };
 
-    const authz = authorizeRead({ actor, timeline });
+    const authz = authorizeRead({ actor, timeline, store: this.store, cycleId });
     if (!authz.ok) return { ok: false, body: errorResponse(authz.code, authz.message, { ...authz.details, cycle_id: cycleId }) };
 
     const viewTimeline = isPartner(actor) ? timeline : redactTimeline({ timeline, viewer: actor });
@@ -97,7 +120,7 @@ export class SettlementReadService {
     const timeline = this.store.state.timelines[cycleId];
     if (!timeline) return { ok: false, body: errorResponse('NOT_FOUND', 'settlement timeline not found', { cycle_id: cycleId }) };
 
-    const authz = authorizeRead({ actor, timeline });
+    const authz = authorizeRead({ actor, timeline, store: this.store, cycleId });
     if (!authz.ok) return { ok: false, body: errorResponse(authz.code, authz.message, { ...authz.details, cycle_id: cycleId }) };
 
     const mode = isPartner(actor) ? 'partner' : 'participant';
@@ -113,7 +136,7 @@ export class SettlementReadService {
 
     // Use timeline for participant check when available.
     const timeline = this.store.state.timelines[cycleId] ?? { legs: [] };
-    const authz = authorizeRead({ actor, timeline });
+    const authz = authorizeRead({ actor, timeline, store: this.store, cycleId });
     if (!authz.ok) return { ok: false, body: errorResponse(authz.code, authz.message, { ...authz.details, cycle_id: cycleId }) };
 
     return { ok: true, body: { receipt } };

@@ -155,6 +155,22 @@ export class SettlementService {
       return { ok: false, error: { code: 'CONFLICT', message: 'commit is not ready for settlement', details: { commit_id: commitId, phase: commit.phase } } };
     }
 
+    // Record partner scoping for multi-tenant read access.
+    this.store.state.tenancy ||= {};
+    this.store.state.tenancy.cycles ||= {};
+    const existingScope = this.store.state.tenancy.cycles[proposal.id];
+    if (existingScope?.partner_id && existingScope.partner_id !== actor.id) {
+      return {
+        ok: false,
+        error: {
+          code: 'FORBIDDEN',
+          message: 'cycle is owned by a different partner',
+          details: { cycle_id: proposal.id, partner_id: actor.id, cycle_partner_id: existingScope.partner_id }
+        }
+      };
+    }
+    this.store.state.tenancy.cycles[proposal.id] = { partner_id: actor.id };
+
     const existing = this.store.state.timelines[proposal.id];
     if (existing) {
       // idempotent: allow re-start if already started.
