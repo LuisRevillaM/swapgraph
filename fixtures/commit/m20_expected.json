@@ -1,0 +1,154 @@
+{
+  "operations": [
+    {
+      "op": "cycleProposals.accept",
+      "proposal_id": "cycle_4f27eb196224",
+      "ok": true,
+      "replayed": false,
+      "error_code": null,
+      "commit_phase": "accept"
+    },
+    {
+      "op": "cycleProposals.accept",
+      "proposal_id": "cycle_4f27eb196224",
+      "ok": true,
+      "replayed": false,
+      "error_code": null,
+      "commit_phase": "accept"
+    },
+    {
+      "op": "cycleProposals.accept",
+      "proposal_id": "cycle_4f27eb196224",
+      "ok": true,
+      "replayed": false,
+      "error_code": null,
+      "commit_phase": "ready"
+    },
+    {
+      "op": "cycleProposals.accept",
+      "proposal_id": "cycle_4f27eb196224",
+      "ok": true,
+      "replayed": true,
+      "error_code": null,
+      "commit_phase": "accept"
+    },
+    {
+      "op": "cycleProposals.accept",
+      "proposal_id": "cycle_4f27eb196224_conflict",
+      "ok": false,
+      "replayed": false,
+      "error_code": "RESERVATION_CONFLICT",
+      "commit_phase": null
+    },
+    {
+      "op": "cycleProposals.accept",
+      "proposal_id": "cycle_961f2288e6f7",
+      "ok": true,
+      "replayed": false,
+      "error_code": null,
+      "commit_phase": "accept"
+    },
+    {
+      "op": "cycleProposals.decline",
+      "proposal_id": "cycle_961f2288e6f7",
+      "ok": true,
+      "replayed": false,
+      "error_code": null,
+      "commit_phase": "cancelled"
+    },
+    {
+      "op": "commits.get",
+      "commit_id": "commit_2fa9f8820558",
+      "ok": true,
+      "error_code": null,
+      "commit_phase": "ready"
+    },
+    {
+      "op": "cycleProposals.accept",
+      "proposal_id": "cycle_missing_000",
+      "ok": false,
+      "replayed": false,
+      "error_code": "NOT_FOUND",
+      "commit_phase": null
+    }
+  ],
+  "reservations": {
+    "intent_a": {
+      "commit_id": "commit_2fa9f8820558",
+      "cycle_id": "cycle_4f27eb196224",
+      "reserved_until": "2026-03-01T00:00:00Z"
+    },
+    "intent_b": {
+      "commit_id": "commit_2fa9f8820558",
+      "cycle_id": "cycle_4f27eb196224",
+      "reserved_until": "2026-03-01T00:00:00Z"
+    },
+    "intent_c": {
+      "commit_id": "commit_2fa9f8820558",
+      "cycle_id": "cycle_4f27eb196224",
+      "reserved_until": "2026-03-01T00:00:00Z"
+    }
+  },
+  "commits": {
+    "commit_2fa9f8820558": {
+      "created_at": "2026-02-16T00:00:10Z",
+      "cycle_id": "cycle_4f27eb196224",
+      "id": "commit_2fa9f8820558",
+      "participants": [
+        {
+          "actor": {
+            "id": "u1",
+            "type": "user"
+          },
+          "commit_token": "tok_commit_2fa9f8820558_user:u1",
+          "status": "accepted"
+        },
+        {
+          "actor": {
+            "id": "u2",
+            "type": "user"
+          },
+          "commit_token": "tok_commit_2fa9f8820558_user:u2",
+          "status": "accepted"
+        },
+        {
+          "actor": {
+            "id": "u3",
+            "type": "user"
+          },
+          "commit_token": "tok_commit_2fa9f8820558_user:u3",
+          "status": "accepted"
+        }
+      ],
+      "phase": "ready",
+      "updated_at": "2026-02-16T00:00:12Z"
+    },
+    "commit_9cf098491ed1": {
+      "created_at": "2026-02-16T00:00:15Z",
+      "cycle_id": "cycle_961f2288e6f7",
+      "id": "commit_9cf098491ed1",
+      "participants": [
+        {
+          "actor": {
+            "id": "u5",
+            "type": "user"
+          },
+          "commit_token": "tok_commit_9cf098491ed1_user:u5",
+          "status": "accepted"
+        },
+        {
+          "actor": {
+            "id": "u6",
+            "type": "user"
+          },
+          "status": "declined"
+        }
+      ],
+      "phase": "cancelled",
+      "updated_at": "2026-02-16T00:00:16Z"
+    }
+  },
+  "idempotency_keys_count": 6,
+  "events_count": 8,
+  "events_unique": 8
+}

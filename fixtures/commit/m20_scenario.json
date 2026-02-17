@@ -1,0 +1,29 @@
+{
+  "occurred_at": [
+    "2026-02-16T00:00:10Z",
+    "2026-02-16T00:00:11Z",
+    "2026-02-16T00:00:12Z",
+    "2026-02-16T00:00:13Z",
+    "2026-02-16T00:00:14Z",
+    "2026-02-16T00:00:15Z",
+    "2026-02-16T00:00:16Z",
+    "2026-02-16T00:00:17Z",
+    "2026-02-16T00:00:18Z"
+  ],
+  "operations": [
+    { "op": "cycleProposals.accept", "proposal_ref": "p3", "actor": {"type":"user","id":"u1"}, "idempotency_key": "a1" },
+    { "op": "cycleProposals.accept", "proposal_ref": "p3", "actor": {"type":"user","id":"u2"}, "idempotency_key": "a2" },
+    { "op": "cycleProposals.accept", "proposal_ref": "p3", "actor": {"type":"user","id":"u3"}, "idempotency_key": "a3" },
+
+    { "op": "cycleProposals.accept", "proposal_ref": "p3", "actor": {"type":"user","id":"u1"}, "idempotency_key": "a1" },
+
+    { "op": "cycleProposals.accept", "proposal_ref": "p3_conflict", "actor": {"type":"user","id":"u1"}, "idempotency_key": "a4" },
+
+    { "op": "cycleProposals.accept", "proposal_ref": "p2", "actor": {"type":"user","id":"u5"}, "idempotency_key": "b1" },
+    { "op": "cycleProposals.decline", "proposal_ref": "p2", "actor": {"type":"user","id":"u6"}, "idempotency_key": "b2" },
+
+    { "op": "commits.get", "proposal_ref": "p3", "actor": {"type":"user","id":"u2"} },
+
+    { "op": "cycleProposals.accept", "proposal_id": "cycle_missing_000", "actor": {"type":"user","id":"u1"}, "idempotency_key": "a5" }
+  ]
+}

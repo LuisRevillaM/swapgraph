@@ -30,9 +30,10 @@ Last updated: 2026-02-17
 - M17: ✅ partner_id in API auth model + correlation IDs in settlement/receipt read responses (contract + verifier)
 - M18: ✅ cycle proposal read APIs fixture scenario (list/get) + authz proofs (contract + verifier)
 - M19: ✅ proposal delivery persistence + partner scoping (polling + webhook ingestion, dedupe-by-event_id)
+- M20: ✅ commit APIs backed by stored proposals (accept/decline loads proposal from store + idempotency + reservation locks)
 
 ## Next
-- M20: commit APIs backed by stored proposals (accept/decline loads proposal from store + authz + idempotency)
+- M21: settlement.start reads commit+proposal from store + enforces partner scoping (no direct proposal injection)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.
