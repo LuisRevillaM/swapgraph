@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/SettlementExpireDepositWindowRequest.schema.json",
+  "title": "SettlementExpireDepositWindowRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["now_iso"],
+  "properties": {
+    "now_iso": { "type": "string", "format": "date-time" }
+  }
+}

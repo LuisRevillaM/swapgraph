@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/SettlementBeginExecutionRequest.schema.json",
+  "title": "SettlementBeginExecutionRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {}
+}

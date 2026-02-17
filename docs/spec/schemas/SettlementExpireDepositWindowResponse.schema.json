@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/SettlementExpireDepositWindowResponse.schema.json",
+  "title": "SettlementExpireDepositWindowResponse",
+  "oneOf": [
+    {
+      "title": "SettlementExpireDepositWindowNoOp",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["correlation_id", "no_op", "details"],
+      "properties": {
+        "correlation_id": { "type": "string", "minLength": 1 },
+        "no_op": { "type": "boolean", "const": true },
+        "details": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    {
+      "title": "SettlementExpireDepositWindowExpired",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["correlation_id", "timeline", "receipt"],
+      "properties": {
+        "correlation_id": { "type": "string", "minLength": 1 },
+        "timeline": { "$ref": "SettlementTimeline.schema.json" },
+        "receipt": { "$ref": "SwapReceipt.schema.json" }
+      }
+    }
+  ]
+}

@@ -35,9 +35,10 @@ Last updated: 2026-02-17
 - M22: ✅ settlement actions via API service (deposit_confirmed/begin_execution/complete; store-backed + partner-scoped)
 - M23: ✅ settlement failure path via API service (deposit-timeout unwind + scoped receipt)
 - M24: ✅ end-to-end store-backed pipeline smoke test (delivery → commit → settlement → read APIs)
+- M25: ✅ settlement write endpoint contracts (start/deposit/begin/complete/expire) + examples + verifier
 
 ## Next
-- M25: add explicit API write endpoint contracts for settlement actions (start/deposit/begin/complete/expire)
+- M26: add correlation_id to remaining response contracts (intents/proposals/commit)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.

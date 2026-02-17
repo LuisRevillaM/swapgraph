@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/SettlementStartRequest.schema.json",
+  "title": "SettlementStartRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["deposit_deadline_at"],
+  "properties": {
+    "deposit_deadline_at": { "type": "string", "format": "date-time" }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/SettlementDepositConfirmedResponse.schema.json",
+  "title": "SettlementDepositConfirmedResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["correlation_id", "timeline"],
+  "properties": {
+    "correlation_id": { "type": "string", "minLength": 1 },
+    "timeline": { "$ref": "SettlementTimeline.schema.json" }
+  }
+}

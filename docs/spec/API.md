@@ -43,6 +43,11 @@ Commit endpoints:
 - `GET /commits/{id}`
 
 Settlement endpoints:
+- `POST /settlement/{cycle_id}/start`
+- `POST /settlement/{cycle_id}/deposit-confirmed`
+- `POST /settlement/{cycle_id}/begin-execution`
+- `POST /settlement/{cycle_id}/complete`
+- `POST /settlement/{cycle_id}/expire-deposit-window`
 - `GET /settlement/{cycle_id}/instructions`
 - `GET /settlement/{cycle_id}/status`
 

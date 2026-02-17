@@ -1,0 +1,263 @@
+{
+  "final": {
+    "cycles": {
+      "p2": {
+        "cycle_id": "cycle_961f2288e6f7",
+        "receipt_final_state": "failed",
+        "timeline_state": "failed"
+      },
+      "p3": {
+        "cycle_id": "cycle_4f27eb196224",
+        "receipt_final_state": "completed",
+        "timeline_state": "completed"
+      }
+    }
+  },
+  "operations": [
+    {
+      "actor": {
+        "id": "other_partner",
+        "type": "partner"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": "FORBIDDEN",
+      "ok": false,
+      "op": "settlement.start"
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "commit_phase": "accept",
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.accept",
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": "CONFLICT",
+      "ok": false,
+      "op": "settlement.start"
+    },
+    {
+      "actor": {
+        "id": "u2",
+        "type": "user"
+      },
+      "commit_phase": "accept",
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.accept",
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "u3",
+        "type": "user"
+      },
+      "commit_phase": "ready",
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.accept",
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "correlation_id": "corr_cycle_4f27eb196224",
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "settlement.start",
+      "timeline_state": "escrow.pending"
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": "FORBIDDEN",
+      "ok": false,
+      "op": "settlement.deposit_confirmed"
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "correlation_id": "corr_cycle_4f27eb196224",
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "settlement.deposit_confirmed",
+      "timeline_state": "escrow.pending"
+    },
+    {
+      "actor": {
+        "id": "u2",
+        "type": "user"
+      },
+      "correlation_id": "corr_cycle_4f27eb196224",
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "settlement.deposit_confirmed",
+      "timeline_state": "escrow.pending"
+    },
+    {
+      "actor": {
+        "id": "u3",
+        "type": "user"
+      },
+      "correlation_id": "corr_cycle_4f27eb196224",
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "settlement.deposit_confirmed",
+      "timeline_state": "escrow.ready"
+    },
+    {
+      "actor": {
+        "id": "other_partner",
+        "type": "partner"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": "FORBIDDEN",
+      "ok": false,
+      "op": "settlement.begin_execution"
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "correlation_id": "corr_cycle_4f27eb196224",
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "settlement.begin_execution",
+      "timeline_state": "executing"
+    },
+    {
+      "actor": {
+        "id": "other_partner",
+        "type": "partner"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": "FORBIDDEN",
+      "ok": false,
+      "op": "settlement.complete"
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "correlation_id": "corr_cycle_4f27eb196224",
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "settlement.complete",
+      "receipt_final_state": "completed",
+      "receipt_id": "receipt_02cce1dcc083",
+      "timeline_state": "completed"
+    },
+    {
+      "actor": {
+        "id": "u5",
+        "type": "user"
+      },
+      "commit_phase": "accept",
+      "cycle_id": "cycle_961f2288e6f7",
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.accept",
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "u6",
+        "type": "user"
+      },
+      "commit_phase": "ready",
+      "cycle_id": "cycle_961f2288e6f7",
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.accept",
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "correlation_id": "corr_cycle_961f2288e6f7",
+      "cycle_id": "cycle_961f2288e6f7",
+      "error_code": null,
+      "ok": true,
+      "op": "settlement.start",
+      "timeline_state": "escrow.pending"
+    },
+    {
+      "actor": {
+        "id": "u5",
+        "type": "user"
+      },
+      "correlation_id": "corr_cycle_961f2288e6f7",
+      "cycle_id": "cycle_961f2288e6f7",
+      "error_code": null,
+      "ok": true,
+      "op": "settlement.deposit_confirmed",
+      "timeline_state": "escrow.pending"
+    },
+    {
+      "actor": {
+        "id": "u5",
+        "type": "user"
+      },
+      "cycle_id": "cycle_961f2288e6f7",
+      "error_code": "FORBIDDEN",
+      "ok": false,
+      "op": "settlement.expire_deposit_window"
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "correlation_id": "corr_cycle_961f2288e6f7",
+      "cycle_id": "cycle_961f2288e6f7",
+      "details_reason": "not_expired",
+      "error_code": null,
+      "no_op": true,
+      "ok": true,
+      "op": "settlement.expire_deposit_window"
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "correlation_id": "corr_cycle_961f2288e6f7",
+      "cycle_id": "cycle_961f2288e6f7",
+      "error_code": null,
+      "ok": true,
+      "op": "settlement.expire_deposit_window",
+      "receipt_final_state": "failed",
+      "receipt_id": "receipt_d74f010588e8",
+      "timeline_state": "failed"
+    }
+  ]
+}

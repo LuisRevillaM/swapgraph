@@ -1,0 +1,42 @@
+{
+  "correlation_id": "corr_cycle_456",
+  "timeline": {
+    "cycle_id": "cycle_456",
+    "state": "failed",
+    "legs": [
+      {
+        "leg_id": "leg_cycle_456_0",
+        "intent_id": "intent_a",
+        "from_actor": { "type": "user", "id": "u1" },
+        "to_actor": { "type": "user", "id": "u2" },
+        "assets": [{ "platform": "steam", "asset_id": "assetA" }],
+        "status": "refunded",
+        "deposit_deadline_at": "2026-02-16T00:03:30Z",
+        "deposit_ref": "dep_u1",
+        "deposited_at": "2026-02-16T00:03:10Z",
+        "refund_ref": "refund_cycle_456_intent_a",
+        "refunded_at": "2026-02-16T00:04:00Z"
+      },
+      {
+        "leg_id": "leg_cycle_456_1",
+        "intent_id": "intent_b",
+        "from_actor": { "type": "user", "id": "u2" },
+        "to_actor": { "type": "user", "id": "u1" },
+        "assets": [{ "platform": "steam", "asset_id": "assetB" }],
+        "status": "pending",
+        "deposit_deadline_at": "2026-02-16T00:03:30Z"
+      }
+    ],
+    "updated_at": "2026-02-16T00:04:00Z"
+  },
+  "receipt": {
+    "id": "receipt_2",
+    "cycle_id": "cycle_456",
+    "final_state": "failed",
+    "intent_ids": ["intent_a", "intent_b"],
+    "asset_ids": ["assetA", "assetB"],
+    "created_at": "2026-02-16T00:04:00Z",
+    "signature": { "key_id": "dev-k1", "alg": "ed25519", "sig": "BASE64_SIGNATURE" },
+    "transparency": { "reason_code": "deposit_timeout" }
+  }
+}

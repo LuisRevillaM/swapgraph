@@ -43,6 +43,47 @@
     },
 
     {
+      "file": "settlement.start.request.json",
+      "schema": "SettlementStartRequest.schema.json"
+    },
+    {
+      "file": "settlement.start.response.json",
+      "schema": "SettlementStartResponse.schema.json"
+    },
+    {
+      "file": "settlement.deposit_confirmed.request.json",
+      "schema": "SettlementDepositConfirmedRequest.schema.json"
+    },
+    {
+      "file": "settlement.deposit_confirmed.response.json",
+      "schema": "SettlementDepositConfirmedResponse.schema.json"
+    },
+    {
+      "file": "settlement.begin_execution.request.json",
+      "schema": "SettlementBeginExecutionRequest.schema.json"
+    },
+    {
+      "file": "settlement.begin_execution.response.json",
+      "schema": "SettlementBeginExecutionResponse.schema.json"
+    },
+    {
+      "file": "settlement.complete.request.json",
+      "schema": "SettlementCompleteRequest.schema.json"
+    },
+    {
+      "file": "settlement.complete.response.json",
+      "schema": "SettlementCompleteResponse.schema.json"
+    },
+    {
+      "file": "settlement.expire_deposit_window.request.json",
+      "schema": "SettlementExpireDepositWindowRequest.schema.json"
+    },
+    {
+      "file": "settlement.expire_deposit_window.response.json",
+      "schema": "SettlementExpireDepositWindowResponse.schema.json"
+    },
+
+    {
       "file": "settlement.instructions.response.json",
       "schema": "SettlementInstructionsGetResponse.schema.json"
     },

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/SettlementDepositConfirmedRequest.schema.json",
+  "title": "SettlementDepositConfirmedRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["deposit_ref"],
+  "properties": {
+    "deposit_ref": { "type": "string", "minLength": 1 }
+  }
+}

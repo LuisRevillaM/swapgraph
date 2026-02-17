@@ -1,0 +1,38 @@
+name: M25
+commands:
+  - cmd: "npm run verify:m25"
+artifacts:
+  - artifact: "docs/prd/M25.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/api/manifest.v1.json"
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+
+  - artifact: "docs/spec/schemas/SettlementStartRequest.schema.json"
+  - artifact: "docs/spec/schemas/SettlementStartResponse.schema.json"
+  - artifact: "docs/spec/schemas/SettlementDepositConfirmedRequest.schema.json"
+  - artifact: "docs/spec/schemas/SettlementDepositConfirmedResponse.schema.json"
+  - artifact: "docs/spec/schemas/SettlementBeginExecutionRequest.schema.json"
+  - artifact: "docs/spec/schemas/SettlementBeginExecutionResponse.schema.json"
+  - artifact: "docs/spec/schemas/SettlementCompleteRequest.schema.json"
+  - artifact: "docs/spec/schemas/SettlementCompleteResponse.schema.json"
+  - artifact: "docs/spec/schemas/SettlementExpireDepositWindowRequest.schema.json"
+  - artifact: "docs/spec/schemas/SettlementExpireDepositWindowResponse.schema.json"
+
+  - artifact: "docs/spec/examples/api/settlement.start.request.json"
+  - artifact: "docs/spec/examples/api/settlement.start.response.json"
+  - artifact: "docs/spec/examples/api/settlement.deposit_confirmed.request.json"
+  - artifact: "docs/spec/examples/api/settlement.deposit_confirmed.response.json"
+  - artifact: "docs/spec/examples/api/settlement.begin_execution.request.json"
+  - artifact: "docs/spec/examples/api/settlement.begin_execution.response.json"
+  - artifact: "docs/spec/examples/api/settlement.complete.request.json"
+  - artifact: "docs/spec/examples/api/settlement.complete.response.json"
+  - artifact: "docs/spec/examples/api/settlement.expire_deposit_window.request.json"
+  - artifact: "docs/spec/examples/api/settlement.expire_deposit_window.response.json"
+
+  - artifact: "src/service/settlementWriteApiService.mjs"
+  - artifact: "scripts/run-m25-settlement-write-contract-scenario.mjs"
+
+  - artifact: "artifacts/milestones/M25/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M25/latest/settlement_write_output.json"
+  - artifact: "artifacts/milestones/M25/latest/assertions.json"
+  - artifact: "artifacts/milestones/M25/latest/commands.log"

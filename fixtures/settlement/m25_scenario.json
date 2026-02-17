@@ -1,0 +1,55 @@
+{
+  "actors": {
+    "partner": { "type": "partner", "id": "swapgraph" },
+    "partner_other": { "type": "partner", "id": "other_partner" },
+
+    "user_u1": { "type": "user", "id": "u1" },
+    "user_u2": { "type": "user", "id": "u2" },
+    "user_u3": { "type": "user", "id": "u3" },
+
+    "user_u5": { "type": "user", "id": "u5" },
+    "user_u6": { "type": "user", "id": "u6" },
+
+    "user_outsider": { "type": "user", "id": "u999" }
+  },
+
+  "cycles": {
+    "p3": { "deposit_deadline_at": "2026-02-17T00:00:00Z" },
+    "p2": { "deposit_deadline_at": "2026-02-16T00:03:30Z" }
+  },
+
+  "operations": [
+    { "op": "settlement.start", "proposal_ref": "p3", "actor_ref": "partner_other", "occurred_at": "2026-02-16T00:00:01Z", "request_body": { "deposit_deadline_at": "2026-02-17T00:00:00Z" } },
+
+    { "op": "cycleProposals.accept", "proposal_ref": "p3", "actor_ref": "user_u1", "occurred_at": "2026-02-16T00:00:10Z", "idempotency_key": "m25_u1" },
+    { "op": "settlement.start", "proposal_ref": "p3", "actor_ref": "partner", "occurred_at": "2026-02-16T00:00:20Z", "request_body": { "deposit_deadline_at": "2026-02-17T00:00:00Z" } },
+
+    { "op": "cycleProposals.accept", "proposal_ref": "p3", "actor_ref": "user_u2", "occurred_at": "2026-02-16T00:00:11Z", "idempotency_key": "m25_u2" },
+    { "op": "cycleProposals.accept", "proposal_ref": "p3", "actor_ref": "user_u3", "occurred_at": "2026-02-16T00:00:12Z", "idempotency_key": "m25_u3" },
+
+    { "op": "settlement.start", "proposal_ref": "p3", "actor_ref": "partner", "occurred_at": "2026-02-16T00:01:00Z", "request_body": { "deposit_deadline_at": "2026-02-17T00:00:00Z" } },
+
+    { "op": "settlement.deposit_confirmed", "proposal_ref": "p3", "actor_ref": "partner", "occurred_at": "2026-02-16T00:01:05Z", "request_body": { "deposit_ref": "dep_partner" } },
+
+    { "op": "settlement.deposit_confirmed", "proposal_ref": "p3", "actor_ref": "user_u1", "occurred_at": "2026-02-16T00:01:10Z", "request_body": { "deposit_ref": "dep_u1_p3" } },
+    { "op": "settlement.deposit_confirmed", "proposal_ref": "p3", "actor_ref": "user_u2", "occurred_at": "2026-02-16T00:01:11Z", "request_body": { "deposit_ref": "dep_u2_p3" } },
+    { "op": "settlement.deposit_confirmed", "proposal_ref": "p3", "actor_ref": "user_u3", "occurred_at": "2026-02-16T00:01:12Z", "request_body": { "deposit_ref": "dep_u3_p3" } },
+
+    { "op": "settlement.begin_execution", "proposal_ref": "p3", "actor_ref": "partner_other", "occurred_at": "2026-02-16T00:02:00Z", "request_body": {} },
+    { "op": "settlement.begin_execution", "proposal_ref": "p3", "actor_ref": "partner", "occurred_at": "2026-02-16T00:02:02Z", "request_body": {} },
+
+    { "op": "settlement.complete", "proposal_ref": "p3", "actor_ref": "partner_other", "occurred_at": "2026-02-16T00:02:20Z", "request_body": {} },
+    { "op": "settlement.complete", "proposal_ref": "p3", "actor_ref": "partner", "occurred_at": "2026-02-16T00:02:30Z", "request_body": {} },
+
+    { "op": "cycleProposals.accept", "proposal_ref": "p2", "actor_ref": "user_u5", "occurred_at": "2026-02-16T00:00:15Z", "idempotency_key": "m25_u5" },
+    { "op": "cycleProposals.accept", "proposal_ref": "p2", "actor_ref": "user_u6", "occurred_at": "2026-02-16T00:00:16Z", "idempotency_key": "m25_u6" },
+
+    { "op": "settlement.start", "proposal_ref": "p2", "actor_ref": "partner", "occurred_at": "2026-02-16T00:03:00Z", "request_body": { "deposit_deadline_at": "2026-02-16T00:03:30Z" } },
+    { "op": "settlement.deposit_confirmed", "proposal_ref": "p2", "actor_ref": "user_u5", "occurred_at": "2026-02-16T00:03:10Z", "request_body": { "deposit_ref": "dep_u5_p2" } },
+
+    { "op": "settlement.expire_deposit_window", "proposal_ref": "p2", "actor_ref": "user_u5", "request_body": { "now_iso": "2026-02-16T00:03:15Z" } },
+    { "op": "settlement.expire_deposit_window", "proposal_ref": "p2", "actor_ref": "partner", "request_body": { "now_iso": "2026-02-16T00:03:15Z" } },
+
+    { "op": "settlement.expire_deposit_window", "proposal_ref": "p2", "actor_ref": "partner", "request_body": { "now_iso": "2026-02-16T00:04:00Z" } }
+  ]
+}

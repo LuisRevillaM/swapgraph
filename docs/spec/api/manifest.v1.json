@@ -81,6 +81,47 @@
     },
 
     {
+      "method": "POST",
+      "path": "/settlement/{cycle_id}/start",
+      "operation_id": "settlement.start",
+      "idempotency_required": true,
+      "request_schema": "SettlementStartRequest.schema.json",
+      "response_schema": "SettlementStartResponse.schema.json"
+    },
+    {
+      "method": "POST",
+      "path": "/settlement/{cycle_id}/deposit-confirmed",
+      "operation_id": "settlement.deposit_confirmed",
+      "idempotency_required": true,
+      "request_schema": "SettlementDepositConfirmedRequest.schema.json",
+      "response_schema": "SettlementDepositConfirmedResponse.schema.json"
+    },
+    {
+      "method": "POST",
+      "path": "/settlement/{cycle_id}/begin-execution",
+      "operation_id": "settlement.begin_execution",
+      "idempotency_required": true,
+      "request_schema": "SettlementBeginExecutionRequest.schema.json",
+      "response_schema": "SettlementBeginExecutionResponse.schema.json"
+    },
+    {
+      "method": "POST",
+      "path": "/settlement/{cycle_id}/complete",
+      "operation_id": "settlement.complete",
+      "idempotency_required": true,
+      "request_schema": "SettlementCompleteRequest.schema.json",
+      "response_schema": "SettlementCompleteResponse.schema.json"
+    },
+    {
+      "method": "POST",
+      "path": "/settlement/{cycle_id}/expire-deposit-window",
+      "operation_id": "settlement.expire_deposit_window",
+      "idempotency_required": true,
+      "request_schema": "SettlementExpireDepositWindowRequest.schema.json",
+      "response_schema": "SettlementExpireDepositWindowResponse.schema.json"
+    },
+
+    {
       "method": "GET",
       "path": "/settlement/{cycle_id}/instructions",
       "operation_id": "settlement.instructions",
