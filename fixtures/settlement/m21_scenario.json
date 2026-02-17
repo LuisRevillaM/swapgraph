@@ -1,0 +1,28 @@
+{
+  "actors": {
+    "partner_a": { "type": "partner", "id": "partner_a" },
+    "partner_b": { "type": "partner", "id": "partner_b" },
+    "user_u1": { "type": "user", "id": "u1" },
+    "user_u2": { "type": "user", "id": "u2" },
+    "user_u3": { "type": "user", "id": "u3" },
+    "agent_1": { "type": "agent", "id": "agent_1" }
+  },
+  "cycles": {
+    "p3": { "deposit_deadline_at": "2026-02-17T00:00:00Z" }
+  },
+  "operations": [
+    { "op": "cycleProposals.accept", "proposal_ref": "p3", "actor_ref": "user_u1", "idempotency_key": "m21_u1", "occurred_at": "2026-02-16T00:00:10Z" },
+
+    { "op": "settlement.start", "proposal_ref": "p3", "actor_ref": "partner_a", "occurred_at": "2026-02-16T00:01:00Z" },
+    { "op": "settlement.start", "proposal_ref": "p3", "actor_ref": "partner_b", "occurred_at": "2026-02-16T00:01:01Z" },
+
+    { "op": "cycleProposals.accept", "proposal_ref": "p3", "actor_ref": "user_u2", "idempotency_key": "m21_u2", "occurred_at": "2026-02-16T00:00:11Z" },
+    { "op": "cycleProposals.accept", "proposal_ref": "p3", "actor_ref": "user_u3", "idempotency_key": "m21_u3", "occurred_at": "2026-02-16T00:00:12Z" },
+
+    { "op": "settlement.start", "proposal_ref": "p3", "actor_ref": "agent_1", "occurred_at": "2026-02-16T00:01:02Z" },
+    { "op": "settlement.start", "proposal_ref": "p3", "actor_ref": "partner_a", "occurred_at": "2026-02-16T00:01:03Z" },
+
+    { "op": "settlement.status", "proposal_ref": "p3", "actor_ref": "partner_a" },
+    { "op": "settlement.status", "proposal_ref": "p3", "actor_ref": "partner_b" }
+  ]
+}

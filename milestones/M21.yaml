@@ -1,0 +1,12 @@
+name: M21
+commands:
+  - cmd: "npm run verify:m21"
+artifacts:
+  - artifact: "docs/prd/M21.md"
+  - artifact: "fixtures/settlement/m21_scenario.json"
+  - artifact: "fixtures/settlement/m21_expected.json"
+  - artifact: "src/service/settlementStartService.mjs"
+  - artifact: "scripts/run-m21-settlement-start-from-store-scenario.mjs"
+  - artifact: "artifacts/milestones/M21/latest/settlement_start_output.json"
+  - artifact: "artifacts/milestones/M21/latest/assertions.json"
+  - artifact: "artifacts/milestones/M21/latest/commands.log"

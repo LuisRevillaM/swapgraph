@@ -1,0 +1,104 @@
+{
+  "operations": [
+    {
+      "commit_phase": "accept",
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.accept",
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "partner_a",
+        "type": "partner"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": "CONFLICT",
+      "ok": false,
+      "op": "settlement.start",
+      "timeline_state": null
+    },
+    {
+      "actor": {
+        "id": "partner_b",
+        "type": "partner"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": "FORBIDDEN",
+      "ok": false,
+      "op": "settlement.start",
+      "timeline_state": null
+    },
+    {
+      "commit_phase": "accept",
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.accept",
+      "replayed": false
+    },
+    {
+      "commit_phase": "ready",
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.accept",
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "agent_1",
+        "type": "agent"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": "FORBIDDEN",
+      "ok": false,
+      "op": "settlement.start",
+      "timeline_state": null
+    },
+    {
+      "actor": {
+        "id": "partner_a",
+        "type": "partner"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "settlement.start",
+      "timeline_state": "escrow.pending"
+    },
+    {
+      "actor": {
+        "id": "partner_a",
+        "type": "partner"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "settlement.status"
+    },
+    {
+      "actor": {
+        "id": "partner_b",
+        "type": "partner"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": "FORBIDDEN",
+      "ok": false,
+      "op": "settlement.status"
+    }
+  ],
+  "tenancy": {
+    "cycles": {
+      "cycle_4f27eb196224": {
+        "partner_id": "partner_a"
+      }
+    },
+    "proposals": {
+      "cycle_4f27eb196224": {
+        "partner_id": "partner_a"
+      }
+    }
+  }
+}
