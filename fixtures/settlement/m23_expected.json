@@ -1,0 +1,108 @@
+{
+  "final": {
+    "cycle_id": "cycle_961f2288e6f7",
+    "receipt_final_state": "failed",
+    "receipt_id": "receipt_d74f010588e8",
+    "receipt_reason_code": "deposit_timeout",
+    "reservations_keys": [],
+    "timeline_state": "failed"
+  },
+  "operations": [
+    {
+      "commit_phase": "accept",
+      "cycle_id": "cycle_961f2288e6f7",
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.accept",
+      "replayed": false
+    },
+    {
+      "commit_phase": "ready",
+      "cycle_id": "cycle_961f2288e6f7",
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.accept",
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "partner_a",
+        "type": "partner"
+      },
+      "cycle_id": "cycle_961f2288e6f7",
+      "error_code": null,
+      "ok": true,
+      "op": "settlement.start",
+      "timeline_state": "escrow.pending"
+    },
+    {
+      "actor": {
+        "id": "u5",
+        "type": "user"
+      },
+      "cycle_id": "cycle_961f2288e6f7",
+      "error_code": null,
+      "ok": true,
+      "op": "settlement.deposit_confirmed",
+      "replayed": false,
+      "timeline_state": "escrow.pending"
+    },
+    {
+      "actor": {
+        "id": "agent_1",
+        "type": "agent"
+      },
+      "cycle_id": "cycle_961f2288e6f7",
+      "error_code": "FORBIDDEN",
+      "final_state": null,
+      "no_op": false,
+      "ok": false,
+      "op": "settlement.expire_deposit_window",
+      "reason_code": null,
+      "receipt_id": null,
+      "timeline_state": null
+    },
+    {
+      "actor": {
+        "id": "partner_b",
+        "type": "partner"
+      },
+      "cycle_id": "cycle_961f2288e6f7",
+      "error_code": "FORBIDDEN",
+      "final_state": null,
+      "no_op": false,
+      "ok": false,
+      "op": "settlement.expire_deposit_window",
+      "reason_code": null,
+      "receipt_id": null,
+      "timeline_state": null
+    },
+    {
+      "actor": {
+        "id": "partner_a",
+        "type": "partner"
+      },
+      "cycle_id": "cycle_961f2288e6f7",
+      "error_code": null,
+      "final_state": "failed",
+      "no_op": false,
+      "ok": true,
+      "op": "settlement.expire_deposit_window",
+      "reason_code": "deposit_timeout",
+      "receipt_id": "receipt_d74f010588e8",
+      "timeline_state": "failed"
+    }
+  ],
+  "tenancy": {
+    "cycles": {
+      "cycle_961f2288e6f7": {
+        "partner_id": "partner_a"
+      }
+    },
+    "proposals": {
+      "cycle_961f2288e6f7": {
+        "partner_id": "partner_a"
+      }
+    }
+  }
+}

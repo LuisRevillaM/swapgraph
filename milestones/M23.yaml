@@ -1,0 +1,14 @@
+name: M23
+commands:
+  - cmd: "npm run verify:m23"
+artifacts:
+  - artifact: "docs/prd/M23.md"
+  - artifact: "fixtures/settlement/m23_scenario.json"
+  - artifact: "fixtures/settlement/m23_expected.json"
+
+  - artifact: "src/service/settlementActionsService.mjs"
+  - artifact: "scripts/run-m23-settlement-failure-from-store-scenario.mjs"
+
+  - artifact: "artifacts/milestones/M23/latest/settlement_failure_output.json"
+  - artifact: "artifacts/milestones/M23/latest/assertions.json"
+  - artifact: "artifacts/milestones/M23/latest/commands.log"

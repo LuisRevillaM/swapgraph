@@ -61,4 +61,20 @@ export class SettlementActionsService {
 
     return this.settlementSvc.complete({ actor, cycleId, occurredAt });
   }
+
+  expireDepositWindow({ actor, cycleId, nowIso }) {
+    if (!isPartner(actor)) {
+      return { ok: false, error: error('FORBIDDEN', 'only partner can expire deposit window', { actor, cycle_id: cycleId }) };
+    }
+
+    const pid = cyclePartnerId({ store: this.store, cycleId });
+    if (!pid) {
+      return { ok: false, error: error('FORBIDDEN', 'cycle is not scoped to a partner', { actor, cycle_id: cycleId, cycle_partner_id: null }) };
+    }
+    if (pid !== actor.id) {
+      return { ok: false, error: error('FORBIDDEN', 'partner cannot access this cycle', { actor, cycle_id: cycleId, cycle_partner_id: pid }) };
+    }
+
+    return this.settlementSvc.expireDepositWindow({ actor, cycleId, nowIso });
+  }
 }
