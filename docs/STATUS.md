@@ -1,6 +1,6 @@
 # Project Status — swapgraph
 
-Last updated: 2026-02-16
+Last updated: 2026-02-17
 
 ## Autopilot
 - Status: **spec hardening** (not approved)
@@ -24,8 +24,10 @@ Last updated: 2026-02-16
 - M13: ✅ settlement read APIs fixture scenario (instructions/status/receipts) driven from store state + schema validation
 - M14: ✅ read endpoint authz rules (partner vs participant) + forbidden proofs
 
+- M15: ✅ read-side redaction + filtering (partner vs participant views)
+
 ## Next
-- M15: extend read-side contract with filtering/redaction (partner view vs participant view)
+- M16: partner scoping (multi-tenant) — ensure partner reads are limited to their own users/cycles
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.

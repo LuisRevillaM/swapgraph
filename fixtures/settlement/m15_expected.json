@@ -1,0 +1,585 @@
+{
+  "operations": [
+    {
+      "commit_phase": "accept",
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.accept",
+      "replayed": false
+    },
+    {
+      "commit_phase": "accept",
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.accept",
+      "replayed": false
+    },
+    {
+      "commit_phase": "ready",
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.accept",
+      "replayed": false
+    },
+    {
+      "cycle_id": "cycle_4f27eb196224",
+      "ok": true,
+      "op": "settlement.start",
+      "replayed": false,
+      "timeline_state": "escrow.pending"
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "body": {
+        "instructions": [
+          {
+            "actor": {
+              "id": "u1",
+              "type": "user"
+            },
+            "deposit_deadline_at": "2026-02-17T00:00:00Z",
+            "intent_id": "intent_a",
+            "kind": "deposit"
+          },
+          {
+            "actor": {
+              "id": "u2",
+              "type": "user"
+            },
+            "deposit_deadline_at": "2026-02-17T00:00:00Z",
+            "intent_id": "intent_b",
+            "kind": "deposit"
+          },
+          {
+            "actor": {
+              "id": "u3",
+              "type": "user"
+            },
+            "deposit_deadline_at": "2026-02-17T00:00:00Z",
+            "intent_id": "intent_c",
+            "kind": "deposit"
+          }
+        ],
+        "timeline": {
+          "cycle_id": "cycle_4f27eb196224",
+          "legs": [
+            {
+              "assets": [
+                {
+                  "asset_id": "assetA",
+                  "platform": "steam"
+                }
+              ],
+              "deposit_deadline_at": "2026-02-17T00:00:00Z",
+              "from_actor": {
+                "id": "u1",
+                "type": "user"
+              },
+              "intent_id": "intent_a",
+              "leg_id": "leg_cycle_4f27eb196224_0",
+              "status": "pending",
+              "to_actor": {
+                "id": "u3",
+                "type": "user"
+              }
+            },
+            {
+              "assets": [
+                {
+                  "asset_id": "assetB",
+                  "platform": "steam"
+                }
+              ],
+              "deposit_deadline_at": "2026-02-17T00:00:00Z",
+              "from_actor": {
+                "id": "u2",
+                "type": "user"
+              },
+              "intent_id": "intent_b",
+              "leg_id": "leg_cycle_4f27eb196224_1",
+              "status": "pending",
+              "to_actor": {
+                "id": "u1",
+                "type": "user"
+              }
+            },
+            {
+              "assets": [
+                {
+                  "asset_id": "assetC",
+                  "platform": "steam"
+                }
+              ],
+              "deposit_deadline_at": "2026-02-17T00:00:00Z",
+              "from_actor": {
+                "id": "u3",
+                "type": "user"
+              },
+              "intent_id": "intent_c",
+              "leg_id": "leg_cycle_4f27eb196224_2",
+              "status": "pending",
+              "to_actor": {
+                "id": "u2",
+                "type": "user"
+              }
+            }
+          ],
+          "state": "escrow.pending",
+          "updated_at": "2026-02-16T00:01:00Z"
+        }
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "settlement.instructions"
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "body": {
+        "instructions": [
+          {
+            "actor": {
+              "id": "u1",
+              "type": "user"
+            },
+            "deposit_deadline_at": "2026-02-17T00:00:00Z",
+            "intent_id": "intent_a",
+            "kind": "deposit"
+          }
+        ],
+        "timeline": {
+          "cycle_id": "cycle_4f27eb196224",
+          "legs": [
+            {
+              "assets": [
+                {
+                  "asset_id": "assetA",
+                  "platform": "steam"
+                }
+              ],
+              "deposit_deadline_at": "2026-02-17T00:00:00Z",
+              "from_actor": {
+                "id": "u1",
+                "type": "user"
+              },
+              "intent_id": "intent_a",
+              "leg_id": "leg_cycle_4f27eb196224_0",
+              "status": "pending",
+              "to_actor": {
+                "id": "redacted",
+                "type": "user"
+              }
+            },
+            {
+              "assets": [
+                {
+                  "asset_id": "assetB",
+                  "platform": "steam"
+                }
+              ],
+              "deposit_deadline_at": "2026-02-17T00:00:00Z",
+              "from_actor": {
+                "id": "redacted",
+                "type": "user"
+              },
+              "intent_id": "intent_b",
+              "leg_id": "leg_cycle_4f27eb196224_1",
+              "status": "pending",
+              "to_actor": {
+                "id": "u1",
+                "type": "user"
+              }
+            },
+            {
+              "assets": [
+                {
+                  "asset_id": "assetC",
+                  "platform": "steam"
+                }
+              ],
+              "deposit_deadline_at": "2026-02-17T00:00:00Z",
+              "from_actor": {
+                "id": "redacted",
+                "type": "user"
+              },
+              "intent_id": "intent_c",
+              "leg_id": "leg_cycle_4f27eb196224_2",
+              "status": "pending",
+              "to_actor": {
+                "id": "redacted",
+                "type": "user"
+              }
+            }
+          ],
+          "state": "escrow.pending",
+          "updated_at": "2026-02-16T00:01:00Z"
+        }
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "settlement.instructions"
+    },
+    {
+      "cycle_id": "cycle_4f27eb196224",
+      "ok": true,
+      "op": "settlement.deposit_confirmed",
+      "replayed": false,
+      "timeline_state": "escrow.pending"
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "body": {
+        "timeline": {
+          "cycle_id": "cycle_4f27eb196224",
+          "legs": [
+            {
+              "assets": [
+                {
+                  "asset_id": "assetA",
+                  "platform": "steam"
+                }
+              ],
+              "deposit_deadline_at": "2026-02-17T00:00:00Z",
+              "deposit_ref": "dep_u1_p3",
+              "deposited_at": "2026-02-16T00:01:10Z",
+              "from_actor": {
+                "id": "u1",
+                "type": "user"
+              },
+              "intent_id": "intent_a",
+              "leg_id": "leg_cycle_4f27eb196224_0",
+              "status": "deposited",
+              "to_actor": {
+                "id": "u3",
+                "type": "user"
+              }
+            },
+            {
+              "assets": [
+                {
+                  "asset_id": "assetB",
+                  "platform": "steam"
+                }
+              ],
+              "deposit_deadline_at": "2026-02-17T00:00:00Z",
+              "from_actor": {
+                "id": "u2",
+                "type": "user"
+              },
+              "intent_id": "intent_b",
+              "leg_id": "leg_cycle_4f27eb196224_1",
+              "status": "pending",
+              "to_actor": {
+                "id": "u1",
+                "type": "user"
+              }
+            },
+            {
+              "assets": [
+                {
+                  "asset_id": "assetC",
+                  "platform": "steam"
+                }
+              ],
+              "deposit_deadline_at": "2026-02-17T00:00:00Z",
+              "from_actor": {
+                "id": "u3",
+                "type": "user"
+              },
+              "intent_id": "intent_c",
+              "leg_id": "leg_cycle_4f27eb196224_2",
+              "status": "pending",
+              "to_actor": {
+                "id": "u2",
+                "type": "user"
+              }
+            }
+          ],
+          "state": "escrow.pending",
+          "updated_at": "2026-02-16T00:01:10Z"
+        }
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "settlement.status"
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "body": {
+        "timeline": {
+          "cycle_id": "cycle_4f27eb196224",
+          "legs": [
+            {
+              "assets": [
+                {
+                  "asset_id": "assetA",
+                  "platform": "steam"
+                }
+              ],
+              "deposit_deadline_at": "2026-02-17T00:00:00Z",
+              "deposit_ref": "dep_u1_p3",
+              "deposited_at": "2026-02-16T00:01:10Z",
+              "from_actor": {
+                "id": "u1",
+                "type": "user"
+              },
+              "intent_id": "intent_a",
+              "leg_id": "leg_cycle_4f27eb196224_0",
+              "status": "deposited",
+              "to_actor": {
+                "id": "redacted",
+                "type": "user"
+              }
+            },
+            {
+              "assets": [
+                {
+                  "asset_id": "assetB",
+                  "platform": "steam"
+                }
+              ],
+              "deposit_deadline_at": "2026-02-17T00:00:00Z",
+              "from_actor": {
+                "id": "redacted",
+                "type": "user"
+              },
+              "intent_id": "intent_b",
+              "leg_id": "leg_cycle_4f27eb196224_1",
+              "status": "pending",
+              "to_actor": {
+                "id": "u1",
+                "type": "user"
+              }
+            },
+            {
+              "assets": [
+                {
+                  "asset_id": "assetC",
+                  "platform": "steam"
+                }
+              ],
+              "deposit_deadline_at": "2026-02-17T00:00:00Z",
+              "from_actor": {
+                "id": "redacted",
+                "type": "user"
+              },
+              "intent_id": "intent_c",
+              "leg_id": "leg_cycle_4f27eb196224_2",
+              "status": "pending",
+              "to_actor": {
+                "id": "redacted",
+                "type": "user"
+              }
+            }
+          ],
+          "state": "escrow.pending",
+          "updated_at": "2026-02-16T00:01:10Z"
+        }
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "settlement.status"
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "body": {
+        "instructions": [
+          {
+            "actor": {
+              "id": "u2",
+              "type": "user"
+            },
+            "deposit_deadline_at": "2026-02-17T00:00:00Z",
+            "intent_id": "intent_b",
+            "kind": "deposit"
+          },
+          {
+            "actor": {
+              "id": "u3",
+              "type": "user"
+            },
+            "deposit_deadline_at": "2026-02-17T00:00:00Z",
+            "intent_id": "intent_c",
+            "kind": "deposit"
+          }
+        ],
+        "timeline": {
+          "cycle_id": "cycle_4f27eb196224",
+          "legs": [
+            {
+              "assets": [
+                {
+                  "asset_id": "assetA",
+                  "platform": "steam"
+                }
+              ],
+              "deposit_deadline_at": "2026-02-17T00:00:00Z",
+              "deposit_ref": "dep_u1_p3",
+              "deposited_at": "2026-02-16T00:01:10Z",
+              "from_actor": {
+                "id": "u1",
+                "type": "user"
+              },
+              "intent_id": "intent_a",
+              "leg_id": "leg_cycle_4f27eb196224_0",
+              "status": "deposited",
+              "to_actor": {
+                "id": "u3",
+                "type": "user"
+              }
+            },
+            {
+              "assets": [
+                {
+                  "asset_id": "assetB",
+                  "platform": "steam"
+                }
+              ],
+              "deposit_deadline_at": "2026-02-17T00:00:00Z",
+              "from_actor": {
+                "id": "u2",
+                "type": "user"
+              },
+              "intent_id": "intent_b",
+              "leg_id": "leg_cycle_4f27eb196224_1",
+              "status": "pending",
+              "to_actor": {
+                "id": "u1",
+                "type": "user"
+              }
+            },
+            {
+              "assets": [
+                {
+                  "asset_id": "assetC",
+                  "platform": "steam"
+                }
+              ],
+              "deposit_deadline_at": "2026-02-17T00:00:00Z",
+              "from_actor": {
+                "id": "u3",
+                "type": "user"
+              },
+              "intent_id": "intent_c",
+              "leg_id": "leg_cycle_4f27eb196224_2",
+              "status": "pending",
+              "to_actor": {
+                "id": "u2",
+                "type": "user"
+              }
+            }
+          ],
+          "state": "escrow.pending",
+          "updated_at": "2026-02-16T00:01:10Z"
+        }
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "settlement.instructions"
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "body": {
+        "instructions": [],
+        "timeline": {
+          "cycle_id": "cycle_4f27eb196224",
+          "legs": [
+            {
+              "assets": [
+                {
+                  "asset_id": "assetA",
+                  "platform": "steam"
+                }
+              ],
+              "deposit_deadline_at": "2026-02-17T00:00:00Z",
+              "deposit_ref": "dep_u1_p3",
+              "deposited_at": "2026-02-16T00:01:10Z",
+              "from_actor": {
+                "id": "u1",
+                "type": "user"
+              },
+              "intent_id": "intent_a",
+              "leg_id": "leg_cycle_4f27eb196224_0",
+              "status": "deposited",
+              "to_actor": {
+                "id": "redacted",
+                "type": "user"
+              }
+            },
+            {
+              "assets": [
+                {
+                  "asset_id": "assetB",
+                  "platform": "steam"
+                }
+              ],
+              "deposit_deadline_at": "2026-02-17T00:00:00Z",
+              "from_actor": {
+                "id": "redacted",
+                "type": "user"
+              },
+              "intent_id": "intent_b",
+              "leg_id": "leg_cycle_4f27eb196224_1",
+              "status": "pending",
+              "to_actor": {
+                "id": "u1",
+                "type": "user"
+              }
+            },
+            {
+              "assets": [
+                {
+                  "asset_id": "assetC",
+                  "platform": "steam"
+                }
+              ],
+              "deposit_deadline_at": "2026-02-17T00:00:00Z",
+              "from_actor": {
+                "id": "redacted",
+                "type": "user"
+              },
+              "intent_id": "intent_c",
+              "leg_id": "leg_cycle_4f27eb196224_2",
+              "status": "pending",
+              "to_actor": {
+                "id": "redacted",
+                "type": "user"
+              }
+            }
+          ],
+          "state": "escrow.pending",
+          "updated_at": "2026-02-16T00:01:10Z"
+        }
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "settlement.instructions"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+name: M15
+commands:
+  - cmd: "npm run verify:m15"
+artifacts:
+  - artifact: "docs/prd/M15.md"
+  - artifact: "fixtures/settlement/m15_scenario.json"
+  - artifact: "fixtures/settlement/m15_expected.json"
+  - artifact: "src/read/settlementReadService.mjs"
+  - artifact: "artifacts/milestones/M15/latest/redaction_output.json"
+  - artifact: "artifacts/milestones/M15/latest/assertions.json"
+  - artifact: "artifacts/milestones/M15/latest/commands.log"
