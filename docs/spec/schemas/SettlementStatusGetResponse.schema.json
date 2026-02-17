@@ -4,8 +4,9 @@
   "title": "SettlementStatusGetResponse",
   "type": "object",
   "additionalProperties": false,
-  "required": ["timeline"],
+  "required": ["correlation_id", "timeline"],
   "properties": {
+    "correlation_id": { "type": "string", "minLength": 1 },
     "timeline": { "$ref": "SettlementTimeline.schema.json" }
   }
 }

@@ -113,7 +113,8 @@ export class SettlementReadService {
     if (!authz.ok) return { ok: false, body: errorResponse(authz.code, authz.message, { ...authz.details, cycle_id: cycleId }) };
 
     const viewTimeline = isPartner(actor) ? timeline : redactTimeline({ timeline, viewer: actor });
-    return { ok: true, body: { timeline: viewTimeline } };
+    const correlation_id = `corr_${cycleId}`;
+    return { ok: true, body: { correlation_id, timeline: viewTimeline } };
   }
 
   instructions({ actor, cycleId }) {
@@ -126,8 +127,9 @@ export class SettlementReadService {
     const mode = isPartner(actor) ? 'partner' : 'participant';
     const instructions = buildDepositInstructions({ timeline, mode, viewer: actor });
     const viewTimeline = isPartner(actor) ? timeline : redactTimeline({ timeline, viewer: actor });
+    const correlation_id = `corr_${cycleId}`;
 
-    return { ok: true, body: { timeline: viewTimeline, instructions } };
+    return { ok: true, body: { correlation_id, timeline: viewTimeline, instructions } };
   }
 
   receipt({ actor, cycleId }) {
@@ -139,6 +141,7 @@ export class SettlementReadService {
     const authz = authorizeRead({ actor, timeline, store: this.store, cycleId });
     if (!authz.ok) return { ok: false, body: errorResponse(authz.code, authz.message, { ...authz.details, cycle_id: cycleId }) };
 
-    return { ok: true, body: { receipt } };
+    const correlation_id = `corr_${cycleId}`;
+    return { ok: true, body: { correlation_id, receipt } };
   }
 }

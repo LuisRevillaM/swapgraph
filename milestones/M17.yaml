@@ -1,0 +1,29 @@
+name: M17
+commands:
+  - cmd: "npm run verify:m17"
+artifacts:
+  - artifact: "docs/prd/M17.md"
+  - artifact: "docs/spec/API.md"
+
+  - artifact: "docs/spec/schemas/SettlementInstructionsGetResponse.schema.json"
+  - artifact: "docs/spec/schemas/SettlementStatusGetResponse.schema.json"
+  - artifact: "docs/spec/schemas/SwapReceiptGetResponse.schema.json"
+
+  - artifact: "docs/spec/examples/api/settlement.instructions.response.json"
+  - artifact: "docs/spec/examples/api/settlement.status.response.json"
+  - artifact: "docs/spec/examples/api/receipts.get.response.json"
+
+  - artifact: "src/read/settlementReadService.mjs"
+
+  - artifact: "scripts/run-m13-settlement-read-api-scenario.mjs"
+  - artifact: "scripts/run-m17-contract-proof.mjs"
+
+  - artifact: "fixtures/settlement/m13_expected.json"
+  - artifact: "fixtures/settlement/m15_expected.json"
+
+  - artifact: "artifacts/milestones/M17/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M17/latest/contract_proof.json"
+  - artifact: "artifacts/milestones/M17/latest/settlement_read_output.json"
+  - artifact: "artifacts/milestones/M17/latest/settlement_read_assertions.json"
+  - artifact: "artifacts/milestones/M17/latest/assertions.json"
+  - artifact: "artifacts/milestones/M17/latest/commands.log"

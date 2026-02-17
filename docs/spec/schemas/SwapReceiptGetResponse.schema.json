@@ -4,8 +4,9 @@
   "title": "SwapReceiptGetResponse",
   "type": "object",
   "additionalProperties": false,
-  "required": ["receipt"],
+  "required": ["correlation_id", "receipt"],
   "properties": {
+    "correlation_id": { "type": "string", "minLength": 1 },
     "receipt": { "$ref": "SwapReceipt.schema.json" }
   }
 }

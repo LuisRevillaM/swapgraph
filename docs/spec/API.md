@@ -13,6 +13,8 @@ This doc defines the **contract** for the REST API and webhook delivery.
 
 ## Auth (v1)
 - Partners authenticate with an API key (placeholder for now).
+  - The key resolves to a stable, server-assigned `partner_id` (modeled as `ActorRef { type:"partner", id:"<partner_id>" }`).
+  - `partner_id` is used for multi-tenant scoping (partners cannot read other partners’ cycles).
 - Users authenticate with SwapGraph sessions.
 - Agents authenticate via delegation tokens (later milestone).
 
@@ -21,6 +23,7 @@ This doc defines the **contract** for the REST API and webhook delivery.
 ## Headers
 - `Idempotency-Key` (required for mutating endpoints)
 - `X-Correlation-Id` (optional on request; always present in responses)
+  - Note: in fixtures-first verification, settlement/receipt read responses also include `correlation_id` in the JSON body as a stand-in for the response header.
 
 ## Resources (v1)
 - `SwapIntent`

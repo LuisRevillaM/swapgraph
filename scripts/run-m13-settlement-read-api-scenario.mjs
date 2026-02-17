@@ -69,19 +69,22 @@ function settlementInstructionsGet({ store, cycleId }) {
   const timeline = store.state.timelines[cycleId];
   if (!timeline) return { ok: false, body: errorResponse('NOT_FOUND', 'settlement timeline not found', { cycle_id: cycleId }) };
   const instructions = buildDepositInstructions(timeline);
-  return { ok: true, body: { timeline, instructions } };
+  const correlation_id = `corr_${cycleId}`;
+  return { ok: true, body: { correlation_id, timeline, instructions } };
 }
 
 function settlementStatusGet({ store, cycleId }) {
   const timeline = store.state.timelines[cycleId];
   if (!timeline) return { ok: false, body: errorResponse('NOT_FOUND', 'settlement timeline not found', { cycle_id: cycleId }) };
-  return { ok: true, body: { timeline } };
+  const correlation_id = `corr_${cycleId}`;
+  return { ok: true, body: { correlation_id, timeline } };
 }
 
 function receiptGet({ store, cycleId }) {
   const receipt = store.state.receipts[cycleId];
   if (!receipt) return { ok: false, body: errorResponse('NOT_FOUND', 'receipt not found', { cycle_id: cycleId }) };
-  return { ok: true, body: { receipt } };
+  const correlation_id = `corr_${cycleId}`;
+  return { ok: true, body: { correlation_id, receipt } };
 }
 
 // ---- Seed store intents from matching fixture input ----

@@ -235,6 +235,7 @@
     },
     {
       "body": {
+        "correlation_id": "corr_cycle_4f27eb196224",
         "instructions": [
           {
             "actor": {
@@ -332,6 +333,7 @@
     },
     {
       "body": {
+        "correlation_id": "corr_cycle_4f27eb196224",
         "timeline": {
           "cycle_id": "cycle_4f27eb196224",
           "legs": [
@@ -438,6 +440,7 @@
     },
     {
       "body": {
+        "correlation_id": "corr_cycle_4f27eb196224",
         "timeline": {
           "cycle_id": "cycle_4f27eb196224",
           "legs": [
@@ -533,6 +536,7 @@
     },
     {
       "body": {
+        "correlation_id": "corr_cycle_4f27eb196224",
         "receipt": {
           "asset_ids": [
             "assetA",
@@ -584,6 +588,7 @@
     },
     {
       "body": {
+        "correlation_id": "corr_cycle_961f2288e6f7",
         "receipt": {
           "asset_ids": [
             "assetD",
