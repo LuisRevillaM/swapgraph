@@ -28,6 +28,7 @@
     "verify:m21": "bash verify/m21.sh",
     "verify:m22": "bash verify/m22.sh",
     "verify:m23": "bash verify/m23.sh",
+    "verify:m24": "bash verify/m24.sh",
     "test": "node --test"
   },
   "devDependencies": {

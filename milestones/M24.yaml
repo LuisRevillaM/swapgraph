@@ -1,0 +1,11 @@
+name: M24
+commands:
+  - cmd: "npm run verify:m24"
+artifacts:
+  - artifact: "docs/prd/M24.md"
+  - artifact: "fixtures/pipeline/m24_scenario.json"
+  - artifact: "fixtures/pipeline/m24_expected.json"
+  - artifact: "scripts/run-m24-e2e-pipeline-scenario.mjs"
+  - artifact: "artifacts/milestones/M24/latest/pipeline_output.json"
+  - artifact: "artifacts/milestones/M24/latest/assertions.json"
+  - artifact: "artifacts/milestones/M24/latest/commands.log"
