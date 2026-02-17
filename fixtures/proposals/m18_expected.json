@@ -1,0 +1,176 @@
+{
+  "operations": [
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.list",
+      "proposal_ids": [
+        "cycle_4f27eb196224",
+        "cycle_961f2288e6f7"
+      ],
+      "proposals_count": 2
+    },
+    {
+      "actor": {
+        "id": "other_partner",
+        "type": "partner"
+      },
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.list",
+      "proposal_ids": [],
+      "proposals_count": 0
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.list",
+      "proposal_ids": [
+        "cycle_4f27eb196224"
+      ],
+      "proposals_count": 1
+    },
+    {
+      "actor": {
+        "id": "u5",
+        "type": "user"
+      },
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.list",
+      "proposal_ids": [
+        "cycle_961f2288e6f7"
+      ],
+      "proposals_count": 1
+    },
+    {
+      "actor": {
+        "id": "u999",
+        "type": "user"
+      },
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.list",
+      "proposal_ids": [],
+      "proposals_count": 0
+    },
+    {
+      "actor": {
+        "id": "agent_1",
+        "type": "agent"
+      },
+      "error_code": "FORBIDDEN",
+      "ok": false,
+      "op": "cycleProposals.list",
+      "proposal_ids": null,
+      "proposals_count": null
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.get",
+      "proposal_id": "cycle_4f27eb196224",
+      "returned_proposal_id": "cycle_4f27eb196224"
+    },
+    {
+      "actor": {
+        "id": "other_partner",
+        "type": "partner"
+      },
+      "error_code": "FORBIDDEN",
+      "ok": false,
+      "op": "cycleProposals.get",
+      "proposal_id": "cycle_4f27eb196224",
+      "returned_proposal_id": null
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.get",
+      "proposal_id": "cycle_4f27eb196224",
+      "returned_proposal_id": "cycle_4f27eb196224"
+    },
+    {
+      "actor": {
+        "id": "u5",
+        "type": "user"
+      },
+      "error_code": "FORBIDDEN",
+      "ok": false,
+      "op": "cycleProposals.get",
+      "proposal_id": "cycle_4f27eb196224",
+      "returned_proposal_id": null
+    },
+    {
+      "actor": {
+        "id": "u5",
+        "type": "user"
+      },
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.get",
+      "proposal_id": "cycle_961f2288e6f7",
+      "returned_proposal_id": "cycle_961f2288e6f7"
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "error_code": "FORBIDDEN",
+      "ok": false,
+      "op": "cycleProposals.get",
+      "proposal_id": "cycle_961f2288e6f7",
+      "returned_proposal_id": null
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "error_code": "NOT_FOUND",
+      "ok": false,
+      "op": "cycleProposals.get",
+      "proposal_id": "cycle_missing_000",
+      "returned_proposal_id": null
+    },
+    {
+      "actor": {
+        "id": "agent_1",
+        "type": "agent"
+      },
+      "error_code": "FORBIDDEN",
+      "ok": false,
+      "op": "cycleProposals.get",
+      "proposal_id": "cycle_4f27eb196224",
+      "returned_proposal_id": null
+    },
+    {
+      "actor": {
+        "id": "u999",
+        "type": "user"
+      },
+      "error_code": "FORBIDDEN",
+      "ok": false,
+      "op": "cycleProposals.get",
+      "proposal_id": "cycle_4f27eb196224",
+      "returned_proposal_id": null
+    }
+  ]
+}

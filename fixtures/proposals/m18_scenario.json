@@ -1,0 +1,31 @@
+{
+  "actor_partner": { "type": "partner", "id": "swapgraph" },
+  "actor_partner_other": { "type": "partner", "id": "other_partner" },
+
+  "actor_user_u1": { "type": "user", "id": "u1" },
+  "actor_user_u5": { "type": "user", "id": "u5" },
+  "actor_user_outsider": { "type": "user", "id": "u999" },
+
+  "actor_agent": { "type": "agent", "id": "agent_1" },
+
+  "operations": [
+    { "op": "cycleProposals.list", "actor_ref": "actor_partner" },
+    { "op": "cycleProposals.list", "actor_ref": "actor_partner_other" },
+    { "op": "cycleProposals.list", "actor_ref": "actor_user_u1" },
+    { "op": "cycleProposals.list", "actor_ref": "actor_user_u5" },
+    { "op": "cycleProposals.list", "actor_ref": "actor_user_outsider" },
+    { "op": "cycleProposals.list", "actor_ref": "actor_agent" },
+
+    { "op": "cycleProposals.get", "proposal_ref": "p3", "actor_ref": "actor_partner" },
+    { "op": "cycleProposals.get", "proposal_ref": "p3", "actor_ref": "actor_partner_other" },
+    { "op": "cycleProposals.get", "proposal_ref": "p3", "actor_ref": "actor_user_u1" },
+    { "op": "cycleProposals.get", "proposal_ref": "p3", "actor_ref": "actor_user_u5" },
+
+    { "op": "cycleProposals.get", "proposal_ref": "p2", "actor_ref": "actor_user_u5" },
+    { "op": "cycleProposals.get", "proposal_ref": "p2", "actor_ref": "actor_user_u1" },
+
+    { "op": "cycleProposals.get", "proposal_id": "cycle_missing_000" , "actor_ref": "actor_partner" },
+    { "op": "cycleProposals.get", "proposal_ref": "p3", "actor_ref": "actor_agent" },
+    { "op": "cycleProposals.get", "proposal_ref": "p3", "actor_ref": "actor_user_outsider" }
+  ]
+}

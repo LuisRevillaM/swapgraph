@@ -22,6 +22,7 @@
     "verify:m15": "bash verify/m15.sh",
     "verify:m16": "bash verify/m16.sh",
     "verify:m17": "bash verify/m17.sh",
+    "verify:m18": "bash verify/m18.sh",
     "test": "node --test"
   },
   "devDependencies": {

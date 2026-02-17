@@ -1,0 +1,13 @@
+name: M18
+commands:
+  - cmd: "npm run verify:m18"
+artifacts:
+  - artifact: "docs/prd/M18.md"
+  - artifact: "fixtures/proposals/m18_scenario.json"
+  - artifact: "fixtures/proposals/m18_expected.json"
+  - artifact: "src/read/cycleProposalsReadService.mjs"
+  - artifact: "src/store/jsonStateStore.mjs"
+  - artifact: "scripts/run-m18-cycle-proposals-read-scenario.mjs"
+  - artifact: "artifacts/milestones/M18/latest/proposals_read_output.json"
+  - artifact: "artifacts/milestones/M18/latest/assertions.json"
+  - artifact: "artifacts/milestones/M18/latest/commands.log"

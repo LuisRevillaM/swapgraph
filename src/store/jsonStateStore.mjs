@@ -9,23 +9,45 @@ export class JsonStateStore {
   constructor({ filePath }) {
     if (!filePath) throw new Error('filePath is required');
     this.filePath = filePath;
-    this.state = { intents: {}, commits: {}, reservations: {}, timelines: {}, receipts: {}, tenancy: { cycles: {} }, events: [], idempotency: {} };
+    this.state = {
+      intents: {},
+      proposals: {},
+      commits: {},
+      reservations: {},
+      timelines: {},
+      receipts: {},
+      tenancy: { cycles: {}, proposals: {} },
+      events: [],
+      idempotency: {}
+    };
   }
 
   load() {
     if (!existsSync(this.filePath)) {
-      this.state = { intents: {}, commits: {}, reservations: {}, timelines: {}, receipts: {}, tenancy: { cycles: {} }, events: [], idempotency: {} };
+      this.state = {
+        intents: {},
+        proposals: {},
+        commits: {},
+        reservations: {},
+        timelines: {},
+        receipts: {},
+        tenancy: { cycles: {}, proposals: {} },
+        events: [],
+        idempotency: {}
+      };
       return;
     }
     const raw = readFileSync(this.filePath, 'utf8');
     this.state = JSON.parse(raw);
     this.state.intents ||= {};
+    this.state.proposals ||= {};
     this.state.commits ||= {};
     this.state.reservations ||= {};
     this.state.timelines ||= {};
     this.state.receipts ||= {};
     this.state.tenancy ||= {};
     this.state.tenancy.cycles ||= {};
+    this.state.tenancy.proposals ||= {};
     this.state.events ||= [];
     this.state.idempotency ||= {};
   }
