@@ -22,9 +22,10 @@ Last updated: 2026-02-16
 - M11: ✅ settlement event types (deposit_required / deposit_confirmed / executing) + payload schemas + verifier
 - M12: ✅ event replay v2 (settlement + receipts summaries + checkpoint resume proof)
 - M13: ✅ settlement read APIs fixture scenario (instructions/status/receipts) driven from store state + schema validation
+- M14: ✅ read endpoint authz rules (partner vs participant) + forbidden proofs
 
 ## Next
-- M14: introduce explicit authz rules for read endpoints (partner vs participant) + forbidden proofs
+- M15: extend read-side contract with filtering/redaction (partner view vs participant view)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.

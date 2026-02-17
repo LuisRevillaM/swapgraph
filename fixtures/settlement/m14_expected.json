@@ -1,0 +1,216 @@
+{
+  "operations": [
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "commit_phase": "accept",
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.accept",
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "u2",
+        "type": "user"
+      },
+      "commit_phase": "accept",
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.accept",
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "u3",
+        "type": "user"
+      },
+      "commit_phase": "ready",
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.accept",
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "ok": true,
+      "op": "settlement.start",
+      "replayed": false,
+      "timeline_state": "escrow.pending"
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "settlement.status"
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "settlement.status"
+    },
+    {
+      "actor": {
+        "id": "u999",
+        "type": "user"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": "FORBIDDEN",
+      "ok": false,
+      "op": "settlement.status"
+    },
+    {
+      "actor": {
+        "id": "agent_1",
+        "type": "agent"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": "FORBIDDEN",
+      "ok": false,
+      "op": "settlement.status"
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "settlement.instructions"
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "settlement.instructions"
+    },
+    {
+      "actor": {
+        "id": "u999",
+        "type": "user"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": "FORBIDDEN",
+      "ok": false,
+      "op": "settlement.instructions"
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "ok": true,
+      "op": "settlement.deposit_confirmed",
+      "replayed": false,
+      "timeline_state": "escrow.pending"
+    },
+    {
+      "actor": {
+        "id": "u2",
+        "type": "user"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "ok": true,
+      "op": "settlement.deposit_confirmed",
+      "replayed": false,
+      "timeline_state": "escrow.pending"
+    },
+    {
+      "actor": {
+        "id": "u3",
+        "type": "user"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "ok": true,
+      "op": "settlement.deposit_confirmed",
+      "replayed": false,
+      "timeline_state": "escrow.ready"
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "ok": true,
+      "op": "settlement.begin_execution",
+      "timeline_state": "executing"
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "final_state": "completed",
+      "ok": true,
+      "op": "settlement.complete",
+      "receipt_id": "receipt_02cce1dcc083",
+      "timeline_state": "completed"
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "receipts.get"
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "receipts.get"
+    },
+    {
+      "actor": {
+        "id": "u999",
+        "type": "user"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": "FORBIDDEN",
+      "ok": false,
+      "op": "receipts.get"
+    },
+    {
+      "actor": {
+        "id": "agent_1",
+        "type": "agent"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": "FORBIDDEN",
+      "ok": false,
+      "op": "receipts.get"
+    }
+  ]
+}
