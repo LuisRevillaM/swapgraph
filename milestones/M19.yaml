@@ -1,0 +1,16 @@
+name: M19
+commands:
+  - cmd: "npm run verify:m19"
+artifacts:
+  - artifact: "docs/prd/M19.md"
+
+  - artifact: "fixtures/delivery/m6_expected.json"
+  - artifact: "fixtures/delivery/m19_scenario.json"
+  - artifact: "fixtures/delivery/m19_expected.json"
+
+  - artifact: "src/delivery/proposalIngestService.mjs"
+  - artifact: "scripts/run-m19-delivery-persistence-scenario.mjs"
+
+  - artifact: "artifacts/milestones/M19/latest/delivery_persistence_output.json"
+  - artifact: "artifacts/milestones/M19/latest/assertions.json"
+  - artifact: "artifacts/milestones/M19/latest/commands.log"

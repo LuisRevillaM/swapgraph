@@ -14,7 +14,7 @@ This doc defines the **contract** for the REST API and webhook delivery.
 ## Auth (v1)
 - Partners authenticate with an API key (placeholder for now).
   - The key resolves to a stable, server-assigned `partner_id` (modeled as `ActorRef { type:"partner", id:"<partner_id>" }`).
-  - `partner_id` is used for multi-tenant scoping (partners cannot read other partners’ cycles).
+  - `partner_id` is used for multi-tenant scoping (partners cannot read other partners’ cycles or proposals).
 - Users authenticate with SwapGraph sessions.
 - Agents authenticate via delegation tokens (later milestone).
 

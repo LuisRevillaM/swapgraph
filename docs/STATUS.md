@@ -29,9 +29,10 @@ Last updated: 2026-02-17
 - M16: ✅ partner scoping (multi-tenant) — partner reads limited to their own cycles
 - M17: ✅ partner_id in API auth model + correlation IDs in settlement/receipt read responses (contract + verifier)
 - M18: ✅ cycle proposal read APIs fixture scenario (list/get) + authz proofs (contract + verifier)
+- M19: ✅ proposal delivery persistence + partner scoping (polling + webhook ingestion, dedupe-by-event_id)
 
 ## Next
-- M19: proposal delivery persistence + partner scoping (store seeded from delivery fixtures + idempotent replay proof)
+- M20: commit APIs backed by stored proposals (accept/decline loads proposal from store + authz + idempotency)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.
