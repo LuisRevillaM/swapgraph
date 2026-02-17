@@ -1,4 +1,5 @@
 {
+  "correlation_id": "corr_intent_123",
   "intent": {
     "id": "intent_123",
     "actor": { "type": "partner", "id": "p1" },

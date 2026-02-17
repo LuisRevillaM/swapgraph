@@ -4,8 +4,9 @@
   "title": "SwapIntentCancelResponse",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "status"],
+  "required": ["correlation_id", "id", "status"],
   "properties": {
+    "correlation_id": { "type": "string", "minLength": 1 },
     "id": { "type": "string", "minLength": 1 },
     "status": { "type": "string", "enum": ["cancelled"] }
   }

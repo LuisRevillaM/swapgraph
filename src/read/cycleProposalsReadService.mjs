@@ -2,6 +2,16 @@ function errorResponse(code, message, details = {}) {
   return { error: { code, message, details } };
 }
 
+function correlationIdForProposalId(proposalId) {
+  return `corr_${proposalId}`;
+}
+
+function correlationIdForCycleProposalsList(actor) {
+  const t = actor?.type ?? 'unknown';
+  const id = actor?.id ?? 'unknown';
+  return `corr_cycle_proposals_list_${t}_${id}`;
+}
+
 function actorKey(actor) {
   return `${actor.type}:${actor.id}`;
 }
@@ -72,7 +82,7 @@ export class CycleProposalsReadService {
     }
 
     proposals.sort((a, b) => a.id.localeCompare(b.id));
-    return { ok: true, body: { proposals } };
+    return { ok: true, body: { correlation_id: correlationIdForCycleProposalsList(actor), proposals } };
   }
 
   get({ actor, proposalId }) {
@@ -82,6 +92,6 @@ export class CycleProposalsReadService {
     const authz = authorizeRead({ actor, proposal, store: this.store });
     if (!authz.ok) return { ok: false, body: errorResponse(authz.code, authz.message, { ...authz.details, proposal_id: proposalId }) };
 
-    return { ok: true, body: { proposal } };
+    return { ok: true, body: { correlation_id: correlationIdForProposalId(proposalId), proposal } };
   }
 }

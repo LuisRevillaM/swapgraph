@@ -4,8 +4,9 @@
   "title": "SwapIntentListResponse",
   "type": "object",
   "additionalProperties": false,
-  "required": ["intents"],
+  "required": ["correlation_id", "intents"],
   "properties": {
+    "correlation_id": { "type": "string", "minLength": 1 },
     "intents": {
       "type": "array",
       "items": { "$ref": "SwapIntent.schema.json" }

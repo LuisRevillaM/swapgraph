@@ -1,5 +1,6 @@
 {
   "polling_response": {
+    "correlation_id": "corr_cycle_proposals_list",
     "proposals": [
       {
         "id": "cycle_961f2288e6f7",

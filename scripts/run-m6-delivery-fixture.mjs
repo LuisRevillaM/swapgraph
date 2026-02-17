@@ -60,7 +60,7 @@ const actor = input.actor;
 const occurredAt = input.occurred_at;
 
 // Build polling response
-const pollingResponse = { proposals };
+const pollingResponse = { correlation_id: 'corr_cycle_proposals_list', proposals };
 const vPoll = validateBySchemaFile('CycleProposalListResponse.schema.json', pollingResponse);
 if (!vPoll.ok) throw new Error(`polling response invalid: ${JSON.stringify(vPoll.errors)}`);
 

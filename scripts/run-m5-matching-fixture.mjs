@@ -35,7 +35,7 @@ for (const sf of schemaFiles) {
 
 const listSchema = readJson(path.join(schemasDir, 'CycleProposalListResponse.schema.json'));
 const validateList = ajv.getSchema(listSchema.$id) ?? ajv.compile(listSchema);
-const payload = { proposals: result.proposals };
+const payload = { correlation_id: 'corr_m5_matching', proposals: result.proposals };
 const ok = validateList(payload);
 if (!ok) {
   throw new Error(`matching output invalid: ${JSON.stringify(validateList.errors)}`);

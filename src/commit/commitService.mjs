@@ -6,6 +6,10 @@ function actorKey(actor) {
   return `${actor.type}:${actor.id}`;
 }
 
+function correlationIdForCycleId(cycleId) {
+  return `corr_${cycleId}`;
+}
+
 // Note: commit timestamps are provided by the caller (fixtures-first, deterministic verification).
 
 function errorResponse(code, message, details = {}) {
@@ -240,7 +244,7 @@ export class CommitService {
         }
 
         commit.updated_at = occurredAt;
-        return { ok: true, body: { commit } };
+        return { ok: true, body: { correlation_id: correlationIdForCycleId(proposal.id), commit } };
       }
     });
   }
@@ -268,7 +272,7 @@ export class CommitService {
           }
           created.phase = 'cancelled';
           created.updated_at = occurredAt;
-          return { ok: true, body: { commit: created } };
+          return { ok: true, body: { correlation_id: correlationIdForCycleId(proposal.id), commit: created } };
         }
 
         const isParticipant = commit.participants.some(p => participantKey(p) === actorKey(actor));
@@ -288,7 +292,7 @@ export class CommitService {
         // Release reservations.
         this._unreserveIntents({ commitId: commit.id, proposal, actorForEvent: actor, occurredAt, reason: 'declined' });
 
-        return { ok: true, body: { commit } };
+        return { ok: true, body: { correlation_id: correlationIdForCycleId(proposal.id), commit } };
       }
     });
   }
@@ -338,6 +342,6 @@ export class CommitService {
     const allowed = commit.participants.some(p => participantKey(p) === actorKey(actor));
     if (!allowed) return { ok: false, body: errorResponse('FORBIDDEN', 'actor cannot access this commit', { commit_id: commitId }) };
 
-    return { ok: true, body: { commit } };
+    return { ok: true, body: { correlation_id: correlationIdForCycleId(commit.cycle_id), commit } };
   }
 }

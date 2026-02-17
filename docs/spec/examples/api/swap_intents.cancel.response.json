@@ -1,1 +1,1 @@
-{ "id": "intent_123", "status": "cancelled" }
+{ "correlation_id": "corr_intent_123", "id": "intent_123", "status": "cancelled" }

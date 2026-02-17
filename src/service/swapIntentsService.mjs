@@ -14,6 +14,16 @@ function errorResponse(code, message, details = {}) {
   };
 }
 
+function correlationIdForIntentId(intentId) {
+  return `corr_${intentId}`;
+}
+
+function correlationIdForIntentsList(actor) {
+  const t = actor?.type ?? 'unknown';
+  const id = actor?.id ?? 'unknown';
+  return `corr_swap_intents_list_${t}_${id}`;
+}
+
 export class SwapIntentsService {
   /**
    * @param {{ store: import('../store/jsonStateStore.mjs').JsonStateStore }} opts
@@ -49,8 +59,9 @@ export class SwapIntentsService {
     }
 
     const result = handler();
-    this.store.state.idempotency[scopeKey] = { payload_hash: h, result };
-    return { replayed: false, result };
+    const snapshot = JSON.parse(JSON.stringify(result));
+    this.store.state.idempotency[scopeKey] = { payload_hash: h, result: snapshot };
+    return { replayed: false, result: snapshot };
   }
 
   create({ actor, idempotencyKey, requestBody }) {
@@ -63,7 +74,7 @@ export class SwapIntentsService {
         const intent = requestBody.intent;
         const stored = { ...intent, status: intent.status ?? 'active' };
         this.store.state.intents[intent.id] = stored;
-        return { ok: true, body: { intent: stored } };
+        return { ok: true, body: { correlation_id: correlationIdForIntentId(stored.id), intent: stored } };
       }
     });
   }
@@ -83,7 +94,7 @@ export class SwapIntentsService {
         const status = prev?.status ?? intent.status ?? 'active';
         const stored = { ...intent, status };
         this.store.state.intents[id] = stored;
-        return { ok: true, body: { intent: stored } };
+        return { ok: true, body: { correlation_id: correlationIdForIntentId(stored.id), intent: stored } };
       }
     });
   }
@@ -101,7 +112,7 @@ export class SwapIntentsService {
           return { ok: false, body: errorResponse('NOT_FOUND', 'intent not found', { id }) };
         }
         this.store.state.intents[id] = { ...prev, status: 'cancelled' };
-        return { ok: true, body: { id, status: 'cancelled' } };
+        return { ok: true, body: { correlation_id: correlationIdForIntentId(id), id, status: 'cancelled' } };
       }
     });
   }
@@ -113,11 +124,11 @@ export class SwapIntentsService {
     if (actorKey(intent.actor) !== actorKey(actor)) {
       return { ok: false, body: errorResponse('FORBIDDEN', 'actor cannot access this intent', { id }) };
     }
-    return { ok: true, body: { intent } };
+    return { ok: true, body: { correlation_id: correlationIdForIntentId(id), intent } };
   }
 
   list({ actor }) {
     const intents = Object.values(this.store.state.intents).filter(i => actorKey(i.actor) === actorKey(actor));
-    return { ok: true, body: { intents } };
+    return { ok: true, body: { correlation_id: correlationIdForIntentsList(actor), intents } };
   }
 }

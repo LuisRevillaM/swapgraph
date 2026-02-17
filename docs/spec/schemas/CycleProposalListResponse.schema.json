@@ -4,8 +4,9 @@
   "title": "CycleProposalListResponse",
   "type": "object",
   "additionalProperties": false,
-  "required": ["proposals"],
+  "required": ["correlation_id", "proposals"],
   "properties": {
+    "correlation_id": { "type": "string", "minLength": 1 },
     "proposals": {
       "type": "array",
       "items": { "$ref": "CycleProposal.schema.json" }

@@ -4,8 +4,9 @@
   "title": "CommitResponse",
   "type": "object",
   "additionalProperties": false,
-  "required": ["commit"],
+  "required": ["correlation_id", "commit"],
   "properties": {
+    "correlation_id": { "type": "string", "minLength": 1 },
     "commit": { "$ref": "Commit.schema.json" }
   }
 }

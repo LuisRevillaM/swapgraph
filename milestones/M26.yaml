@@ -1,0 +1,47 @@
+name: M26
+commands:
+  - cmd: "npm run verify:m26"
+artifacts:
+  - artifact: "docs/prd/M26.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/api/manifest.v1.json"
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+
+  - artifact: "docs/spec/schemas/SwapIntentUpsertResponse.schema.json"
+  - artifact: "docs/spec/schemas/SwapIntentCancelResponse.schema.json"
+  - artifact: "docs/spec/schemas/SwapIntentGetResponse.schema.json"
+  - artifact: "docs/spec/schemas/SwapIntentListResponse.schema.json"
+  - artifact: "docs/spec/schemas/CycleProposalListResponse.schema.json"
+  - artifact: "docs/spec/schemas/CycleProposalGetResponse.schema.json"
+  - artifact: "docs/spec/schemas/CommitResponse.schema.json"
+  - artifact: "docs/spec/schemas/CommitGetResponse.schema.json"
+
+  - artifact: "docs/spec/examples/api/swap_intents.create.response.json"
+  - artifact: "docs/spec/examples/api/swap_intents.cancel.response.json"
+  - artifact: "docs/spec/examples/api/cycle_proposals.list.response.json"
+  - artifact: "docs/spec/examples/api/cycle_proposals.accept.response.json"
+  - artifact: "docs/spec/examples/api/cycle_proposals.decline.response.json"
+  - artifact: "docs/spec/examples/api/commits.get.response.json"
+
+  - artifact: "src/service/swapIntentsService.mjs"
+  - artifact: "src/read/cycleProposalsReadService.mjs"
+  - artifact: "src/commit/commitService.mjs"
+
+  - artifact: "scripts/validate-api-contract.mjs"
+  - artifact: "verify/m26.sh"
+
+  - artifact: "artifacts/milestones/M26/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M26/latest/assertions.json"
+  - artifact: "artifacts/milestones/M26/latest/commands.log"
+
+  - artifact: "artifacts/milestones/M26/latest/m4/intent_ingestion_results.json"
+  - artifact: "artifacts/milestones/M26/latest/m4/intents_store_snapshot.json"
+  - artifact: "artifacts/milestones/M26/latest/m4/assertions.json"
+
+  - artifact: "artifacts/milestones/M26/latest/m7/commit_output.json"
+  - artifact: "artifacts/milestones/M26/latest/m7/events_outbox.ndjson"
+  - artifact: "artifacts/milestones/M26/latest/m7/events_validation.json"
+  - artifact: "artifacts/milestones/M26/latest/m7/assertions.json"
+
+  - artifact: "artifacts/milestones/M26/latest/m18/proposals_read_output.json"
+  - artifact: "artifacts/milestones/M26/latest/m18/assertions.json"
