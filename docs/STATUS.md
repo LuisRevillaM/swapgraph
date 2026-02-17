@@ -38,9 +38,10 @@ Last updated: 2026-02-17
 - M25: ✅ settlement write endpoint contracts (start/deposit/begin/complete/expire) + examples + verifier
 - M26: ✅ correlation_id in remaining response contracts (intents/proposals/commit)
 - M27: ✅ correlation_id in ErrorResponse (fixtures-first) + propagate to all error bodies
+- M28: ✅ verifiable receipt signatures (Ed25519) + receipt signing keys contract + verifier
 
 ## Next
-- M28: TBD (pick next spec-hardening gap)
+- M29: webhook/event signing + replay protection (contract + fixture verification)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.

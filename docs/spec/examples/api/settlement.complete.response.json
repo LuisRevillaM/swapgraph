@@ -40,6 +40,6 @@
     "intent_ids": ["intent_a", "intent_b"],
     "asset_ids": ["assetA", "assetB"],
     "created_at": "2026-02-16T00:02:30Z",
-    "signature": { "key_id": "dev-k1", "alg": "ed25519", "sig": "BASE64_SIGNATURE" }
+    "signature": { "key_id": "dev-k1", "alg": "ed25519", "sig": "fzpRjKG1YhwI6Dx8UUMtFyEqnF+Bi3yRjWNkYXulYtJezv+8J2auE9ZQ6w/xA++LXyoE8jGD8tDYy0fjBBxLDw==" }
   }
 }

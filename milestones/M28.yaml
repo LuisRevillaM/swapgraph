@@ -1,0 +1,45 @@
+name: M28
+commands:
+  - cmd: "npm run verify:m28"
+artifacts:
+  - artifact: "docs/prd/M28.md"
+
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/KEYS.md"
+
+  - artifact: "docs/spec/schemas/SwapReceipt.schema.json"
+  - artifact: "docs/spec/schemas/ReceiptSigningKey.schema.json"
+  - artifact: "docs/spec/schemas/ReceiptSigningKeysGetResponse.schema.json"
+
+  - artifact: "docs/spec/api/manifest.v1.json"
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+  - artifact: "docs/spec/examples/api/keys.receipt_signing.get.response.json"
+
+  - artifact: "fixtures/keys/receipt_signing_dev_k1_public.pem"
+  - artifact: "fixtures/keys/receipt_signing_dev_k1_private.pem"
+
+  - artifact: "fixtures/events/event_log.v1.ndjson"
+  - artifact: "fixtures/events/event_log.v2.ndjson"
+
+  - artifact: "fixtures/settlement/m9_expected.json"
+  - artifact: "fixtures/settlement/m13_expected.json"
+
+  - artifact: "src/crypto/receiptSigning.mjs"
+  - artifact: "src/settlement/settlementService.mjs"
+
+  - artifact: "scripts/verify-receipt-signatures.mjs"
+  - artifact: "verify/m28.sh"
+
+  - artifact: "artifacts/milestones/M28/latest/commands.log"
+  - artifact: "artifacts/milestones/M28/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M28/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M28/latest/receipt_signature_verification.json"
+  - artifact: "artifacts/milestones/M28/latest/assertions.json"
+
+  - artifact: "artifacts/milestones/M28/latest/m9/settlement_output.json"
+  - artifact: "artifacts/milestones/M28/latest/m9/events_outbox.ndjson"
+  - artifact: "artifacts/milestones/M28/latest/m9/events_validation.json"
+  - artifact: "artifacts/milestones/M28/latest/m9/assertions.json"
+
+  - artifact: "artifacts/milestones/M28/latest/m13/settlement_read_output.json"
+  - artifact: "artifacts/milestones/M28/latest/m13/assertions.json"

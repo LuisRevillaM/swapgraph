@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 
 import { commitIdForProposalId } from '../commit/commitIds.mjs';
 import { stableEventId } from '../delivery/eventIds.mjs';
+import { signReceipt } from '../crypto/receiptSigning.mjs';
 
 function actorKey(actor) {
   return `${actor.type}:${actor.id}`;
@@ -320,15 +321,16 @@ export class SettlementService {
       .filter(Boolean);
     assetIds.sort();
 
-    const receipt = {
+    const unsignedReceipt = {
       id: stableReceiptId({ cycleId, finalState: 'completed' }),
       cycle_id: cycleId,
       final_state: 'completed',
       intent_ids: intentIds,
       asset_ids: Array.from(new Set(assetIds)),
-      created_at: occurredAt,
-      signature: { key_id: 'dev-k1', alg: 'ed25519', sig: 'BASE64_SIGNATURE' }
+      created_at: occurredAt
     };
+
+    const receipt = { ...unsignedReceipt, signature: signReceipt(unsignedReceipt) };
 
     this.store.state.receipts[cycleId] = receipt;
     this.store.state.events.push(buildReceiptCreatedEvent({ receipt, actor, occurredAt }));
@@ -395,16 +397,17 @@ export class SettlementService {
       .filter(Boolean);
     assetIds.sort();
 
-    const receipt = {
+    const unsignedReceipt = {
       id: stableReceiptId({ cycleId, finalState: 'failed' }),
       cycle_id: cycleId,
       final_state: 'failed',
       intent_ids: intentIds,
       asset_ids: Array.from(new Set(assetIds)),
       created_at: nowIso,
-      signature: { key_id: 'dev-k1', alg: 'ed25519', sig: 'BASE64_SIGNATURE' },
       transparency: { reason_code: 'deposit_timeout' }
     };
+
+    const receipt = { ...unsignedReceipt, signature: signReceipt(unsignedReceipt) };
 
     this.store.state.receipts[cycleId] = receipt;
     this.store.state.events.push(buildReceiptCreatedEvent({ receipt, actor, occurredAt: nowIso }));

@@ -97,6 +97,11 @@
     },
 
     {
+      "file": "keys.receipt_signing.get.response.json",
+      "schema": "ReceiptSigningKeysGetResponse.schema.json"
+    },
+
+    {
       "file": "error.example.json",
       "schema": "ErrorResponse.schema.json"
     }

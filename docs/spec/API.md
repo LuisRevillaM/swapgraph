@@ -54,6 +54,9 @@ Settlement endpoints:
 Receipt endpoints:
 - `GET /receipts/{cycle_id}`
 
+Signing key endpoints:
+- `GET /keys/receipt-signing` (public keys for verifying `SwapReceipt.signature`)
+
 (Implementation is fixtures-first; server transport comes later.)
 
 ## Webhooks (v1)

@@ -19,7 +19,7 @@
         "signature": {
           "alg": "ed25519",
           "key_id": "dev-k1",
-          "sig": "BASE64_SIGNATURE"
+          "sig": "l6dXIMKR8vKDS4f8r3QeO1PtwuAyUC0e6e1aU/rCmefLvaI3uBHnyeeazuIBGfU5vE2xIuxFWzhOkMRTqZljCg=="
         }
       },
       "cycle_961f2288e6f7": {
@@ -38,7 +38,7 @@
         "signature": {
           "alg": "ed25519",
           "key_id": "dev-k1",
-          "sig": "BASE64_SIGNATURE"
+          "sig": "hDKM03zjsfbG5d4kGkA2Yr3dWBS/JrSiqTL4HLu1FhAl9e4DmuOuTUbtXTpKy5RAsNv1PTsALeB30kcCG8VjCw=="
         },
         "transparency": {
           "reason_code": "deposit_timeout"
@@ -556,7 +556,7 @@
           "signature": {
             "alg": "ed25519",
             "key_id": "dev-k1",
-            "sig": "BASE64_SIGNATURE"
+            "sig": "l6dXIMKR8vKDS4f8r3QeO1PtwuAyUC0e6e1aU/rCmefLvaI3uBHnyeeazuIBGfU5vE2xIuxFWzhOkMRTqZljCg=="
           }
         }
       },
@@ -606,7 +606,7 @@
           "signature": {
             "alg": "ed25519",
             "key_id": "dev-k1",
-            "sig": "BASE64_SIGNATURE"
+            "sig": "hDKM03zjsfbG5d4kGkA2Yr3dWBS/JrSiqTL4HLu1FhAl9e4DmuOuTUbtXTpKy5RAsNv1PTsALeB30kcCG8VjCw=="
           },
           "transparency": {
             "reason_code": "deposit_timeout"

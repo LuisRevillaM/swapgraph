@@ -8,6 +8,6 @@
     "asset_ids": ["assetA", "assetB"],
     "fees": [{ "actor": { "type": "user", "id": "u1" }, "fee_usd": 1.25 }],
     "created_at": "2026-02-16T00:05:00Z",
-    "signature": { "key_id": "dev-k1", "alg": "ed25519", "sig": "BASE64_SIGNATURE" }
+    "signature": { "key_id": "dev-k1", "alg": "ed25519", "sig": "0j0f1uUgpGD99r1nm9GhhevTdt4BrPJcFiEINP6r0R37lcMZyN4pG45gwnmrn6nJpO4P8w2ZisSnUxi8gVZKDg==" }
   }
 }

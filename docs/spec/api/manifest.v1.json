@@ -141,6 +141,14 @@
       "operation_id": "receipts.get",
       "idempotency_required": false,
       "response_schema": "SwapReceiptGetResponse.schema.json"
+    },
+
+    {
+      "method": "GET",
+      "path": "/keys/receipt-signing",
+      "operation_id": "keys.receipt_signing.get",
+      "idempotency_required": false,
+      "response_schema": "ReceiptSigningKeysGetResponse.schema.json"
     }
   ],
   "webhooks": {

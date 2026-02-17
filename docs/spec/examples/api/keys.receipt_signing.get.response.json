@@ -1,0 +1,10 @@
+{
+  "correlation_id": "corr_keys_receipt_signing",
+  "keys": [
+    {
+      "key_id": "dev-k1",
+      "alg": "ed25519",
+      "public_key_pem": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAoShZGqCsxR2P7TK9tC6xYQpsCsCKf0adlPsIe1hn2cc=\n-----END PUBLIC KEY-----\n"
+    }
+  ]
+}
