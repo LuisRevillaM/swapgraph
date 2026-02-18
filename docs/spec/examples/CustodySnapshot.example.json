@@ -1,0 +1,26 @@
+{
+  "snapshot_id": "cust_snap_001",
+  "recorded_at": "2026-02-18T20:05:00Z",
+  "leaf_count": 1,
+  "root_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "holdings": [
+    {
+      "holding_key": "steam:730:asset_001|user:u1|vault_u1|dep_001|hold_001",
+      "leaf_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "holding": {
+        "holding_id": "hold_001",
+        "asset": {
+          "platform": "steam",
+          "asset_id": "730:asset_001"
+        },
+        "owner_actor": {
+          "type": "user",
+          "id": "u1"
+        },
+        "vault_id": "vault_u1",
+        "deposit_id": "dep_001",
+        "deposited_at": "2026-02-18T20:00:00Z"
+      }
+    }
+  ]
+}

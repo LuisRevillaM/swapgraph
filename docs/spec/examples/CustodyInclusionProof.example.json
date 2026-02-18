@@ -1,0 +1,13 @@
+{
+  "snapshot_id": "cust_snap_001",
+  "root_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "holding_key": "steam:730:asset_001|user:u1|vault_u1|dep_001|hold_001",
+  "leaf_index": 0,
+  "leaf_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "siblings": [
+    {
+      "position": "right",
+      "hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    }
+  ]
+}

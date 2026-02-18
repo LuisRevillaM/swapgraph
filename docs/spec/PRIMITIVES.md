@@ -45,6 +45,18 @@ Canonical proof of completion or unwind.
 - includes asset identifiers + timestamps + transaction refs (where available)
 - includes a SwapGraph signature (`signature`) and optional transparency-log inclusion.
 
+### CustodySnapshot
+Deterministic point-in-time custody commitment for vault/deposit holdings.
+- includes `snapshot_id`, `recorded_at`, `leaf_count`, and Merkle `root_hash`
+- includes canonical holding entries (`holding_key`, `leaf_hash`, `holding`)
+- is suitable for offline inclusion verification.
+
+### CustodyInclusionProof
+Deterministic proof that a specific custody holding is included in a published snapshot root.
+- includes leaf metadata (`holding_key`, `leaf_hash`, `leaf_index`)
+- includes ordered sibling path (`siblings[]` with `left|right` positions)
+- verifies to snapshot `root_hash` with stable hashing rules.
+
 ## Protocol invariants (non-negotiable)
 - **Constraints are never overridden**.
 - **Only one active reservation per intent**.

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/CustodyInclusionProof.schema.json",
+  "title": "CustodyInclusionProof",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["snapshot_id", "root_hash", "holding_key", "leaf_index", "leaf_hash", "siblings"],
+  "properties": {
+    "snapshot_id": { "type": "string", "minLength": 1 },
+    "root_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "holding_key": { "type": "string", "minLength": 1 },
+    "leaf_index": { "type": "integer", "minimum": 0 },
+    "leaf_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "siblings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["position", "hash"],
+        "properties": {
+          "position": { "type": "string", "enum": ["left", "right"] },
+          "hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      }
+    }
+  }
+}

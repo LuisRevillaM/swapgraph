@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/CustodySnapshot.schema.json",
+  "title": "CustodySnapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["snapshot_id", "recorded_at", "leaf_count", "root_hash", "holdings"],
+  "properties": {
+    "snapshot_id": { "type": "string", "minLength": 1 },
+    "recorded_at": { "type": "string", "format": "date-time" },
+    "leaf_count": { "type": "integer", "minimum": 0 },
+    "root_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "holdings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["holding_key", "leaf_hash", "holding"],
+        "properties": {
+          "holding_key": { "type": "string", "minLength": 1 },
+          "leaf_hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "holding": { "$ref": "CustodyHolding.schema.json" }
+        }
+      }
+    }
+  }
+}

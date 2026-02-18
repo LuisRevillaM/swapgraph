@@ -1,0 +1,91 @@
+{
+  "negative_checks": [
+    {
+      "details": {
+        "holding_key": "steam:730:asset_999|user:u9|vault_u9|dep_999|hold_999"
+      },
+      "error": "holding_not_found",
+      "kind": "build_missing",
+      "name": "holding_not_found",
+      "ok": false
+    },
+    {
+      "details": {
+        "expected_root_hash": "5467c32f45e60d635c938877fc614bcc0b55df39232e1883483626663a5ddebb",
+        "provided_root_hash": "fb7acb8d9da247f6f37850c49c737b110cca42beb0170d388abf7d506e7fe51a"
+      },
+      "error": "root_mismatch",
+      "kind": "tamper_sibling_hash",
+      "name": "tampered_sibling_hash",
+      "ok": false
+    },
+    {
+      "details": {
+        "expected_leaf_hash": "e46f7f21d02d2ba74c9a4c80029c9f054dd5308e645d9aa1ce964263fc3eeb24",
+        "provided_leaf_hash": "e5257a3dfd119e893de9d3104075b26343c0a6777ce72e5e2140c7c2009aeddb"
+      },
+      "error": "leaf_hash_mismatch",
+      "kind": "tamper_holding_asset",
+      "name": "tampered_holding_asset",
+      "ok": false
+    },
+    {
+      "details": {
+        "position": "center"
+      },
+      "error": "invalid_sibling_position",
+      "kind": "tamper_sibling_position",
+      "name": "tampered_sibling_position",
+      "ok": false
+    }
+  ],
+  "positive_checks": [
+    {
+      "derived_root_hash": "5467c32f45e60d635c938877fc614bcc0b55df39232e1883483626663a5ddebb",
+      "holding_id": "hold_001",
+      "holding_key": "steam:730:asset_001|user:u1|vault_u1|dep_001|hold_001",
+      "proof_leaf_index": 0,
+      "proof_siblings_count": 3,
+      "verify_error": null,
+      "verify_ok": true
+    },
+    {
+      "derived_root_hash": "5467c32f45e60d635c938877fc614bcc0b55df39232e1883483626663a5ddebb",
+      "holding_id": "hold_003",
+      "holding_key": "steam:730:asset_003|user:u2|vault_u2|dep_003|hold_003",
+      "proof_leaf_index": 2,
+      "proof_siblings_count": 3,
+      "verify_error": null,
+      "verify_ok": true
+    },
+    {
+      "derived_root_hash": "5467c32f45e60d635c938877fc614bcc0b55df39232e1883483626663a5ddebb",
+      "holding_id": "hold_005",
+      "holding_key": "steam:730:asset_005|user:u3|vault_u3|dep_005|hold_005",
+      "proof_leaf_index": 4,
+      "proof_siblings_count": 3,
+      "verify_error": null,
+      "verify_ok": true
+    }
+  ],
+  "snapshot_summary": {
+    "holding_keys": [
+      "steam:730:asset_001|user:u1|vault_u1|dep_001|hold_001",
+      "steam:730:asset_002|user:u1|vault_u1|dep_002|hold_002",
+      "steam:730:asset_003|user:u2|vault_u2|dep_003|hold_003",
+      "steam:730:asset_004|user:u3|vault_u3|dep_004|hold_004",
+      "steam:730:asset_005|user:u3|vault_u3|dep_005|hold_005"
+    ],
+    "leaf_count": 5,
+    "leaf_hashes": [
+      "fbb9d8c8d33e283b4ca16975dea3812658eaa93da8a9a822c783e38bd13dfa49",
+      "83e384d49c67fc6485f7ff45dc8a4b02830ed351c4feecf24c274d70850d8029",
+      "e5257a3dfd119e893de9d3104075b26343c0a6777ce72e5e2140c7c2009aeddb",
+      "0ef13b471cd25ee86d2451443eb83b292a74118822f0663a208178538f75d891",
+      "58391a619f83c1e0bb9285bea9ea0f2e6b1bc7faff7a8deaf9f7a679e81da68c"
+    ],
+    "recorded_at": "2026-02-18T20:35:00Z",
+    "root_hash": "5467c32f45e60d635c938877fc614bcc0b55df39232e1883483626663a5ddebb",
+    "snapshot_id": "cust_snap_m46_001"
+  }
+}

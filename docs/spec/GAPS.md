@@ -101,6 +101,7 @@ Each item here must become at least one of:
 
 15) **Proof-of-custody scope**
 - Decide cadence, snapshot schema, Merkle root publication schedule, and inclusion proof format.
+- Resolved (fixtures-first, partial): M46 established canonical `CustodySnapshot` / `CustodyInclusionProof` schemas and deterministic Merkle inclusion verification primitives.
 
 ---
 
@@ -130,7 +131,8 @@ Each item here must become at least one of:
 - Resolved (fixtures-first, partial): M43 (consent-proof challenge context + export checkpoint compaction contract).
 - Resolved (fixtures-first, partial): M44 (stateful export checkpoint continuation continuity: checkpoint existence + cursor/attestation/query context lock).
 - Resolved (fixtures-first, partial): M45 (checkpoint retention + expiry enforcement + opportunistic checkpoint GC).
-- Remaining: macro-track continues with vault/proof-of-custody and partner-program layers (outside delegated-policy export chain hardening slice).
+- Resolved (fixtures-first, partial): M46 (proof-of-custody primitives: canonical custody snapshot + Merkle inclusion proof verifier).
+- Remaining: vault deposit/withdraw lifecycle contracts, custody root publication cadence, and partner-program/commercial layers.
 
 ---
 

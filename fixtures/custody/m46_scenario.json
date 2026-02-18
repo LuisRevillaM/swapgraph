@@ -1,0 +1,93 @@
+{
+  "snapshot": {
+    "snapshot_id": "cust_snap_m46_001",
+    "recorded_at": "2026-02-18T20:35:00Z",
+    "holdings": [
+      {
+        "holding_id": "hold_001",
+        "asset": { "platform": "steam", "asset_id": "730:asset_001" },
+        "owner_actor": { "type": "user", "id": "u1" },
+        "vault_id": "vault_u1",
+        "deposit_id": "dep_001",
+        "deposited_at": "2026-02-18T20:00:00Z"
+      },
+      {
+        "holding_id": "hold_002",
+        "asset": { "platform": "steam", "asset_id": "730:asset_002" },
+        "owner_actor": { "type": "user", "id": "u1" },
+        "vault_id": "vault_u1",
+        "deposit_id": "dep_002",
+        "deposited_at": "2026-02-18T20:01:00Z"
+      },
+      {
+        "holding_id": "hold_003",
+        "asset": { "platform": "steam", "asset_id": "730:asset_003" },
+        "owner_actor": { "type": "user", "id": "u2" },
+        "vault_id": "vault_u2",
+        "deposit_id": "dep_003",
+        "deposited_at": "2026-02-18T20:02:00Z"
+      },
+      {
+        "holding_id": "hold_004",
+        "asset": { "platform": "steam", "asset_id": "730:asset_004" },
+        "owner_actor": { "type": "user", "id": "u3" },
+        "vault_id": "vault_u3",
+        "deposit_id": "dep_004",
+        "deposited_at": "2026-02-18T20:03:00Z"
+      },
+      {
+        "holding_id": "hold_005",
+        "asset": { "platform": "steam", "asset_id": "730:asset_005" },
+        "owner_actor": { "type": "user", "id": "u3" },
+        "vault_id": "vault_u3",
+        "deposit_id": "dep_005",
+        "deposited_at": "2026-02-18T20:04:00Z"
+      }
+    ]
+  },
+  "proof_checks": [
+    { "holding_id": "hold_001", "expect_ok": true },
+    { "holding_id": "hold_003", "expect_ok": true },
+    { "holding_id": "hold_005", "expect_ok": true }
+  ],
+  "negative_checks": [
+    {
+      "name": "holding_not_found",
+      "kind": "build_missing",
+      "holding": {
+        "holding_id": "hold_999",
+        "asset": { "platform": "steam", "asset_id": "730:asset_999" },
+        "owner_actor": { "type": "user", "id": "u9" },
+        "vault_id": "vault_u9",
+        "deposit_id": "dep_999",
+        "deposited_at": "2026-02-18T20:09:00Z"
+      },
+      "expect_error": "holding_not_found"
+    },
+    {
+      "name": "tampered_sibling_hash",
+      "kind": "tamper_sibling_hash",
+      "source_holding_id": "hold_003",
+      "sibling_index": 0,
+      "expect_ok": false,
+      "expect_error": "root_mismatch"
+    },
+    {
+      "name": "tampered_holding_asset",
+      "kind": "tamper_holding_asset",
+      "source_holding_id": "hold_003",
+      "override_asset_id": "730:asset_003_tampered",
+      "expect_ok": false,
+      "expect_error": "leaf_hash_mismatch"
+    },
+    {
+      "name": "tampered_sibling_position",
+      "kind": "tamper_sibling_position",
+      "source_holding_id": "hold_003",
+      "sibling_index": 0,
+      "override_position": "center",
+      "expect_ok": false,
+      "expect_error": "invalid_sibling_position"
+    }
+  ]
+}

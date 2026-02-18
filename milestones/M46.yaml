@@ -1,0 +1,30 @@
+name: M46
+commands:
+  - cmd: "npm run verify:m46"
+artifacts:
+  - artifact: "docs/prd/M46.md"
+  - artifact: "docs/spec/PRIMITIVES.md"
+  - artifact: "docs/spec/GAPS.md"
+
+  - artifact: "docs/spec/schemas/CustodyHolding.schema.json"
+  - artifact: "docs/spec/schemas/CustodySnapshot.schema.json"
+  - artifact: "docs/spec/schemas/CustodyInclusionProof.schema.json"
+
+  - artifact: "docs/spec/examples/CustodyHolding.example.json"
+  - artifact: "docs/spec/examples/CustodySnapshot.example.json"
+  - artifact: "docs/spec/examples/CustodyInclusionProof.example.json"
+
+  - artifact: "src/custody/proofOfCustody.mjs"
+
+  - artifact: "scripts/run-m46-proof-of-custody-scenario.mjs"
+  - artifact: "fixtures/custody/m46_scenario.json"
+  - artifact: "fixtures/custody/m46_expected.json"
+
+  - artifact: "verify/m46.sh"
+
+  - artifact: "artifacts/milestones/M46/latest/commands.log"
+  - artifact: "artifacts/milestones/M46/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M46/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M46/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M46/latest/proof_of_custody_output.json"
+  - artifact: "artifacts/milestones/M46/latest/assertions.json"

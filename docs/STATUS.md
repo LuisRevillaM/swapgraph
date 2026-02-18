@@ -53,9 +53,13 @@ Last updated: 2026-02-18
 - M40: ✅ consent proof binding + delegated policy audit pagination/retention hardening (fixtures-first)
 - M41: ✅ consent proof signature contract + delegated policy audit export integrity (fixtures-first)
 - M42: ✅ consent-proof anti-replay + signed export pagination attestations (fixtures-first)
+- M43: ✅ consent-proof challenge context + export checkpoint compaction contract (fixtures-first)
+- M44: ✅ stateful checkpoint continuation continuity (checkpoint exists + cursor/attestation/query context lock) (fixtures-first)
+- M45: ✅ checkpoint retention + expiry enforcement + opportunistic checkpoint GC (fixtures-first)
+- M46: ✅ proof-of-custody primitives (custody snapshot + Merkle inclusion proof verifier) (fixtures-first)
 
 ## Next
-- M43: consent-proof challenge context + export checkpoint compaction contract (TBD)
+- M47: vault deposit/withdraw lifecycle contract scaffold + deterministic state-transition verifier
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.
