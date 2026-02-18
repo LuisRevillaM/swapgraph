@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/DelegationTokenIntrospectResponse.schema.json",
+  "title": "DelegationTokenIntrospectResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["correlation_id", "active", "reason", "details"],
+  "properties": {
+    "correlation_id": { "type": "string", "minLength": 1 },
+    "active": { "type": "boolean" },
+    "reason": {
+      "type": "string",
+      "enum": [
+        "active",
+        "missing_token",
+        "unsupported_token_prefix",
+        "malformed",
+        "invalid_signature",
+        "unknown_key_id",
+        "unsupported_alg",
+        "expired",
+        "revoked",
+        "delegation_mismatch"
+      ]
+    },
+    "delegation": { "$ref": "DelegationGrant.schema.json" },
+    "details": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

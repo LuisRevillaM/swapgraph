@@ -1,0 +1,133 @@
+{
+  "operations": [
+    {
+      "active_key_id": "dev-dt-k1",
+      "key_statuses": {
+        "dev-dt-k1": "active",
+        "dev-dt-k2": "verify_only"
+      },
+      "keys_count": 2,
+      "ok": true,
+      "op": "keys.delegation_token_signing.get"
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "delegation_id": "del_m36_k1",
+      "error_code": null,
+      "ok": true,
+      "op": "delegations.create",
+      "replayed": false,
+      "token_key_id": "dev-dt-k1",
+      "token_ref": "tok_k1"
+    },
+    {
+      "active": true,
+      "delegation_id": "del_m36_k1",
+      "key_id": "dev-dt-k1",
+      "ok": true,
+      "op": "auth.delegation_token.introspect",
+      "reason": "active"
+    },
+    {
+      "active_key_id": "dev-dt-k2",
+      "op": "auth.delegation_token.rotate"
+    },
+    {
+      "active_key_id": "dev-dt-k2",
+      "key_statuses": {
+        "dev-dt-k1": "verify_only",
+        "dev-dt-k2": "active"
+      },
+      "keys_count": 2,
+      "ok": true,
+      "op": "keys.delegation_token_signing.get"
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "delegation_id": "del_m36_k2",
+      "error_code": null,
+      "ok": true,
+      "op": "delegations.create",
+      "replayed": false,
+      "token_key_id": "dev-dt-k2",
+      "token_ref": "tok_k2"
+    },
+    {
+      "active": true,
+      "delegation_id": "del_m36_k1",
+      "key_id": "dev-dt-k1",
+      "ok": true,
+      "op": "auth.delegation_token.introspect",
+      "reason": "active"
+    },
+    {
+      "active": true,
+      "delegation_id": "del_m36_k2",
+      "key_id": "dev-dt-k2",
+      "ok": true,
+      "op": "auth.delegation_token.introspect",
+      "reason": "active"
+    },
+    {
+      "op": "token.tamper_signature",
+      "save_token_ref": "tok_k2_tampered",
+      "token_ref": "tok_k2"
+    },
+    {
+      "active": false,
+      "delegation_id": "del_m36_k2",
+      "key_id": "dev-dt-k2",
+      "ok": true,
+      "op": "auth.delegation_token.introspect",
+      "reason": "invalid_signature"
+    },
+    {
+      "key_id": "dev-dt-k999",
+      "op": "token.unknown_key",
+      "save_token_ref": "tok_k2_unknown_key",
+      "token_ref": "tok_k2"
+    },
+    {
+      "active": false,
+      "delegation_id": "del_m36_k2",
+      "key_id": "dev-dt-k999",
+      "ok": true,
+      "op": "auth.delegation_token.introspect",
+      "reason": "unknown_key_id"
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "delegation_id": "del_m36_k1",
+      "error_code": null,
+      "ok": true,
+      "op": "delegations.revoke",
+      "replayed": false,
+      "revoked_at_present": true
+    },
+    {
+      "active": false,
+      "delegation_id": "del_m36_k1",
+      "key_id": "dev-dt-k1",
+      "ok": true,
+      "op": "auth.delegation_token.introspect",
+      "reason": "revoked"
+    },
+    {
+      "active": false,
+      "delegation_id": "del_m36_k2",
+      "key_id": "dev-dt-k2",
+      "ok": true,
+      "op": "auth.delegation_token.introspect",
+      "reason": "expired"
+    }
+  ]
+}

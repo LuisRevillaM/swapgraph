@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/DelegationTokenIntrospectRequest.schema.json",
+  "title": "DelegationTokenIntrospectRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["delegation_token"],
+  "properties": {
+    "delegation_token": { "type": "string", "minLength": 1 },
+    "now_iso": { "type": "string", "format": "date-time" }
+  }
+}

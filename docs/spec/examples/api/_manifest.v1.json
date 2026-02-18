@@ -94,6 +94,10 @@
       "schema": "SwapReceiptGetResponse.schema.json"
     },
     {
+      "file": "keys.delegation_token_signing.get.response.json",
+      "schema": "DelegationTokenSigningKeysGetResponse.schema.json"
+    },
+    {
       "file": "keys.receipt_signing.get.response.json",
       "schema": "ReceiptSigningKeysGetResponse.schema.json"
     },
@@ -124,6 +128,14 @@
     {
       "file": "delegations.revoke.response.json",
       "schema": "DelegationRevokeResponse.schema.json"
+    },
+    {
+      "file": "auth.delegation_token.introspect.request.json",
+      "schema": "DelegationTokenIntrospectRequest.schema.json"
+    },
+    {
+      "file": "auth.delegation_token.introspect.response.json",
+      "schema": "DelegationTokenIntrospectResponse.schema.json"
     }
   ]
 }

@@ -48,3 +48,34 @@ In this repo (fixtures-first), we include a non-production dev keypair under:
 
 This enables deterministic signing + verification in milestone proofs.
 Production deployments must **not** ship with these fixture keys.
+
+## Delegation-token signing keys
+`DelegationToken.signature` is produced by SwapGraph and must be verifiable by any token consumer.
+
+### Publication
+Delegation-token signing public keys are published via:
+- `GET /keys/delegation-token-signing`
+
+See:
+- schema: `docs/spec/schemas/DelegationTokenSigningKeysGetResponse.schema.json`
+- example: `docs/spec/examples/api/keys.delegation_token_signing.get.response.json`
+
+### Rotation contract
+The key-set response includes:
+- `active_key_id`: key used for minting new delegation tokens
+- `keys[].status`:
+  - `active` for current minting key
+  - `verify_only` for still-published historical keys
+
+Consumers verify by `DelegationToken.signature.key_id`.
+This keeps previously issued tokens verifiable during rotation windows.
+
+### Algorithms
+- v1 uses `alg = "ed25519"`.
+
+### Fixtures-first note
+In this repo (fixtures-first), we include non-production dev keypairs under:
+- `fixtures/keys/delegation_token_signing_dev_dt_k1_{public,private}.pem`
+- `fixtures/keys/delegation_token_signing_dev_dt_k2_{public,private}.pem`
+
+Production deployments must **not** ship with these fixture keys.

@@ -6,10 +6,23 @@ import { fileURLToPath } from 'node:url';
 import { canonicalStringify } from '../util/canonicalJson.mjs';
 
 const TOKEN_PREFIX = 'sgdt1.';
-const KEY_ID = 'dev-dt-k1';
 const ALG = 'ed25519';
+const DEFAULT_ACTIVE_KEY_ID = 'dev-dt-k1';
 
-let _keys;
+const KEY_CONFIGS = [
+  {
+    key_id: 'dev-dt-k1',
+    private_file: 'fixtures/keys/delegation_token_signing_dev_dt_k1_private.pem',
+    public_file: 'fixtures/keys/delegation_token_signing_dev_dt_k1_public.pem'
+  },
+  {
+    key_id: 'dev-dt-k2',
+    private_file: 'fixtures/keys/delegation_token_signing_dev_dt_k2_private.pem',
+    public_file: 'fixtures/keys/delegation_token_signing_dev_dt_k2_public.pem'
+  }
+];
+
+let _keyMaterialById;
 
 function repoRoot() {
   const here = path.dirname(fileURLToPath(import.meta.url));
@@ -17,18 +30,35 @@ function repoRoot() {
   return path.resolve(here, '../..');
 }
 
-function getKeys() {
-  if (_keys) return _keys;
+function keyConfigById(keyId) {
+  return KEY_CONFIGS.find(k => k.key_id === keyId) ?? null;
+}
+
+function resolveActiveKeyId() {
+  const configured = process.env.DELEGATION_TOKEN_SIGNING_ACTIVE_KEY_ID?.trim();
+  if (configured && keyConfigById(configured)) return configured;
+  return DEFAULT_ACTIVE_KEY_ID;
+}
+
+function getKeyMaterialMap() {
+  if (_keyMaterialById) return _keyMaterialById;
 
   const root = repoRoot();
-  const privPem = readFileSync(path.join(root, 'fixtures/keys/delegation_token_signing_dev_dt_k1_private.pem'), 'utf8');
-  const pubPem = readFileSync(path.join(root, 'fixtures/keys/delegation_token_signing_dev_dt_k1_public.pem'), 'utf8');
+  const map = new Map();
+  for (const cfg of KEY_CONFIGS) {
+    const privPem = readFileSync(path.join(root, cfg.private_file), 'utf8');
+    const pubPem = readFileSync(path.join(root, cfg.public_file), 'utf8');
 
-  const privateKey = crypto.createPrivateKey(privPem);
-  const publicKey = crypto.createPublicKey(pubPem);
+    map.set(cfg.key_id, {
+      key_id: cfg.key_id,
+      privateKey: crypto.createPrivateKey(privPem),
+      publicKey: crypto.createPublicKey(pubPem),
+      public_key_pem: pubPem
+    });
+  }
 
-  _keys = { privateKey, publicKey };
-  return _keys;
+  _keyMaterialById = map;
+  return map;
 }
 
 function stripRevokedAt(delegation) {
@@ -47,23 +77,47 @@ export function delegationTokenSigningMessageBytes(token) {
   return tokenSigningMessage(token);
 }
 
-export function signDelegationToken(token) {
-  const { privateKey } = getKeys();
+export function getDelegationTokenSigningActiveKeyId() {
+  return resolveActiveKeyId();
+}
+
+export function getDelegationTokenSigningPublicKeys() {
+  const activeKeyId = resolveActiveKeyId();
+  const mat = getKeyMaterialMap();
+
+  return KEY_CONFIGS.map(cfg => {
+    const key = mat.get(cfg.key_id);
+    return {
+      key_id: cfg.key_id,
+      alg: ALG,
+      public_key_pem: key.public_key_pem,
+      status: cfg.key_id === activeKeyId ? 'active' : 'verify_only'
+    };
+  });
+}
+
+export function signDelegationToken(token, { keyId } = {}) {
+  const selectedKeyId = keyId ?? resolveActiveKeyId();
+  const key = getKeyMaterialMap().get(selectedKeyId);
+  if (!key) {
+    throw new Error(`unknown delegation token signing key id: ${selectedKeyId}`);
+  }
+
   const msg = tokenSigningMessage(token);
-  const sig = crypto.sign(null, msg, privateKey);
+  const sig = crypto.sign(null, msg, key.privateKey);
 
   return {
-    key_id: KEY_ID,
+    key_id: selectedKeyId,
     alg: ALG,
     sig: sig.toString('base64')
   };
 }
 
-export function mintDelegationToken({ delegation }) {
+export function mintDelegationToken({ delegation, keyId }) {
   const token = {
     delegation: stripRevokedAt(delegation)
   };
-  return { ...token, signature: signDelegationToken(token) };
+  return { ...token, signature: signDelegationToken(token, { keyId }) };
 }
 
 export function encodeDelegationTokenString(token) {
@@ -100,16 +154,17 @@ export function decodeDelegationTokenString(tokenString) {
 }
 
 export function verifyDelegationTokenSignature(token) {
-  const { publicKey } = getKeys();
-
   const sigB64 = token?.signature?.sig;
   if (!sigB64) return { ok: false, error: 'missing_signature' };
 
-  if (token.signature.key_id !== KEY_ID) {
-    return { ok: false, error: 'unknown_key_id', details: { key_id: token.signature.key_id } };
+  const keyId = token?.signature?.key_id;
+  const key = getKeyMaterialMap().get(keyId);
+  if (!key) {
+    return { ok: false, error: 'unknown_key_id', details: { key_id: keyId ?? null } };
   }
-  if (token.signature.alg !== ALG) {
-    return { ok: false, error: 'unsupported_alg', details: { alg: token.signature.alg } };
+
+  if (token?.signature?.alg !== ALG) {
+    return { ok: false, error: 'unsupported_alg', details: { alg: token?.signature?.alg ?? null } };
   }
 
   let sig;
@@ -120,7 +175,7 @@ export function verifyDelegationTokenSignature(token) {
   }
 
   const msg = tokenSigningMessage(token);
-  const ok = crypto.verify(null, msg, publicKey, sig);
+  const ok = crypto.verify(null, msg, key.publicKey, sig);
   return ok ? { ok: true } : { ok: false, error: 'bad_signature' };
 }
 

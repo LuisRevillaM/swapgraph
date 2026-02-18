@@ -69,7 +69,11 @@ Delegation read/write responses include:
 - `delegation` (`DelegationGrant`)
 - `delegation_token` (`sgdt1...`) suitable for `Authorization: Bearer ...` by the agent
 
+Auth utility endpoints:
+- `POST /auth/delegation-token/introspect` (evaluate delegation token activity in a deterministic contract)
+
 Signing key endpoints:
+- `GET /keys/delegation-token-signing` (public keys for verifying delegation-token signatures)
 - `GET /keys/receipt-signing` (public keys for verifying `SwapReceipt.signature`)
 - `GET /keys/event-signing` (public keys for verifying `EventEnvelope.signature`)
 

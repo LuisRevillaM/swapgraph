@@ -19,6 +19,7 @@ const schemaFiles = [
   'TradingPolicy.schema.json',
   'DelegationGrant.schema.json',
   'DelegationToken.schema.json',
+  'DelegationTokenSigningKey.schema.json',
   'EventSignature.schema.json',
   'EventEnvelope.schema.json'
 ];
@@ -35,6 +36,7 @@ const exampleMap = {
   'TradingPolicy.schema.json': 'TradingPolicy.example.json',
   'DelegationGrant.schema.json': 'DelegationGrant.example.json',
   'DelegationToken.schema.json': 'DelegationToken.example.json',
+  'DelegationTokenSigningKey.schema.json': 'DelegationTokenSigningKey.example.json',
   'EventSignature.schema.json': 'EventSignature.example.json',
   'EventEnvelope.schema.json': 'EventEnvelope.example.json'
 };

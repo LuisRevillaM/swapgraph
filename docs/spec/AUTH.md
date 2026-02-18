@@ -37,6 +37,15 @@ Server-side parsing/verification in fixtures-first:
 - `src/core/authHeaders.mjs` parses `Authorization` and verifies token signature
 - `src/core/authz.mjs` enforces revocation/expiry and scopes (including persisted revocations)
 
+Delegation-token key publication / rotation:
+- `GET /keys/delegation-token-signing`
+- response includes `active_key_id` and key statuses (`active` / `verify_only`)
+- verification is key-id based (`signature.key_id`) so previously issued tokens remain verifiable across rotation windows
+
+Delegation-token introspection contract:
+- `POST /auth/delegation-token/introspect`
+- returns `{ active, reason, delegation?, details }` for deterministic lifecycle checks
+
 #### Fixtures-first modeling
 In fixtures-first verification (no HTTP layer yet), some scenarios pass auth directly, equivalent to what header parsing would produce:
 - `auth.delegation`: a `DelegationGrant` object

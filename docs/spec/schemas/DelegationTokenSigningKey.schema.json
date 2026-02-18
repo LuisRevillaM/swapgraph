@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/DelegationTokenSigningKey.schema.json",
+  "title": "DelegationTokenSigningKey",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["key_id", "alg", "public_key_pem", "status"],
+  "properties": {
+    "key_id": { "type": "string", "minLength": 1 },
+    "alg": { "type": "string", "minLength": 1 },
+    "public_key_pem": { "type": "string", "minLength": 1 },
+    "status": { "type": "string", "enum": ["active", "verify_only"] }
+  }
+}

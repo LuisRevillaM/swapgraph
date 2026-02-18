@@ -371,6 +371,39 @@
       }
     },
     {
+      "method": "POST",
+      "path": "/auth/delegation-token/introspect",
+      "operation_id": "auth.delegation_token.introspect",
+      "idempotency_required": false,
+      "request_schema": "DelegationTokenIntrospectRequest.schema.json",
+      "response_schema": "DelegationTokenIntrospectResponse.schema.json",
+      "auth": {
+        "required": false,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/keys/delegation-token-signing",
+      "operation_id": "keys.delegation_token_signing.get",
+      "idempotency_required": false,
+      "response_schema": "DelegationTokenSigningKeysGetResponse.schema.json",
+      "auth": {
+        "required": false,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": []
+      }
+    },
+    {
       "method": "GET",
       "path": "/keys/receipt-signing",
       "operation_id": "keys.receipt_signing.get",

@@ -1,0 +1,46 @@
+name: M36
+commands:
+  - cmd: "npm run verify:m36"
+artifacts:
+  - artifact: "docs/prd/M36.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/AUTH.md"
+  - artifact: "docs/spec/KEYS.md"
+  - artifact: "docs/spec/GAPS.md"
+  - artifact: "docs/spec/api/manifest.v1.json"
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+
+  - artifact: "docs/spec/schemas/DelegationTokenSigningKey.schema.json"
+  - artifact: "docs/spec/schemas/DelegationTokenSigningKeysGetResponse.schema.json"
+  - artifact: "docs/spec/schemas/DelegationTokenIntrospectRequest.schema.json"
+  - artifact: "docs/spec/schemas/DelegationTokenIntrospectResponse.schema.json"
+
+  - artifact: "docs/spec/examples/DelegationTokenSigningKey.example.json"
+  - artifact: "docs/spec/examples/api/keys.delegation_token_signing.get.response.json"
+  - artifact: "docs/spec/examples/api/auth.delegation_token.introspect.request.json"
+  - artifact: "docs/spec/examples/api/auth.delegation_token.introspect.response.json"
+
+  - artifact: "fixtures/keys/delegation_token_signing_dev_dt_k1_private.pem"
+  - artifact: "fixtures/keys/delegation_token_signing_dev_dt_k1_public.pem"
+  - artifact: "fixtures/keys/delegation_token_signing_dev_dt_k2_private.pem"
+  - artifact: "fixtures/keys/delegation_token_signing_dev_dt_k2_public.pem"
+
+  - artifact: "src/crypto/delegationTokenSigning.mjs"
+  - artifact: "src/service/delegationTokenAuthService.mjs"
+  - artifact: "src/service/delegationsService.mjs"
+
+  - artifact: "scripts/validate-schemas.mjs"
+  - artifact: "scripts/run-m36-delegation-key-rotation-introspection-scenario.mjs"
+
+  - artifact: "fixtures/delegation/m36_scenario.json"
+  - artifact: "fixtures/delegation/m36_expected.json"
+
+  - artifact: "verify/m36.sh"
+
+  - artifact: "artifacts/milestones/M36/latest/commands.log"
+  - artifact: "artifacts/milestones/M36/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M36/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M36/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M36/latest/delegation_rotation_introspection_output.json"
+  - artifact: "artifacts/milestones/M36/latest/store.json"
+  - artifact: "artifacts/milestones/M36/latest/assertions.json"

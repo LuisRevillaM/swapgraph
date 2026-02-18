@@ -1,0 +1,18 @@
+{
+  "correlation_id": "corr_keys_delegation_token_signing",
+  "active_key_id": "dev-dt-k1",
+  "keys": [
+    {
+      "key_id": "dev-dt-k1",
+      "alg": "ed25519",
+      "public_key_pem": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAlBVwhqm1Bzefa7mLIAlR8FfbssvribscTPfa5k1YfcA=\n-----END PUBLIC KEY-----\n",
+      "status": "active"
+    },
+    {
+      "key_id": "dev-dt-k2",
+      "alg": "ed25519",
+      "public_key_pem": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAJtnHAU4p+o1y9eFGNCgODAP4K+H5h/sT9in2gpBpWT8=\n-----END PUBLIC KEY-----\n",
+      "status": "verify_only"
+    }
+  ]
+}

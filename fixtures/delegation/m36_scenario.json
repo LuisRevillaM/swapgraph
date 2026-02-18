@@ -1,0 +1,142 @@
+{
+  "actors": {
+    "user_u1": { "type": "user", "id": "u1" }
+  },
+  "operations": [
+    {
+      "op": "keys.delegation_token_signing.get",
+      "expect_ok": true,
+      "expect_active_key_id": "dev-dt-k1",
+      "expect_keys_count": 2
+    },
+    {
+      "op": "delegations.create",
+      "actor_ref": "user_u1",
+      "auth": { "scopes": ["delegations:write"] },
+      "idempotency_key": "k_m36_create_1",
+      "occurred_at": "2026-02-16T00:00:00Z",
+      "request": {
+        "delegation": {
+          "delegation_id": "del_m36_k1",
+          "principal_agent": { "type": "agent", "id": "agent_1" },
+          "scopes": ["cycle_proposals:read"],
+          "policy": {
+            "max_value_per_swap_usd": 100,
+            "min_confidence_score": 0.8,
+            "max_cycle_length": 3,
+            "require_escrow": true
+          },
+          "expires_at": "2026-03-01T00:00:00Z"
+        }
+      },
+      "save_token_ref": "tok_k1",
+      "expect_ok": true,
+      "expect_token_key_id": "dev-dt-k1"
+    },
+    {
+      "op": "auth.delegation_token.introspect",
+      "token_ref": "tok_k1",
+      "now_iso": "2026-02-16T00:00:01Z",
+      "expect_active": true,
+      "expect_reason": "active",
+      "expect_key_id": "dev-dt-k1"
+    },
+    {
+      "op": "auth.delegation_token.rotate",
+      "active_key_id": "dev-dt-k2",
+      "expect_active_key_id": "dev-dt-k2"
+    },
+    {
+      "op": "keys.delegation_token_signing.get",
+      "expect_ok": true,
+      "expect_active_key_id": "dev-dt-k2",
+      "expect_keys_count": 2
+    },
+    {
+      "op": "delegations.create",
+      "actor_ref": "user_u1",
+      "auth": { "scopes": ["delegations:write"] },
+      "idempotency_key": "k_m36_create_2",
+      "occurred_at": "2026-02-16T01:00:00Z",
+      "request": {
+        "delegation": {
+          "delegation_id": "del_m36_k2",
+          "principal_agent": { "type": "agent", "id": "agent_1" },
+          "scopes": ["cycle_proposals:read"],
+          "policy": {
+            "max_value_per_swap_usd": 100,
+            "min_confidence_score": 0.8,
+            "max_cycle_length": 3,
+            "require_escrow": true
+          },
+          "expires_at": "2026-03-01T00:00:00Z"
+        }
+      },
+      "save_token_ref": "tok_k2",
+      "expect_ok": true,
+      "expect_token_key_id": "dev-dt-k2"
+    },
+    {
+      "op": "auth.delegation_token.introspect",
+      "token_ref": "tok_k1",
+      "now_iso": "2026-02-16T01:00:01Z",
+      "expect_active": true,
+      "expect_reason": "active",
+      "expect_key_id": "dev-dt-k1"
+    },
+    {
+      "op": "auth.delegation_token.introspect",
+      "token_ref": "tok_k2",
+      "now_iso": "2026-02-16T01:00:01Z",
+      "expect_active": true,
+      "expect_reason": "active",
+      "expect_key_id": "dev-dt-k2"
+    },
+    {
+      "op": "token.tamper_signature",
+      "token_ref": "tok_k2",
+      "save_token_ref": "tok_k2_tampered"
+    },
+    {
+      "op": "auth.delegation_token.introspect",
+      "token_ref": "tok_k2_tampered",
+      "expect_active": false,
+      "expect_reason": "invalid_signature"
+    },
+    {
+      "op": "token.unknown_key",
+      "token_ref": "tok_k2",
+      "key_id": "dev-dt-k999",
+      "save_token_ref": "tok_k2_unknown_key"
+    },
+    {
+      "op": "auth.delegation_token.introspect",
+      "token_ref": "tok_k2_unknown_key",
+      "expect_active": false,
+      "expect_reason": "unknown_key_id"
+    },
+    {
+      "op": "delegations.revoke",
+      "actor_ref": "user_u1",
+      "auth": { "scopes": ["delegations:write"] },
+      "idempotency_key": "k_m36_revoke_1",
+      "path": { "id": "del_m36_k1" },
+      "request": { "revoked_at": "2026-02-17T00:00:00Z" },
+      "expect_ok": true
+    },
+    {
+      "op": "auth.delegation_token.introspect",
+      "token_ref": "tok_k1",
+      "now_iso": "2026-02-17T00:00:01Z",
+      "expect_active": false,
+      "expect_reason": "revoked"
+    },
+    {
+      "op": "auth.delegation_token.introspect",
+      "token_ref": "tok_k2",
+      "now_iso": "2026-04-01T00:00:00Z",
+      "expect_active": false,
+      "expect_reason": "expired"
+    }
+  ]
+}

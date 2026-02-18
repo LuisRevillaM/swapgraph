@@ -1,0 +1,6 @@
+{
+  "key_id": "dev-dt-k1",
+  "alg": "ed25519",
+  "public_key_pem": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAlBVwhqm1Bzefa7mLIAlR8FfbssvribscTPfa5k1YfcA=\n-----END PUBLIC KEY-----\n",
+  "status": "active"
+}
