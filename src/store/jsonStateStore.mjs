@@ -22,7 +22,8 @@ export class JsonStateStore {
       idempotency: {},
       policy_spend_daily: {},
       policy_audit: [],
-      policy_consent_replay: {}
+      policy_consent_replay: {},
+      policy_audit_export_checkpoints: {}
     };
   }
 
@@ -41,7 +42,8 @@ export class JsonStateStore {
         idempotency: {},
         policy_spend_daily: {},
         policy_audit: [],
-        policy_consent_replay: {}
+        policy_consent_replay: {},
+        policy_audit_export_checkpoints: {}
       };
       return;
     }
@@ -62,6 +64,7 @@ export class JsonStateStore {
     this.state.policy_spend_daily ||= {};
     this.state.policy_audit ||= [];
     this.state.policy_consent_replay ||= {};
+    this.state.policy_audit_export_checkpoints ||= {};
   }
 
   save() {

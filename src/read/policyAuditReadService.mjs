@@ -46,6 +46,31 @@ function exportCheckpointEnforced() {
   return process.env.POLICY_AUDIT_EXPORT_CHECKPOINT_ENFORCE === '1';
 }
 
+function ensureCheckpointState(store) {
+  store.state.policy_audit_export_checkpoints ||= {};
+  return store.state.policy_audit_export_checkpoints;
+}
+
+function normalizeOptionalString(value) {
+  return typeof value === 'string' && value.trim() ? value.trim() : null;
+}
+
+function checkpointContextFromQuery({ query, subjectActorId }) {
+  return {
+    subject_actor_id: subjectActorId,
+    decision: normalizeOptionalString(query?.decision),
+    operation_id: normalizeOptionalString(query?.operation_id),
+    delegation_id: normalizeOptionalString(query?.delegation_id),
+    from_iso: normalizeOptionalString(query?.from_iso),
+    to_iso: normalizeOptionalString(query?.to_iso),
+    limit: normalizeLimit(query?.limit)
+  };
+}
+
+function checkpointContextKey(context) {
+  return JSON.stringify(context);
+}
+
 function requireUserScope({ actor, query, correlationId }) {
   if (actor?.type !== 'user') {
     return {
@@ -179,6 +204,7 @@ export class PolicyAuditReadService {
   constructor({ store }) {
     if (!store) throw new Error('store is required');
     this.store = store;
+    ensureCheckpointState(this.store);
   }
 
   list({ actor, auth, query }) {
@@ -255,6 +281,9 @@ export class PolicyAuditReadService {
       : null;
 
     const checkpointRequired = exportCheckpointEnforced();
+    const checkpointState = ensureCheckpointState(this.store);
+    const checkpointContext = checkpointContextFromQuery({ query, subjectActorId: scoped.subjectActorId });
+    const checkpointContextFingerprint = checkpointContextKey(checkpointContext);
 
     if (checkpointRequired && paged.cursorAfter && !checkpointAfter) {
       return {
@@ -285,6 +314,56 @@ export class PolicyAuditReadService {
       };
     }
 
+    if (checkpointRequired && paged.cursorAfter) {
+      const priorCheckpoint = checkpointState[checkpointAfter] ?? null;
+
+      if (!priorCheckpoint) {
+        return {
+          ok: false,
+          body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'checkpoint_after not found for export continuation', {
+            reason_code: 'checkpoint_after_not_found',
+            checkpoint_after: checkpointAfter
+          })
+        };
+      }
+
+      if (priorCheckpoint.next_cursor !== paged.cursorAfter) {
+        return {
+          ok: false,
+          body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'cursor_after does not match checkpoint continuation cursor', {
+            reason_code: 'checkpoint_cursor_mismatch',
+            checkpoint_after: checkpointAfter,
+            expected_cursor_after: priorCheckpoint.next_cursor ?? null,
+            cursor_after: paged.cursorAfter
+          })
+        };
+      }
+
+      if (priorCheckpoint.attestation_chain_hash !== attestationAfter) {
+        return {
+          ok: false,
+          body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'attestation_after does not match checkpoint continuation chain', {
+            reason_code: 'checkpoint_attestation_mismatch',
+            checkpoint_after: checkpointAfter,
+            expected_attestation_after: priorCheckpoint.attestation_chain_hash ?? null,
+            attestation_after: attestationAfter
+          })
+        };
+      }
+
+      if (priorCheckpoint.query_context_fingerprint !== checkpointContextFingerprint) {
+        return {
+          ok: false,
+          body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'export continuation query does not match checkpoint context', {
+            reason_code: 'checkpoint_query_mismatch',
+            checkpoint_after: checkpointAfter,
+            expected_context: priorCheckpoint.query_context ?? null,
+            provided_context: checkpointContext
+          })
+        };
+      }
+    }
+
     const exportedAt = exportNowIso(query);
     if (parseIsoMs(exportedAt) === null) {
       return {
@@ -308,6 +387,19 @@ export class PolicyAuditReadService {
       withAttestation,
       withCheckpoint
     });
+
+    if (checkpointRequired && signedPayload?.checkpoint?.checkpoint_hash) {
+      checkpointState[signedPayload.checkpoint.checkpoint_hash] = {
+        checkpoint_hash: signedPayload.checkpoint.checkpoint_hash,
+        checkpoint_after: signedPayload.checkpoint.checkpoint_after ?? null,
+        subject_actor_id: scoped.subjectActorId,
+        next_cursor: signedPayload.checkpoint.next_cursor ?? null,
+        attestation_chain_hash: signedPayload.attestation?.chain_hash ?? null,
+        query_context_fingerprint: checkpointContextFingerprint,
+        query_context: checkpointContext,
+        exported_at: signedPayload.exported_at
+      };
+    }
 
     return {
       ok: true,

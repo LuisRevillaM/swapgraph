@@ -80,6 +80,7 @@ Delegated-policy audit endpoints:
   - supports list filters plus optional pagination (`limit`, `cursor_after`)
   - paginated continuation requires `attestation_after` to chain from the previous page attestation
   - when export-checkpoint mode is enabled, continuation also requires `checkpoint_after` (previous page checkpoint hash)
+  - checkpoint continuation is statefully validated (checkpoint exists, cursor/attestation match, and filter context is unchanged)
   - response includes `export_hash` + detached `signature`
   - paginated responses include `next_cursor` + signed `attestation` (`page_hash`, `chain_hash`) for continuity verification
   - checkpoint mode adds `checkpoint` (`checkpoint_hash`) for chain compaction anchors

@@ -127,7 +127,9 @@ Each item here must become at least one of:
 - Resolved (fixtures-first, partial): M40 (consent proof binding + delegated policy audit pagination/retention hardening).
 - Resolved (fixtures-first, partial): M41 (consent proof signature assurances + delegated policy-audit export integrity contracts).
 - Resolved (fixtures-first, partial): M42 (consent-proof anti-replay + export-attestation continuity across pagination chunks).
-- Remaining: consent-proof challenge context and export-checkpoint compaction contracts.
+- Resolved (fixtures-first, partial): M43 (consent-proof challenge context + export checkpoint compaction contract).
+- Resolved (fixtures-first, partial): M44 (stateful export checkpoint continuation continuity: checkpoint existence + cursor/attestation/query context lock).
+- Remaining: export-checkpoint lifecycle (retention/expiry) hardening.
 
 ---
 
