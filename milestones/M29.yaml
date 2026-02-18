@@ -1,0 +1,66 @@
+name: M29
+commands:
+  - cmd: "npm run verify:m29"
+artifacts:
+  - artifact: "docs/prd/M29.md"
+
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/EVENTS.md"
+  - artifact: "docs/spec/KEYS.md"
+  - artifact: "docs/spec/events/manifest.v1.json"
+
+  - artifact: "docs/spec/schemas/EventSignature.schema.json"
+  - artifact: "docs/spec/schemas/EventEnvelope.schema.json"
+  - artifact: "docs/spec/schemas/EventSigningKey.schema.json"
+  - artifact: "docs/spec/schemas/EventSigningKeysGetResponse.schema.json"
+
+  - artifact: "docs/spec/examples/EventSignature.example.json"
+  - artifact: "docs/spec/examples/EventEnvelope.example.json"
+
+  - artifact: "docs/spec/api/manifest.v1.json"
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+  - artifact: "docs/spec/examples/api/keys.event_signing.get.response.json"
+
+  - artifact: "fixtures/keys/event_signing_dev_ev_k1_public.pem"
+  - artifact: "fixtures/keys/event_signing_dev_ev_k1_private.pem"
+
+  - artifact: "fixtures/events/event_log.v1.ndjson"
+  - artifact: "fixtures/events/event_log.v2.ndjson"
+
+  - artifact: "src/crypto/eventSigning.mjs"
+  - artifact: "src/delivery/proposalDelivery.mjs"
+  - artifact: "src/commit/commitService.mjs"
+  - artifact: "src/settlement/settlementService.mjs"
+
+  - artifact: "scripts/validate-schemas.mjs"
+  - artifact: "scripts/validate-api-contract.mjs"
+  - artifact: "scripts/validate-events.mjs"
+  - artifact: "scripts/verify-event-signatures.mjs"
+  - artifact: "verify/m29.sh"
+
+  - artifact: "artifacts/milestones/M29/latest/commands.log"
+  - artifact: "artifacts/milestones/M29/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M29/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M29/latest/events_manifest_validation.json"
+  - artifact: "artifacts/milestones/M29/latest/replay_v1_output.json"
+  - artifact: "artifacts/milestones/M29/latest/event_signature_verification.json"
+  - artifact: "artifacts/milestones/M29/latest/assertions.json"
+
+  - artifact: "artifacts/milestones/M29/latest/m6/delivery_output.json"
+  - artifact: "artifacts/milestones/M29/latest/m6/webhook_events.ndjson"
+  - artifact: "artifacts/milestones/M29/latest/m6/delivery_validation.json"
+  - artifact: "artifacts/milestones/M29/latest/m6/assertions.json"
+
+  - artifact: "artifacts/milestones/M29/latest/m7/commit_output.json"
+  - artifact: "artifacts/milestones/M29/latest/m7/events_outbox.ndjson"
+  - artifact: "artifacts/milestones/M29/latest/m7/events_validation.json"
+  - artifact: "artifacts/milestones/M29/latest/m7/assertions.json"
+
+  - artifact: "artifacts/milestones/M29/latest/m9/settlement_output.json"
+  - artifact: "artifacts/milestones/M29/latest/m9/events_outbox.ndjson"
+  - artifact: "artifacts/milestones/M29/latest/m9/events_validation.json"
+  - artifact: "artifacts/milestones/M29/latest/m9/assertions.json"
+
+  - artifact: "artifacts/milestones/M29/latest/replay_v2/replay_output.json"
+  - artifact: "artifacts/milestones/M29/latest/replay_v2/events_validation.json"
+  - artifact: "artifacts/milestones/M29/latest/replay_v2/assertions.json"

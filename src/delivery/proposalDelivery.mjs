@@ -1,9 +1,11 @@
 import { stableEventId } from './eventIds.mjs';
+import { signEventEnvelope } from '../crypto/eventSigning.mjs';
 
 export function buildProposalCreatedEvent({ proposal, actor, occurredAt, correlationId }) {
   const type = 'proposal.created';
   const event_id = stableEventId({ type, correlationId, key: proposal.id });
-  return {
+
+  const envelope = {
     event_id,
     type,
     occurred_at: occurredAt,
@@ -13,12 +15,15 @@ export function buildProposalCreatedEvent({ proposal, actor, occurredAt, correla
       proposal
     }
   };
+
+  return { ...envelope, signature: signEventEnvelope(envelope) };
 }
 
 export function buildProposalExpiringEvent({ proposalId, expiresAt, actor, occurredAt, correlationId }) {
   const type = 'proposal.expiring';
   const event_id = stableEventId({ type, correlationId, key: proposalId });
-  return {
+
+  const envelope = {
     event_id,
     type,
     occurred_at: occurredAt,
@@ -29,4 +34,6 @@ export function buildProposalExpiringEvent({ proposalId, expiresAt, actor, occur
       expires_at: expiresAt
     }
   };
+
+  return { ...envelope, signature: signEventEnvelope(envelope) };
 }

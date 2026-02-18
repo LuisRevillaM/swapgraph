@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/EventSignature.schema.json",
+  "title": "EventSignature",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["key_id", "alg", "sig"],
+  "properties": {
+    "key_id": { "type": "string", "minLength": 1 },
+    "alg": { "type": "string", "minLength": 1 },
+    "sig": { "type": "string", "minLength": 1 }
+  }
+}

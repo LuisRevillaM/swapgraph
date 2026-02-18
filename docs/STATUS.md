@@ -1,6 +1,6 @@
 # Project Status — swapgraph
 
-Last updated: 2026-02-17
+Last updated: 2026-02-18
 
 ## Autopilot
 - Status: **spec hardening** (not approved)
@@ -39,9 +39,10 @@ Last updated: 2026-02-17
 - M26: ✅ correlation_id in remaining response contracts (intents/proposals/commit)
 - M27: ✅ correlation_id in ErrorResponse (fixtures-first) + propagate to all error bodies
 - M28: ✅ verifiable receipt signatures (Ed25519) + receipt signing keys contract + verifier
+- M29: ✅ webhook/event signing (Ed25519) + event signing keys contract + verifier
 
 ## Next
-- M29: webhook/event signing + replay protection (contract + fixture verification)
+- M30: partner auth/scopes + webhook delivery hardening (TBD)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.

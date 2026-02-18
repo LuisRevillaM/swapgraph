@@ -4,7 +4,7 @@
   "title": "EventEnvelope",
   "type": "object",
   "additionalProperties": false,
-  "required": ["event_id", "type", "occurred_at", "correlation_id", "actor", "payload"],
+  "required": ["event_id", "type", "occurred_at", "correlation_id", "actor", "payload", "signature"],
   "properties": {
     "event_id": { "type": "string", "minLength": 1 },
     "type": { "type": "string", "minLength": 1 },
@@ -15,9 +15,6 @@
       "type": "object",
       "additionalProperties": true
     },
-    "signature": {
-      "type": "object",
-      "additionalProperties": true
-    }
+    "signature": { "$ref": "EventSignature.schema.json" }
   }
 }

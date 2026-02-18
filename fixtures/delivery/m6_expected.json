@@ -271,6 +271,11 @@
             "confidence_score=0.8302"
           ]
         }
+      },
+      "signature": {
+        "key_id": "dev-ev-k1",
+        "alg": "ed25519",
+        "sig": "KSjf7eREb/I8nFzMcdRwVMy24FyD9oXTPN3SYxglG60it9GxltYc6TgU76/7vGo8hyHG6cadUeBRu6dw9CwSBw=="
       }
     },
     {
@@ -351,6 +356,11 @@
             "confidence_score=0.8804"
           ]
         }
+      },
+      "signature": {
+        "key_id": "dev-ev-k1",
+        "alg": "ed25519",
+        "sig": "0sNi2pKdBG0/a1ZBEmk166UzEwyc8fFtQZ1G+Q+Lqq0SbHQuVtl9K+AFxV+lHwC542YFV767o7px8W2czYMKCQ=="
       }
     },
     {
@@ -457,6 +467,11 @@
             "confidence_score=0.8302"
           ]
         }
+      },
+      "signature": {
+        "key_id": "dev-ev-k1",
+        "alg": "ed25519",
+        "sig": "KSjf7eREb/I8nFzMcdRwVMy24FyD9oXTPN3SYxglG60it9GxltYc6TgU76/7vGo8hyHG6cadUeBRu6dw9CwSBw=="
       }
     }
   ],

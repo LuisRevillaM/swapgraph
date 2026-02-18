@@ -56,6 +56,7 @@ Receipt endpoints:
 
 Signing key endpoints:
 - `GET /keys/receipt-signing` (public keys for verifying `SwapReceipt.signature`)
+- `GET /keys/event-signing` (public keys for verifying `EventEnvelope.signature`)
 
 (Implementation is fixtures-first; server transport comes later.)
 

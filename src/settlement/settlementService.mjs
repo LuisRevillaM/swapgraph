@@ -3,6 +3,7 @@ import crypto from 'node:crypto';
 import { commitIdForProposalId } from '../commit/commitIds.mjs';
 import { stableEventId } from '../delivery/eventIds.mjs';
 import { signReceipt } from '../crypto/receiptSigning.mjs';
+import { signEventEnvelope } from '../crypto/eventSigning.mjs';
 
 function actorKey(actor) {
   return `${actor.type}:${actor.id}`;
@@ -23,7 +24,8 @@ function buildCycleStateChangedEvent({ cycleId, fromState, toState, reasonCode, 
     to_state: toState
   };
   if (reasonCode) payload.reason_code = reasonCode;
-  return {
+
+  const envelope = {
     event_id,
     type,
     occurred_at: occurredAt,
@@ -31,13 +33,16 @@ function buildCycleStateChangedEvent({ cycleId, fromState, toState, reasonCode, 
     actor,
     payload
   };
+
+  return { ...envelope, signature: signEventEnvelope(envelope) };
 }
 
 function buildSettlementDepositRequiredEvent({ cycleId, depositDeadlineAt, actor, occurredAt }) {
   const type = 'settlement.deposit_required';
   const correlationId = `corr_${cycleId}`;
   const event_id = stableEventId({ type, correlationId, key: `deposit_required|${depositDeadlineAt}` });
-  return {
+
+  const envelope = {
     event_id,
     type,
     occurred_at: occurredAt,
@@ -48,13 +53,16 @@ function buildSettlementDepositRequiredEvent({ cycleId, depositDeadlineAt, actor
       deposit_deadline_at: depositDeadlineAt
     }
   };
+
+  return { ...envelope, signature: signEventEnvelope(envelope) };
 }
 
 function buildSettlementDepositConfirmedEvent({ cycleId, intentId, depositRef, actor, occurredAt }) {
   const type = 'settlement.deposit_confirmed';
   const correlationId = `corr_${cycleId}`;
   const event_id = stableEventId({ type, correlationId, key: `${intentId}|${depositRef}` });
-  return {
+
+  const envelope = {
     event_id,
     type,
     occurred_at: occurredAt,
@@ -66,13 +74,16 @@ function buildSettlementDepositConfirmedEvent({ cycleId, intentId, depositRef, a
       deposit_ref: depositRef
     }
   };
+
+  return { ...envelope, signature: signEventEnvelope(envelope) };
 }
 
 function buildSettlementExecutingEvent({ cycleId, actor, occurredAt }) {
   const type = 'settlement.executing';
   const correlationId = `corr_${cycleId}`;
   const event_id = stableEventId({ type, correlationId, key: 'executing' });
-  return {
+
+  const envelope = {
     event_id,
     type,
     occurred_at: occurredAt,
@@ -82,13 +93,16 @@ function buildSettlementExecutingEvent({ cycleId, actor, occurredAt }) {
       cycle_id: cycleId
     }
   };
+
+  return { ...envelope, signature: signEventEnvelope(envelope) };
 }
 
 function buildIntentUnreservedEvent({ intentId, cycleId, reason, actor, occurredAt }) {
   const type = 'intent.unreserved';
   const correlationId = `corr_${cycleId}`;
   const event_id = stableEventId({ type, correlationId, key: `${intentId}` });
-  return {
+
+  const envelope = {
     event_id,
     type,
     occurred_at: occurredAt,
@@ -100,13 +114,16 @@ function buildIntentUnreservedEvent({ intentId, cycleId, reason, actor, occurred
       reason
     }
   };
+
+  return { ...envelope, signature: signEventEnvelope(envelope) };
 }
 
 function buildReceiptCreatedEvent({ receipt, actor, occurredAt }) {
   const type = 'receipt.created';
   const correlationId = `corr_${receipt.cycle_id}`;
   const event_id = stableEventId({ type, correlationId, key: `${receipt.id}` });
-  return {
+
+  const envelope = {
     event_id,
     type,
     occurred_at: occurredAt,
@@ -116,6 +133,8 @@ function buildReceiptCreatedEvent({ receipt, actor, occurredAt }) {
       receipt
     }
   };
+
+  return { ...envelope, signature: signEventEnvelope(envelope) };
 }
 
 function buildLegs({ proposal, depositDeadlineAt }) {

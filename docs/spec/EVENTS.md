@@ -10,10 +10,23 @@ Every event is wrapped in an envelope with:
 - `correlation_id`
 - `actor`
 - `payload`
+- `signature`
 
 ## Delivery semantics
 - At-least-once delivery.
 - Consumers must de-duplicate by `event_id`.
+
+## Event signing (v1)
+Events are signed by SwapGraph.
+
+- `EventEnvelope.signature` is an Ed25519 signature over:
+  - `canonical_json(EventEnvelope without signature)`
+- Consumers should:
+  - verify the signature before applying an event
+  - de-duplicate by `event_id` to prevent replay side-effects
+
+Key publication:
+- `GET /keys/event-signing`
 
 ## Replay
 - A consumer can request replay from a checkpoint.

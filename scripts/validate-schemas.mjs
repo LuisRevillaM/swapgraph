@@ -17,6 +17,7 @@ const schemaFiles = [
   'SettlementTimeline.schema.json',
   'SwapReceipt.schema.json',
   'TradingPolicy.schema.json',
+  'EventSignature.schema.json',
   'EventEnvelope.schema.json'
 ];
 
@@ -30,6 +31,7 @@ const exampleMap = {
   'SettlementTimeline.schema.json': 'SettlementTimeline.example.json',
   'SwapReceipt.schema.json': 'SwapReceipt.example.json',
   'TradingPolicy.schema.json': 'TradingPolicy.example.json',
+  'EventSignature.schema.json': 'EventSignature.example.json',
   'EventEnvelope.schema.json': 'EventEnvelope.example.json'
 };
 

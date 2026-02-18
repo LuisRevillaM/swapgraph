@@ -100,6 +100,10 @@
       "file": "keys.receipt_signing.get.response.json",
       "schema": "ReceiptSigningKeysGetResponse.schema.json"
     },
+    {
+      "file": "keys.event_signing.get.response.json",
+      "schema": "EventSigningKeysGetResponse.schema.json"
+    },
 
     {
       "file": "error.example.json",

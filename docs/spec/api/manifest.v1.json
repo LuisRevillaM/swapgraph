@@ -149,6 +149,14 @@
       "operation_id": "keys.receipt_signing.get",
       "idempotency_required": false,
       "response_schema": "ReceiptSigningKeysGetResponse.schema.json"
+    },
+
+    {
+      "method": "GET",
+      "path": "/keys/event-signing",
+      "operation_id": "keys.event_signing.get",
+      "idempotency_required": false,
+      "response_schema": "EventSigningKeysGetResponse.schema.json"
     }
   ],
   "webhooks": {

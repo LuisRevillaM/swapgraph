@@ -1,6 +1,7 @@
 import { commitIdForProposalId } from './commitIds.mjs';
 import { idempotencyScopeKey, payloadHash } from '../core/idempotency.mjs';
 import { stableEventId } from '../delivery/eventIds.mjs';
+import { signEventEnvelope } from '../crypto/eventSigning.mjs';
 
 function actorKey(actor) {
   return `${actor.type}:${actor.id}`;
@@ -28,7 +29,8 @@ function buildIntentReservedEvent({ intentId, cycleId, reservedUntil, actor, occ
   const type = 'intent.reserved';
   const correlationId = `corr_${cycleId}`;
   const event_id = stableEventId({ type, correlationId, key: `${intentId}` });
-  return {
+
+  const envelope = {
     event_id,
     type,
     occurred_at: occurredAt,
@@ -40,13 +42,16 @@ function buildIntentReservedEvent({ intentId, cycleId, reservedUntil, actor, occ
       reserved_until: reservedUntil
     }
   };
+
+  return { ...envelope, signature: signEventEnvelope(envelope) };
 }
 
 function buildIntentUnreservedEvent({ intentId, cycleId, reason, actor, occurredAt }) {
   const type = 'intent.unreserved';
   const correlationId = `corr_${cycleId}`;
   const event_id = stableEventId({ type, correlationId, key: `${intentId}` });
-  return {
+
+  const envelope = {
     event_id,
     type,
     occurred_at: occurredAt,
@@ -58,6 +63,8 @@ function buildIntentUnreservedEvent({ intentId, cycleId, reason, actor, occurred
       reason
     }
   };
+
+  return { ...envelope, signature: signEventEnvelope(envelope) };
 }
 
 function buildCycleStateChangedEvent({ cycleId, fromState, toState, reasonCode, actor, occurredAt }) {
@@ -70,7 +77,8 @@ function buildCycleStateChangedEvent({ cycleId, fromState, toState, reasonCode, 
     to_state: toState
   };
   if (reasonCode) payload.reason_code = reasonCode;
-  return {
+
+  const envelope = {
     event_id,
     type,
     occurred_at: occurredAt,
@@ -78,6 +86,8 @@ function buildCycleStateChangedEvent({ cycleId, fromState, toState, reasonCode, 
     actor,
     payload
   };
+
+  return { ...envelope, signature: signEventEnvelope(envelope) };
 }
 
 export class CommitService {

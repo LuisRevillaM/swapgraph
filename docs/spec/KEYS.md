@@ -27,3 +27,24 @@ In this repo (fixtures-first), we include a non-production dev keypair under:
 
 This enables deterministic signing + verification in milestone proofs.
 Production deployments must **not** ship with these fixture keys.
+
+## Event signing keys
+`EventEnvelope.signature` is produced by SwapGraph and must be verifiable by any consumer.
+
+### Publication
+Event signing public keys are published via:
+- `GET /keys/event-signing`
+
+See:
+- schema: `docs/spec/schemas/EventSigningKeysGetResponse.schema.json`
+- example: `docs/spec/examples/api/keys.event_signing.get.response.json`
+
+### Algorithms
+- v1 uses `alg = "ed25519"`.
+
+### Fixtures-first note
+In this repo (fixtures-first), we include a non-production dev keypair under:
+- `fixtures/keys/event_signing_dev_ev_k1_{public,private}.pem`
+
+This enables deterministic signing + verification in milestone proofs.
+Production deployments must **not** ship with these fixture keys.

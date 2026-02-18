@@ -1,0 +1,10 @@
+{
+  "correlation_id": "corr_keys_event_signing",
+  "keys": [
+    {
+      "key_id": "dev-ev-k1",
+      "alg": "ed25519",
+      "public_key_pem": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAckXvLwseu64jFt7mboJAqxqanpejg6/XT48JLy5kzmw=\n-----END PUBLIC KEY-----\n"
+    }
+  ]
+}
