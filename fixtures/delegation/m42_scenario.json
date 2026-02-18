@@ -1,0 +1,279 @@
+{
+  "actors": {
+    "user_u1": { "type": "user", "id": "u1" },
+    "user_u2": { "type": "user", "id": "u2" }
+  },
+  "operations": [
+    {
+      "op": "delegations.create",
+      "actor_ref": "user_u1",
+      "idempotency_key": "idem_m42_d1",
+      "occurred_at": "2026-02-18T13:00:00Z",
+      "auth": { "scopes": ["delegations:write"] },
+      "request": {
+        "delegation": {
+          "delegation_id": "del_m42_u1_agent1",
+          "principal_agent": { "type": "agent", "id": "agent_1" },
+          "scopes": ["swap_intents:write", "swap_intents:read", "delegations:read"],
+          "policy": {
+            "max_value_per_swap_usd": 500,
+            "max_value_per_day_usd": 1200,
+            "high_value_consent_threshold_usd": 100,
+            "min_confidence_score": 0.7,
+            "max_cycle_length": 3,
+            "require_escrow": true
+          },
+          "expires_at": "2026-02-20T12:00:00Z"
+        }
+      },
+      "save_token_ref": "token_u1_agent1",
+      "expect_ok": true
+    },
+    {
+      "op": "keys.policy_integrity_signing.get",
+      "expect_ok": true,
+      "expect_active_key_id": "dev-pi-k1",
+      "expect_keys_count": 2,
+      "expect_key_statuses": {
+        "dev-pi-k1": "active",
+        "dev-pi-k2": "verify_only"
+      }
+    },
+    {
+      "op": "swapIntents.create.via_token",
+      "token_ref": "token_u1_agent1",
+      "idempotency_key": "idem_m42_i1_ok",
+      "auth": {
+        "now_iso": "2026-02-18T13:10:00Z",
+        "user_consent": {
+          "consent_id": "consent_m42",
+          "consent_tier": "step_up",
+          "consent_proof_mode": "signed_bound",
+          "consent_proof_nonce": "nonce_m42_1",
+          "consent_proof_issued_at": "2026-02-18T13:09:00Z",
+          "consent_proof_expires_at": "2026-02-18T14:00:00Z",
+          "approved_max_usd": 220,
+          "expires_at": "2026-02-18T14:30:00Z"
+        }
+      },
+      "request": {
+        "intent": {
+          "id": "intent_m42_i1",
+          "actor": { "type": "user", "id": "u1" },
+          "offer": [{ "platform": "steam", "asset_id": "asset_m42_i1" }],
+          "want_spec": { "type": "set", "any_of": [{ "type": "specific_asset", "platform": "steam", "asset_key": "steam:730:item:m42_i1" }] },
+          "value_band": { "min_usd": 115, "max_usd": 130, "pricing_source": "market_median" },
+          "trust_constraints": { "max_cycle_length": 3, "min_counterparty_reliability": 4 },
+          "time_constraints": { "expires_at": "2026-03-01T00:00:00Z", "urgency": "normal" },
+          "settlement_preferences": { "require_escrow": true }
+        }
+      },
+      "expect_ok": true
+    },
+    {
+      "op": "swapIntents.create.via_token",
+      "token_ref": "token_u1_agent1",
+      "idempotency_key": "idem_m42_i2_replay",
+      "auth": {
+        "now_iso": "2026-02-18T13:11:00Z",
+        "user_consent": {
+          "consent_id": "consent_m42",
+          "consent_tier": "step_up",
+          "consent_proof_mode": "signed_bound",
+          "consent_proof_nonce": "nonce_m42_1",
+          "consent_proof_issued_at": "2026-02-18T13:10:00Z",
+          "consent_proof_expires_at": "2026-02-18T14:00:00Z",
+          "approved_max_usd": 220,
+          "expires_at": "2026-02-18T14:30:00Z"
+        }
+      },
+      "request": {
+        "intent": {
+          "id": "intent_m42_i2",
+          "actor": { "type": "user", "id": "u1" },
+          "offer": [{ "platform": "steam", "asset_id": "asset_m42_i2" }],
+          "want_spec": { "type": "set", "any_of": [{ "type": "specific_asset", "platform": "steam", "asset_key": "steam:730:item:m42_i2" }] },
+          "value_band": { "min_usd": 112, "max_usd": 129, "pricing_source": "market_median" },
+          "trust_constraints": { "max_cycle_length": 3, "min_counterparty_reliability": 4 },
+          "time_constraints": { "expires_at": "2026-03-01T00:00:00Z", "urgency": "normal" },
+          "settlement_preferences": { "require_escrow": true }
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN",
+      "expect_reason_code": "consent_proof_replayed"
+    },
+    {
+      "op": "swapIntents.create.via_token",
+      "token_ref": "token_u1_agent1",
+      "idempotency_key": "idem_m42_i3_ok",
+      "auth": {
+        "now_iso": "2026-02-18T13:12:00Z",
+        "user_consent": {
+          "consent_id": "consent_m42",
+          "consent_tier": "step_up",
+          "consent_proof_mode": "signed_bound",
+          "consent_proof_nonce": "nonce_m42_2",
+          "consent_proof_issued_at": "2026-02-18T13:11:00Z",
+          "consent_proof_expires_at": "2026-02-18T14:00:00Z",
+          "approved_max_usd": 220,
+          "expires_at": "2026-02-18T14:30:00Z"
+        }
+      },
+      "request": {
+        "intent": {
+          "id": "intent_m42_i3",
+          "actor": { "type": "user", "id": "u1" },
+          "offer": [{ "platform": "steam", "asset_id": "asset_m42_i3" }],
+          "want_spec": { "type": "set", "any_of": [{ "type": "specific_asset", "platform": "steam", "asset_key": "steam:730:item:m42_i3" }] },
+          "value_band": { "min_usd": 114, "max_usd": 131, "pricing_source": "market_median" },
+          "trust_constraints": { "max_cycle_length": 3, "min_counterparty_reliability": 4 },
+          "time_constraints": { "expires_at": "2026-03-01T00:00:00Z", "urgency": "normal" },
+          "settlement_preferences": { "require_escrow": true }
+        }
+      },
+      "expect_ok": true
+    },
+    {
+      "op": "swapIntents.create.via_token",
+      "token_ref": "token_u1_agent1",
+      "idempotency_key": "idem_m42_i4_nonce_required",
+      "auth": {
+        "now_iso": "2026-02-18T13:13:00Z",
+        "user_consent": {
+          "consent_id": "consent_m42",
+          "consent_tier": "step_up",
+          "consent_proof_mode": "signed_bound",
+          "consent_proof_issued_at": "2026-02-18T13:12:00Z",
+          "consent_proof_expires_at": "2026-02-18T14:00:00Z",
+          "approved_max_usd": 220,
+          "expires_at": "2026-02-18T14:30:00Z"
+        }
+      },
+      "request": {
+        "intent": {
+          "id": "intent_m42_i4",
+          "actor": { "type": "user", "id": "u1" },
+          "offer": [{ "platform": "steam", "asset_id": "asset_m42_i4" }],
+          "want_spec": { "type": "set", "any_of": [{ "type": "specific_asset", "platform": "steam", "asset_key": "steam:730:item:m42_i4" }] },
+          "value_band": { "min_usd": 118, "max_usd": 132, "pricing_source": "market_median" },
+          "trust_constraints": { "max_cycle_length": 3, "min_counterparty_reliability": 4 },
+          "time_constraints": { "expires_at": "2026-03-01T00:00:00Z", "urgency": "normal" },
+          "settlement_preferences": { "require_escrow": true }
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN",
+      "expect_reason_code": "consent_proof_nonce_required"
+    },
+    {
+      "op": "policyAudit.export",
+      "actor_ref": "user_u1",
+      "auth": { "scopes": ["delegations:read"] },
+      "query": {
+        "subject_actor_id": "u1",
+        "limit": 2,
+        "now_iso": "2026-02-18T13:20:00Z",
+        "exported_at_iso": "2026-02-18T13:20:00Z"
+      },
+      "save_export_ref": "export_page_1",
+      "expect_ok": true,
+      "expect_entries_count": 2,
+      "expect_next_cursor": "pa_2",
+      "expect_total_filtered": 4,
+      "expect_verify_ok": true,
+      "expect_verify_public_ok": true,
+      "expect_reason_codes": ["ok", "consent_proof_replayed"]
+    },
+    {
+      "op": "policyAudit.export",
+      "actor_ref": "user_u1",
+      "auth": { "scopes": ["delegations:read"] },
+      "query": {
+        "subject_actor_id": "u1",
+        "limit": 2,
+        "cursor_after": "pa_2",
+        "now_iso": "2026-02-18T13:20:00Z",
+        "exported_at_iso": "2026-02-18T13:20:00Z"
+      },
+      "attestation_after_ref": "export_page_1",
+      "save_export_ref": "export_page_2",
+      "expect_ok": true,
+      "expect_entries_count": 2,
+      "expect_next_cursor": null,
+      "expect_total_filtered": 2,
+      "expect_verify_ok": true,
+      "expect_verify_public_ok": true,
+      "expect_reason_codes": ["ok", "consent_proof_nonce_required"],
+      "expect_attestation_chain_ok": true
+    },
+    {
+      "op": "policyAudit.export.verify_tampered_attestation",
+      "export_ref": "export_page_2",
+      "expect_verify_ok": false,
+      "expect_verify_error": "attestation_chain_hash_mismatch"
+    },
+    {
+      "op": "policyAudit.export",
+      "actor_ref": "user_u1",
+      "auth": { "scopes": ["delegations:read"] },
+      "query": {
+        "subject_actor_id": "u1",
+        "limit": 2,
+        "cursor_after": "pa_2",
+        "now_iso": "2026-02-18T13:20:00Z",
+        "exported_at_iso": "2026-02-18T13:20:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION"
+    },
+    {
+      "op": "policyAudit.export",
+      "actor_ref": "user_u1",
+      "auth": { "scopes": ["delegations:read"] },
+      "query": {
+        "subject_actor_id": "u1",
+        "limit": 2,
+        "attestation_after": "deadbeef",
+        "now_iso": "2026-02-18T13:20:00Z",
+        "exported_at_iso": "2026-02-18T13:20:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION"
+    },
+    {
+      "op": "policyAudit.export.via_token",
+      "token_ref": "token_u1_agent1",
+      "auth": {
+        "now_iso": "2026-02-18T13:20:00Z"
+      },
+      "query": {
+        "subject_actor_id": "u1",
+        "limit": 2,
+        "now_iso": "2026-02-18T13:20:00Z",
+        "exported_at_iso": "2026-02-18T13:20:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN"
+    },
+    {
+      "op": "policyAudit.export",
+      "actor_ref": "user_u2",
+      "auth": { "scopes": ["delegations:read"] },
+      "query": {
+        "subject_actor_id": "u2",
+        "limit": 2,
+        "now_iso": "2026-02-18T13:20:00Z",
+        "exported_at_iso": "2026-02-18T13:20:00Z"
+      },
+      "save_export_ref": "export_u2",
+      "expect_ok": true,
+      "expect_entries_count": 0,
+      "expect_next_cursor": null,
+      "expect_total_filtered": 0,
+      "expect_verify_ok": true,
+      "expect_verify_public_ok": true,
+      "expect_reason_codes": []
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+name: M42
+commands:
+  - cmd: "npm run verify:m42"
+artifacts:
+  - artifact: "docs/prd/M42.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/AUTH.md"
+  - artifact: "docs/spec/KEYS.md"
+  - artifact: "docs/spec/GAPS.md"
+  - artifact: "docs/spec/api/manifest.v1.json"
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+
+  - artifact: "docs/spec/schemas/PolicyAuditExportResponse.schema.json"
+  - artifact: "docs/spec/examples/api/policy_audit.delegated_writes.export.response.json"
+
+  - artifact: "src/core/tradingPolicyBoundaries.mjs"
+  - artifact: "src/crypto/policyIntegritySigning.mjs"
+  - artifact: "src/read/policyAuditReadService.mjs"
+  - artifact: "src/service/swapIntentsService.mjs"
+  - artifact: "src/store/jsonStateStore.mjs"
+
+  - artifact: "scripts/run-m42-consent-replay-export-attestation-scenario.mjs"
+  - artifact: "fixtures/delegation/m42_scenario.json"
+  - artifact: "fixtures/delegation/m42_expected.json"
+
+  - artifact: "verify/m42.sh"
+
+  - artifact: "artifacts/milestones/M42/latest/commands.log"
+  - artifact: "artifacts/milestones/M42/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M42/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M42/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M42/latest/consent_replay_export_attestation_output.json"
+  - artifact: "artifacts/milestones/M42/latest/store.json"
+  - artifact: "artifacts/milestones/M42/latest/assertions.json"

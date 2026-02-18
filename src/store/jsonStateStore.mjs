@@ -21,7 +21,8 @@ export class JsonStateStore {
       events: [],
       idempotency: {},
       policy_spend_daily: {},
-      policy_audit: []
+      policy_audit: [],
+      policy_consent_replay: {}
     };
   }
 
@@ -39,7 +40,8 @@ export class JsonStateStore {
         events: [],
         idempotency: {},
         policy_spend_daily: {},
-        policy_audit: []
+        policy_audit: [],
+        policy_consent_replay: {}
       };
       return;
     }
@@ -59,6 +61,7 @@ export class JsonStateStore {
     this.state.idempotency ||= {};
     this.state.policy_spend_daily ||= {};
     this.state.policy_audit ||= [];
+    this.state.policy_consent_replay ||= {};
   }
 
   save() {

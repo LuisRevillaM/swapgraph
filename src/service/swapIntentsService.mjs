@@ -53,6 +53,7 @@ function reasonCodeFromPolicyCheck(check, fallback) {
 function ensurePolicyState(store) {
   store.state.policy_spend_daily ||= {};
   store.state.policy_audit ||= [];
+  store.state.policy_consent_replay ||= {};
 }
 
 function getDailySpend(store, subjectActor, dayKey) {
@@ -226,7 +227,8 @@ export class SwapIntentsService {
             auth,
             nowIso,
             subjectActor,
-            delegationId: auth?.delegation?.delegation_id
+            delegationId: auth?.delegation?.delegation_id,
+            consentReplayState: this.store.state.policy_consent_replay
           });
           if (!consentCheck.ok) {
             appendPolicyAudit(this.store, {
@@ -297,7 +299,14 @@ export class SwapIntentsService {
               projected_usd: dailyCheck.details?.projected_usd ?? null,
               cap_usd: dailyCheck.details?.cap_usd ?? null,
               consent_required: !!consentCheck.required,
-              consent_id: consentCheck.details?.consent_id ?? null
+              consent_id: consentCheck.details?.consent_id ?? null,
+              ...(consentCheck.details?.replay_enforced
+                ? {
+                  consent_proof_key_id: consentCheck.details?.consent_proof_key_id ?? null,
+                  consent_proof_nonce: consentCheck.details?.consent_proof_nonce ?? null,
+                  consent_proof_replay_key: consentCheck.details?.consent_proof_replay_key ?? null
+                }
+                : {})
             }
           });
         }
@@ -412,7 +421,8 @@ export class SwapIntentsService {
             auth,
             nowIso,
             subjectActor,
-            delegationId: auth?.delegation?.delegation_id
+            delegationId: auth?.delegation?.delegation_id,
+            consentReplayState: this.store.state.policy_consent_replay
           });
           if (!consentCheck.ok) {
             appendPolicyAudit(this.store, {
@@ -483,7 +493,14 @@ export class SwapIntentsService {
               projected_usd: dailyCheck.details?.projected_usd ?? null,
               cap_usd: dailyCheck.details?.cap_usd ?? null,
               consent_required: !!consentCheck.required,
-              consent_id: consentCheck.details?.consent_id ?? null
+              consent_id: consentCheck.details?.consent_id ?? null,
+              ...(consentCheck.details?.replay_enforced
+                ? {
+                  consent_proof_key_id: consentCheck.details?.consent_proof_key_id ?? null,
+                  consent_proof_nonce: consentCheck.details?.consent_proof_nonce ?? null,
+                  consent_proof_replay_key: consentCheck.details?.consent_proof_replay_key ?? null
+                }
+                : {})
             }
           });
         }

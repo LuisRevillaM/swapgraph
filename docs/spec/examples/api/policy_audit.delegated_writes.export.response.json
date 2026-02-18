@@ -4,9 +4,11 @@
   "query": {
     "subject_actor_id": "u1",
     "decision": "deny",
+    "limit": 1,
     "now_iso": "2026-02-16T10:09:00Z"
   },
-  "total_filtered": 1,
+  "total_filtered": 2,
+  "next_cursor": "pa_1",
   "entries": [
     {
       "audit_id": "pa_1",
@@ -33,6 +35,13 @@
       }
     }
   ],
+  "attestation": {
+    "cursor_after": null,
+    "next_cursor": "pa_1",
+    "attestation_after": null,
+    "page_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "chain_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  },
   "export_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "signature": {
     "key_id": "dev-pi-k1",

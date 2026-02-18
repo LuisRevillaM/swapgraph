@@ -127,6 +127,47 @@ function selectFilteredEntries({ store, subjectActorId, query, correlationId }) 
   };
 }
 
+function paginateEntries({ entries, query, correlationId }) {
+  let orderedEntries = entries;
+
+  const cursorAfter = typeof query?.cursor_after === 'string' && query.cursor_after.trim()
+    ? query.cursor_after.trim()
+    : null;
+
+  if (cursorAfter) {
+    const idx = orderedEntries.findIndex(e => e?.audit_id === cursorAfter);
+    if (idx < 0) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'cursor_after not found in filtered result set', {
+          cursor_after: cursorAfter
+        })
+      };
+    }
+    orderedEntries = orderedEntries.slice(idx + 1);
+  }
+
+  const totalFiltered = orderedEntries.length;
+
+  const limit = normalizeLimit(query?.limit);
+  let nextCursor = null;
+
+  if (limit && orderedEntries.length > limit) {
+    const page = orderedEntries.slice(0, limit);
+    nextCursor = page[page.length - 1]?.audit_id ?? null;
+    orderedEntries = page;
+  }
+
+  return {
+    ok: true,
+    entries: orderedEntries,
+    totalFiltered,
+    nextCursor,
+    cursorAfter,
+    limit
+  };
+}
+
 export class PolicyAuditReadService {
   /**
    * @param {{ store: import('../store/jsonStateStore.mjs').JsonStateStore }} opts
@@ -150,39 +191,16 @@ export class PolicyAuditReadService {
     const selected = selectFilteredEntries({ store: this.store, subjectActorId: scoped.subjectActorId, query, correlationId });
     if (!selected.ok) return selected;
 
-    let orderedEntries = selected.entries;
-
-    if (typeof query?.cursor_after === 'string' && query.cursor_after.trim()) {
-      const cursor = query.cursor_after.trim();
-      const idx = orderedEntries.findIndex(e => e?.audit_id === cursor);
-      if (idx < 0) {
-        return {
-          ok: false,
-          body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'cursor_after not found in filtered result set', {
-            cursor_after: cursor
-          })
-        };
-      }
-      orderedEntries = orderedEntries.slice(idx + 1);
-    }
-
-    const totalFiltered = orderedEntries.length;
-
-    let nextCursor = null;
-    const limit = normalizeLimit(query?.limit);
-    if (limit && orderedEntries.length > limit) {
-      const page = orderedEntries.slice(0, limit);
-      nextCursor = page[page.length - 1]?.audit_id ?? null;
-      orderedEntries = page;
-    }
+    const paged = paginateEntries({ entries: selected.entries, query, correlationId });
+    if (!paged.ok) return paged;
 
     const body = {
       correlation_id: correlationId,
-      entries: orderedEntries,
-      total_filtered: totalFiltered
+      entries: paged.entries,
+      total_filtered: paged.totalFiltered
     };
 
-    if (nextCursor) body.next_cursor = nextCursor;
+    if (paged.nextCursor) body.next_cursor = paged.nextCursor;
 
     return { ok: true, body };
   }
@@ -198,18 +216,35 @@ export class PolicyAuditReadService {
     const scoped = requireUserScope({ actor, query, correlationId });
     if (!scoped.ok) return scoped;
 
-    if (Object.prototype.hasOwnProperty.call(query ?? {}, 'limit') || Object.prototype.hasOwnProperty.call(query ?? {}, 'cursor_after')) {
+    const selected = selectFilteredEntries({ store: this.store, subjectActorId: scoped.subjectActorId, query, correlationId });
+    if (!selected.ok) return selected;
+
+    const paged = paginateEntries({ entries: selected.entries, query, correlationId });
+    if (!paged.ok) return paged;
+
+    const attestationAfter = typeof query?.attestation_after === 'string' && query.attestation_after.trim()
+      ? query.attestation_after.trim()
+      : null;
+
+    if (paged.cursorAfter && !attestationAfter) {
       return {
         ok: false,
-        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'export does not support pagination parameters', {
-          limit: query?.limit ?? null,
-          cursor_after: query?.cursor_after ?? null
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'attestation_after is required when cursor_after is provided', {
+          cursor_after: paged.cursorAfter,
+          attestation_after: query?.attestation_after ?? null
         })
       };
     }
 
-    const selected = selectFilteredEntries({ store: this.store, subjectActorId: scoped.subjectActorId, query, correlationId });
-    if (!selected.ok) return selected;
+    if (!paged.cursorAfter && attestationAfter) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'attestation_after is only allowed with cursor_after', {
+          cursor_after: query?.cursor_after ?? null,
+          attestation_after: attestationAfter
+        })
+      };
+    }
 
     const exportedAt = exportNowIso(query);
     if (parseIsoMs(exportedAt) === null) {
@@ -222,11 +257,15 @@ export class PolicyAuditReadService {
       };
     }
 
+    const withAttestation = Boolean(paged.limit || paged.cursorAfter || attestationAfter);
+
     const signedPayload = buildSignedPolicyAuditExportPayload({
       exportedAt,
       query,
-      entries: selected.entries,
-      totalFiltered: selected.entries.length
+      entries: paged.entries,
+      totalFiltered: paged.totalFiltered,
+      nextCursor: paged.nextCursor,
+      withAttestation
     });
 
     return {

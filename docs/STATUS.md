@@ -52,9 +52,10 @@ Last updated: 2026-02-18
 - M39: ✅ high-value consent tier hardening + delegated policy audit read contract (fixtures-first)
 - M40: ✅ consent proof binding + delegated policy audit pagination/retention hardening (fixtures-first)
 - M41: ✅ consent proof signature contract + delegated policy audit export integrity (fixtures-first)
+- M42: ✅ consent-proof anti-replay + signed export pagination attestations (fixtures-first)
 
 ## Next
-- M42: consent-proof anti-replay + signed export pagination attestations (TBD)
+- M43: consent-proof challenge context + export checkpoint compaction contract (TBD)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.

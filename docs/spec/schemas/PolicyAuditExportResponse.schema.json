@@ -26,13 +26,35 @@
         "delegation_id": { "type": "string", "minLength": 1 },
         "from_iso": { "type": "string", "format": "date-time" },
         "to_iso": { "type": "string", "format": "date-time" },
-        "now_iso": { "type": "string", "format": "date-time" }
+        "now_iso": { "type": "string", "format": "date-time" },
+        "limit": { "type": "integer", "minimum": 1, "maximum": 200 },
+        "cursor_after": { "type": "string", "minLength": 1 },
+        "attestation_after": { "type": "string", "minLength": 1 }
       }
     },
     "total_filtered": { "type": "integer", "minimum": 0 },
     "entries": {
       "type": "array",
       "items": { "$ref": "PolicyAuditEntry.schema.json" }
+    },
+    "next_cursor": { "type": "string", "minLength": 1 },
+    "attestation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cursor_after", "next_cursor", "attestation_after", "page_hash", "chain_hash"],
+      "properties": {
+        "cursor_after": { "type": ["string", "null"], "minLength": 1 },
+        "next_cursor": { "type": ["string", "null"], "minLength": 1 },
+        "attestation_after": { "type": ["string", "null"], "minLength": 1 },
+        "page_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "chain_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
     },
     "export_hash": {
       "type": "string",

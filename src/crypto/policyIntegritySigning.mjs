@@ -91,11 +91,28 @@ function normalizeExportQuery(query) {
   if (typeof query?.to_iso === 'string' && query.to_iso.trim()) out.to_iso = query.to_iso.trim();
   if (typeof query?.now_iso === 'string' && query.now_iso.trim()) out.now_iso = query.now_iso.trim();
 
+  const limit = Number.parseInt(String(query?.limit ?? ''), 10);
+  if (Number.isFinite(limit) && limit > 0) out.limit = limit;
+
+  if (typeof query?.cursor_after === 'string' && query.cursor_after.trim()) out.cursor_after = query.cursor_after.trim();
+  if (typeof query?.attestation_after === 'string' && query.attestation_after.trim()) out.attestation_after = query.attestation_after.trim();
+
   return out;
 }
 
-function exportSignablePayload(payload) {
+function normalizeExportAttestation(attestation) {
+  if (!attestation || typeof attestation !== 'object') return null;
   return {
+    cursor_after: typeof attestation.cursor_after === 'string' && attestation.cursor_after.trim() ? attestation.cursor_after.trim() : null,
+    next_cursor: typeof attestation.next_cursor === 'string' && attestation.next_cursor.trim() ? attestation.next_cursor.trim() : null,
+    attestation_after: typeof attestation.attestation_after === 'string' && attestation.attestation_after.trim() ? attestation.attestation_after.trim() : null,
+    page_hash: typeof attestation.page_hash === 'string' ? attestation.page_hash : null,
+    chain_hash: typeof attestation.chain_hash === 'string' ? attestation.chain_hash : null
+  };
+}
+
+function exportSignablePayload(payload) {
+  const out = {
     exported_at: payload?.exported_at,
     query: normalizeExportQuery(payload?.query),
     total_filtered: Number.isFinite(payload?.total_filtered) ? Number(payload.total_filtered) : 0,
@@ -103,6 +120,13 @@ function exportSignablePayload(payload) {
     export_hash: payload?.export_hash,
     signature: payload?.signature
   };
+
+  if (typeof payload?.next_cursor === 'string' && payload.next_cursor.trim()) out.next_cursor = payload.next_cursor.trim();
+
+  const attestation = normalizeExportAttestation(payload?.attestation);
+  if (attestation) out.attestation = attestation;
+
+  return out;
 }
 
 export function policyIntegritySigningMessageBytes(value) {
@@ -333,19 +357,110 @@ export function verifySignedConsentProofString({ tokenString, expectedBinding, n
   return { ok: true, proof };
 }
 
-export function buildPolicyAuditExportHash({ entries, totalFiltered, query }) {
+export function buildPolicyAuditExportHash({ entries, totalFiltered, query, nextCursor }) {
   const input = {
     entries: entries ?? [],
     total_filtered: Number.isFinite(totalFiltered) ? Number(totalFiltered) : 0,
     query: normalizeExportQuery(query)
   };
 
+  if (typeof nextCursor === 'string' && nextCursor.trim()) input.next_cursor = nextCursor.trim();
+
   return sha256HexCanonical(input);
 }
 
-export function buildSignedPolicyAuditExportPayload({ exportedAt, query, entries, totalFiltered, keyId }) {
+export function buildPolicyAuditExportAttestation({ query, nextCursor, exportHash }) {
   const normalizedQuery = normalizeExportQuery(query);
-  const exportHash = buildPolicyAuditExportHash({ entries, totalFiltered, query: normalizedQuery });
+  const cursorAfter = typeof normalizedQuery.cursor_after === 'string' ? normalizedQuery.cursor_after : null;
+  const attestationAfter = typeof normalizedQuery.attestation_after === 'string' ? normalizedQuery.attestation_after : null;
+  const next = typeof nextCursor === 'string' && nextCursor.trim() ? nextCursor.trim() : null;
+
+  const attestationInput = {
+    cursor_after: cursorAfter,
+    next_cursor: next,
+    attestation_after: attestationAfter,
+    page_hash: exportHash
+  };
+
+  return {
+    ...attestationInput,
+    chain_hash: sha256HexCanonical(attestationInput)
+  };
+}
+
+export function verifyPolicyAuditExportAttestation({ attestation, query, nextCursor, exportHash }) {
+  const provided = normalizeExportAttestation(attestation);
+  if (!provided) return { ok: false, error: 'attestation_missing' };
+
+  const expected = buildPolicyAuditExportAttestation({ query, nextCursor, exportHash });
+
+  if (provided.page_hash !== expected.page_hash) {
+    return {
+      ok: false,
+      error: 'attestation_page_hash_mismatch',
+      details: {
+        expected_page_hash: expected.page_hash,
+        provided_page_hash: provided.page_hash
+      }
+    };
+  }
+
+  if (provided.cursor_after !== expected.cursor_after) {
+    return {
+      ok: false,
+      error: 'attestation_cursor_mismatch',
+      details: {
+        expected_cursor_after: expected.cursor_after,
+        provided_cursor_after: provided.cursor_after
+      }
+    };
+  }
+
+  if (provided.next_cursor !== expected.next_cursor) {
+    return {
+      ok: false,
+      error: 'attestation_next_cursor_mismatch',
+      details: {
+        expected_next_cursor: expected.next_cursor,
+        provided_next_cursor: provided.next_cursor
+      }
+    };
+  }
+
+  if (provided.attestation_after !== expected.attestation_after) {
+    return {
+      ok: false,
+      error: 'attestation_after_mismatch',
+      details: {
+        expected_attestation_after: expected.attestation_after,
+        provided_attestation_after: provided.attestation_after
+      }
+    };
+  }
+
+  if (provided.chain_hash !== expected.chain_hash) {
+    return {
+      ok: false,
+      error: 'attestation_chain_hash_mismatch',
+      details: {
+        expected_chain_hash: expected.chain_hash,
+        provided_chain_hash: provided.chain_hash
+      }
+    };
+  }
+
+  return { ok: true };
+}
+
+export function buildSignedPolicyAuditExportPayload({ exportedAt, query, entries, totalFiltered, nextCursor, withAttestation, keyId }) {
+  const normalizedQuery = normalizeExportQuery(query);
+  const normalizedNextCursor = typeof nextCursor === 'string' && nextCursor.trim() ? nextCursor.trim() : null;
+  const exportHash = buildPolicyAuditExportHash({
+    entries,
+    totalFiltered,
+    query: normalizedQuery,
+    nextCursor: normalizedNextCursor
+  });
 
   const payload = {
     exported_at: exportedAt,
@@ -354,6 +469,16 @@ export function buildSignedPolicyAuditExportPayload({ exportedAt, query, entries
     entries: entries ?? [],
     export_hash: exportHash
   };
+
+  if (normalizedNextCursor) payload.next_cursor = normalizedNextCursor;
+
+  if (withAttestation) {
+    payload.attestation = buildPolicyAuditExportAttestation({
+      query: normalizedQuery,
+      nextCursor: normalizedNextCursor,
+      exportHash
+    });
+  }
 
   payload.signature = signPolicyIntegrityPayload(payload, { keyId });
   return payload;
@@ -367,7 +492,8 @@ export function verifyPolicyAuditExportPayload(payload) {
   const expectedHash = buildPolicyAuditExportHash({
     entries: payload.entries,
     totalFiltered: payload.total_filtered,
-    query: payload.query
+    query: payload.query,
+    nextCursor: payload.next_cursor
   });
 
   if (payload.export_hash !== expectedHash) {
@@ -379,6 +505,16 @@ export function verifyPolicyAuditExportPayload(payload) {
         provided_hash: payload.export_hash ?? null
       }
     };
+  }
+
+  if (payload.attestation) {
+    const attest = verifyPolicyAuditExportAttestation({
+      attestation: payload.attestation,
+      query: payload.query,
+      nextCursor: payload.next_cursor,
+      exportHash: expectedHash
+    });
+    if (!attest.ok) return attest;
   }
 
   const signable = exportSignablePayload(payload);
@@ -396,7 +532,8 @@ export function verifyPolicyAuditExportPayloadWithPublicKeyPem({ payload, public
   const expectedHash = buildPolicyAuditExportHash({
     entries: payload.entries,
     totalFiltered: payload.total_filtered,
-    query: payload.query
+    query: payload.query,
+    nextCursor: payload.next_cursor
   });
 
   if (payload.export_hash !== expectedHash) {
@@ -408,6 +545,16 @@ export function verifyPolicyAuditExportPayloadWithPublicKeyPem({ payload, public
         provided_hash: payload.export_hash ?? null
       }
     };
+  }
+
+  if (payload.attestation) {
+    const attest = verifyPolicyAuditExportAttestation({
+      attestation: payload.attestation,
+      query: payload.query,
+      nextCursor: payload.next_cursor,
+      exportHash: expectedHash
+    });
+    if (!attest.ok) return attest;
   }
 
   const signable = exportSignablePayload(payload);

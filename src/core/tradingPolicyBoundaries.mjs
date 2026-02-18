@@ -232,7 +232,12 @@ export function buildConsentProofBinding({ consentId, subjectActor, delegationId
   return `sgcp1|${consentId ?? ''}|${subject ?? ''}|${delegationId ?? ''}|${intentId ?? ''}|${cents}`;
 }
 
-export function evaluateHighValueConsentForIntent({ policy, intent, auth, nowIso, subjectActor, delegationId }) {
+export function buildConsentProofReplayKey({ consentId, subjectActor, delegationId, nonce }) {
+  const subject = actorKey(subjectActor);
+  return `sgcpr1|${consentId ?? ''}|${subject ?? ''}|${delegationId ?? ''}|${nonce ?? ''}`;
+}
+
+export function evaluateHighValueConsentForIntent({ policy, intent, auth, nowIso, subjectActor, delegationId, consentReplayState }) {
   const threshold = finiteNumberOrNull(policy?.high_value_consent_threshold_usd);
   const maxUsd = intentMaxUsd(intent);
 
@@ -275,9 +280,12 @@ export function evaluateHighValueConsentForIntent({ policy, intent, auth, nowIso
   const tierEnforced = process.env.POLICY_CONSENT_TIER_ENFORCE === '1';
   const bindingEnforced = process.env.POLICY_CONSENT_PROOF_BIND_ENFORCE === '1';
   const signatureEnforced = process.env.POLICY_CONSENT_PROOF_SIG_ENFORCE === '1';
+  const replayEnforced = process.env.POLICY_CONSENT_PROOF_REPLAY_ENFORCE === '1';
   const requiredTier = maxUsd > (threshold * 1.5) ? 'passkey' : 'step_up';
   const consentProof = consent?.consent_proof;
   let consentProofKeyId = null;
+  let consentProofNonce = null;
+  let consentProofReplayKey = null;
 
   if (tierEnforced) {
     const consentTier = consent?.consent_tier;
@@ -495,6 +503,9 @@ export function evaluateHighValueConsentForIntent({ policy, intent, auth, nowIso
       }
 
       consentProofKeyId = proofVerification.proof?.signature?.key_id ?? null;
+      consentProofNonce = typeof proofVerification.proof?.nonce === 'string' && proofVerification.proof.nonce.trim().length > 0
+        ? proofVerification.proof.nonce.trim()
+        : null;
     } else if (providedProof !== expectedProof) {
       return {
         ok: false,
@@ -563,6 +574,94 @@ export function evaluateHighValueConsentForIntent({ policy, intent, auth, nowIso
     }
   }
 
+  if (replayEnforced) {
+    if (!signatureEnforced) {
+      return {
+        ok: false,
+        code: 'CONSTRAINT_VIOLATION',
+        message: 'consent proof replay enforcement requires signature enforcement',
+        details: {
+          reason_code: 'consent_proof_replay_config_invalid',
+          threshold_usd: threshold,
+          max_usd: maxUsd,
+          required_tier: requiredTier,
+          consent_id: consent.consent_id
+        }
+      };
+    }
+
+    if (typeof consentProofNonce !== 'string' || consentProofNonce.trim().length < 1) {
+      return {
+        ok: false,
+        code: 'FORBIDDEN',
+        message: 'delegation consent proof nonce required',
+        details: {
+          reason_code: 'consent_proof_nonce_required',
+          threshold_usd: threshold,
+          max_usd: maxUsd,
+          required_tier: requiredTier,
+          consent_tier: consent?.consent_tier ?? null,
+          consent_id: consent.consent_id,
+          consent_proof_key_id: consentProofKeyId
+        }
+      };
+    }
+
+    if (!consentReplayState || typeof consentReplayState !== 'object') {
+      return {
+        ok: false,
+        code: 'CONSTRAINT_VIOLATION',
+        message: 'consent replay state is required',
+        details: {
+          reason_code: 'consent_proof_replay_state_missing',
+          threshold_usd: threshold,
+          max_usd: maxUsd,
+          required_tier: requiredTier,
+          consent_id: consent.consent_id
+        }
+      };
+    }
+
+    const replayKey = buildConsentProofReplayKey({
+      consentId: consent.consent_id,
+      subjectActor,
+      delegationId,
+      nonce: consentProofNonce
+    });
+
+    const seen = consentReplayState[replayKey];
+    if (seen) {
+      return {
+        ok: false,
+        code: 'FORBIDDEN',
+        message: 'delegation consent proof replayed',
+        details: {
+          reason_code: 'consent_proof_replayed',
+          threshold_usd: threshold,
+          max_usd: maxUsd,
+          required_tier: requiredTier,
+          consent_tier: consent?.consent_tier ?? null,
+          consent_id: consent.consent_id,
+          consent_proof_key_id: consentProofKeyId,
+          consent_proof_nonce: consentProofNonce,
+          consent_proof_replay_key: replayKey,
+          first_seen_at: seen?.first_seen_at ?? null,
+          first_seen_intent_id: seen?.intent_id ?? null
+        }
+      };
+    }
+
+    consentReplayState[replayKey] = {
+      first_seen_at: nowIso ?? null,
+      intent_id: intent?.id ?? null,
+      consent_id: consent.consent_id,
+      nonce: consentProofNonce,
+      key_id: consentProofKeyId
+    };
+
+    consentProofReplayKey = replayKey;
+  }
+
   return {
     ok: true,
     required: true,
@@ -574,9 +673,12 @@ export function evaluateHighValueConsentForIntent({ policy, intent, auth, nowIso
       tier_enforced: tierEnforced,
       binding_enforced: bindingEnforced,
       signature_enforced: signatureEnforced,
+      replay_enforced: replayEnforced,
       consent_tier: consent?.consent_tier ?? null,
       consent_id: consent.consent_id,
       consent_proof_key_id: consentProofKeyId,
+      consent_proof_nonce: consentProofNonce,
+      consent_proof_replay_key: consentProofReplayKey,
       approved_max_usd: finiteNumberOrNull(consent.approved_max_usd)
     }
   };

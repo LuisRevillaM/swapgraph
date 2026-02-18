@@ -1,0 +1,248 @@
+{
+  "final": {
+    "consent_replay_keys": [
+      "sgcpr1|consent_m42|user:u1|del_m42_u1_agent1|nonce_m42_1",
+      "sgcpr1|consent_m42|user:u1|del_m42_u1_agent1|nonce_m42_2"
+    ],
+    "policy_audit": [
+      {
+        "audit_id": "pa_1",
+        "consent_id": "consent_m42",
+        "consent_proof_key_id": "dev-pi-k1",
+        "consent_proof_nonce": "nonce_m42_1",
+        "consent_tier": null,
+        "decision": "allow",
+        "intent_id": "intent_m42_i1",
+        "operation_id": "swapIntents.create",
+        "reason_code": "ok",
+        "required_tier": null
+      },
+      {
+        "audit_id": "pa_2",
+        "consent_id": "consent_m42",
+        "consent_proof_key_id": "dev-pi-k1",
+        "consent_proof_nonce": "nonce_m42_1",
+        "consent_tier": "step_up",
+        "decision": "deny",
+        "intent_id": "intent_m42_i2",
+        "operation_id": "swapIntents.create",
+        "reason_code": "consent_proof_replayed",
+        "required_tier": "step_up"
+      },
+      {
+        "audit_id": "pa_3",
+        "consent_id": "consent_m42",
+        "consent_proof_key_id": "dev-pi-k1",
+        "consent_proof_nonce": "nonce_m42_2",
+        "consent_tier": null,
+        "decision": "allow",
+        "intent_id": "intent_m42_i3",
+        "operation_id": "swapIntents.create",
+        "reason_code": "ok",
+        "required_tier": null
+      },
+      {
+        "audit_id": "pa_4",
+        "consent_id": "consent_m42",
+        "consent_proof_key_id": "dev-pi-k1",
+        "consent_proof_nonce": null,
+        "consent_tier": "step_up",
+        "decision": "deny",
+        "intent_id": "intent_m42_i4",
+        "operation_id": "swapIntents.create",
+        "reason_code": "consent_proof_nonce_required",
+        "required_tier": "step_up"
+      }
+    ],
+    "policy_audit_count": 4
+  },
+  "operations": [
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "delegation_id": "del_m42_u1_agent1",
+      "error_code": null,
+      "ok": true,
+      "op": "delegations.create",
+      "replayed": false
+    },
+    {
+      "active_key_id": "dev-pi-k1",
+      "key_statuses": {
+        "dev-pi-k1": "active",
+        "dev-pi-k2": "verify_only"
+      },
+      "keys_count": 2,
+      "ok": true,
+      "op": "keys.policy_integrity_signing.get"
+    },
+    {
+      "error_code": null,
+      "intent_id": "intent_m42_i1",
+      "ok": true,
+      "op": "swapIntents.create.via_token",
+      "parse_ok": true,
+      "reason_code": null,
+      "replayed": false
+    },
+    {
+      "error_code": "FORBIDDEN",
+      "intent_id": "intent_m42_i2",
+      "ok": false,
+      "op": "swapIntents.create.via_token",
+      "parse_ok": true,
+      "reason_code": "consent_proof_replayed",
+      "replayed": false
+    },
+    {
+      "error_code": null,
+      "intent_id": "intent_m42_i3",
+      "ok": true,
+      "op": "swapIntents.create.via_token",
+      "parse_ok": true,
+      "reason_code": null,
+      "replayed": false
+    },
+    {
+      "error_code": "FORBIDDEN",
+      "intent_id": "intent_m42_i4",
+      "ok": false,
+      "op": "swapIntents.create.via_token",
+      "parse_ok": true,
+      "reason_code": "consent_proof_nonce_required",
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "attestation_after": null,
+      "attestation_chain_hash": "832b70bd3151805a5708eb8ea6fc2fd5a2ae9f4766928de514f80d1e30070168",
+      "attestation_chain_ok": null,
+      "entries_count": 2,
+      "error_code": null,
+      "export_hash": "609e951a12a6454f440323025608c9429f6647caa70e0859048f36d571024d18",
+      "next_cursor": "pa_2",
+      "ok": true,
+      "op": "policyAudit.export",
+      "reason_codes": [
+        "ok",
+        "consent_proof_replayed"
+      ],
+      "signature_key_id": "dev-pi-k1",
+      "total_filtered": 4,
+      "verify_error": null,
+      "verify_ok": true,
+      "verify_public_error": null,
+      "verify_public_ok": true
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "attestation_after": "832b70bd3151805a5708eb8ea6fc2fd5a2ae9f4766928de514f80d1e30070168",
+      "attestation_chain_hash": "afe386b573f9fdd1a351ef5ff761631953dfe3ba08cc0bc03d8d6d1e54cfceab",
+      "attestation_chain_ok": true,
+      "entries_count": 2,
+      "error_code": null,
+      "export_hash": "de903fb29a69a55ca25e202d8c4d9204d869abe7428ebf56a0eea89c8454e45f",
+      "next_cursor": null,
+      "ok": true,
+      "op": "policyAudit.export",
+      "reason_codes": [
+        "ok",
+        "consent_proof_nonce_required"
+      ],
+      "signature_key_id": "dev-pi-k1",
+      "total_filtered": 2,
+      "verify_error": null,
+      "verify_ok": true,
+      "verify_public_error": null,
+      "verify_public_ok": true
+    },
+    {
+      "export_ref": "export_page_2",
+      "op": "policyAudit.export.verify_tampered_attestation",
+      "verify_error": "attestation_chain_hash_mismatch",
+      "verify_ok": false
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "attestation_after": null,
+      "attestation_chain_hash": null,
+      "attestation_chain_ok": null,
+      "entries_count": null,
+      "error_code": "CONSTRAINT_VIOLATION",
+      "export_hash": null,
+      "next_cursor": null,
+      "ok": false,
+      "op": "policyAudit.export",
+      "reason_codes": null,
+      "signature_key_id": null,
+      "total_filtered": null,
+      "verify_error": null,
+      "verify_ok": null,
+      "verify_public_error": null,
+      "verify_public_ok": null
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "attestation_after": null,
+      "attestation_chain_hash": null,
+      "attestation_chain_ok": null,
+      "entries_count": null,
+      "error_code": "CONSTRAINT_VIOLATION",
+      "export_hash": null,
+      "next_cursor": null,
+      "ok": false,
+      "op": "policyAudit.export",
+      "reason_codes": null,
+      "signature_key_id": null,
+      "total_filtered": null,
+      "verify_error": null,
+      "verify_ok": null,
+      "verify_public_error": null,
+      "verify_public_ok": null
+    },
+    {
+      "entries_count": null,
+      "error_code": "FORBIDDEN",
+      "ok": false,
+      "op": "policyAudit.export.via_token",
+      "parse_ok": true,
+      "total_filtered": null
+    },
+    {
+      "actor": {
+        "id": "u2",
+        "type": "user"
+      },
+      "attestation_after": null,
+      "attestation_chain_hash": "c9777ceed046900a9c61f7b8abf6dd385ce17a3e6bd87230b403e4d85a5ad4e5",
+      "attestation_chain_ok": null,
+      "entries_count": 0,
+      "error_code": null,
+      "export_hash": "5483a26bf6264cf8c2dc891f008afaac178e371f83b3957a35c33f0648917b32",
+      "next_cursor": null,
+      "ok": true,
+      "op": "policyAudit.export",
+      "reason_codes": [],
+      "signature_key_id": "dev-pi-k1",
+      "total_filtered": 0,
+      "verify_error": null,
+      "verify_ok": true,
+      "verify_public_error": null,
+      "verify_public_ok": true
+    }
+  ]
+}

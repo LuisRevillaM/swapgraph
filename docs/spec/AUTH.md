@@ -62,7 +62,7 @@ Policy checks currently enforced at these boundaries:
 - `max_cycle_length`
 - `quiet_hours` (for `settlement.instructions` when `auth.now_iso` is provided)
 
-Delegated write-path policy controls (M38–M41):
+Delegated write-path policy controls (M38–M42):
 - `swapIntents.create/update` enforce:
   - `max_value_per_swap_usd`
   - `max_value_per_day_usd` (UTC day bucket, deterministic via `auth.now_iso`)
@@ -77,6 +77,7 @@ Delegated write-path policy controls (M38–M41):
   - signature verification
   - binding match
   - expiry checks (when `expires_at` is present)
+- when anti-replay is enabled (`POLICY_CONSENT_PROOF_REPLAY_ENFORCE=1`), signed consent proof must include a unique nonce and is one-time-consumable per consent binding context.
 - policy-integrity signing public keys are published via:
   - `GET /keys/policy-integrity-signing`
 - delegated write decisions are recorded in store-backed audit records (`policy_audit`) for deterministic proofing
@@ -85,6 +86,9 @@ Delegated write-path policy controls (M38–M41):
   - in fixtures-first, retention uses `POLICY_AUDIT_RETENTION_DAYS` and deterministic `now_iso` query override
 - users can export signed audit snapshots via `GET /policy-audit/delegated-writes/export`
   - response carries `export_hash` + signature for offline integrity verification
+  - pagination supports `limit` + `cursor_after`
+  - continuation requires `attestation_after` (previous page `attestation.chain_hash`)
+  - paginated pages include `attestation` (`page_hash`, `chain_hash`) to verify chain continuity
 
 ## Scope taxonomy
 Scopes are stable strings.
