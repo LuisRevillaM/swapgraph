@@ -129,7 +129,8 @@ Each item here must become at least one of:
 - Resolved (fixtures-first, partial): M42 (consent-proof anti-replay + export-attestation continuity across pagination chunks).
 - Resolved (fixtures-first, partial): M43 (consent-proof challenge context + export checkpoint compaction contract).
 - Resolved (fixtures-first, partial): M44 (stateful export checkpoint continuation continuity: checkpoint existence + cursor/attestation/query context lock).
-- Remaining: export-checkpoint lifecycle (retention/expiry) hardening.
+- Resolved (fixtures-first, partial): M45 (checkpoint retention + expiry enforcement + opportunistic checkpoint GC).
+- Remaining: macro-track continues with vault/proof-of-custody and partner-program layers (outside delegated-policy export chain hardening slice).
 
 ---
 

@@ -93,6 +93,7 @@ Delegated write-path policy controls (M38–M42):
   - continuation requires `attestation_after` (previous page `attestation.chain_hash`)
   - when checkpoint mode is enabled (`POLICY_AUDIT_EXPORT_CHECKPOINT_ENFORCE=1`), continuation also requires `checkpoint_after` (previous page `checkpoint.checkpoint_hash`)
   - checkpoint continuation is statefully validated for cursor + attestation + query-context continuity
+  - checkpoint anchors are retention-bounded (`POLICY_AUDIT_EXPORT_CHECKPOINT_RETENTION_DAYS`) and can fail with `reason_code: checkpoint_expired`
   - paginated pages include `attestation` (`page_hash`, `chain_hash`) to verify chain continuity
   - checkpoint mode adds a compact `checkpoint` chain anchor (`checkpoint_hash`)
 

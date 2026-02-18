@@ -71,6 +71,32 @@ function checkpointContextKey(context) {
   return JSON.stringify(context);
 }
 
+function checkpointRetentionDays() {
+  const raw = Number.parseInt(String(process.env.POLICY_AUDIT_EXPORT_CHECKPOINT_RETENTION_DAYS ?? ''), 10);
+  if (!Number.isFinite(raw) || raw < 1) return retentionDays();
+  return Math.min(raw, 3650);
+}
+
+function checkpointRetentionWindowMs() {
+  return checkpointRetentionDays() * 24 * 60 * 60 * 1000;
+}
+
+function isCheckpointExpired({ checkpointRecord, nowMs }) {
+  if (!checkpointRecord || typeof checkpointRecord !== 'object') return true;
+  const exportedAtMs = parseIsoMs(checkpointRecord.exported_at);
+  if (exportedAtMs === null) return true;
+  return nowMs > (exportedAtMs + checkpointRetentionWindowMs());
+}
+
+function pruneExpiredCheckpoints({ checkpointState, nowMs }) {
+  if (!checkpointState || typeof checkpointState !== 'object') return;
+  for (const [checkpointHash, checkpointRecord] of Object.entries(checkpointState)) {
+    if (isCheckpointExpired({ checkpointRecord, nowMs })) {
+      delete checkpointState[checkpointHash];
+    }
+  }
+}
+
 function requireUserScope({ actor, query, correlationId }) {
   if (actor?.type !== 'user') {
     return {
@@ -284,6 +310,17 @@ export class PolicyAuditReadService {
     const checkpointState = ensureCheckpointState(this.store);
     const checkpointContext = checkpointContextFromQuery({ query, subjectActorId: scoped.subjectActorId });
     const checkpointContextFingerprint = checkpointContextKey(checkpointContext);
+    const checkpointNowIso = nowIsoForRetention(query);
+    const checkpointNowMs = parseIsoMs(checkpointNowIso);
+
+    if (checkpointRequired && checkpointNowMs === null) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'invalid now_iso for checkpoint retention', {
+          now_iso: checkpointNowIso
+        })
+      };
+    }
 
     if (checkpointRequired && paged.cursorAfter && !checkpointAfter) {
       return {
@@ -323,6 +360,20 @@ export class PolicyAuditReadService {
           body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'checkpoint_after not found for export continuation', {
             reason_code: 'checkpoint_after_not_found',
             checkpoint_after: checkpointAfter
+          })
+        };
+      }
+
+      if (isCheckpointExpired({ checkpointRecord: priorCheckpoint, nowMs: checkpointNowMs })) {
+        delete checkpointState[checkpointAfter];
+        return {
+          ok: false,
+          body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'checkpoint_after expired for export continuation', {
+            reason_code: 'checkpoint_expired',
+            checkpoint_after: checkpointAfter,
+            exported_at: priorCheckpoint.exported_at ?? null,
+            now_iso: checkpointNowIso,
+            retention_days: checkpointRetentionDays()
           })
         };
       }
@@ -399,6 +450,8 @@ export class PolicyAuditReadService {
         query_context: checkpointContext,
         exported_at: signedPayload.exported_at
       };
+
+      pruneExpiredCheckpoints({ checkpointState, nowMs: checkpointNowMs });
     }
 
     return {

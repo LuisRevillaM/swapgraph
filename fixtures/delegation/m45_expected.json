@@ -1,0 +1,244 @@
+{
+  "final": {
+    "checkpoint_keys": [
+      "c5b3320a1dd4888207daddeb2699fd04c5f6bd66d80e5865e5ee0070e63bca96",
+      "fb687fd0c9846a2fbcf0999cf26d446429e4b4ac6d33ae23343a6d17d254550a"
+    ],
+    "checkpoint_records": [
+      {
+        "attestation_chain_hash": "5ed70c26af8c6aca19995dcae70a5ce0d57d32faaae5dbc768f67cc6aba7b85d",
+        "checkpoint_after": null,
+        "checkpoint_hash": "c5b3320a1dd4888207daddeb2699fd04c5f6bd66d80e5865e5ee0070e63bca96",
+        "exported_at": "2026-02-20T21:11:00Z",
+        "next_cursor": "pa_1"
+      },
+      {
+        "attestation_chain_hash": "f1c63b7d64ad03838263ff6e4079d9806c02968ecc7653c4dd42c599841f6c93",
+        "checkpoint_after": "c5b3320a1dd4888207daddeb2699fd04c5f6bd66d80e5865e5ee0070e63bca96",
+        "checkpoint_hash": "fb687fd0c9846a2fbcf0999cf26d446429e4b4ac6d33ae23343a6d17d254550a",
+        "exported_at": "2026-02-20T21:11:00Z",
+        "next_cursor": "pa_2"
+      }
+    ],
+    "fresh_checkpoint_hash": "c5b3320a1dd4888207daddeb2699fd04c5f6bd66d80e5865e5ee0070e63bca96",
+    "fresh_continuation_checkpoint_hash": "fb687fd0c9846a2fbcf0999cf26d446429e4b4ac6d33ae23343a6d17d254550a",
+    "has_fresh_checkpoint": true,
+    "has_fresh_continuation_checkpoint": true,
+    "has_old_checkpoint": false,
+    "has_old_continuation_checkpoint": false,
+    "old_checkpoint_hash": "d0805e76bef34346f5841163910cd19d8f3b1e09566dd877feb1dcb188ab8b19",
+    "old_continuation_checkpoint_hash": "f33f072f69fc091e893a77a260754e089284e0904493c58f4a38a66c0b11baee",
+    "policy_audit_count": 4,
+    "policy_audit_reason_codes": [
+      "ok",
+      "ok",
+      "ok",
+      "ok"
+    ]
+  },
+  "operations": [
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "delegation_id": "del_m45_u1_agent1",
+      "error_code": null,
+      "ok": true,
+      "op": "delegations.create",
+      "replayed": false
+    },
+    {
+      "active_key_id": "dev-pi-k1",
+      "key_statuses": {
+        "dev-pi-k1": "active",
+        "dev-pi-k2": "verify_only"
+      },
+      "keys_count": 2,
+      "ok": true,
+      "op": "keys.policy_integrity_signing.get"
+    },
+    {
+      "error_code": null,
+      "intent_id": "intent_m45_i1",
+      "ok": true,
+      "op": "swapIntents.create.via_token",
+      "parse_ok": true,
+      "reason_code": null,
+      "replayed": false
+    },
+    {
+      "error_code": null,
+      "intent_id": "intent_m45_i2",
+      "ok": true,
+      "op": "swapIntents.create.via_token",
+      "parse_ok": true,
+      "reason_code": null,
+      "replayed": false
+    },
+    {
+      "error_code": null,
+      "intent_id": "intent_m45_i3",
+      "ok": true,
+      "op": "swapIntents.create.via_token",
+      "parse_ok": true,
+      "reason_code": null,
+      "replayed": false
+    },
+    {
+      "error_code": null,
+      "intent_id": "intent_m45_i4",
+      "ok": true,
+      "op": "swapIntents.create.via_token",
+      "parse_ok": true,
+      "reason_code": null,
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "attestation_after": null,
+      "attestation_chain_hash": "60225ddfc401e9597c48d13ae109c702a346931951020d7b22d3372f70c98b3f",
+      "attestation_chain_ok": null,
+      "checkpoint_after": null,
+      "checkpoint_chain_ok": null,
+      "checkpoint_hash": "d0805e76bef34346f5841163910cd19d8f3b1e09566dd877feb1dcb188ab8b19",
+      "entries_count": 2,
+      "error_code": null,
+      "export_hash": "afb346f71cd92caec64eb3235d648bfe1356e2f8a258f93d4b60cf7e1ff8a188",
+      "next_cursor": "pa_2",
+      "ok": true,
+      "op": "policyAudit.export",
+      "reason_code": null,
+      "reason_codes": [
+        "ok",
+        "ok"
+      ],
+      "signature_key_id": "dev-pi-k1",
+      "total_filtered": 4,
+      "verify_error": null,
+      "verify_ok": true,
+      "verify_public_error": null,
+      "verify_public_ok": true
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "attestation_after": "60225ddfc401e9597c48d13ae109c702a346931951020d7b22d3372f70c98b3f",
+      "attestation_chain_hash": "00716514b811d0152a6015b3d5b111b24c9d539448ba861cc72528d75945ef8f",
+      "attestation_chain_ok": true,
+      "checkpoint_after": "d0805e76bef34346f5841163910cd19d8f3b1e09566dd877feb1dcb188ab8b19",
+      "checkpoint_chain_ok": true,
+      "checkpoint_hash": "f33f072f69fc091e893a77a260754e089284e0904493c58f4a38a66c0b11baee",
+      "entries_count": 2,
+      "error_code": null,
+      "export_hash": "ff64d7fc238b2453039129a17774ce171874cb850ac9742509b3a6f141fced68",
+      "next_cursor": null,
+      "ok": true,
+      "op": "policyAudit.export",
+      "reason_code": null,
+      "reason_codes": [
+        "ok",
+        "ok"
+      ],
+      "signature_key_id": "dev-pi-k1",
+      "total_filtered": 2,
+      "verify_error": null,
+      "verify_ok": true,
+      "verify_public_error": null,
+      "verify_public_ok": true
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "attestation_after": null,
+      "attestation_chain_hash": null,
+      "attestation_chain_ok": null,
+      "checkpoint_after": null,
+      "checkpoint_chain_ok": null,
+      "checkpoint_hash": null,
+      "entries_count": null,
+      "error_code": "CONSTRAINT_VIOLATION",
+      "export_hash": null,
+      "next_cursor": null,
+      "ok": false,
+      "op": "policyAudit.export",
+      "reason_code": "checkpoint_expired",
+      "reason_codes": null,
+      "signature_key_id": null,
+      "total_filtered": null,
+      "verify_error": null,
+      "verify_ok": null,
+      "verify_public_error": null,
+      "verify_public_ok": null
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "attestation_after": null,
+      "attestation_chain_hash": "5ed70c26af8c6aca19995dcae70a5ce0d57d32faaae5dbc768f67cc6aba7b85d",
+      "attestation_chain_ok": null,
+      "checkpoint_after": null,
+      "checkpoint_chain_ok": null,
+      "checkpoint_hash": "c5b3320a1dd4888207daddeb2699fd04c5f6bd66d80e5865e5ee0070e63bca96",
+      "entries_count": 1,
+      "error_code": null,
+      "export_hash": "6b3b58da7c72840322aa40bd8439edb74f5aa6a3570029535495b90e6a3f67a2",
+      "next_cursor": "pa_1",
+      "ok": true,
+      "op": "policyAudit.export",
+      "reason_code": null,
+      "reason_codes": [
+        "ok"
+      ],
+      "signature_key_id": "dev-pi-k1",
+      "total_filtered": 4,
+      "verify_error": null,
+      "verify_ok": true,
+      "verify_public_error": null,
+      "verify_public_ok": true
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "attestation_after": "5ed70c26af8c6aca19995dcae70a5ce0d57d32faaae5dbc768f67cc6aba7b85d",
+      "attestation_chain_hash": "f1c63b7d64ad03838263ff6e4079d9806c02968ecc7653c4dd42c599841f6c93",
+      "attestation_chain_ok": true,
+      "checkpoint_after": "c5b3320a1dd4888207daddeb2699fd04c5f6bd66d80e5865e5ee0070e63bca96",
+      "checkpoint_chain_ok": true,
+      "checkpoint_hash": "fb687fd0c9846a2fbcf0999cf26d446429e4b4ac6d33ae23343a6d17d254550a",
+      "entries_count": 1,
+      "error_code": null,
+      "export_hash": "a691d407872d6ac182e6608fdf20e6237bbc51ee35014b44a39b470516563d9c",
+      "next_cursor": "pa_2",
+      "ok": true,
+      "op": "policyAudit.export",
+      "reason_code": null,
+      "reason_codes": [
+        "ok"
+      ],
+      "signature_key_id": "dev-pi-k1",
+      "total_filtered": 3,
+      "verify_error": null,
+      "verify_ok": true,
+      "verify_public_error": null,
+      "verify_public_ok": true
+    },
+    {
+      "export_ref": "export_fresh_page_2",
+      "op": "policyAudit.export.verify_tampered_checkpoint",
+      "verify_error": "checkpoint_hash_mismatch",
+      "verify_ok": false
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+name: M45
+commands:
+  - cmd: "npm run verify:m45"
+artifacts:
+  - artifact: "docs/prd/M45.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/AUTH.md"
+  - artifact: "docs/spec/GAPS.md"
+  - artifact: "docs/spec/ERRORS.md"
+
+  - artifact: "src/read/policyAuditReadService.mjs"
+  - artifact: "src/store/jsonStateStore.mjs"
+
+  - artifact: "scripts/run-m45-export-checkpoint-retention-scenario.mjs"
+  - artifact: "fixtures/delegation/m45_scenario.json"
+  - artifact: "fixtures/delegation/m45_expected.json"
+
+  - artifact: "verify/m45.sh"
+
+  - artifact: "artifacts/milestones/M45/latest/commands.log"
+  - artifact: "artifacts/milestones/M45/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M45/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M45/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M45/latest/export_checkpoint_retention_output.json"
+  - artifact: "artifacts/milestones/M45/latest/store.json"
+  - artifact: "artifacts/milestones/M45/latest/assertions.json"

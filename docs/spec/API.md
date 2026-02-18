@@ -81,6 +81,7 @@ Delegated-policy audit endpoints:
   - paginated continuation requires `attestation_after` to chain from the previous page attestation
   - when export-checkpoint mode is enabled, continuation also requires `checkpoint_after` (previous page checkpoint hash)
   - checkpoint continuation is statefully validated (checkpoint exists, cursor/attestation match, and filter context is unchanged)
+  - checkpoint anchors have retention controls (`POLICY_AUDIT_EXPORT_CHECKPOINT_RETENTION_DAYS`) and expired anchors are rejected
   - response includes `export_hash` + detached `signature`
   - paginated responses include `next_cursor` + signed `attestation` (`page_hash`, `chain_hash`) for continuity verification
   - checkpoint mode adds `checkpoint` (`checkpoint_hash`) for chain compaction anchors

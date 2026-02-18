@@ -33,3 +33,9 @@ Notes:
 ## Notes
 - Keep messages safe (no secrets).
 - `details` must be machine-readable.
+- Delegated policy-audit export continuation may include deterministic `details.reason_code` values such as:
+  - `checkpoint_after_not_found`
+  - `checkpoint_cursor_mismatch`
+  - `checkpoint_attestation_mismatch`
+  - `checkpoint_query_mismatch`
+  - `checkpoint_expired`
