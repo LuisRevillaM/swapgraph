@@ -1,0 +1,183 @@
+{
+  "final": {
+    "intents": [
+      {
+        "actor": {
+          "id": "u1",
+          "type": "user"
+        },
+        "id": "intent_agent_u1_ok",
+        "max_usd": 80,
+        "status": "active"
+      },
+      {
+        "actor": {
+          "id": "u2",
+          "type": "user"
+        },
+        "id": "intent_u2_seed",
+        "max_usd": 10,
+        "status": "active"
+      }
+    ]
+  },
+  "operations": [
+    {
+      "actor": {
+        "id": "agent_1",
+        "type": "agent"
+      },
+      "auth": {
+        "scopes": [
+          "swap_intents:read"
+        ]
+      },
+      "error_code": "FORBIDDEN",
+      "ok": false,
+      "op": "swapIntents.list"
+    },
+    {
+      "actor": {
+        "id": "agent_1",
+        "type": "agent"
+      },
+      "auth": {
+        "delegation_id": "del_u1_ro",
+        "scopes": [
+          "swap_intents:read"
+        ]
+      },
+      "error_code": null,
+      "intent_ids": [],
+      "intents_count": 0,
+      "ok": true,
+      "op": "swapIntents.list"
+    },
+    {
+      "actor": {
+        "id": "agent_1",
+        "type": "agent"
+      },
+      "auth": {
+        "delegation_id": "del_u1_ro",
+        "scopes": [
+          "swap_intents:read"
+        ]
+      },
+      "error_code": "INSUFFICIENT_SCOPE",
+      "intent_id": "intent_agent_u1_ro",
+      "ok": false,
+      "op": "swapIntents.create",
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "agent_1",
+        "type": "agent"
+      },
+      "auth": {
+        "delegation_id": "del_u1_rw",
+        "scopes": [
+          "swap_intents:read",
+          "swap_intents:write"
+        ]
+      },
+      "error_code": "FORBIDDEN",
+      "intent_id": "intent_agent_u2_bad",
+      "ok": false,
+      "op": "swapIntents.create",
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "agent_1",
+        "type": "agent"
+      },
+      "auth": {
+        "delegation_id": "del_u1_rw",
+        "scopes": [
+          "swap_intents:read",
+          "swap_intents:write"
+        ]
+      },
+      "error_code": "FORBIDDEN",
+      "intent_id": "intent_agent_u1_policy_violate",
+      "ok": false,
+      "op": "swapIntents.create",
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "agent_1",
+        "type": "agent"
+      },
+      "auth": {
+        "delegation_id": "del_u1_rw",
+        "scopes": [
+          "swap_intents:read",
+          "swap_intents:write"
+        ]
+      },
+      "error_code": null,
+      "intent_id": "intent_agent_u1_ok",
+      "ok": true,
+      "op": "swapIntents.create",
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "agent_1",
+        "type": "agent"
+      },
+      "auth": {
+        "delegation_id": "del_u1_rw",
+        "scopes": [
+          "swap_intents:read",
+          "swap_intents:write"
+        ]
+      },
+      "error_code": null,
+      "intent_ids": [
+        "intent_agent_u1_ok"
+      ],
+      "intents_count": 1,
+      "ok": true,
+      "op": "swapIntents.list"
+    },
+    {
+      "actor": {
+        "id": "agent_1",
+        "type": "agent"
+      },
+      "auth": {
+        "delegation_id": "del_u1_rw",
+        "scopes": [
+          "swap_intents:read",
+          "swap_intents:write"
+        ]
+      },
+      "error_code": null,
+      "id": "intent_agent_u1_ok",
+      "ok": true,
+      "op": "swapIntents.get",
+      "returned_intent_id": "intent_agent_u1_ok"
+    },
+    {
+      "actor": {
+        "id": "agent_1",
+        "type": "agent"
+      },
+      "auth": {
+        "delegation_id": "del_u1_rw",
+        "scopes": [
+          "swap_intents:read",
+          "swap_intents:write"
+        ]
+      },
+      "error_code": "FORBIDDEN",
+      "id": "intent_u2_seed",
+      "ok": false,
+      "op": "swapIntents.get"
+    }
+  ]
+}

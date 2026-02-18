@@ -5,6 +5,56 @@ function actorKey(actor) {
   return `${actor.type}:${actor.id}`;
 }
 
+function effectiveActor({ actor, auth }) {
+  if (actor?.type === 'agent') {
+    return auth?.delegation?.subject_actor ?? null;
+  }
+  return actor;
+}
+
+function policyForActor({ actor, auth }) {
+  if (actor?.type === 'agent') {
+    return auth?.delegation?.policy ?? null;
+  }
+  return null;
+}
+
+function enforceTradingPolicyForIntent({ policy, intent }) {
+  if (!policy) {
+    return { ok: false, code: 'FORBIDDEN', message: 'delegation policy is required', details: { policy: null } };
+  }
+
+  const violations = [];
+
+  const maxUsd = intent?.value_band?.max_usd;
+  if (Number.isFinite(policy.max_value_per_swap_usd) && Number.isFinite(maxUsd) && maxUsd > policy.max_value_per_swap_usd) {
+    violations.push({ field: 'value_band.max_usd', max_allowed: policy.max_value_per_swap_usd, actual: maxUsd });
+  }
+
+  const maxCycle = intent?.trust_constraints?.max_cycle_length;
+  if (Number.isFinite(policy.max_cycle_length) && Number.isFinite(maxCycle) && maxCycle > policy.max_cycle_length) {
+    violations.push({ field: 'trust_constraints.max_cycle_length', max_allowed: policy.max_cycle_length, actual: maxCycle });
+  }
+
+  if (typeof policy.require_escrow === 'boolean') {
+    const reqEscrow = intent?.settlement_preferences?.require_escrow;
+    if (typeof reqEscrow === 'boolean' && reqEscrow !== policy.require_escrow) {
+      violations.push({ field: 'settlement_preferences.require_escrow', required: policy.require_escrow, actual: reqEscrow });
+    }
+  }
+
+  if (violations.length > 0) {
+    return {
+      ok: false,
+      code: 'FORBIDDEN',
+      message: 'delegation policy violation',
+      details: { violations }
+    };
+  }
+
+  return { ok: true };
+}
+
 function errorResponse(correlationId, code, message, details = {}) {
   return {
     correlation_id: correlationId,
@@ -81,6 +131,46 @@ export class SwapIntentsService {
       };
     }
 
+    const eff = effectiveActor({ actor, auth }) ?? actor;
+    if (actor?.type === 'agent' && !eff) {
+      return {
+        replayed: false,
+        result: {
+          ok: false,
+          body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation subject', { actor })
+        }
+      };
+    }
+
+    const intent = requestBody?.intent;
+    if (actor?.type === 'agent') {
+      if (actorKey(intent?.actor) !== actorKey(eff)) {
+        return {
+          replayed: false,
+          result: {
+            ok: false,
+            body: errorResponse(correlationId, 'FORBIDDEN', 'agent cannot act for this actor', {
+              actor,
+              subject_actor: eff,
+              intent_actor: intent?.actor ?? null
+            })
+          }
+        };
+      }
+
+      const policy = policyForActor({ actor, auth });
+      const pol = enforceTradingPolicyForIntent({ policy, intent });
+      if (!pol.ok) {
+        return {
+          replayed: false,
+          result: {
+            ok: false,
+            body: errorResponse(correlationId, pol.code, pol.message, pol.details)
+          }
+        };
+      }
+    }
+
     return this._withIdempotency({
       actor,
       operationId: 'swapIntents.create',
@@ -88,7 +178,6 @@ export class SwapIntentsService {
       requestBody,
       correlationId,
       handler: () => {
-        const intent = requestBody.intent;
         const stored = { ...intent, status: intent.status ?? 'active' };
         this.store.state.intents[intent.id] = stored;
         return { ok: true, body: { correlation_id: correlationIdForIntentId(stored.id), intent: stored } };
@@ -110,6 +199,61 @@ export class SwapIntentsService {
       };
     }
 
+    const eff = effectiveActor({ actor, auth }) ?? actor;
+    if (actor?.type === 'agent' && !eff) {
+      return {
+        replayed: false,
+        result: {
+          ok: false,
+          body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation subject', { actor })
+        }
+      };
+    }
+
+    const intent = requestBody?.intent;
+    if (actor?.type === 'agent') {
+      if (actorKey(intent?.actor) !== actorKey(eff)) {
+        return {
+          replayed: false,
+          result: {
+            ok: false,
+            body: errorResponse(correlationId, 'FORBIDDEN', 'agent cannot act for this actor', {
+              actor,
+              subject_actor: eff,
+              intent_actor: intent?.actor ?? null
+            })
+          }
+        };
+      }
+
+      const policy = policyForActor({ actor, auth });
+      const pol = enforceTradingPolicyForIntent({ policy, intent });
+      if (!pol.ok) {
+        return {
+          replayed: false,
+          result: {
+            ok: false,
+            body: errorResponse(correlationId, pol.code, pol.message, pol.details)
+          }
+        };
+      }
+
+      const existing = this.store.state.intents[id];
+      if (existing && actorKey(existing.actor) !== actorKey(eff)) {
+        return {
+          replayed: false,
+          result: {
+            ok: false,
+            body: errorResponse(correlationId, 'FORBIDDEN', 'agent cannot modify this intent', {
+              actor,
+              subject_actor: eff,
+              intent_actor: existing.actor
+            })
+          }
+        };
+      }
+    }
+
     return this._withIdempotency({
       actor,
       operationId: 'swapIntents.update',
@@ -117,7 +261,6 @@ export class SwapIntentsService {
       requestBody,
       correlationId,
       handler: () => {
-        const intent = requestBody.intent;
         if (intent.id !== id) {
           return { ok: false, body: errorResponse(correlationIdForIntentId(id), 'CONSTRAINT_VIOLATION', 'intent.id must match path id', { id, intent_id: intent.id }) };
         }
@@ -144,6 +287,17 @@ export class SwapIntentsService {
       };
     }
 
+    const eff = effectiveActor({ actor, auth }) ?? actor;
+    if (actor?.type === 'agent' && !eff) {
+      return {
+        replayed: false,
+        result: {
+          ok: false,
+          body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation subject', { actor })
+        }
+      };
+    }
+
     return this._withIdempotency({
       actor,
       operationId: 'swapIntents.cancel',
@@ -156,6 +310,18 @@ export class SwapIntentsService {
         if (!prev) {
           return { ok: false, body: errorResponse(correlationIdForIntentId(id), 'NOT_FOUND', 'intent not found', { id }) };
         }
+
+        if (actor?.type === 'agent' && actorKey(prev.actor) !== actorKey(eff)) {
+          return {
+            ok: false,
+            body: errorResponse(correlationIdForIntentId(id), 'FORBIDDEN', 'agent cannot cancel this intent', {
+              actor,
+              subject_actor: eff,
+              intent_actor: prev.actor
+            })
+          };
+        }
+
         this.store.state.intents[id] = { ...prev, status: 'cancelled' };
         return { ok: true, body: { correlation_id: correlationIdForIntentId(id), id, status: 'cancelled' } };
       }
@@ -170,10 +336,15 @@ export class SwapIntentsService {
       return { ok: false, body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details) };
     }
 
-    // v1: actor must match intent.actor.
+    const eff = effectiveActor({ actor, auth }) ?? actor;
+    if (actor?.type === 'agent' && !eff) {
+      return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation subject', { actor }) };
+    }
+
+    // v1: actor must match intent.actor (agent matches via delegation subject).
     const intent = this.store.state.intents[id];
     if (!intent) return { ok: false, body: errorResponse(correlationId, 'NOT_FOUND', 'intent not found', { id }) };
-    if (actorKey(intent.actor) !== actorKey(actor)) {
+    if (actorKey(intent.actor) !== actorKey(eff)) {
       return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'actor cannot access this intent', { id }) };
     }
     return { ok: true, body: { correlation_id: correlationId, intent } };
@@ -187,7 +358,12 @@ export class SwapIntentsService {
       return { ok: false, body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details) };
     }
 
-    const intents = Object.values(this.store.state.intents).filter(i => actorKey(i.actor) === actorKey(actor));
+    const eff = effectiveActor({ actor, auth }) ?? actor;
+    if (actor?.type === 'agent' && !eff) {
+      return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation subject', { actor }) };
+    }
+
+    const intents = Object.values(this.store.state.intents).filter(i => actorKey(i.actor) === actorKey(eff));
     return { ok: true, body: { correlation_id: correlationId, intents } };
   }
 }

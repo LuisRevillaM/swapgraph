@@ -42,9 +42,10 @@ Last updated: 2026-02-18
 - M29: ✅ webhook/event signing (Ed25519) + event signing keys contract + verifier
 - M30: ✅ auth scopes contract + webhook ingestion hardening (signature verify + persistent dedupe proof)
 - M31: ✅ scope enforcement in services (+ INSUFFICIENT_SCOPE proofs; behind AUTHZ_ENFORCE=1)
+- M32: ✅ agent delegation grants + TradingPolicy enforcement (SwapIntents; behind AUTHZ_ENFORCE=1)
 
 ## Next
-- M32: agent delegation tokens + TradingPolicy enforcement (TBD)
+- M33: delegation lifecycle (expiry/revocation) + agent read access expansion (TBD)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.

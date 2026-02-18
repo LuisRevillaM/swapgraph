@@ -1,0 +1,175 @@
+{
+  "actors": {
+    "agent_1": { "type": "agent", "id": "agent_1" },
+    "user_u1": { "type": "user", "id": "u1" },
+    "user_u2": { "type": "user", "id": "u2" }
+  },
+  "delegations": {
+    "u1_ro": {
+      "delegation_id": "del_u1_ro",
+      "principal_agent": { "type": "agent", "id": "agent_1" },
+      "subject_actor": { "type": "user", "id": "u1" },
+      "scopes": ["swap_intents:read"],
+      "policy": {
+        "max_value_per_swap_usd": 100,
+        "min_confidence_score": 0.8,
+        "max_cycle_length": 3,
+        "require_escrow": true
+      },
+      "issued_at": "2026-02-16T00:00:00Z",
+      "expires_at": "2026-03-01T00:00:00Z"
+    },
+    "u1_rw": {
+      "delegation_id": "del_u1_rw",
+      "principal_agent": { "type": "agent", "id": "agent_1" },
+      "subject_actor": { "type": "user", "id": "u1" },
+      "scopes": ["swap_intents:read", "swap_intents:write"],
+      "policy": {
+        "max_value_per_swap_usd": 100,
+        "min_confidence_score": 0.8,
+        "max_cycle_length": 3,
+        "require_escrow": true
+      },
+      "issued_at": "2026-02-16T00:00:00Z",
+      "expires_at": "2026-03-01T00:00:00Z"
+    }
+  },
+  "seed_intents": [
+    {
+      "id": "intent_u2_seed",
+      "actor": { "type": "user", "id": "u2" },
+      "offer": [{ "platform": "steam", "asset_id": "assetB" }],
+      "want_spec": { "type": "set", "any_of": [{ "type": "specific_asset", "platform": "steam", "asset_key": "steam:assetA" }] },
+      "value_band": { "min_usd": 10, "max_usd": 10, "pricing_source": "fixture" },
+      "trust_constraints": { "max_cycle_length": 3, "min_counterparty_reliability": 0 },
+      "time_constraints": { "expires_at": "2026-03-01T00:00:00Z", "urgency": "normal" },
+      "settlement_preferences": { "require_escrow": true }
+    }
+  ],
+  "ops": [
+    {
+      "op": "swapIntents.list",
+      "actor_ref": "agent_1",
+      "auth": { "scopes": ["swap_intents:read"] },
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN"
+    },
+
+    {
+      "op": "swapIntents.list",
+      "actor_ref": "agent_1",
+      "auth": { "delegation_ref": "u1_ro" },
+      "expect_ok": true,
+      "expect_intents_count": 0
+    },
+
+    {
+      "op": "swapIntents.create",
+      "actor_ref": "agent_1",
+      "auth": { "delegation_ref": "u1_ro" },
+      "idempotency_key": "k_ro_create",
+      "request": {
+        "intent": {
+          "id": "intent_agent_u1_ro",
+          "actor": { "type": "user", "id": "u1" },
+          "offer": [{ "platform": "steam", "asset_id": "assetA" }],
+          "want_spec": { "type": "set", "any_of": [{ "type": "specific_asset", "platform": "steam", "asset_key": "steam:assetB" }] },
+          "value_band": { "min_usd": 10, "max_usd": 50, "pricing_source": "fixture" },
+          "trust_constraints": { "max_cycle_length": 3, "min_counterparty_reliability": 0 },
+          "time_constraints": { "expires_at": "2026-03-01T00:00:00Z", "urgency": "normal" },
+          "settlement_preferences": { "require_escrow": true }
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    },
+
+    {
+      "op": "swapIntents.create",
+      "actor_ref": "agent_1",
+      "auth": { "delegation_ref": "u1_rw" },
+      "idempotency_key": "k_subject_mismatch",
+      "request": {
+        "intent": {
+          "id": "intent_agent_u2_bad",
+          "actor": { "type": "user", "id": "u2" },
+          "offer": [{ "platform": "steam", "asset_id": "assetB" }],
+          "want_spec": { "type": "set", "any_of": [{ "type": "specific_asset", "platform": "steam", "asset_key": "steam:assetC" }] },
+          "value_band": { "min_usd": 10, "max_usd": 20, "pricing_source": "fixture" },
+          "trust_constraints": { "max_cycle_length": 3, "min_counterparty_reliability": 0 },
+          "time_constraints": { "expires_at": "2026-03-01T00:00:00Z", "urgency": "normal" },
+          "settlement_preferences": { "require_escrow": true }
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN"
+    },
+
+    {
+      "op": "swapIntents.create",
+      "actor_ref": "agent_1",
+      "auth": { "delegation_ref": "u1_rw" },
+      "idempotency_key": "k_policy_violation",
+      "request": {
+        "intent": {
+          "id": "intent_agent_u1_policy_violate",
+          "actor": { "type": "user", "id": "u1" },
+          "offer": [{ "platform": "steam", "asset_id": "assetA" }],
+          "want_spec": { "type": "set", "any_of": [{ "type": "specific_asset", "platform": "steam", "asset_key": "steam:assetB" }] },
+          "value_band": { "min_usd": 10, "max_usd": 200, "pricing_source": "fixture" },
+          "trust_constraints": { "max_cycle_length": 3, "min_counterparty_reliability": 0 },
+          "time_constraints": { "expires_at": "2026-03-01T00:00:00Z", "urgency": "normal" },
+          "settlement_preferences": { "require_escrow": true }
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN"
+    },
+
+    {
+      "op": "swapIntents.create",
+      "actor_ref": "agent_1",
+      "auth": { "delegation_ref": "u1_rw" },
+      "idempotency_key": "k_ok",
+      "request": {
+        "intent": {
+          "id": "intent_agent_u1_ok",
+          "actor": { "type": "user", "id": "u1" },
+          "offer": [{ "platform": "steam", "asset_id": "assetA" }],
+          "want_spec": { "type": "set", "any_of": [{ "type": "specific_asset", "platform": "steam", "asset_key": "steam:assetB" }] },
+          "value_band": { "min_usd": 10, "max_usd": 80, "pricing_source": "fixture" },
+          "trust_constraints": { "max_cycle_length": 3, "min_counterparty_reliability": 0 },
+          "time_constraints": { "expires_at": "2026-03-01T00:00:00Z", "urgency": "normal" },
+          "settlement_preferences": { "require_escrow": true }
+        }
+      },
+      "expect_ok": true
+    },
+
+    {
+      "op": "swapIntents.list",
+      "actor_ref": "agent_1",
+      "auth": { "delegation_ref": "u1_rw" },
+      "expect_ok": true,
+      "expect_intents_count": 1,
+      "expect_intent_ids": ["intent_agent_u1_ok"]
+    },
+
+    {
+      "op": "swapIntents.get",
+      "actor_ref": "agent_1",
+      "auth": { "delegation_ref": "u1_rw" },
+      "path": { "id": "intent_agent_u1_ok" },
+      "expect_ok": true
+    },
+
+    {
+      "op": "swapIntents.get",
+      "actor_ref": "agent_1",
+      "auth": { "delegation_ref": "u1_rw" },
+      "path": { "id": "intent_u2_seed" },
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN"
+    }
+  ]
+}

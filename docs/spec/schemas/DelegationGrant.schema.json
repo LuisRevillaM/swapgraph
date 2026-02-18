@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/DelegationGrant.schema.json",
+  "title": "DelegationGrant",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "delegation_id",
+    "principal_agent",
+    "subject_actor",
+    "scopes",
+    "policy",
+    "issued_at",
+    "expires_at"
+  ],
+  "properties": {
+    "delegation_id": { "type": "string", "minLength": 1 },
+
+    "principal_agent": {
+      "allOf": [
+        { "$ref": "ActorRef.schema.json" },
+        {
+          "type": "object",
+          "required": ["type"],
+          "properties": { "type": { "const": "agent" } }
+        }
+      ]
+    },
+
+    "subject_actor": {
+      "allOf": [
+        { "$ref": "ActorRef.schema.json" },
+        {
+          "type": "object",
+          "required": ["type"],
+          "properties": { "type": { "const": "user" } }
+        }
+      ]
+    },
+
+    "scopes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+
+    "policy": { "$ref": "TradingPolicy.schema.json" },
+
+    "issued_at": { "type": "string", "format": "date-time" },
+    "expires_at": { "type": "string", "format": "date-time" }
+  }
+}

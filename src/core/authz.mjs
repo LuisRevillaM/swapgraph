@@ -104,8 +104,48 @@ export function authorizeApiOperation({ operationId, actor, auth }) {
     }
   }
 
+  const delegation = auth?.delegation ?? null;
+
+  // Agent actor type implies delegation in v1.
+  if (actor.type === 'agent') {
+    if (!delegation) {
+      return {
+        ok: false,
+        error: {
+          code: 'FORBIDDEN',
+          message: 'agent access requires delegation',
+          details: { operation_id: operationId, actor }
+        }
+      };
+    }
+
+    const principal = delegation?.principal_agent ?? null;
+    if (principal?.type !== 'agent' || principal?.id !== actor.id) {
+      return {
+        ok: false,
+        error: {
+          code: 'FORBIDDEN',
+          message: 'delegation principal mismatch',
+          details: { operation_id: operationId, actor, principal_agent: principal }
+        }
+      };
+    }
+
+    const subject = delegation?.subject_actor ?? null;
+    if (subject?.type !== 'user' || !subject?.id) {
+      return {
+        ok: false,
+        error: {
+          code: 'FORBIDDEN',
+          message: 'delegation subject must be a user',
+          details: { operation_id: operationId, actor, subject_actor: subject }
+        }
+      };
+    }
+  }
+
   const requiredScopes = sortedUniqueStrings(opAuth.required_scopes ?? []);
-  const providedScopes = sortedUniqueStrings(auth?.scopes ?? []);
+  const providedScopes = sortedUniqueStrings(auth?.scopes ?? delegation?.scopes ?? []);
 
   // If the endpoint requires auth and declares scopes, enforce them.
   if (requiredScopes.length > 0) {
