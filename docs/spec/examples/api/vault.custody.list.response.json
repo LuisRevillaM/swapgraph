@@ -1,0 +1,13 @@
+{
+  "correlation_id": "corr_vault.custody.list_p1",
+  "snapshots": [
+    {
+      "snapshot_id": "cust_snap_001",
+      "recorded_at": "2026-02-18T23:00:00Z",
+      "leaf_count": 1,
+      "root_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "next_cursor": "cust_snap_001",
+  "total": 2
+}

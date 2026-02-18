@@ -59,9 +59,10 @@ Last updated: 2026-02-18
 - M46: ✅ proof-of-custody primitives (custody snapshot + Merkle inclusion proof verifier) (fixtures-first)
 - M47: ✅ vault deposit/withdraw lifecycle contract scaffold + deterministic state-transition verifier (fixtures-first)
 - M48: ✅ vault publication/read contract scaffold (snapshot catalog pagination + inclusion proof retrieval) (fixtures-first)
+- M49: ✅ vault API auth/scope transport surface wiring (manifest endpoints + `vault:*` scopes + service-level manifest auth enforcement + deterministic auth verifier) (fixtures-first)
 
 ## Next
-- M49: custody publication API transport contract wiring + auth/scope surface (fixtures-first)
+- M50: vault/settlement pipeline integration contract (fixtures-first)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.

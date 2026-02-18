@@ -405,6 +405,173 @@
     },
     {
       "method": "POST",
+      "path": "/vault/holdings/deposit",
+      "operation_id": "vault.deposit",
+      "idempotency_required": true,
+      "request_schema": "VaultDepositRequest.schema.json",
+      "response_schema": "VaultHoldingMutationResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user"
+        ],
+        "required_scopes": [
+          "vault:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/vault/holdings/{holding_id}/reserve",
+      "operation_id": "vault.reserve",
+      "idempotency_required": true,
+      "request_schema": "VaultReservationRequest.schema.json",
+      "response_schema": "VaultHoldingMutationResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "vault:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/vault/holdings/{holding_id}/release",
+      "operation_id": "vault.release",
+      "idempotency_required": true,
+      "request_schema": "VaultReservationRequest.schema.json",
+      "response_schema": "VaultHoldingMutationResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "vault:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/vault/holdings/{holding_id}/withdraw",
+      "operation_id": "vault.withdraw",
+      "idempotency_required": true,
+      "request_schema": "VaultWithdrawRequest.schema.json",
+      "response_schema": "VaultHoldingMutationResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user"
+        ],
+        "required_scopes": [
+          "vault:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/vault/holdings/{holding_id}",
+      "operation_id": "vault.get",
+      "idempotency_required": false,
+      "response_schema": "VaultHoldingGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "vault:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/vault/holdings",
+      "operation_id": "vault.list",
+      "idempotency_required": false,
+      "response_schema": "VaultHoldingListResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "vault:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/vault/custody/snapshots",
+      "operation_id": "vault.custody.publish",
+      "idempotency_required": true,
+      "request_schema": "VaultCustodyPublishRequest.schema.json",
+      "response_schema": "VaultCustodyPublishResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "vault:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/vault/custody/snapshots",
+      "operation_id": "vault.custody.list",
+      "idempotency_required": false,
+      "response_schema": "VaultCustodySnapshotListResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "vault:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/vault/custody/snapshots/{snapshot_id}",
+      "operation_id": "vault.custody.get",
+      "idempotency_required": false,
+      "response_schema": "VaultCustodySnapshotGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "vault:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/vault/custody/snapshots/{snapshot_id}/holdings/{holding_id}/proof",
+      "operation_id": "vault.custody.proof",
+      "idempotency_required": false,
+      "response_schema": "VaultCustodyInclusionProofGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "vault:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/auth/delegation-token/introspect",
       "operation_id": "auth.delegation_token.introspect",
       "idempotency_required": false,

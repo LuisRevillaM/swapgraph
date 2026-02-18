@@ -1,4 +1,5 @@
 import { idempotencyScopeKey, payloadHash } from '../core/idempotency.mjs';
+import { authorizeApiOperation } from '../core/authz.mjs';
 
 function errorResponse(correlationId, code, message, details = {}) {
   return {
@@ -27,6 +28,16 @@ function ensureVaultState(store) {
   store.state.idempotency ||= {};
   store.state.vault_holdings ||= {};
   store.state.vault_events ||= [];
+}
+
+function authorizeOrError({ store, operationId, actor, auth, correlationId }) {
+  const authz = authorizeApiOperation({ operationId, actor, auth, store });
+  if (authz.ok) return null;
+
+  return {
+    ok: false,
+    body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details)
+  };
 }
 
 function appendVaultEvent(store, {
@@ -116,9 +127,23 @@ export class VaultLifecycleService {
     return { replayed: false, result };
   }
 
-  deposit({ actor, idempotencyKey, requestBody, nowIso }) {
+  deposit({ actor, auth, idempotencyKey, requestBody, nowIso }) {
     const holdingId = requestBody?.holding?.holding_id ?? requestBody?.holding_id ?? 'unknown';
     const corr = correlationId('vault.deposit', holdingId);
+
+    const authFailure = authorizeOrError({
+      store: this.store,
+      operationId: 'vault.deposit',
+      actor,
+      auth,
+      correlationId: corr
+    });
+    if (authFailure) {
+      return {
+        replayed: false,
+        result: authFailure
+      };
+    }
 
     if (actor?.type !== 'user') {
       return {
@@ -199,9 +224,23 @@ export class VaultLifecycleService {
     });
   }
 
-  reserve({ actor, idempotencyKey, requestBody, nowIso }) {
+  reserve({ actor, auth, idempotencyKey, requestBody, nowIso }) {
     const holdingId = requestBody?.holding_id ?? 'unknown';
     const corr = correlationId('vault.reserve', holdingId);
+
+    const authFailure = authorizeOrError({
+      store: this.store,
+      operationId: 'vault.reserve',
+      actor,
+      auth,
+      correlationId: corr
+    });
+    if (authFailure) {
+      return {
+        replayed: false,
+        result: authFailure
+      };
+    }
 
     if (actor?.type !== 'partner') {
       return {
@@ -282,9 +321,23 @@ export class VaultLifecycleService {
     });
   }
 
-  release({ actor, idempotencyKey, requestBody, nowIso }) {
+  release({ actor, auth, idempotencyKey, requestBody, nowIso }) {
     const holdingId = requestBody?.holding_id ?? 'unknown';
     const corr = correlationId('vault.release', holdingId);
+
+    const authFailure = authorizeOrError({
+      store: this.store,
+      operationId: 'vault.release',
+      actor,
+      auth,
+      correlationId: corr
+    });
+    if (authFailure) {
+      return {
+        replayed: false,
+        result: authFailure
+      };
+    }
 
     if (actor?.type !== 'partner') {
       return {
@@ -376,9 +429,23 @@ export class VaultLifecycleService {
     });
   }
 
-  withdraw({ actor, idempotencyKey, requestBody, nowIso }) {
+  withdraw({ actor, auth, idempotencyKey, requestBody, nowIso }) {
     const holdingId = requestBody?.holding_id ?? 'unknown';
     const corr = correlationId('vault.withdraw', holdingId);
+
+    const authFailure = authorizeOrError({
+      store: this.store,
+      operationId: 'vault.withdraw',
+      actor,
+      auth,
+      correlationId: corr
+    });
+    if (authFailure) {
+      return {
+        replayed: false,
+        result: authFailure
+      };
+    }
 
     if (actor?.type !== 'user') {
       return {
@@ -480,8 +547,18 @@ export class VaultLifecycleService {
     });
   }
 
-  get({ actor, holdingId }) {
+  get({ actor, auth, holdingId }) {
     const corr = correlationId('vault.get', holdingId);
+
+    const authFailure = authorizeOrError({
+      store: this.store,
+      operationId: 'vault.get',
+      actor,
+      auth,
+      correlationId: corr
+    });
+    if (authFailure) return authFailure;
+
     const holding = this.store.state.vault_holdings[holdingId] ?? null;
 
     if (!holding) {
@@ -514,8 +591,18 @@ export class VaultLifecycleService {
     };
   }
 
-  list({ actor, query }) {
+  list({ actor, auth, query }) {
     const corr = correlationId('vault.list', actor?.id ?? 'unknown');
+
+    const authFailure = authorizeOrError({
+      store: this.store,
+      operationId: 'vault.list',
+      actor,
+      auth,
+      correlationId: corr
+    });
+    if (authFailure) return authFailure;
+
     const includeWithdrawn = query?.include_withdrawn === true;
 
     const holdings = Object.values(this.store.state.vault_holdings ?? {})

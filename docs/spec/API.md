@@ -87,6 +87,21 @@ Delegated-policy audit endpoints:
   - checkpoint mode adds `checkpoint` (`checkpoint_hash`) for chain compaction anchors
   - signature verifies export integrity against published policy-integrity signing keys
 
+Vault lifecycle endpoints:
+- `POST /vault/holdings/deposit` (user deposits a holding into vault state)
+- `POST /vault/holdings/{holding_id}/reserve` (partner reserves an available vaulted holding)
+- `POST /vault/holdings/{holding_id}/release` (partner releases a reservation)
+- `POST /vault/holdings/{holding_id}/withdraw` (owner withdraws an available vaulted holding)
+- `GET /vault/holdings/{holding_id}`
+- `GET /vault/holdings`
+
+Vault custody publication/read endpoints:
+- `POST /vault/custody/snapshots` (partner publishes a custody snapshot root)
+- `GET /vault/custody/snapshots` (snapshot catalog with cursor pagination)
+- `GET /vault/custody/snapshots/{snapshot_id}`
+- `GET /vault/custody/snapshots/{snapshot_id}/holdings/{holding_id}/proof`
+  - proof responses include deterministic Merkle inclusion material for offline verification
+
 Auth utility endpoints:
 - `POST /auth/delegation-token/introspect` (evaluate delegation token activity in a deterministic contract)
 

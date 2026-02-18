@@ -1,0 +1,247 @@
+{
+  "actors": {
+    "user_u1": { "type": "user", "id": "u1" },
+    "user_u2": { "type": "user", "id": "u2" },
+    "partner_p1": { "type": "partner", "id": "p1" }
+  },
+  "operations": [
+    {
+      "op": "vault.deposit",
+      "actor_ref": "user_u1",
+      "auth": { "scopes": ["vault:write"] },
+      "idempotency_key": "idem_m49_dep_1",
+      "now_iso": "2026-02-19T00:00:00Z",
+      "request": {
+        "holding": {
+          "holding_id": "hold_001",
+          "asset": { "platform": "steam", "asset_id": "730:asset_001" },
+          "owner_actor": { "type": "user", "id": "u1" },
+          "vault_id": "vault_u1",
+          "deposit_id": "dep_001",
+          "deposited_at": "2026-02-19T00:00:00Z"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_status": "available"
+    },
+    {
+      "op": "vault.deposit",
+      "actor_ref": "user_u1",
+      "auth": { "scopes": [] },
+      "idempotency_key": "idem_m49_dep_2",
+      "now_iso": "2026-02-19T00:00:01Z",
+      "request": {
+        "holding": {
+          "holding_id": "hold_002",
+          "asset": { "platform": "steam", "asset_id": "730:asset_002" },
+          "owner_actor": { "type": "user", "id": "u1" },
+          "vault_id": "vault_u1",
+          "deposit_id": "dep_002",
+          "deposited_at": "2026-02-19T00:00:01Z"
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    },
+    {
+      "op": "vault.reserve",
+      "actor_ref": "partner_p1",
+      "auth": { "scopes": ["vault:write"] },
+      "idempotency_key": "idem_m49_res_1",
+      "now_iso": "2026-02-19T00:01:00Z",
+      "request": {
+        "holding_id": "hold_001",
+        "reservation_id": "rsv_001"
+      },
+      "expect_ok": true,
+      "expect_status": "reserved",
+      "expect_reservation_id": "rsv_001"
+    },
+    {
+      "op": "vault.reserve",
+      "actor_ref": "user_u1",
+      "auth": { "scopes": ["vault:write"] },
+      "idempotency_key": "idem_m49_res_user",
+      "now_iso": "2026-02-19T00:01:01Z",
+      "request": {
+        "holding_id": "hold_001",
+        "reservation_id": "rsv_user"
+      },
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN"
+    },
+    {
+      "op": "vault.list",
+      "actor_ref": "user_u1",
+      "auth": { "scopes": ["vault:read"] },
+      "query": { "include_withdrawn": true },
+      "expect_ok": true,
+      "expect_list_count": 1,
+      "expect_list_statuses": ["reserved"]
+    },
+    {
+      "op": "vault.list",
+      "actor_ref": "user_u1",
+      "auth": { "scopes": [] },
+      "query": { "include_withdrawn": true },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    },
+    {
+      "op": "vault.release",
+      "actor_ref": "partner_p1",
+      "auth": { "scopes": ["vault:write"] },
+      "idempotency_key": "idem_m49_rel_1",
+      "now_iso": "2026-02-19T00:02:00Z",
+      "request": {
+        "holding_id": "hold_001",
+        "reservation_id": "rsv_001"
+      },
+      "expect_ok": true,
+      "expect_status": "available",
+      "expect_reservation_id": null
+    },
+    {
+      "op": "vault.withdraw",
+      "actor_ref": "user_u1",
+      "auth": { "scopes": ["vault:write"] },
+      "idempotency_key": "idem_m49_wd_1",
+      "now_iso": "2026-02-19T00:02:30Z",
+      "request": {
+        "holding_id": "hold_001",
+        "withdrawn_at": "2026-02-19T00:02:30Z"
+      },
+      "expect_ok": true,
+      "expect_status": "withdrawn"
+    },
+    {
+      "op": "vault.get",
+      "actor_ref": "partner_p1",
+      "auth": { "scopes": ["vault:read"] },
+      "holding_id": "hold_001",
+      "expect_ok": true,
+      "expect_status": "withdrawn"
+    },
+    {
+      "op": "vault.get",
+      "actor_ref": "user_u2",
+      "auth": { "scopes": ["vault:read"] },
+      "holding_id": "hold_001",
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN",
+      "expect_reason_code": "vault_owner_mismatch"
+    },
+    {
+      "op": "custody.publish",
+      "actor_ref": "partner_p1",
+      "auth": { "scopes": ["vault:write"] },
+      "idempotency_key": "idem_m49_pub_1",
+      "now_iso": "2026-02-19T00:03:00Z",
+      "request": {
+        "snapshot_id": "cust_snap_auth_001",
+        "recorded_at": "2026-02-19T00:03:00Z",
+        "holdings": [
+          {
+            "holding_id": "hold_c1",
+            "asset": { "platform": "steam", "asset_id": "730:asset_c1" },
+            "owner_actor": { "type": "user", "id": "u1" },
+            "vault_id": "vault_u1",
+            "deposit_id": "dep_c1",
+            "deposited_at": "2026-02-19T00:03:00Z"
+          },
+          {
+            "holding_id": "hold_c2",
+            "asset": { "platform": "steam", "asset_id": "730:asset_c2" },
+            "owner_actor": { "type": "user", "id": "u2" },
+            "vault_id": "vault_u2",
+            "deposit_id": "dep_c2",
+            "deposited_at": "2026-02-19T00:03:10Z"
+          }
+        ]
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_leaf_count": 2,
+      "save_snapshot_ref": "snap_auth_1"
+    },
+    {
+      "op": "custody.publish",
+      "actor_ref": "partner_p1",
+      "auth": { "scopes": [] },
+      "idempotency_key": "idem_m49_pub_2",
+      "now_iso": "2026-02-19T00:03:20Z",
+      "request": {
+        "snapshot_id": "cust_snap_auth_002",
+        "recorded_at": "2026-02-19T00:03:20Z",
+        "holdings": []
+      },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    },
+    {
+      "op": "custody.publish",
+      "actor_ref": "user_u1",
+      "auth": { "scopes": ["vault:write"] },
+      "idempotency_key": "idem_m49_pub_user",
+      "now_iso": "2026-02-19T00:03:30Z",
+      "request": {
+        "snapshot_id": "cust_snap_auth_user",
+        "recorded_at": "2026-02-19T00:03:30Z",
+        "holdings": []
+      },
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN"
+    },
+    {
+      "op": "custody.list",
+      "actor_ref": "partner_p1",
+      "auth": { "scopes": ["vault:read"] },
+      "query": { "limit": 10 },
+      "expect_ok": true,
+      "expect_snapshot_ids": ["cust_snap_auth_001"]
+    },
+    {
+      "op": "custody.list",
+      "actor_ref": "partner_p1",
+      "auth": { "scopes": [] },
+      "query": { "limit": 10 },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    },
+    {
+      "op": "custody.get",
+      "actor_ref": "partner_p1",
+      "auth": { "scopes": ["vault:read"] },
+      "snapshot_id": "cust_snap_auth_001",
+      "expect_ok": true,
+      "expect_leaf_count": 2
+    },
+    {
+      "op": "custody.proof",
+      "actor_ref": "partner_p1",
+      "auth": { "scopes": ["vault:read"] },
+      "snapshot_id": "cust_snap_auth_001",
+      "holding_id": "hold_c1",
+      "expect_ok": true,
+      "expect_verify_ok": true,
+      "save_proof_ref": "proof_auth_1"
+    },
+    {
+      "op": "custody.proof",
+      "actor_ref": "partner_p1",
+      "auth": { "scopes": ["vault:write"] },
+      "snapshot_id": "cust_snap_auth_001",
+      "holding_id": "hold_c1",
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    },
+    {
+      "op": "custody.proof.verify_tampered",
+      "proof_ref": "proof_auth_1",
+      "tamper": { "kind": "sibling_hash", "index": 0 },
+      "expect_verify_ok": false,
+      "expect_verify_error": "root_mismatch"
+    }
+  ]
+}

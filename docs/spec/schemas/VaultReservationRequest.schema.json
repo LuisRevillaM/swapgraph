@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/VaultReservationRequest.schema.json",
+  "title": "VaultReservationRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["holding_id", "reservation_id"],
+  "properties": {
+    "holding_id": { "type": "string", "minLength": 1 },
+    "reservation_id": { "type": "string", "minLength": 1 }
+  }
+}

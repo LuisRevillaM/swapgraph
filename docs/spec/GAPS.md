@@ -134,7 +134,8 @@ Each item here must become at least one of:
 - Resolved (fixtures-first, partial): M46 (proof-of-custody primitives: canonical custody snapshot + Merkle inclusion proof verifier).
 - Resolved (fixtures-first, partial): M47 (vault holding lifecycle scaffold: deposit/reserve/release/withdraw state-machine + deterministic verifier).
 - Resolved (fixtures-first, partial): M48 (vault custody publication/read scaffold: snapshot catalog pagination + inclusion-proof retrieval + deterministic failure semantics).
-- Remaining: custody publication API transport contract, vault/settlement integration, and partner-program/commercial layers.
+- Resolved (fixtures-first, partial): M49 (vault API transport/auth-scope surface wiring: manifest endpoints + `vault:read`/`vault:write` scopes + manifest-driven service auth enforcement + deterministic auth-surface verifier).
+- Remaining: vault/settlement integration and partner-program/commercial layers.
 
 ---
 

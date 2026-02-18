@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/VaultHoldingMutationResponse.schema.json",
+  "title": "VaultHoldingMutationResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["correlation_id", "holding"],
+  "properties": {
+    "correlation_id": { "type": "string", "minLength": 1 },
+    "holding": { "$ref": "VaultHolding.schema.json" }
+  }
+}

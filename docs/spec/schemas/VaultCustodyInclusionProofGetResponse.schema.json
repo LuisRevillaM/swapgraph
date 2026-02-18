@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/VaultCustodyInclusionProofGetResponse.schema.json",
+  "title": "VaultCustodyInclusionProofGetResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["correlation_id", "snapshot_id", "root_hash", "holding", "proof"],
+  "properties": {
+    "correlation_id": { "type": "string", "minLength": 1 },
+    "snapshot_id": { "type": "string", "minLength": 1 },
+    "root_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "holding": { "$ref": "CustodyHolding.schema.json" },
+    "proof": { "$ref": "CustodyInclusionProof.schema.json" }
+  }
+}

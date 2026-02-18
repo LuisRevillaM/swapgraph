@@ -148,6 +148,66 @@
     {
       "file": "auth.delegation_token.introspect.response.json",
       "schema": "DelegationTokenIntrospectResponse.schema.json"
+    },
+    {
+      "file": "vault.deposit.request.json",
+      "schema": "VaultDepositRequest.schema.json"
+    },
+    {
+      "file": "vault.deposit.response.json",
+      "schema": "VaultHoldingMutationResponse.schema.json"
+    },
+    {
+      "file": "vault.reserve.request.json",
+      "schema": "VaultReservationRequest.schema.json"
+    },
+    {
+      "file": "vault.reserve.response.json",
+      "schema": "VaultHoldingMutationResponse.schema.json"
+    },
+    {
+      "file": "vault.release.request.json",
+      "schema": "VaultReservationRequest.schema.json"
+    },
+    {
+      "file": "vault.release.response.json",
+      "schema": "VaultHoldingMutationResponse.schema.json"
+    },
+    {
+      "file": "vault.withdraw.request.json",
+      "schema": "VaultWithdrawRequest.schema.json"
+    },
+    {
+      "file": "vault.withdraw.response.json",
+      "schema": "VaultHoldingMutationResponse.schema.json"
+    },
+    {
+      "file": "vault.get.response.json",
+      "schema": "VaultHoldingGetResponse.schema.json"
+    },
+    {
+      "file": "vault.list.response.json",
+      "schema": "VaultHoldingListResponse.schema.json"
+    },
+    {
+      "file": "vault.custody.publish.request.json",
+      "schema": "VaultCustodyPublishRequest.schema.json"
+    },
+    {
+      "file": "vault.custody.publish.response.json",
+      "schema": "VaultCustodyPublishResponse.schema.json"
+    },
+    {
+      "file": "vault.custody.list.response.json",
+      "schema": "VaultCustodySnapshotListResponse.schema.json"
+    },
+    {
+      "file": "vault.custody.get.response.json",
+      "schema": "VaultCustodySnapshotGetResponse.schema.json"
+    },
+    {
+      "file": "vault.custody.proof.response.json",
+      "schema": "VaultCustodyInclusionProofGetResponse.schema.json"
     }
   ]
 }

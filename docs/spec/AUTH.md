@@ -112,11 +112,14 @@ Core scopes (v1):
 - `keys:read`
 - `delegations:read`
 - `delegations:write`
+- `vault:read`
+- `vault:write`
 
 Notes:
 - `keys:*` endpoints are public in v1 (no auth required), but we still model a scope for completeness.
 - `delegations:*` endpoints are user-scoped in v1 (users create/revoke grants for their own user identity).
 - Agent scopes exist only with delegation; v1 fixtures support agent access for SwapIntents and reads under delegation (when `AUTHZ_ENFORCE=1`).
+- Vault custody publication/read is partner-scoped in v1 (`vault:*`), while vault holding deposit/withdraw is user-scoped and reservation controls are partner-scoped.
 
 ## Enforcement source of truth
 Endpoint scope requirements are annotated in:

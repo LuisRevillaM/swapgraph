@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/VaultCustodyPublishRequest.schema.json",
+  "title": "VaultCustodyPublishRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["snapshot_id", "recorded_at", "holdings"],
+  "properties": {
+    "snapshot_id": { "type": "string", "minLength": 1 },
+    "recorded_at": { "type": "string", "format": "date-time" },
+    "holdings": {
+      "type": "array",
+      "items": { "$ref": "CustodyHolding.schema.json" }
+    }
+  }
+}

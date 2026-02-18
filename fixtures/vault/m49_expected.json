@@ -1,0 +1,335 @@
+{
+  "final": {
+    "custody_snapshot_ids": [
+      "cust_snap_auth_001"
+    ],
+    "custody_snapshots": [
+      {
+        "holding_ids": [
+          "hold_c1",
+          "hold_c2"
+        ],
+        "leaf_count": 2,
+        "root_hash": "e773768f992032c5e0135a9f938179a1f14ac52ffbe119396c7508e30f10962c",
+        "snapshot_id": "cust_snap_auth_001"
+      }
+    ],
+    "vault_event_count": 4,
+    "vault_event_types": [
+      "vault.deposit_confirmed",
+      "vault.holding_reserved",
+      "vault.holding_released",
+      "vault.holding_withdrawn"
+    ],
+    "vault_holding_ids": [
+      "hold_001"
+    ],
+    "vault_holdings": [
+      {
+        "holding_id": "hold_001",
+        "owner_actor": {
+          "id": "u1",
+          "type": "user"
+        },
+        "reservation_id": null,
+        "status": "withdrawn",
+        "withdrawn_at": "2026-02-19T00:02:30Z"
+      }
+    ]
+  },
+  "operations": [
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "error_code": null,
+      "holding_id": "hold_001",
+      "list_count": null,
+      "list_statuses": null,
+      "ok": true,
+      "op": "vault.deposit",
+      "reason_code": null,
+      "replayed": false,
+      "reservation_id": null,
+      "status": "available"
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "error_code": "INSUFFICIENT_SCOPE",
+      "holding_id": "hold_002",
+      "list_count": null,
+      "list_statuses": null,
+      "ok": false,
+      "op": "vault.deposit",
+      "reason_code": null,
+      "replayed": false,
+      "reservation_id": null,
+      "status": null
+    },
+    {
+      "actor": {
+        "id": "p1",
+        "type": "partner"
+      },
+      "error_code": null,
+      "holding_id": "hold_001",
+      "list_count": null,
+      "list_statuses": null,
+      "ok": true,
+      "op": "vault.reserve",
+      "reason_code": null,
+      "replayed": false,
+      "reservation_id": "rsv_001",
+      "status": "reserved"
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "error_code": "FORBIDDEN",
+      "holding_id": "hold_001",
+      "list_count": null,
+      "list_statuses": null,
+      "ok": false,
+      "op": "vault.reserve",
+      "reason_code": null,
+      "replayed": false,
+      "reservation_id": null,
+      "status": null
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "error_code": null,
+      "holding_id": null,
+      "list_count": 1,
+      "list_statuses": [
+        "reserved"
+      ],
+      "ok": true,
+      "op": "vault.list",
+      "reason_code": null,
+      "replayed": null,
+      "reservation_id": null,
+      "status": null
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "error_code": "INSUFFICIENT_SCOPE",
+      "holding_id": null,
+      "list_count": null,
+      "list_statuses": null,
+      "ok": false,
+      "op": "vault.list",
+      "reason_code": null,
+      "replayed": null,
+      "reservation_id": null,
+      "status": null
+    },
+    {
+      "actor": {
+        "id": "p1",
+        "type": "partner"
+      },
+      "error_code": null,
+      "holding_id": "hold_001",
+      "list_count": null,
+      "list_statuses": null,
+      "ok": true,
+      "op": "vault.release",
+      "reason_code": null,
+      "replayed": false,
+      "reservation_id": null,
+      "status": "available"
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "error_code": null,
+      "holding_id": "hold_001",
+      "list_count": null,
+      "list_statuses": null,
+      "ok": true,
+      "op": "vault.withdraw",
+      "reason_code": null,
+      "replayed": false,
+      "reservation_id": null,
+      "status": "withdrawn"
+    },
+    {
+      "actor": {
+        "id": "p1",
+        "type": "partner"
+      },
+      "error_code": null,
+      "holding_id": "hold_001",
+      "list_count": null,
+      "list_statuses": null,
+      "ok": true,
+      "op": "vault.get",
+      "reason_code": null,
+      "replayed": null,
+      "reservation_id": null,
+      "status": "withdrawn"
+    },
+    {
+      "actor": {
+        "id": "u2",
+        "type": "user"
+      },
+      "error_code": "FORBIDDEN",
+      "holding_id": "hold_001",
+      "list_count": null,
+      "list_statuses": null,
+      "ok": false,
+      "op": "vault.get",
+      "reason_code": "vault_owner_mismatch",
+      "replayed": null,
+      "reservation_id": null,
+      "status": null
+    },
+    {
+      "actor": {
+        "id": "p1",
+        "type": "partner"
+      },
+      "error_code": null,
+      "leaf_count": 2,
+      "ok": true,
+      "op": "custody.publish",
+      "reason_code": null,
+      "replayed": false,
+      "root_hash": "e773768f992032c5e0135a9f938179a1f14ac52ffbe119396c7508e30f10962c",
+      "snapshot_id": "cust_snap_auth_001"
+    },
+    {
+      "actor": {
+        "id": "p1",
+        "type": "partner"
+      },
+      "error_code": "INSUFFICIENT_SCOPE",
+      "leaf_count": null,
+      "ok": false,
+      "op": "custody.publish",
+      "reason_code": null,
+      "replayed": false,
+      "root_hash": null,
+      "snapshot_id": "cust_snap_auth_002"
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "error_code": "FORBIDDEN",
+      "leaf_count": null,
+      "ok": false,
+      "op": "custody.publish",
+      "reason_code": null,
+      "replayed": false,
+      "root_hash": null,
+      "snapshot_id": "cust_snap_auth_user"
+    },
+    {
+      "actor": {
+        "id": "p1",
+        "type": "partner"
+      },
+      "error_code": null,
+      "leaf_counts": [
+        2
+      ],
+      "next_cursor": null,
+      "ok": true,
+      "op": "custody.list",
+      "reason_code": null,
+      "replayed": null,
+      "snapshot_ids": [
+        "cust_snap_auth_001"
+      ],
+      "total": 1
+    },
+    {
+      "actor": {
+        "id": "p1",
+        "type": "partner"
+      },
+      "error_code": "INSUFFICIENT_SCOPE",
+      "leaf_counts": null,
+      "next_cursor": null,
+      "ok": false,
+      "op": "custody.list",
+      "reason_code": null,
+      "replayed": null,
+      "snapshot_ids": null,
+      "total": null
+    },
+    {
+      "actor": {
+        "id": "p1",
+        "type": "partner"
+      },
+      "error_code": null,
+      "leaf_count": 2,
+      "ok": true,
+      "op": "custody.get",
+      "reason_code": null,
+      "replayed": null,
+      "root_hash": "e773768f992032c5e0135a9f938179a1f14ac52ffbe119396c7508e30f10962c",
+      "snapshot_id": "cust_snap_auth_001"
+    },
+    {
+      "actor": {
+        "id": "p1",
+        "type": "partner"
+      },
+      "error_code": null,
+      "holding_id": "hold_c1",
+      "ok": true,
+      "op": "custody.proof",
+      "proof_leaf_index": 0,
+      "proof_siblings_count": 1,
+      "reason_code": null,
+      "replayed": null,
+      "snapshot_id": "cust_snap_auth_001",
+      "verify_error": null,
+      "verify_ok": true
+    },
+    {
+      "actor": {
+        "id": "p1",
+        "type": "partner"
+      },
+      "error_code": "INSUFFICIENT_SCOPE",
+      "holding_id": "hold_c1",
+      "ok": false,
+      "op": "custody.proof",
+      "proof_leaf_index": null,
+      "proof_siblings_count": null,
+      "reason_code": null,
+      "replayed": null,
+      "snapshot_id": "cust_snap_auth_001",
+      "verify_error": null,
+      "verify_ok": null
+    },
+    {
+      "op": "custody.proof.verify_tampered",
+      "proof_ref": "proof_auth_1",
+      "tamper_kind": "sibling_hash",
+      "verify_error": "root_mismatch",
+      "verify_ok": false
+    }
+  ]
+}

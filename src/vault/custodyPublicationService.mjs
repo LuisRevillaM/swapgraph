@@ -1,4 +1,5 @@
 import { idempotencyScopeKey, payloadHash } from '../core/idempotency.mjs';
+import { authorizeApiOperation } from '../core/authz.mjs';
 import {
   buildCustodySnapshot,
   buildCustodyInclusionProof
@@ -37,6 +38,16 @@ function parseLimit(limit) {
   const n = Number.parseInt(String(limit ?? ''), 10);
   if (!Number.isFinite(n) || n <= 0) return 50;
   return Math.min(n, 200);
+}
+
+function authorizeOrError({ store, operationId, actor, auth, correlationId }) {
+  const authz = authorizeApiOperation({ operationId, actor, auth, store });
+  if (authz.ok) return null;
+
+  return {
+    ok: false,
+    body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details)
+  };
 }
 
 function requirePartnerActor(actor, correlationId) {
@@ -106,9 +117,23 @@ export class VaultCustodyPublicationService {
     return { replayed: false, result };
   }
 
-  publishSnapshot({ actor, idempotencyKey, requestBody, nowIso }) {
+  publishSnapshot({ actor, auth, idempotencyKey, requestBody, nowIso }) {
     const snapshotId = requestBody?.snapshot_id ?? 'unknown';
     const correlation = correlationId('vault.custody.publish', snapshotId);
+
+    const authFailure = authorizeOrError({
+      store: this.store,
+      operationId: 'vault.custody.publish',
+      actor,
+      auth,
+      correlationId: correlation
+    });
+    if (authFailure) {
+      return {
+        replayed: false,
+        result: authFailure
+      };
+    }
 
     const partnerRequired = requirePartnerActor(actor, correlation);
     if (partnerRequired) {
@@ -169,8 +194,17 @@ export class VaultCustodyPublicationService {
     });
   }
 
-  listSnapshots({ actor, query }) {
+  listSnapshots({ actor, auth, query }) {
     const correlation = correlationId('vault.custody.list', actor?.id);
+
+    const authFailure = authorizeOrError({
+      store: this.store,
+      operationId: 'vault.custody.list',
+      actor,
+      auth,
+      correlationId: correlation
+    });
+    if (authFailure) return authFailure;
 
     const partnerRequired = requirePartnerActor(actor, correlation);
     if (partnerRequired) return partnerRequired;
@@ -222,8 +256,17 @@ export class VaultCustodyPublicationService {
     };
   }
 
-  getSnapshot({ actor, snapshotId }) {
+  getSnapshot({ actor, auth, snapshotId }) {
     const correlation = correlationId('vault.custody.get', snapshotId);
+
+    const authFailure = authorizeOrError({
+      store: this.store,
+      operationId: 'vault.custody.get',
+      actor,
+      auth,
+      correlationId: correlation
+    });
+    if (authFailure) return authFailure;
 
     const partnerRequired = requirePartnerActor(actor, correlation);
     if (partnerRequired) return partnerRequired;
@@ -248,8 +291,17 @@ export class VaultCustodyPublicationService {
     };
   }
 
-  getInclusionProof({ actor, snapshotId, holdingId }) {
+  getInclusionProof({ actor, auth, snapshotId, holdingId }) {
     const correlation = correlationId('vault.custody.proof', `${snapshotId}_${holdingId}`);
+
+    const authFailure = authorizeOrError({
+      store: this.store,
+      operationId: 'vault.custody.proof',
+      actor,
+      auth,
+      correlationId: correlation
+    });
+    if (authFailure) return authFailure;
 
     const partnerRequired = requirePartnerActor(actor, correlation);
     if (partnerRequired) return partnerRequired;

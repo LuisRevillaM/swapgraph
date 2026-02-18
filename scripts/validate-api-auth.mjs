@@ -21,7 +21,9 @@ const allowedScopes = new Set([
   'receipts:read',
   'keys:read',
   'delegations:read',
-  'delegations:write'
+  'delegations:write',
+  'vault:read',
+  'vault:write'
 ]);
 
 function isObject(x) {

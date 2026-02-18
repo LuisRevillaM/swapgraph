@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/VaultDepositRequest.schema.json",
+  "title": "VaultDepositRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["holding"],
+  "properties": {
+    "holding": { "$ref": "CustodyHolding.schema.json" }
+  }
+}
