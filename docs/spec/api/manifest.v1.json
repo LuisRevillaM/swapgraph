@@ -321,6 +321,56 @@
       }
     },
     {
+      "method": "POST",
+      "path": "/delegations",
+      "operation_id": "delegations.create",
+      "idempotency_required": true,
+      "request_schema": "DelegationCreateRequest.schema.json",
+      "response_schema": "DelegationCreateResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user"
+        ],
+        "required_scopes": [
+          "delegations:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/delegations/{id}",
+      "operation_id": "delegations.get",
+      "idempotency_required": false,
+      "response_schema": "DelegationGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user"
+        ],
+        "required_scopes": [
+          "delegations:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/delegations/{id}/revoke",
+      "operation_id": "delegations.revoke",
+      "idempotency_required": true,
+      "request_schema": "DelegationRevokeRequest.schema.json",
+      "response_schema": "DelegationRevokeResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user"
+        ],
+        "required_scopes": [
+          "delegations:write"
+        ]
+      }
+    },
+    {
       "method": "GET",
       "path": "/keys/receipt-signing",
       "operation_id": "keys.receipt_signing.get",

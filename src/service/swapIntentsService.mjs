@@ -120,7 +120,7 @@ export class SwapIntentsService {
   create({ actor, auth, idempotencyKey, requestBody }) {
     const correlationId = correlationIdForIntentId(requestBody?.intent?.id ?? 'unknown');
 
-    const authz = authorizeApiOperation({ operationId: 'swapIntents.create', actor, auth });
+    const authz = authorizeApiOperation({ operationId: 'swapIntents.create', actor, auth, store: this.store });
     if (!authz.ok) {
       return {
         replayed: false,
@@ -188,7 +188,7 @@ export class SwapIntentsService {
   update({ actor, auth, id, idempotencyKey, requestBody }) {
     const correlationId = correlationIdForIntentId(id);
 
-    const authz = authorizeApiOperation({ operationId: 'swapIntents.update', actor, auth });
+    const authz = authorizeApiOperation({ operationId: 'swapIntents.update', actor, auth, store: this.store });
     if (!authz.ok) {
       return {
         replayed: false,
@@ -276,7 +276,7 @@ export class SwapIntentsService {
   cancel({ actor, auth, idempotencyKey, requestBody }) {
     const correlationId = correlationIdForIntentId(requestBody?.id ?? 'unknown');
 
-    const authz = authorizeApiOperation({ operationId: 'swapIntents.cancel', actor, auth });
+    const authz = authorizeApiOperation({ operationId: 'swapIntents.cancel', actor, auth, store: this.store });
     if (!authz.ok) {
       return {
         replayed: false,
@@ -331,7 +331,7 @@ export class SwapIntentsService {
   get({ actor, auth, id }) {
     const correlationId = correlationIdForIntentId(id);
 
-    const authz = authorizeApiOperation({ operationId: 'swapIntents.get', actor, auth });
+    const authz = authorizeApiOperation({ operationId: 'swapIntents.get', actor, auth, store: this.store });
     if (!authz.ok) {
       return { ok: false, body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details) };
     }
@@ -353,7 +353,7 @@ export class SwapIntentsService {
   list({ actor, auth }) {
     const correlationId = correlationIdForIntentsList(actor);
 
-    const authz = authorizeApiOperation({ operationId: 'swapIntents.list', actor, auth });
+    const authz = authorizeApiOperation({ operationId: 'swapIntents.list', actor, auth, store: this.store });
     if (!authz.ok) {
       return { ok: false, body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details) };
     }

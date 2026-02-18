@@ -41,7 +41,6 @@
       "file": "commits.get.response.json",
       "schema": "CommitGetResponse.schema.json"
     },
-
     {
       "file": "settlement.start.request.json",
       "schema": "SettlementStartRequest.schema.json"
@@ -82,7 +81,6 @@
       "file": "settlement.expire_deposit_window.response.json",
       "schema": "SettlementExpireDepositWindowResponse.schema.json"
     },
-
     {
       "file": "settlement.instructions.response.json",
       "schema": "SettlementInstructionsGetResponse.schema.json"
@@ -95,7 +93,6 @@
       "file": "receipts.get.response.json",
       "schema": "SwapReceiptGetResponse.schema.json"
     },
-
     {
       "file": "keys.receipt_signing.get.response.json",
       "schema": "ReceiptSigningKeysGetResponse.schema.json"
@@ -104,10 +101,29 @@
       "file": "keys.event_signing.get.response.json",
       "schema": "EventSigningKeysGetResponse.schema.json"
     },
-
     {
       "file": "error.example.json",
       "schema": "ErrorResponse.schema.json"
+    },
+    {
+      "file": "delegations.create.request.json",
+      "schema": "DelegationCreateRequest.schema.json"
+    },
+    {
+      "file": "delegations.create.response.json",
+      "schema": "DelegationCreateResponse.schema.json"
+    },
+    {
+      "file": "delegations.get.response.json",
+      "schema": "DelegationGetResponse.schema.json"
+    },
+    {
+      "file": "delegations.revoke.request.json",
+      "schema": "DelegationRevokeRequest.schema.json"
+    },
+    {
+      "file": "delegations.revoke.response.json",
+      "schema": "DelegationRevokeResponse.schema.json"
     }
   ]
 }

@@ -77,7 +77,7 @@ export class CycleProposalsReadService {
   list({ actor, auth }) {
     const correlationId = correlationIdForCycleProposalsList(actor);
 
-    const authz = authorizeApiOperation({ operationId: 'cycleProposals.list', actor, auth });
+    const authz = authorizeApiOperation({ operationId: 'cycleProposals.list', actor, auth, store: this.store });
     if (!authz.ok) {
       return { ok: false, body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details) };
     }
@@ -112,7 +112,7 @@ export class CycleProposalsReadService {
   get({ actor, auth, proposalId }) {
     const correlationId = correlationIdForProposalId(proposalId);
 
-    const authzOp = authorizeApiOperation({ operationId: 'cycleProposals.get', actor, auth });
+    const authzOp = authorizeApiOperation({ operationId: 'cycleProposals.get', actor, auth, store: this.store });
     if (!authzOp.ok) {
       return { ok: false, body: errorResponse(correlationId, authzOp.error.code, authzOp.error.message, authzOp.error.details) };
     }

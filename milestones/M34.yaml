@@ -1,0 +1,40 @@
+name: M34
+commands:
+  - cmd: "npm run verify:m34"
+artifacts:
+  - artifact: "docs/prd/M34.md"
+
+  - artifact: "docs/spec/AUTH.md"
+  - artifact: "docs/spec/api/manifest.v1.json"
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+
+  - artifact: "docs/spec/schemas/DelegationGrant.schema.json"
+  - artifact: "docs/spec/schemas/DelegationCreateRequest.schema.json"
+  - artifact: "docs/spec/schemas/DelegationCreateResponse.schema.json"
+  - artifact: "docs/spec/schemas/DelegationGetResponse.schema.json"
+  - artifact: "docs/spec/schemas/DelegationRevokeRequest.schema.json"
+  - artifact: "docs/spec/schemas/DelegationRevokeResponse.schema.json"
+
+  - artifact: "docs/spec/examples/api/delegations.create.request.json"
+  - artifact: "docs/spec/examples/api/delegations.create.response.json"
+  - artifact: "docs/spec/examples/api/delegations.get.response.json"
+  - artifact: "docs/spec/examples/api/delegations.revoke.request.json"
+  - artifact: "docs/spec/examples/api/delegations.revoke.response.json"
+
+  - artifact: "src/core/authz.mjs"
+  - artifact: "src/store/jsonStateStore.mjs"
+  - artifact: "src/service/delegationsService.mjs"
+
+  - artifact: "fixtures/delegation/m34_scenario.json"
+  - artifact: "fixtures/delegation/m34_expected.json"
+  - artifact: "scripts/run-m34-delegations-revocation-persistence-scenario.mjs"
+
+  - artifact: "verify/m34.sh"
+
+  - artifact: "artifacts/milestones/M34/latest/commands.log"
+  - artifact: "artifacts/milestones/M34/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M34/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M34/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M34/latest/delegations_output.json"
+  - artifact: "artifacts/milestones/M34/latest/store.json"
+  - artifact: "artifacts/milestones/M34/latest/assertions.json"

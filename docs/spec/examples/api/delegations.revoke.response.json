@@ -1,0 +1,20 @@
+{
+  "correlation_id": "corr_delegation_del_123",
+  "delegation": {
+    "delegation_id": "del_123",
+    "principal_agent": { "type": "agent", "id": "agent_1" },
+    "subject_actor": { "type": "user", "id": "u1" },
+    "scopes": ["swap_intents:read", "swap_intents:write"],
+    "policy": {
+      "max_value_per_swap_usd": 100,
+      "max_value_per_day_usd": 250,
+      "min_confidence_score": 0.8,
+      "max_cycle_length": 3,
+      "require_escrow": true,
+      "quiet_hours": { "start": "22:00", "end": "07:00", "tz": "America/New_York" }
+    },
+    "issued_at": "2026-02-16T00:00:00Z",
+    "expires_at": "2026-03-01T00:00:00Z",
+    "revoked_at": "2026-02-17T00:00:00Z"
+  }
+}

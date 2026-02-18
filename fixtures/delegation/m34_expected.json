@@ -1,0 +1,71 @@
+{
+  "operations": [
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "delegation_id": "del_m34_1",
+      "error_code": null,
+      "ok": true,
+      "op": "delegations.create",
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "agent_1",
+        "type": "agent"
+      },
+      "error_code": null,
+      "grant_revoked_at_present": false,
+      "ok": true,
+      "op": "cycleProposals.list",
+      "proposals_count": 1
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "delegation_id": "del_m34_1",
+      "error_code": null,
+      "ok": true,
+      "op": "delegations.get",
+      "revoked_at_present": false
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "delegation_id": "del_m34_1",
+      "error_code": null,
+      "ok": true,
+      "op": "delegations.revoke",
+      "replayed": false,
+      "revoked_at_present": true
+    },
+    {
+      "actor": {
+        "id": "agent_1",
+        "type": "agent"
+      },
+      "error_code": "UNAUTHORIZED",
+      "grant_revoked_at_present": false,
+      "ok": false,
+      "op": "cycleProposals.list",
+      "proposals_count": null
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "delegation_id": "del_m34_1",
+      "error_code": null,
+      "ok": true,
+      "op": "delegations.get",
+      "revoked_at_present": true
+    }
+  ]
+}

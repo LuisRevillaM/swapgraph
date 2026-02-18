@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/DelegationRevokeRequest.schema.json",
+  "title": "DelegationRevokeRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["revoked_at"],
+  "properties": {
+    "revoked_at": { "type": "string", "format": "date-time" }
+  }
+}

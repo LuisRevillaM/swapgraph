@@ -43,7 +43,7 @@ function sortedUniqueStrings(xs) {
  * @param {{ operationId: string, actor: any, auth?: { scopes?: string[] } }} params
  * @returns {{ ok: true, skipped?: boolean } | { ok: false, error: { code: string, message: string, details: any } }}
  */
-export function authorizeApiOperation({ operationId, actor, auth }) {
+export function authorizeApiOperation({ operationId, actor, auth, store }) {
   if (!authzEnforced()) return { ok: true, skipped: true };
 
   if (!operationId) {
@@ -105,6 +105,8 @@ export function authorizeApiOperation({ operationId, actor, auth }) {
   }
 
   const delegation = auth?.delegation ?? null;
+  let persistedDelegation = null;
+  let effectiveDelegation = delegation;
 
   // Agent actor type implies delegation in v1.
   if (actor.type === 'agent') {
@@ -119,7 +121,22 @@ export function authorizeApiOperation({ operationId, actor, auth }) {
       };
     }
 
-    const principal = delegation?.principal_agent ?? null;
+    const delegationId = delegation?.delegation_id ?? null;
+    if (!delegationId) {
+      return {
+        ok: false,
+        error: {
+          code: 'CONSTRAINT_VIOLATION',
+          message: 'delegation_id is required',
+          details: { operation_id: operationId, actor }
+        }
+      };
+    }
+
+    persistedDelegation = store?.state?.delegations?.[delegationId] ?? null;
+    if (persistedDelegation) effectiveDelegation = persistedDelegation;
+
+    const principal = effectiveDelegation?.principal_agent ?? null;
     if (principal?.type !== 'agent' || principal?.id !== actor.id) {
       return {
         ok: false,
@@ -131,7 +148,7 @@ export function authorizeApiOperation({ operationId, actor, auth }) {
       };
     }
 
-    const subject = delegation?.subject_actor ?? null;
+    const subject = effectiveDelegation?.subject_actor ?? null;
     if (subject?.type !== 'user' || !subject?.id) {
       return {
         ok: false,
@@ -143,30 +160,60 @@ export function authorizeApiOperation({ operationId, actor, auth }) {
       };
     }
 
-    // Lifecycle: revoked grants are rejected.
-    if (delegation?.revoked_at) {
+    // If the delegation is persisted in store, require the presented grant to match.
+    if (persistedDelegation) {
+      const presentedSubject = delegation?.subject_actor ?? null;
+      const presentedPrincipal = delegation?.principal_agent ?? null;
+
+      if (presentedSubject?.type !== subject.type || presentedSubject?.id !== subject.id) {
+        return {
+          ok: false,
+          error: {
+            code: 'FORBIDDEN',
+            message: 'delegation subject mismatch',
+            details: { operation_id: operationId, actor, subject_actor: subject, presented_subject_actor: presentedSubject }
+          }
+        };
+      }
+
+      if (presentedPrincipal?.type !== principal.type || presentedPrincipal?.id !== principal.id) {
+        return {
+          ok: false,
+          error: {
+            code: 'FORBIDDEN',
+            message: 'delegation principal mismatch',
+            details: { operation_id: operationId, actor, principal_agent: principal, presented_principal_agent: presentedPrincipal }
+          }
+        };
+      }
+    }
+
+    // Lifecycle: revoked grants are rejected (persisted revocations win).
+    const revokedAt = persistedDelegation?.revoked_at ?? delegation?.revoked_at ?? null;
+    if (revokedAt) {
       return {
         ok: false,
         error: {
           code: 'UNAUTHORIZED',
           message: 'delegation revoked',
-          details: { operation_id: operationId, delegation_id: delegation.delegation_id, revoked_at: delegation.revoked_at }
+          details: { operation_id: operationId, delegation_id: delegationId, revoked_at: revokedAt }
         }
       };
     }
 
     // Lifecycle: expiry is evaluated deterministically when a `now` is provided.
     const nowIso = auth?.now_iso ?? process.env.AUTHZ_NOW_ISO ?? null;
-    if (nowIso) {
+    const expiresAt = persistedDelegation?.expires_at ?? delegation?.expires_at ?? null;
+    if (nowIso && expiresAt) {
       const nowMs = Date.parse(nowIso);
-      const expMs = Date.parse(delegation.expires_at);
+      const expMs = Date.parse(expiresAt);
       if (!Number.isFinite(nowMs) || !Number.isFinite(expMs)) {
         return {
           ok: false,
           error: {
             code: 'CONSTRAINT_VIOLATION',
             message: 'invalid ISO timestamp for delegation lifecycle check',
-            details: { operation_id: operationId, now_iso: nowIso, expires_at: delegation.expires_at }
+            details: { operation_id: operationId, now_iso: nowIso, expires_at: expiresAt }
           }
         };
       }
@@ -177,7 +224,7 @@ export function authorizeApiOperation({ operationId, actor, auth }) {
           error: {
             code: 'UNAUTHORIZED',
             message: 'delegation expired',
-            details: { operation_id: operationId, delegation_id: delegation.delegation_id, now_iso: nowIso, expires_at: delegation.expires_at }
+            details: { operation_id: operationId, delegation_id: delegationId, now_iso: nowIso, expires_at: expiresAt }
           }
         };
       }
@@ -185,7 +232,9 @@ export function authorizeApiOperation({ operationId, actor, auth }) {
   }
 
   const requiredScopes = sortedUniqueStrings(opAuth.required_scopes ?? []);
-  const providedScopes = sortedUniqueStrings(auth?.scopes ?? delegation?.scopes ?? []);
+  const providedScopes = actor.type === 'agent'
+    ? sortedUniqueStrings(effectiveDelegation?.scopes ?? delegation?.scopes ?? [])
+    : sortedUniqueStrings(auth?.scopes ?? []);
 
   // If the endpoint requires auth and declares scopes, enforce them.
   if (requiredScopes.length > 0) {

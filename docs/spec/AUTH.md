@@ -41,10 +41,13 @@ Core scopes (v1):
 - `settlement:write`
 - `receipts:read`
 - `keys:read`
+- `delegations:read`
+- `delegations:write`
 
 Notes:
 - `keys:*` endpoints are public in v1 (no auth required), but we still model a scope for completeness.
-- Agent scopes exist only with delegation; v1 fixtures support agent access for SwapIntents under delegation, and return `FORBIDDEN` for agent access in other services until later milestones.
+- `delegations:*` endpoints are user-scoped in v1 (users create/revoke grants for their own user identity).
+- Agent scopes exist only with delegation; v1 fixtures support agent access for SwapIntents and reads under delegation (when `AUTHZ_ENFORCE=1`).
 
 ## Enforcement source of truth
 Endpoint scope requirements are annotated in:

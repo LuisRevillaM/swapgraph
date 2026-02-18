@@ -126,7 +126,7 @@ export class SettlementReadService {
       return { ok: false, body: errorResponse(correlationId, 'NOT_FOUND', 'settlement timeline not found', { cycle_id: cycleId }) };
     }
 
-    const authzOp = authorizeApiOperation({ operationId: 'settlement.status', actor, auth });
+    const authzOp = authorizeApiOperation({ operationId: 'settlement.status', actor, auth, store: this.store });
     if (!authzOp.ok) {
       return { ok: false, body: errorResponse(correlationId, authzOp.error.code, authzOp.error.message, authzOp.error.details) };
     }
@@ -163,7 +163,7 @@ export class SettlementReadService {
       return { ok: false, body: errorResponse(correlationId, 'NOT_FOUND', 'settlement timeline not found', { cycle_id: cycleId }) };
     }
 
-    const authzOp = authorizeApiOperation({ operationId: 'settlement.instructions', actor, auth });
+    const authzOp = authorizeApiOperation({ operationId: 'settlement.instructions', actor, auth, store: this.store });
     if (!authzOp.ok) {
       return { ok: false, body: errorResponse(correlationId, authzOp.error.code, authzOp.error.message, authzOp.error.details) };
     }
@@ -203,7 +203,7 @@ export class SettlementReadService {
       return { ok: false, body: errorResponse(correlationId, 'NOT_FOUND', 'receipt not found', { cycle_id: cycleId }) };
     }
 
-    const authzOp = authorizeApiOperation({ operationId: 'receipts.get', actor, auth });
+    const authzOp = authorizeApiOperation({ operationId: 'receipts.get', actor, auth, store: this.store });
     if (!authzOp.ok) {
       return { ok: false, body: errorResponse(correlationId, authzOp.error.code, authzOp.error.message, authzOp.error.details) };
     }

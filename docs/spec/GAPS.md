@@ -118,7 +118,8 @@ Each item here must become at least one of:
 - Policy schema (max value/day, confidence threshold, quiet hours), token TTL/refresh, revocation model.
 - Resolved (fixtures-first, partial): M32 (delegation grant contract + SwapIntents enforcement under `AUTHZ_ENFORCE=1`).
 - Resolved (fixtures-first, partial): M33 (delegation lifecycle checks + agent read access expansion under `AUTHZ_ENFORCE=1`).
-- Remaining: delegation lifecycle APIs + revocation persistence + policy enforcement on matching/commit/settlement.
+- Resolved (fixtures-first, partial): M34 (delegation lifecycle APIs + revocation persistence enforced from store under `AUTHZ_ENFORCE=1`).
+- Remaining: signed delegation token format + policy enforcement on matching/commit/settlement.
 
 ---
 

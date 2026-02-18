@@ -25,7 +25,7 @@ export class SettlementWriteApiService {
   start({ actor, auth, cycleId, requestBody, occurredAt }) {
     const correlationId = correlationIdForCycleId(cycleId);
 
-    const authz = authorizeApiOperation({ operationId: 'settlement.start', actor, auth });
+    const authz = authorizeApiOperation({ operationId: 'settlement.start', actor, auth, store: this.store });
     if (!authz.ok) {
       return { ok: false, body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details) };
     }
@@ -52,7 +52,7 @@ export class SettlementWriteApiService {
   depositConfirmed({ actor, auth, cycleId, requestBody, occurredAt }) {
     const correlationId = correlationIdForCycleId(cycleId);
 
-    const authz = authorizeApiOperation({ operationId: 'settlement.deposit_confirmed', actor, auth });
+    const authz = authorizeApiOperation({ operationId: 'settlement.deposit_confirmed', actor, auth, store: this.store });
     if (!authz.ok) {
       return { ok: false, body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details) };
     }
@@ -79,7 +79,7 @@ export class SettlementWriteApiService {
   beginExecution({ actor, auth, cycleId, requestBody, occurredAt }) {
     const correlationId = correlationIdForCycleId(cycleId);
 
-    const authz = authorizeApiOperation({ operationId: 'settlement.begin_execution', actor, auth });
+    const authz = authorizeApiOperation({ operationId: 'settlement.begin_execution', actor, auth, store: this.store });
     if (!authz.ok) {
       return { ok: false, body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details) };
     }
@@ -108,7 +108,7 @@ export class SettlementWriteApiService {
   complete({ actor, auth, cycleId, requestBody, occurredAt }) {
     const correlationId = correlationIdForCycleId(cycleId);
 
-    const authz = authorizeApiOperation({ operationId: 'settlement.complete', actor, auth });
+    const authz = authorizeApiOperation({ operationId: 'settlement.complete', actor, auth, store: this.store });
     if (!authz.ok) {
       return { ok: false, body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details) };
     }
@@ -138,7 +138,7 @@ export class SettlementWriteApiService {
   expireDepositWindow({ actor, auth, cycleId, requestBody }) {
     const correlationId = correlationIdForCycleId(cycleId);
 
-    const authz = authorizeApiOperation({ operationId: 'settlement.expire_deposit_window', actor, auth });
+    const authz = authorizeApiOperation({ operationId: 'settlement.expire_deposit_window', actor, auth, store: this.store });
     if (!authz.ok) {
       return { ok: false, body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details) };
     }

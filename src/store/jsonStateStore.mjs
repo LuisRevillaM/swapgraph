@@ -16,6 +16,7 @@ export class JsonStateStore {
       reservations: {},
       timelines: {},
       receipts: {},
+      delegations: {},
       tenancy: { cycles: {}, proposals: {} },
       events: [],
       idempotency: {}
@@ -31,6 +32,7 @@ export class JsonStateStore {
         reservations: {},
         timelines: {},
         receipts: {},
+        delegations: {},
         tenancy: { cycles: {}, proposals: {} },
         events: [],
         idempotency: {}
@@ -45,6 +47,7 @@ export class JsonStateStore {
     this.state.reservations ||= {};
     this.state.timelines ||= {};
     this.state.receipts ||= {};
+    this.state.delegations ||= {};
     this.state.tenancy ||= {};
     this.state.tenancy.cycles ||= {};
     this.state.tenancy.proposals ||= {};

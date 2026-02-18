@@ -208,7 +208,7 @@ export class CommitService {
   accept({ actor, auth, idempotencyKey, proposal, requestBody, occurredAt }) {
     const correlationId = correlationIdForCycleId(proposal.id);
 
-    const authz = authorizeApiOperation({ operationId: 'cycleProposals.accept', actor, auth });
+    const authz = authorizeApiOperation({ operationId: 'cycleProposals.accept', actor, auth, store: this.store });
     if (!authz.ok) {
       return {
         replayed: false,
@@ -296,7 +296,7 @@ export class CommitService {
   decline({ actor, auth, idempotencyKey, proposal, requestBody, occurredAt }) {
     const correlationId = correlationIdForCycleId(proposal.id);
 
-    const authz = authorizeApiOperation({ operationId: 'cycleProposals.decline', actor, auth });
+    const authz = authorizeApiOperation({ operationId: 'cycleProposals.decline', actor, auth, store: this.store });
     if (!authz.ok) {
       return {
         replayed: false,
@@ -414,7 +414,7 @@ export class CommitService {
 
     const correlationId = correlationIdForCycleId(commit.cycle_id);
 
-    const authz = authorizeApiOperation({ operationId: 'commits.get', actor, auth });
+    const authz = authorizeApiOperation({ operationId: 'commits.get', actor, auth, store: this.store });
     if (!authz.ok) {
       return { ok: false, body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details) };
     }

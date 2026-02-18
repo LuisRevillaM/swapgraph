@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/DelegationGetResponse.schema.json",
+  "title": "DelegationGetResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["correlation_id", "delegation"],
+  "properties": {
+    "correlation_id": { "type": "string", "minLength": 1 },
+    "delegation": { "$ref": "DelegationGrant.schema.json" }
+  }
+}

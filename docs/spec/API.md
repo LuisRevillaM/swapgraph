@@ -59,6 +59,11 @@ Settlement endpoints:
 Receipt endpoints:
 - `GET /receipts/{cycle_id}`
 
+Delegation endpoints:
+- `POST /delegations` (create a delegation grant)
+- `GET /delegations/{id}`
+- `POST /delegations/{id}/revoke`
+
 Signing key endpoints:
 - `GET /keys/receipt-signing` (public keys for verifying `SwapReceipt.signature`)
 - `GET /keys/event-signing` (public keys for verifying `EventEnvelope.signature`)
