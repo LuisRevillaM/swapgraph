@@ -16,6 +16,78 @@ export function policyForDelegatedActor({ actor, auth }) {
   return null;
 }
 
+function finiteNumberOrNull(x) {
+  return Number.isFinite(x) ? x : null;
+}
+
+export function resolvePolicyNowIso({ auth }) {
+  return auth?.now_iso ?? process.env.AUTHZ_NOW_ISO ?? new Date().toISOString();
+}
+
+export function dayKeyFromIsoUtc(nowIso) {
+  const ms = Date.parse(nowIso);
+  if (!Number.isFinite(ms)) return null;
+  return new Date(ms).toISOString().slice(0, 10);
+}
+
+export function intentMaxUsd(intent) {
+  const v = finiteNumberOrNull(intent?.value_band?.max_usd);
+  return v ?? 0;
+}
+
+export function activeIntentMaxUsd(intent) {
+  if (!intent) return 0;
+  if (intent?.status === 'cancelled') return 0;
+  return intentMaxUsd(intent);
+}
+
+export function dailySpendDeltaForIntentMutation({ previousIntent, nextIntent }) {
+  const prev = activeIntentMaxUsd(previousIntent);
+  const next = activeIntentMaxUsd(nextIntent);
+  return next - prev;
+}
+
+export function evaluateIntentAgainstTradingPolicy({ policy, intent }) {
+  if (!policy) {
+    return {
+      ok: false,
+      code: 'FORBIDDEN',
+      message: 'delegation policy is required',
+      details: { policy: null }
+    };
+  }
+
+  const violations = [];
+
+  const maxUsd = finiteNumberOrNull(intent?.value_band?.max_usd);
+  if (Number.isFinite(policy.max_value_per_swap_usd) && Number.isFinite(maxUsd) && maxUsd > policy.max_value_per_swap_usd) {
+    violations.push({ field: 'value_band.max_usd', max_allowed: policy.max_value_per_swap_usd, actual: maxUsd });
+  }
+
+  const maxCycle = finiteNumberOrNull(intent?.trust_constraints?.max_cycle_length);
+  if (Number.isFinite(policy.max_cycle_length) && Number.isFinite(maxCycle) && maxCycle > policy.max_cycle_length) {
+    violations.push({ field: 'trust_constraints.max_cycle_length', max_allowed: policy.max_cycle_length, actual: maxCycle });
+  }
+
+  if (typeof policy.require_escrow === 'boolean') {
+    const reqEscrow = intent?.settlement_preferences?.require_escrow;
+    if (typeof reqEscrow === 'boolean' && reqEscrow !== policy.require_escrow) {
+      violations.push({ field: 'settlement_preferences.require_escrow', required: policy.require_escrow, actual: reqEscrow });
+    }
+  }
+
+  if (violations.length > 0) {
+    return {
+      ok: false,
+      code: 'FORBIDDEN',
+      message: 'delegation policy violation',
+      details: { violations }
+    };
+  }
+
+  return { ok: true };
+}
+
 export function evaluateProposalAgainstTradingPolicy({ policy, proposal }) {
   if (!policy) {
     return {
@@ -65,12 +137,17 @@ function clockMinutesForIsoInTz(iso, tz) {
   const d = new Date(iso);
   if (!Number.isFinite(d.getTime())) return null;
 
-  const fmt = new Intl.DateTimeFormat('en-GB', {
-    timeZone: tz,
-    hour12: false,
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+  let fmt;
+  try {
+    fmt = new Intl.DateTimeFormat('en-GB', {
+      timeZone: tz,
+      hour12: false,
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch {
+    return null;
+  }
 
   const parts = fmt.formatToParts(d);
   const hh = Number.parseInt(parts.find(p => p.type === 'hour')?.value ?? '', 10);
@@ -135,6 +212,166 @@ export function evaluateQuietHoursPolicy({ policy, nowIso }) {
       now_minutes: nowMin,
       start_minutes: startMin,
       end_minutes: endMin
+    }
+  };
+}
+
+export function evaluateHighValueConsentForIntent({ policy, intent, auth, nowIso }) {
+  const threshold = finiteNumberOrNull(policy?.high_value_consent_threshold_usd);
+  const maxUsd = intentMaxUsd(intent);
+
+  if (!Number.isFinite(threshold)) {
+    return { ok: true, required: false, skipped: true };
+  }
+
+  if (!Number.isFinite(maxUsd) || maxUsd <= threshold) {
+    return { ok: true, required: false, skipped: false };
+  }
+
+  const consent = auth?.user_consent;
+  if (!consent || typeof consent !== 'object') {
+    return {
+      ok: false,
+      code: 'FORBIDDEN',
+      message: 'delegation consent required for high-value intent',
+      details: {
+        reason_code: 'consent_required',
+        threshold_usd: threshold,
+        max_usd: maxUsd
+      }
+    };
+  }
+
+  if (typeof consent.consent_id !== 'string' || consent.consent_id.trim().length < 1) {
+    return {
+      ok: false,
+      code: 'CONSTRAINT_VIOLATION',
+      message: 'invalid user_consent payload',
+      details: {
+        reason_code: 'consent_malformed',
+        threshold_usd: threshold,
+        max_usd: maxUsd,
+        user_consent: consent
+      }
+    };
+  }
+
+  if (Number.isFinite(consent.approved_max_usd) && consent.approved_max_usd < maxUsd) {
+    return {
+      ok: false,
+      code: 'FORBIDDEN',
+      message: 'delegation consent limit exceeded',
+      details: {
+        reason_code: 'consent_limit_exceeded',
+        threshold_usd: threshold,
+        max_usd: maxUsd,
+        approved_max_usd: consent.approved_max_usd,
+        consent_id: consent.consent_id
+      }
+    };
+  }
+
+  if (consent.expires_at) {
+    const nowMs = Date.parse(nowIso ?? '');
+    const expMs = Date.parse(consent.expires_at);
+    if (!Number.isFinite(nowMs) || !Number.isFinite(expMs)) {
+      return {
+        ok: false,
+        code: 'CONSTRAINT_VIOLATION',
+        message: 'invalid consent expiry timestamps',
+        details: {
+          reason_code: 'consent_invalid_expiry',
+          now_iso: nowIso ?? null,
+          expires_at: consent.expires_at,
+          consent_id: consent.consent_id
+        }
+      };
+    }
+
+    if (nowMs > expMs) {
+      return {
+        ok: false,
+        code: 'FORBIDDEN',
+        message: 'delegation consent expired',
+        details: {
+          reason_code: 'consent_expired',
+          now_iso: nowIso,
+          expires_at: consent.expires_at,
+          consent_id: consent.consent_id
+        }
+      };
+    }
+  }
+
+  return {
+    ok: true,
+    required: true,
+    skipped: false,
+    details: {
+      threshold_usd: threshold,
+      max_usd: maxUsd,
+      consent_id: consent.consent_id,
+      approved_max_usd: finiteNumberOrNull(consent.approved_max_usd)
+    }
+  };
+}
+
+export function evaluateDailySpendCapForIntent({
+  policy,
+  subjectActor,
+  nowIso,
+  spendByActorDay,
+  existingIntent,
+  nextIntent
+}) {
+  const capUsd = finiteNumberOrNull(policy?.max_value_per_day_usd);
+  if (!Number.isFinite(capUsd)) {
+    return { ok: true, enforced: false, skipped: true };
+  }
+
+  const dayKey = dayKeyFromIsoUtc(nowIso);
+  if (!dayKey) {
+    return {
+      ok: false,
+      code: 'CONSTRAINT_VIOLATION',
+      message: 'invalid now_iso for daily spend policy',
+      details: { now_iso: nowIso ?? null }
+    };
+  }
+
+  const subject = actorKey(subjectActor);
+  const usedUsd = finiteNumberOrNull(spendByActorDay?.[subject]?.[dayKey]) ?? 0;
+  const deltaUsd = dailySpendDeltaForIntentMutation({ previousIntent: existingIntent, nextIntent });
+  const projectedUsd = usedUsd + deltaUsd;
+
+  if (projectedUsd > capUsd) {
+    return {
+      ok: false,
+      code: 'FORBIDDEN',
+      message: 'delegation daily value cap exceeded',
+      details: {
+        reason_code: 'daily_cap_exceeded',
+        cap_usd: capUsd,
+        used_usd: usedUsd,
+        delta_usd: deltaUsd,
+        projected_usd: projectedUsd,
+        day_key: dayKey,
+        subject_actor: subjectActor
+      }
+    };
+  }
+
+  return {
+    ok: true,
+    enforced: true,
+    skipped: false,
+    details: {
+      cap_usd: capUsd,
+      used_usd: usedUsd,
+      delta_usd: deltaUsd,
+      projected_usd: projectedUsd,
+      day_key: dayKey,
+      subject_actor: subjectActor
     }
   };
 }

@@ -19,7 +19,9 @@ export class JsonStateStore {
       delegations: {},
       tenancy: { cycles: {}, proposals: {} },
       events: [],
-      idempotency: {}
+      idempotency: {},
+      policy_spend_daily: {},
+      policy_audit: []
     };
   }
 
@@ -35,7 +37,9 @@ export class JsonStateStore {
         delegations: {},
         tenancy: { cycles: {}, proposals: {} },
         events: [],
-        idempotency: {}
+        idempotency: {},
+        policy_spend_daily: {},
+        policy_audit: []
       };
       return;
     }
@@ -53,6 +57,8 @@ export class JsonStateStore {
     this.state.tenancy.proposals ||= {};
     this.state.events ||= [];
     this.state.idempotency ||= {};
+    this.state.policy_spend_daily ||= {};
+    this.state.policy_audit ||= [];
   }
 
   save() {

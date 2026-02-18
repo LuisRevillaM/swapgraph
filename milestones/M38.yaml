@@ -1,0 +1,28 @@
+name: M38
+commands:
+  - cmd: "npm run verify:m38"
+artifacts:
+  - artifact: "docs/prd/M38.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/AUTH.md"
+  - artifact: "docs/spec/GAPS.md"
+  - artifact: "docs/spec/schemas/TradingPolicy.schema.json"
+  - artifact: "docs/spec/examples/TradingPolicy.example.json"
+
+  - artifact: "src/core/tradingPolicyBoundaries.mjs"
+  - artifact: "src/service/swapIntentsService.mjs"
+  - artifact: "src/store/jsonStateStore.mjs"
+
+  - artifact: "scripts/run-m38-delegated-write-policy-controls-scenario.mjs"
+  - artifact: "fixtures/delegation/m38_scenario.json"
+  - artifact: "fixtures/delegation/m38_expected.json"
+
+  - artifact: "verify/m38.sh"
+
+  - artifact: "artifacts/milestones/M38/latest/commands.log"
+  - artifact: "artifacts/milestones/M38/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M38/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M38/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M38/latest/delegated_write_policy_output.json"
+  - artifact: "artifacts/milestones/M38/latest/store.json"
+  - artifact: "artifacts/milestones/M38/latest/assertions.json"

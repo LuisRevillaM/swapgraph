@@ -38,6 +38,7 @@ Auth headers (see `docs/spec/AUTH.md` for details):
   - `POST /swap-intents/{id}/cancel`
   - `GET /swap-intents/{id}`
   - `GET /swap-intents` (list)
+  - delegated agent writes are policy-gated (per-swap cap, daily cap, and optional high-value consent hook)
 
 - `CycleProposal`
   - `GET /cycle-proposals` (list)

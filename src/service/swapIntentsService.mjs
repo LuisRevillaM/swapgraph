@@ -1,59 +1,16 @@
 import { idempotencyScopeKey, payloadHash } from '../core/idempotency.mjs';
 import { authorizeApiOperation } from '../core/authz.mjs';
-
-function actorKey(actor) {
-  return `${actor.type}:${actor.id}`;
-}
-
-function effectiveActor({ actor, auth }) {
-  if (actor?.type === 'agent') {
-    return auth?.delegation?.subject_actor ?? null;
-  }
-  return actor;
-}
-
-function policyForActor({ actor, auth }) {
-  if (actor?.type === 'agent') {
-    return auth?.delegation?.policy ?? null;
-  }
-  return null;
-}
-
-function enforceTradingPolicyForIntent({ policy, intent }) {
-  if (!policy) {
-    return { ok: false, code: 'FORBIDDEN', message: 'delegation policy is required', details: { policy: null } };
-  }
-
-  const violations = [];
-
-  const maxUsd = intent?.value_band?.max_usd;
-  if (Number.isFinite(policy.max_value_per_swap_usd) && Number.isFinite(maxUsd) && maxUsd > policy.max_value_per_swap_usd) {
-    violations.push({ field: 'value_band.max_usd', max_allowed: policy.max_value_per_swap_usd, actual: maxUsd });
-  }
-
-  const maxCycle = intent?.trust_constraints?.max_cycle_length;
-  if (Number.isFinite(policy.max_cycle_length) && Number.isFinite(maxCycle) && maxCycle > policy.max_cycle_length) {
-    violations.push({ field: 'trust_constraints.max_cycle_length', max_allowed: policy.max_cycle_length, actual: maxCycle });
-  }
-
-  if (typeof policy.require_escrow === 'boolean') {
-    const reqEscrow = intent?.settlement_preferences?.require_escrow;
-    if (typeof reqEscrow === 'boolean' && reqEscrow !== policy.require_escrow) {
-      violations.push({ field: 'settlement_preferences.require_escrow', required: policy.require_escrow, actual: reqEscrow });
-    }
-  }
-
-  if (violations.length > 0) {
-    return {
-      ok: false,
-      code: 'FORBIDDEN',
-      message: 'delegation policy violation',
-      details: { violations }
-    };
-  }
-
-  return { ok: true };
-}
+import {
+  actorKey,
+  effectiveActorForDelegation,
+  policyForDelegatedActor,
+  evaluateIntentAgainstTradingPolicy,
+  evaluateHighValueConsentForIntent,
+  evaluateDailySpendCapForIntent,
+  resolvePolicyNowIso,
+  dayKeyFromIsoUtc,
+  dailySpendDeltaForIntentMutation
+} from '../core/tradingPolicyBoundaries.mjs';
 
 function errorResponse(correlationId, code, message, details = {}) {
   return {
@@ -76,6 +33,72 @@ function correlationIdForIntentsList(actor) {
   return `corr_swap_intents_list_${t}_${id}`;
 }
 
+function policySnapshot(policy) {
+  if (!policy) return null;
+  return {
+    max_value_per_swap_usd: policy.max_value_per_swap_usd ?? null,
+    max_value_per_day_usd: policy.max_value_per_day_usd ?? null,
+    high_value_consent_threshold_usd: policy.high_value_consent_threshold_usd ?? null,
+    min_confidence_score: policy.min_confidence_score ?? null,
+    max_cycle_length: policy.max_cycle_length ?? null,
+    require_escrow: policy.require_escrow ?? null,
+    quiet_hours: policy.quiet_hours ?? null
+  };
+}
+
+function reasonCodeFromPolicyCheck(check, fallback) {
+  return check?.details?.reason_code ?? fallback;
+}
+
+function ensurePolicyState(store) {
+  store.state.policy_spend_daily ||= {};
+  store.state.policy_audit ||= [];
+}
+
+function getDailySpend(store, subjectActor, dayKey) {
+  const subject = actorKey(subjectActor);
+  return Number(store.state.policy_spend_daily?.[subject]?.[dayKey] ?? 0);
+}
+
+function setDailySpend(store, subjectActor, dayKey, value) {
+  const subject = actorKey(subjectActor);
+  store.state.policy_spend_daily ||= {};
+  store.state.policy_spend_daily[subject] ||= {};
+  store.state.policy_spend_daily[subject][dayKey] = Math.max(0, Number(value));
+}
+
+function appendPolicyAudit(store, {
+  occurredAt,
+  operationId,
+  decision,
+  reasonCode,
+  actor,
+  subjectActor,
+  intentId,
+  delegationId,
+  policy,
+  details
+}) {
+  ensurePolicyState(store);
+
+  const idx = (store.state.policy_audit?.length ?? 0) + 1;
+  const audit = {
+    audit_id: `pa_${idx}`,
+    occurred_at: occurredAt,
+    operation_id: operationId,
+    decision,
+    reason_code: reasonCode,
+    actor,
+    subject_actor: subjectActor,
+    intent_id: intentId,
+    delegation_id: delegationId ?? null,
+    policy: policySnapshot(policy),
+    details: details ?? {}
+  };
+
+  store.state.policy_audit.push(audit);
+}
+
 export class SwapIntentsService {
   /**
    * @param {{ store: import('../store/jsonStateStore.mjs').JsonStateStore }} opts
@@ -83,6 +106,7 @@ export class SwapIntentsService {
   constructor({ store }) {
     if (!store) throw new Error('store is required');
     this.store = store;
+    ensurePolicyState(this.store);
   }
 
   /**
@@ -131,8 +155,8 @@ export class SwapIntentsService {
       };
     }
 
-    const eff = effectiveActor({ actor, auth }) ?? actor;
-    if (actor?.type === 'agent' && !eff) {
+    const subjectActor = effectiveActorForDelegation({ actor, auth }) ?? actor;
+    if (actor?.type === 'agent' && !subjectActor) {
       return {
         replayed: false,
         result: {
@@ -144,28 +168,16 @@ export class SwapIntentsService {
 
     const intent = requestBody?.intent;
     if (actor?.type === 'agent') {
-      if (actorKey(intent?.actor) !== actorKey(eff)) {
+      if (actorKey(intent?.actor) !== actorKey(subjectActor)) {
         return {
           replayed: false,
           result: {
             ok: false,
             body: errorResponse(correlationId, 'FORBIDDEN', 'agent cannot act for this actor', {
               actor,
-              subject_actor: eff,
+              subject_actor: subjectActor,
               intent_actor: intent?.actor ?? null
             })
-          }
-        };
-      }
-
-      const policy = policyForActor({ actor, auth });
-      const pol = enforceTradingPolicyForIntent({ policy, intent });
-      if (!pol.ok) {
-        return {
-          replayed: false,
-          result: {
-            ok: false,
-            body: errorResponse(correlationId, pol.code, pol.message, pol.details)
           }
         };
       }
@@ -178,9 +190,112 @@ export class SwapIntentsService {
       requestBody,
       correlationId,
       handler: () => {
-        const stored = { ...intent, status: intent.status ?? 'active' };
-        this.store.state.intents[intent.id] = stored;
-        return { ok: true, body: { correlation_id: correlationIdForIntentId(stored.id), intent: stored } };
+        const previousIntent = this.store.state.intents[intent.id] ?? null;
+        const nextIntent = { ...intent, status: intent.status ?? 'active' };
+
+        let dayKey = null;
+        let dailyCheck = { ok: true, enforced: false, skipped: true, details: {} };
+        let consentCheck = { ok: true, required: false, skipped: true, details: {} };
+        let policy = null;
+        let nowIso = null;
+
+        if (actor?.type === 'agent') {
+          policy = policyForDelegatedActor({ actor, auth });
+          nowIso = resolvePolicyNowIso({ auth });
+
+          const intentPolicy = evaluateIntentAgainstTradingPolicy({ policy, intent: nextIntent });
+          if (!intentPolicy.ok) {
+            appendPolicyAudit(this.store, {
+              occurredAt: nowIso,
+              operationId: 'swapIntents.create',
+              decision: 'deny',
+              reasonCode: reasonCodeFromPolicyCheck(intentPolicy, 'policy_violation'),
+              actor,
+              subjectActor,
+              intentId: intent?.id ?? null,
+              delegationId: auth?.delegation?.delegation_id,
+              policy,
+              details: intentPolicy.details
+            });
+            return { ok: false, body: errorResponse(correlationId, intentPolicy.code, intentPolicy.message, intentPolicy.details) };
+          }
+
+          consentCheck = evaluateHighValueConsentForIntent({ policy, intent: nextIntent, auth, nowIso });
+          if (!consentCheck.ok) {
+            appendPolicyAudit(this.store, {
+              occurredAt: nowIso,
+              operationId: 'swapIntents.create',
+              decision: 'deny',
+              reasonCode: reasonCodeFromPolicyCheck(consentCheck, 'consent_required'),
+              actor,
+              subjectActor,
+              intentId: intent?.id ?? null,
+              delegationId: auth?.delegation?.delegation_id,
+              policy,
+              details: consentCheck.details
+            });
+            return { ok: false, body: errorResponse(correlationId, consentCheck.code, consentCheck.message, consentCheck.details) };
+          }
+
+          dailyCheck = evaluateDailySpendCapForIntent({
+            policy,
+            subjectActor,
+            nowIso,
+            spendByActorDay: this.store.state.policy_spend_daily,
+            existingIntent: previousIntent,
+            nextIntent
+          });
+
+          if (!dailyCheck.ok) {
+            appendPolicyAudit(this.store, {
+              occurredAt: nowIso,
+              operationId: 'swapIntents.create',
+              decision: 'deny',
+              reasonCode: reasonCodeFromPolicyCheck(dailyCheck, 'daily_cap_exceeded'),
+              actor,
+              subjectActor,
+              intentId: intent?.id ?? null,
+              delegationId: auth?.delegation?.delegation_id,
+              policy,
+              details: dailyCheck.details
+            });
+            return { ok: false, body: errorResponse(correlationId, dailyCheck.code, dailyCheck.message, dailyCheck.details) };
+          }
+
+          dayKey = dailyCheck.details?.day_key ?? dayKeyFromIsoUtc(nowIso);
+        }
+
+        this.store.state.intents[intent.id] = nextIntent;
+
+        if (actor?.type === 'agent') {
+          const deltaUsd = dailySpendDeltaForIntentMutation({ previousIntent, nextIntent });
+          if (dailyCheck.enforced && dayKey) {
+            const used = getDailySpend(this.store, subjectActor, dayKey);
+            setDailySpend(this.store, subjectActor, dayKey, used + deltaUsd);
+          }
+
+          appendPolicyAudit(this.store, {
+            occurredAt: nowIso,
+            operationId: 'swapIntents.create',
+            decision: 'allow',
+            reasonCode: 'ok',
+            actor,
+            subjectActor,
+            intentId: intent?.id ?? null,
+            delegationId: auth?.delegation?.delegation_id,
+            policy,
+            details: {
+              day_key: dayKey,
+              delta_usd: deltaUsd,
+              projected_usd: dailyCheck.details?.projected_usd ?? null,
+              cap_usd: dailyCheck.details?.cap_usd ?? null,
+              consent_required: !!consentCheck.required,
+              consent_id: consentCheck.details?.consent_id ?? null
+            }
+          });
+        }
+
+        return { ok: true, body: { correlation_id: correlationIdForIntentId(nextIntent.id), intent: nextIntent } };
       }
     });
   }
@@ -199,8 +314,8 @@ export class SwapIntentsService {
       };
     }
 
-    const eff = effectiveActor({ actor, auth }) ?? actor;
-    if (actor?.type === 'agent' && !eff) {
+    const subjectActor = effectiveActorForDelegation({ actor, auth }) ?? actor;
+    if (actor?.type === 'agent' && !subjectActor) {
       return {
         replayed: false,
         result: {
@@ -212,41 +327,29 @@ export class SwapIntentsService {
 
     const intent = requestBody?.intent;
     if (actor?.type === 'agent') {
-      if (actorKey(intent?.actor) !== actorKey(eff)) {
+      if (actorKey(intent?.actor) !== actorKey(subjectActor)) {
         return {
           replayed: false,
           result: {
             ok: false,
             body: errorResponse(correlationId, 'FORBIDDEN', 'agent cannot act for this actor', {
               actor,
-              subject_actor: eff,
+              subject_actor: subjectActor,
               intent_actor: intent?.actor ?? null
             })
           }
         };
       }
 
-      const policy = policyForActor({ actor, auth });
-      const pol = enforceTradingPolicyForIntent({ policy, intent });
-      if (!pol.ok) {
-        return {
-          replayed: false,
-          result: {
-            ok: false,
-            body: errorResponse(correlationId, pol.code, pol.message, pol.details)
-          }
-        };
-      }
-
       const existing = this.store.state.intents[id];
-      if (existing && actorKey(existing.actor) !== actorKey(eff)) {
+      if (existing && actorKey(existing.actor) !== actorKey(subjectActor)) {
         return {
           replayed: false,
           result: {
             ok: false,
             body: errorResponse(correlationId, 'FORBIDDEN', 'agent cannot modify this intent', {
               actor,
-              subject_actor: eff,
+              subject_actor: subjectActor,
               intent_actor: existing.actor
             })
           }
@@ -264,11 +367,114 @@ export class SwapIntentsService {
         if (intent.id !== id) {
           return { ok: false, body: errorResponse(correlationIdForIntentId(id), 'CONSTRAINT_VIOLATION', 'intent.id must match path id', { id, intent_id: intent.id }) };
         }
-        const prev = this.store.state.intents[id];
+
+        const prev = this.store.state.intents[id] ?? null;
         const status = prev?.status ?? intent.status ?? 'active';
-        const stored = { ...intent, status };
-        this.store.state.intents[id] = stored;
-        return { ok: true, body: { correlation_id: correlationIdForIntentId(stored.id), intent: stored } };
+        const nextIntent = { ...intent, status };
+
+        let dayKey = null;
+        let dailyCheck = { ok: true, enforced: false, skipped: true, details: {} };
+        let consentCheck = { ok: true, required: false, skipped: true, details: {} };
+        let policy = null;
+        let nowIso = null;
+
+        if (actor?.type === 'agent') {
+          policy = policyForDelegatedActor({ actor, auth });
+          nowIso = resolvePolicyNowIso({ auth });
+
+          const intentPolicy = evaluateIntentAgainstTradingPolicy({ policy, intent: nextIntent });
+          if (!intentPolicy.ok) {
+            appendPolicyAudit(this.store, {
+              occurredAt: nowIso,
+              operationId: 'swapIntents.update',
+              decision: 'deny',
+              reasonCode: reasonCodeFromPolicyCheck(intentPolicy, 'policy_violation'),
+              actor,
+              subjectActor,
+              intentId: id,
+              delegationId: auth?.delegation?.delegation_id,
+              policy,
+              details: intentPolicy.details
+            });
+            return { ok: false, body: errorResponse(correlationId, intentPolicy.code, intentPolicy.message, intentPolicy.details) };
+          }
+
+          consentCheck = evaluateHighValueConsentForIntent({ policy, intent: nextIntent, auth, nowIso });
+          if (!consentCheck.ok) {
+            appendPolicyAudit(this.store, {
+              occurredAt: nowIso,
+              operationId: 'swapIntents.update',
+              decision: 'deny',
+              reasonCode: reasonCodeFromPolicyCheck(consentCheck, 'consent_required'),
+              actor,
+              subjectActor,
+              intentId: id,
+              delegationId: auth?.delegation?.delegation_id,
+              policy,
+              details: consentCheck.details
+            });
+            return { ok: false, body: errorResponse(correlationId, consentCheck.code, consentCheck.message, consentCheck.details) };
+          }
+
+          dailyCheck = evaluateDailySpendCapForIntent({
+            policy,
+            subjectActor,
+            nowIso,
+            spendByActorDay: this.store.state.policy_spend_daily,
+            existingIntent: prev,
+            nextIntent
+          });
+
+          if (!dailyCheck.ok) {
+            appendPolicyAudit(this.store, {
+              occurredAt: nowIso,
+              operationId: 'swapIntents.update',
+              decision: 'deny',
+              reasonCode: reasonCodeFromPolicyCheck(dailyCheck, 'daily_cap_exceeded'),
+              actor,
+              subjectActor,
+              intentId: id,
+              delegationId: auth?.delegation?.delegation_id,
+              policy,
+              details: dailyCheck.details
+            });
+            return { ok: false, body: errorResponse(correlationId, dailyCheck.code, dailyCheck.message, dailyCheck.details) };
+          }
+
+          dayKey = dailyCheck.details?.day_key ?? dayKeyFromIsoUtc(nowIso);
+        }
+
+        this.store.state.intents[id] = nextIntent;
+
+        if (actor?.type === 'agent') {
+          const deltaUsd = dailySpendDeltaForIntentMutation({ previousIntent: prev, nextIntent });
+          if (dailyCheck.enforced && dayKey) {
+            const used = getDailySpend(this.store, subjectActor, dayKey);
+            setDailySpend(this.store, subjectActor, dayKey, used + deltaUsd);
+          }
+
+          appendPolicyAudit(this.store, {
+            occurredAt: nowIso,
+            operationId: 'swapIntents.update',
+            decision: 'allow',
+            reasonCode: 'ok',
+            actor,
+            subjectActor,
+            intentId: id,
+            delegationId: auth?.delegation?.delegation_id,
+            policy,
+            details: {
+              day_key: dayKey,
+              delta_usd: deltaUsd,
+              projected_usd: dailyCheck.details?.projected_usd ?? null,
+              cap_usd: dailyCheck.details?.cap_usd ?? null,
+              consent_required: !!consentCheck.required,
+              consent_id: consentCheck.details?.consent_id ?? null
+            }
+          });
+        }
+
+        return { ok: true, body: { correlation_id: correlationIdForIntentId(nextIntent.id), intent: nextIntent } };
       }
     });
   }
@@ -287,8 +493,8 @@ export class SwapIntentsService {
       };
     }
 
-    const eff = effectiveActor({ actor, auth }) ?? actor;
-    if (actor?.type === 'agent' && !eff) {
+    const subjectActor = effectiveActorForDelegation({ actor, auth }) ?? actor;
+    if (actor?.type === 'agent' && !subjectActor) {
       return {
         replayed: false,
         result: {
@@ -311,18 +517,48 @@ export class SwapIntentsService {
           return { ok: false, body: errorResponse(correlationIdForIntentId(id), 'NOT_FOUND', 'intent not found', { id }) };
         }
 
-        if (actor?.type === 'agent' && actorKey(prev.actor) !== actorKey(eff)) {
+        if (actor?.type === 'agent' && actorKey(prev.actor) !== actorKey(subjectActor)) {
           return {
             ok: false,
             body: errorResponse(correlationIdForIntentId(id), 'FORBIDDEN', 'agent cannot cancel this intent', {
               actor,
-              subject_actor: eff,
+              subject_actor: subjectActor,
               intent_actor: prev.actor
             })
           };
         }
 
-        this.store.state.intents[id] = { ...prev, status: 'cancelled' };
+        const nextIntent = { ...prev, status: 'cancelled' };
+        this.store.state.intents[id] = nextIntent;
+
+        if (actor?.type === 'agent') {
+          const policy = policyForDelegatedActor({ actor, auth });
+          const nowIso = resolvePolicyNowIso({ auth });
+          const dayKey = dayKeyFromIsoUtc(nowIso);
+
+          if (policy && Number.isFinite(policy.max_value_per_day_usd) && dayKey) {
+            const deltaUsd = dailySpendDeltaForIntentMutation({ previousIntent: prev, nextIntent });
+            const used = getDailySpend(this.store, subjectActor, dayKey);
+            setDailySpend(this.store, subjectActor, dayKey, used + deltaUsd);
+          }
+
+          appendPolicyAudit(this.store, {
+            occurredAt: nowIso,
+            operationId: 'swapIntents.cancel',
+            decision: 'allow',
+            reasonCode: 'ok',
+            actor,
+            subjectActor,
+            intentId: id,
+            delegationId: auth?.delegation?.delegation_id,
+            policy,
+            details: {
+              day_key: dayKey,
+              cancelled: true
+            }
+          });
+        }
+
         return { ok: true, body: { correlation_id: correlationIdForIntentId(id), id, status: 'cancelled' } };
       }
     });
@@ -336,15 +572,15 @@ export class SwapIntentsService {
       return { ok: false, body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details) };
     }
 
-    const eff = effectiveActor({ actor, auth }) ?? actor;
-    if (actor?.type === 'agent' && !eff) {
+    const subjectActor = effectiveActorForDelegation({ actor, auth }) ?? actor;
+    if (actor?.type === 'agent' && !subjectActor) {
       return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation subject', { actor }) };
     }
 
     // v1: actor must match intent.actor (agent matches via delegation subject).
     const intent = this.store.state.intents[id];
     if (!intent) return { ok: false, body: errorResponse(correlationId, 'NOT_FOUND', 'intent not found', { id }) };
-    if (actorKey(intent.actor) !== actorKey(eff)) {
+    if (actorKey(intent.actor) !== actorKey(subjectActor)) {
       return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'actor cannot access this intent', { id }) };
     }
     return { ok: true, body: { correlation_id: correlationId, intent } };
@@ -358,12 +594,12 @@ export class SwapIntentsService {
       return { ok: false, body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details) };
     }
 
-    const eff = effectiveActor({ actor, auth }) ?? actor;
-    if (actor?.type === 'agent' && !eff) {
+    const subjectActor = effectiveActorForDelegation({ actor, auth }) ?? actor;
+    if (actor?.type === 'agent' && !subjectActor) {
       return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation subject', { actor }) };
     }
 
-    const intents = Object.values(this.store.state.intents).filter(i => actorKey(i.actor) === actorKey(eff));
+    const intents = Object.values(this.store.state.intents).filter(i => actorKey(i.actor) === actorKey(subjectActor));
     return { ok: true, body: { correlation_id: correlationId, intents } };
   }
 }

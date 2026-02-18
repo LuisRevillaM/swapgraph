@@ -1,6 +1,7 @@
 {
   "max_value_per_swap_usd": 100,
   "max_value_per_day_usd": 250,
+  "high_value_consent_threshold_usd": 120,
   "min_confidence_score": 0.8,
   "max_cycle_length": 3,
   "require_escrow": true,

@@ -1,0 +1,232 @@
+{
+  "final": {
+    "intents": [
+      {
+        "id": "intent_m38_i1",
+        "max_usd": 90,
+        "status": "active"
+      },
+      {
+        "id": "intent_m38_i2",
+        "max_usd": 130,
+        "status": "cancelled"
+      },
+      {
+        "id": "intent_m38_i3",
+        "max_usd": 30,
+        "status": "active"
+      },
+      {
+        "id": "intent_m38_i4",
+        "max_usd": 130,
+        "status": "active"
+      }
+    ],
+    "policy_audit": [
+      {
+        "cap_usd": 250,
+        "consent_id": null,
+        "day_key": "2026-02-16",
+        "decision": "allow",
+        "intent_id": "intent_m38_i1",
+        "operation_id": "swapIntents.create",
+        "projected_usd": 100,
+        "reason_code": "ok"
+      },
+      {
+        "cap_usd": null,
+        "consent_id": null,
+        "day_key": null,
+        "decision": "deny",
+        "intent_id": "intent_m38_i2",
+        "operation_id": "swapIntents.create",
+        "projected_usd": null,
+        "reason_code": "consent_required"
+      },
+      {
+        "cap_usd": 250,
+        "consent_id": "consent_m38_i2",
+        "day_key": "2026-02-16",
+        "decision": "allow",
+        "intent_id": "intent_m38_i2",
+        "operation_id": "swapIntents.create",
+        "projected_usd": 230,
+        "reason_code": "ok"
+      },
+      {
+        "cap_usd": 250,
+        "consent_id": null,
+        "day_key": "2026-02-16",
+        "decision": "deny",
+        "intent_id": "intent_m38_i3",
+        "operation_id": "swapIntents.create",
+        "projected_usd": 260,
+        "reason_code": "daily_cap_exceeded"
+      },
+      {
+        "cap_usd": 250,
+        "consent_id": null,
+        "day_key": "2026-02-16",
+        "decision": "allow",
+        "intent_id": "intent_m38_i1",
+        "operation_id": "swapIntents.update",
+        "projected_usd": 220,
+        "reason_code": "ok"
+      },
+      {
+        "cap_usd": 250,
+        "consent_id": null,
+        "day_key": "2026-02-16",
+        "decision": "allow",
+        "intent_id": "intent_m38_i3",
+        "operation_id": "swapIntents.create",
+        "projected_usd": 250,
+        "reason_code": "ok"
+      },
+      {
+        "cap_usd": null,
+        "consent_id": null,
+        "day_key": "2026-02-16",
+        "decision": "allow",
+        "intent_id": "intent_m38_i2",
+        "operation_id": "swapIntents.cancel",
+        "projected_usd": null,
+        "reason_code": "ok"
+      },
+      {
+        "cap_usd": null,
+        "consent_id": "consent_m38_i4_low",
+        "day_key": null,
+        "decision": "deny",
+        "intent_id": "intent_m38_i4",
+        "operation_id": "swapIntents.create",
+        "projected_usd": null,
+        "reason_code": "consent_limit_exceeded"
+      },
+      {
+        "cap_usd": 250,
+        "consent_id": "consent_m38_i4_ok",
+        "day_key": "2026-02-16",
+        "decision": "allow",
+        "intent_id": "intent_m38_i4",
+        "operation_id": "swapIntents.create",
+        "projected_usd": 250,
+        "reason_code": "ok"
+      }
+    ],
+    "policy_spend_daily": {
+      "user:u1": {
+        "2026-02-16": 250
+      }
+    }
+  },
+  "operations": [
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "delegation_id": "del_m38_u1_agent1",
+      "error_code": null,
+      "ok": true,
+      "op": "delegations.create",
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "agent_1",
+        "type": "agent"
+      },
+      "error_code": null,
+      "ok": true,
+      "op": "authHeaders.parse"
+    },
+    {
+      "error_code": null,
+      "intent_id": "intent_m38_i1",
+      "ok": true,
+      "op": "swapIntents.create.via_token",
+      "parse_ok": true,
+      "replayed": false
+    },
+    {
+      "error_code": "FORBIDDEN",
+      "intent_id": "intent_m38_i2",
+      "ok": false,
+      "op": "swapIntents.create.via_token",
+      "parse_ok": true,
+      "replayed": false
+    },
+    {
+      "error_code": null,
+      "intent_id": "intent_m38_i2",
+      "ok": true,
+      "op": "swapIntents.create.via_token",
+      "parse_ok": true,
+      "replayed": false
+    },
+    {
+      "error_code": "FORBIDDEN",
+      "intent_id": "intent_m38_i3",
+      "ok": false,
+      "op": "swapIntents.create.via_token",
+      "parse_ok": true,
+      "replayed": false
+    },
+    {
+      "error_code": null,
+      "intent_id": "intent_m38_i1",
+      "ok": true,
+      "op": "swapIntents.update.via_token",
+      "parse_ok": true,
+      "replayed": false,
+      "updated_max_usd": 90
+    },
+    {
+      "error_code": null,
+      "intent_id": "intent_m38_i3",
+      "ok": true,
+      "op": "swapIntents.create.via_token",
+      "parse_ok": true,
+      "replayed": false
+    },
+    {
+      "error_code": null,
+      "intent_id": "intent_m38_i2",
+      "ok": true,
+      "op": "swapIntents.cancel.via_token",
+      "parse_ok": true,
+      "replayed": false,
+      "status": "cancelled"
+    },
+    {
+      "error_code": "FORBIDDEN",
+      "intent_id": "intent_m38_i4",
+      "ok": false,
+      "op": "swapIntents.create.via_token",
+      "parse_ok": true,
+      "replayed": false
+    },
+    {
+      "error_code": null,
+      "intent_id": "intent_m38_i4",
+      "ok": true,
+      "op": "swapIntents.create.via_token",
+      "parse_ok": true,
+      "replayed": false
+    },
+    {
+      "error_code": null,
+      "intent_ids": [
+        "intent_m38_i1",
+        "intent_m38_i2",
+        "intent_m38_i3",
+        "intent_m38_i4"
+      ],
+      "intents_count": 4,
+      "ok": true,
+      "op": "swapIntents.list.via_token",
+      "parse_ok": true
+    }
+  ]
+}

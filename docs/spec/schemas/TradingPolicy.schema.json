@@ -8,6 +8,7 @@
   "properties": {
     "max_value_per_swap_usd": { "type": "number", "minimum": 0 },
     "max_value_per_day_usd": { "type": "number", "minimum": 0 },
+    "high_value_consent_threshold_usd": { "type": "number", "minimum": 0 },
     "min_confidence_score": { "type": "number", "minimum": 0, "maximum": 1 },
     "max_cycle_length": { "type": "integer", "minimum": 2, "maximum": 6 },
     "require_escrow": { "type": "boolean" },
