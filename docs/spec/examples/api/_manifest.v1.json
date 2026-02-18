@@ -46,6 +46,10 @@
       "schema": "PolicyAuditListResponse.schema.json"
     },
     {
+      "file": "policy_audit.delegated_writes.export.response.json",
+      "schema": "PolicyAuditExportResponse.schema.json"
+    },
+    {
       "file": "settlement.start.request.json",
       "schema": "SettlementStartRequest.schema.json"
     },
@@ -96,6 +100,10 @@
     {
       "file": "receipts.get.response.json",
       "schema": "SwapReceiptGetResponse.schema.json"
+    },
+    {
+      "file": "keys.policy_integrity_signing.get.response.json",
+      "schema": "PolicyIntegritySigningKeysGetResponse.schema.json"
     },
     {
       "file": "keys.delegation_token_signing.get.response.json",

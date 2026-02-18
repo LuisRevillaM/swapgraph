@@ -388,12 +388,44 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/policy-audit/delegated-writes/export",
+      "operation_id": "policyAudit.delegated_writes.export",
+      "idempotency_required": false,
+      "response_schema": "PolicyAuditExportResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user"
+        ],
+        "required_scopes": [
+          "delegations:read"
+        ]
+      }
+    },
+    {
       "method": "POST",
       "path": "/auth/delegation-token/introspect",
       "operation_id": "auth.delegation_token.introspect",
       "idempotency_required": false,
       "request_schema": "DelegationTokenIntrospectRequest.schema.json",
       "response_schema": "DelegationTokenIntrospectResponse.schema.json",
+      "auth": {
+        "required": false,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/keys/policy-integrity-signing",
+      "operation_id": "keys.policy_integrity_signing.get",
+      "idempotency_required": false,
+      "response_schema": "PolicyIntegritySigningKeysGetResponse.schema.json",
       "auth": {
         "required": false,
         "allowed_actor_types": [

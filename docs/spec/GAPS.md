@@ -125,7 +125,8 @@ Each item here must become at least one of:
 - Resolved (fixtures-first, partial): M38 (delegated write-path daily cap + high-value consent hooks + policy audit trail).
 - Resolved (fixtures-first, partial): M39 (consent tier hardening + delegated policy audit read contract).
 - Resolved (fixtures-first, partial): M40 (consent proof binding + delegated policy audit pagination/retention hardening).
-- Remaining: consent proof signature assurances and audit export integrity contracts.
+- Resolved (fixtures-first, partial): M41 (consent proof signature assurances + delegated policy-audit export integrity contracts).
+- Remaining: consent-proof anti-replay and export-attestation continuity across pagination chunks.
 
 ---
 

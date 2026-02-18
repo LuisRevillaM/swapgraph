@@ -51,9 +51,10 @@ Last updated: 2026-02-18
 - M38: ✅ advanced delegated write-path policy controls (`max_value_per_day_usd`, consent hooks, audit trail expansion) (fixtures-first)
 - M39: ✅ high-value consent tier hardening + delegated policy audit read contract (fixtures-first)
 - M40: ✅ consent proof binding + delegated policy audit pagination/retention hardening (fixtures-first)
+- M41: ✅ consent proof signature contract + delegated policy audit export integrity (fixtures-first)
 
 ## Next
-- M41: consent proof signature contract + delegated policy audit export integrity (TBD)
+- M42: consent-proof anti-replay + signed export pagination attestations (TBD)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.

@@ -1,0 +1,43 @@
+name: M41
+commands:
+  - cmd: "npm run verify:m41"
+artifacts:
+  - artifact: "docs/prd/M41.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/AUTH.md"
+  - artifact: "docs/spec/KEYS.md"
+  - artifact: "docs/spec/GAPS.md"
+  - artifact: "docs/spec/api/manifest.v1.json"
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+
+  - artifact: "docs/spec/schemas/PolicyIntegritySigningKey.schema.json"
+  - artifact: "docs/spec/schemas/PolicyIntegritySigningKeysGetResponse.schema.json"
+  - artifact: "docs/spec/schemas/PolicyAuditExportResponse.schema.json"
+  - artifact: "docs/spec/examples/PolicyIntegritySigningKey.example.json"
+  - artifact: "docs/spec/examples/api/keys.policy_integrity_signing.get.response.json"
+  - artifact: "docs/spec/examples/api/policy_audit.delegated_writes.export.response.json"
+
+  - artifact: "src/crypto/policyIntegritySigning.mjs"
+  - artifact: "src/core/tradingPolicyBoundaries.mjs"
+  - artifact: "src/read/policyAuditReadService.mjs"
+  - artifact: "src/service/policyIntegritySigningService.mjs"
+
+  - artifact: "fixtures/keys/policy_integrity_signing_dev_pi_k1_private.pem"
+  - artifact: "fixtures/keys/policy_integrity_signing_dev_pi_k1_public.pem"
+  - artifact: "fixtures/keys/policy_integrity_signing_dev_pi_k2_private.pem"
+  - artifact: "fixtures/keys/policy_integrity_signing_dev_pi_k2_public.pem"
+
+  - artifact: "scripts/validate-schemas.mjs"
+  - artifact: "scripts/run-m41-consent-proof-signature-audit-export-scenario.mjs"
+  - artifact: "fixtures/delegation/m41_scenario.json"
+  - artifact: "fixtures/delegation/m41_expected.json"
+
+  - artifact: "verify/m41.sh"
+
+  - artifact: "artifacts/milestones/M41/latest/commands.log"
+  - artifact: "artifacts/milestones/M41/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M41/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M41/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M41/latest/consent_proof_signature_audit_export_output.json"
+  - artifact: "artifacts/milestones/M41/latest/store.json"
+  - artifact: "artifacts/milestones/M41/latest/assertions.json"

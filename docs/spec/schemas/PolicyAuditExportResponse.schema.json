@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/PolicyAuditExportResponse.schema.json",
+  "title": "PolicyAuditExportResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "exported_at",
+    "query",
+    "total_filtered",
+    "entries",
+    "export_hash",
+    "signature"
+  ],
+  "properties": {
+    "correlation_id": { "type": "string", "minLength": 1 },
+    "exported_at": { "type": "string", "format": "date-time" },
+    "query": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "subject_actor_id": { "type": "string", "minLength": 1 },
+        "decision": { "type": "string", "enum": ["allow", "deny"] },
+        "operation_id": { "type": "string", "minLength": 1 },
+        "delegation_id": { "type": "string", "minLength": 1 },
+        "from_iso": { "type": "string", "format": "date-time" },
+        "to_iso": { "type": "string", "format": "date-time" },
+        "now_iso": { "type": "string", "format": "date-time" }
+      }
+    },
+    "total_filtered": { "type": "integer", "minimum": 0 },
+    "entries": {
+      "type": "array",
+      "items": { "$ref": "PolicyAuditEntry.schema.json" }
+    },
+    "export_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "signature": { "$ref": "EventSignature.schema.json" }
+  }
+}

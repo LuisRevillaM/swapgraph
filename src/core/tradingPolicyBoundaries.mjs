@@ -1,3 +1,5 @@
+import { verifySignedConsentProofString } from '../crypto/policyIntegritySigning.mjs';
+
 export function actorKey(actor) {
   return `${actor?.type}:${actor?.id}`;
 }
@@ -272,8 +274,10 @@ export function evaluateHighValueConsentForIntent({ policy, intent, auth, nowIso
 
   const tierEnforced = process.env.POLICY_CONSENT_TIER_ENFORCE === '1';
   const bindingEnforced = process.env.POLICY_CONSENT_PROOF_BIND_ENFORCE === '1';
+  const signatureEnforced = process.env.POLICY_CONSENT_PROOF_SIG_ENFORCE === '1';
   const requiredTier = maxUsd > (threshold * 1.5) ? 'passkey' : 'step_up';
   const consentProof = consent?.consent_proof;
+  let consentProofKeyId = null;
 
   if (tierEnforced) {
     const consentTier = consent?.consent_tier;
@@ -370,7 +374,128 @@ export function evaluateHighValueConsentForIntent({ policy, intent, auth, nowIso
       intent
     });
 
-    if (consentProof.trim() !== expectedProof) {
+    const providedProof = consentProof.trim();
+
+    if (signatureEnforced) {
+      const proofVerification = verifySignedConsentProofString({
+        tokenString: providedProof,
+        expectedBinding: expectedProof,
+        nowIso
+      });
+
+      if (!proofVerification.ok) {
+        if (proofVerification.error === 'binding_mismatch') {
+          return {
+            ok: false,
+            code: 'FORBIDDEN',
+            message: 'delegation consent proof mismatch',
+            details: {
+              reason_code: 'consent_proof_mismatch',
+              threshold_usd: threshold,
+              max_usd: maxUsd,
+              required_tier: requiredTier,
+              consent_tier: consent?.consent_tier ?? null,
+              consent_id: consent.consent_id,
+              expected_proof: expectedProof,
+              provided_proof: providedProof
+            }
+          };
+        }
+
+        if (proofVerification.error === 'expired') {
+          return {
+            ok: false,
+            code: 'FORBIDDEN',
+            message: 'delegation consent proof expired',
+            details: {
+              reason_code: 'consent_proof_expired',
+              threshold_usd: threshold,
+              max_usd: maxUsd,
+              required_tier: requiredTier,
+              consent_tier: consent?.consent_tier ?? null,
+              consent_id: consent.consent_id,
+              now_iso: proofVerification.details?.now_iso ?? nowIso ?? null,
+              expires_at: proofVerification.details?.expires_at ?? null
+            }
+          };
+        }
+
+        if (proofVerification.error === 'invalid_timestamps') {
+          return {
+            ok: false,
+            code: 'CONSTRAINT_VIOLATION',
+            message: 'invalid consent proof timestamps',
+            details: {
+              reason_code: 'consent_proof_invalid_expiry',
+              threshold_usd: threshold,
+              max_usd: maxUsd,
+              required_tier: requiredTier,
+              consent_tier: consent?.consent_tier ?? null,
+              consent_id: consent.consent_id,
+              verify_details: proofVerification.details ?? null
+            }
+          };
+        }
+
+        if (proofVerification.error === 'unsupported_token_prefix') {
+          return {
+            ok: false,
+            code: 'FORBIDDEN',
+            message: 'delegation consent proof signature required',
+            details: {
+              reason_code: 'consent_proof_signature_required',
+              threshold_usd: threshold,
+              max_usd: maxUsd,
+              required_tier: requiredTier,
+              consent_tier: consent?.consent_tier ?? null,
+              consent_id: consent.consent_id,
+              expected_prefix: proofVerification.details?.expected_prefix ?? null
+            }
+          };
+        }
+
+        if (
+          proofVerification.error === 'missing_token'
+          || proofVerification.error === 'invalid_base64url'
+          || proofVerification.error === 'invalid_json'
+          || proofVerification.error === 'missing_binding'
+        ) {
+          return {
+            ok: false,
+            code: 'CONSTRAINT_VIOLATION',
+            message: 'malformed consent proof payload',
+            details: {
+              reason_code: 'consent_proof_malformed',
+              threshold_usd: threshold,
+              max_usd: maxUsd,
+              required_tier: requiredTier,
+              consent_tier: consent?.consent_tier ?? null,
+              consent_id: consent.consent_id,
+              verify_error: proofVerification.error,
+              verify_details: proofVerification.details ?? null
+            }
+          };
+        }
+
+        return {
+          ok: false,
+          code: 'FORBIDDEN',
+          message: 'delegation consent proof signature invalid',
+          details: {
+            reason_code: 'consent_proof_signature_invalid',
+            threshold_usd: threshold,
+            max_usd: maxUsd,
+            required_tier: requiredTier,
+            consent_tier: consent?.consent_tier ?? null,
+            consent_id: consent.consent_id,
+            verify_error: proofVerification.error,
+            verify_details: proofVerification.details ?? null
+          }
+        };
+      }
+
+      consentProofKeyId = proofVerification.proof?.signature?.key_id ?? null;
+    } else if (providedProof !== expectedProof) {
       return {
         ok: false,
         code: 'FORBIDDEN',
@@ -383,7 +508,7 @@ export function evaluateHighValueConsentForIntent({ policy, intent, auth, nowIso
           consent_tier: consent?.consent_tier ?? null,
           consent_id: consent.consent_id,
           expected_proof: expectedProof,
-          provided_proof: consentProof.trim()
+          provided_proof: providedProof
         }
       };
     }
@@ -448,8 +573,10 @@ export function evaluateHighValueConsentForIntent({ policy, intent, auth, nowIso
       required_tier: requiredTier,
       tier_enforced: tierEnforced,
       binding_enforced: bindingEnforced,
+      signature_enforced: signatureEnforced,
       consent_tier: consent?.consent_tier ?? null,
       consent_id: consent.consent_id,
+      consent_proof_key_id: consentProofKeyId,
       approved_max_usd: finiteNumberOrNull(consent.approved_max_usd)
     }
   };

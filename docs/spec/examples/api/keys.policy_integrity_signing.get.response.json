@@ -1,0 +1,18 @@
+{
+  "correlation_id": "corr_keys_policy_integrity_signing",
+  "active_key_id": "dev-pi-k1",
+  "keys": [
+    {
+      "key_id": "dev-pi-k1",
+      "alg": "ed25519",
+      "public_key_pem": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEA6Ra5oGC+1VEGr5yS8Xyc5LZEVPy37OrJdBoHPQw93wc=\n-----END PUBLIC KEY-----\n",
+      "status": "active"
+    },
+    {
+      "key_id": "dev-pi-k2",
+      "alg": "ed25519",
+      "public_key_pem": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAzkiPQb34BycgyWasEAXihxl/z7WXq5ziIW7F96TyFTY=\n-----END PUBLIC KEY-----\n",
+      "status": "verify_only"
+    }
+  ]
+}

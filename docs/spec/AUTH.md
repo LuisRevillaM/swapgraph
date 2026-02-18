@@ -62,7 +62,7 @@ Policy checks currently enforced at these boundaries:
 - `max_cycle_length`
 - `quiet_hours` (for `settlement.instructions` when `auth.now_iso` is provided)
 
-Delegated write-path policy controls (M38/M39):
+Delegated write-path policy controls (M38–M41):
 - `swapIntents.create/update` enforce:
   - `max_value_per_swap_usd`
   - `max_value_per_day_usd` (UTC day bucket, deterministic via `auth.now_iso`)
@@ -71,10 +71,20 @@ Delegated write-path policy controls (M38/M39):
   - `auth.user_consent.consent_tier` (`step_up` or `passkey`)
   - `auth.user_consent.consent_proof` (non-empty proof handle)
   - higher-value intents may require `passkey` tier
+- when proof binding is enabled (`POLICY_CONSENT_PROOF_BIND_ENFORCE=1`), consent proof must bind to:
+  - `consent_id`, subject actor, delegation id, intent id, and intent max_usd (`sgcp1|...` binding)
+- when signature enforcement is enabled (`POLICY_CONSENT_PROOF_SIG_ENFORCE=1`), `consent_proof` must be a signed token (`sgcp2.<base64url-json>`) and pass:
+  - signature verification
+  - binding match
+  - expiry checks (when `expires_at` is present)
+- policy-integrity signing public keys are published via:
+  - `GET /keys/policy-integrity-signing`
 - delegated write decisions are recorded in store-backed audit records (`policy_audit`) for deterministic proofing
 - users can read audit entries via `GET /policy-audit/delegated-writes`
   - includes pagination cursor support and retention-window filtering
   - in fixtures-first, retention uses `POLICY_AUDIT_RETENTION_DAYS` and deterministic `now_iso` query override
+- users can export signed audit snapshots via `GET /policy-audit/delegated-writes/export`
+  - response carries `export_hash` + signature for offline integrity verification
 
 ## Scope taxonomy
 Scopes are stable strings.

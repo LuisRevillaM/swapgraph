@@ -38,7 +38,7 @@ Auth headers (see `docs/spec/AUTH.md` for details):
   - `POST /swap-intents/{id}/cancel`
   - `GET /swap-intents/{id}`
   - `GET /swap-intents` (list)
-  - delegated agent writes are policy-gated (per-swap cap, daily cap, and optional high-value consent hook)
+  - delegated agent writes are policy-gated (per-swap cap, daily cap, and optional high-value consent hook with proof binding/signature enforcement controls)
 
 - `CycleProposal`
   - `GET /cycle-proposals` (list)
@@ -71,16 +71,21 @@ Delegation read/write responses include:
 - `delegation` (`DelegationGrant`)
 - `delegation_token` (`sgdt1...`) suitable for `Authorization: Bearer ...` by the agent
 
-Delegated-policy audit endpoint:
+Delegated-policy audit endpoints:
 - `GET /policy-audit/delegated-writes` (user-scoped policy decision audit entries)
   - supports filters (`decision`, `operation_id`, `delegation_id`, `from_iso`, `to_iso`)
   - supports pagination (`limit`, `cursor_after`, response `next_cursor`)
   - applies retention window filtering in fixtures-first verification
+- `GET /policy-audit/delegated-writes/export` (signed export for offline integrity verification)
+  - same filters as list (no pagination params)
+  - response includes `export_hash` + detached `signature`
+  - signature verifies export integrity against published policy-integrity signing keys
 
 Auth utility endpoints:
 - `POST /auth/delegation-token/introspect` (evaluate delegation token activity in a deterministic contract)
 
 Signing key endpoints:
+- `GET /keys/policy-integrity-signing` (public keys for verifying consent-proof signatures and policy-audit export signatures)
 - `GET /keys/delegation-token-signing` (public keys for verifying delegation-token signatures)
 - `GET /keys/receipt-signing` (public keys for verifying `SwapReceipt.signature`)
 - `GET /keys/event-signing` (public keys for verifying `EventEnvelope.signature`)

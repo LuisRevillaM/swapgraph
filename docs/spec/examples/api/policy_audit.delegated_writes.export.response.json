@@ -1,0 +1,42 @@
+{
+  "correlation_id": "corr_policy_audit_delegated_writes_export",
+  "exported_at": "2026-02-16T10:09:00Z",
+  "query": {
+    "subject_actor_id": "u1",
+    "decision": "deny",
+    "now_iso": "2026-02-16T10:09:00Z"
+  },
+  "total_filtered": 1,
+  "entries": [
+    {
+      "audit_id": "pa_1",
+      "occurred_at": "2026-02-16T10:05:00Z",
+      "operation_id": "swapIntents.create",
+      "decision": "deny",
+      "reason_code": "consent_required",
+      "actor": { "type": "agent", "id": "agent_1" },
+      "subject_actor": { "type": "user", "id": "u1" },
+      "intent_id": "intent_abc",
+      "delegation_id": "del_123",
+      "policy": {
+        "max_value_per_swap_usd": 200,
+        "max_value_per_day_usd": 250,
+        "high_value_consent_threshold_usd": 120,
+        "min_confidence_score": 0.8,
+        "max_cycle_length": 3,
+        "require_escrow": true
+      },
+      "details": {
+        "reason_code": "consent_required",
+        "threshold_usd": 120,
+        "max_usd": 130
+      }
+    }
+  ],
+  "export_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "signature": {
+    "key_id": "dev-pi-k1",
+    "alg": "ed25519",
+    "sig": "MEUCIQExamplePolicyAuditExportSignatured8p4qbvMIQIgYzY="
+  }
+}

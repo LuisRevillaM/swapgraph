@@ -2,6 +2,36 @@
 
 SwapGraph signs certain artifacts so partners/users can verify integrity **offline**.
 
+## Policy-integrity signing keys
+Policy-integrity signatures cover:
+- signed consent proofs (`consent_proof`, prefix `sgcp2.`)
+- delegated policy-audit export envelopes (`/policy-audit/delegated-writes/export`)
+
+### Publication
+Policy-integrity public keys are published via:
+- `GET /keys/policy-integrity-signing`
+
+See:
+- schema: `docs/spec/schemas/PolicyIntegritySigningKeysGetResponse.schema.json`
+- example: `docs/spec/examples/api/keys.policy_integrity_signing.get.response.json`
+
+### Rotation contract
+The key-set response includes:
+- `active_key_id`: key used for minting new signatures
+- `keys[].status`:
+  - `active` for current minting key
+  - `verify_only` for still-published historical keys
+
+### Algorithms
+- v1 uses `alg = "ed25519"`.
+
+### Fixtures-first note
+In this repo (fixtures-first), we include non-production dev keypairs under:
+- `fixtures/keys/policy_integrity_signing_dev_pi_k1_{public,private}.pem`
+- `fixtures/keys/policy_integrity_signing_dev_pi_k2_{public,private}.pem`
+
+Production deployments must **not** ship with these fixture keys.
+
 ## Receipt signing keys
 `SwapReceipt.signature` is produced by SwapGraph and must be verifiable by any consumer.
 

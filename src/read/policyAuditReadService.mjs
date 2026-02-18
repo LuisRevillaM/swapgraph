@@ -1,4 +1,5 @@
 import { authorizeApiOperation } from '../core/authz.mjs';
+import { buildSignedPolicyAuditExportPayload } from '../crypto/policyIntegritySigning.mjs';
 
 function actorKey(actor) {
   return `${actor?.type}:${actor?.id}`;
@@ -10,6 +11,10 @@ function errorResponse(correlationId, code, message, details = {}) {
 
 function correlationIdForPolicyAuditList() {
   return 'corr_policy_audit_delegated_writes';
+}
+
+function correlationIdForPolicyAuditExport() {
+  return 'corr_policy_audit_delegated_writes_export';
 }
 
 function normalizeLimit(limit) {
@@ -33,6 +38,95 @@ function nowIsoForRetention(query) {
   return query?.now_iso ?? process.env.AUTHZ_NOW_ISO ?? new Date().toISOString();
 }
 
+function exportNowIso(query) {
+  return query?.exported_at_iso ?? query?.now_iso ?? process.env.AUTHZ_NOW_ISO ?? new Date().toISOString();
+}
+
+function requireUserScope({ actor, query, correlationId }) {
+  if (actor?.type !== 'user') {
+    return {
+      ok: false,
+      body: errorResponse(correlationId, 'FORBIDDEN', 'only user can read delegated policy audit', { actor })
+    };
+  }
+
+  const subjectActorId = query?.subject_actor_id ?? actor.id;
+  if (subjectActorId !== actor.id) {
+    return {
+      ok: false,
+      body: errorResponse(correlationId, 'FORBIDDEN', 'cannot read delegated policy audit for a different user', {
+        actor,
+        requested_subject_actor_id: subjectActorId
+      })
+    };
+  }
+
+  return { ok: true, subjectActorId };
+}
+
+function selectFilteredEntries({ store, subjectActorId, query, correlationId }) {
+  const retentionNowIso = nowIsoForRetention(query);
+  const retentionNowMs = parseIsoMs(retentionNowIso);
+  if (retentionNowMs === null) {
+    return {
+      ok: false,
+      body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'invalid now_iso for policy audit retention', {
+        now_iso: retentionNowIso
+      })
+    };
+  }
+
+  const cutoffMs = retentionNowMs - (retentionDays() * 24 * 60 * 60 * 1000);
+
+  const fromMs = query?.from_iso ? parseIsoMs(query.from_iso) : null;
+  if (query?.from_iso && fromMs === null) {
+    return {
+      ok: false,
+      body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'invalid from_iso filter', { from_iso: query.from_iso })
+    };
+  }
+
+  const toMs = query?.to_iso ? parseIsoMs(query.to_iso) : null;
+  if (query?.to_iso && toMs === null) {
+    return {
+      ok: false,
+      body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'invalid to_iso filter', { to_iso: query.to_iso })
+    };
+  }
+
+  const subjectKey = actorKey({ type: 'user', id: subjectActorId });
+  let entries = (store.state.policy_audit ?? [])
+    .filter(e => actorKey(e?.subject_actor) === subjectKey)
+    .map(e => ({ entry: e, ts: parseIsoMs(e?.occurred_at) }))
+    .filter(x => x.ts !== null)
+    .filter(x => x.ts >= cutoffMs);
+
+  if (typeof query?.decision === 'string' && query.decision.trim()) {
+    entries = entries.filter(x => x.entry?.decision === query.decision.trim());
+  }
+
+  if (typeof query?.operation_id === 'string' && query.operation_id.trim()) {
+    entries = entries.filter(x => x.entry?.operation_id === query.operation_id.trim());
+  }
+
+  if (typeof query?.delegation_id === 'string' && query.delegation_id.trim()) {
+    entries = entries.filter(x => x.entry?.delegation_id === query.delegation_id.trim());
+  }
+
+  if (fromMs !== null) entries = entries.filter(x => x.ts >= fromMs);
+  if (toMs !== null) entries = entries.filter(x => x.ts <= toMs);
+
+  entries.sort((a, b) => {
+    if (a.ts !== b.ts) return a.ts - b.ts;
+    return String(a.entry?.audit_id ?? '').localeCompare(String(b.entry?.audit_id ?? ''));
+  });
+
+  return {
+    ok: true,
+    entries: entries.map(x => x.entry)
+  };
+}
+
 export class PolicyAuditReadService {
   /**
    * @param {{ store: import('../store/jsonStateStore.mjs').JsonStateStore }} opts
@@ -50,78 +144,13 @@ export class PolicyAuditReadService {
       return { ok: false, body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details) };
     }
 
-    if (actor?.type !== 'user') {
-      return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'only user can read delegated policy audit', { actor }) };
-    }
+    const scoped = requireUserScope({ actor, query, correlationId });
+    if (!scoped.ok) return scoped;
 
-    const subjectActorId = query?.subject_actor_id ?? actor.id;
-    if (subjectActorId !== actor.id) {
-      return {
-        ok: false,
-        body: errorResponse(correlationId, 'FORBIDDEN', 'cannot read delegated policy audit for a different user', {
-          actor,
-          requested_subject_actor_id: subjectActorId
-        })
-      };
-    }
+    const selected = selectFilteredEntries({ store: this.store, subjectActorId: scoped.subjectActorId, query, correlationId });
+    if (!selected.ok) return selected;
 
-    const retentionNowIso = nowIsoForRetention(query);
-    const retentionNowMs = parseIsoMs(retentionNowIso);
-    if (retentionNowMs === null) {
-      return {
-        ok: false,
-        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'invalid now_iso for policy audit retention', {
-          now_iso: retentionNowIso
-        })
-      };
-    }
-
-    const cutoffMs = retentionNowMs - (retentionDays() * 24 * 60 * 60 * 1000);
-
-    const fromMs = query?.from_iso ? parseIsoMs(query.from_iso) : null;
-    if (query?.from_iso && fromMs === null) {
-      return {
-        ok: false,
-        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'invalid from_iso filter', { from_iso: query.from_iso })
-      };
-    }
-
-    const toMs = query?.to_iso ? parseIsoMs(query.to_iso) : null;
-    if (query?.to_iso && toMs === null) {
-      return {
-        ok: false,
-        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'invalid to_iso filter', { to_iso: query.to_iso })
-      };
-    }
-
-    const subjectKey = actorKey({ type: 'user', id: subjectActorId });
-    let entries = (this.store.state.policy_audit ?? [])
-      .filter(e => actorKey(e?.subject_actor) === subjectKey)
-      .map(e => ({ entry: e, ts: parseIsoMs(e?.occurred_at) }))
-      .filter(x => x.ts !== null)
-      .filter(x => x.ts >= cutoffMs);
-
-    if (typeof query?.decision === 'string' && query.decision.trim()) {
-      entries = entries.filter(x => x.entry?.decision === query.decision.trim());
-    }
-
-    if (typeof query?.operation_id === 'string' && query.operation_id.trim()) {
-      entries = entries.filter(x => x.entry?.operation_id === query.operation_id.trim());
-    }
-
-    if (typeof query?.delegation_id === 'string' && query.delegation_id.trim()) {
-      entries = entries.filter(x => x.entry?.delegation_id === query.delegation_id.trim());
-    }
-
-    if (fromMs !== null) entries = entries.filter(x => x.ts >= fromMs);
-    if (toMs !== null) entries = entries.filter(x => x.ts <= toMs);
-
-    entries.sort((a, b) => {
-      if (a.ts !== b.ts) return a.ts - b.ts;
-      return String(a.entry?.audit_id ?? '').localeCompare(String(b.entry?.audit_id ?? ''));
-    });
-
-    let orderedEntries = entries.map(x => x.entry);
+    let orderedEntries = selected.entries;
 
     if (typeof query?.cursor_after === 'string' && query.cursor_after.trim()) {
       const cursor = query.cursor_after.trim();
@@ -156,5 +185,56 @@ export class PolicyAuditReadService {
     if (nextCursor) body.next_cursor = nextCursor;
 
     return { ok: true, body };
+  }
+
+  exportDelegatedWrites({ actor, auth, query }) {
+    const correlationId = correlationIdForPolicyAuditExport();
+
+    const authz = authorizeApiOperation({ operationId: 'policyAudit.delegated_writes.export', actor, auth, store: this.store });
+    if (!authz.ok) {
+      return { ok: false, body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details) };
+    }
+
+    const scoped = requireUserScope({ actor, query, correlationId });
+    if (!scoped.ok) return scoped;
+
+    if (Object.prototype.hasOwnProperty.call(query ?? {}, 'limit') || Object.prototype.hasOwnProperty.call(query ?? {}, 'cursor_after')) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'export does not support pagination parameters', {
+          limit: query?.limit ?? null,
+          cursor_after: query?.cursor_after ?? null
+        })
+      };
+    }
+
+    const selected = selectFilteredEntries({ store: this.store, subjectActorId: scoped.subjectActorId, query, correlationId });
+    if (!selected.ok) return selected;
+
+    const exportedAt = exportNowIso(query);
+    if (parseIsoMs(exportedAt) === null) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'invalid exported_at_iso for policy audit export', {
+          exported_at_iso: query?.exported_at_iso ?? null,
+          now_iso: query?.now_iso ?? null
+        })
+      };
+    }
+
+    const signedPayload = buildSignedPolicyAuditExportPayload({
+      exportedAt,
+      query,
+      entries: selected.entries,
+      totalFiltered: selected.entries.length
+    });
+
+    return {
+      ok: true,
+      body: {
+        correlation_id: correlationId,
+        ...signedPayload
+      }
+    };
   }
 }
