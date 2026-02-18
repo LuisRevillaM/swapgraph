@@ -133,7 +133,8 @@ Each item here must become at least one of:
 - Resolved (fixtures-first, partial): M45 (checkpoint retention + expiry enforcement + opportunistic checkpoint GC).
 - Resolved (fixtures-first, partial): M46 (proof-of-custody primitives: canonical custody snapshot + Merkle inclusion proof verifier).
 - Resolved (fixtures-first, partial): M47 (vault holding lifecycle scaffold: deposit/reserve/release/withdraw state-machine + deterministic verifier).
-- Remaining: custody root publication/read contracts, vault integration with settlement pipelines, and partner-program/commercial layers.
+- Resolved (fixtures-first, partial): M48 (vault custody publication/read scaffold: snapshot catalog pagination + inclusion-proof retrieval + deterministic failure semantics).
+- Remaining: custody publication API transport contract, vault/settlement integration, and partner-program/commercial layers.
 
 ---
 

@@ -1,0 +1,235 @@
+{
+  "actors": {
+    "partner_p1": { "type": "partner", "id": "p1" },
+    "user_u1": { "type": "user", "id": "u1" }
+  },
+  "operations": [
+    {
+      "op": "custody.publish",
+      "actor_ref": "partner_p1",
+      "idempotency_key": "idem_m48_pub_1",
+      "now_iso": "2026-02-18T23:00:00Z",
+      "request": {
+        "snapshot_id": "cust_snap_001",
+        "recorded_at": "2026-02-18T23:00:00Z",
+        "holdings": [
+          {
+            "holding_id": "hold_001",
+            "asset": { "platform": "steam", "asset_id": "730:asset_001" },
+            "owner_actor": { "type": "user", "id": "u1" },
+            "vault_id": "vault_u1",
+            "deposit_id": "dep_001",
+            "deposited_at": "2026-02-18T22:00:00Z"
+          },
+          {
+            "holding_id": "hold_002",
+            "asset": { "platform": "steam", "asset_id": "730:asset_002" },
+            "owner_actor": { "type": "user", "id": "u1" },
+            "vault_id": "vault_u1",
+            "deposit_id": "dep_002",
+            "deposited_at": "2026-02-18T22:05:00Z"
+          },
+          {
+            "holding_id": "hold_003",
+            "asset": { "platform": "steam", "asset_id": "730:asset_003" },
+            "owner_actor": { "type": "user", "id": "u2" },
+            "vault_id": "vault_u2",
+            "deposit_id": "dep_003",
+            "deposited_at": "2026-02-18T22:10:00Z"
+          }
+        ]
+      },
+      "save_snapshot_ref": "snap_1",
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_leaf_count": 3
+    },
+    {
+      "op": "custody.publish",
+      "actor_ref": "partner_p1",
+      "idempotency_key": "idem_m48_pub_1",
+      "now_iso": "2026-02-18T23:00:01Z",
+      "request": {
+        "snapshot_id": "cust_snap_001",
+        "recorded_at": "2026-02-18T23:00:00Z",
+        "holdings": [
+          {
+            "holding_id": "hold_001",
+            "asset": { "platform": "steam", "asset_id": "730:asset_001" },
+            "owner_actor": { "type": "user", "id": "u1" },
+            "vault_id": "vault_u1",
+            "deposit_id": "dep_001",
+            "deposited_at": "2026-02-18T22:00:00Z"
+          },
+          {
+            "holding_id": "hold_002",
+            "asset": { "platform": "steam", "asset_id": "730:asset_002" },
+            "owner_actor": { "type": "user", "id": "u1" },
+            "vault_id": "vault_u1",
+            "deposit_id": "dep_002",
+            "deposited_at": "2026-02-18T22:05:00Z"
+          },
+          {
+            "holding_id": "hold_003",
+            "asset": { "platform": "steam", "asset_id": "730:asset_003" },
+            "owner_actor": { "type": "user", "id": "u2" },
+            "vault_id": "vault_u2",
+            "deposit_id": "dep_003",
+            "deposited_at": "2026-02-18T22:10:00Z"
+          }
+        ]
+      },
+      "expect_ok": true,
+      "expect_replayed": true,
+      "expect_leaf_count": 3
+    },
+    {
+      "op": "custody.publish",
+      "actor_ref": "partner_p1",
+      "idempotency_key": "idem_m48_pub_1",
+      "now_iso": "2026-02-18T23:00:02Z",
+      "request": {
+        "snapshot_id": "cust_snap_001_mutated",
+        "recorded_at": "2026-02-18T23:00:02Z",
+        "holdings": [
+          {
+            "holding_id": "hold_099",
+            "asset": { "platform": "steam", "asset_id": "730:asset_099" },
+            "owner_actor": { "type": "user", "id": "u9" },
+            "vault_id": "vault_u9",
+            "deposit_id": "dep_099",
+            "deposited_at": "2026-02-18T22:12:00Z"
+          }
+        ]
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    },
+    {
+      "op": "custody.publish",
+      "actor_ref": "partner_p1",
+      "idempotency_key": "idem_m48_pub_2",
+      "now_iso": "2026-02-18T23:05:00Z",
+      "request": {
+        "snapshot_id": "cust_snap_002",
+        "recorded_at": "2026-02-18T23:05:00Z",
+        "holdings": [
+          {
+            "holding_id": "hold_010",
+            "asset": { "platform": "steam", "asset_id": "730:asset_010" },
+            "owner_actor": { "type": "user", "id": "u1" },
+            "vault_id": "vault_u1",
+            "deposit_id": "dep_010",
+            "deposited_at": "2026-02-18T22:15:00Z"
+          },
+          {
+            "holding_id": "hold_011",
+            "asset": { "platform": "steam", "asset_id": "730:asset_011" },
+            "owner_actor": { "type": "user", "id": "u2" },
+            "vault_id": "vault_u2",
+            "deposit_id": "dep_011",
+            "deposited_at": "2026-02-18T22:16:00Z"
+          }
+        ]
+      },
+      "save_snapshot_ref": "snap_2",
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_leaf_count": 2
+    },
+    {
+      "op": "custody.publish",
+      "actor_ref": "partner_p1",
+      "idempotency_key": "idem_m48_pub_3",
+      "now_iso": "2026-02-18T23:06:00Z",
+      "request": {
+        "snapshot_id": "cust_snap_001",
+        "recorded_at": "2026-02-18T23:06:00Z",
+        "holdings": []
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "vault_custody_snapshot_exists"
+    },
+    {
+      "op": "custody.list",
+      "actor_ref": "partner_p1",
+      "query": { "limit": 1 },
+      "expect_ok": true,
+      "expect_snapshot_ids": ["cust_snap_001"],
+      "expect_next_cursor": "cust_snap_001"
+    },
+    {
+      "op": "custody.list",
+      "actor_ref": "partner_p1",
+      "query": { "limit": 1, "cursor_after": "cust_snap_001" },
+      "expect_ok": true,
+      "expect_snapshot_ids": ["cust_snap_002"],
+      "expect_next_cursor": null
+    },
+    {
+      "op": "custody.list",
+      "actor_ref": "partner_p1",
+      "query": { "limit": 1, "cursor_after": "cust_snap_unknown" },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "vault_custody_cursor_not_found"
+    },
+    {
+      "op": "custody.get",
+      "actor_ref": "partner_p1",
+      "snapshot_id": "cust_snap_001",
+      "expect_ok": true,
+      "expect_leaf_count": 3
+    },
+    {
+      "op": "custody.get",
+      "actor_ref": "partner_p1",
+      "snapshot_id": "cust_snap_unknown",
+      "expect_ok": false,
+      "expect_error_code": "NOT_FOUND",
+      "expect_reason_code": "vault_custody_snapshot_not_found"
+    },
+    {
+      "op": "custody.proof",
+      "actor_ref": "partner_p1",
+      "snapshot_id": "cust_snap_001",
+      "holding_id": "hold_002",
+      "save_proof_ref": "proof_snap1_hold2",
+      "expect_ok": true,
+      "expect_verify_ok": true
+    },
+    {
+      "op": "custody.proof",
+      "actor_ref": "partner_p1",
+      "snapshot_id": "cust_snap_001",
+      "holding_id": "hold_999",
+      "expect_ok": false,
+      "expect_error_code": "NOT_FOUND",
+      "expect_reason_code": "vault_custody_holding_not_found"
+    },
+    {
+      "op": "custody.proof.verify_tampered",
+      "proof_ref": "proof_snap1_hold2",
+      "tamper": {
+        "kind": "sibling_hash",
+        "index": 0
+      },
+      "expect_verify_ok": false,
+      "expect_verify_error": "root_mismatch"
+    },
+    {
+      "op": "custody.publish",
+      "actor_ref": "user_u1",
+      "idempotency_key": "idem_m48_pub_user",
+      "now_iso": "2026-02-18T23:07:00Z",
+      "request": {
+        "snapshot_id": "cust_snap_user_forbidden",
+        "recorded_at": "2026-02-18T23:07:00Z",
+        "holdings": []
+      },
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN"
+    }
+  ]
+}

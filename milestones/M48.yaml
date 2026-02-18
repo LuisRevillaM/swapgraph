@@ -1,0 +1,23 @@
+name: M48
+commands:
+  - cmd: "npm run verify:m48"
+artifacts:
+  - artifact: "docs/prd/M48.md"
+  - artifact: "docs/STATUS.md"
+  - artifact: "docs/spec/GAPS.md"
+
+  - artifact: "src/vault/custodyPublicationService.mjs"
+
+  - artifact: "scripts/run-m48-vault-custody-publication-scenario.mjs"
+  - artifact: "fixtures/vault/m48_scenario.json"
+  - artifact: "fixtures/vault/m48_expected.json"
+
+  - artifact: "verify/m48.sh"
+
+  - artifact: "artifacts/milestones/M48/latest/commands.log"
+  - artifact: "artifacts/milestones/M48/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M48/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M48/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M48/latest/vault_custody_publication_output.json"
+  - artifact: "artifacts/milestones/M48/latest/store.json"
+  - artifact: "artifacts/milestones/M48/latest/assertions.json"

@@ -1,0 +1,229 @@
+{
+  "final": {
+    "snapshot_count": 2,
+    "snapshots": [
+      {
+        "holding_ids": [
+          "hold_001",
+          "hold_002",
+          "hold_003"
+        ],
+        "leaf_count": 3,
+        "recorded_at": "2026-02-18T23:00:00Z",
+        "root_hash": "396e69539ee5e1d448d11a7df77f121bf178fe53030926c8c70b46c281fda198",
+        "snapshot_id": "cust_snap_001"
+      },
+      {
+        "holding_ids": [
+          "hold_010",
+          "hold_011"
+        ],
+        "leaf_count": 2,
+        "recorded_at": "2026-02-18T23:05:00Z",
+        "root_hash": "81b8af8bdcaf85c5f8636e0f07ee899567f89bc60a190bb762ffe39c2ca09db9",
+        "snapshot_id": "cust_snap_002"
+      }
+    ]
+  },
+  "operations": [
+    {
+      "actor": {
+        "id": "p1",
+        "type": "partner"
+      },
+      "error_code": null,
+      "leaf_count": 3,
+      "ok": true,
+      "op": "custody.publish",
+      "reason_code": null,
+      "replayed": false,
+      "root_hash": "396e69539ee5e1d448d11a7df77f121bf178fe53030926c8c70b46c281fda198",
+      "snapshot_id": "cust_snap_001"
+    },
+    {
+      "actor": {
+        "id": "p1",
+        "type": "partner"
+      },
+      "error_code": null,
+      "leaf_count": 3,
+      "ok": true,
+      "op": "custody.publish",
+      "reason_code": null,
+      "replayed": true,
+      "root_hash": "396e69539ee5e1d448d11a7df77f121bf178fe53030926c8c70b46c281fda198",
+      "snapshot_id": "cust_snap_001"
+    },
+    {
+      "actor": {
+        "id": "p1",
+        "type": "partner"
+      },
+      "error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH",
+      "leaf_count": null,
+      "ok": false,
+      "op": "custody.publish",
+      "reason_code": null,
+      "replayed": false,
+      "root_hash": null,
+      "snapshot_id": "cust_snap_001_mutated"
+    },
+    {
+      "actor": {
+        "id": "p1",
+        "type": "partner"
+      },
+      "error_code": null,
+      "leaf_count": 2,
+      "ok": true,
+      "op": "custody.publish",
+      "reason_code": null,
+      "replayed": false,
+      "root_hash": "81b8af8bdcaf85c5f8636e0f07ee899567f89bc60a190bb762ffe39c2ca09db9",
+      "snapshot_id": "cust_snap_002"
+    },
+    {
+      "actor": {
+        "id": "p1",
+        "type": "partner"
+      },
+      "error_code": "CONSTRAINT_VIOLATION",
+      "leaf_count": null,
+      "ok": false,
+      "op": "custody.publish",
+      "reason_code": "vault_custody_snapshot_exists",
+      "replayed": false,
+      "root_hash": null,
+      "snapshot_id": "cust_snap_001"
+    },
+    {
+      "actor": {
+        "id": "p1",
+        "type": "partner"
+      },
+      "error_code": null,
+      "leaf_counts": [
+        3
+      ],
+      "next_cursor": "cust_snap_001",
+      "ok": true,
+      "op": "custody.list",
+      "reason_code": null,
+      "snapshot_ids": [
+        "cust_snap_001"
+      ],
+      "total": 2
+    },
+    {
+      "actor": {
+        "id": "p1",
+        "type": "partner"
+      },
+      "error_code": null,
+      "leaf_counts": [
+        2
+      ],
+      "next_cursor": null,
+      "ok": true,
+      "op": "custody.list",
+      "reason_code": null,
+      "snapshot_ids": [
+        "cust_snap_002"
+      ],
+      "total": 2
+    },
+    {
+      "actor": {
+        "id": "p1",
+        "type": "partner"
+      },
+      "error_code": "CONSTRAINT_VIOLATION",
+      "leaf_counts": null,
+      "next_cursor": null,
+      "ok": false,
+      "op": "custody.list",
+      "reason_code": "vault_custody_cursor_not_found",
+      "snapshot_ids": null,
+      "total": null
+    },
+    {
+      "actor": {
+        "id": "p1",
+        "type": "partner"
+      },
+      "error_code": null,
+      "leaf_count": 3,
+      "ok": true,
+      "op": "custody.get",
+      "reason_code": null,
+      "root_hash": "396e69539ee5e1d448d11a7df77f121bf178fe53030926c8c70b46c281fda198",
+      "snapshot_id": "cust_snap_001"
+    },
+    {
+      "actor": {
+        "id": "p1",
+        "type": "partner"
+      },
+      "error_code": "NOT_FOUND",
+      "leaf_count": null,
+      "ok": false,
+      "op": "custody.get",
+      "reason_code": "vault_custody_snapshot_not_found",
+      "root_hash": null,
+      "snapshot_id": "cust_snap_unknown"
+    },
+    {
+      "actor": {
+        "id": "p1",
+        "type": "partner"
+      },
+      "error_code": null,
+      "holding_id": "hold_002",
+      "ok": true,
+      "op": "custody.proof",
+      "proof_leaf_index": 1,
+      "proof_siblings_count": 2,
+      "reason_code": null,
+      "snapshot_id": "cust_snap_001",
+      "verify_error": null,
+      "verify_ok": true
+    },
+    {
+      "actor": {
+        "id": "p1",
+        "type": "partner"
+      },
+      "error_code": "NOT_FOUND",
+      "holding_id": "hold_999",
+      "ok": false,
+      "op": "custody.proof",
+      "proof_leaf_index": null,
+      "proof_siblings_count": null,
+      "reason_code": "vault_custody_holding_not_found",
+      "snapshot_id": "cust_snap_001",
+      "verify_error": null,
+      "verify_ok": null
+    },
+    {
+      "op": "custody.proof.verify_tampered",
+      "proof_ref": "proof_snap1_hold2",
+      "tamper_kind": "sibling_hash",
+      "verify_error": "root_mismatch",
+      "verify_ok": false
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "error_code": "FORBIDDEN",
+      "leaf_count": null,
+      "ok": false,
+      "op": "custody.publish",
+      "reason_code": null,
+      "replayed": false,
+      "root_hash": null,
+      "snapshot_id": "cust_snap_user_forbidden"
+    }
+  ]
+}

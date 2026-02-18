@@ -58,9 +58,10 @@ Last updated: 2026-02-18
 - M45: ✅ checkpoint retention + expiry enforcement + opportunistic checkpoint GC (fixtures-first)
 - M46: ✅ proof-of-custody primitives (custody snapshot + Merkle inclusion proof verifier) (fixtures-first)
 - M47: ✅ vault deposit/withdraw lifecycle contract scaffold + deterministic state-transition verifier (fixtures-first)
+- M48: ✅ vault publication/read contract scaffold (snapshot catalog pagination + inclusion proof retrieval) (fixtures-first)
 
 ## Next
-- M48: vault publication/read contract scaffold (snapshot root catalog + inclusion proof retrieval)
+- M49: custody publication API transport contract wiring + auth/scope surface (fixtures-first)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.
