@@ -1,0 +1,8 @@
+{
+  "delivery_fixture": "fixtures/delivery/m6_expected.json",
+  "event_signing_keys_fixture": "docs/spec/examples/api/keys.event_signing.get.response.json",
+  "tamper": {
+    "event_index": 0,
+    "new_expires_at": "2026-03-02T00:00:00Z"
+  }
+}

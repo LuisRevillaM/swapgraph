@@ -1,0 +1,114 @@
+{
+  "checks": {
+    "dedupe_persisted_across_restart": true,
+    "proposals_present": true,
+    "tamper_rejected": true
+  },
+  "final": {
+    "after_restart": {
+      "proposal_ids": [
+        "cycle_4f27eb196224",
+        "cycle_961f2288e6f7"
+      ],
+      "proposals_count": 2,
+      "seen_event_ids": [
+        "evt_3b99b0e3463a",
+        "evt_d1092004fb8e"
+      ],
+      "seen_event_ids_count": 2
+    },
+    "before_restart": {
+      "proposal_ids": [
+        "cycle_4f27eb196224",
+        "cycle_961f2288e6f7"
+      ],
+      "proposals_count": 2,
+      "seen_event_ids": [
+        "evt_3b99b0e3463a",
+        "evt_d1092004fb8e"
+      ],
+      "seen_event_ids_count": 2
+    }
+  },
+  "operations": [
+    {
+      "events_applied": 0,
+      "events_duplicates": 0,
+      "events_ignored": 0,
+      "events_invalid_signature": 1,
+      "events_new_unique": 0,
+      "events_total": 1,
+      "invalid_signatures": [
+        {
+          "details": null,
+          "error": "bad_signature",
+          "event_id": "evt_3b99b0e3463a",
+          "type": "proposal.created"
+        }
+      ],
+      "label": "tampered",
+      "ok": false,
+      "op": "delivery.ingest_webhooks",
+      "store": {
+        "proposal_ids": [],
+        "proposals_count": 0,
+        "seen_event_ids": [],
+        "seen_event_ids_count": 0
+      },
+      "tamper": {
+        "event_id": "evt_3b99b0e3463a",
+        "new_expires_at": "2026-03-02T00:00:00Z",
+        "old_expires_at": "2026-03-01T00:00:00Z",
+        "type": "proposal.created"
+      }
+    },
+    {
+      "events_applied": 2,
+      "events_duplicates": 1,
+      "events_ignored": 0,
+      "events_invalid_signature": 0,
+      "events_new_unique": 2,
+      "events_total": 3,
+      "invalid_signatures": [],
+      "label": "round1",
+      "ok": true,
+      "op": "delivery.ingest_webhooks",
+      "store": {
+        "proposal_ids": [
+          "cycle_4f27eb196224",
+          "cycle_961f2288e6f7"
+        ],
+        "proposals_count": 2,
+        "seen_event_ids": [
+          "evt_3b99b0e3463a",
+          "evt_d1092004fb8e"
+        ],
+        "seen_event_ids_count": 2
+      }
+    },
+    {
+      "events_applied": 0,
+      "events_duplicates": 3,
+      "events_ignored": 0,
+      "events_invalid_signature": 0,
+      "events_new_unique": 0,
+      "events_total": 3,
+      "invalid_signatures": [],
+      "label": "after_restart",
+      "ok": true,
+      "op": "delivery.ingest_webhooks",
+      "store": {
+        "proposal_ids": [
+          "cycle_4f27eb196224",
+          "cycle_961f2288e6f7"
+        ],
+        "proposals_count": 2,
+        "seen_event_ids": [
+          "evt_3b99b0e3463a",
+          "evt_d1092004fb8e"
+        ],
+        "seen_event_ids_count": 2
+      }
+    }
+  ]
+}

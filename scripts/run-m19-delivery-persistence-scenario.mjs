@@ -29,6 +29,9 @@ const expected = readJson(expectedPath);
 
 const delivery = readJson(path.join(root, scenario.delivery_fixture));
 
+// Event signing keys (fixtures-first key publication example)
+const eventSigningKeys = readJson(path.join(root, 'docs/spec/examples/api/keys.event_signing.get.response.json'));
+
 // ---- Load API manifest for response schema mapping ----
 const apiManifest = readJson(path.join(root, 'docs/spec/api/manifest.v1.json'));
 const endpointsByOp = new Map((apiManifest.endpoints ?? []).map(e => [e.operation_id, e]));
@@ -133,7 +136,7 @@ for (const op of scenario.operations ?? []) {
     const actor = actorsByRef[op.actor_ref];
     if (!actor) throw new Error(`unknown actor_ref: ${op.actor_ref}`);
 
-    const r = ingestWebhookEvents({ store: storeWebhook, events: delivery.webhook_events, seenEventIds });
+    const r = ingestWebhookEvents({ store: storeWebhook, events: delivery.webhook_events, keySet: eventSigningKeys, seenEventIds });
     if (!r.ok) throw new Error(`ingest_webhooks failed: ${JSON.stringify(r)}`);
     seenEventIds = r.seenEventIds;
 

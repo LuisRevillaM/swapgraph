@@ -1,0 +1,31 @@
+name: M30
+commands:
+  - cmd: "npm run verify:m30"
+artifacts:
+  - artifact: "docs/prd/M30.md"
+  - artifact: "docs/spec/AUTH.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/ERRORS.md"
+  - artifact: "docs/spec/GAPS.md"
+
+  - artifact: "docs/spec/api/manifest.v1.json"
+  - artifact: "docs/spec/examples/api/keys.event_signing.get.response.json"
+
+  - artifact: "fixtures/delivery/m30_scenario.json"
+  - artifact: "fixtures/delivery/m30_expected.json"
+
+  - artifact: "scripts/validate-api-auth.mjs"
+  - artifact: "scripts/run-m30-webhook-hardening-scenario.mjs"
+
+  - artifact: "src/delivery/proposalIngestService.mjs"
+
+  - artifact: "verify/m30.sh"
+
+  - artifact: "artifacts/milestones/M30/latest/commands.log"
+  - artifact: "artifacts/milestones/M30/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M30/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M30/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M30/latest/events_manifest_validation.json"
+  - artifact: "artifacts/milestones/M30/latest/webhook_hardening_output.json"
+  - artifact: "artifacts/milestones/M30/latest/store.json"
+  - artifact: "artifacts/milestones/M30/latest/assertions.json"

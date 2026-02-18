@@ -51,6 +51,9 @@ const expected = readJson(path.join(root, 'fixtures/pipeline/m24_expected.json')
 
 const delivery = readJson(path.join(root, scenario.delivery_fixture));
 
+// Event signing keys (fixtures-first key publication example)
+const eventSigningKeys = readJson(path.join(root, 'docs/spec/examples/api/keys.event_signing.get.response.json'));
+
 // Validate delivery fixture against schemas.
 {
   const vPoll = validateAgainstSchemaFile('CycleProposalListResponse.schema.json', delivery.polling_response);
@@ -107,7 +110,7 @@ const operations = [];
 for (const op of scenario.operations ?? []) {
   if (op.op === 'delivery.ingest_webhooks') {
     const actor = actors[op.actor_ref];
-    const r = ingestWebhookEvents({ store, events: delivery.webhook_events, seenEventIds });
+    const r = ingestWebhookEvents({ store, events: delivery.webhook_events, keySet: eventSigningKeys, seenEventIds });
     if (!r.ok) throw new Error(`ingest_webhooks failed: ${JSON.stringify(r)}`);
     seenEventIds = r.seenEventIds;
 

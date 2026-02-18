@@ -40,9 +40,10 @@ Last updated: 2026-02-18
 - M27: ✅ correlation_id in ErrorResponse (fixtures-first) + propagate to all error bodies
 - M28: ✅ verifiable receipt signatures (Ed25519) + receipt signing keys contract + verifier
 - M29: ✅ webhook/event signing (Ed25519) + event signing keys contract + verifier
+- M30: ✅ auth scopes contract + webhook ingestion hardening (signature verify + persistent dedupe proof)
 
 ## Next
-- M30: partner auth/scopes + webhook delivery hardening (TBD)
+- M31: scope enforcement in services (+ INSUFFICIENT_SCOPE proofs) / delegation tokens (TBD)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.

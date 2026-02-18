@@ -8,7 +8,17 @@
       "operation_id": "swapIntents.create",
       "idempotency_required": true,
       "request_schema": "SwapIntentUpsertRequest.schema.json",
-      "response_schema": "SwapIntentUpsertResponse.schema.json"
+      "response_schema": "SwapIntentUpsertResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "swap_intents:write"
+        ]
+      }
     },
     {
       "method": "PATCH",
@@ -16,7 +26,17 @@
       "operation_id": "swapIntents.update",
       "idempotency_required": true,
       "request_schema": "SwapIntentUpsertRequest.schema.json",
-      "response_schema": "SwapIntentUpsertResponse.schema.json"
+      "response_schema": "SwapIntentUpsertResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "swap_intents:write"
+        ]
+      }
     },
     {
       "method": "POST",
@@ -24,45 +44,102 @@
       "operation_id": "swapIntents.cancel",
       "idempotency_required": true,
       "request_schema": "SwapIntentCancelRequest.schema.json",
-      "response_schema": "SwapIntentCancelResponse.schema.json"
+      "response_schema": "SwapIntentCancelResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "swap_intents:write"
+        ]
+      }
     },
     {
       "method": "GET",
       "path": "/swap-intents/{id}",
       "operation_id": "swapIntents.get",
       "idempotency_required": false,
-      "response_schema": "SwapIntentGetResponse.schema.json"
+      "response_schema": "SwapIntentGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "swap_intents:read"
+        ]
+      }
     },
     {
       "method": "GET",
       "path": "/swap-intents",
       "operation_id": "swapIntents.list",
       "idempotency_required": false,
-      "response_schema": "SwapIntentListResponse.schema.json"
+      "response_schema": "SwapIntentListResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "swap_intents:read"
+        ]
+      }
     },
-
     {
       "method": "GET",
       "path": "/cycle-proposals",
       "operation_id": "cycleProposals.list",
       "idempotency_required": false,
-      "response_schema": "CycleProposalListResponse.schema.json"
+      "response_schema": "CycleProposalListResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "cycle_proposals:read"
+        ]
+      }
     },
     {
       "method": "GET",
       "path": "/cycle-proposals/{id}",
       "operation_id": "cycleProposals.get",
       "idempotency_required": false,
-      "response_schema": "CycleProposalGetResponse.schema.json"
+      "response_schema": "CycleProposalGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "cycle_proposals:read"
+        ]
+      }
     },
-
     {
       "method": "POST",
       "path": "/cycle-proposals/{id}/accept",
       "operation_id": "cycleProposals.accept",
       "idempotency_required": true,
       "request_schema": "CommitAcceptRequest.schema.json",
-      "response_schema": "CommitResponse.schema.json"
+      "response_schema": "CommitResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user"
+        ],
+        "required_scopes": [
+          "commits:write"
+        ]
+      }
     },
     {
       "method": "POST",
@@ -70,23 +147,49 @@
       "operation_id": "cycleProposals.decline",
       "idempotency_required": true,
       "request_schema": "CommitDeclineRequest.schema.json",
-      "response_schema": "CommitResponse.schema.json"
+      "response_schema": "CommitResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user"
+        ],
+        "required_scopes": [
+          "commits:write"
+        ]
+      }
     },
     {
       "method": "GET",
       "path": "/commits/{id}",
       "operation_id": "commits.get",
       "idempotency_required": false,
-      "response_schema": "CommitGetResponse.schema.json"
+      "response_schema": "CommitGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user"
+        ],
+        "required_scopes": [
+          "commits:read"
+        ]
+      }
     },
-
     {
       "method": "POST",
       "path": "/settlement/{cycle_id}/start",
       "operation_id": "settlement.start",
       "idempotency_required": true,
       "request_schema": "SettlementStartRequest.schema.json",
-      "response_schema": "SettlementStartResponse.schema.json"
+      "response_schema": "SettlementStartResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
     },
     {
       "method": "POST",
@@ -94,7 +197,16 @@
       "operation_id": "settlement.deposit_confirmed",
       "idempotency_required": true,
       "request_schema": "SettlementDepositConfirmedRequest.schema.json",
-      "response_schema": "SettlementDepositConfirmedResponse.schema.json"
+      "response_schema": "SettlementDepositConfirmedResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
     },
     {
       "method": "POST",
@@ -102,7 +214,16 @@
       "operation_id": "settlement.begin_execution",
       "idempotency_required": true,
       "request_schema": "SettlementBeginExecutionRequest.schema.json",
-      "response_schema": "SettlementBeginExecutionResponse.schema.json"
+      "response_schema": "SettlementBeginExecutionResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
     },
     {
       "method": "POST",
@@ -110,7 +231,16 @@
       "operation_id": "settlement.complete",
       "idempotency_required": true,
       "request_schema": "SettlementCompleteRequest.schema.json",
-      "response_schema": "SettlementCompleteResponse.schema.json"
+      "response_schema": "SettlementCompleteResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
     },
     {
       "method": "POST",
@@ -118,45 +248,99 @@
       "operation_id": "settlement.expire_deposit_window",
       "idempotency_required": true,
       "request_schema": "SettlementExpireDepositWindowRequest.schema.json",
-      "response_schema": "SettlementExpireDepositWindowResponse.schema.json"
+      "response_schema": "SettlementExpireDepositWindowResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
     },
-
     {
       "method": "GET",
       "path": "/settlement/{cycle_id}/instructions",
       "operation_id": "settlement.instructions",
       "idempotency_required": false,
-      "response_schema": "SettlementInstructionsGetResponse.schema.json"
+      "response_schema": "SettlementInstructionsGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
     },
     {
       "method": "GET",
       "path": "/settlement/{cycle_id}/status",
       "operation_id": "settlement.status",
       "idempotency_required": false,
-      "response_schema": "SettlementStatusGetResponse.schema.json"
+      "response_schema": "SettlementStatusGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
     },
     {
       "method": "GET",
       "path": "/receipts/{cycle_id}",
       "operation_id": "receipts.get",
       "idempotency_required": false,
-      "response_schema": "SwapReceiptGetResponse.schema.json"
+      "response_schema": "SwapReceiptGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "receipts:read"
+        ]
+      }
     },
-
     {
       "method": "GET",
       "path": "/keys/receipt-signing",
       "operation_id": "keys.receipt_signing.get",
       "idempotency_required": false,
-      "response_schema": "ReceiptSigningKeysGetResponse.schema.json"
+      "response_schema": "ReceiptSigningKeysGetResponse.schema.json",
+      "auth": {
+        "required": false,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": []
+      }
     },
-
     {
       "method": "GET",
       "path": "/keys/event-signing",
       "operation_id": "keys.event_signing.get",
       "idempotency_required": false,
-      "response_schema": "EventSigningKeysGetResponse.schema.json"
+      "response_schema": "EventSigningKeysGetResponse.schema.json",
+      "auth": {
+        "required": false,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": []
+      }
     }
   ],
   "webhooks": {

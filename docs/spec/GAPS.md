@@ -108,9 +108,11 @@ Each item here must become at least one of:
 
 16) **Partner auth model + scopes**
 - API keys vs OAuth client creds; per-partner quotas; least privilege.
+- Resolved (fixtures-first): M30 (`docs/spec/AUTH.md` + per-endpoint scope annotations in API manifest).
 
 17) **Webhook signing + replay protection**
 - HMAC vs asymmetric; rotation; nonce/timestamp window.
+- Resolved (fixtures-first): M29 (signed `EventEnvelope` + public key publication + tamper-fail verifier).
 
 18) **Agent delegation tokens + TradingPolicy enforcement**
 - Policy schema (max value/day, confidence threshold, quiet hours), token TTL/refresh, revocation model.

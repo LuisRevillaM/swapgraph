@@ -12,18 +12,23 @@ This doc defines the **contract** for the REST API and webhook delivery.
 - **No polling required** for integrations that use webhooks/streams (polling allowed as a fallback).
 
 ## Auth (v1)
-- Partners authenticate with an API key (placeholder for now).
+- Partners authenticate with an API key.
   - The key resolves to a stable, server-assigned `partner_id` (modeled as `ActorRef { type:"partner", id:"<partner_id>" }`).
   - `partner_id` is used for multi-tenant scoping (partners cannot read other partners’ cycles or proposals).
 - Users authenticate with SwapGraph sessions.
 - Agents authenticate via delegation tokens (later milestone).
 
-(M2/M3 define the concrete header fields/scopes; this doc is the contract anchor.)
+Concrete auth headers + scope taxonomy live in:
+- `docs/spec/AUTH.md`
 
 ## Headers
 - `Idempotency-Key` (required for mutating endpoints)
 - `X-Correlation-Id` (optional on request; always present in responses)
   - Note: in fixtures-first verification (no HTTP layer yet), responses also include `correlation_id` in the JSON body as a stand-in for the response header.
+
+Auth headers (see `docs/spec/AUTH.md` for details):
+- `X-Partner-Key` (partner)
+- `Authorization: Bearer ...` (user/agent)
 
 ## Resources (v1)
 - `SwapIntent`
