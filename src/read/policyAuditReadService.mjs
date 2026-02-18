@@ -42,6 +42,10 @@ function exportNowIso(query) {
   return query?.exported_at_iso ?? query?.now_iso ?? process.env.AUTHZ_NOW_ISO ?? new Date().toISOString();
 }
 
+function exportCheckpointEnforced() {
+  return process.env.POLICY_AUDIT_EXPORT_CHECKPOINT_ENFORCE === '1';
+}
+
 function requireUserScope({ actor, query, correlationId }) {
   if (actor?.type !== 'user') {
     return {
@@ -246,6 +250,41 @@ export class PolicyAuditReadService {
       };
     }
 
+    const checkpointAfter = typeof query?.checkpoint_after === 'string' && query.checkpoint_after.trim()
+      ? query.checkpoint_after.trim()
+      : null;
+
+    const checkpointRequired = exportCheckpointEnforced();
+
+    if (checkpointRequired && paged.cursorAfter && !checkpointAfter) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'checkpoint_after is required when cursor_after is provided', {
+          cursor_after: paged.cursorAfter,
+          checkpoint_after: query?.checkpoint_after ?? null
+        })
+      };
+    }
+
+    if (checkpointRequired && !paged.cursorAfter && checkpointAfter) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'checkpoint_after is only allowed with cursor_after', {
+          cursor_after: query?.cursor_after ?? null,
+          checkpoint_after: checkpointAfter
+        })
+      };
+    }
+
+    if (!checkpointRequired && checkpointAfter) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'checkpoint_after is not enabled for this export contract', {
+          checkpoint_after: checkpointAfter
+        })
+      };
+    }
+
     const exportedAt = exportNowIso(query);
     if (parseIsoMs(exportedAt) === null) {
       return {
@@ -258,6 +297,7 @@ export class PolicyAuditReadService {
     }
 
     const withAttestation = Boolean(paged.limit || paged.cursorAfter || attestationAfter);
+    const withCheckpoint = checkpointRequired && withAttestation;
 
     const signedPayload = buildSignedPolicyAuditExportPayload({
       exportedAt,
@@ -265,7 +305,8 @@ export class PolicyAuditReadService {
       entries: paged.entries,
       totalFiltered: paged.totalFiltered,
       nextCursor: paged.nextCursor,
-      withAttestation
+      withAttestation,
+      withCheckpoint
     });
 
     return {

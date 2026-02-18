@@ -38,7 +38,7 @@ Auth headers (see `docs/spec/AUTH.md` for details):
   - `POST /swap-intents/{id}/cancel`
   - `GET /swap-intents/{id}`
   - `GET /swap-intents` (list)
-  - delegated agent writes are policy-gated (per-swap cap, daily cap, and optional high-value consent hook with proof binding/signature/anti-replay controls)
+  - delegated agent writes are policy-gated (per-swap cap, daily cap, and optional high-value consent hook with proof binding/signature/anti-replay/challenge controls)
 
 - `CycleProposal`
   - `GET /cycle-proposals` (list)
@@ -79,8 +79,10 @@ Delegated-policy audit endpoints:
 - `GET /policy-audit/delegated-writes/export` (signed export for offline integrity verification)
   - supports list filters plus optional pagination (`limit`, `cursor_after`)
   - paginated continuation requires `attestation_after` to chain from the previous page attestation
+  - when export-checkpoint mode is enabled, continuation also requires `checkpoint_after` (previous page checkpoint hash)
   - response includes `export_hash` + detached `signature`
   - paginated responses include `next_cursor` + signed `attestation` (`page_hash`, `chain_hash`) for continuity verification
+  - checkpoint mode adds `checkpoint` (`checkpoint_hash`) for chain compaction anchors
   - signature verifies export integrity against published policy-integrity signing keys
 
 Auth utility endpoints:

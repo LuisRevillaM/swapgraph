@@ -42,6 +42,14 @@
     "page_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
     "chain_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
   },
+  "checkpoint": {
+    "checkpoint_after": null,
+    "attestation_chain_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "next_cursor": "pa_1",
+    "entries_count": 1,
+    "total_filtered": 2,
+    "checkpoint_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+  },
   "export_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "signature": {
     "key_id": "dev-pi-k1",

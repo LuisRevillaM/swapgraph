@@ -7,6 +7,7 @@ Policy-integrity signatures cover:
 - signed consent proofs (`consent_proof`, prefix `sgcp2.`)
 - delegated policy-audit export envelopes (`/policy-audit/delegated-writes/export`)
 - paginated export attestations (`attestation.page_hash`, `attestation.chain_hash`)
+- export checkpoint anchors (`checkpoint.checkpoint_hash`)
 
 ### Publication
 Policy-integrity public keys are published via:

@@ -29,7 +29,11 @@
         "now_iso": { "type": "string", "format": "date-time" },
         "limit": { "type": "integer", "minimum": 1, "maximum": 200 },
         "cursor_after": { "type": "string", "minLength": 1 },
-        "attestation_after": { "type": "string", "minLength": 1 }
+        "attestation_after": { "type": "string", "minLength": 1 },
+        "checkpoint_after": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
       }
     },
     "total_filtered": { "type": "integer", "minimum": 0 },
@@ -54,6 +58,19 @@
           "type": "string",
           "pattern": "^[a-f0-9]{64}$"
         }
+      }
+    },
+    "checkpoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["checkpoint_after", "attestation_chain_hash", "next_cursor", "entries_count", "total_filtered", "checkpoint_hash"],
+      "properties": {
+        "checkpoint_after": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$" },
+        "attestation_chain_hash": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$" },
+        "next_cursor": { "type": ["string", "null"], "minLength": 1 },
+        "entries_count": { "type": "integer", "minimum": 0 },
+        "total_filtered": { "type": "integer", "minimum": 0 },
+        "checkpoint_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
       }
     },
     "export_hash": {

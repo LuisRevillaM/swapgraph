@@ -228,7 +228,8 @@ export class SwapIntentsService {
             nowIso,
             subjectActor,
             delegationId: auth?.delegation?.delegation_id,
-            consentReplayState: this.store.state.policy_consent_replay
+            consentReplayState: this.store.state.policy_consent_replay,
+            operationId: 'swapIntents.create'
           });
           if (!consentCheck.ok) {
             appendPolicyAudit(this.store, {
@@ -305,6 +306,13 @@ export class SwapIntentsService {
                   consent_proof_key_id: consentCheck.details?.consent_proof_key_id ?? null,
                   consent_proof_nonce: consentCheck.details?.consent_proof_nonce ?? null,
                   consent_proof_replay_key: consentCheck.details?.consent_proof_replay_key ?? null
+                }
+                : {}),
+              ...(consentCheck.details?.challenge_enforced
+                ? {
+                  challenge_id: consentCheck.details?.challenge_id ?? null,
+                  consent_proof_challenge_id: consentCheck.details?.consent_proof_challenge_id ?? null,
+                  consent_proof_challenge_binding: consentCheck.details?.consent_proof_challenge_binding ?? null
                 }
                 : {})
             }
@@ -422,7 +430,8 @@ export class SwapIntentsService {
             nowIso,
             subjectActor,
             delegationId: auth?.delegation?.delegation_id,
-            consentReplayState: this.store.state.policy_consent_replay
+            consentReplayState: this.store.state.policy_consent_replay,
+            operationId: 'swapIntents.update'
           });
           if (!consentCheck.ok) {
             appendPolicyAudit(this.store, {
@@ -499,6 +508,13 @@ export class SwapIntentsService {
                   consent_proof_key_id: consentCheck.details?.consent_proof_key_id ?? null,
                   consent_proof_nonce: consentCheck.details?.consent_proof_nonce ?? null,
                   consent_proof_replay_key: consentCheck.details?.consent_proof_replay_key ?? null
+                }
+                : {}),
+              ...(consentCheck.details?.challenge_enforced
+                ? {
+                  challenge_id: consentCheck.details?.challenge_id ?? null,
+                  consent_proof_challenge_id: consentCheck.details?.consent_proof_challenge_id ?? null,
+                  consent_proof_challenge_binding: consentCheck.details?.consent_proof_challenge_binding ?? null
                 }
                 : {})
             }

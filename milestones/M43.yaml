@@ -1,0 +1,32 @@
+name: M43
+commands:
+  - cmd: "npm run verify:m43"
+artifacts:
+  - artifact: "docs/prd/M43.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/AUTH.md"
+  - artifact: "docs/spec/KEYS.md"
+  - artifact: "docs/spec/GAPS.md"
+
+  - artifact: "docs/spec/schemas/PolicyAuditExportResponse.schema.json"
+  - artifact: "docs/spec/examples/api/policy_audit.delegated_writes.export.response.json"
+
+  - artifact: "src/core/tradingPolicyBoundaries.mjs"
+  - artifact: "src/crypto/policyIntegritySigning.mjs"
+  - artifact: "src/read/policyAuditReadService.mjs"
+  - artifact: "src/service/swapIntentsService.mjs"
+  - artifact: "src/store/jsonStateStore.mjs"
+
+  - artifact: "scripts/run-m43-consent-challenge-checkpoint-scenario.mjs"
+  - artifact: "fixtures/delegation/m43_scenario.json"
+  - artifact: "fixtures/delegation/m43_expected.json"
+
+  - artifact: "verify/m43.sh"
+
+  - artifact: "artifacts/milestones/M43/latest/commands.log"
+  - artifact: "artifacts/milestones/M43/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M43/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M43/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M43/latest/consent_challenge_checkpoint_output.json"
+  - artifact: "artifacts/milestones/M43/latest/store.json"
+  - artifact: "artifacts/milestones/M43/latest/assertions.json"

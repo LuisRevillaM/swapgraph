@@ -237,7 +237,24 @@ export function buildConsentProofReplayKey({ consentId, subjectActor, delegation
   return `sgcpr1|${consentId ?? ''}|${subject ?? ''}|${delegationId ?? ''}|${nonce ?? ''}`;
 }
 
-export function evaluateHighValueConsentForIntent({ policy, intent, auth, nowIso, subjectActor, delegationId, consentReplayState }) {
+export function buildConsentProofChallengeBinding({ consentId, subjectActor, delegationId, intent, operationId }) {
+  const subject = actorKey(subjectActor);
+  const intentId = intent?.id ?? null;
+  const maxUsd = intentMaxUsd(intent);
+  const cents = Math.round((Number.isFinite(maxUsd) ? maxUsd : 0) * 100);
+  return `sgcc1|${operationId ?? ''}|${consentId ?? ''}|${subject ?? ''}|${delegationId ?? ''}|${intentId ?? ''}|${cents}`;
+}
+
+export function evaluateHighValueConsentForIntent({
+  policy,
+  intent,
+  auth,
+  nowIso,
+  subjectActor,
+  delegationId,
+  consentReplayState,
+  operationId
+}) {
   const threshold = finiteNumberOrNull(policy?.high_value_consent_threshold_usd);
   const maxUsd = intentMaxUsd(intent);
 
@@ -281,11 +298,70 @@ export function evaluateHighValueConsentForIntent({ policy, intent, auth, nowIso
   const bindingEnforced = process.env.POLICY_CONSENT_PROOF_BIND_ENFORCE === '1';
   const signatureEnforced = process.env.POLICY_CONSENT_PROOF_SIG_ENFORCE === '1';
   const replayEnforced = process.env.POLICY_CONSENT_PROOF_REPLAY_ENFORCE === '1';
+  const challengeEnforced = process.env.POLICY_CONSENT_PROOF_CHALLENGE_ENFORCE === '1';
   const requiredTier = maxUsd > (threshold * 1.5) ? 'passkey' : 'step_up';
   const consentProof = consent?.consent_proof;
+  const challengeId = typeof consent?.challenge_id === 'string' && consent.challenge_id.trim().length > 0
+    ? consent.challenge_id.trim()
+    : null;
+  const expectedChallengeBinding = buildConsentProofChallengeBinding({
+    consentId: consent.consent_id,
+    subjectActor,
+    delegationId,
+    intent,
+    operationId
+  });
+
   let consentProofKeyId = null;
   let consentProofNonce = null;
   let consentProofReplayKey = null;
+  let consentProofChallengeId = null;
+  let consentProofChallengeBinding = null;
+
+  if (challengeEnforced && !bindingEnforced) {
+    return {
+      ok: false,
+      code: 'CONSTRAINT_VIOLATION',
+      message: 'consent proof challenge enforcement requires binding enforcement',
+      details: {
+        reason_code: 'consent_proof_challenge_config_invalid',
+        threshold_usd: threshold,
+        max_usd: maxUsd,
+        required_tier: requiredTier,
+        consent_id: consent.consent_id
+      }
+    };
+  }
+
+  if (challengeEnforced && !signatureEnforced) {
+    return {
+      ok: false,
+      code: 'CONSTRAINT_VIOLATION',
+      message: 'consent proof challenge enforcement requires signature enforcement',
+      details: {
+        reason_code: 'consent_proof_challenge_config_invalid',
+        threshold_usd: threshold,
+        max_usd: maxUsd,
+        required_tier: requiredTier,
+        consent_id: consent.consent_id
+      }
+    };
+  }
+
+  if (challengeEnforced && !challengeId) {
+    return {
+      ok: false,
+      code: 'FORBIDDEN',
+      message: 'delegation consent challenge required',
+      details: {
+        reason_code: 'consent_challenge_required',
+        threshold_usd: threshold,
+        max_usd: maxUsd,
+        required_tier: requiredTier,
+        consent_id: consent.consent_id
+      }
+    };
+  }
 
   if (tierEnforced) {
     const consentTier = consent?.consent_tier;
@@ -506,6 +582,51 @@ export function evaluateHighValueConsentForIntent({ policy, intent, auth, nowIso
       consentProofNonce = typeof proofVerification.proof?.nonce === 'string' && proofVerification.proof.nonce.trim().length > 0
         ? proofVerification.proof.nonce.trim()
         : null;
+      consentProofChallengeId = typeof proofVerification.proof?.challenge_id === 'string' && proofVerification.proof.challenge_id.trim().length > 0
+        ? proofVerification.proof.challenge_id.trim()
+        : null;
+      consentProofChallengeBinding = typeof proofVerification.proof?.challenge_binding === 'string' && proofVerification.proof.challenge_binding.trim().length > 0
+        ? proofVerification.proof.challenge_binding.trim()
+        : null;
+
+      if (challengeEnforced) {
+        if (!consentProofChallengeId || !consentProofChallengeBinding) {
+          return {
+            ok: false,
+            code: 'FORBIDDEN',
+            message: 'delegation consent proof challenge required',
+            details: {
+              reason_code: 'consent_proof_challenge_required',
+              threshold_usd: threshold,
+              max_usd: maxUsd,
+              required_tier: requiredTier,
+              consent_tier: consent?.consent_tier ?? null,
+              consent_id: consent.consent_id,
+              challenge_id: challengeId
+            }
+          };
+        }
+
+        if (consentProofChallengeId !== challengeId || consentProofChallengeBinding !== expectedChallengeBinding) {
+          return {
+            ok: false,
+            code: 'FORBIDDEN',
+            message: 'delegation consent proof challenge mismatch',
+            details: {
+              reason_code: 'consent_proof_challenge_mismatch',
+              threshold_usd: threshold,
+              max_usd: maxUsd,
+              required_tier: requiredTier,
+              consent_tier: consent?.consent_tier ?? null,
+              consent_id: consent.consent_id,
+              challenge_id: challengeId,
+              proof_challenge_id: consentProofChallengeId,
+              expected_challenge_binding: expectedChallengeBinding,
+              proof_challenge_binding: consentProofChallengeBinding
+            }
+          };
+        }
+      }
     } else if (providedProof !== expectedProof) {
       return {
         ok: false,
@@ -674,11 +795,15 @@ export function evaluateHighValueConsentForIntent({ policy, intent, auth, nowIso
       binding_enforced: bindingEnforced,
       signature_enforced: signatureEnforced,
       replay_enforced: replayEnforced,
+      challenge_enforced: challengeEnforced,
       consent_tier: consent?.consent_tier ?? null,
       consent_id: consent.consent_id,
       consent_proof_key_id: consentProofKeyId,
       consent_proof_nonce: consentProofNonce,
       consent_proof_replay_key: consentProofReplayKey,
+      challenge_id: challengeId,
+      consent_proof_challenge_id: consentProofChallengeId,
+      consent_proof_challenge_binding: consentProofChallengeBinding,
       approved_max_usd: finiteNumberOrNull(consent.approved_max_usd)
     }
   };
