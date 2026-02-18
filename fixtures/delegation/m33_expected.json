@@ -1,0 +1,172 @@
+{
+  "operations": [
+    {
+      "actor": {
+        "id": "agent_1",
+        "type": "agent"
+      },
+      "auth": {
+        "delegation_id": "del_u1_only_intents",
+        "expires_at": "2026-03-01T00:00:00Z",
+        "scopes": [
+          "swap_intents:read"
+        ]
+      },
+      "error_code": "INSUFFICIENT_SCOPE",
+      "ok": false,
+      "op": "cycleProposals.list"
+    },
+    {
+      "actor": {
+        "id": "agent_1",
+        "type": "agent"
+      },
+      "auth": {
+        "delegation_id": "del_u1_revoked",
+        "expires_at": "2026-03-01T00:00:00Z",
+        "revoked_at": "2026-02-17T00:00:00Z",
+        "scopes": [
+          "cycle_proposals:read"
+        ]
+      },
+      "error_code": "UNAUTHORIZED",
+      "ok": false,
+      "op": "cycleProposals.list"
+    },
+    {
+      "actor": {
+        "id": "agent_1",
+        "type": "agent"
+      },
+      "auth": {
+        "delegation_id": "del_u1_expired",
+        "expires_at": "2026-02-15T00:00:00Z",
+        "now_iso": "2026-02-16T00:00:00Z",
+        "scopes": [
+          "cycle_proposals:read"
+        ]
+      },
+      "error_code": "UNAUTHORIZED",
+      "ok": false,
+      "op": "cycleProposals.list"
+    },
+    {
+      "actor": {
+        "id": "agent_1",
+        "type": "agent"
+      },
+      "auth": {
+        "delegation_id": "del_u1_read_all",
+        "expires_at": "2026-03-01T00:00:00Z",
+        "scopes": [
+          "cycle_proposals:read",
+          "settlement:read",
+          "receipts:read"
+        ]
+      },
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.list",
+      "proposals_count": 1
+    },
+    {
+      "actor": {
+        "id": "agent_1",
+        "type": "agent"
+      },
+      "auth": {
+        "delegation_id": "del_u1_read_all",
+        "expires_at": "2026-03-01T00:00:00Z",
+        "scopes": [
+          "cycle_proposals:read",
+          "settlement:read",
+          "receipts:read"
+        ]
+      },
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.get",
+      "proposal_id": "cycle_4f27eb196224",
+      "returned_proposal_id": "cycle_4f27eb196224"
+    },
+    {
+      "actor": {
+        "id": "agent_1",
+        "type": "agent"
+      },
+      "auth": {
+        "delegation_id": "del_u1_read_all",
+        "expires_at": "2026-03-01T00:00:00Z",
+        "scopes": [
+          "cycle_proposals:read",
+          "settlement:read",
+          "receipts:read"
+        ]
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "settlement.status",
+      "timeline_state": "escrow.pending"
+    },
+    {
+      "actor": {
+        "id": "agent_1",
+        "type": "agent"
+      },
+      "auth": {
+        "delegation_id": "del_u1_read_all",
+        "expires_at": "2026-03-01T00:00:00Z",
+        "scopes": [
+          "cycle_proposals:read",
+          "settlement:read",
+          "receipts:read"
+        ]
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "instructions_count": 1,
+      "ok": true,
+      "op": "settlement.instructions"
+    },
+    {
+      "actor": {
+        "id": "agent_1",
+        "type": "agent"
+      },
+      "auth": {
+        "delegation_id": "del_u1_read_all",
+        "expires_at": "2026-03-01T00:00:00Z",
+        "scopes": [
+          "cycle_proposals:read",
+          "settlement:read",
+          "receipts:read"
+        ]
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "receipts.get",
+      "receipt_id": "receipt_cycle_4f27eb196224"
+    },
+    {
+      "actor": {
+        "id": "agent_1",
+        "type": "agent"
+      },
+      "auth": {
+        "delegation_id": "del_u1_read_all",
+        "expires_at": "2026-03-01T00:00:00Z",
+        "scopes": [
+          "cycle_proposals:read",
+          "settlement:read",
+          "receipts:read"
+        ]
+      },
+      "cycle_id": "cycle_961f2288e6f7",
+      "error_code": "FORBIDDEN",
+      "ok": false,
+      "op": "receipts.get"
+    }
+  ]
+}

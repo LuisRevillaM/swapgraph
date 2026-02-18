@@ -43,9 +43,10 @@ Last updated: 2026-02-18
 - M30: ✅ auth scopes contract + webhook ingestion hardening (signature verify + persistent dedupe proof)
 - M31: ✅ scope enforcement in services (+ INSUFFICIENT_SCOPE proofs; behind AUTHZ_ENFORCE=1)
 - M32: ✅ agent delegation grants + TradingPolicy enforcement (SwapIntents; behind AUTHZ_ENFORCE=1)
+- M33: ✅ delegation lifecycle (expiry/revocation) + agent read access expansion (behind AUTHZ_ENFORCE=1)
 
 ## Next
-- M33: delegation lifecycle (expiry/revocation) + agent read access expansion (TBD)
+- M34: delegation lifecycle APIs + revocation persistence + agent proposal/settlement proofs (TBD)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.

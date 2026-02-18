@@ -1,4 +1,4 @@
-import { authorizeApiOperation } from '../core/authz.mjs';
+import { authorizeApiOperation, authzEnforced } from '../core/authz.mjs';
 
 function errorResponse(correlationId, code, message, details = {}) {
   return { correlation_id: correlationId, error: { code, message, details } };
@@ -10,6 +10,13 @@ function correlationIdForCycleId(cycleId) {
 
 function actorKey(actor) {
   return `${actor.type}:${actor.id}`;
+}
+
+function effectiveActor({ actor, auth }) {
+  if (actor?.type === 'agent') {
+    return auth?.delegation?.subject_actor ?? null;
+  }
+  return actor;
 }
 
 function isPartner(actor) {
@@ -124,7 +131,19 @@ export class SettlementReadService {
       return { ok: false, body: errorResponse(correlationId, authzOp.error.code, authzOp.error.message, authzOp.error.details) };
     }
 
-    const authz = authorizeRead({ actor, timeline, store: this.store, cycleId });
+    let viewActor = actor;
+    if (actor?.type === 'agent') {
+      if (!authzEnforced()) {
+        return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation', { actor }) };
+      }
+      const eff = effectiveActor({ actor, auth });
+      if (!eff) {
+        return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation subject', { actor }) };
+      }
+      viewActor = eff;
+    }
+
+    const authz = authorizeRead({ actor: viewActor, timeline, store: this.store, cycleId });
     if (!authz.ok) {
       return {
         ok: false,
@@ -132,7 +151,7 @@ export class SettlementReadService {
       };
     }
 
-    const viewTimeline = isPartner(actor) ? timeline : redactTimeline({ timeline, viewer: actor });
+    const viewTimeline = isPartner(viewActor) ? timeline : redactTimeline({ timeline, viewer: viewActor });
     return { ok: true, body: { correlation_id: correlationId, timeline: viewTimeline } };
   }
 
@@ -149,7 +168,19 @@ export class SettlementReadService {
       return { ok: false, body: errorResponse(correlationId, authzOp.error.code, authzOp.error.message, authzOp.error.details) };
     }
 
-    const authz = authorizeRead({ actor, timeline, store: this.store, cycleId });
+    let viewActor = actor;
+    if (actor?.type === 'agent') {
+      if (!authzEnforced()) {
+        return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation', { actor }) };
+      }
+      const eff = effectiveActor({ actor, auth });
+      if (!eff) {
+        return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation subject', { actor }) };
+      }
+      viewActor = eff;
+    }
+
+    const authz = authorizeRead({ actor: viewActor, timeline, store: this.store, cycleId });
     if (!authz.ok) {
       return {
         ok: false,
@@ -157,9 +188,9 @@ export class SettlementReadService {
       };
     }
 
-    const mode = isPartner(actor) ? 'partner' : 'participant';
-    const instructions = buildDepositInstructions({ timeline, mode, viewer: actor });
-    const viewTimeline = isPartner(actor) ? timeline : redactTimeline({ timeline, viewer: actor });
+    const mode = isPartner(viewActor) ? 'partner' : 'participant';
+    const instructions = buildDepositInstructions({ timeline, mode, viewer: viewActor });
+    const viewTimeline = isPartner(viewActor) ? timeline : redactTimeline({ timeline, viewer: viewActor });
 
     return { ok: true, body: { correlation_id: correlationId, timeline: viewTimeline, instructions } };
   }
@@ -177,9 +208,21 @@ export class SettlementReadService {
       return { ok: false, body: errorResponse(correlationId, authzOp.error.code, authzOp.error.message, authzOp.error.details) };
     }
 
+    let viewActor = actor;
+    if (actor?.type === 'agent') {
+      if (!authzEnforced()) {
+        return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation', { actor }) };
+      }
+      const eff = effectiveActor({ actor, auth });
+      if (!eff) {
+        return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation subject', { actor }) };
+      }
+      viewActor = eff;
+    }
+
     // Use timeline for participant check when available.
     const timeline = this.store.state.timelines[cycleId] ?? { legs: [] };
-    const authz = authorizeRead({ actor, timeline, store: this.store, cycleId });
+    const authz = authorizeRead({ actor: viewActor, timeline, store: this.store, cycleId });
     if (!authz.ok) {
       return {
         ok: false,

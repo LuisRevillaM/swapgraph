@@ -142,6 +142,46 @@ export function authorizeApiOperation({ operationId, actor, auth }) {
         }
       };
     }
+
+    // Lifecycle: revoked grants are rejected.
+    if (delegation?.revoked_at) {
+      return {
+        ok: false,
+        error: {
+          code: 'UNAUTHORIZED',
+          message: 'delegation revoked',
+          details: { operation_id: operationId, delegation_id: delegation.delegation_id, revoked_at: delegation.revoked_at }
+        }
+      };
+    }
+
+    // Lifecycle: expiry is evaluated deterministically when a `now` is provided.
+    const nowIso = auth?.now_iso ?? process.env.AUTHZ_NOW_ISO ?? null;
+    if (nowIso) {
+      const nowMs = Date.parse(nowIso);
+      const expMs = Date.parse(delegation.expires_at);
+      if (!Number.isFinite(nowMs) || !Number.isFinite(expMs)) {
+        return {
+          ok: false,
+          error: {
+            code: 'CONSTRAINT_VIOLATION',
+            message: 'invalid ISO timestamp for delegation lifecycle check',
+            details: { operation_id: operationId, now_iso: nowIso, expires_at: delegation.expires_at }
+          }
+        };
+      }
+
+      if (nowMs > expMs) {
+        return {
+          ok: false,
+          error: {
+            code: 'UNAUTHORIZED',
+            message: 'delegation expired',
+            details: { operation_id: operationId, delegation_id: delegation.delegation_id, now_iso: nowIso, expires_at: delegation.expires_at }
+          }
+        };
+      }
+    }
   }
 
   const requiredScopes = sortedUniqueStrings(opAuth.required_scopes ?? []);

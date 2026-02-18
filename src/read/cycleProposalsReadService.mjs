@@ -1,4 +1,4 @@
-import { authorizeApiOperation } from '../core/authz.mjs';
+import { authorizeApiOperation, authzEnforced } from '../core/authz.mjs';
 
 function errorResponse(correlationId, code, message, details = {}) {
   return { correlation_id: correlationId, error: { code, message, details } };
@@ -16,6 +16,13 @@ function correlationIdForCycleProposalsList(actor) {
 
 function actorKey(actor) {
   return `${actor.type}:${actor.id}`;
+}
+
+function effectiveActor({ actor, auth }) {
+  if (actor?.type === 'agent') {
+    return auth?.delegation?.subject_actor ?? null;
+  }
+  return actor;
 }
 
 function isPartner(actor) {
@@ -75,23 +82,31 @@ export class CycleProposalsReadService {
       return { ok: false, body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details) };
     }
 
+    let viewActor = actor;
     if (actor?.type === 'agent') {
-      return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation (not implemented)', { actor }) };
+      if (!authzEnforced()) {
+        return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation', { actor }) };
+      }
+      const eff = effectiveActor({ actor, auth });
+      if (!eff) {
+        return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation subject', { actor }) };
+      }
+      viewActor = eff;
     }
 
     const all = Object.values(this.store.state.proposals ?? {});
 
     let proposals;
-    if (isPartner(actor)) {
-      proposals = all.filter(p => proposalPartnerId({ store: this.store, proposalId: p.id }) === actor.id);
-    } else if (actor?.type === 'user') {
-      proposals = all.filter(p => isUserParticipant({ actor, proposal: p }));
+    if (isPartner(viewActor)) {
+      proposals = all.filter(p => proposalPartnerId({ store: this.store, proposalId: p.id }) === viewActor.id);
+    } else if (viewActor?.type === 'user') {
+      proposals = all.filter(p => isUserParticipant({ actor: viewActor, proposal: p }));
     } else {
-      return { ok: false, body: errorResponse(correlationIdForCycleProposalsList(actor), 'FORBIDDEN', 'actor type is not allowed', { actor }) };
+      return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'actor type is not allowed', { actor: viewActor }) };
     }
 
     proposals.sort((a, b) => a.id.localeCompare(b.id));
-    return { ok: true, body: { correlation_id: correlationIdForCycleProposalsList(actor), proposals } };
+    return { ok: true, body: { correlation_id: correlationId, proposals } };
   }
 
   get({ actor, auth, proposalId }) {
@@ -102,10 +117,22 @@ export class CycleProposalsReadService {
       return { ok: false, body: errorResponse(correlationId, authzOp.error.code, authzOp.error.message, authzOp.error.details) };
     }
 
+    let viewActor = actor;
+    if (actor?.type === 'agent') {
+      if (!authzEnforced()) {
+        return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation', { actor }) };
+      }
+      const eff = effectiveActor({ actor, auth });
+      if (!eff) {
+        return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation subject', { actor }) };
+      }
+      viewActor = eff;
+    }
+
     const proposal = this.store.state.proposals?.[proposalId];
     if (!proposal) return { ok: false, body: errorResponse(correlationId, 'NOT_FOUND', 'cycle proposal not found', { proposal_id: proposalId }) };
 
-    const authz = authorizeRead({ actor, proposal, store: this.store });
+    const authz = authorizeRead({ actor: viewActor, proposal, store: this.store });
     if (!authz.ok) return { ok: false, body: errorResponse(correlationId, authz.code, authz.message, { ...authz.details, proposal_id: proposalId }) };
 
     return { ok: true, body: { correlation_id: correlationId, proposal } };

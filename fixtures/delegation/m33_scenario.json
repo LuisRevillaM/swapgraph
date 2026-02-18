@@ -1,0 +1,134 @@
+{
+  "actors": {
+    "agent_1": { "type": "agent", "id": "agent_1" }
+  },
+  "delegations": {
+    "u1_read_all": {
+      "delegation_id": "del_u1_read_all",
+      "principal_agent": { "type": "agent", "id": "agent_1" },
+      "subject_actor": { "type": "user", "id": "u1" },
+      "scopes": ["cycle_proposals:read", "settlement:read", "receipts:read"],
+      "policy": {
+        "max_value_per_swap_usd": 100,
+        "min_confidence_score": 0.8,
+        "max_cycle_length": 3,
+        "require_escrow": true
+      },
+      "issued_at": "2026-02-16T00:00:00Z",
+      "expires_at": "2026-03-01T00:00:00Z"
+    },
+    "u1_only_intents": {
+      "delegation_id": "del_u1_only_intents",
+      "principal_agent": { "type": "agent", "id": "agent_1" },
+      "subject_actor": { "type": "user", "id": "u1" },
+      "scopes": ["swap_intents:read"],
+      "policy": {
+        "max_value_per_swap_usd": 100,
+        "min_confidence_score": 0.8,
+        "max_cycle_length": 3,
+        "require_escrow": true
+      },
+      "issued_at": "2026-02-16T00:00:00Z",
+      "expires_at": "2026-03-01T00:00:00Z"
+    },
+    "u1_revoked": {
+      "delegation_id": "del_u1_revoked",
+      "principal_agent": { "type": "agent", "id": "agent_1" },
+      "subject_actor": { "type": "user", "id": "u1" },
+      "scopes": ["cycle_proposals:read"],
+      "policy": {
+        "max_value_per_swap_usd": 100,
+        "min_confidence_score": 0.8,
+        "max_cycle_length": 3,
+        "require_escrow": true
+      },
+      "issued_at": "2026-02-16T00:00:00Z",
+      "expires_at": "2026-03-01T00:00:00Z",
+      "revoked_at": "2026-02-17T00:00:00Z"
+    },
+    "u1_expired": {
+      "delegation_id": "del_u1_expired",
+      "principal_agent": { "type": "agent", "id": "agent_1" },
+      "subject_actor": { "type": "user", "id": "u1" },
+      "scopes": ["cycle_proposals:read"],
+      "policy": {
+        "max_value_per_swap_usd": 100,
+        "min_confidence_score": 0.8,
+        "max_cycle_length": 3,
+        "require_escrow": true
+      },
+      "issued_at": "2026-02-16T00:00:00Z",
+      "expires_at": "2026-02-15T00:00:00Z"
+    }
+  },
+  "ops": [
+    {
+      "op": "cycleProposals.list",
+      "actor_ref": "agent_1",
+      "auth": { "delegation_ref": "u1_only_intents" },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    },
+    {
+      "op": "cycleProposals.list",
+      "actor_ref": "agent_1",
+      "auth": { "delegation_ref": "u1_revoked" },
+      "expect_ok": false,
+      "expect_error_code": "UNAUTHORIZED"
+    },
+    {
+      "op": "cycleProposals.list",
+      "actor_ref": "agent_1",
+      "auth": { "delegation_ref": "u1_expired", "now_iso": "2026-02-16T00:00:00Z" },
+      "expect_ok": false,
+      "expect_error_code": "UNAUTHORIZED"
+    },
+
+    {
+      "op": "cycleProposals.list",
+      "actor_ref": "agent_1",
+      "auth": { "delegation_ref": "u1_read_all" },
+      "expect_ok": true,
+      "expect_proposals_count": 1
+    },
+    {
+      "op": "cycleProposals.get",
+      "actor_ref": "agent_1",
+      "auth": { "delegation_ref": "u1_read_all" },
+      "proposal_ref": "p3",
+      "expect_ok": true
+    },
+
+    {
+      "op": "settlement.status",
+      "actor_ref": "agent_1",
+      "auth": { "delegation_ref": "u1_read_all" },
+      "cycle_ref": "p3",
+      "expect_ok": true
+    },
+    {
+      "op": "settlement.instructions",
+      "actor_ref": "agent_1",
+      "auth": { "delegation_ref": "u1_read_all" },
+      "cycle_ref": "p3",
+      "expect_ok": true,
+      "expect_instructions_count": 1
+    },
+
+    {
+      "op": "receipts.get",
+      "actor_ref": "agent_1",
+      "auth": { "delegation_ref": "u1_read_all" },
+      "cycle_ref": "p3",
+      "expect_ok": true
+    },
+    {
+      "op": "receipts.get",
+      "actor_ref": "agent_1",
+      "auth": { "delegation_ref": "u1_read_all" },
+      "cycle_ref": "p2",
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN"
+    }
+  ]
+}

@@ -26,6 +26,7 @@ In production, the principal is derived from request headers.
 In fixtures-first verification (no HTTP layer yet), we model this as:
 - `auth.scopes`: the granted scopes
 - `auth.delegation`: a `DelegationGrant` object (see `DelegationGrant.schema.json`)
+- `auth.now_iso`: optional ISO timestamp used for deterministic delegation expiry checks in verifiers
 
 ## Scope taxonomy
 Scopes are stable strings.

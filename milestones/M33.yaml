@@ -1,0 +1,28 @@
+name: M33
+commands:
+  - cmd: "npm run verify:m33"
+artifacts:
+  - artifact: "docs/prd/M33.md"
+
+  - artifact: "docs/spec/AUTH.md"
+  - artifact: "docs/spec/api/manifest.v1.json"
+  - artifact: "docs/spec/schemas/DelegationGrant.schema.json"
+
+  - artifact: "src/core/authz.mjs"
+  - artifact: "src/read/cycleProposalsReadService.mjs"
+  - artifact: "src/read/settlementReadService.mjs"
+
+  - artifact: "fixtures/delegation/m33_scenario.json"
+  - artifact: "fixtures/delegation/m33_expected.json"
+
+  - artifact: "scripts/run-m33-delegation-lifecycle-scenario.mjs"
+
+  - artifact: "verify/m33.sh"
+
+  - artifact: "artifacts/milestones/M33/latest/commands.log"
+  - artifact: "artifacts/milestones/M33/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M33/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M33/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M33/latest/delegation_lifecycle_output.json"
+  - artifact: "artifacts/milestones/M33/latest/store.json"
+  - artifact: "artifacts/milestones/M33/latest/assertions.json"
