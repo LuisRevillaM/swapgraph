@@ -1,0 +1,303 @@
+{
+  "final": {
+    "holding_ids": [
+      "hold_001",
+      "hold_002"
+    ],
+    "holdings": [
+      {
+        "holding_id": "hold_001",
+        "owner_actor": {
+          "id": "u1",
+          "type": "user"
+        },
+        "reservation_id": null,
+        "status": "withdrawn",
+        "vault_id": "vault_u1",
+        "withdrawn_at": "2026-02-18T22:01:40Z"
+      },
+      {
+        "holding_id": "hold_002",
+        "owner_actor": {
+          "id": "u1",
+          "type": "user"
+        },
+        "reservation_id": null,
+        "status": "available",
+        "vault_id": "vault_u1",
+        "withdrawn_at": null
+      }
+    ],
+    "vault_event_count": 5,
+    "vault_event_types": [
+      "vault.deposit_confirmed",
+      "vault.holding_reserved",
+      "vault.holding_released",
+      "vault.holding_withdrawn",
+      "vault.deposit_confirmed"
+    ]
+  },
+  "operations": [
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "error_code": null,
+      "holding_id": "hold_001",
+      "list_count": null,
+      "list_statuses": null,
+      "ok": true,
+      "op": "vault.deposit",
+      "reason_code": null,
+      "replayed": false,
+      "reservation_id": null,
+      "status": "available"
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "error_code": null,
+      "holding_id": "hold_001",
+      "list_count": null,
+      "list_statuses": null,
+      "ok": true,
+      "op": "vault.deposit",
+      "reason_code": null,
+      "replayed": true,
+      "reservation_id": null,
+      "status": "available"
+    },
+    {
+      "actor": {
+        "id": "p1",
+        "type": "partner"
+      },
+      "error_code": null,
+      "holding_id": "hold_001",
+      "list_count": null,
+      "list_statuses": null,
+      "ok": true,
+      "op": "vault.reserve",
+      "reason_code": null,
+      "replayed": false,
+      "reservation_id": "rsv_001",
+      "status": "reserved"
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "error_code": "FORBIDDEN",
+      "holding_id": "hold_001",
+      "list_count": null,
+      "list_statuses": null,
+      "ok": false,
+      "op": "vault.withdraw",
+      "reason_code": "vault_holding_reserved",
+      "replayed": false,
+      "reservation_id": null,
+      "status": null
+    },
+    {
+      "actor": {
+        "id": "p1",
+        "type": "partner"
+      },
+      "error_code": "CONSTRAINT_VIOLATION",
+      "holding_id": "hold_001",
+      "list_count": null,
+      "list_statuses": null,
+      "ok": false,
+      "op": "vault.release",
+      "reason_code": "vault_reservation_mismatch",
+      "replayed": false,
+      "reservation_id": null,
+      "status": null
+    },
+    {
+      "actor": {
+        "id": "p1",
+        "type": "partner"
+      },
+      "error_code": null,
+      "holding_id": "hold_001",
+      "list_count": null,
+      "list_statuses": null,
+      "ok": true,
+      "op": "vault.release",
+      "reason_code": null,
+      "replayed": false,
+      "reservation_id": null,
+      "status": "available"
+    },
+    {
+      "actor": {
+        "id": "u2",
+        "type": "user"
+      },
+      "error_code": "FORBIDDEN",
+      "holding_id": "hold_001",
+      "list_count": null,
+      "list_statuses": null,
+      "ok": false,
+      "op": "vault.withdraw",
+      "reason_code": "vault_owner_mismatch",
+      "replayed": false,
+      "reservation_id": null,
+      "status": null
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "error_code": null,
+      "holding_id": "hold_001",
+      "list_count": null,
+      "list_statuses": null,
+      "ok": true,
+      "op": "vault.withdraw",
+      "reason_code": null,
+      "replayed": false,
+      "reservation_id": null,
+      "status": "withdrawn"
+    },
+    {
+      "actor": {
+        "id": "p1",
+        "type": "partner"
+      },
+      "error_code": "CONSTRAINT_VIOLATION",
+      "holding_id": "hold_001",
+      "list_count": null,
+      "list_statuses": null,
+      "ok": false,
+      "op": "vault.reserve",
+      "reason_code": "vault_holding_not_available",
+      "replayed": false,
+      "reservation_id": null,
+      "status": null
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "error_code": null,
+      "holding_id": "hold_001",
+      "list_count": null,
+      "list_statuses": null,
+      "ok": true,
+      "op": "vault.get",
+      "reason_code": null,
+      "replayed": null,
+      "reservation_id": null,
+      "status": "withdrawn"
+    },
+    {
+      "actor": {
+        "id": "u2",
+        "type": "user"
+      },
+      "error_code": "FORBIDDEN",
+      "holding_id": "hold_001",
+      "list_count": null,
+      "list_statuses": null,
+      "ok": false,
+      "op": "vault.get",
+      "reason_code": "vault_owner_mismatch",
+      "replayed": null,
+      "reservation_id": null,
+      "status": null
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "error_code": null,
+      "holding_id": null,
+      "list_count": 0,
+      "list_statuses": [],
+      "ok": true,
+      "op": "vault.list",
+      "reason_code": null,
+      "replayed": null,
+      "reservation_id": null,
+      "status": null
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "error_code": null,
+      "holding_id": "hold_002",
+      "list_count": null,
+      "list_statuses": null,
+      "ok": true,
+      "op": "vault.deposit",
+      "reason_code": null,
+      "replayed": false,
+      "reservation_id": null,
+      "status": "available"
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "error_code": null,
+      "holding_id": null,
+      "list_count": 1,
+      "list_statuses": [
+        "available"
+      ],
+      "ok": true,
+      "op": "vault.list",
+      "reason_code": null,
+      "replayed": null,
+      "reservation_id": null,
+      "status": null
+    },
+    {
+      "actor": {
+        "id": "p1",
+        "type": "partner"
+      },
+      "error_code": null,
+      "holding_id": null,
+      "list_count": 2,
+      "list_statuses": [
+        "withdrawn",
+        "available"
+      ],
+      "ok": true,
+      "op": "vault.list",
+      "reason_code": null,
+      "replayed": null,
+      "reservation_id": null,
+      "status": null
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH",
+      "holding_id": "hold_003",
+      "list_count": null,
+      "list_statuses": null,
+      "ok": false,
+      "op": "vault.deposit",
+      "reason_code": null,
+      "replayed": false,
+      "reservation_id": null,
+      "status": null
+    }
+  ]
+}

@@ -23,7 +23,9 @@ const schemaFiles = [
   'DelegationTokenSigningKey.schema.json',
   'PolicyIntegritySigningKey.schema.json',
   'EventSignature.schema.json',
-  'EventEnvelope.schema.json'
+  'EventEnvelope.schema.json',
+  'VaultHolding.schema.json',
+  'VaultEvent.schema.json'
 ];
 
 const exampleMap = {
@@ -42,7 +44,9 @@ const exampleMap = {
   'DelegationTokenSigningKey.schema.json': 'DelegationTokenSigningKey.example.json',
   'PolicyIntegritySigningKey.schema.json': 'PolicyIntegritySigningKey.example.json',
   'EventSignature.schema.json': 'EventSignature.example.json',
-  'EventEnvelope.schema.json': 'EventEnvelope.example.json'
+  'EventEnvelope.schema.json': 'EventEnvelope.example.json',
+  'VaultHolding.schema.json': 'VaultHolding.example.json',
+  'VaultEvent.schema.json': 'VaultEvent.example.json'
 };
 
 const ajv = new Ajv2020({ strict: true, allErrors: true });

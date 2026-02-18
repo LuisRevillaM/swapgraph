@@ -1,0 +1,29 @@
+name: M47
+commands:
+  - cmd: "npm run verify:m47"
+artifacts:
+  - artifact: "docs/prd/M47.md"
+  - artifact: "docs/STATUS.md"
+  - artifact: "docs/spec/PRIMITIVES.md"
+  - artifact: "docs/spec/GAPS.md"
+
+  - artifact: "docs/spec/schemas/VaultHolding.schema.json"
+  - artifact: "docs/spec/schemas/VaultEvent.schema.json"
+  - artifact: "docs/spec/examples/VaultHolding.example.json"
+  - artifact: "docs/spec/examples/VaultEvent.example.json"
+
+  - artifact: "src/vault/vaultLifecycleService.mjs"
+
+  - artifact: "scripts/run-m47-vault-lifecycle-scenario.mjs"
+  - artifact: "fixtures/vault/m47_scenario.json"
+  - artifact: "fixtures/vault/m47_expected.json"
+
+  - artifact: "verify/m47.sh"
+
+  - artifact: "artifacts/milestones/M47/latest/commands.log"
+  - artifact: "artifacts/milestones/M47/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M47/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M47/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M47/latest/vault_lifecycle_output.json"
+  - artifact: "artifacts/milestones/M47/latest/store.json"
+  - artifact: "artifacts/milestones/M47/latest/assertions.json"

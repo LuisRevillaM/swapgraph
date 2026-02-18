@@ -1,0 +1,15 @@
+{
+  "event_id": "ve_1",
+  "operation_id": "vault.deposit",
+  "event_type": "vault.deposit_confirmed",
+  "occurred_at": "2026-02-18T20:00:00Z",
+  "actor": {
+    "type": "user",
+    "id": "u1"
+  },
+  "holding_id": "hold_001",
+  "details": {
+    "vault_id": "vault_u1",
+    "deposit_id": "dep_001"
+  }
+}

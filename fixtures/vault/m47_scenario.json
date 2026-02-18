@@ -1,0 +1,218 @@
+{
+  "actors": {
+    "user_u1": { "type": "user", "id": "u1" },
+    "user_u2": { "type": "user", "id": "u2" },
+    "partner_p1": { "type": "partner", "id": "p1" }
+  },
+  "operations": [
+    {
+      "op": "vault.deposit",
+      "actor_ref": "user_u1",
+      "idempotency_key": "idem_m47_dep_1",
+      "now_iso": "2026-02-18T22:00:00Z",
+      "request": {
+        "holding": {
+          "holding_id": "hold_001",
+          "vault_id": "vault_u1",
+          "asset": { "platform": "steam", "asset_id": "730:asset_001" },
+          "owner_actor": { "type": "user", "id": "u1" },
+          "deposit_id": "dep_001",
+          "deposited_at": "2026-02-18T22:00:00Z"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_status": "available"
+    },
+    {
+      "op": "vault.deposit",
+      "actor_ref": "user_u1",
+      "idempotency_key": "idem_m47_dep_1",
+      "now_iso": "2026-02-18T22:00:01Z",
+      "request": {
+        "holding": {
+          "holding_id": "hold_001",
+          "vault_id": "vault_u1",
+          "asset": { "platform": "steam", "asset_id": "730:asset_001" },
+          "owner_actor": { "type": "user", "id": "u1" },
+          "deposit_id": "dep_001",
+          "deposited_at": "2026-02-18T22:00:00Z"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": true,
+      "expect_status": "available"
+    },
+    {
+      "op": "vault.reserve",
+      "actor_ref": "partner_p1",
+      "idempotency_key": "idem_m47_res_1",
+      "now_iso": "2026-02-18T22:01:00Z",
+      "request": {
+        "holding_id": "hold_001",
+        "reservation_id": "rsv_001"
+      },
+      "expect_ok": true,
+      "expect_status": "reserved",
+      "expect_reservation_id": "rsv_001"
+    },
+    {
+      "op": "vault.withdraw",
+      "actor_ref": "user_u1",
+      "idempotency_key": "idem_m47_wd_1",
+      "now_iso": "2026-02-18T22:01:05Z",
+      "request": {
+        "holding_id": "hold_001",
+        "withdrawn_at": "2026-02-18T22:01:05Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN",
+      "expect_reason_code": "vault_holding_reserved"
+    },
+    {
+      "op": "vault.release",
+      "actor_ref": "partner_p1",
+      "idempotency_key": "idem_m47_rel_bad",
+      "now_iso": "2026-02-18T22:01:10Z",
+      "request": {
+        "holding_id": "hold_001",
+        "reservation_id": "rsv_bad"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "vault_reservation_mismatch"
+    },
+    {
+      "op": "vault.release",
+      "actor_ref": "partner_p1",
+      "idempotency_key": "idem_m47_rel_1",
+      "now_iso": "2026-02-18T22:01:20Z",
+      "request": {
+        "holding_id": "hold_001",
+        "reservation_id": "rsv_001"
+      },
+      "expect_ok": true,
+      "expect_status": "available",
+      "expect_reservation_id": null
+    },
+    {
+      "op": "vault.withdraw",
+      "actor_ref": "user_u2",
+      "idempotency_key": "idem_m47_wd_2",
+      "now_iso": "2026-02-18T22:01:30Z",
+      "request": {
+        "holding_id": "hold_001",
+        "withdrawn_at": "2026-02-18T22:01:30Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN",
+      "expect_reason_code": "vault_owner_mismatch"
+    },
+    {
+      "op": "vault.withdraw",
+      "actor_ref": "user_u1",
+      "idempotency_key": "idem_m47_wd_3",
+      "now_iso": "2026-02-18T22:01:40Z",
+      "request": {
+        "holding_id": "hold_001",
+        "withdrawn_at": "2026-02-18T22:01:40Z"
+      },
+      "expect_ok": true,
+      "expect_status": "withdrawn"
+    },
+    {
+      "op": "vault.reserve",
+      "actor_ref": "partner_p1",
+      "idempotency_key": "idem_m47_res_2",
+      "now_iso": "2026-02-18T22:01:50Z",
+      "request": {
+        "holding_id": "hold_001",
+        "reservation_id": "rsv_002"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "vault_holding_not_available"
+    },
+    {
+      "op": "vault.get",
+      "actor_ref": "user_u1",
+      "holding_id": "hold_001",
+      "expect_ok": true,
+      "expect_status": "withdrawn"
+    },
+    {
+      "op": "vault.get",
+      "actor_ref": "user_u2",
+      "holding_id": "hold_001",
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN",
+      "expect_reason_code": "vault_owner_mismatch"
+    },
+    {
+      "op": "vault.list",
+      "actor_ref": "user_u1",
+      "query": {
+        "include_withdrawn": false
+      },
+      "expect_ok": true,
+      "expect_list_count": 0
+    },
+    {
+      "op": "vault.deposit",
+      "actor_ref": "user_u1",
+      "idempotency_key": "idem_m47_dep_2",
+      "now_iso": "2026-02-18T22:02:00Z",
+      "request": {
+        "holding": {
+          "holding_id": "hold_002",
+          "vault_id": "vault_u1",
+          "asset": { "platform": "steam", "asset_id": "730:asset_002" },
+          "owner_actor": { "type": "user", "id": "u1" },
+          "deposit_id": "dep_002",
+          "deposited_at": "2026-02-18T22:02:00Z"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_status": "available"
+    },
+    {
+      "op": "vault.list",
+      "actor_ref": "user_u1",
+      "query": {
+        "include_withdrawn": false
+      },
+      "expect_ok": true,
+      "expect_list_count": 1,
+      "expect_list_statuses": ["available"]
+    },
+    {
+      "op": "vault.list",
+      "actor_ref": "partner_p1",
+      "query": {
+        "include_withdrawn": true
+      },
+      "expect_ok": true,
+      "expect_list_count": 2,
+      "expect_list_statuses": ["withdrawn", "available"]
+    },
+    {
+      "op": "vault.deposit",
+      "actor_ref": "user_u1",
+      "idempotency_key": "idem_m47_dep_2",
+      "now_iso": "2026-02-18T22:02:10Z",
+      "request": {
+        "holding": {
+          "holding_id": "hold_003",
+          "vault_id": "vault_u1",
+          "asset": { "platform": "steam", "asset_id": "730:asset_003" },
+          "owner_actor": { "type": "user", "id": "u1" },
+          "deposit_id": "dep_003",
+          "deposited_at": "2026-02-18T22:02:10Z"
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    }
+  ]
+}

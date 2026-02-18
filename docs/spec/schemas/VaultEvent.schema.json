@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/VaultEvent.schema.json",
+  "title": "VaultEvent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["event_id", "operation_id", "event_type", "occurred_at", "actor", "holding_id", "details"],
+  "properties": {
+    "event_id": { "type": "string", "minLength": 1 },
+    "operation_id": { "type": "string", "minLength": 1 },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "vault.deposit_confirmed",
+        "vault.holding_reserved",
+        "vault.holding_released",
+        "vault.holding_withdrawn"
+      ]
+    },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "actor": { "$ref": "ActorRef.schema.json" },
+    "holding_id": { "type": "string", "minLength": 1 },
+    "details": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

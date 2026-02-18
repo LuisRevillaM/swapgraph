@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/VaultHolding.schema.json",
+  "title": "VaultHolding",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "holding_id",
+    "vault_id",
+    "asset",
+    "owner_actor",
+    "status",
+    "deposit_id",
+    "deposited_at",
+    "reservation_id",
+    "withdrawn_at",
+    "updated_at"
+  ],
+  "properties": {
+    "holding_id": { "type": "string", "minLength": 1 },
+    "vault_id": { "type": "string", "minLength": 1 },
+    "asset": { "$ref": "AssetRef.schema.json" },
+    "owner_actor": { "$ref": "ActorRef.schema.json" },
+    "status": { "type": "string", "enum": ["available", "reserved", "withdrawn"] },
+    "deposit_id": { "type": ["string", "null"], "minLength": 1 },
+    "deposited_at": { "type": "string", "format": "date-time" },
+    "reservation_id": { "type": ["string", "null"], "minLength": 1 },
+    "withdrawn_at": { "type": ["string", "null"], "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" }
+  }
+}

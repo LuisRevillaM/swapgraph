@@ -57,6 +57,19 @@ Deterministic proof that a specific custody holding is included in a published s
 - includes ordered sibling path (`siblings[]` with `left|right` positions)
 - verifies to snapshot `root_hash` with stable hashing rules.
 
+### VaultHolding
+Canonical lifecycle record for a vaulted holding.
+- states: `available -> reserved -> available|withdrawn`
+- owner-scoped withdraw semantics (only owner can withdraw)
+- reservation lock semantics (reserved holdings are not withdrawable)
+
+### VaultEvent
+Append-only lifecycle events for vault transitions.
+- `vault.deposit_confirmed`
+- `vault.holding_reserved`
+- `vault.holding_released`
+- `vault.holding_withdrawn`
+
 ## Protocol invariants (non-negotiable)
 - **Constraints are never overridden**.
 - **Only one active reservation per intent**.
