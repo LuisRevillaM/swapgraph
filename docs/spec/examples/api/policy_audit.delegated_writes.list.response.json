@@ -1,0 +1,55 @@
+{
+  "correlation_id": "corr_policy_audit_delegated_writes",
+  "entries": [
+    {
+      "audit_id": "pa_1",
+      "occurred_at": "2026-02-16T10:05:00Z",
+      "operation_id": "swapIntents.create",
+      "decision": "deny",
+      "reason_code": "consent_required",
+      "actor": { "type": "agent", "id": "agent_1" },
+      "subject_actor": { "type": "user", "id": "u1" },
+      "intent_id": "intent_abc",
+      "delegation_id": "del_123",
+      "policy": {
+        "max_value_per_swap_usd": 200,
+        "max_value_per_day_usd": 250,
+        "high_value_consent_threshold_usd": 120,
+        "min_confidence_score": 0.8,
+        "max_cycle_length": 3,
+        "require_escrow": true
+      },
+      "details": {
+        "reason_code": "consent_required",
+        "threshold_usd": 120,
+        "max_usd": 130
+      }
+    },
+    {
+      "audit_id": "pa_2",
+      "occurred_at": "2026-02-16T10:06:00Z",
+      "operation_id": "swapIntents.create",
+      "decision": "allow",
+      "reason_code": "ok",
+      "actor": { "type": "agent", "id": "agent_1" },
+      "subject_actor": { "type": "user", "id": "u1" },
+      "intent_id": "intent_abc",
+      "delegation_id": "del_123",
+      "policy": {
+        "max_value_per_swap_usd": 200,
+        "max_value_per_day_usd": 250,
+        "high_value_consent_threshold_usd": 120,
+        "min_confidence_score": 0.8,
+        "max_cycle_length": 3,
+        "require_escrow": true
+      },
+      "details": {
+        "day_key": "2026-02-16",
+        "projected_usd": 230,
+        "cap_usd": 250,
+        "consent_required": true,
+        "consent_id": "consent_abc"
+      }
+    }
+  ]
+}

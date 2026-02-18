@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/PolicyAuditEntry.schema.json",
+  "title": "PolicyAuditEntry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "audit_id",
+    "occurred_at",
+    "operation_id",
+    "decision",
+    "reason_code",
+    "actor",
+    "subject_actor",
+    "details"
+  ],
+  "properties": {
+    "audit_id": { "type": "string", "minLength": 1 },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "operation_id": { "type": "string", "minLength": 1 },
+    "decision": { "type": "string", "enum": ["allow", "deny"] },
+    "reason_code": { "type": "string", "minLength": 1 },
+    "actor": { "$ref": "ActorRef.schema.json" },
+    "subject_actor": { "$ref": "ActorRef.schema.json" },
+    "intent_id": { "type": "string", "minLength": 1 },
+    "delegation_id": { "type": "string", "minLength": 1 },
+    "policy": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "details": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

@@ -372,6 +372,22 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/policy-audit/delegated-writes",
+      "operation_id": "policyAudit.delegated_writes.list",
+      "idempotency_required": false,
+      "response_schema": "PolicyAuditListResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user"
+        ],
+        "required_scopes": [
+          "delegations:read"
+        ]
+      }
+    },
+    {
       "method": "POST",
       "path": "/auth/delegation-token/introspect",
       "operation_id": "auth.delegation_token.introspect",

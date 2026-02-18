@@ -71,6 +71,9 @@ Delegation read/write responses include:
 - `delegation` (`DelegationGrant`)
 - `delegation_token` (`sgdt1...`) suitable for `Authorization: Bearer ...` by the agent
 
+Delegated-policy audit endpoint:
+- `GET /policy-audit/delegated-writes` (user-scoped policy decision audit entries)
+
 Auth utility endpoints:
 - `POST /auth/delegation-token/introspect` (evaluate delegation token activity in a deterministic contract)
 

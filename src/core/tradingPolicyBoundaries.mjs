@@ -216,6 +216,12 @@ export function evaluateQuietHoursPolicy({ policy, nowIso }) {
   };
 }
 
+function consentTierRank(tier) {
+  if (tier === 'step_up') return 1;
+  if (tier === 'passkey') return 2;
+  return 0;
+}
+
 export function evaluateHighValueConsentForIntent({ policy, intent, auth, nowIso }) {
   const threshold = finiteNumberOrNull(policy?.high_value_consent_threshold_usd);
   const maxUsd = intentMaxUsd(intent);
@@ -256,6 +262,81 @@ export function evaluateHighValueConsentForIntent({ policy, intent, auth, nowIso
     };
   }
 
+  const tierEnforced = process.env.POLICY_CONSENT_TIER_ENFORCE === '1';
+  const requiredTier = maxUsd > (threshold * 1.5) ? 'passkey' : 'step_up';
+
+  if (tierEnforced) {
+    const consentTier = consent?.consent_tier;
+    const consentProof = consent?.consent_proof;
+
+    if (typeof consentTier !== 'string' || consentTier.trim().length < 1) {
+      return {
+        ok: false,
+        code: 'FORBIDDEN',
+        message: 'delegation consent tier required',
+        details: {
+          reason_code: 'consent_tier_required',
+          threshold_usd: threshold,
+          max_usd: maxUsd,
+          required_tier: requiredTier,
+          consent_id: consent.consent_id
+        }
+      };
+    }
+
+    const providedTier = consentTier.trim();
+    const requiredRank = consentTierRank(requiredTier);
+    const providedRank = consentTierRank(providedTier);
+
+    if (providedRank === 0) {
+      return {
+        ok: false,
+        code: 'CONSTRAINT_VIOLATION',
+        message: 'invalid consent tier',
+        details: {
+          reason_code: 'consent_tier_invalid',
+          threshold_usd: threshold,
+          max_usd: maxUsd,
+          required_tier: requiredTier,
+          consent_tier: providedTier,
+          consent_id: consent.consent_id
+        }
+      };
+    }
+
+    if (providedRank < requiredRank) {
+      return {
+        ok: false,
+        code: 'FORBIDDEN',
+        message: 'delegation consent tier insufficient',
+        details: {
+          reason_code: 'consent_tier_insufficient',
+          threshold_usd: threshold,
+          max_usd: maxUsd,
+          required_tier: requiredTier,
+          consent_tier: providedTier,
+          consent_id: consent.consent_id
+        }
+      };
+    }
+
+    if (typeof consentProof !== 'string' || consentProof.trim().length < 1) {
+      return {
+        ok: false,
+        code: 'FORBIDDEN',
+        message: 'delegation consent proof required',
+        details: {
+          reason_code: 'consent_proof_required',
+          threshold_usd: threshold,
+          max_usd: maxUsd,
+          required_tier: requiredTier,
+          consent_tier: providedTier,
+          consent_id: consent.consent_id
+        }
+      };
+    }
+  }
+
   if (Number.isFinite(consent.approved_max_usd) && consent.approved_max_usd < maxUsd) {
     return {
       ok: false,
@@ -266,7 +347,9 @@ export function evaluateHighValueConsentForIntent({ policy, intent, auth, nowIso
         threshold_usd: threshold,
         max_usd: maxUsd,
         approved_max_usd: consent.approved_max_usd,
-        consent_id: consent.consent_id
+        consent_id: consent.consent_id,
+        required_tier: requiredTier,
+        consent_tier: consent?.consent_tier ?? null
       }
     };
   }
@@ -310,6 +393,9 @@ export function evaluateHighValueConsentForIntent({ policy, intent, auth, nowIso
     details: {
       threshold_usd: threshold,
       max_usd: maxUsd,
+      required_tier: requiredTier,
+      tier_enforced: tierEnforced,
+      consent_tier: consent?.consent_tier ?? null,
       consent_id: consent.consent_id,
       approved_max_usd: finiteNumberOrNull(consent.approved_max_usd)
     }

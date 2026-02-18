@@ -1,0 +1,38 @@
+name: M39
+commands:
+  - cmd: "npm run verify:m39"
+artifacts:
+  - artifact: "docs/prd/M39.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/AUTH.md"
+  - artifact: "docs/spec/GAPS.md"
+  - artifact: "docs/spec/api/manifest.v1.json"
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+
+  - artifact: "docs/spec/schemas/PolicyAuditEntry.schema.json"
+  - artifact: "docs/spec/schemas/PolicyAuditListResponse.schema.json"
+  - artifact: "docs/spec/examples/PolicyAuditEntry.example.json"
+  - artifact: "docs/spec/examples/api/policy_audit.delegated_writes.list.response.json"
+
+  - artifact: "docs/spec/schemas/TradingPolicy.schema.json"
+  - artifact: "docs/spec/examples/TradingPolicy.example.json"
+
+  - artifact: "src/core/tradingPolicyBoundaries.mjs"
+  - artifact: "src/service/swapIntentsService.mjs"
+  - artifact: "src/read/policyAuditReadService.mjs"
+  - artifact: "src/store/jsonStateStore.mjs"
+
+  - artifact: "scripts/validate-schemas.mjs"
+  - artifact: "scripts/run-m39-consent-tier-audit-read-scenario.mjs"
+  - artifact: "fixtures/delegation/m39_scenario.json"
+  - artifact: "fixtures/delegation/m39_expected.json"
+
+  - artifact: "verify/m39.sh"
+
+  - artifact: "artifacts/milestones/M39/latest/commands.log"
+  - artifact: "artifacts/milestones/M39/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M39/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M39/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M39/latest/consent_tier_audit_read_output.json"
+  - artifact: "artifacts/milestones/M39/latest/store.json"
+  - artifact: "artifacts/milestones/M39/latest/assertions.json"

@@ -1,0 +1,174 @@
+{
+  "final": {
+    "policy_audit": [
+      {
+        "audit_id": "pa_1",
+        "consent_id": null,
+        "consent_tier": null,
+        "decision": "deny",
+        "intent_id": "intent_m39_i1",
+        "operation_id": "swapIntents.create",
+        "reason_code": "consent_required",
+        "required_tier": null
+      },
+      {
+        "audit_id": "pa_2",
+        "consent_id": "consent_m39_i1_missing_tier",
+        "consent_tier": null,
+        "decision": "deny",
+        "intent_id": "intent_m39_i1",
+        "operation_id": "swapIntents.create",
+        "reason_code": "consent_tier_required",
+        "required_tier": "step_up"
+      },
+      {
+        "audit_id": "pa_3",
+        "consent_id": "consent_m39_i1_stepup",
+        "consent_tier": null,
+        "decision": "allow",
+        "intent_id": "intent_m39_i1",
+        "operation_id": "swapIntents.create",
+        "reason_code": "ok",
+        "required_tier": null
+      },
+      {
+        "audit_id": "pa_4",
+        "consent_id": "consent_m39_i2_stepup",
+        "consent_tier": "step_up",
+        "decision": "deny",
+        "intent_id": "intent_m39_i2",
+        "operation_id": "swapIntents.create",
+        "reason_code": "consent_tier_insufficient",
+        "required_tier": "passkey"
+      },
+      {
+        "audit_id": "pa_5",
+        "consent_id": "consent_m39_i2_passkey",
+        "consent_tier": null,
+        "decision": "allow",
+        "intent_id": "intent_m39_i2",
+        "operation_id": "swapIntents.create",
+        "reason_code": "ok",
+        "required_tier": null
+      }
+    ],
+    "policy_audit_count": 5
+  },
+  "operations": [
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "delegation_id": "del_m39_u1_agent1",
+      "error_code": null,
+      "ok": true,
+      "op": "delegations.create",
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "agent_1",
+        "type": "agent"
+      },
+      "error_code": null,
+      "ok": true,
+      "op": "authHeaders.parse"
+    },
+    {
+      "error_code": "FORBIDDEN",
+      "intent_id": "intent_m39_i1",
+      "ok": false,
+      "op": "swapIntents.create.via_token",
+      "parse_ok": true,
+      "reason_code": "consent_required",
+      "replayed": false
+    },
+    {
+      "error_code": "FORBIDDEN",
+      "intent_id": "intent_m39_i1",
+      "ok": false,
+      "op": "swapIntents.create.via_token",
+      "parse_ok": true,
+      "reason_code": "consent_tier_required",
+      "replayed": false
+    },
+    {
+      "error_code": null,
+      "intent_id": "intent_m39_i1",
+      "ok": true,
+      "op": "swapIntents.create.via_token",
+      "parse_ok": true,
+      "reason_code": null,
+      "replayed": false
+    },
+    {
+      "error_code": "FORBIDDEN",
+      "intent_id": "intent_m39_i2",
+      "ok": false,
+      "op": "swapIntents.create.via_token",
+      "parse_ok": true,
+      "reason_code": "consent_tier_insufficient",
+      "replayed": false
+    },
+    {
+      "error_code": null,
+      "intent_id": "intent_m39_i2",
+      "ok": true,
+      "op": "swapIntents.create.via_token",
+      "parse_ok": true,
+      "reason_code": null,
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "entries_count": 5,
+      "error_code": null,
+      "ok": true,
+      "op": "policyAudit.list",
+      "reason_codes": [
+        "consent_required",
+        "consent_tier_required",
+        "ok",
+        "consent_tier_insufficient",
+        "ok"
+      ]
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "entries_count": 3,
+      "error_code": null,
+      "ok": true,
+      "op": "policyAudit.list",
+      "reason_codes": [
+        "consent_required",
+        "consent_tier_required",
+        "consent_tier_insufficient"
+      ]
+    },
+    {
+      "entries_count": null,
+      "error_code": "FORBIDDEN",
+      "ok": false,
+      "op": "policyAudit.list.via_token",
+      "parse_ok": true
+    },
+    {
+      "actor": {
+        "id": "u2",
+        "type": "user"
+      },
+      "entries_count": 0,
+      "error_code": null,
+      "ok": true,
+      "op": "policyAudit.list",
+      "reason_codes": []
+    }
+  ]
+}

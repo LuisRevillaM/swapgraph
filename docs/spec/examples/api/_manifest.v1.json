@@ -42,6 +42,10 @@
       "schema": "CommitGetResponse.schema.json"
     },
     {
+      "file": "policy_audit.delegated_writes.list.response.json",
+      "schema": "PolicyAuditListResponse.schema.json"
+    },
+    {
       "file": "settlement.start.request.json",
       "schema": "SettlementStartRequest.schema.json"
     },

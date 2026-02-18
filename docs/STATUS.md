@@ -49,9 +49,10 @@ Last updated: 2026-02-18
 - M36: ✅ delegation-token key publication/rotation contract + token introspection endpoint (fixtures-first)
 - M37: ✅ delegation policy enforcement expanded across matching/commit/settlement read boundaries (fixtures-first)
 - M38: ✅ advanced delegated write-path policy controls (`max_value_per_day_usd`, consent hooks, audit trail expansion) (fixtures-first)
+- M39: ✅ high-value consent tier hardening + delegated policy audit read contract (fixtures-first)
 
 ## Next
-- M39: high-value consent tiering hardening + delegated audit API/read contract (TBD)
+- M40: consent proof binding + delegated policy audit pagination/retention contract hardening (TBD)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.

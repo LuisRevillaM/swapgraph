@@ -123,7 +123,8 @@ Each item here must become at least one of:
 - Resolved (fixtures-first, partial): M36 (delegation-token key publication/rotation + token introspection contract).
 - Resolved (fixtures-first, partial): M37 (delegation policy enforcement expanded across matching/commit/settlement read boundaries).
 - Resolved (fixtures-first, partial): M38 (delegated write-path daily cap + high-value consent hooks + policy audit trail).
-- Remaining: consent tier hardening and explicit delegated-audit read contract.
+- Resolved (fixtures-first, partial): M39 (consent tier hardening + delegated policy audit read contract).
+- Remaining: consent proof binding and delegated-audit pagination/retention contract hardening.
 
 ---
 
