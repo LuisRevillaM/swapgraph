@@ -220,7 +220,14 @@ export class SwapIntentsService {
             return { ok: false, body: errorResponse(correlationId, intentPolicy.code, intentPolicy.message, intentPolicy.details) };
           }
 
-          consentCheck = evaluateHighValueConsentForIntent({ policy, intent: nextIntent, auth, nowIso });
+          consentCheck = evaluateHighValueConsentForIntent({
+            policy,
+            intent: nextIntent,
+            auth,
+            nowIso,
+            subjectActor,
+            delegationId: auth?.delegation?.delegation_id
+          });
           if (!consentCheck.ok) {
             appendPolicyAudit(this.store, {
               occurredAt: nowIso,
@@ -399,7 +406,14 @@ export class SwapIntentsService {
             return { ok: false, body: errorResponse(correlationId, intentPolicy.code, intentPolicy.message, intentPolicy.details) };
           }
 
-          consentCheck = evaluateHighValueConsentForIntent({ policy, intent: nextIntent, auth, nowIso });
+          consentCheck = evaluateHighValueConsentForIntent({
+            policy,
+            intent: nextIntent,
+            auth,
+            nowIso,
+            subjectActor,
+            delegationId: auth?.delegation?.delegation_id
+          });
           if (!consentCheck.ok) {
             appendPolicyAudit(this.store, {
               occurredAt: nowIso,

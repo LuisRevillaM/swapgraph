@@ -10,6 +10,8 @@
     "entries": {
       "type": "array",
       "items": { "$ref": "PolicyAuditEntry.schema.json" }
-    }
+    },
+    "next_cursor": { "type": "string", "minLength": 1 },
+    "total_filtered": { "type": "integer", "minimum": 0 }
   }
 }

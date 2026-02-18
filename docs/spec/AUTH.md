@@ -73,6 +73,8 @@ Delegated write-path policy controls (M38/M39):
   - higher-value intents may require `passkey` tier
 - delegated write decisions are recorded in store-backed audit records (`policy_audit`) for deterministic proofing
 - users can read audit entries via `GET /policy-audit/delegated-writes`
+  - includes pagination cursor support and retention-window filtering
+  - in fixtures-first, retention uses `POLICY_AUDIT_RETENTION_DAYS` and deterministic `now_iso` query override
 
 ## Scope taxonomy
 Scopes are stable strings.

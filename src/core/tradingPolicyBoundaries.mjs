@@ -222,7 +222,15 @@ function consentTierRank(tier) {
   return 0;
 }
 
-export function evaluateHighValueConsentForIntent({ policy, intent, auth, nowIso }) {
+export function buildConsentProofBinding({ consentId, subjectActor, delegationId, intent }) {
+  const subject = actorKey(subjectActor);
+  const intentId = intent?.id ?? null;
+  const maxUsd = intentMaxUsd(intent);
+  const cents = Math.round((Number.isFinite(maxUsd) ? maxUsd : 0) * 100);
+  return `sgcp1|${consentId ?? ''}|${subject ?? ''}|${delegationId ?? ''}|${intentId ?? ''}|${cents}`;
+}
+
+export function evaluateHighValueConsentForIntent({ policy, intent, auth, nowIso, subjectActor, delegationId }) {
   const threshold = finiteNumberOrNull(policy?.high_value_consent_threshold_usd);
   const maxUsd = intentMaxUsd(intent);
 
@@ -263,11 +271,12 @@ export function evaluateHighValueConsentForIntent({ policy, intent, auth, nowIso
   }
 
   const tierEnforced = process.env.POLICY_CONSENT_TIER_ENFORCE === '1';
+  const bindingEnforced = process.env.POLICY_CONSENT_PROOF_BIND_ENFORCE === '1';
   const requiredTier = maxUsd > (threshold * 1.5) ? 'passkey' : 'step_up';
+  const consentProof = consent?.consent_proof;
 
   if (tierEnforced) {
     const consentTier = consent?.consent_tier;
-    const consentProof = consent?.consent_proof;
 
     if (typeof consentTier !== 'string' || consentTier.trim().length < 1) {
       return {
@@ -337,6 +346,49 @@ export function evaluateHighValueConsentForIntent({ policy, intent, auth, nowIso
     }
   }
 
+  if (bindingEnforced) {
+    if (typeof consentProof !== 'string' || consentProof.trim().length < 1) {
+      return {
+        ok: false,
+        code: 'FORBIDDEN',
+        message: 'delegation consent proof required',
+        details: {
+          reason_code: 'consent_proof_required',
+          threshold_usd: threshold,
+          max_usd: maxUsd,
+          required_tier: requiredTier,
+          consent_tier: consent?.consent_tier ?? null,
+          consent_id: consent.consent_id
+        }
+      };
+    }
+
+    const expectedProof = buildConsentProofBinding({
+      consentId: consent.consent_id,
+      subjectActor,
+      delegationId,
+      intent
+    });
+
+    if (consentProof.trim() !== expectedProof) {
+      return {
+        ok: false,
+        code: 'FORBIDDEN',
+        message: 'delegation consent proof mismatch',
+        details: {
+          reason_code: 'consent_proof_mismatch',
+          threshold_usd: threshold,
+          max_usd: maxUsd,
+          required_tier: requiredTier,
+          consent_tier: consent?.consent_tier ?? null,
+          consent_id: consent.consent_id,
+          expected_proof: expectedProof,
+          provided_proof: consentProof.trim()
+        }
+      };
+    }
+  }
+
   if (Number.isFinite(consent.approved_max_usd) && consent.approved_max_usd < maxUsd) {
     return {
       ok: false,
@@ -395,6 +447,7 @@ export function evaluateHighValueConsentForIntent({ policy, intent, auth, nowIso
       max_usd: maxUsd,
       required_tier: requiredTier,
       tier_enforced: tierEnforced,
+      binding_enforced: bindingEnforced,
       consent_tier: consent?.consent_tier ?? null,
       consent_id: consent.consent_id,
       approved_max_usd: finiteNumberOrNull(consent.approved_max_usd)

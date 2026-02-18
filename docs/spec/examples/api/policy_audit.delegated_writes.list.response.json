@@ -1,5 +1,7 @@
 {
   "correlation_id": "corr_policy_audit_delegated_writes",
+  "total_filtered": 5,
+  "next_cursor": "pa_2",
   "entries": [
     {
       "audit_id": "pa_1",

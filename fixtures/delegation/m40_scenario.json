@@ -1,0 +1,276 @@
+{
+  "actors": {
+    "user_u1": { "type": "user", "id": "u1" },
+    "user_u2": { "type": "user", "id": "u2" }
+  },
+  "operations": [
+    {
+      "op": "delegations.create",
+      "actor_ref": "user_u1",
+      "auth": { "scopes": ["delegations:write"] },
+      "idempotency_key": "k_m40_delegation_create",
+      "occurred_at": "2026-02-13T09:59:00Z",
+      "request": {
+        "delegation": {
+          "delegation_id": "del_m40_u1_agent1",
+          "principal_agent": { "type": "agent", "id": "agent_1" },
+          "scopes": ["swap_intents:read", "swap_intents:write"],
+          "policy": {
+            "max_value_per_swap_usd": 500,
+            "max_value_per_day_usd": 1000,
+            "high_value_consent_threshold_usd": 100,
+            "min_confidence_score": 0.8,
+            "max_cycle_length": 3,
+            "require_escrow": true
+          },
+          "expires_at": "2026-03-01T00:00:00Z"
+        }
+      },
+      "save_token_ref": "tok_m40",
+      "expect_ok": true
+    },
+    {
+      "op": "authHeaders.parse",
+      "token_ref": "tok_m40",
+      "expect_ok": true,
+      "expect_actor": { "type": "agent", "id": "agent_1" }
+    },
+    {
+      "op": "swapIntents.create.via_token",
+      "token_ref": "tok_m40",
+      "idempotency_key": "k_m40_old_no_consent",
+      "auth": { "now_iso": "2026-02-13T10:00:00Z" },
+      "request": {
+        "intent": {
+          "id": "intent_m40_old",
+          "actor": { "type": "user", "id": "u1" },
+          "offer": [{ "platform": "steam", "asset_id": "asset_m40_old" }],
+          "want_spec": { "type": "set", "any_of": [{ "type": "specific_asset", "platform": "steam", "asset_key": "steam:730:item:m40_old" }] },
+          "value_band": { "min_usd": 80, "max_usd": 130, "pricing_source": "market_median" },
+          "trust_constraints": { "max_cycle_length": 3, "min_counterparty_reliability": 4 },
+          "time_constraints": { "expires_at": "2026-03-01T00:00:00Z", "urgency": "normal" },
+          "settlement_preferences": { "require_escrow": true }
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN",
+      "expect_reason_code": "consent_required"
+    },
+    {
+      "op": "swapIntents.create.via_token",
+      "token_ref": "tok_m40",
+      "idempotency_key": "k_m40_i1_mismatch",
+      "auth": {
+        "now_iso": "2026-02-16T10:01:00Z",
+        "user_consent": {
+          "consent_id": "consent_m40_i1",
+          "consent_tier": "step_up",
+          "consent_proof_mode": "mismatch",
+          "approved_max_usd": 150,
+          "expires_at": "2026-02-16T23:59:00Z"
+        }
+      },
+      "request": {
+        "intent": {
+          "id": "intent_m40_i1",
+          "actor": { "type": "user", "id": "u1" },
+          "offer": [{ "platform": "steam", "asset_id": "asset_m40_i1" }],
+          "want_spec": { "type": "set", "any_of": [{ "type": "specific_asset", "platform": "steam", "asset_key": "steam:730:item:m40_i1" }] },
+          "value_band": { "min_usd": 80, "max_usd": 130, "pricing_source": "market_median" },
+          "trust_constraints": { "max_cycle_length": 3, "min_counterparty_reliability": 4 },
+          "time_constraints": { "expires_at": "2026-03-01T00:00:00Z", "urgency": "normal" },
+          "settlement_preferences": { "require_escrow": true }
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN",
+      "expect_reason_code": "consent_proof_mismatch"
+    },
+    {
+      "op": "swapIntents.create.via_token",
+      "token_ref": "tok_m40",
+      "idempotency_key": "k_m40_i1_bound",
+      "auth": {
+        "now_iso": "2026-02-16T10:02:00Z",
+        "user_consent": {
+          "consent_id": "consent_m40_i1",
+          "consent_tier": "step_up",
+          "consent_proof_mode": "bound",
+          "approved_max_usd": 150,
+          "expires_at": "2026-02-16T23:59:00Z"
+        }
+      },
+      "request": {
+        "intent": {
+          "id": "intent_m40_i1",
+          "actor": { "type": "user", "id": "u1" },
+          "offer": [{ "platform": "steam", "asset_id": "asset_m40_i1" }],
+          "want_spec": { "type": "set", "any_of": [{ "type": "specific_asset", "platform": "steam", "asset_key": "steam:730:item:m40_i1" }] },
+          "value_band": { "min_usd": 80, "max_usd": 130, "pricing_source": "market_median" },
+          "trust_constraints": { "max_cycle_length": 3, "min_counterparty_reliability": 4 },
+          "time_constraints": { "expires_at": "2026-03-01T00:00:00Z", "urgency": "normal" },
+          "settlement_preferences": { "require_escrow": true }
+        }
+      },
+      "expect_ok": true
+    },
+    {
+      "op": "swapIntents.create.via_token",
+      "token_ref": "tok_m40",
+      "idempotency_key": "k_m40_i2_stepup",
+      "auth": {
+        "now_iso": "2026-02-16T10:03:00Z",
+        "user_consent": {
+          "consent_id": "consent_m40_i2",
+          "consent_tier": "step_up",
+          "consent_proof_mode": "bound",
+          "approved_max_usd": 220,
+          "expires_at": "2026-02-16T23:59:00Z"
+        }
+      },
+      "request": {
+        "intent": {
+          "id": "intent_m40_i2",
+          "actor": { "type": "user", "id": "u1" },
+          "offer": [{ "platform": "steam", "asset_id": "asset_m40_i2" }],
+          "want_spec": { "type": "set", "any_of": [{ "type": "specific_asset", "platform": "steam", "asset_key": "steam:730:item:m40_i2" }] },
+          "value_band": { "min_usd": 110, "max_usd": 170, "pricing_source": "market_median" },
+          "trust_constraints": { "max_cycle_length": 3, "min_counterparty_reliability": 4 },
+          "time_constraints": { "expires_at": "2026-03-01T00:00:00Z", "urgency": "normal" },
+          "settlement_preferences": { "require_escrow": true }
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN",
+      "expect_reason_code": "consent_tier_insufficient"
+    },
+    {
+      "op": "swapIntents.create.via_token",
+      "token_ref": "tok_m40",
+      "idempotency_key": "k_m40_i2_passkey_mismatch",
+      "auth": {
+        "now_iso": "2026-02-16T10:04:00Z",
+        "user_consent": {
+          "consent_id": "consent_m40_i2",
+          "consent_tier": "passkey",
+          "consent_proof_mode": "mismatch",
+          "approved_max_usd": 220,
+          "expires_at": "2026-02-16T23:59:00Z"
+        }
+      },
+      "request": {
+        "intent": {
+          "id": "intent_m40_i2",
+          "actor": { "type": "user", "id": "u1" },
+          "offer": [{ "platform": "steam", "asset_id": "asset_m40_i2" }],
+          "want_spec": { "type": "set", "any_of": [{ "type": "specific_asset", "platform": "steam", "asset_key": "steam:730:item:m40_i2" }] },
+          "value_band": { "min_usd": 110, "max_usd": 170, "pricing_source": "market_median" },
+          "trust_constraints": { "max_cycle_length": 3, "min_counterparty_reliability": 4 },
+          "time_constraints": { "expires_at": "2026-03-01T00:00:00Z", "urgency": "normal" },
+          "settlement_preferences": { "require_escrow": true }
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN",
+      "expect_reason_code": "consent_proof_mismatch"
+    },
+    {
+      "op": "swapIntents.create.via_token",
+      "token_ref": "tok_m40",
+      "idempotency_key": "k_m40_i2_passkey_bound",
+      "auth": {
+        "now_iso": "2026-02-16T10:05:00Z",
+        "user_consent": {
+          "consent_id": "consent_m40_i2",
+          "consent_tier": "passkey",
+          "consent_proof_mode": "bound",
+          "approved_max_usd": 220,
+          "expires_at": "2026-02-16T23:59:00Z"
+        }
+      },
+      "request": {
+        "intent": {
+          "id": "intent_m40_i2",
+          "actor": { "type": "user", "id": "u1" },
+          "offer": [{ "platform": "steam", "asset_id": "asset_m40_i2" }],
+          "want_spec": { "type": "set", "any_of": [{ "type": "specific_asset", "platform": "steam", "asset_key": "steam:730:item:m40_i2" }] },
+          "value_band": { "min_usd": 110, "max_usd": 170, "pricing_source": "market_median" },
+          "trust_constraints": { "max_cycle_length": 3, "min_counterparty_reliability": 4 },
+          "time_constraints": { "expires_at": "2026-03-01T00:00:00Z", "urgency": "normal" },
+          "settlement_preferences": { "require_escrow": true }
+        }
+      },
+      "expect_ok": true
+    },
+    {
+      "op": "policyAudit.list",
+      "actor_ref": "user_u1",
+      "auth": { "scopes": ["delegations:read"] },
+      "query": { "now_iso": "2026-02-18T00:00:00Z", "limit": 2 },
+      "expect_ok": true,
+      "expect_entries_count": 2,
+      "expect_next_cursor": "pa_3",
+      "expect_total_filtered": 5,
+      "expect_reason_codes": ["consent_proof_mismatch", "ok"]
+    },
+    {
+      "op": "policyAudit.list",
+      "actor_ref": "user_u1",
+      "auth": { "scopes": ["delegations:read"] },
+      "query": { "now_iso": "2026-02-18T00:00:00Z", "limit": 2, "cursor_after": "pa_3" },
+      "expect_ok": true,
+      "expect_entries_count": 2,
+      "expect_next_cursor": "pa_5",
+      "expect_total_filtered": 3,
+      "expect_reason_codes": ["consent_tier_insufficient", "consent_proof_mismatch"]
+    },
+    {
+      "op": "policyAudit.list",
+      "actor_ref": "user_u1",
+      "auth": { "scopes": ["delegations:read"] },
+      "query": { "now_iso": "2026-02-18T00:00:00Z", "limit": 2, "cursor_after": "pa_5" },
+      "expect_ok": true,
+      "expect_entries_count": 1,
+      "expect_next_cursor": null,
+      "expect_total_filtered": 1,
+      "expect_reason_codes": ["ok"]
+    },
+    {
+      "op": "policyAudit.list",
+      "actor_ref": "user_u1",
+      "auth": { "scopes": ["delegations:read"] },
+      "query": { "now_iso": "2026-02-18T00:00:00Z", "decision": "deny" },
+      "expect_ok": true,
+      "expect_entries_count": 3,
+      "expect_reason_codes": ["consent_proof_mismatch", "consent_tier_insufficient", "consent_proof_mismatch"]
+    },
+    {
+      "op": "policyAudit.list",
+      "actor_ref": "user_u1",
+      "auth": { "scopes": ["delegations:read"] },
+      "query": {
+        "now_iso": "2026-02-18T00:00:00Z",
+        "from_iso": "2026-02-16T10:03:00Z",
+        "to_iso": "2026-02-16T10:05:00Z"
+      },
+      "expect_ok": true,
+      "expect_entries_count": 3,
+      "expect_reason_codes": ["consent_tier_insufficient", "consent_proof_mismatch", "ok"]
+    },
+    {
+      "op": "policyAudit.list.via_token",
+      "token_ref": "tok_m40",
+      "query": { "now_iso": "2026-02-18T00:00:00Z" },
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN"
+    },
+    {
+      "op": "policyAudit.list",
+      "actor_ref": "user_u2",
+      "auth": { "scopes": ["delegations:read"] },
+      "query": { "now_iso": "2026-02-18T00:00:00Z" },
+      "expect_ok": true,
+      "expect_entries_count": 0
+    }
+  ]
+}

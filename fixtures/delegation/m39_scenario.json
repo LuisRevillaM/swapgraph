@@ -171,7 +171,7 @@
       "op": "policyAudit.list",
       "actor_ref": "user_u1",
       "auth": { "scopes": ["delegations:read"] },
-      "query": {},
+      "query": { "now_iso": "2026-02-18T00:00:00Z" },
       "expect_ok": true,
       "expect_entries_count": 5,
       "expect_reason_codes": [
@@ -186,7 +186,7 @@
       "op": "policyAudit.list",
       "actor_ref": "user_u1",
       "auth": { "scopes": ["delegations:read"] },
-      "query": { "decision": "deny" },
+      "query": { "decision": "deny", "now_iso": "2026-02-18T00:00:00Z" },
       "expect_ok": true,
       "expect_entries_count": 3,
       "expect_reason_codes": [
@@ -198,7 +198,7 @@
     {
       "op": "policyAudit.list.via_token",
       "token_ref": "tok_m39",
-      "query": {},
+      "query": { "now_iso": "2026-02-18T00:00:00Z" },
       "expect_ok": false,
       "expect_error_code": "FORBIDDEN"
     },
@@ -206,7 +206,7 @@
       "op": "policyAudit.list",
       "actor_ref": "user_u2",
       "auth": { "scopes": ["delegations:read"] },
-      "query": {},
+      "query": { "now_iso": "2026-02-18T00:00:00Z" },
       "expect_ok": true,
       "expect_entries_count": 0
     }

@@ -73,6 +73,9 @@ Delegation read/write responses include:
 
 Delegated-policy audit endpoint:
 - `GET /policy-audit/delegated-writes` (user-scoped policy decision audit entries)
+  - supports filters (`decision`, `operation_id`, `delegation_id`, `from_iso`, `to_iso`)
+  - supports pagination (`limit`, `cursor_after`, response `next_cursor`)
+  - applies retention window filtering in fixtures-first verification
 
 Auth utility endpoints:
 - `POST /auth/delegation-token/introspect` (evaluate delegation token activity in a deterministic contract)
