@@ -18,6 +18,7 @@ const schemaFiles = [
   'SwapReceipt.schema.json',
   'TradingPolicy.schema.json',
   'DelegationGrant.schema.json',
+  'DelegationToken.schema.json',
   'EventSignature.schema.json',
   'EventEnvelope.schema.json'
 ];
@@ -33,6 +34,7 @@ const exampleMap = {
   'SwapReceipt.schema.json': 'SwapReceipt.example.json',
   'TradingPolicy.schema.json': 'TradingPolicy.example.json',
   'DelegationGrant.schema.json': 'DelegationGrant.example.json',
+  'DelegationToken.schema.json': 'DelegationToken.example.json',
   'EventSignature.schema.json': 'EventSignature.example.json',
   'EventEnvelope.schema.json': 'EventEnvelope.example.json'
 };

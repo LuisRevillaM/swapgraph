@@ -1,0 +1,38 @@
+name: M35
+commands:
+  - cmd: "npm run verify:m35"
+artifacts:
+  - artifact: "docs/prd/M35.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/AUTH.md"
+
+  - artifact: "docs/spec/schemas/DelegationToken.schema.json"
+  - artifact: "docs/spec/examples/DelegationToken.example.json"
+  - artifact: "fixtures/keys/delegation_token_signing_dev_dt_k1_private.pem"
+  - artifact: "fixtures/keys/delegation_token_signing_dev_dt_k1_public.pem"
+
+  - artifact: "src/crypto/delegationTokenSigning.mjs"
+  - artifact: "src/core/authHeaders.mjs"
+  - artifact: "src/service/delegationsService.mjs"
+
+  - artifact: "docs/spec/schemas/DelegationCreateResponse.schema.json"
+  - artifact: "docs/spec/schemas/DelegationGetResponse.schema.json"
+  - artifact: "docs/spec/schemas/DelegationRevokeResponse.schema.json"
+
+  - artifact: "docs/spec/examples/api/delegations.create.response.json"
+  - artifact: "docs/spec/examples/api/delegations.get.response.json"
+  - artifact: "docs/spec/examples/api/delegations.revoke.response.json"
+
+  - artifact: "fixtures/delegation/m35_scenario.json"
+  - artifact: "fixtures/delegation/m35_expected.json"
+  - artifact: "scripts/run-m35-delegation-token-auth-scenario.mjs"
+
+  - artifact: "verify/m35.sh"
+
+  - artifact: "artifacts/milestones/M35/latest/commands.log"
+  - artifact: "artifacts/milestones/M35/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M35/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M35/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M35/latest/delegation_token_auth_output.json"
+  - artifact: "artifacts/milestones/M35/latest/store.json"
+  - artifact: "artifacts/milestones/M35/latest/assertions.json"

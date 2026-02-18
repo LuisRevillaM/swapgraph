@@ -16,7 +16,7 @@ This doc defines the **contract** for the REST API and webhook delivery.
   - The key resolves to a stable, server-assigned `partner_id` (modeled as `ActorRef { type:"partner", id:"<partner_id>" }`).
   - `partner_id` is used for multi-tenant scoping (partners cannot read other partners’ cycles or proposals).
 - Users authenticate with SwapGraph sessions.
-- Agents authenticate via delegation tokens (later milestone).
+- Agents authenticate via delegation tokens (see `docs/spec/AUTH.md`).
 
 Concrete auth headers + scope taxonomy live in:
 - `docs/spec/AUTH.md`
@@ -29,6 +29,7 @@ Concrete auth headers + scope taxonomy live in:
 Auth headers (see `docs/spec/AUTH.md` for details):
 - `X-Partner-Key` (partner)
 - `Authorization: Bearer ...` (user/agent)
+  - agent bearer tokens use the v1 delegation-token format prefix `sgdt1.`
 
 ## Resources (v1)
 - `SwapIntent`
@@ -63,6 +64,10 @@ Delegation endpoints:
 - `POST /delegations` (create a delegation grant)
 - `GET /delegations/{id}`
 - `POST /delegations/{id}/revoke`
+
+Delegation read/write responses include:
+- `delegation` (`DelegationGrant`)
+- `delegation_token` (`sgdt1...`) suitable for `Authorization: Bearer ...` by the agent
 
 Signing key endpoints:
 - `GET /keys/receipt-signing` (public keys for verifying `SwapReceipt.signature`)

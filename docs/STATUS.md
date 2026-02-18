@@ -45,9 +45,10 @@ Last updated: 2026-02-18
 - M32: ✅ agent delegation grants + TradingPolicy enforcement (SwapIntents; behind AUTHZ_ENFORCE=1)
 - M33: ✅ delegation lifecycle (expiry/revocation) + agent read access expansion (behind AUTHZ_ENFORCE=1)
 - M34: ✅ delegation lifecycle APIs + revocation persistence (store-backed; behind AUTHZ_ENFORCE=1)
+- M35: ✅ signed delegation token format + header parsing/auth middleware (fixtures-first)
 
 ## Next
-- M35: delegation token format (signed) + header parsing/auth middleware (TBD)
+- M36: delegation key publication/rotation contract + token introspection endpoint (TBD)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.

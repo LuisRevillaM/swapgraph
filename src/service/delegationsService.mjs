@@ -1,5 +1,6 @@
 import { idempotencyScopeKey, payloadHash } from '../core/idempotency.mjs';
 import { authorizeApiOperation } from '../core/authz.mjs';
+import { mintDelegationToken, encodeDelegationTokenString } from '../crypto/delegationTokenSigning.mjs';
 
 function actorKey(actor) {
   return `${actor.type}:${actor.id}`;
@@ -11,6 +12,12 @@ function errorResponse(correlationId, code, message, details = {}) {
 
 function correlationIdForDelegationId(delegationId) {
   return `corr_delegation_${delegationId}`;
+}
+
+function delegationResponse(correlationId, delegation) {
+  const token = mintDelegationToken({ delegation });
+  const delegation_token = encodeDelegationTokenString(token);
+  return { correlation_id: correlationId, delegation, delegation_token };
 }
 
 export class DelegationsService {
@@ -117,7 +124,7 @@ export class DelegationsService {
             };
           }
 
-          return { ok: true, body: { correlation_id: correlationId, delegation: existing } };
+          return { ok: true, body: delegationResponse(correlationId, existing) };
         }
 
         const grant = {
@@ -132,7 +139,7 @@ export class DelegationsService {
 
         this.store.state.delegations[d.delegation_id] = grant;
 
-        return { ok: true, body: { correlation_id: correlationId, delegation: grant } };
+        return { ok: true, body: delegationResponse(correlationId, grant) };
       }
     });
   }
@@ -162,7 +169,7 @@ export class DelegationsService {
       return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'delegation belongs to a different user', { delegation_id: delegationId }) };
     }
 
-    return { ok: true, body: { correlation_id: correlationId, delegation: grant } };
+    return { ok: true, body: delegationResponse(correlationId, grant) };
   }
 
   revoke({ actor, auth, idempotencyKey, delegationId, requestBody }) {
@@ -212,11 +219,11 @@ export class DelegationsService {
         }
 
         if (grant.revoked_at) {
-          return { ok: true, body: { correlation_id: correlationId, delegation: grant } };
+          return { ok: true, body: delegationResponse(correlationId, grant) };
         }
 
         grant.revoked_at = revokedAt;
-        return { ok: true, body: { correlation_id: correlationId, delegation: grant } };
+        return { ok: true, body: delegationResponse(correlationId, grant) };
       }
     });
   }

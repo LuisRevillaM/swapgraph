@@ -1,0 +1,57 @@
+{
+  "operations": [
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "delegation_id": "del_m35_u1_agent1",
+      "error_code": null,
+      "has_delegation_token": true,
+      "ok": true,
+      "op": "delegations.create",
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "agent_1",
+        "type": "agent"
+      },
+      "error_code": null,
+      "ok": true,
+      "op": "authHeaders.parse"
+    },
+    {
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.list.via_token",
+      "parse_ok": true,
+      "proposals_count": 1
+    },
+    {
+      "actor": null,
+      "error_code": "UNAUTHORIZED",
+      "ok": false,
+      "op": "authHeaders.parse.tampered"
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "delegation_id": "del_m35_u1_agent1",
+      "error_code": null,
+      "ok": true,
+      "op": "delegations.revoke",
+      "replayed": false,
+      "revoked_at_present": true
+    },
+    {
+      "error_code": "UNAUTHORIZED",
+      "ok": false,
+      "op": "cycleProposals.list.via_token",
+      "parse_ok": true,
+      "proposals_count": null
+    }
+  ]
+}

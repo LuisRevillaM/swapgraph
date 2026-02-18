@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/DelegationToken.schema.json",
+  "title": "DelegationToken",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["delegation", "signature"],
+  "properties": {
+    "delegation": { "$ref": "DelegationGrant.schema.json" },
+    "signature": { "$ref": "EventSignature.schema.json" }
+  }
+}

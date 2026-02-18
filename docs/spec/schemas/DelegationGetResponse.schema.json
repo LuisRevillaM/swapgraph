@@ -4,9 +4,10 @@
   "title": "DelegationGetResponse",
   "type": "object",
   "additionalProperties": false,
-  "required": ["correlation_id", "delegation"],
+  "required": ["correlation_id", "delegation", "delegation_token"],
   "properties": {
     "correlation_id": { "type": "string", "minLength": 1 },
-    "delegation": { "$ref": "DelegationGrant.schema.json" }
+    "delegation": { "$ref": "DelegationGrant.schema.json" },
+    "delegation_token": { "type": "string", "minLength": 1 }
   }
 }

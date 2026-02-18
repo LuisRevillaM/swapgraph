@@ -23,9 +23,23 @@ In production, the principal is derived from request headers.
   - resolves to `ActorRef { type:"agent", id:"<agent_id>" }`
   - also resolves to a `DelegationGrant` (who the agent may act for, what scopes it has, and a `TradingPolicy`)
 
-In fixtures-first verification (no HTTP layer yet), we model this as:
-- `auth.scopes`: the granted scopes
-- `auth.delegation`: a `DelegationGrant` object (see `DelegationGrant.schema.json`)
+#### Delegation token format (v1)
+- Prefix: `sgdt1.`
+- Payload: base64url(canonical_json(DelegationToken))
+
+Where `DelegationToken` is:
+- `docs/spec/schemas/DelegationToken.schema.json`
+
+Signature bytes are computed over:
+- canonical_json(token_without_signature)
+
+Server-side parsing/verification in fixtures-first:
+- `src/core/authHeaders.mjs` parses `Authorization` and verifies token signature
+- `src/core/authz.mjs` enforces revocation/expiry and scopes (including persisted revocations)
+
+#### Fixtures-first modeling
+In fixtures-first verification (no HTTP layer yet), some scenarios pass auth directly, equivalent to what header parsing would produce:
+- `auth.delegation`: a `DelegationGrant` object
 - `auth.now_iso`: optional ISO timestamp used for deterministic delegation expiry checks in verifiers
 
 ## Scope taxonomy

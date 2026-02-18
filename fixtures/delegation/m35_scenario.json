@@ -1,0 +1,63 @@
+{
+  "actors": {
+    "user_u1": { "type": "user", "id": "u1" }
+  },
+  "operations": [
+    {
+      "op": "delegations.create",
+      "actor_ref": "user_u1",
+      "auth": { "scopes": ["delegations:write"] },
+      "idempotency_key": "k_create",
+      "occurred_at": "2026-02-16T00:00:00Z",
+      "request": {
+        "delegation": {
+          "delegation_id": "del_m35_u1_agent1",
+          "principal_agent": { "type": "agent", "id": "agent_1" },
+          "scopes": ["cycle_proposals:read"],
+          "policy": {
+            "max_value_per_swap_usd": 100,
+            "min_confidence_score": 0.8,
+            "max_cycle_length": 3,
+            "require_escrow": true
+          },
+          "expires_at": "2026-03-01T00:00:00Z"
+        }
+      },
+      "expect_ok": true
+    },
+    {
+      "op": "authHeaders.parse",
+      "token_ref": "created",
+      "expect_ok": true,
+      "expect_actor": { "type": "agent", "id": "agent_1" }
+    },
+    {
+      "op": "cycleProposals.list.via_token",
+      "token_ref": "created",
+      "expect_ok": true,
+      "expect_proposals_count": 1
+    },
+    {
+      "op": "authHeaders.parse.tampered",
+      "token_ref": "created",
+      "expect_ok": false,
+      "expect_error_code": "UNAUTHORIZED"
+    },
+    {
+      "op": "delegations.revoke",
+      "actor_ref": "user_u1",
+      "auth": { "scopes": ["delegations:write"] },
+      "idempotency_key": "k_revoke",
+      "path": { "id": "del_m35_u1_agent1" },
+      "request": { "revoked_at": "2026-02-17T00:00:00Z" },
+      "expect_ok": true
+    },
+    {
+      "op": "cycleProposals.list.via_token",
+      "token_ref": "created",
+      "expect_ok": false,
+      "expect_error_code": "UNAUTHORIZED",
+      "expect_parse_ok": true
+    }
+  ]
+}
