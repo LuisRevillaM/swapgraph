@@ -47,9 +47,10 @@ Last updated: 2026-02-18
 - M34: ✅ delegation lifecycle APIs + revocation persistence (store-backed; behind AUTHZ_ENFORCE=1)
 - M35: ✅ signed delegation token format + header parsing/auth middleware (fixtures-first)
 - M36: ✅ delegation-token key publication/rotation contract + token introspection endpoint (fixtures-first)
+- M37: ✅ delegation policy enforcement expanded across matching/commit/settlement read boundaries (fixtures-first)
 
 ## Next
-- M37: policy enforcement expansion for delegated agents on matching/commit/settlement boundaries (TBD)
+- M38: advanced delegation policy controls (`max_value_per_day_usd`, consent-tier hooks, and audit trail expansion) (TBD)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.

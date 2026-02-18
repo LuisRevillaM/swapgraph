@@ -1,0 +1,122 @@
+{
+  "operations": [
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "delegation_id": "del_m37_u1_agent1",
+      "error_code": null,
+      "ok": true,
+      "op": "delegations.create",
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "agent_1",
+        "type": "agent"
+      },
+      "error_code": null,
+      "ok": true,
+      "op": "authHeaders.parse"
+    },
+    {
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.list.via_token",
+      "parse_ok": true,
+      "proposal_ids": [
+        "cycle_ok"
+      ],
+      "proposals_count": 1
+    },
+    {
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.get.via_token",
+      "parse_ok": true,
+      "proposal_found": "cycle_ok",
+      "proposal_id": "cycle_ok"
+    },
+    {
+      "error_code": "FORBIDDEN",
+      "ok": false,
+      "op": "cycleProposals.get.via_token",
+      "parse_ok": true,
+      "proposal_found": null,
+      "proposal_id": "cycle_low_conf"
+    },
+    {
+      "error_code": "FORBIDDEN",
+      "ok": false,
+      "op": "cycleProposals.get.via_token",
+      "parse_ok": true,
+      "proposal_found": null,
+      "proposal_id": "cycle_long"
+    },
+    {
+      "commit_id": "commit_ok",
+      "commit_phase": "ready",
+      "error_code": null,
+      "ok": true,
+      "op": "commits.get.via_token",
+      "parse_ok": true
+    },
+    {
+      "commit_id": "commit_low_conf",
+      "commit_phase": null,
+      "error_code": "FORBIDDEN",
+      "ok": false,
+      "op": "commits.get.via_token",
+      "parse_ok": true
+    },
+    {
+      "cycle_id": "cycle_ok",
+      "error_code": null,
+      "ok": true,
+      "op": "settlement.status.via_token",
+      "parse_ok": true,
+      "timeline_state": "escrow.pending"
+    },
+    {
+      "cycle_id": "cycle_low_conf",
+      "error_code": "FORBIDDEN",
+      "ok": false,
+      "op": "settlement.status.via_token",
+      "parse_ok": true,
+      "timeline_state": null
+    },
+    {
+      "cycle_id": "cycle_ok",
+      "error_code": "FORBIDDEN",
+      "instructions_count": null,
+      "ok": false,
+      "op": "settlement.instructions.via_token",
+      "parse_ok": true
+    },
+    {
+      "cycle_id": "cycle_ok",
+      "error_code": null,
+      "instructions_count": 1,
+      "ok": true,
+      "op": "settlement.instructions.via_token",
+      "parse_ok": true
+    },
+    {
+      "cycle_id": "cycle_ok",
+      "error_code": null,
+      "ok": true,
+      "op": "receipts.get.via_token",
+      "parse_ok": true,
+      "receipt_final_state": "completed"
+    },
+    {
+      "cycle_id": "cycle_low_conf",
+      "error_code": "FORBIDDEN",
+      "ok": false,
+      "op": "receipts.get.via_token",
+      "parse_ok": true,
+      "receipt_final_state": null
+    }
+  ]
+}

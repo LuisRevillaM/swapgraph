@@ -1,12 +1,16 @@
 import { commitIdForProposalId } from './commitIds.mjs';
 import { idempotencyScopeKey, payloadHash } from '../core/idempotency.mjs';
-import { authorizeApiOperation } from '../core/authz.mjs';
+import { authorizeApiOperation, authzEnforced } from '../core/authz.mjs';
+import {
+  actorKey,
+  effectiveActorForDelegation,
+  policyForDelegatedActor,
+  evaluateProposalAgainstTradingPolicy
+} from '../core/tradingPolicyBoundaries.mjs';
 import { stableEventId } from '../delivery/eventIds.mjs';
 import { signEventEnvelope } from '../crypto/eventSigning.mjs';
 
-function actorKey(actor) {
-  return `${actor.type}:${actor.id}`;
-}
+// actor/policy helpers are imported from core/tradingPolicyBoundaries.mjs
 
 function correlationIdForCycleId(cycleId) {
   return `corr_${cycleId}`;
@@ -419,13 +423,47 @@ export class CommitService {
       return { ok: false, body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details) };
     }
 
+    let viewActor = actor;
+    let delegatedPolicy = null;
+
+    if (actor?.type === 'agent') {
+      if (!authzEnforced()) {
+        return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation', { actor }) };
+      }
+
+      const eff = effectiveActorForDelegation({ actor, auth });
+      if (!eff) {
+        return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation subject', { actor }) };
+      }
+
+      delegatedPolicy = policyForDelegatedActor({ actor, auth });
+      if (!delegatedPolicy) {
+        return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'delegation policy is required', { actor }) };
+      }
+
+      viewActor = eff;
+    }
+
     // v1: only participants can view.
-    const allowed = commit.participants.some(p => participantKey(p) === actorKey(actor));
+    const allowed = commit.participants.some(p => participantKey(p) === actorKey(viewActor));
     if (!allowed) {
       return {
         ok: false,
         body: errorResponse(correlationId, 'FORBIDDEN', 'actor cannot access this commit', { commit_id: commitId })
       };
+    }
+
+    if (actor?.type === 'agent') {
+      const proposal = this.store.state.proposals?.[commit.cycle_id] ?? null;
+      if (proposal) {
+        const pol = evaluateProposalAgainstTradingPolicy({ policy: delegatedPolicy, proposal });
+        if (!pol.ok) {
+          return {
+            ok: false,
+            body: errorResponse(correlationId, pol.code, pol.message, { ...pol.details, commit_id: commitId, cycle_id: commit.cycle_id })
+          };
+        }
+      }
     }
 
     return { ok: true, body: { correlation_id: correlationId, commit } };

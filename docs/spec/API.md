@@ -47,6 +47,7 @@ Commit endpoints:
 - `POST /cycle-proposals/{id}/accept`
 - `POST /cycle-proposals/{id}/decline`
 - `GET /commits/{id}`
+  - delegated agents may read commit state under `commits:read` + delegation policy checks
 
 Settlement endpoints:
 - `POST /settlement/{cycle_id}/start`

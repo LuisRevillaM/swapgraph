@@ -51,6 +51,17 @@ In fixtures-first verification (no HTTP layer yet), some scenarios pass auth dir
 - `auth.delegation`: a `DelegationGrant` object
 - `auth.now_iso`: optional ISO timestamp used for deterministic delegation expiry checks in verifiers
 
+#### Delegated policy boundaries (M37)
+When actor type is `agent`, delegated reads are policy-gated at downstream boundaries:
+- matching boundary: `cycleProposals.list/get`
+- commit boundary: `commits.get`
+- settlement boundary: `settlement.status`, `settlement.instructions`, `receipts.get`
+
+Policy checks currently enforced at these boundaries:
+- `min_confidence_score`
+- `max_cycle_length`
+- `quiet_hours` (for `settlement.instructions` when `auth.now_iso` is provided)
+
 ## Scope taxonomy
 Scopes are stable strings.
 

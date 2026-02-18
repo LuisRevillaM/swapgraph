@@ -1,4 +1,11 @@
 import { authorizeApiOperation, authzEnforced } from '../core/authz.mjs';
+import {
+  actorKey,
+  effectiveActorForDelegation,
+  policyForDelegatedActor,
+  evaluateProposalAgainstTradingPolicy,
+  evaluateQuietHoursPolicy
+} from '../core/tradingPolicyBoundaries.mjs';
 
 function errorResponse(correlationId, code, message, details = {}) {
   return { correlation_id: correlationId, error: { code, message, details } };
@@ -8,16 +15,7 @@ function correlationIdForCycleId(cycleId) {
   return `corr_${cycleId}`;
 }
 
-function actorKey(actor) {
-  return `${actor.type}:${actor.id}`;
-}
-
-function effectiveActor({ actor, auth }) {
-  if (actor?.type === 'agent') {
-    return auth?.delegation?.subject_actor ?? null;
-  }
-  return actor;
-}
+// actor/policy helpers are imported from core/tradingPolicyBoundaries.mjs
 
 function isPartner(actor) {
   return actor?.type === 'partner';
@@ -57,6 +55,53 @@ function authorizeRead({ actor, timeline, store, cycleId }) {
   if (actor?.type === 'agent') return { ok: false, code: 'FORBIDDEN', message: 'agent access requires delegation (not implemented)', details: { actor } };
   if (isUserParticipant({ actor, timeline })) return { ok: true };
   return { ok: false, code: 'FORBIDDEN', message: 'actor cannot access this cycle', details: { actor } };
+}
+
+function proposalForCycle({ store, cycleId }) {
+  return store?.state?.proposals?.[cycleId] ?? null;
+}
+
+function enforceAgentPolicyForCycle({ actor, auth, store, correlationId, cycleId, includeQuietHours }) {
+  if (actor?.type !== 'agent') return { ok: true };
+
+  const policy = policyForDelegatedActor({ actor, auth });
+  if (!policy) {
+    return {
+      ok: false,
+      body: errorResponse(correlationId, 'FORBIDDEN', 'delegation policy is required', { actor, cycle_id: cycleId })
+    };
+  }
+
+  const proposal = proposalForCycle({ store, cycleId });
+  if (proposal) {
+    const pol = evaluateProposalAgainstTradingPolicy({ policy, proposal });
+    if (!pol.ok) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, pol.code, pol.message, { ...pol.details, cycle_id: cycleId })
+      };
+    }
+  }
+
+  if (includeQuietHours) {
+    const nowIso = auth?.now_iso ?? process.env.AUTHZ_NOW_ISO ?? null;
+    const qh = evaluateQuietHoursPolicy({ policy, nowIso });
+    if (!qh.ok) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, qh.code, qh.message, { ...qh.details, cycle_id: cycleId })
+      };
+    }
+
+    if (qh.in_quiet_hours) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'FORBIDDEN', 'delegation policy quiet hours', { ...qh.details, cycle_id: cycleId })
+      };
+    }
+  }
+
+  return { ok: true };
 }
 
 function redactActor({ actor, viewer }) {
@@ -136,7 +181,7 @@ export class SettlementReadService {
       if (!authzEnforced()) {
         return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation', { actor }) };
       }
-      const eff = effectiveActor({ actor, auth });
+      const eff = effectiveActorForDelegation({ actor, auth });
       if (!eff) {
         return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation subject', { actor }) };
       }
@@ -150,6 +195,16 @@ export class SettlementReadService {
         body: errorResponse(correlationId, authz.code, authz.message, { ...authz.details, cycle_id: cycleId })
       };
     }
+
+    const policyCheck = enforceAgentPolicyForCycle({
+      actor,
+      auth,
+      store: this.store,
+      correlationId,
+      cycleId,
+      includeQuietHours: false
+    });
+    if (!policyCheck.ok) return policyCheck;
 
     const viewTimeline = isPartner(viewActor) ? timeline : redactTimeline({ timeline, viewer: viewActor });
     return { ok: true, body: { correlation_id: correlationId, timeline: viewTimeline } };
@@ -173,7 +228,7 @@ export class SettlementReadService {
       if (!authzEnforced()) {
         return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation', { actor }) };
       }
-      const eff = effectiveActor({ actor, auth });
+      const eff = effectiveActorForDelegation({ actor, auth });
       if (!eff) {
         return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation subject', { actor }) };
       }
@@ -187,6 +242,16 @@ export class SettlementReadService {
         body: errorResponse(correlationId, authz.code, authz.message, { ...authz.details, cycle_id: cycleId })
       };
     }
+
+    const policyCheck = enforceAgentPolicyForCycle({
+      actor,
+      auth,
+      store: this.store,
+      correlationId,
+      cycleId,
+      includeQuietHours: true
+    });
+    if (!policyCheck.ok) return policyCheck;
 
     const mode = isPartner(viewActor) ? 'partner' : 'participant';
     const instructions = buildDepositInstructions({ timeline, mode, viewer: viewActor });
@@ -213,7 +278,7 @@ export class SettlementReadService {
       if (!authzEnforced()) {
         return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation', { actor }) };
       }
-      const eff = effectiveActor({ actor, auth });
+      const eff = effectiveActorForDelegation({ actor, auth });
       if (!eff) {
         return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation subject', { actor }) };
       }
@@ -229,6 +294,16 @@ export class SettlementReadService {
         body: errorResponse(correlationId, authz.code, authz.message, { ...authz.details, cycle_id: cycleId })
       };
     }
+
+    const policyCheck = enforceAgentPolicyForCycle({
+      actor,
+      auth,
+      store: this.store,
+      correlationId,
+      cycleId,
+      includeQuietHours: false
+    });
+    if (!policyCheck.ok) return policyCheck;
 
     return { ok: true, body: { correlation_id: correlationId, receipt } };
   }

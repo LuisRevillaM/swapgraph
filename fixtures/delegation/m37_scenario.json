@@ -1,0 +1,306 @@
+{
+  "actors": {
+    "user_u1": { "type": "user", "id": "u1" }
+  },
+  "seed": {
+    "proposals": [
+      {
+        "id": "cycle_ok",
+        "expires_at": "2026-03-01T00:00:00Z",
+        "participants": [
+          {
+            "intent_id": "intent_u1_ok",
+            "actor": { "type": "user", "id": "u1" },
+            "give": [{ "platform": "steam", "asset_id": "asset_u1_a" }],
+            "get": [{ "platform": "steam", "asset_id": "asset_u2_b" }]
+          },
+          {
+            "intent_id": "intent_u2_ok",
+            "actor": { "type": "user", "id": "u2" },
+            "give": [{ "platform": "steam", "asset_id": "asset_u2_b" }],
+            "get": [{ "platform": "steam", "asset_id": "asset_u1_a" }]
+          }
+        ],
+        "confidence_score": 0.91,
+        "value_spread": 0.03,
+        "fee_breakdown": [{ "actor": { "type": "user", "id": "u1" }, "fee_usd": 1.2 }],
+        "explainability": ["cycle_length=2", "confidence_score=0.91"]
+      },
+      {
+        "id": "cycle_low_conf",
+        "expires_at": "2026-03-01T00:00:00Z",
+        "participants": [
+          {
+            "intent_id": "intent_u1_low",
+            "actor": { "type": "user", "id": "u1" },
+            "give": [{ "platform": "steam", "asset_id": "asset_u1_c" }],
+            "get": [{ "platform": "steam", "asset_id": "asset_u3_d" }]
+          },
+          {
+            "intent_id": "intent_u3_low",
+            "actor": { "type": "user", "id": "u3" },
+            "give": [{ "platform": "steam", "asset_id": "asset_u3_d" }],
+            "get": [{ "platform": "steam", "asset_id": "asset_u1_c" }]
+          }
+        ],
+        "confidence_score": 0.71,
+        "value_spread": 0.05,
+        "fee_breakdown": [{ "actor": { "type": "user", "id": "u1" }, "fee_usd": 1.5 }],
+        "explainability": ["cycle_length=2", "confidence_score=0.71"]
+      },
+      {
+        "id": "cycle_long",
+        "expires_at": "2026-03-01T00:00:00Z",
+        "participants": [
+          {
+            "intent_id": "intent_u1_long",
+            "actor": { "type": "user", "id": "u1" },
+            "give": [{ "platform": "steam", "asset_id": "asset_u1_e" }],
+            "get": [{ "platform": "steam", "asset_id": "asset_u2_f" }]
+          },
+          {
+            "intent_id": "intent_u2_long",
+            "actor": { "type": "user", "id": "u2" },
+            "give": [{ "platform": "steam", "asset_id": "asset_u2_f" }],
+            "get": [{ "platform": "steam", "asset_id": "asset_u3_g" }]
+          },
+          {
+            "intent_id": "intent_u3_long",
+            "actor": { "type": "user", "id": "u3" },
+            "give": [{ "platform": "steam", "asset_id": "asset_u3_g" }],
+            "get": [{ "platform": "steam", "asset_id": "asset_u4_h" }]
+          },
+          {
+            "intent_id": "intent_u4_long",
+            "actor": { "type": "user", "id": "u4" },
+            "give": [{ "platform": "steam", "asset_id": "asset_u4_h" }],
+            "get": [{ "platform": "steam", "asset_id": "asset_u1_e" }]
+          }
+        ],
+        "confidence_score": 0.95,
+        "value_spread": 0.04,
+        "fee_breakdown": [{ "actor": { "type": "user", "id": "u1" }, "fee_usd": 2.1 }],
+        "explainability": ["cycle_length=4", "confidence_score=0.95"]
+      }
+    ],
+    "commits": [
+      {
+        "id": "commit_ok",
+        "cycle_id": "cycle_ok",
+        "phase": "ready",
+        "participants": [
+          { "actor": { "type": "user", "id": "u1" }, "status": "accepted", "commit_token": "tok_commit_ok_u1" },
+          { "actor": { "type": "user", "id": "u2" }, "status": "accepted", "commit_token": "tok_commit_ok_u2" }
+        ],
+        "created_at": "2026-02-16T00:30:00Z",
+        "updated_at": "2026-02-16T00:35:00Z"
+      },
+      {
+        "id": "commit_low_conf",
+        "cycle_id": "cycle_low_conf",
+        "phase": "accept",
+        "participants": [
+          { "actor": { "type": "user", "id": "u1" }, "status": "pending" },
+          { "actor": { "type": "user", "id": "u3" }, "status": "accepted", "commit_token": "tok_commit_low_u3" }
+        ],
+        "created_at": "2026-02-16T01:00:00Z",
+        "updated_at": "2026-02-16T01:05:00Z"
+      }
+    ],
+    "timelines": [
+      {
+        "cycle_id": "cycle_ok",
+        "state": "escrow.pending",
+        "legs": [
+          {
+            "leg_id": "leg_ok_1",
+            "intent_id": "intent_u1_ok",
+            "from_actor": { "type": "user", "id": "u1" },
+            "to_actor": { "type": "user", "id": "u2" },
+            "assets": [{ "platform": "steam", "asset_id": "asset_u1_a" }],
+            "status": "pending",
+            "deposit_deadline_at": "2026-02-20T00:00:00Z"
+          },
+          {
+            "leg_id": "leg_ok_2",
+            "intent_id": "intent_u2_ok",
+            "from_actor": { "type": "user", "id": "u2" },
+            "to_actor": { "type": "user", "id": "u1" },
+            "assets": [{ "platform": "steam", "asset_id": "asset_u2_b" }],
+            "status": "pending",
+            "deposit_deadline_at": "2026-02-20T00:00:00Z"
+          }
+        ],
+        "updated_at": "2026-02-16T00:40:00Z"
+      },
+      {
+        "cycle_id": "cycle_low_conf",
+        "state": "accepted",
+        "legs": [
+          {
+            "leg_id": "leg_low_1",
+            "intent_id": "intent_u1_low",
+            "from_actor": { "type": "user", "id": "u1" },
+            "to_actor": { "type": "user", "id": "u3" },
+            "assets": [{ "platform": "steam", "asset_id": "asset_u1_c" }],
+            "status": "pending",
+            "deposit_deadline_at": "2026-02-20T00:00:00Z"
+          },
+          {
+            "leg_id": "leg_low_2",
+            "intent_id": "intent_u3_low",
+            "from_actor": { "type": "user", "id": "u3" },
+            "to_actor": { "type": "user", "id": "u1" },
+            "assets": [{ "platform": "steam", "asset_id": "asset_u3_d" }],
+            "status": "pending",
+            "deposit_deadline_at": "2026-02-20T00:00:00Z"
+          }
+        ],
+        "updated_at": "2026-02-16T01:10:00Z"
+      }
+    ],
+    "receipts": [
+      {
+        "id": "receipt_ok",
+        "cycle_id": "cycle_ok",
+        "final_state": "completed",
+        "intent_ids": ["intent_u1_ok", "intent_u2_ok"],
+        "asset_ids": ["asset_u1_a", "asset_u2_b"],
+        "fees": [{ "actor": { "type": "user", "id": "u1" }, "fee_usd": 1.2 }],
+        "created_at": "2026-02-16T01:20:00Z",
+        "signature": {
+          "key_id": "dev-k1",
+          "alg": "ed25519",
+          "sig": "ZmFrZV9zaWdfb2s="
+        }
+      },
+      {
+        "id": "receipt_low",
+        "cycle_id": "cycle_low_conf",
+        "final_state": "failed",
+        "intent_ids": ["intent_u1_low", "intent_u3_low"],
+        "asset_ids": ["asset_u1_c", "asset_u3_d"],
+        "fees": [{ "actor": { "type": "user", "id": "u1" }, "fee_usd": 1.5 }],
+        "created_at": "2026-02-16T01:21:00Z",
+        "signature": {
+          "key_id": "dev-k1",
+          "alg": "ed25519",
+          "sig": "ZmFrZV9zaWdfbG93"
+        }
+      }
+    ]
+  },
+  "operations": [
+    {
+      "op": "delegations.create",
+      "actor_ref": "user_u1",
+      "auth": { "scopes": ["delegations:write"] },
+      "idempotency_key": "k_m37_create",
+      "occurred_at": "2026-02-16T00:00:00Z",
+      "request": {
+        "delegation": {
+          "delegation_id": "del_m37_u1_agent1",
+          "principal_agent": { "type": "agent", "id": "agent_1" },
+          "scopes": ["cycle_proposals:read", "commits:read", "settlement:read", "receipts:read"],
+          "policy": {
+            "max_value_per_swap_usd": 100,
+            "min_confidence_score": 0.8,
+            "max_cycle_length": 3,
+            "require_escrow": true,
+            "quiet_hours": { "start": "22:00", "end": "07:00", "tz": "UTC" }
+          },
+          "expires_at": "2026-03-01T00:00:00Z"
+        }
+      },
+      "save_token_ref": "tok_m37",
+      "expect_ok": true
+    },
+    {
+      "op": "authHeaders.parse",
+      "token_ref": "tok_m37",
+      "expect_ok": true,
+      "expect_actor": { "type": "agent", "id": "agent_1" }
+    },
+    {
+      "op": "cycleProposals.list.via_token",
+      "token_ref": "tok_m37",
+      "expect_ok": true,
+      "expect_proposal_ids": ["cycle_ok"]
+    },
+    {
+      "op": "cycleProposals.get.via_token",
+      "token_ref": "tok_m37",
+      "path": { "id": "cycle_ok" },
+      "expect_ok": true
+    },
+    {
+      "op": "cycleProposals.get.via_token",
+      "token_ref": "tok_m37",
+      "path": { "id": "cycle_low_conf" },
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN"
+    },
+    {
+      "op": "cycleProposals.get.via_token",
+      "token_ref": "tok_m37",
+      "path": { "id": "cycle_long" },
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN"
+    },
+    {
+      "op": "commits.get.via_token",
+      "token_ref": "tok_m37",
+      "path": { "id": "commit_ok" },
+      "expect_ok": true
+    },
+    {
+      "op": "commits.get.via_token",
+      "token_ref": "tok_m37",
+      "path": { "id": "commit_low_conf" },
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN"
+    },
+    {
+      "op": "settlement.status.via_token",
+      "token_ref": "tok_m37",
+      "path": { "cycle_id": "cycle_ok" },
+      "expect_ok": true
+    },
+    {
+      "op": "settlement.status.via_token",
+      "token_ref": "tok_m37",
+      "path": { "cycle_id": "cycle_low_conf" },
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN"
+    },
+    {
+      "op": "settlement.instructions.via_token",
+      "token_ref": "tok_m37",
+      "path": { "cycle_id": "cycle_ok" },
+      "now_iso": "2026-02-16T23:30:00Z",
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN"
+    },
+    {
+      "op": "settlement.instructions.via_token",
+      "token_ref": "tok_m37",
+      "path": { "cycle_id": "cycle_ok" },
+      "now_iso": "2026-02-16T12:00:00Z",
+      "expect_ok": true,
+      "expect_instructions_count": 1
+    },
+    {
+      "op": "receipts.get.via_token",
+      "token_ref": "tok_m37",
+      "path": { "cycle_id": "cycle_ok" },
+      "expect_ok": true
+    },
+    {
+      "op": "receipts.get.via_token",
+      "token_ref": "tok_m37",
+      "path": { "cycle_id": "cycle_low_conf" },
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN"
+    }
+  ]
+}

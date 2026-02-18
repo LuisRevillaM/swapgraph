@@ -1,4 +1,10 @@
 import { authorizeApiOperation, authzEnforced } from '../core/authz.mjs';
+import {
+  actorKey,
+  effectiveActorForDelegation,
+  policyForDelegatedActor,
+  evaluateProposalAgainstTradingPolicy
+} from '../core/tradingPolicyBoundaries.mjs';
 
 function errorResponse(correlationId, code, message, details = {}) {
   return { correlation_id: correlationId, error: { code, message, details } };
@@ -14,16 +20,7 @@ function correlationIdForCycleProposalsList(actor) {
   return `corr_cycle_proposals_list_${t}_${id}`;
 }
 
-function actorKey(actor) {
-  return `${actor.type}:${actor.id}`;
-}
-
-function effectiveActor({ actor, auth }) {
-  if (actor?.type === 'agent') {
-    return auth?.delegation?.subject_actor ?? null;
-  }
-  return actor;
-}
+// actor/policy helpers are imported from core/tradingPolicyBoundaries.mjs
 
 function isPartner(actor) {
   return actor?.type === 'partner';
@@ -83,14 +80,22 @@ export class CycleProposalsReadService {
     }
 
     let viewActor = actor;
+    let delegatedPolicy = null;
+
     if (actor?.type === 'agent') {
       if (!authzEnforced()) {
         return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation', { actor }) };
       }
-      const eff = effectiveActor({ actor, auth });
+      const eff = effectiveActorForDelegation({ actor, auth });
       if (!eff) {
         return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation subject', { actor }) };
       }
+
+      delegatedPolicy = policyForDelegatedActor({ actor, auth });
+      if (!delegatedPolicy) {
+        return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'delegation policy is required', { actor }) };
+      }
+
       viewActor = eff;
     }
 
@@ -103,6 +108,10 @@ export class CycleProposalsReadService {
       proposals = all.filter(p => isUserParticipant({ actor: viewActor, proposal: p }));
     } else {
       return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'actor type is not allowed', { actor: viewActor }) };
+    }
+
+    if (actor?.type === 'agent') {
+      proposals = proposals.filter(p => evaluateProposalAgainstTradingPolicy({ policy: delegatedPolicy, proposal: p }).ok);
     }
 
     proposals.sort((a, b) => a.id.localeCompare(b.id));
@@ -118,14 +127,22 @@ export class CycleProposalsReadService {
     }
 
     let viewActor = actor;
+    let delegatedPolicy = null;
+
     if (actor?.type === 'agent') {
       if (!authzEnforced()) {
         return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation', { actor }) };
       }
-      const eff = effectiveActor({ actor, auth });
+      const eff = effectiveActorForDelegation({ actor, auth });
       if (!eff) {
         return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation subject', { actor }) };
       }
+
+      delegatedPolicy = policyForDelegatedActor({ actor, auth });
+      if (!delegatedPolicy) {
+        return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'delegation policy is required', { actor }) };
+      }
+
       viewActor = eff;
     }
 
@@ -134,6 +151,13 @@ export class CycleProposalsReadService {
 
     const authz = authorizeRead({ actor: viewActor, proposal, store: this.store });
     if (!authz.ok) return { ok: false, body: errorResponse(correlationId, authz.code, authz.message, { ...authz.details, proposal_id: proposalId }) };
+
+    if (actor?.type === 'agent') {
+      const pol = evaluateProposalAgainstTradingPolicy({ policy: delegatedPolicy, proposal });
+      if (!pol.ok) {
+        return { ok: false, body: errorResponse(correlationId, pol.code, pol.message, { ...pol.details, proposal_id: proposalId }) };
+      }
+    }
 
     return { ok: true, body: { correlation_id: correlationId, proposal } };
   }

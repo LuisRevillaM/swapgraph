@@ -41,6 +41,7 @@
     "verify:m34": "bash verify/m34.sh",
     "verify:m35": "bash verify/m35.sh",
     "verify:m36": "bash verify/m36.sh",
+    "verify:m37": "bash verify/m37.sh",
     "test": "node --test"
   },
   "devDependencies": {

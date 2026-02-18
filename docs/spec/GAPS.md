@@ -121,7 +121,8 @@ Each item here must become at least one of:
 - Resolved (fixtures-first, partial): M34 (delegation lifecycle APIs + revocation persistence enforced from store under `AUTHZ_ENFORCE=1`).
 - Resolved (fixtures-first, partial): M35 (signed delegation token format + header parsing/auth middleware).
 - Resolved (fixtures-first, partial): M36 (delegation-token key publication/rotation + token introspection contract).
-- Remaining: policy enforcement expansion on matching/commit/settlement boundaries.
+- Resolved (fixtures-first, partial): M37 (delegation policy enforcement expanded across matching/commit/settlement read boundaries).
+- Remaining: advanced policy controls (`max_value_per_day_usd`, high-value consent tiering) and delegated write-path policy auditability.
 
 ---
 

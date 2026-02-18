@@ -1,0 +1,29 @@
+name: M37
+commands:
+  - cmd: "npm run verify:m37"
+artifacts:
+  - artifact: "docs/prd/M37.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/AUTH.md"
+  - artifact: "docs/spec/GAPS.md"
+  - artifact: "docs/spec/api/manifest.v1.json"
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+
+  - artifact: "src/core/tradingPolicyBoundaries.mjs"
+  - artifact: "src/read/cycleProposalsReadService.mjs"
+  - artifact: "src/commit/commitService.mjs"
+  - artifact: "src/read/settlementReadService.mjs"
+
+  - artifact: "scripts/run-m37-policy-boundaries-scenario.mjs"
+  - artifact: "fixtures/delegation/m37_scenario.json"
+  - artifact: "fixtures/delegation/m37_expected.json"
+
+  - artifact: "verify/m37.sh"
+
+  - artifact: "artifacts/milestones/M37/latest/commands.log"
+  - artifact: "artifacts/milestones/M37/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M37/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M37/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M37/latest/policy_boundaries_output.json"
+  - artifact: "artifacts/milestones/M37/latest/store.json"
+  - artifact: "artifacts/milestones/M37/latest/assertions.json"
