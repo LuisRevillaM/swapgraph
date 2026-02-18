@@ -1,0 +1,49 @@
+{
+  "actors": {
+    "partner": { "type": "partner", "id": "swapgraph" },
+    "user": { "type": "user", "id": "u1" }
+  },
+  "ops": [
+    {
+      "op": "swapIntents.list",
+      "actor_ref": "user",
+      "auth": { "scopes": [] },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    },
+    {
+      "op": "swapIntents.list",
+      "actor_ref": "user",
+      "auth": { "scopes": ["swap_intents:read"] },
+      "expect_ok": true
+    },
+
+    {
+      "op": "cycleProposals.list",
+      "actor_ref": "partner",
+      "auth": { "scopes": [] },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    },
+    {
+      "op": "cycleProposals.list",
+      "actor_ref": "partner",
+      "auth": { "scopes": ["cycle_proposals:read"] },
+      "expect_ok": true
+    },
+
+    {
+      "op": "settlement.status",
+      "actor_ref": "partner",
+      "auth": { "scopes": [] },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    },
+    {
+      "op": "settlement.status",
+      "actor_ref": "partner",
+      "auth": { "scopes": ["settlement:read"] },
+      "expect_ok": true
+    }
+  ]
+}

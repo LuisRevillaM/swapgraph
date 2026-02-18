@@ -1,3 +1,5 @@
+import { authorizeApiOperation } from '../core/authz.mjs';
+
 function errorResponse(correlationId, code, message, details = {}) {
   return { correlation_id: correlationId, error: { code, message, details } };
 }
@@ -109,51 +111,70 @@ export class SettlementReadService {
     this.store = store;
   }
 
-  status({ actor, cycleId }) {
+  status({ actor, auth, cycleId }) {
+    const correlationId = correlationIdForCycleId(cycleId);
+
     const timeline = this.store.state.timelines[cycleId];
     if (!timeline) {
-      return { ok: false, body: errorResponse(correlationIdForCycleId(cycleId), 'NOT_FOUND', 'settlement timeline not found', { cycle_id: cycleId }) };
+      return { ok: false, body: errorResponse(correlationId, 'NOT_FOUND', 'settlement timeline not found', { cycle_id: cycleId }) };
+    }
+
+    const authzOp = authorizeApiOperation({ operationId: 'settlement.status', actor, auth });
+    if (!authzOp.ok) {
+      return { ok: false, body: errorResponse(correlationId, authzOp.error.code, authzOp.error.message, authzOp.error.details) };
     }
 
     const authz = authorizeRead({ actor, timeline, store: this.store, cycleId });
     if (!authz.ok) {
       return {
         ok: false,
-        body: errorResponse(correlationIdForCycleId(cycleId), authz.code, authz.message, { ...authz.details, cycle_id: cycleId })
+        body: errorResponse(correlationId, authz.code, authz.message, { ...authz.details, cycle_id: cycleId })
       };
     }
 
     const viewTimeline = isPartner(actor) ? timeline : redactTimeline({ timeline, viewer: actor });
-    const correlation_id = `corr_${cycleId}`;
-    return { ok: true, body: { correlation_id, timeline: viewTimeline } };
+    return { ok: true, body: { correlation_id: correlationId, timeline: viewTimeline } };
   }
 
-  instructions({ actor, cycleId }) {
+  instructions({ actor, auth, cycleId }) {
+    const correlationId = correlationIdForCycleId(cycleId);
+
     const timeline = this.store.state.timelines[cycleId];
     if (!timeline) {
-      return { ok: false, body: errorResponse(correlationIdForCycleId(cycleId), 'NOT_FOUND', 'settlement timeline not found', { cycle_id: cycleId }) };
+      return { ok: false, body: errorResponse(correlationId, 'NOT_FOUND', 'settlement timeline not found', { cycle_id: cycleId }) };
+    }
+
+    const authzOp = authorizeApiOperation({ operationId: 'settlement.instructions', actor, auth });
+    if (!authzOp.ok) {
+      return { ok: false, body: errorResponse(correlationId, authzOp.error.code, authzOp.error.message, authzOp.error.details) };
     }
 
     const authz = authorizeRead({ actor, timeline, store: this.store, cycleId });
     if (!authz.ok) {
       return {
         ok: false,
-        body: errorResponse(correlationIdForCycleId(cycleId), authz.code, authz.message, { ...authz.details, cycle_id: cycleId })
+        body: errorResponse(correlationId, authz.code, authz.message, { ...authz.details, cycle_id: cycleId })
       };
     }
 
     const mode = isPartner(actor) ? 'partner' : 'participant';
     const instructions = buildDepositInstructions({ timeline, mode, viewer: actor });
     const viewTimeline = isPartner(actor) ? timeline : redactTimeline({ timeline, viewer: actor });
-    const correlation_id = `corr_${cycleId}`;
 
-    return { ok: true, body: { correlation_id, timeline: viewTimeline, instructions } };
+    return { ok: true, body: { correlation_id: correlationId, timeline: viewTimeline, instructions } };
   }
 
-  receipt({ actor, cycleId }) {
+  receipt({ actor, auth, cycleId }) {
+    const correlationId = correlationIdForCycleId(cycleId);
+
     const receipt = this.store.state.receipts[cycleId];
     if (!receipt) {
-      return { ok: false, body: errorResponse(correlationIdForCycleId(cycleId), 'NOT_FOUND', 'receipt not found', { cycle_id: cycleId }) };
+      return { ok: false, body: errorResponse(correlationId, 'NOT_FOUND', 'receipt not found', { cycle_id: cycleId }) };
+    }
+
+    const authzOp = authorizeApiOperation({ operationId: 'receipts.get', actor, auth });
+    if (!authzOp.ok) {
+      return { ok: false, body: errorResponse(correlationId, authzOp.error.code, authzOp.error.message, authzOp.error.details) };
     }
 
     // Use timeline for participant check when available.
@@ -162,11 +183,10 @@ export class SettlementReadService {
     if (!authz.ok) {
       return {
         ok: false,
-        body: errorResponse(correlationIdForCycleId(cycleId), authz.code, authz.message, { ...authz.details, cycle_id: cycleId })
+        body: errorResponse(correlationId, authz.code, authz.message, { ...authz.details, cycle_id: cycleId })
       };
     }
 
-    const correlation_id = `corr_${cycleId}`;
-    return { ok: true, body: { correlation_id, receipt } };
+    return { ok: true, body: { correlation_id: correlationId, receipt } };
   }
 }

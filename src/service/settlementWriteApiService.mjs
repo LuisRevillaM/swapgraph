@@ -1,5 +1,6 @@
 import { SettlementStartService } from './settlementStartService.mjs';
 import { SettlementActionsService } from './settlementActionsService.mjs';
+import { authorizeApiOperation } from '../core/authz.mjs';
 
 function errorResponse(correlationId, code, message, details = {}) {
   return { correlation_id: correlationId, error: { code, message, details } };
@@ -21,47 +22,68 @@ export class SettlementWriteApiService {
     this.actionsSvc = new SettlementActionsService({ store });
   }
 
-  start({ actor, cycleId, requestBody, occurredAt }) {
+  start({ actor, auth, cycleId, requestBody, occurredAt }) {
+    const correlationId = correlationIdForCycleId(cycleId);
+
+    const authz = authorizeApiOperation({ operationId: 'settlement.start', actor, auth });
+    if (!authz.ok) {
+      return { ok: false, body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details) };
+    }
+
     const depositDeadlineAt = requestBody?.deposit_deadline_at;
     const r = this.startSvc.start({ actor, cycleId, occurredAt, depositDeadlineAt });
 
     if (!r.ok) {
       return {
         ok: false,
-        body: errorResponse(correlationIdForCycleId(cycleId), r.error.code, r.error.message, r.error.details)
+        body: errorResponse(correlationId, r.error.code, r.error.message, r.error.details)
       };
     }
 
     return {
       ok: true,
       body: {
-        correlation_id: correlationIdForCycleId(cycleId),
+        correlation_id: correlationId,
         timeline: r.timeline
       }
     };
   }
 
-  depositConfirmed({ actor, cycleId, requestBody, occurredAt }) {
+  depositConfirmed({ actor, auth, cycleId, requestBody, occurredAt }) {
+    const correlationId = correlationIdForCycleId(cycleId);
+
+    const authz = authorizeApiOperation({ operationId: 'settlement.deposit_confirmed', actor, auth });
+    if (!authz.ok) {
+      return { ok: false, body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details) };
+    }
+
     const depositRef = requestBody?.deposit_ref;
     const r = this.actionsSvc.confirmDeposit({ actor, cycleId, depositRef, occurredAt });
 
     if (!r.ok) {
       return {
         ok: false,
-        body: errorResponse(correlationIdForCycleId(cycleId), r.error.code, r.error.message, r.error.details)
+        body: errorResponse(correlationId, r.error.code, r.error.message, r.error.details)
       };
     }
 
     return {
       ok: true,
       body: {
-        correlation_id: correlationIdForCycleId(cycleId),
+        correlation_id: correlationId,
         timeline: r.timeline
       }
     };
   }
 
-  beginExecution({ actor, cycleId, requestBody, occurredAt }) {
+  beginExecution({ actor, auth, cycleId, requestBody, occurredAt }) {
+    const correlationId = correlationIdForCycleId(cycleId);
+
+    const authz = authorizeApiOperation({ operationId: 'settlement.begin_execution', actor, auth });
+    if (!authz.ok) {
+      return { ok: false, body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details) };
+    }
+
     // requestBody is intentionally empty in v1.
     void requestBody;
 
@@ -70,20 +92,27 @@ export class SettlementWriteApiService {
     if (!r.ok) {
       return {
         ok: false,
-        body: errorResponse(correlationIdForCycleId(cycleId), r.error.code, r.error.message, r.error.details)
+        body: errorResponse(correlationId, r.error.code, r.error.message, r.error.details)
       };
     }
 
     return {
       ok: true,
       body: {
-        correlation_id: correlationIdForCycleId(cycleId),
+        correlation_id: correlationId,
         timeline: r.timeline
       }
     };
   }
 
-  complete({ actor, cycleId, requestBody, occurredAt }) {
+  complete({ actor, auth, cycleId, requestBody, occurredAt }) {
+    const correlationId = correlationIdForCycleId(cycleId);
+
+    const authz = authorizeApiOperation({ operationId: 'settlement.complete', actor, auth });
+    if (!authz.ok) {
+      return { ok: false, body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details) };
+    }
+
     // requestBody is intentionally empty in v1.
     void requestBody;
 
@@ -92,28 +121,35 @@ export class SettlementWriteApiService {
     if (!r.ok) {
       return {
         ok: false,
-        body: errorResponse(correlationIdForCycleId(cycleId), r.error.code, r.error.message, r.error.details)
+        body: errorResponse(correlationId, r.error.code, r.error.message, r.error.details)
       };
     }
 
     return {
       ok: true,
       body: {
-        correlation_id: correlationIdForCycleId(cycleId),
+        correlation_id: correlationId,
         timeline: r.timeline,
         receipt: r.receipt
       }
     };
   }
 
-  expireDepositWindow({ actor, cycleId, requestBody }) {
+  expireDepositWindow({ actor, auth, cycleId, requestBody }) {
+    const correlationId = correlationIdForCycleId(cycleId);
+
+    const authz = authorizeApiOperation({ operationId: 'settlement.expire_deposit_window', actor, auth });
+    if (!authz.ok) {
+      return { ok: false, body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details) };
+    }
+
     const nowIso = requestBody?.now_iso;
     const r = this.actionsSvc.expireDepositWindow({ actor, cycleId, nowIso });
 
     if (!r.ok) {
       return {
         ok: false,
-        body: errorResponse(correlationIdForCycleId(cycleId), r.error.code, r.error.message, r.error.details)
+        body: errorResponse(correlationId, r.error.code, r.error.message, r.error.details)
       };
     }
 
@@ -121,7 +157,7 @@ export class SettlementWriteApiService {
       return {
         ok: true,
         body: {
-          correlation_id: correlationIdForCycleId(cycleId),
+          correlation_id: correlationId,
           no_op: true,
           details: r.details ?? { cycle_id: cycleId }
         }
@@ -131,7 +167,7 @@ export class SettlementWriteApiService {
     return {
       ok: true,
       body: {
-        correlation_id: correlationIdForCycleId(cycleId),
+        correlation_id: correlationId,
         timeline: r.timeline,
         receipt: r.receipt
       }

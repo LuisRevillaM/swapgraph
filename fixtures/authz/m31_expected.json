@@ -1,0 +1,82 @@
+{
+  "operations": [
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "auth": {
+        "scopes": []
+      },
+      "error_code": "INSUFFICIENT_SCOPE",
+      "ok": false,
+      "op": "swapIntents.list"
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "auth": {
+        "scopes": [
+          "swap_intents:read"
+        ]
+      },
+      "error_code": null,
+      "ok": true,
+      "op": "swapIntents.list"
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "auth": {
+        "scopes": []
+      },
+      "error_code": "INSUFFICIENT_SCOPE",
+      "ok": false,
+      "op": "cycleProposals.list"
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "auth": {
+        "scopes": [
+          "cycle_proposals:read"
+        ]
+      },
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.list"
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "auth": {
+        "scopes": []
+      },
+      "error_code": "INSUFFICIENT_SCOPE",
+      "ok": false,
+      "op": "settlement.status"
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "error_code": null,
+      "ok": true,
+      "op": "settlement.status"
+    }
+  ]
+}

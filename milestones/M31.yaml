@@ -1,0 +1,28 @@
+name: M31
+commands:
+  - cmd: "npm run verify:m31"
+artifacts:
+  - artifact: "docs/prd/M31.md"
+
+  - artifact: "src/core/authz.mjs"
+
+  - artifact: "src/service/swapIntentsService.mjs"
+  - artifact: "src/read/cycleProposalsReadService.mjs"
+  - artifact: "src/commit/commitService.mjs"
+  - artifact: "src/service/settlementWriteApiService.mjs"
+  - artifact: "src/read/settlementReadService.mjs"
+
+  - artifact: "fixtures/authz/m31_scenario.json"
+  - artifact: "fixtures/authz/m31_expected.json"
+
+  - artifact: "scripts/run-m31-authz-scenario.mjs"
+
+  - artifact: "verify/m31.sh"
+
+  - artifact: "artifacts/milestones/M31/latest/commands.log"
+  - artifact: "artifacts/milestones/M31/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M31/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M31/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M31/latest/authz_output.json"
+  - artifact: "artifacts/milestones/M31/latest/store.json"
+  - artifact: "artifacts/milestones/M31/latest/assertions.json"

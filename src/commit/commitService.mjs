@@ -1,5 +1,6 @@
 import { commitIdForProposalId } from './commitIds.mjs';
 import { idempotencyScopeKey, payloadHash } from '../core/idempotency.mjs';
+import { authorizeApiOperation } from '../core/authz.mjs';
 import { stableEventId } from '../delivery/eventIds.mjs';
 import { signEventEnvelope } from '../crypto/eventSigning.mjs';
 
@@ -204,13 +205,26 @@ export class CommitService {
     }
   }
 
-  accept({ actor, idempotencyKey, proposal, requestBody, occurredAt }) {
+  accept({ actor, auth, idempotencyKey, proposal, requestBody, occurredAt }) {
+    const correlationId = correlationIdForCycleId(proposal.id);
+
+    const authz = authorizeApiOperation({ operationId: 'cycleProposals.accept', actor, auth });
+    if (!authz.ok) {
+      return {
+        replayed: false,
+        result: {
+          ok: false,
+          body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details)
+        }
+      };
+    }
+
     return this._withIdempotency({
       actor,
       operationId: 'cycleProposals.accept',
       idempotencyKey,
       requestBody,
-      correlationId: correlationIdForCycleId(proposal.id),
+      correlationId,
       handler: () => {
         if (!occurredAt) throw new Error('occurredAt is required');
 
@@ -279,13 +293,26 @@ export class CommitService {
     });
   }
 
-  decline({ actor, idempotencyKey, proposal, requestBody, occurredAt }) {
+  decline({ actor, auth, idempotencyKey, proposal, requestBody, occurredAt }) {
+    const correlationId = correlationIdForCycleId(proposal.id);
+
+    const authz = authorizeApiOperation({ operationId: 'cycleProposals.decline', actor, auth });
+    if (!authz.ok) {
+      return {
+        replayed: false,
+        result: {
+          ok: false,
+          body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details)
+        }
+      };
+    }
+
     return this._withIdempotency({
       actor,
       operationId: 'cycleProposals.decline',
       idempotencyKey,
       requestBody,
-      correlationId: correlationIdForCycleId(proposal.id),
+      correlationId,
       handler: () => {
         if (!occurredAt) throw new Error('occurredAt is required');
 
@@ -376,7 +403,7 @@ export class CommitService {
     return { ok: true, expired_commit_ids: expired };
   }
 
-  get({ actor, commitId }) {
+  get({ actor, auth, commitId }) {
     const commit = this.store.state.commits[commitId];
     if (!commit) {
       return {
@@ -385,15 +412,22 @@ export class CommitService {
       };
     }
 
+    const correlationId = correlationIdForCycleId(commit.cycle_id);
+
+    const authz = authorizeApiOperation({ operationId: 'commits.get', actor, auth });
+    if (!authz.ok) {
+      return { ok: false, body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details) };
+    }
+
     // v1: only participants can view.
     const allowed = commit.participants.some(p => participantKey(p) === actorKey(actor));
     if (!allowed) {
       return {
         ok: false,
-        body: errorResponse(correlationIdForCycleId(commit.cycle_id), 'FORBIDDEN', 'actor cannot access this commit', { commit_id: commitId })
+        body: errorResponse(correlationId, 'FORBIDDEN', 'actor cannot access this commit', { commit_id: commitId })
       };
     }
 
-    return { ok: true, body: { correlation_id: correlationIdForCycleId(commit.cycle_id), commit } };
+    return { ok: true, body: { correlation_id: correlationId, commit } };
   }
 }

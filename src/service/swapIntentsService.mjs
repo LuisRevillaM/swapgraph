@@ -1,4 +1,5 @@
 import { idempotencyScopeKey, payloadHash } from '../core/idempotency.mjs';
+import { authorizeApiOperation } from '../core/authz.mjs';
 
 function actorKey(actor) {
   return `${actor.type}:${actor.id}`;
@@ -66,13 +67,26 @@ export class SwapIntentsService {
     return { replayed: false, result: snapshot };
   }
 
-  create({ actor, idempotencyKey, requestBody }) {
+  create({ actor, auth, idempotencyKey, requestBody }) {
+    const correlationId = correlationIdForIntentId(requestBody?.intent?.id ?? 'unknown');
+
+    const authz = authorizeApiOperation({ operationId: 'swapIntents.create', actor, auth });
+    if (!authz.ok) {
+      return {
+        replayed: false,
+        result: {
+          ok: false,
+          body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details)
+        }
+      };
+    }
+
     return this._withIdempotency({
       actor,
       operationId: 'swapIntents.create',
       idempotencyKey,
       requestBody,
-      correlationId: correlationIdForIntentId(requestBody?.intent?.id ?? 'unknown'),
+      correlationId,
       handler: () => {
         const intent = requestBody.intent;
         const stored = { ...intent, status: intent.status ?? 'active' };
@@ -82,13 +96,26 @@ export class SwapIntentsService {
     });
   }
 
-  update({ actor, id, idempotencyKey, requestBody }) {
+  update({ actor, auth, id, idempotencyKey, requestBody }) {
+    const correlationId = correlationIdForIntentId(id);
+
+    const authz = authorizeApiOperation({ operationId: 'swapIntents.update', actor, auth });
+    if (!authz.ok) {
+      return {
+        replayed: false,
+        result: {
+          ok: false,
+          body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details)
+        }
+      };
+    }
+
     return this._withIdempotency({
       actor,
       operationId: 'swapIntents.update',
       idempotencyKey,
       requestBody,
-      correlationId: correlationIdForIntentId(id),
+      correlationId,
       handler: () => {
         const intent = requestBody.intent;
         if (intent.id !== id) {
@@ -103,13 +130,26 @@ export class SwapIntentsService {
     });
   }
 
-  cancel({ actor, idempotencyKey, requestBody }) {
+  cancel({ actor, auth, idempotencyKey, requestBody }) {
+    const correlationId = correlationIdForIntentId(requestBody?.id ?? 'unknown');
+
+    const authz = authorizeApiOperation({ operationId: 'swapIntents.cancel', actor, auth });
+    if (!authz.ok) {
+      return {
+        replayed: false,
+        result: {
+          ok: false,
+          body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details)
+        }
+      };
+    }
+
     return this._withIdempotency({
       actor,
       operationId: 'swapIntents.cancel',
       idempotencyKey,
       requestBody,
-      correlationId: correlationIdForIntentId(requestBody?.id ?? 'unknown'),
+      correlationId,
       handler: () => {
         const id = requestBody.id;
         const prev = this.store.state.intents[id];
@@ -122,18 +162,32 @@ export class SwapIntentsService {
     });
   }
 
-  get({ actor, id }) {
-    // v1: auth not implemented; we still restrict list/get to the same actor.
-    const intent = this.store.state.intents[id];
-    if (!intent) return { ok: false, body: errorResponse(correlationIdForIntentId(id), 'NOT_FOUND', 'intent not found', { id }) };
-    if (actorKey(intent.actor) !== actorKey(actor)) {
-      return { ok: false, body: errorResponse(correlationIdForIntentId(id), 'FORBIDDEN', 'actor cannot access this intent', { id }) };
+  get({ actor, auth, id }) {
+    const correlationId = correlationIdForIntentId(id);
+
+    const authz = authorizeApiOperation({ operationId: 'swapIntents.get', actor, auth });
+    if (!authz.ok) {
+      return { ok: false, body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details) };
     }
-    return { ok: true, body: { correlation_id: correlationIdForIntentId(id), intent } };
+
+    // v1: actor must match intent.actor.
+    const intent = this.store.state.intents[id];
+    if (!intent) return { ok: false, body: errorResponse(correlationId, 'NOT_FOUND', 'intent not found', { id }) };
+    if (actorKey(intent.actor) !== actorKey(actor)) {
+      return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'actor cannot access this intent', { id }) };
+    }
+    return { ok: true, body: { correlation_id: correlationId, intent } };
   }
 
-  list({ actor }) {
+  list({ actor, auth }) {
+    const correlationId = correlationIdForIntentsList(actor);
+
+    const authz = authorizeApiOperation({ operationId: 'swapIntents.list', actor, auth });
+    if (!authz.ok) {
+      return { ok: false, body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details) };
+    }
+
     const intents = Object.values(this.store.state.intents).filter(i => actorKey(i.actor) === actorKey(actor));
-    return { ok: true, body: { correlation_id: correlationIdForIntentsList(actor), intents } };
+    return { ok: true, body: { correlation_id: correlationId, intents } };
   }
 }

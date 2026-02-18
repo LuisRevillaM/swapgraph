@@ -18,7 +18,7 @@ export class CycleProposalsCommitService {
     this.commitSvc = new CommitService({ store });
   }
 
-  accept({ actor, idempotencyKey, proposalId, requestBody, occurredAt }) {
+  accept({ actor, auth, idempotencyKey, proposalId, requestBody, occurredAt }) {
     const proposal = this.store.state.proposals?.[proposalId];
     if (!proposal) {
       return {
@@ -30,10 +30,10 @@ export class CycleProposalsCommitService {
       };
     }
 
-    return this.commitSvc.accept({ actor, idempotencyKey, proposal, requestBody, occurredAt });
+    return this.commitSvc.accept({ actor, auth, idempotencyKey, proposal, requestBody, occurredAt });
   }
 
-  decline({ actor, idempotencyKey, proposalId, requestBody, occurredAt }) {
+  decline({ actor, auth, idempotencyKey, proposalId, requestBody, occurredAt }) {
     const proposal = this.store.state.proposals?.[proposalId];
     if (!proposal) {
       return {
@@ -45,6 +45,6 @@ export class CycleProposalsCommitService {
       };
     }
 
-    return this.commitSvc.decline({ actor, idempotencyKey, proposal, requestBody, occurredAt });
+    return this.commitSvc.decline({ actor, auth, idempotencyKey, proposal, requestBody, occurredAt });
   }
 }
