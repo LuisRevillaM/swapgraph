@@ -741,6 +741,8 @@ function normalizePartnerProgramRolloutPolicyAuditExportQuery(query) {
   if (Number.isFinite(limit) && limit > 0) out.limit = Math.min(limit, 200);
 
   if (typeof query?.cursor_after === 'string' && query.cursor_after.trim()) out.cursor_after = query.cursor_after.trim();
+  if (typeof query?.attestation_after === 'string' && query.attestation_after.trim()) out.attestation_after = query.attestation_after.trim();
+  if (typeof query?.checkpoint_after === 'string' && query.checkpoint_after.trim()) out.checkpoint_after = query.checkpoint_after.trim();
 
   return out;
 }
@@ -782,6 +784,12 @@ function partnerProgramRolloutPolicyAuditExportSignablePayload(payload) {
 
   if (typeof payload?.next_cursor === 'string' && payload.next_cursor.trim()) out.next_cursor = payload.next_cursor.trim();
 
+  const attestation = normalizeExportAttestation(payload?.attestation);
+  if (attestation) out.attestation = attestation;
+
+  const checkpoint = normalizeExportCheckpoint(payload?.checkpoint);
+  if (checkpoint) out.checkpoint = checkpoint;
+
   return out;
 }
 
@@ -805,6 +813,8 @@ export function buildSignedPartnerProgramRolloutPolicyAuditExportPayload({
   entries,
   totalFiltered,
   nextCursor,
+  withAttestation,
+  withCheckpoint,
   keyId
 }) {
   const normalizedQuery = normalizePartnerProgramRolloutPolicyAuditExportQuery(query);
@@ -829,6 +839,24 @@ export function buildSignedPartnerProgramRolloutPolicyAuditExportPayload({
   };
 
   if (normalizedNextCursor) payload.next_cursor = normalizedNextCursor;
+
+  if (withAttestation) {
+    payload.attestation = buildPolicyAuditExportAttestation({
+      query: normalizedQuery,
+      nextCursor: normalizedNextCursor,
+      exportHash
+    });
+  }
+
+  if (withCheckpoint) {
+    payload.checkpoint = buildPolicyAuditExportCheckpoint({
+      query: normalizedQuery,
+      attestation: payload.attestation ?? null,
+      nextCursor: normalizedNextCursor,
+      entriesCount: (entries ?? []).length,
+      totalFiltered
+    });
+  }
 
   payload.signature = signPolicyIntegrityPayload(payload, { keyId });
   return payload;
@@ -856,6 +884,28 @@ export function verifyPartnerProgramRolloutPolicyAuditExportPayload(payload) {
         provided_hash: payload.export_hash ?? null
       }
     };
+  }
+
+  if (payload.attestation) {
+    const attest = verifyPolicyAuditExportAttestation({
+      attestation: payload.attestation,
+      query: payload.query,
+      nextCursor: payload.next_cursor,
+      exportHash: expectedHash
+    });
+    if (!attest.ok) return attest;
+  }
+
+  if (payload.checkpoint) {
+    const checkpoint = verifyPolicyAuditExportCheckpoint({
+      checkpoint: payload.checkpoint,
+      query: payload.query,
+      attestation: payload.attestation ?? null,
+      nextCursor: payload.next_cursor,
+      entriesCount: Array.isArray(payload.entries) ? payload.entries.length : 0,
+      totalFiltered: payload.total_filtered
+    });
+    if (!checkpoint.ok) return checkpoint;
   }
 
   const signable = partnerProgramRolloutPolicyAuditExportSignablePayload(payload);
@@ -887,6 +937,28 @@ export function verifyPartnerProgramRolloutPolicyAuditExportPayloadWithPublicKey
         provided_hash: payload.export_hash ?? null
       }
     };
+  }
+
+  if (payload.attestation) {
+    const attest = verifyPolicyAuditExportAttestation({
+      attestation: payload.attestation,
+      query: payload.query,
+      nextCursor: payload.next_cursor,
+      exportHash: expectedHash
+    });
+    if (!attest.ok) return attest;
+  }
+
+  if (payload.checkpoint) {
+    const checkpoint = verifyPolicyAuditExportCheckpoint({
+      checkpoint: payload.checkpoint,
+      query: payload.query,
+      attestation: payload.attestation ?? null,
+      nextCursor: payload.next_cursor,
+      entriesCount: Array.isArray(payload.entries) ? payload.entries.length : 0,
+      totalFiltered: payload.total_filtered
+    });
+    if (!checkpoint.ok) return checkpoint;
   }
 
   const signable = partnerProgramRolloutPolicyAuditExportSignablePayload(payload);

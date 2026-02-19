@@ -1,0 +1,338 @@
+{
+  "final": {
+    "checkpoint_keys": [
+      "94add3b41ad8deab9594ad6b9a906e3726887387325ca840d603903909ff4040"
+    ],
+    "checkpoint_records": [
+      {
+        "attestation_chain_hash": "1eade6f76fd0897ca571da860b1d8d517147f4f0cc7d05449a8bfb87743853ef",
+        "checkpoint_after": "79e6b375766fa218655705468b4b576d97db356c344e361dd753bd68dc2cd71c",
+        "checkpoint_hash": "94add3b41ad8deab9594ad6b9a906e3726887387325ca840d603903909ff4040",
+        "exported_at": "2026-02-19T07:02:30Z",
+        "next_cursor": null,
+        "query_context": {
+          "from_iso": "2026-02-19T07:00:00Z",
+          "limit": 1,
+          "to_iso": null
+        }
+      }
+    ],
+    "idempotency": [
+      {
+        "error_code": null,
+        "ok": true,
+        "payload_hash": "09354418b27b56ab4676c37b3f5378f30f89d9a0eadbb7633a119e2bc3d17981",
+        "scope_key": "partner:ops-admin|partnerProgram.vault_export.rollout_policy.upsert|m58_policy_v1"
+      },
+      {
+        "error_code": null,
+        "ok": true,
+        "payload_hash": "229baf678d6ced20d2f62bafc8a67bd299b6fc9d3f1d37a9e142082103ca66e8",
+        "scope_key": "partner:ops-admin|partnerProgram.vault_export.rollout_policy.upsert|m58_policy_v2"
+      }
+    ],
+    "partner_program_records": [
+      {
+        "feature_vault_reconciliation_export": true,
+        "partner_id": "swapgraph",
+        "plan_id": "pro",
+        "quota_vault_reconciliation_export_daily": 5
+      }
+    ],
+    "partner_program_usage": [],
+    "rollout_policy": {
+      "allowlist": [
+        "otherpartner",
+        "swapgraph"
+      ],
+      "min_plan_id": "pro",
+      "updated_at": "2026-02-19T07:01:00Z",
+      "updated_by": {
+        "id": "ops-admin",
+        "type": "partner"
+      },
+      "version": 2
+    },
+    "rollout_policy_audit": [
+      {
+        "actor_id": "ops-admin",
+        "allowlist_after": [
+          "swapgraph"
+        ],
+        "audit_id": "rollout_policy_000001",
+        "min_plan_after": "pro",
+        "occurred_at": "2026-02-19T07:00:00Z",
+        "version_after": 1
+      },
+      {
+        "actor_id": "ops-admin",
+        "allowlist_after": [
+          "otherpartner",
+          "swapgraph"
+        ],
+        "audit_id": "rollout_policy_000002",
+        "min_plan_after": "pro",
+        "occurred_at": "2026-02-19T07:01:00Z",
+        "version_after": 2
+      }
+    ]
+  },
+  "operations": [
+    {
+      "active_key_id": "dev-pi-k1",
+      "key_statuses": {
+        "dev-pi-k1": "active",
+        "dev-pi-k2": "verify_only"
+      },
+      "keys_count": 2,
+      "ok": true,
+      "op": "keys.policy_integrity_signing.get"
+    },
+    {
+      "daily_limit": 5,
+      "feature_enabled": true,
+      "op": "partner_program.configure",
+      "partner_id": "swapgraph",
+      "plan_id": "pro",
+      "reset_usage": true
+    },
+    {
+      "actor": {
+        "id": "ops-admin",
+        "type": "partner"
+      },
+      "audit_id": "rollout_policy_000001",
+      "error_code": null,
+      "ok": true,
+      "op": "partnerProgram.vault_export.rollout_policy.upsert",
+      "policy_allowlist": [
+        "swapgraph"
+      ],
+      "policy_min_plan_id": "pro",
+      "policy_source": "store",
+      "policy_version": 1,
+      "reason_code": null,
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "ops-admin",
+        "type": "partner"
+      },
+      "audit_id": "rollout_policy_000002",
+      "error_code": null,
+      "ok": true,
+      "op": "partnerProgram.vault_export.rollout_policy.upsert",
+      "policy_allowlist": [
+        "otherpartner",
+        "swapgraph"
+      ],
+      "policy_min_plan_id": "pro",
+      "policy_source": "store",
+      "policy_version": 2,
+      "reason_code": null,
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "allowlist_enforced": true,
+      "error_code": null,
+      "export_allowed": true,
+      "min_plan_id": "pro",
+      "ok": true,
+      "op": "partnerProgram.vault_export.get",
+      "partner_allowed": true,
+      "plan_id": "pro",
+      "plan_meets_minimum": true,
+      "quota_daily_limit": 5,
+      "quota_daily_used": 0,
+      "reason_code": null,
+      "reasons": []
+    },
+    {
+      "actor": {
+        "id": "ops-admin",
+        "type": "partner"
+      },
+      "attestation_after": null,
+      "attestation_chain_hash": "81c0be3d6425630c68f81dda16e821b12b515eb24a2ac222e9a9963be9615ea4",
+      "checkpoint_after": null,
+      "checkpoint_hash": "79e6b375766fa218655705468b4b576d97db356c344e361dd753bd68dc2cd71c",
+      "entries_count": 1,
+      "error_code": null,
+      "export_hash": "545c4d73120aa4aa301003071a04992cbd98e3587a673d316b18828835790249",
+      "next_cursor": "rollout_policy_000001",
+      "ok": true,
+      "op": "partnerProgram.vault_export.rollout_policy_audit.export",
+      "policy_version": 2,
+      "reason_code": null,
+      "signature_key_id": "dev-pi-k1",
+      "total_filtered": 2
+    },
+    {
+      "export_ref": "audit_page1",
+      "op": "partnerProgram.vault_export.rollout_policy_audit.export.verify",
+      "verify_error": null,
+      "verify_ok": true,
+      "verify_public_error": null,
+      "verify_public_ok": true
+    },
+    {
+      "actor": {
+        "id": "ops-admin",
+        "type": "partner"
+      },
+      "attestation_after": "81c0be3d6425630c68f81dda16e821b12b515eb24a2ac222e9a9963be9615ea4",
+      "attestation_chain_hash": "1eade6f76fd0897ca571da860b1d8d517147f4f0cc7d05449a8bfb87743853ef",
+      "checkpoint_after": "79e6b375766fa218655705468b4b576d97db356c344e361dd753bd68dc2cd71c",
+      "checkpoint_hash": "94add3b41ad8deab9594ad6b9a906e3726887387325ca840d603903909ff4040",
+      "entries_count": 1,
+      "error_code": null,
+      "export_hash": "f74a6f6b08a979751d2fc6b4144d40d762dc99bece76418193760e1a2f844eab",
+      "next_cursor": null,
+      "ok": true,
+      "op": "partnerProgram.vault_export.rollout_policy_audit.export",
+      "policy_version": 2,
+      "reason_code": null,
+      "signature_key_id": "dev-pi-k1",
+      "total_filtered": 1
+    },
+    {
+      "export_ref": "audit_page2",
+      "op": "partnerProgram.vault_export.rollout_policy_audit.export.verify",
+      "verify_error": null,
+      "verify_ok": true,
+      "verify_public_error": null,
+      "verify_public_ok": true
+    },
+    {
+      "actor": {
+        "id": "ops-admin",
+        "type": "partner"
+      },
+      "attestation_after": null,
+      "attestation_chain_hash": null,
+      "checkpoint_after": null,
+      "checkpoint_hash": null,
+      "entries_count": null,
+      "error_code": "CONSTRAINT_VIOLATION",
+      "export_hash": null,
+      "next_cursor": null,
+      "ok": false,
+      "op": "partnerProgram.vault_export.rollout_policy_audit.export",
+      "policy_version": null,
+      "reason_code": null,
+      "signature_key_id": null,
+      "total_filtered": null
+    },
+    {
+      "actor": {
+        "id": "ops-admin",
+        "type": "partner"
+      },
+      "attestation_after": null,
+      "attestation_chain_hash": null,
+      "checkpoint_after": null,
+      "checkpoint_hash": null,
+      "entries_count": null,
+      "error_code": "CONSTRAINT_VIOLATION",
+      "export_hash": null,
+      "next_cursor": null,
+      "ok": false,
+      "op": "partnerProgram.vault_export.rollout_policy_audit.export",
+      "policy_version": null,
+      "reason_code": "checkpoint_after_not_found",
+      "signature_key_id": null,
+      "total_filtered": null
+    },
+    {
+      "actor": {
+        "id": "ops-admin",
+        "type": "partner"
+      },
+      "attestation_after": null,
+      "attestation_chain_hash": null,
+      "checkpoint_after": null,
+      "checkpoint_hash": null,
+      "entries_count": null,
+      "error_code": "CONSTRAINT_VIOLATION",
+      "export_hash": null,
+      "next_cursor": null,
+      "ok": false,
+      "op": "partnerProgram.vault_export.rollout_policy_audit.export",
+      "policy_version": null,
+      "reason_code": "checkpoint_cursor_mismatch",
+      "signature_key_id": null,
+      "total_filtered": null
+    },
+    {
+      "actor": {
+        "id": "ops-admin",
+        "type": "partner"
+      },
+      "attestation_after": null,
+      "attestation_chain_hash": null,
+      "checkpoint_after": null,
+      "checkpoint_hash": null,
+      "entries_count": null,
+      "error_code": "CONSTRAINT_VIOLATION",
+      "export_hash": null,
+      "next_cursor": null,
+      "ok": false,
+      "op": "partnerProgram.vault_export.rollout_policy_audit.export",
+      "policy_version": null,
+      "reason_code": "checkpoint_attestation_mismatch",
+      "signature_key_id": null,
+      "total_filtered": null
+    },
+    {
+      "actor": {
+        "id": "ops-admin",
+        "type": "partner"
+      },
+      "attestation_after": null,
+      "attestation_chain_hash": null,
+      "checkpoint_after": null,
+      "checkpoint_hash": null,
+      "entries_count": null,
+      "error_code": "CONSTRAINT_VIOLATION",
+      "export_hash": null,
+      "next_cursor": null,
+      "ok": false,
+      "op": "partnerProgram.vault_export.rollout_policy_audit.export",
+      "policy_version": null,
+      "reason_code": "checkpoint_query_mismatch",
+      "signature_key_id": null,
+      "total_filtered": null
+    },
+    {
+      "actor": {
+        "id": "ops-admin",
+        "type": "partner"
+      },
+      "attestation_after": null,
+      "attestation_chain_hash": null,
+      "checkpoint_after": null,
+      "checkpoint_hash": null,
+      "entries_count": null,
+      "error_code": "CONSTRAINT_VIOLATION",
+      "export_hash": null,
+      "next_cursor": null,
+      "ok": false,
+      "op": "partnerProgram.vault_export.rollout_policy_audit.export",
+      "policy_version": null,
+      "reason_code": "checkpoint_expired",
+      "signature_key_id": null,
+      "total_filtered": null
+    },
+    {
+      "export_ref": "audit_page1",
+      "op": "partnerProgram.vault_export.rollout_policy_audit.export.verify_tampered",
+      "verify_error": "hash_mismatch",
+      "verify_ok": false
+    }
+  ]
+}

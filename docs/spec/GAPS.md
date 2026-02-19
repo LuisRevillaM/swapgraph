@@ -143,7 +143,8 @@ Each item here must become at least one of:
 - Resolved (fixtures-first, partial): M55 (partner-program/commercial scaffold for vault exports: deterministic entitlement gating, per-day quota controls, and partner usage metadata projection on successful export responses).
 - Resolved (fixtures-first, partial): M56 (partner-program governance read surface + rollout policy hooks: allowlist + minimum-plan gates with deterministic reason codes and self-serve entitlement/quota visibility).
 - Resolved (fixtures-first, partial): M57 (partner-program admin-governed rollout policy mutation/read surfaces + deterministic policy-change audit entries + signed rollout-policy audit export).
-- Remaining: rollout-policy export continuity/retention hardening and broader commercial governance controls.
+- Resolved (fixtures-first, partial): M58 (rollout-policy audit export continuity + retention hardening: signed attestation/checkpoint chaining, stateful continuation locks, deterministic checkpoint-expiry failures, and opportunistic checkpoint GC).
+- Remaining: broader commercial governance controls and operator policy overlays.
 
 ---
 

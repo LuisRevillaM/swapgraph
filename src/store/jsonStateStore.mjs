@@ -28,7 +28,8 @@ export class JsonStateStore {
       partner_program: {},
       partner_program_usage: {},
       partner_program_rollout_policy: {},
-      partner_program_rollout_policy_audit: []
+      partner_program_rollout_policy_audit: [],
+      partner_program_rollout_policy_export_checkpoints: {}
     };
   }
 
@@ -53,7 +54,8 @@ export class JsonStateStore {
         partner_program: {},
         partner_program_usage: {},
         partner_program_rollout_policy: {},
-        partner_program_rollout_policy_audit: []
+        partner_program_rollout_policy_audit: [],
+        partner_program_rollout_policy_export_checkpoints: {}
       };
       return;
     }
@@ -80,6 +82,7 @@ export class JsonStateStore {
     this.state.partner_program_usage ||= {};
     this.state.partner_program_rollout_policy ||= {};
     this.state.partner_program_rollout_policy_audit ||= [];
+    this.state.partner_program_rollout_policy_export_checkpoints ||= {};
   }
 
   save() {

@@ -68,9 +68,10 @@ Last updated: 2026-02-19
 - M55: ✅ partner-program/commercial scaffold for vault export rollout (`SETTLEMENT_VAULT_EXPORT_PARTNER_PROGRAM_ENFORCE`, entitlement gating, daily quota enforcement, and partner usage metadata projection) (fixtures-first)
 - M56: ✅ partner program governance surfaces (`partnerProgram.vault_export.get` read API + rollout policy hooks: allowlist + minimum plan + deterministic governance reason codes) (fixtures-first)
 - M57: ✅ partner program admin-governed rollout mutation surfaces (`rollout_policy.get`/`rollout_policy.upsert` + signed `rollout_policy_audit.export` + idempotent admin writes + deterministic audit entries) (fixtures-first)
+- M58: ✅ rollout-policy audit continuity/retention hardening (signed attestation/checkpoint chain, stateful continuation validation, and deterministic checkpoint expiry controls) (fixtures-first)
 
 ## Next
-- M58: rollout-policy continuity/retention hardening for signed policy-audit exports (attestation/checkpoint chain + deterministic expiry controls) (fixtures-first)
+- M59: rollout-policy governance controls hardening (policy freeze windows + deterministic maintenance-mode gates + signed admin-action audit overlays) (fixtures-first)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.

@@ -82,6 +82,10 @@ Settlement endpoints:
 - `GET /partner-program/vault-export/rollout-policy-audit/export`
   - partner-admin signed export of rollout policy-change audit entries (`export_hash` + detached signature)
   - supports filter/pagination (`from_iso`, `to_iso`, `limit`, `cursor_after`)
+  - paginated continuation requires `attestation_after` when `cursor_after` is provided
+  - when checkpoint mode is enabled (`PARTNER_PROGRAM_ROLLOUT_POLICY_EXPORT_CHECKPOINT_ENFORCE=1`), continuation also requires `checkpoint_after`
+  - checkpoint anchors have retention controls (`PARTNER_PROGRAM_ROLLOUT_POLICY_EXPORT_CHECKPOINT_RETENTION_DAYS`) and expired anchors are rejected
+  - paginated responses include signed `attestation`, optional signed `checkpoint`, and optional `next_cursor`
 
 Receipt endpoints:
 - `GET /receipts/{cycle_id}`

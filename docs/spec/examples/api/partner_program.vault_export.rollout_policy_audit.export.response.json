@@ -1,9 +1,11 @@
 {
   "correlation_id": "corr_partner_program_vault_export_rollout_policy_audit_export",
-  "exported_at": "2026-02-19T06:45:00Z",
+  "exported_at": "2026-02-19T07:02:00Z",
   "query": {
-    "from_iso": "2026-02-19T06:00:00Z",
-    "limit": 1
+    "from_iso": "2026-02-19T07:00:00Z",
+    "limit": 1,
+    "now_iso": "2026-02-19T07:02:00Z",
+    "exported_at_iso": "2026-02-19T07:02:00Z"
   },
   "policy": {
     "policy_key": "vault_reconciliation_export",
@@ -12,7 +14,7 @@
     "allowlist_enforced": true,
     "min_plan_id": "pro",
     "version": 2,
-    "updated_at": "2026-02-19T06:40:00Z",
+    "updated_at": "2026-02-19T07:01:00Z",
     "updated_by": {
       "type": "partner",
       "id": "ops-admin"
@@ -23,7 +25,7 @@
     {
       "audit_id": "rollout_policy_000001",
       "operation_id": "partnerProgram.vault_export.rollout_policy.upsert",
-      "occurred_at": "2026-02-19T06:30:00Z",
+      "occurred_at": "2026-02-19T07:00:00Z",
       "actor": {
         "type": "partner",
         "id": "ops-admin"
@@ -45,10 +47,25 @@
     }
   ],
   "next_cursor": "rollout_policy_000001",
-  "export_hash": "9c0b18d1724b0c7f9564fb05ecf71a0252ad4a5d8be6b47f3597a98a8f23c6d5",
+  "attestation": {
+    "cursor_after": null,
+    "next_cursor": "rollout_policy_000001",
+    "attestation_after": null,
+    "page_hash": "545c4d73120aa4aa301003071a04992cbd98e3587a673d316b18828835790249",
+    "chain_hash": "81c0be3d6425630c68f81dda16e821b12b515eb24a2ac222e9a9963be9615ea4"
+  },
+  "checkpoint": {
+    "checkpoint_after": null,
+    "attestation_chain_hash": "81c0be3d6425630c68f81dda16e821b12b515eb24a2ac222e9a9963be9615ea4",
+    "next_cursor": "rollout_policy_000001",
+    "entries_count": 1,
+    "total_filtered": 2,
+    "checkpoint_hash": "79e6b375766fa218655705468b4b576d97db356c344e361dd753bd68dc2cd71c"
+  },
+  "export_hash": "545c4d73120aa4aa301003071a04992cbd98e3587a673d316b18828835790249",
   "signature": {
     "key_id": "dev-pi-k1",
     "alg": "ed25519",
-    "sig": "MEQCIFAKE"
+    "sig": "MEYCIQCoR+6jO9Dj31m2s9t85x9V4fq+3x0W8wOjTGCj4Fh6oQIhAKx6h7aVrz6hK2LeY8Ex7vOUjS0Fr9xW+tJQh0h6WODv"
   }
 }
