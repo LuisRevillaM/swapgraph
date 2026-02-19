@@ -58,6 +58,14 @@
       "schema": "SettlementStartResponse.schema.json"
     },
     {
+      "file": "settlement.start.vault.request.json",
+      "schema": "SettlementStartRequest.schema.json"
+    },
+    {
+      "file": "settlement.start.vault.response.json",
+      "schema": "SettlementStartResponse.schema.json"
+    },
+    {
       "file": "settlement.deposit_confirmed.request.json",
       "schema": "SettlementDepositConfirmedRequest.schema.json"
     },

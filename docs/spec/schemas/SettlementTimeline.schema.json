@@ -42,8 +42,11 @@
           "status": { "type": "string", "enum": ["pending", "deposited", "released", "refunded"] },
 
           "deposit_deadline_at": { "type": "string", "format": "date-time" },
+          "deposit_mode": { "type": "string", "enum": ["deposit", "vault"] },
           "deposit_ref": { "type": "string" },
           "deposited_at": { "type": "string", "format": "date-time" },
+          "vault_holding_id": { "type": "string", "minLength": 1 },
+          "vault_reservation_id": { "type": "string", "minLength": 1 },
 
           "release_ref": { "type": "string" },
           "released_at": { "type": "string", "format": "date-time" },

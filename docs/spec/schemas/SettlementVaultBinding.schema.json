@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/SettlementVaultBinding.schema.json",
+  "title": "SettlementVaultBinding",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["intent_id", "holding_id", "reservation_id"],
+  "properties": {
+    "intent_id": { "type": "string", "minLength": 1 },
+    "holding_id": { "type": "string", "minLength": 1 },
+    "reservation_id": { "type": "string", "minLength": 1 }
+  }
+}

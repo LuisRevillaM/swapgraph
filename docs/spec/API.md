@@ -52,7 +52,11 @@ Commit endpoints:
 
 Settlement endpoints:
 - `POST /settlement/{cycle_id}/start`
+  - accepts required `deposit_deadline_at` and optional `vault_bindings[]` (`intent_id`, `holding_id`, `reservation_id`)
+  - vault-bound legs are marked deposited at start; if all legs are vault-bound, timeline starts at `escrow.ready`
+  - mixed cycles are supported (vault-bound + manual deposit legs)
 - `POST /settlement/{cycle_id}/deposit-confirmed`
+  - manual deposits only; vault-bound legs reject manual deposit confirmation (`vault_backed_leg`)
 - `POST /settlement/{cycle_id}/begin-execution`
 - `POST /settlement/{cycle_id}/complete`
 - `POST /settlement/{cycle_id}/expire-deposit-window`

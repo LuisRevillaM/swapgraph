@@ -1,0 +1,20 @@
+{
+  "deposit_deadline_at": "2026-02-17T00:00:00Z",
+  "vault_bindings": [
+    {
+      "intent_id": "intent_a",
+      "holding_id": "hold_a",
+      "reservation_id": "rsv_a"
+    },
+    {
+      "intent_id": "intent_b",
+      "holding_id": "hold_b",
+      "reservation_id": "rsv_b"
+    },
+    {
+      "intent_id": "intent_c",
+      "holding_id": "hold_c",
+      "reservation_id": "rsv_c"
+    }
+  ]
+}

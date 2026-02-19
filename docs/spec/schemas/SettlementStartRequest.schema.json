@@ -6,6 +6,11 @@
   "additionalProperties": false,
   "required": ["deposit_deadline_at"],
   "properties": {
-    "deposit_deadline_at": { "type": "string", "format": "date-time" }
+    "deposit_deadline_at": { "type": "string", "format": "date-time" },
+    "vault_bindings": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "SettlementVaultBinding.schema.json" }
+    }
   }
 }

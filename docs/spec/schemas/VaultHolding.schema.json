@@ -26,6 +26,7 @@
     "deposited_at": { "type": "string", "format": "date-time" },
     "reservation_id": { "type": ["string", "null"], "minLength": 1 },
     "withdrawn_at": { "type": ["string", "null"], "format": "date-time" },
+    "settlement_cycle_id": { "type": ["string", "null"], "minLength": 1 },
     "updated_at": { "type": "string", "format": "date-time" }
   }
 }

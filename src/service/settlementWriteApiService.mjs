@@ -31,7 +31,8 @@ export class SettlementWriteApiService {
     }
 
     const depositDeadlineAt = requestBody?.deposit_deadline_at;
-    const r = this.startSvc.start({ actor, cycleId, occurredAt, depositDeadlineAt });
+    const vaultBindings = requestBody?.vault_bindings;
+    const r = this.startSvc.start({ actor, cycleId, occurredAt, depositDeadlineAt, vaultBindings });
 
     if (!r.ok) {
       return {

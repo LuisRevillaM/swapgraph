@@ -1,0 +1,36 @@
+name: M50
+commands:
+  - cmd: "npm run verify:m50"
+artifacts:
+  - artifact: "docs/prd/M50.md"
+  - artifact: "docs/STATUS.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/GAPS.md"
+
+  - artifact: "docs/spec/schemas/SettlementVaultBinding.schema.json"
+  - artifact: "docs/spec/schemas/SettlementStartRequest.schema.json"
+  - artifact: "docs/spec/schemas/SettlementTimeline.schema.json"
+  - artifact: "docs/spec/schemas/VaultHolding.schema.json"
+
+  - artifact: "src/service/settlementStartService.mjs"
+  - artifact: "src/service/settlementWriteApiService.mjs"
+  - artifact: "src/settlement/settlementService.mjs"
+  - artifact: "src/vault/vaultLifecycleService.mjs"
+
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+  - artifact: "docs/spec/examples/api/settlement.start.vault.request.json"
+  - artifact: "docs/spec/examples/api/settlement.start.vault.response.json"
+
+  - artifact: "scripts/run-m50-vault-settlement-integration-scenario.mjs"
+  - artifact: "fixtures/vault/m50_scenario.json"
+  - artifact: "fixtures/vault/m50_expected.json"
+
+  - artifact: "verify/m50.sh"
+
+  - artifact: "artifacts/milestones/M50/latest/commands.log"
+  - artifact: "artifacts/milestones/M50/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M50/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M50/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M50/latest/vault_settlement_integration_output.json"
+  - artifact: "artifacts/milestones/M50/latest/store.json"
+  - artifact: "artifacts/milestones/M50/latest/assertions.json"

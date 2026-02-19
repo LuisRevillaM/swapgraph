@@ -135,7 +135,8 @@ Each item here must become at least one of:
 - Resolved (fixtures-first, partial): M47 (vault holding lifecycle scaffold: deposit/reserve/release/withdraw state-machine + deterministic verifier).
 - Resolved (fixtures-first, partial): M48 (vault custody publication/read scaffold: snapshot catalog pagination + inclusion-proof retrieval + deterministic failure semantics).
 - Resolved (fixtures-first, partial): M49 (vault API transport/auth-scope surface wiring: manifest endpoints + `vault:read`/`vault:write` scopes + manifest-driven service auth enforcement + deterministic auth-surface verifier).
-- Remaining: vault/settlement integration and partner-program/commercial layers.
+- Resolved (fixtures-first, partial): M50 (vault/settlement integration contract: start-time vault binding validation, mixed deposit modes, instant-ready all-vault cycles, and deterministic terminal vault-holding reconciliation on complete/fail).
+- Remaining: partner-program/commercial layers.
 
 ---
 

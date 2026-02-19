@@ -78,6 +78,7 @@ function makeVaultHolding({ holding, ownerActor, nowIso }) {
     deposited_at: holding.deposited_at ?? nowIso,
     reservation_id: null,
     withdrawn_at: null,
+    settlement_cycle_id: null,
     updated_at: nowIso
   };
 }

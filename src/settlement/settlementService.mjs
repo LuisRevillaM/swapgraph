@@ -9,6 +9,250 @@ function actorKey(actor) {
   return `${actor.type}:${actor.id}`;
 }
 
+function assetKey(asset) {
+  return `${asset?.platform ?? ''}:${asset?.asset_id ?? ''}`;
+}
+
+function ensureVaultState(store) {
+  store.state.vault_holdings ||= {};
+  store.state.vault_events ||= [];
+}
+
+function applyVaultBindingsToTimeline({ store, proposal, timeline, vaultBindings, occurredAt }) {
+  if (!Array.isArray(vaultBindings) || vaultBindings.length === 0) {
+    return { ok: true, applied_count: 0 };
+  }
+
+  ensureVaultState(store);
+
+  const legsByIntent = new Map((timeline.legs ?? []).map(leg => [leg.intent_id, leg]));
+  const seenIntentIds = new Set();
+  const seenHoldingIds = new Set();
+  const planned = [];
+
+  for (const binding of vaultBindings) {
+    const intentId = binding?.intent_id;
+    const holdingId = binding?.holding_id;
+    const reservationId = binding?.reservation_id;
+
+    if (!intentId || !holdingId || !reservationId) {
+      return {
+        ok: false,
+        error: {
+          code: 'SCHEMA_INVALID',
+          message: 'vault binding payload is invalid',
+          details: {
+            cycle_id: proposal.id,
+            reason_code: 'vault_binding_invalid',
+            binding
+          }
+        }
+      };
+    }
+
+    const leg = legsByIntent.get(intentId);
+    if (!leg) {
+      return {
+        ok: false,
+        error: {
+          code: 'CONSTRAINT_VIOLATION',
+          message: 'vault binding intent is not in cycle',
+          details: {
+            cycle_id: proposal.id,
+            reason_code: 'vault_binding_intent_not_in_cycle',
+            intent_id: intentId
+          }
+        }
+      };
+    }
+
+    if (seenIntentIds.has(intentId)) {
+      return {
+        ok: false,
+        error: {
+          code: 'CONSTRAINT_VIOLATION',
+          message: 'duplicate vault binding for intent',
+          details: {
+            cycle_id: proposal.id,
+            reason_code: 'vault_binding_duplicate_intent',
+            intent_id: intentId
+          }
+        }
+      };
+    }
+
+    if (seenHoldingIds.has(holdingId)) {
+      return {
+        ok: false,
+        error: {
+          code: 'CONSTRAINT_VIOLATION',
+          message: 'duplicate vault binding for holding',
+          details: {
+            cycle_id: proposal.id,
+            reason_code: 'vault_binding_duplicate_holding',
+            holding_id: holdingId
+          }
+        }
+      };
+    }
+
+    const holding = store.state.vault_holdings[holdingId] ?? null;
+    if (!holding) {
+      return {
+        ok: false,
+        error: {
+          code: 'NOT_FOUND',
+          message: 'vault holding not found',
+          details: {
+            cycle_id: proposal.id,
+            reason_code: 'vault_holding_not_found',
+            intent_id: intentId,
+            holding_id: holdingId
+          }
+        }
+      };
+    }
+
+    if (holding.status !== 'reserved') {
+      return {
+        ok: false,
+        error: {
+          code: 'CONSTRAINT_VIOLATION',
+          message: 'vault holding is not reserved',
+          details: {
+            cycle_id: proposal.id,
+            reason_code: 'vault_holding_not_reserved',
+            intent_id: intentId,
+            holding_id: holdingId,
+            status: holding.status
+          }
+        }
+      };
+    }
+
+    if (holding.reservation_id !== reservationId) {
+      return {
+        ok: false,
+        error: {
+          code: 'CONSTRAINT_VIOLATION',
+          message: 'vault reservation does not match holding reservation',
+          details: {
+            cycle_id: proposal.id,
+            reason_code: 'vault_reservation_mismatch',
+            intent_id: intentId,
+            holding_id: holdingId,
+            expected_reservation_id: holding.reservation_id,
+            reservation_id: reservationId
+          }
+        }
+      };
+    }
+
+    if (actorKey(holding.owner_actor) !== actorKey(leg.from_actor)) {
+      return {
+        ok: false,
+        error: {
+          code: 'FORBIDDEN',
+          message: 'vault holding owner does not match cycle leg actor',
+          details: {
+            cycle_id: proposal.id,
+            reason_code: 'vault_owner_mismatch',
+            intent_id: intentId,
+            holding_id: holdingId,
+            owner_actor: holding.owner_actor,
+            expected_actor: leg.from_actor
+          }
+        }
+      };
+    }
+
+    const legAssetKeys = new Set((leg.assets ?? []).map(assetKey));
+    if (!legAssetKeys.has(assetKey(holding.asset))) {
+      return {
+        ok: false,
+        error: {
+          code: 'CONSTRAINT_VIOLATION',
+          message: 'vault holding asset does not match leg assets',
+          details: {
+            cycle_id: proposal.id,
+            reason_code: 'vault_binding_asset_mismatch',
+            intent_id: intentId,
+            holding_id: holdingId,
+            holding_asset: holding.asset,
+            leg_assets: leg.assets
+          }
+        }
+      };
+    }
+
+    const existingSettlementCycleId = holding.settlement_cycle_id ?? null;
+    if (existingSettlementCycleId && existingSettlementCycleId !== proposal.id) {
+      return {
+        ok: false,
+        error: {
+          code: 'CONFLICT',
+          message: 'vault holding is already bound to another settlement cycle',
+          details: {
+            cycle_id: proposal.id,
+            reason_code: 'vault_holding_in_settlement',
+            intent_id: intentId,
+            holding_id: holdingId,
+            holding_cycle_id: existingSettlementCycleId
+          }
+        }
+      };
+    }
+
+    seenIntentIds.add(intentId);
+    seenHoldingIds.add(holdingId);
+    planned.push({ binding, leg, holding });
+  }
+
+  for (const { binding, leg, holding } of planned) {
+    leg.status = 'deposited';
+    leg.deposit_mode = 'vault';
+    leg.deposit_ref = `vault:${holding.holding_id}:${binding.reservation_id}`;
+    leg.deposited_at = occurredAt;
+    leg.vault_holding_id = holding.holding_id;
+    leg.vault_reservation_id = binding.reservation_id;
+
+    holding.settlement_cycle_id = proposal.id;
+    holding.updated_at = occurredAt;
+  }
+
+  return { ok: true, applied_count: planned.length };
+}
+
+function settleVaultBindingsForTerminalState({ store, timeline, finalState, occurredAt }) {
+  if (!timeline?.cycle_id) return;
+  if (!['completed', 'failed'].includes(finalState)) return;
+
+  ensureVaultState(store);
+
+  for (const leg of timeline.legs ?? []) {
+    const holdingId = leg?.vault_holding_id;
+    const reservationId = leg?.vault_reservation_id;
+    if (!holdingId || !reservationId) continue;
+
+    const holding = store.state.vault_holdings[holdingId] ?? null;
+    if (!holding) continue;
+
+    if ((holding.settlement_cycle_id ?? null) && holding.settlement_cycle_id !== timeline.cycle_id) continue;
+    if ((holding.reservation_id ?? null) !== reservationId) continue;
+
+    if (finalState === 'completed') {
+      holding.status = 'withdrawn';
+      holding.withdrawn_at = occurredAt;
+    } else if (finalState === 'failed') {
+      holding.status = 'available';
+    }
+
+    holding.reservation_id = null;
+    holding.settlement_cycle_id = null;
+    holding.updated_at = occurredAt;
+  }
+}
+
 function stableReceiptId({ cycleId, finalState }) {
   const h = crypto.createHash('sha256').update(`${cycleId}|${finalState}`).digest('hex').slice(0, 12);
   return `receipt_${h}`;
@@ -165,7 +409,7 @@ export class SettlementService {
     this.store = store;
   }
 
-  start({ actor, proposal, occurredAt, depositDeadlineAt }) {
+  start({ actor, proposal, occurredAt, depositDeadlineAt, vaultBindings }) {
     if (!depositDeadlineAt) throw new Error('depositDeadlineAt is required');
 
     const commitId = commitIdForProposalId(proposal.id);
@@ -204,6 +448,21 @@ export class SettlementService {
       updated_at: occurredAt
     };
 
+    const vaultBindingResult = applyVaultBindingsToTimeline({
+      store: this.store,
+      proposal,
+      timeline,
+      vaultBindings,
+      occurredAt
+    });
+    if (!vaultBindingResult.ok) return vaultBindingResult;
+
+    const allDeposited = (timeline.legs ?? []).every(leg => leg.status === 'deposited');
+    if (allDeposited) {
+      timeline.state = 'escrow.ready';
+      timeline.updated_at = occurredAt;
+    }
+
     this.store.state.timelines[proposal.id] = timeline;
 
     // accepted -> escrow.pending
@@ -215,12 +474,22 @@ export class SettlementService {
       occurredAt
     }));
 
-    this.store.state.events.push(buildSettlementDepositRequiredEvent({
-      cycleId: proposal.id,
-      depositDeadlineAt,
-      actor,
-      occurredAt
-    }));
+    if (!allDeposited) {
+      this.store.state.events.push(buildSettlementDepositRequiredEvent({
+        cycleId: proposal.id,
+        depositDeadlineAt,
+        actor,
+        occurredAt
+      }));
+    } else {
+      this.store.state.events.push(buildCycleStateChangedEvent({
+        cycleId: proposal.id,
+        fromState: 'escrow.pending',
+        toState: 'escrow.ready',
+        actor,
+        occurredAt
+      }));
+    }
 
     return { ok: true, timeline, replayed: false };
   }
@@ -234,6 +503,23 @@ export class SettlementService {
     const leg = (timeline.legs ?? []).find(l => actorKey(l.from_actor) === actorKey(actor));
     if (!leg) {
       return { ok: false, error: { code: 'CONSTRAINT_VIOLATION', message: 'actor is not a depositor in this cycle', details: { cycle_id: cycleId, actor } } };
+    }
+
+    if (leg.deposit_mode === 'vault') {
+      return {
+        ok: false,
+        error: {
+          code: 'CONFLICT',
+          message: 'vault-backed leg does not accept manual deposit confirmation',
+          details: {
+            cycle_id: cycleId,
+            intent_id: leg.intent_id,
+            reason_code: 'vault_backed_leg',
+            vault_holding_id: leg.vault_holding_id,
+            vault_reservation_id: leg.vault_reservation_id
+          }
+        }
+      };
     }
 
     if (leg.status === 'pending') {
@@ -335,6 +621,13 @@ export class SettlementService {
       }
     }
 
+    settleVaultBindingsForTerminalState({
+      store: this.store,
+      timeline,
+      finalState: 'completed',
+      occurredAt
+    });
+
     const assetIds = (timeline.legs ?? [])
       .flatMap(l => (l.assets ?? []).map(a => a.asset_id))
       .filter(Boolean);
@@ -410,6 +703,13 @@ export class SettlementService {
         this.store.state.events.push(buildIntentUnreservedEvent({ intentId, cycleId, reason: 'failed', actor, occurredAt: nowIso }));
       }
     }
+
+    settleVaultBindingsForTerminalState({
+      store: this.store,
+      timeline,
+      finalState: 'failed',
+      occurredAt: nowIso
+    });
 
     const assetIds = (timeline.legs ?? [])
       .flatMap(l => (l.assets ?? []).map(a => a.asset_id))

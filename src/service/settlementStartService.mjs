@@ -26,9 +26,9 @@ export class SettlementStartService {
   /**
    * Start settlement for a cycle.
    *
-   * @param {{ actor:any, cycleId:string, occurredAt:string, depositDeadlineAt:string }} params
+   * @param {{ actor:any, cycleId:string, occurredAt:string, depositDeadlineAt:string, vaultBindings?:Array<object> }} params
    */
-  start({ actor, cycleId, occurredAt, depositDeadlineAt }) {
+  start({ actor, cycleId, occurredAt, depositDeadlineAt, vaultBindings }) {
     if (!cycleId) throw new Error('cycleId is required');
 
     if (!isPartner(actor)) {
@@ -62,7 +62,7 @@ export class SettlementStartService {
     }
 
     // Delegate the actual timeline creation + cycle tenancy enforcement.
-    const r = this.settlementSvc.start({ actor, proposal, occurredAt, depositDeadlineAt });
+    const r = this.settlementSvc.start({ actor, proposal, occurredAt, depositDeadlineAt, vaultBindings });
     if (!r.ok) {
       // Normalize to {ok:false,error:{code,message,details}}.
       return { ok: false, error: r.error };
