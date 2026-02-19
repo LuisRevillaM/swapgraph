@@ -150,7 +150,8 @@ Each item here must become at least one of:
 - Resolved (fixtures-first, partial): M62 (rollout diagnostics export continuity + retention hardening: signed attestation/checkpoint chaining, stateful checkpoint continuation validation, deterministic checkpoint mismatch/expiry reason codes, and diagnostics checkpoint retention controls).
 - Resolved (fixtures-first, partial): M63 (rollout diagnostics lifecycle hardening: signed lifecycle telemetry + deterministic stale-control alerts + threshold-validated diagnostics checks with continuity compatibility).
 - Resolved (fixtures-first, partial): M64 (rollout diagnostics automation-hints hardening: signed operator automation planning payloads + bounded action-queue controls + deterministic automation parameter validation).
-- Remaining: broader commercial governance controls beyond diagnostics/audit/automation-hints lifecycle and continuity hardening.
+- Resolved (fixtures-first, partial): M65 (rollout diagnostics automation execution-template hardening: signed deterministic `action_requests[]` templates + idempotency scope metadata + automation/runbook coupling guardrail).
+- Remaining: broader commercial governance controls beyond diagnostics/audit/automation execution-template lifecycle and continuity hardening.
 
 ---
 

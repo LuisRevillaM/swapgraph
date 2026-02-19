@@ -370,9 +370,11 @@ function buildRolloutPolicyDiagnosticsAlerts({
   return out;
 }
 
-function buildRolloutPolicyDiagnosticsAutomationHints({ recommendedActions, alerts, maxActions }) {
+function buildRolloutPolicyDiagnosticsAutomationHints({ recommendedActions, alerts, runbookHooks, maxActions, policyVersion }) {
   const queue = [];
+  const actionRequests = [];
   const seen = new Set();
+  const runbookHookIndex = new Map((runbookHooks ?? []).map(hook => [hook?.hook_id, hook]));
 
   for (const action of recommendedActions ?? []) {
     const hookId = normalizeOptionalString(action?.runbook_hook_id);
@@ -390,6 +392,20 @@ function buildRolloutPolicyDiagnosticsAutomationHints({ recommendedActions, aler
       priority
     });
 
+    const hookTemplate = runbookHookIndex.get(hookId);
+    const step = queue.length;
+    const version = Number.isFinite(policyVersion) ? Number(policyVersion) : 0;
+
+    actionRequests.push({
+      step,
+      hook_id: hookId,
+      operation_id: normalizeOptionalString(hookTemplate?.operation_id) ?? 'partnerProgram.vault_export.rollout_policy.admin_action',
+      idempotency_key_template: `diag_auto_v${version}_${String(step).padStart(2, '0')}_${hookId}`,
+      request: {
+        action: clone(hookTemplate?.action ?? { action_type: 'observe' })
+      }
+    });
+
     if (queue.length >= maxActions) break;
   }
 
@@ -397,8 +413,10 @@ function buildRolloutPolicyDiagnosticsAutomationHints({ recommendedActions, aler
     requires_operator_confirmation: queue.length > 0,
     source_alert_codes: (alerts ?? []).map(alert => alert?.code).filter(x => typeof x === 'string' && x),
     action_queue: queue,
+    action_requests: actionRequests,
     safety: {
       idempotency_required: true,
+      idempotency_scope: 'partnerProgram.vault_export.rollout_policy.admin_action',
       max_actions_per_run: maxActions
     }
   };
@@ -1024,6 +1042,18 @@ export class PartnerProgramGovernanceService {
     const includeRunbookHooks = parseOptionalBoolean(query?.include_runbook_hooks) !== false;
     const includeAutomationHints = parseOptionalBoolean(query?.include_automation_hints) === true;
 
+    if (includeAutomationHints && !includeRunbookHooks) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'automation hints require runbook hooks in diagnostics export', {
+          reason_code: 'partner_rollout_diagnostics_automation_requires_runbook_hooks',
+          field: 'include_runbook_hooks',
+          include_automation_hints: true,
+          include_runbook_hooks: false
+        })
+      };
+    }
+
     const automationMaxActionsParsed = normalizeDiagnosticsAutomationMaxActions({
       value: query?.automation_max_actions,
       defaultValue: 2
@@ -1192,7 +1222,9 @@ export class PartnerProgramGovernanceService {
       ? buildRolloutPolicyDiagnosticsAutomationHints({
           recommendedActions,
           alerts,
-          maxActions: automationMaxActions
+          runbookHooks,
+          maxActions: automationMaxActions,
+          policyVersion: policyView?.version ?? 0
         })
       : null;
 

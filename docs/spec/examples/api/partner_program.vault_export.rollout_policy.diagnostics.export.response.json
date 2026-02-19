@@ -90,8 +90,35 @@
         "priority": "high"
       }
     ],
+    "action_requests": [
+      {
+        "step": 1,
+        "hook_id": "disable_maintenance_mode",
+        "operation_id": "partnerProgram.vault_export.rollout_policy.admin_action",
+        "idempotency_key_template": "diag_auto_v12_01_disable_maintenance_mode",
+        "request": {
+          "action": {
+            "action_type": "set_maintenance_mode",
+            "maintenance_mode_enabled": false
+          }
+        }
+      },
+      {
+        "step": 2,
+        "hook_id": "clear_freeze_window",
+        "operation_id": "partnerProgram.vault_export.rollout_policy.admin_action",
+        "idempotency_key_template": "diag_auto_v12_02_clear_freeze_window",
+        "request": {
+          "action": {
+            "action_type": "set_freeze_window",
+            "freeze_until": null
+          }
+        }
+      }
+    ],
     "safety": {
       "idempotency_required": true,
+      "idempotency_scope": "partnerProgram.vault_export.rollout_policy.admin_action",
       "max_actions_per_run": 2
     }
   },

@@ -1147,14 +1147,53 @@ function normalizePartnerProgramRolloutPolicyDiagnosticsAutomationHints(automati
       }))
     : [];
 
+  const actionRequests = Array.isArray(automationHints.action_requests)
+    ? automationHints.action_requests.map(request => {
+        const step = Number.parseInt(String(request?.step ?? ''), 10);
+
+        const action = request?.request?.action && typeof request.request.action === 'object' && !Array.isArray(request.request.action)
+          ? {
+              action_type: typeof request.request.action.action_type === 'string' ? request.request.action.action_type : null,
+              maintenance_mode_enabled: typeof request.request.action.maintenance_mode_enabled === 'boolean'
+                ? request.request.action.maintenance_mode_enabled
+                : undefined,
+              maintenance_reason_code: typeof request.request.action.maintenance_reason_code === 'string' && request.request.action.maintenance_reason_code.trim()
+                ? request.request.action.maintenance_reason_code.trim()
+                : undefined,
+              freeze_until: typeof request.request.action.freeze_until === 'string' && request.request.action.freeze_until.trim()
+                ? request.request.action.freeze_until.trim()
+                : undefined,
+              freeze_reason_code: typeof request.request.action.freeze_reason_code === 'string' && request.request.action.freeze_reason_code.trim()
+                ? request.request.action.freeze_reason_code.trim()
+                : undefined
+            }
+          : { action_type: null };
+
+        return {
+          step: Number.isFinite(step) && step > 0 ? step : null,
+          hook_id: typeof request?.hook_id === 'string' ? request.hook_id : null,
+          operation_id: typeof request?.operation_id === 'string' ? request.operation_id : null,
+          idempotency_key_template: typeof request?.idempotency_key_template === 'string' ? request.idempotency_key_template : null,
+          request: {
+            action: Object.fromEntries(Object.entries(action).filter(([, v]) => v !== undefined))
+          }
+        };
+      })
+    : [];
+
   const maxActionsPerRun = Number.parseInt(String(automationHints?.safety?.max_actions_per_run ?? ''), 10);
+  const idempotencyScope = typeof automationHints?.safety?.idempotency_scope === 'string' && automationHints.safety.idempotency_scope.trim()
+    ? automationHints.safety.idempotency_scope.trim()
+    : 'partnerProgram.vault_export.rollout_policy.admin_action';
 
   return {
     requires_operator_confirmation: automationHints.requires_operator_confirmation === true,
     source_alert_codes: sourceAlertCodes,
     action_queue: actionQueue,
+    action_requests: actionRequests,
     safety: {
       idempotency_required: automationHints?.safety?.idempotency_required !== false,
+      idempotency_scope: idempotencyScope,
       max_actions_per_run: Number.isFinite(maxActionsPerRun) && maxActionsPerRun > 0 ? maxActionsPerRun : 1
     }
   };

@@ -75,9 +75,10 @@ Last updated: 2026-02-19
 - M62: ✅ commercial governance diagnostics continuity hardening (signed diagnostics attestation/checkpoint chaining + stateful continuation locks + deterministic checkpoint expiry controls + compact diagnostics mode) (fixtures-first)
 - M63: ✅ commercial governance diagnostics lifecycle hardening (signed lifecycle telemetry + stale-control alerts + threshold-validated diagnostics policy checks with continuity compatibility) (fixtures-first)
 - M64: ✅ commercial governance diagnostics operator automation hints hardening (signed automation planning hints + bounded action queues + deterministic automation parameter validation with continuity/signature coverage) (fixtures-first)
+- M65: ✅ commercial governance diagnostics automation execution-template hardening (signed `automation_hints.action_requests[]`, deterministic idempotency-scope metadata, and strict automation+runbook context coupling) (fixtures-first)
 
 ## Next
-- M65: commercial governance diagnostics automation attestation-chain follow-up (fixtures-first)
+- M66: commercial governance diagnostics automation execution-proof follow-up (fixtures-first)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.

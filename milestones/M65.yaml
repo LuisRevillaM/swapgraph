@@ -1,0 +1,33 @@
+name: M65
+commands:
+  - cmd: "npm run verify:m65"
+artifacts:
+  - artifact: "docs/prd/M65.md"
+  - artifact: "docs/STATUS.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/ERRORS.md"
+  - artifact: "docs/spec/GAPS.md"
+
+  - artifact: "src/service/partnerProgramGovernanceService.mjs"
+  - artifact: "src/crypto/policyIntegritySigning.mjs"
+
+  - artifact: "docs/spec/api/manifest.v1.json"
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+  - artifact: "docs/spec/examples/api/partner_program.vault_export.rollout_policy.diagnostics.export.response.json"
+
+  - artifact: "docs/spec/schemas/PartnerProgramVaultExportRolloutPolicyDiagnosticsExportResponse.schema.json"
+
+  - artifact: "scripts/run-m65-rollout-diagnostics-automation-requests-scenario.mjs"
+  - artifact: "fixtures/vault/m65_scenario.json"
+  - artifact: "fixtures/vault/m65_expected.json"
+
+  - artifact: "milestones/M65.yaml"
+  - artifact: "verify/m65.sh"
+
+  - artifact: "artifacts/milestones/M65/latest/commands.log"
+  - artifact: "artifacts/milestones/M65/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M65/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M65/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M65/latest/rollout_diagnostics_automation_requests_output.json"
+  - artifact: "artifacts/milestones/M65/latest/store.json"
+  - artifact: "artifacts/milestones/M65/latest/assertions.json"

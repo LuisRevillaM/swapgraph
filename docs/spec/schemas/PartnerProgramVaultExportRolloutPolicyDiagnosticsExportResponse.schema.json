@@ -115,7 +115,7 @@
     "automation_hints": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["requires_operator_confirmation", "source_alert_codes", "action_queue", "safety"],
+      "required": ["requires_operator_confirmation", "source_alert_codes", "action_queue", "action_requests", "safety"],
       "properties": {
         "requires_operator_confirmation": { "type": "boolean" },
         "source_alert_codes": {
@@ -147,12 +147,58 @@
             }
           }
         },
+        "action_requests": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["step", "hook_id", "operation_id", "idempotency_key_template", "request"],
+            "properties": {
+              "step": { "type": "integer", "minimum": 1 },
+              "hook_id": {
+                "type": "string",
+                "enum": ["disable_maintenance_mode", "clear_freeze_window", "clear_controls", "observe_only"]
+              },
+              "operation_id": {
+                "type": "string",
+                "const": "partnerProgram.vault_export.rollout_policy.admin_action"
+              },
+              "idempotency_key_template": { "type": "string", "minLength": 1 },
+              "request": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["action"],
+                "properties": {
+                  "action": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["action_type"],
+                    "properties": {
+                      "action_type": {
+                        "type": "string",
+                        "enum": ["set_maintenance_mode", "set_freeze_window", "clear_controls", "observe"]
+                      },
+                      "maintenance_mode_enabled": { "type": "boolean" },
+                      "maintenance_reason_code": { "type": ["string", "null"], "minLength": 1 },
+                      "freeze_until": { "type": ["string", "null"], "format": "date-time" },
+                      "freeze_reason_code": { "type": ["string", "null"], "minLength": 1 }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "safety": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["idempotency_required", "max_actions_per_run"],
+          "required": ["idempotency_required", "idempotency_scope", "max_actions_per_run"],
           "properties": {
             "idempotency_required": { "type": "boolean" },
+            "idempotency_scope": {
+              "type": "string",
+              "const": "partnerProgram.vault_export.rollout_policy.admin_action"
+            },
             "max_actions_per_run": { "type": "integer", "minimum": 1, "maximum": 10 }
           }
         }
