@@ -78,9 +78,10 @@ Last updated: 2026-02-19
 - M65: ✅ commercial governance diagnostics automation execution-template hardening (signed `automation_hints.action_requests[]`, deterministic idempotency-scope metadata, and strict automation+runbook context coupling) (fixtures-first)
 - M66: ✅ commercial governance diagnostics automation plan-integrity hardening (signed deterministic `action_requests[].request_hash` + bundle-level `automation_hints.plan_hash` anchors for downstream execution-plan integrity checks) (fixtures-first)
 - M67: ✅ commercial governance diagnostics automation expected-effect hardening (signed deterministic `action_requests[].expected_effect` projections for per-step policy-control outcomes) (fixtures-first)
+- M68: ✅ commercial governance diagnostics automation execution-attestation hardening (signed deterministic `automation_hints.execution_attestation` anchors for projected run outcomes: pre/post policy version envelope, expected-effect hash chain, request-hash chain, and attestation hash) (fixtures-first)
 
 ## Next
-- M68: commercial governance diagnostics automation execution-result attestation follow-up (fixtures-first)
+- M69: commercial governance diagnostics automation attestation-link verification follow-up (fixtures-first)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.

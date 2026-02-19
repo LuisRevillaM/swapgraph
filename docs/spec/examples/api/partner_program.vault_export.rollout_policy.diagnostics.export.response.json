@@ -131,6 +131,14 @@
       }
     ],
     "plan_hash": "30fb85098dd7f7f9a835f29847825b861fca038fbf539ca47f9ff15b9e2a4985",
+    "execution_attestation": {
+      "policy_version_before": 12,
+      "policy_version_after_expected": 14,
+      "non_empty_action_plan": true,
+      "expected_effect_hash": "e36d2e1943a1b0315f5c8c9c8ca460ca6f46f2f0cb30a8397f0d80ff2b6cc913",
+      "request_hash_chain": "2dd310fbc9f4b5f92644ba3527d2878afef349399fefab95f85f1e4b74fef374",
+      "attestation_hash": "f1642d258840ea7aa9c07065408eeb7f0881512198f8cc20d89cd47418f23bf6"
+    },
     "safety": {
       "idempotency_required": true,
       "idempotency_scope": "partnerProgram.vault_export.rollout_policy.admin_action",

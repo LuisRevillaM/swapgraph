@@ -382,6 +382,7 @@ function buildRolloutPolicyDiagnosticsAutomationHints({
   const actionRequests = [];
   const seen = new Set();
   const runbookHookIndex = new Map((runbookHooks ?? []).map(hook => [hook?.hook_id, hook]));
+  const versionBefore = Number.isFinite(policyVersion) ? Number(policyVersion) : 0;
 
   const projectedControls = {
     maintenance_mode_enabled: policyControls?.maintenance_mode_enabled === true,
@@ -407,7 +408,6 @@ function buildRolloutPolicyDiagnosticsAutomationHints({
 
     const hookTemplate = runbookHookIndex.get(hookId);
     const step = queue.length;
-    const version = Number.isFinite(policyVersion) ? Number(policyVersion) : 0;
     const operationId = normalizeOptionalString(hookTemplate?.operation_id) ?? 'partnerProgram.vault_export.rollout_policy.admin_action';
     const actionTemplate = clone(hookTemplate?.action ?? { action_type: 'observe' });
     const actionType = normalizeOptionalString(actionTemplate?.action_type) ?? 'observe';
@@ -430,13 +430,13 @@ function buildRolloutPolicyDiagnosticsAutomationHints({
       step,
       hook_id: hookId,
       operation_id: operationId,
-      idempotency_key_template: `diag_auto_v${version}_${String(step).padStart(2, '0')}_${hookId}`,
+      idempotency_key_template: `diag_auto_v${versionBefore}_${String(step).padStart(2, '0')}_${hookId}`,
       request_hash: payloadHash({ operation_id: operationId, action: actionTemplate }),
       request: {
         action: actionTemplate
       },
       expected_effect: {
-        policy_version_after: version + step,
+        policy_version_after: versionBefore + step,
         maintenance_mode_enabled: projectedControls.maintenance_mode_enabled,
         freeze_until: projectedControls.freeze_until,
         freeze_active: projectedControls.freeze_active
@@ -467,12 +467,30 @@ function buildRolloutPolicyDiagnosticsAutomationHints({
     safety
   });
 
+  const policyVersionAfterExpected = actionRequests.length > 0
+    ? actionRequests[actionRequests.length - 1].expected_effect.policy_version_after
+    : versionBefore;
+  const expectedEffectHash = payloadHash(actionRequests.map(request => ({ step: request.step, expected_effect: request.expected_effect })));
+  const requestHashChain = payloadHash(actionRequests.map(request => request.request_hash));
+  const executionAttestation = {
+    policy_version_before: versionBefore,
+    policy_version_after_expected: policyVersionAfterExpected,
+    non_empty_action_plan: actionRequests.length > 0,
+    expected_effect_hash: expectedEffectHash,
+    request_hash_chain: requestHashChain
+  };
+  executionAttestation.attestation_hash = payloadHash({
+    plan_hash: planHash,
+    ...executionAttestation
+  });
+
   return {
     requires_operator_confirmation: queue.length > 0,
     source_alert_codes: sourceAlertCodes,
     action_queue: queue,
     action_requests: actionRequests,
     plan_hash: planHash,
+    execution_attestation: executionAttestation,
     safety
   };
 }

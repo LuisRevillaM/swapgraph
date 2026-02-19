@@ -1,0 +1,33 @@
+name: M68
+commands:
+  - cmd: "npm run verify:m68"
+artifacts:
+  - artifact: "docs/prd/M68.md"
+  - artifact: "docs/STATUS.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/ERRORS.md"
+  - artifact: "docs/spec/GAPS.md"
+
+  - artifact: "src/service/partnerProgramGovernanceService.mjs"
+  - artifact: "src/crypto/policyIntegritySigning.mjs"
+
+  - artifact: "docs/spec/api/manifest.v1.json"
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+  - artifact: "docs/spec/examples/api/partner_program.vault_export.rollout_policy.diagnostics.export.response.json"
+
+  - artifact: "docs/spec/schemas/PartnerProgramVaultExportRolloutPolicyDiagnosticsExportResponse.schema.json"
+
+  - artifact: "scripts/run-m68-rollout-diagnostics-execution-attestation-scenario.mjs"
+  - artifact: "fixtures/vault/m68_scenario.json"
+  - artifact: "fixtures/vault/m68_expected.json"
+
+  - artifact: "milestones/M68.yaml"
+  - artifact: "verify/m68.sh"
+
+  - artifact: "artifacts/milestones/M68/latest/commands.log"
+  - artifact: "artifacts/milestones/M68/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M68/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M68/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M68/latest/rollout_diagnostics_execution_attestation_output.json"
+  - artifact: "artifacts/milestones/M68/latest/store.json"
+  - artifact: "artifacts/milestones/M68/latest/assertions.json"

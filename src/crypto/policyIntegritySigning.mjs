@@ -1205,12 +1205,34 @@ function normalizePartnerProgramRolloutPolicyDiagnosticsAutomationHints(automati
     ? automationHints.plan_hash.trim()
     : null;
 
+  const executionPolicyVersionBefore = Number.parseInt(String(automationHints?.execution_attestation?.policy_version_before ?? ''), 10);
+  const executionPolicyVersionAfterExpected = Number.parseInt(String(automationHints?.execution_attestation?.policy_version_after_expected ?? ''), 10);
+  const executionExpectedEffectHash = typeof automationHints?.execution_attestation?.expected_effect_hash === 'string' && automationHints.execution_attestation.expected_effect_hash.trim()
+    ? automationHints.execution_attestation.expected_effect_hash.trim()
+    : null;
+  const executionRequestHashChain = typeof automationHints?.execution_attestation?.request_hash_chain === 'string' && automationHints.execution_attestation.request_hash_chain.trim()
+    ? automationHints.execution_attestation.request_hash_chain.trim()
+    : null;
+  const executionAttestationHash = typeof automationHints?.execution_attestation?.attestation_hash === 'string' && automationHints.execution_attestation.attestation_hash.trim()
+    ? automationHints.execution_attestation.attestation_hash.trim()
+    : null;
+
   return {
     requires_operator_confirmation: automationHints.requires_operator_confirmation === true,
     source_alert_codes: sourceAlertCodes,
     action_queue: actionQueue,
     action_requests: actionRequests,
     plan_hash: planHash,
+    execution_attestation: {
+      policy_version_before: Number.isFinite(executionPolicyVersionBefore) && executionPolicyVersionBefore > 0 ? executionPolicyVersionBefore : 0,
+      policy_version_after_expected: Number.isFinite(executionPolicyVersionAfterExpected) && executionPolicyVersionAfterExpected > 0
+        ? executionPolicyVersionAfterExpected
+        : (Number.isFinite(executionPolicyVersionBefore) && executionPolicyVersionBefore > 0 ? executionPolicyVersionBefore : 0),
+      non_empty_action_plan: automationHints?.execution_attestation?.non_empty_action_plan === true,
+      expected_effect_hash: executionExpectedEffectHash,
+      request_hash_chain: executionRequestHashChain,
+      attestation_hash: executionAttestationHash
+    },
     safety: {
       idempotency_required: automationHints?.safety?.idempotency_required !== false,
       idempotency_scope: idempotencyScope,
