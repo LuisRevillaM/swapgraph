@@ -12,11 +12,24 @@
     "partner_program_enforced": true,
     "checkpoint_enforced": true,
     "checkpoint_retention_days": 30,
+    "freeze_export_enforced": false,
+    "policy_source": "store",
+    "policy_version": 8,
+    "policy_updated_at": "2026-02-19T09:05:00Z",
+    "policy_updated_by": {
+      "type": "partner",
+      "id": "ops-admin"
+    },
     "maintenance_mode_enabled": false,
     "maintenance_reason_code": null,
     "freeze_until": null,
     "freeze_reason_code": null,
     "freeze_active": false,
+    "last_admin_action_at": "2026-02-19T09:05:00Z",
+    "last_admin_action_by": {
+      "type": "partner",
+      "id": "ops-admin"
+    },
     "allowlist_enforced": true,
     "partner_allowed": true,
     "min_plan_id": "pro",

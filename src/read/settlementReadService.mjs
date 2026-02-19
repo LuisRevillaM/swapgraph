@@ -252,6 +252,10 @@ function partnerProgramEnforced() {
   return process.env.SETTLEMENT_VAULT_EXPORT_PARTNER_PROGRAM_ENFORCE === '1';
 }
 
+function freezeExportEnforced() {
+  return process.env.PARTNER_PROGRAM_ROLLOUT_POLICY_FREEZE_EXPORT_ENFORCE === '1';
+}
+
 function ensurePartnerProgramState(store) {
   store.state.partner_program ||= {};
   store.state.partner_program_usage ||= {};
@@ -836,6 +840,19 @@ export class SettlementReadService {
         };
       }
 
+      if (freezeExportEnforced() && rollout.policy?.controls?.freeze_active) {
+        return {
+          ok: false,
+          body: errorResponse(correlationId, 'FORBIDDEN', 'vault export rollout is frozen', {
+            reason_code: 'partner_rollout_frozen',
+            partner_id: viewActor.id,
+            freeze_until: rollout.policy?.controls?.freeze_until ?? null,
+            freeze_reason_code: rollout.policy?.controls?.freeze_reason_code ?? null,
+            freeze_export_enforced: true
+          })
+        };
+      }
+
       if (!rollout.policy.partner_allowed) {
         return {
           ok: false,
@@ -992,6 +1009,7 @@ export class SettlementReadService {
     });
 
     const reasons = [];
+    const freezeGateEnabled = freezeExportEnforced();
 
     if (partnerProgramEnforced()) {
       if (!program) reasons.push('partner_program_missing');
@@ -1000,6 +1018,7 @@ export class SettlementReadService {
       if (!rollout.ok) reasons.push(rollout.error?.reason_code ?? 'partner_rollout_config_invalid');
       else {
         if (rollout.policy?.controls?.maintenance_mode_enabled) reasons.push('partner_rollout_maintenance_mode');
+        if (freezeGateEnabled && rollout.policy?.controls?.freeze_active) reasons.push('partner_rollout_frozen');
         if (!rollout.policy.partner_allowed) reasons.push('partner_rollout_not_allowed');
         if (!rollout.policy.plan_meets_minimum) reasons.push('partner_plan_insufficient');
       }
@@ -1009,11 +1028,18 @@ export class SettlementReadService {
       partner_program_enforced: partnerProgramEnforced(),
       checkpoint_enforced: exportCheckpointEnforced(),
       checkpoint_retention_days: settlementVaultExportCheckpointRetentionDays(),
+      freeze_export_enforced: freezeGateEnabled,
+      policy_source: rollout.policy?.source ?? 'env',
+      policy_version: rollout.policy?.version ?? null,
+      policy_updated_at: rollout.policy?.updated_at ?? null,
+      policy_updated_by: rollout.policy?.updated_by ?? null,
       maintenance_mode_enabled: rollout.policy?.controls?.maintenance_mode_enabled === true,
       maintenance_reason_code: rollout.policy?.controls?.maintenance_reason_code ?? null,
       freeze_until: rollout.policy?.controls?.freeze_until ?? null,
       freeze_reason_code: rollout.policy?.controls?.freeze_reason_code ?? null,
       freeze_active: rollout.policy?.controls?.freeze_active === true,
+      last_admin_action_at: rollout.policy?.controls?.last_admin_action_at ?? null,
+      last_admin_action_by: rollout.policy?.controls?.last_admin_action_by ?? null,
       ...(
         rollout.ok
           ? {

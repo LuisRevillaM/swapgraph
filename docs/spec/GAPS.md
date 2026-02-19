@@ -145,7 +145,8 @@ Each item here must become at least one of:
 - Resolved (fixtures-first, partial): M57 (partner-program admin-governed rollout policy mutation/read surfaces + deterministic policy-change audit entries + signed rollout-policy audit export).
 - Resolved (fixtures-first, partial): M58 (rollout-policy audit export continuity + retention hardening: signed attestation/checkpoint chaining, stateful continuation locks, deterministic checkpoint-expiry failures, and opportunistic checkpoint GC).
 - Resolved (fixtures-first, partial): M59 (rollout-policy governance controls hardening: freeze-window mutation locks, deterministic maintenance-mode export gates, idempotent admin-action control surface, and signed admin-action audit overlays).
-- Remaining: broader commercial governance controls, operator policy overlays, and control-plane observability refinement.
+- Resolved (fixtures-first, partial): M60 (operator freeze-export overlay gate + rollout control observability expansion on partner status projection).
+- Remaining: broader commercial governance controls, operator runbook hooks, and control-plane diagnostics export refinement.
 
 ---
 

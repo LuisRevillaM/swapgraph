@@ -1,0 +1,28 @@
+name: M60
+commands:
+  - cmd: "npm run verify:m60"
+artifacts:
+  - artifact: "docs/prd/M60.md"
+  - artifact: "docs/STATUS.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/ERRORS.md"
+  - artifact: "docs/spec/GAPS.md"
+
+  - artifact: "src/read/settlementReadService.mjs"
+  - artifact: "docs/spec/schemas/PartnerProgramVaultExportGetResponse.schema.json"
+  - artifact: "docs/spec/examples/api/partner_program.vault_export.get.response.json"
+
+  - artifact: "scripts/run-m60-rollout-overlay-observability-scenario.mjs"
+  - artifact: "fixtures/vault/m60_scenario.json"
+  - artifact: "fixtures/vault/m60_expected.json"
+
+  - artifact: "milestones/M60.yaml"
+  - artifact: "verify/m60.sh"
+
+  - artifact: "artifacts/milestones/M60/latest/commands.log"
+  - artifact: "artifacts/milestones/M60/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M60/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M60/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M60/latest/rollout_overlay_observability_output.json"
+  - artifact: "artifacts/milestones/M60/latest/store.json"
+  - artifact: "artifacts/milestones/M60/latest/assertions.json"

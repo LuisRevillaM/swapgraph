@@ -40,6 +40,7 @@ Notes:
   - `checkpoint_query_mismatch`
   - `checkpoint_expired`
 - Partner-program/commercial rollout enforcement reason codes include:
+  - `partner_rollout_frozen` is also used as an export-path gate when `PARTNER_PROGRAM_ROLLOUT_POLICY_FREEZE_EXPORT_ENFORCE=1` and a freeze window is active.
   - `partner_program_missing`
   - `partner_feature_not_enabled`
   - `partner_quota_exceeded`

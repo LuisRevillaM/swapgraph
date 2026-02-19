@@ -1,0 +1,281 @@
+{
+  "actors": {
+    "admin_partner": { "type": "partner", "id": "ops-admin" },
+    "partner": { "type": "partner", "id": "swapgraph" }
+  },
+  "operations": [
+    { "op": "keys.policy_integrity_signing.get", "expect_ok": true, "expect_keys_count": 2 },
+
+    {
+      "op": "rollout_overlay.set",
+      "config": { "freeze_export_enforce": false }
+    },
+
+    { "op": "seed.vault_cycle", "cycle_id": "cycle_m60", "partner_id": "swapgraph" },
+
+    {
+      "op": "partner_program.configure",
+      "partner_id": "swapgraph",
+      "plan_id": "pro",
+      "feature_enabled": true,
+      "daily_limit": 3,
+      "reset_usage": true
+    },
+
+    {
+      "op": "partnerProgram.vault_export.get",
+      "actor_ref": "partner",
+      "auth": { "scopes": ["settlement:read"] },
+      "query": { "now_iso": "2026-02-19T09:00:00Z" },
+      "expect_ok": true,
+      "expect_export_allowed": true,
+      "expect_reasons": [],
+      "expect_plan_id": "pro",
+      "expect_quota_daily_limit": 3,
+      "expect_quota_daily_used": 0,
+      "expect_freeze_export_enforced": false,
+      "expect_policy_source": "env",
+      "expect_policy_version": null,
+      "expect_policy_updated_at": null,
+      "expect_policy_updated_by": null,
+      "expect_maintenance_mode_enabled": false,
+      "expect_maintenance_reason_code": null,
+      "expect_freeze_until": null,
+      "expect_freeze_reason_code": null,
+      "expect_freeze_active": false,
+      "expect_last_admin_action_at": null,
+      "expect_last_admin_action_by": null,
+      "expect_allowlist_enforced": false,
+      "expect_partner_allowed": true,
+      "expect_min_plan_id": null,
+      "expect_plan_meets_minimum": true
+    },
+
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.upsert",
+      "actor_ref": "admin_partner",
+      "auth": { "scopes": ["settlement:write"] },
+      "idempotency_key": "m60_policy_v1",
+      "occurred_at": "2026-02-19T09:00:30Z",
+      "request": {
+        "occurred_at": "2026-02-19T09:00:30Z",
+        "policy": {
+          "allowlist": ["swapgraph"],
+          "min_plan_id": "pro"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_policy_source": "store",
+      "expect_policy_allowlist": ["swapgraph"],
+      "expect_policy_min_plan_id": "pro",
+      "expect_policy_version": 1,
+      "expect_audit_id": "rollout_policy_000001"
+    },
+
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.admin_action",
+      "actor_ref": "admin_partner",
+      "auth": { "scopes": ["settlement:write"] },
+      "idempotency_key": "m60_action_freeze",
+      "occurred_at": "2026-02-19T09:01:00Z",
+      "request": {
+        "occurred_at": "2026-02-19T09:01:00Z",
+        "action": {
+          "action_type": "set_freeze_window",
+          "freeze_until": "2026-02-19T09:30:00Z",
+          "freeze_reason_code": "release_freeze"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_policy_source": "store",
+      "expect_policy_version": 2,
+      "expect_maintenance_mode_enabled": false,
+      "expect_maintenance_reason_code": null,
+      "expect_freeze_until": "2026-02-19T09:30:00Z",
+      "expect_freeze_reason_code": "release_freeze",
+      "expect_audit_id": "rollout_policy_000002",
+      "expect_audit_action_type": "set_freeze_window"
+    },
+
+    {
+      "op": "partnerProgram.vault_export.get",
+      "actor_ref": "partner",
+      "auth": { "scopes": ["settlement:read"] },
+      "query": { "now_iso": "2026-02-19T09:01:10Z" },
+      "expect_ok": true,
+      "expect_export_allowed": true,
+      "expect_reasons": [],
+      "expect_plan_id": "pro",
+      "expect_quota_daily_limit": 3,
+      "expect_quota_daily_used": 0,
+      "expect_freeze_export_enforced": false,
+      "expect_policy_source": "store",
+      "expect_policy_version": 2,
+      "expect_policy_updated_at": "2026-02-19T09:01:00Z",
+      "expect_policy_updated_by": { "type": "partner", "id": "ops-admin" },
+      "expect_maintenance_mode_enabled": false,
+      "expect_maintenance_reason_code": null,
+      "expect_freeze_until": "2026-02-19T09:30:00Z",
+      "expect_freeze_reason_code": "release_freeze",
+      "expect_freeze_active": true,
+      "expect_last_admin_action_at": "2026-02-19T09:01:00Z",
+      "expect_last_admin_action_by": { "type": "partner", "id": "ops-admin" },
+      "expect_allowlist_enforced": true,
+      "expect_partner_allowed": true,
+      "expect_min_plan_id": "pro",
+      "expect_plan_meets_minimum": true
+    },
+
+    {
+      "op": "settlement.vault_reconciliation.export",
+      "actor_ref": "partner",
+      "cycle_id": "cycle_m60",
+      "auth": { "scopes": ["settlement:read"] },
+      "query": {
+        "include_transitions": true,
+        "now_iso": "2026-02-19T09:01:20Z",
+        "exported_at_iso": "2026-02-19T09:01:20Z"
+      },
+      "save_export_ref": "before_overlay",
+      "expect_ok": true,
+      "expect_entries_count": 2
+    },
+    {
+      "op": "settlement.vault_reconciliation.export.verify",
+      "export_ref": "before_overlay",
+      "expect_verify_ok": true,
+      "expect_verify_public_ok": true
+    },
+
+    {
+      "op": "rollout_overlay.set",
+      "config": { "freeze_export_enforce": true }
+    },
+
+    {
+      "op": "partnerProgram.vault_export.get",
+      "actor_ref": "partner",
+      "auth": { "scopes": ["settlement:read"] },
+      "query": { "now_iso": "2026-02-19T09:02:00Z" },
+      "expect_ok": true,
+      "expect_export_allowed": false,
+      "expect_reasons": ["partner_rollout_frozen"],
+      "expect_plan_id": "pro",
+      "expect_quota_daily_limit": 3,
+      "expect_quota_daily_used": 1,
+      "expect_freeze_export_enforced": true,
+      "expect_policy_source": "store",
+      "expect_policy_version": 2,
+      "expect_policy_updated_at": "2026-02-19T09:01:00Z",
+      "expect_policy_updated_by": { "type": "partner", "id": "ops-admin" },
+      "expect_maintenance_mode_enabled": false,
+      "expect_maintenance_reason_code": null,
+      "expect_freeze_until": "2026-02-19T09:30:00Z",
+      "expect_freeze_reason_code": "release_freeze",
+      "expect_freeze_active": true,
+      "expect_last_admin_action_at": "2026-02-19T09:01:00Z",
+      "expect_last_admin_action_by": { "type": "partner", "id": "ops-admin" },
+      "expect_allowlist_enforced": true,
+      "expect_partner_allowed": true,
+      "expect_min_plan_id": "pro",
+      "expect_plan_meets_minimum": true
+    },
+
+    {
+      "op": "settlement.vault_reconciliation.export",
+      "actor_ref": "partner",
+      "cycle_id": "cycle_m60",
+      "auth": { "scopes": ["settlement:read"] },
+      "query": {
+        "include_transitions": true,
+        "now_iso": "2026-02-19T09:02:10Z",
+        "exported_at_iso": "2026-02-19T09:02:10Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN",
+      "expect_reason_code": "partner_rollout_frozen"
+    },
+
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.admin_action",
+      "actor_ref": "admin_partner",
+      "auth": { "scopes": ["settlement:write"] },
+      "idempotency_key": "m60_action_clear",
+      "occurred_at": "2026-02-19T09:05:00Z",
+      "request": {
+        "occurred_at": "2026-02-19T09:05:00Z",
+        "action": {
+          "action_type": "clear_controls"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_policy_source": "store",
+      "expect_policy_version": 3,
+      "expect_maintenance_mode_enabled": false,
+      "expect_maintenance_reason_code": null,
+      "expect_freeze_until": null,
+      "expect_freeze_reason_code": null,
+      "expect_audit_id": "rollout_policy_000003",
+      "expect_audit_action_type": "clear_controls"
+    },
+
+    {
+      "op": "partnerProgram.vault_export.get",
+      "actor_ref": "partner",
+      "auth": { "scopes": ["settlement:read"] },
+      "query": { "now_iso": "2026-02-19T09:05:10Z" },
+      "expect_ok": true,
+      "expect_export_allowed": true,
+      "expect_reasons": [],
+      "expect_plan_id": "pro",
+      "expect_quota_daily_limit": 3,
+      "expect_quota_daily_used": 1,
+      "expect_freeze_export_enforced": true,
+      "expect_policy_source": "store",
+      "expect_policy_version": 3,
+      "expect_policy_updated_at": "2026-02-19T09:05:00Z",
+      "expect_policy_updated_by": { "type": "partner", "id": "ops-admin" },
+      "expect_maintenance_mode_enabled": false,
+      "expect_maintenance_reason_code": null,
+      "expect_freeze_until": null,
+      "expect_freeze_reason_code": null,
+      "expect_freeze_active": false,
+      "expect_last_admin_action_at": "2026-02-19T09:05:00Z",
+      "expect_last_admin_action_by": { "type": "partner", "id": "ops-admin" },
+      "expect_allowlist_enforced": true,
+      "expect_partner_allowed": true,
+      "expect_min_plan_id": "pro",
+      "expect_plan_meets_minimum": true
+    },
+
+    {
+      "op": "settlement.vault_reconciliation.export",
+      "actor_ref": "partner",
+      "cycle_id": "cycle_m60",
+      "auth": { "scopes": ["settlement:read"] },
+      "query": {
+        "include_transitions": true,
+        "now_iso": "2026-02-19T09:05:20Z",
+        "exported_at_iso": "2026-02-19T09:05:20Z"
+      },
+      "save_export_ref": "after_clear",
+      "expect_ok": true,
+      "expect_entries_count": 2
+    },
+    {
+      "op": "settlement.vault_reconciliation.export.verify",
+      "export_ref": "after_clear",
+      "expect_verify_ok": true,
+      "expect_verify_public_ok": true
+    },
+    {
+      "op": "settlement.vault_reconciliation.export.verify_tampered",
+      "export_ref": "after_clear",
+      "expect_verify_ok": false,
+      "expect_verify_error": "hash_mismatch"
+    }
+  ]
+}

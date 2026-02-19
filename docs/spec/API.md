@@ -71,9 +71,12 @@ Settlement endpoints:
   - checkpoint anchors have retention controls (`SETTLEMENT_VAULT_EXPORT_CHECKPOINT_RETENTION_DAYS`) and expired anchors are rejected
   - optional partner-program enforcement (`SETTLEMENT_VAULT_EXPORT_PARTNER_PROGRAM_ENFORCE=1`) gates export entitlement and daily quota usage
   - optional rollout hooks: allowlist (`SETTLEMENT_VAULT_EXPORT_PARTNER_ALLOWLIST`) + minimum plan (`SETTLEMENT_VAULT_EXPORT_MIN_PLAN`)
+  - optional freeze export overlay (`PARTNER_PROGRAM_ROLLOUT_POLICY_FREEZE_EXPORT_ENFORCE=1`) turns active rollout freeze windows into export gate failures (`partner_rollout_frozen`)
   - paginated responses include `total_filtered`, optional `next_cursor`, signed `attestation`, optional signed `checkpoint`, and optional `partner_program` usage metadata when program enforcement is active
 - `GET /partner-program/vault-export`
   - partner self-serve read surface for vault export entitlement, quota usage, and rollout-policy visibility
+  - includes rollout observability fields (`policy_source`, `policy_version`, `policy_updated_*`, `last_admin_action_*`)
+  - includes operator overlay state `freeze_export_enforced` (from `PARTNER_PROGRAM_ROLLOUT_POLICY_FREEZE_EXPORT_ENFORCE=1`)
 - `GET /partner-program/vault-export/rollout-policy`
   - returns the effective rollout policy contract (`source`, `allowlist`, `min_plan_id`, `version`, `updated_*`)
 - `POST /partner-program/vault-export/rollout-policy`

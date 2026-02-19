@@ -40,11 +40,18 @@
         "partner_program_enforced",
         "checkpoint_enforced",
         "checkpoint_retention_days",
+        "freeze_export_enforced",
+        "policy_source",
+        "policy_version",
+        "policy_updated_at",
+        "policy_updated_by",
         "maintenance_mode_enabled",
         "maintenance_reason_code",
         "freeze_until",
         "freeze_reason_code",
         "freeze_active",
+        "last_admin_action_at",
+        "last_admin_action_by",
         "allowlist_enforced",
         "partner_allowed",
         "min_plan_id",
@@ -54,11 +61,34 @@
         "partner_program_enforced": { "type": "boolean" },
         "checkpoint_enforced": { "type": "boolean" },
         "checkpoint_retention_days": { "type": "integer", "minimum": 1 },
+        "freeze_export_enforced": { "type": "boolean" },
+        "policy_source": { "type": "string", "enum": ["env", "store"] },
+        "policy_version": { "type": ["integer", "null"], "minimum": 1 },
+        "policy_updated_at": { "type": ["string", "null"], "format": "date-time" },
+        "policy_updated_by": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "required": ["type", "id"],
+          "properties": {
+            "type": { "type": "string", "minLength": 1 },
+            "id": { "type": "string", "minLength": 1 }
+          }
+        },
         "maintenance_mode_enabled": { "type": "boolean" },
         "maintenance_reason_code": { "type": ["string", "null"], "minLength": 1 },
         "freeze_until": { "type": ["string", "null"], "format": "date-time" },
         "freeze_reason_code": { "type": ["string", "null"], "minLength": 1 },
         "freeze_active": { "type": "boolean" },
+        "last_admin_action_at": { "type": ["string", "null"], "format": "date-time" },
+        "last_admin_action_by": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "required": ["type", "id"],
+          "properties": {
+            "type": { "type": "string", "minLength": 1 },
+            "id": { "type": "string", "minLength": 1 }
+          }
+        },
         "allowlist_enforced": { "type": "boolean" },
         "partner_allowed": { "type": "boolean" },
         "min_plan_id": { "type": ["string", "null"], "enum": [null, "starter", "pro", "enterprise"] },
@@ -78,7 +108,8 @@
           "partner_rollout_not_allowed",
           "partner_plan_insufficient",
           "partner_rollout_config_invalid",
-          "partner_rollout_maintenance_mode"
+          "partner_rollout_maintenance_mode",
+          "partner_rollout_frozen"
         ]
       }
     }

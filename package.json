@@ -64,6 +64,7 @@
     "verify:m57": "bash verify/m57.sh",
     "verify:m58": "bash verify/m58.sh",
     "verify:m59": "bash verify/m59.sh",
+    "verify:m60": "bash verify/m60.sh",
     "test": "node --test"
   },
   "devDependencies": {
