@@ -273,11 +273,12 @@ function quotaDayFromIso(iso) {
   return new Date(ms).toISOString().slice(0, 10);
 }
 
-function buildPartnerRolloutPolicy({ store, partnerId, partnerPlanId }) {
+function buildPartnerRolloutPolicy({ store, partnerId, partnerPlanId, nowIso }) {
   return evaluateVaultExportRolloutForPartner({
     store,
     partnerId,
-    partnerPlanId
+    partnerPlanId,
+    nowIso
   });
 }
 
@@ -810,7 +811,8 @@ export class SettlementReadService {
       const rollout = buildPartnerRolloutPolicy({
         store: this.store,
         partnerId: viewActor.id,
-        partnerPlanId: program?.plan_id ?? null
+        partnerPlanId: program?.plan_id ?? null,
+        nowIso: query?.now_iso ?? process.env.AUTHZ_NOW_ISO ?? new Date().toISOString()
       });
 
       if (!rollout.ok) {
@@ -819,6 +821,17 @@ export class SettlementReadService {
           body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'partner rollout policy configuration is invalid', {
             reason_code: rollout.error?.reason_code ?? 'partner_rollout_config_invalid',
             ...rollout.error
+          })
+        };
+      }
+
+      if (rollout.policy?.controls?.maintenance_mode_enabled) {
+        return {
+          ok: false,
+          body: errorResponse(correlationId, 'FORBIDDEN', 'vault export rollout is in maintenance mode', {
+            reason_code: 'partner_rollout_maintenance_mode',
+            partner_id: viewActor.id,
+            maintenance_reason_code: rollout.policy?.controls?.maintenance_reason_code ?? null
           })
         };
       }
@@ -974,7 +987,8 @@ export class SettlementReadService {
     const rollout = buildPartnerRolloutPolicy({
       store: this.store,
       partnerId: actor.id,
-      partnerPlanId: program?.plan_id ?? null
+      partnerPlanId: program?.plan_id ?? null,
+      nowIso: nowIso
     });
 
     const reasons = [];
@@ -985,6 +999,7 @@ export class SettlementReadService {
       if (dailyLimit !== null && dailyUsed >= dailyLimit) reasons.push('partner_quota_exceeded');
       if (!rollout.ok) reasons.push(rollout.error?.reason_code ?? 'partner_rollout_config_invalid');
       else {
+        if (rollout.policy?.controls?.maintenance_mode_enabled) reasons.push('partner_rollout_maintenance_mode');
         if (!rollout.policy.partner_allowed) reasons.push('partner_rollout_not_allowed');
         if (!rollout.policy.plan_meets_minimum) reasons.push('partner_plan_insufficient');
       }
@@ -994,6 +1009,11 @@ export class SettlementReadService {
       partner_program_enforced: partnerProgramEnforced(),
       checkpoint_enforced: exportCheckpointEnforced(),
       checkpoint_retention_days: settlementVaultExportCheckpointRetentionDays(),
+      maintenance_mode_enabled: rollout.policy?.controls?.maintenance_mode_enabled === true,
+      maintenance_reason_code: rollout.policy?.controls?.maintenance_reason_code ?? null,
+      freeze_until: rollout.policy?.controls?.freeze_until ?? null,
+      freeze_reason_code: rollout.policy?.controls?.freeze_reason_code ?? null,
+      freeze_active: rollout.policy?.controls?.freeze_active === true,
       ...(
         rollout.ok
           ? {

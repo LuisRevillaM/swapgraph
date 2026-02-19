@@ -11,6 +11,15 @@
     "updated_by": {
       "type": "partner",
       "id": "ops-admin"
+    },
+    "controls": {
+      "maintenance_mode_enabled": false,
+      "maintenance_reason_code": null,
+      "freeze_until": null,
+      "freeze_reason_code": null,
+      "freeze_active": false,
+      "last_admin_action_at": null,
+      "last_admin_action_by": null
     }
   }
 }

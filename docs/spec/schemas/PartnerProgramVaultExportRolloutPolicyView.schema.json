@@ -12,7 +12,8 @@
     "min_plan_id",
     "version",
     "updated_at",
-    "updated_by"
+    "updated_by",
+    "controls"
   ],
   "properties": {
     "policy_key": { "type": "string", "const": "vault_reconciliation_export" },
@@ -33,6 +34,36 @@
       "properties": {
         "type": { "type": "string", "enum": ["user", "partner", "agent"] },
         "id": { "type": "string", "minLength": 1 }
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maintenance_mode_enabled",
+        "maintenance_reason_code",
+        "freeze_until",
+        "freeze_reason_code",
+        "freeze_active",
+        "last_admin_action_at",
+        "last_admin_action_by"
+      ],
+      "properties": {
+        "maintenance_mode_enabled": { "type": "boolean" },
+        "maintenance_reason_code": { "type": ["string", "null"], "minLength": 1 },
+        "freeze_until": { "type": ["string", "null"], "format": "date-time" },
+        "freeze_reason_code": { "type": ["string", "null"], "minLength": 1 },
+        "freeze_active": { "type": "boolean" },
+        "last_admin_action_at": { "type": ["string", "null"], "format": "date-time" },
+        "last_admin_action_by": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "required": ["type", "id"],
+          "properties": {
+            "type": { "type": "string", "enum": ["user", "partner", "agent"] },
+            "id": { "type": "string", "minLength": 1 }
+          }
+        }
       }
     }
   }

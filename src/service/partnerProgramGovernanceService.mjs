@@ -61,7 +61,15 @@ function normalizeStoredPolicyForAudit(policy) {
       min_plan_id: null,
       version: 0,
       updated_at: null,
-      updated_by: null
+      updated_by: null,
+      controls: {
+        maintenance_mode_enabled: false,
+        maintenance_reason_code: null,
+        freeze_until: null,
+        freeze_reason_code: null,
+        last_admin_action_at: null,
+        last_admin_action_by: null
+      }
     };
   }
 
@@ -69,12 +77,31 @@ function normalizeStoredPolicyForAudit(policy) {
     ? Array.from(new Set(policy.allowlist.filter(x => typeof x === 'string' && x.trim()).map(x => x.trim()))).sort()
     : [];
 
+  const controls = isObject(policy.controls)
+    ? {
+        maintenance_mode_enabled: policy.controls.maintenance_mode_enabled === true,
+        maintenance_reason_code: normalizeOptionalString(policy.controls.maintenance_reason_code),
+        freeze_until: normalizeOptionalString(policy.controls.freeze_until),
+        freeze_reason_code: normalizeOptionalString(policy.controls.freeze_reason_code),
+        last_admin_action_at: normalizeOptionalString(policy.controls.last_admin_action_at),
+        last_admin_action_by: normalizeActorRef(policy.controls.last_admin_action_by)
+      }
+    : {
+        maintenance_mode_enabled: false,
+        maintenance_reason_code: null,
+        freeze_until: null,
+        freeze_reason_code: null,
+        last_admin_action_at: null,
+        last_admin_action_by: null
+      };
+
   return {
     allowlist,
     min_plan_id: typeof policy.min_plan_id === 'string' && policy.min_plan_id.trim() ? policy.min_plan_id.trim().toLowerCase() : null,
     version: Number.isFinite(policy.version) ? Number(policy.version) : 0,
     updated_at: normalizeOptionalString(policy.updated_at),
-    updated_by: normalizeActorRef(policy.updated_by)
+    updated_by: normalizeActorRef(policy.updated_by),
+    controls
   };
 }
 
@@ -131,6 +158,140 @@ function checkpointContextFromPartnerProgramRolloutPolicyExportQuery({ query }) 
 
 function checkpointContextKey(context) {
   return JSON.stringify(context);
+}
+
+function freezeActiveFromControls({ controls, nowIso }) {
+  const freezeUntil = normalizeOptionalString(controls?.freeze_until);
+  if (!freezeUntil) return false;
+  const freezeMs = parseIsoMs(freezeUntil);
+  if (freezeMs === null) return false;
+  const nowMs = parseIsoMs(nowIso ?? process.env.AUTHZ_NOW_ISO ?? new Date().toISOString());
+  if (nowMs === null) return false;
+  return nowMs <= freezeMs;
+}
+
+function controlsForAudit(controls) {
+  return {
+    maintenance_mode_enabled: controls?.maintenance_mode_enabled === true,
+    maintenance_reason_code: controls?.maintenance_reason_code ?? null,
+    freeze_until: controls?.freeze_until ?? null,
+    freeze_reason_code: controls?.freeze_reason_code ?? null
+  };
+}
+
+function applyAdminActionToControls({ controls, action, actor, occurredAtIso }) {
+  const next = {
+    maintenance_mode_enabled: controls?.maintenance_mode_enabled === true,
+    maintenance_reason_code: controls?.maintenance_reason_code ?? null,
+    freeze_until: controls?.freeze_until ?? null,
+    freeze_reason_code: controls?.freeze_reason_code ?? null,
+    last_admin_action_at: occurredAtIso,
+    last_admin_action_by: normalizeActorRef(actor)
+  };
+
+  if (!isObject(action)) {
+    return {
+      ok: false,
+      error: {
+        reason_code: 'partner_rollout_admin_action_invalid',
+        message: 'action object is required'
+      }
+    };
+  }
+
+  const actionType = normalizeOptionalString(action.action_type);
+  if (!actionType) {
+    return {
+      ok: false,
+      error: {
+        reason_code: 'partner_rollout_admin_action_invalid',
+        message: 'action.action_type is required'
+      }
+    };
+  }
+
+  if (actionType === 'set_maintenance_mode') {
+    if (typeof action.maintenance_mode_enabled !== 'boolean') {
+      return {
+        ok: false,
+        error: {
+          reason_code: 'partner_rollout_admin_action_invalid',
+          message: 'maintenance_mode_enabled boolean is required for set_maintenance_mode'
+        }
+      };
+    }
+
+    next.maintenance_mode_enabled = action.maintenance_mode_enabled;
+    next.maintenance_reason_code = action.maintenance_mode_enabled
+      ? (normalizeOptionalString(action.maintenance_reason_code) ?? 'maintenance_mode_enabled')
+      : null;
+
+    return {
+      ok: true,
+      action_type: actionType,
+      next,
+      audit_action: {
+        action_type: actionType,
+        maintenance_mode_enabled: next.maintenance_mode_enabled,
+        maintenance_reason_code: next.maintenance_reason_code
+      }
+    };
+  }
+
+  if (actionType === 'set_freeze_window') {
+    const freezeUntil = normalizeOptionalString(action.freeze_until);
+    const freezeReason = normalizeOptionalString(action.freeze_reason_code);
+
+    if (freezeUntil && parseIsoMs(freezeUntil) === null) {
+      return {
+        ok: false,
+        error: {
+          reason_code: 'partner_rollout_admin_action_invalid',
+          message: 'freeze_until must be a valid date-time or null',
+          freeze_until: freezeUntil
+        }
+      };
+    }
+
+    next.freeze_until = freezeUntil;
+    next.freeze_reason_code = freezeUntil ? (freezeReason ?? 'manual_freeze') : null;
+
+    return {
+      ok: true,
+      action_type: actionType,
+      next,
+      audit_action: {
+        action_type: actionType,
+        freeze_until: next.freeze_until,
+        freeze_reason_code: next.freeze_reason_code
+      }
+    };
+  }
+
+  if (actionType === 'clear_controls') {
+    next.maintenance_mode_enabled = false;
+    next.maintenance_reason_code = null;
+    next.freeze_until = null;
+    next.freeze_reason_code = null;
+
+    return {
+      ok: true,
+      action_type: actionType,
+      next,
+      audit_action: {
+        action_type: actionType
+      }
+    };
+  }
+
+  return {
+    ok: false,
+    error: {
+      reason_code: 'partner_rollout_admin_action_invalid',
+      message: 'unsupported action_type',
+      action_type: actionType
+    }
+  };
 }
 
 export class PartnerProgramGovernanceService {
@@ -248,6 +409,18 @@ export class PartnerProgramGovernanceService {
         const auditState = ensureVaultExportRolloutPolicyAuditState(this.store);
 
         const previousPolicy = normalizeStoredPolicyForAudit(rolloutState.vault_reconciliation_export);
+        const freezeActive = freezeActiveFromControls({ controls: previousPolicy.controls, nowIso: occurredAtIso });
+        if (freezeActive) {
+          return {
+            ok: false,
+            body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'rollout policy is frozen for updates', {
+              reason_code: 'partner_rollout_frozen',
+              freeze_until: previousPolicy.controls.freeze_until,
+              freeze_reason_code: previousPolicy.controls.freeze_reason_code
+            })
+          };
+        }
+
         const nextVersion = previousPolicy.version + 1;
 
         const nextPolicy = {
@@ -255,7 +428,10 @@ export class PartnerProgramGovernanceService {
           min_plan_id: minPlanParsed.min_plan_id,
           updated_at: occurredAtIso,
           updated_by: normalizeActorRef(actor),
-          version: nextVersion
+          version: nextVersion,
+          controls: {
+            ...previousPolicy.controls
+          }
         };
 
         rolloutState.vault_reconciliation_export = nextPolicy;
@@ -268,22 +444,154 @@ export class PartnerProgramGovernanceService {
           policy_before: {
             allowlist: previousPolicy.allowlist,
             min_plan_id: previousPolicy.min_plan_id,
-            version: previousPolicy.version
+            version: previousPolicy.version,
+            controls: controlsForAudit(previousPolicy.controls)
           },
           policy_after: {
             allowlist: nextPolicy.allowlist,
             min_plan_id: nextPolicy.min_plan_id,
-            version: nextPolicy.version
+            version: nextPolicy.version,
+            controls: controlsForAudit(nextPolicy.controls)
           },
           change_summary: {
             allowlist_changed: JSON.stringify(previousPolicy.allowlist) !== JSON.stringify(nextPolicy.allowlist),
-            min_plan_changed: previousPolicy.min_plan_id !== nextPolicy.min_plan_id
+            min_plan_changed: previousPolicy.min_plan_id !== nextPolicy.min_plan_id,
+            maintenance_mode_changed: previousPolicy.controls.maintenance_mode_enabled !== nextPolicy.controls.maintenance_mode_enabled,
+            freeze_window_changed:
+              previousPolicy.controls.freeze_until !== nextPolicy.controls.freeze_until ||
+              previousPolicy.controls.freeze_reason_code !== nextPolicy.controls.freeze_reason_code
           }
         };
 
         auditState.push(auditEntry);
 
-        const resolved = resolveVaultExportRolloutPolicy({ store: this.store });
+        const resolved = resolveVaultExportRolloutPolicy({ store: this.store, nowIso: occurredAtIso });
+        if (!resolved.ok) {
+          return {
+            ok: false,
+            body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'rollout policy configuration became invalid', {
+              reason_code: resolved.error?.reason_code ?? 'partner_rollout_config_invalid'
+            })
+          };
+        }
+
+        return {
+          ok: true,
+          body: {
+            correlation_id: correlationId,
+            policy: vaultExportRolloutPolicyView({ policy: resolved.policy }),
+            audit_entry: auditEntry
+          }
+        };
+      }
+    });
+  }
+
+  adminActionVaultExportRolloutPolicy({ actor, auth, idempotencyKey, requestBody, occurredAt }) {
+    const correlationId = correlationIdForRolloutPolicy();
+
+    const authz = authorizeApiOperation({ operationId: 'partnerProgram.vault_export.rollout_policy.admin_action', actor, auth, store: this.store });
+    if (!authz.ok) {
+      return {
+        replayed: false,
+        result: {
+          ok: false,
+          body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details)
+        }
+      };
+    }
+
+    return this._withIdempotency({
+      actor,
+      operationId: 'partnerProgram.vault_export.rollout_policy.admin_action',
+      idempotencyKey,
+      requestBody,
+      correlationId,
+      handler: () => {
+        if (!isPartnerProgramAdminActor(actor)) {
+          return {
+            ok: false,
+            body: errorResponse(correlationId, 'FORBIDDEN', 'partner admin role required for rollout policy admin actions', {
+              reason_code: 'partner_admin_required',
+              actor,
+              admin_allowlist: [...parsePartnerProgramAdminAllowlist()].sort()
+            })
+          };
+        }
+
+        const occurredAtIso = occurredAt ?? requestBody?.occurred_at ?? new Date().toISOString();
+        if (parseIsoMs(occurredAtIso) === null) {
+          return {
+            ok: false,
+            body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'invalid occurred_at timestamp', {
+              occurred_at: occurredAtIso
+            })
+          };
+        }
+
+        const rolloutState = ensureVaultExportRolloutPolicyState(this.store);
+        const auditState = ensureVaultExportRolloutPolicyAuditState(this.store);
+
+        const previousPolicy = normalizeStoredPolicyForAudit(rolloutState.vault_reconciliation_export);
+        const actionApplied = applyAdminActionToControls({
+          controls: previousPolicy.controls,
+          action: requestBody?.action,
+          actor,
+          occurredAtIso
+        });
+        if (!actionApplied.ok) {
+          return {
+            ok: false,
+            body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'invalid rollout policy admin action', actionApplied.error)
+          };
+        }
+
+        const nextVersion = previousPolicy.version + 1;
+        const nextPolicy = {
+          allowlist: previousPolicy.allowlist,
+          min_plan_id: previousPolicy.min_plan_id,
+          updated_at: occurredAtIso,
+          updated_by: normalizeActorRef(actor),
+          version: nextVersion,
+          controls: {
+            ...actionApplied.next
+          }
+        };
+
+        rolloutState.vault_reconciliation_export = nextPolicy;
+
+        const auditEntry = {
+          audit_id: makeAuditId(nextVersion),
+          operation_id: 'partnerProgram.vault_export.rollout_policy.admin_action',
+          occurred_at: occurredAtIso,
+          actor: normalizeActorRef(actor),
+          policy_before: {
+            allowlist: previousPolicy.allowlist,
+            min_plan_id: previousPolicy.min_plan_id,
+            version: previousPolicy.version,
+            controls: controlsForAudit(previousPolicy.controls)
+          },
+          policy_after: {
+            allowlist: nextPolicy.allowlist,
+            min_plan_id: nextPolicy.min_plan_id,
+            version: nextPolicy.version,
+            controls: controlsForAudit(nextPolicy.controls)
+          },
+          change_summary: {
+            allowlist_changed: false,
+            min_plan_changed: false,
+            maintenance_mode_changed: previousPolicy.controls.maintenance_mode_enabled !== nextPolicy.controls.maintenance_mode_enabled ||
+              previousPolicy.controls.maintenance_reason_code !== nextPolicy.controls.maintenance_reason_code,
+            freeze_window_changed:
+              previousPolicy.controls.freeze_until !== nextPolicy.controls.freeze_until ||
+              previousPolicy.controls.freeze_reason_code !== nextPolicy.controls.freeze_reason_code
+          },
+          admin_action: actionApplied.audit_action
+        };
+
+        auditState.push(auditEntry);
+
+        const resolved = resolveVaultExportRolloutPolicy({ store: this.store, nowIso: occurredAtIso });
         if (!resolved.ok) {
           return {
             ok: false,
@@ -313,7 +621,10 @@ export class PartnerProgramGovernanceService {
       return { ok: false, body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details) };
     }
 
-    const resolved = resolveVaultExportRolloutPolicy({ store: this.store });
+    const resolved = resolveVaultExportRolloutPolicy({
+      store: this.store,
+      nowIso: auth?.now_iso ?? process.env.AUTHZ_NOW_ISO ?? new Date().toISOString()
+    });
     if (!resolved.ok) {
       return {
         ok: false,
@@ -564,7 +875,10 @@ export class PartnerProgramGovernanceService {
       };
     }
 
-    const resolved = resolveVaultExportRolloutPolicy({ store: this.store });
+    const resolved = resolveVaultExportRolloutPolicy({
+      store: this.store,
+      nowIso: query?.now_iso ?? process.env.AUTHZ_NOW_ISO ?? new Date().toISOString()
+    });
     if (!resolved.ok) {
       return {
         ok: false,

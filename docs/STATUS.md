@@ -69,9 +69,10 @@ Last updated: 2026-02-19
 - M56: ✅ partner program governance surfaces (`partnerProgram.vault_export.get` read API + rollout policy hooks: allowlist + minimum plan + deterministic governance reason codes) (fixtures-first)
 - M57: ✅ partner program admin-governed rollout mutation surfaces (`rollout_policy.get`/`rollout_policy.upsert` + signed `rollout_policy_audit.export` + idempotent admin writes + deterministic audit entries) (fixtures-first)
 - M58: ✅ rollout-policy audit continuity/retention hardening (signed attestation/checkpoint chain, stateful continuation validation, and deterministic checkpoint expiry controls) (fixtures-first)
+- M59: ✅ rollout-policy governance controls hardening (policy freeze windows + deterministic maintenance-mode gates + signed admin-action audit overlays) (fixtures-first)
 
 ## Next
-- M59: rollout-policy governance controls hardening (policy freeze windows + deterministic maintenance-mode gates + signed admin-action audit overlays) (fixtures-first)
+- M60: commercial governance hardening follow-up (operator policy overlays + rollout-control observability refinements) (fixtures-first)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.

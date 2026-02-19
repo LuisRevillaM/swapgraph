@@ -79,8 +79,15 @@ Settlement endpoints:
 - `POST /partner-program/vault-export/rollout-policy`
   - partner-admin controlled rollout policy mutation (`allowlist`, `min_plan_id`), idempotent by key
   - writes deterministic policy-change audit entries
+  - mutation is blocked during active freeze window (`partner_rollout_frozen`) unless controls are adjusted via admin action
+- `POST /partner-program/vault-export/rollout-policy/admin-action`
+  - partner-admin control surface for governance overlays:
+    - maintenance mode on/off (`partner_rollout_maintenance_mode` gate on export path)
+    - freeze window controls (`freeze_until`, `freeze_reason_code`)
+    - clear/reset controls
+  - writes signed-audit-compatible admin action records
 - `GET /partner-program/vault-export/rollout-policy-audit/export`
-  - partner-admin signed export of rollout policy-change audit entries (`export_hash` + detached signature)
+  - partner-admin signed export of rollout policy-change/admin-action audit entries (`export_hash` + detached signature)
   - supports filter/pagination (`from_iso`, `to_iso`, `limit`, `cursor_after`)
   - paginated continuation requires `attestation_after` when `cursor_after` is provided
   - when checkpoint mode is enabled (`PARTNER_PROGRAM_ROLLOUT_POLICY_EXPORT_CHECKPOINT_ENFORCE=1`), continuation also requires `checkpoint_after`

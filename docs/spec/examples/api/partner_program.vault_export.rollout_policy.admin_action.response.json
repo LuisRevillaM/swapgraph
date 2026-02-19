@@ -6,42 +6,34 @@
     "allowlist": ["otherpartner", "swapgraph"],
     "allowlist_enforced": true,
     "min_plan_id": "pro",
-    "version": 2,
-    "updated_at": "2026-02-19T06:40:00Z",
+    "version": 3,
+    "updated_at": "2026-02-19T07:10:00Z",
     "updated_by": {
       "type": "partner",
       "id": "ops-admin"
     },
     "controls": {
-      "maintenance_mode_enabled": false,
-      "maintenance_reason_code": null,
+      "maintenance_mode_enabled": true,
+      "maintenance_reason_code": "maintenance_window",
       "freeze_until": null,
       "freeze_reason_code": null,
       "freeze_active": false,
-      "last_admin_action_at": null,
-      "last_admin_action_by": null
+      "last_admin_action_at": "2026-02-19T07:10:00Z",
+      "last_admin_action_by": {
+        "type": "partner",
+        "id": "ops-admin"
+      }
     }
   },
   "audit_entry": {
-    "audit_id": "rollout_policy_000002",
-    "operation_id": "partnerProgram.vault_export.rollout_policy.upsert",
-    "occurred_at": "2026-02-19T06:40:00Z",
+    "audit_id": "rollout_policy_000003",
+    "operation_id": "partnerProgram.vault_export.rollout_policy.admin_action",
+    "occurred_at": "2026-02-19T07:10:00Z",
     "actor": {
       "type": "partner",
       "id": "ops-admin"
     },
     "policy_before": {
-      "allowlist": ["swapgraph"],
-      "min_plan_id": "pro",
-      "version": 1,
-      "controls": {
-        "maintenance_mode_enabled": false,
-        "maintenance_reason_code": null,
-        "freeze_until": null,
-        "freeze_reason_code": null
-      }
-    },
-    "policy_after": {
       "allowlist": ["otherpartner", "swapgraph"],
       "min_plan_id": "pro",
       "version": 2,
@@ -52,11 +44,27 @@
         "freeze_reason_code": null
       }
     },
+    "policy_after": {
+      "allowlist": ["otherpartner", "swapgraph"],
+      "min_plan_id": "pro",
+      "version": 3,
+      "controls": {
+        "maintenance_mode_enabled": true,
+        "maintenance_reason_code": "maintenance_window",
+        "freeze_until": null,
+        "freeze_reason_code": null
+      }
+    },
     "change_summary": {
-      "allowlist_changed": true,
+      "allowlist_changed": false,
       "min_plan_changed": false,
-      "maintenance_mode_changed": false,
+      "maintenance_mode_changed": true,
       "freeze_window_changed": false
+    },
+    "admin_action": {
+      "action_type": "set_maintenance_mode",
+      "maintenance_mode_enabled": true,
+      "maintenance_reason_code": "maintenance_window"
     }
   }
 }

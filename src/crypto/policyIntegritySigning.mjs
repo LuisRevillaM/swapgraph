@@ -759,6 +759,13 @@ function normalizePartnerProgramRolloutPolicyForExport(policy) {
       }
     : null;
 
+  const lastAdminActionBy = policy?.controls?.last_admin_action_by && typeof policy.controls.last_admin_action_by === 'object'
+    ? {
+        type: typeof policy.controls.last_admin_action_by.type === 'string' ? policy.controls.last_admin_action_by.type : null,
+        id: typeof policy.controls.last_admin_action_by.id === 'string' ? policy.controls.last_admin_action_by.id : null
+      }
+    : null;
+
   return {
     policy_key: typeof policy?.policy_key === 'string' && policy.policy_key.trim() ? policy.policy_key.trim() : 'vault_reconciliation_export',
     source: typeof policy?.source === 'string' && policy.source.trim() ? policy.source.trim() : 'env',
@@ -767,7 +774,24 @@ function normalizePartnerProgramRolloutPolicyForExport(policy) {
     min_plan_id: typeof policy?.min_plan_id === 'string' && policy.min_plan_id.trim() ? policy.min_plan_id.trim().toLowerCase() : null,
     version: Number.isFinite(policy?.version) ? Number(policy.version) : null,
     updated_at: typeof policy?.updated_at === 'string' && policy.updated_at.trim() ? policy.updated_at.trim() : null,
-    updated_by: updatedBy && updatedBy.type && updatedBy.id ? updatedBy : null
+    updated_by: updatedBy && updatedBy.type && updatedBy.id ? updatedBy : null,
+    controls: {
+      maintenance_mode_enabled: policy?.controls?.maintenance_mode_enabled === true,
+      maintenance_reason_code: typeof policy?.controls?.maintenance_reason_code === 'string' && policy.controls.maintenance_reason_code.trim()
+        ? policy.controls.maintenance_reason_code.trim()
+        : null,
+      freeze_until: typeof policy?.controls?.freeze_until === 'string' && policy.controls.freeze_until.trim()
+        ? policy.controls.freeze_until.trim()
+        : null,
+      freeze_reason_code: typeof policy?.controls?.freeze_reason_code === 'string' && policy.controls.freeze_reason_code.trim()
+        ? policy.controls.freeze_reason_code.trim()
+        : null,
+      freeze_active: policy?.controls?.freeze_active === true,
+      last_admin_action_at: typeof policy?.controls?.last_admin_action_at === 'string' && policy.controls.last_admin_action_at.trim()
+        ? policy.controls.last_admin_action_at.trim()
+        : null,
+      last_admin_action_by: lastAdminActionBy && lastAdminActionBy.type && lastAdminActionBy.id ? lastAdminActionBy : null
+    }
   };
 }
 

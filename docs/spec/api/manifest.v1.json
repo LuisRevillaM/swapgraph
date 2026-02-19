@@ -369,6 +369,23 @@
       }
     },
     {
+      "method": "POST",
+      "path": "/partner-program/vault-export/rollout-policy/admin-action",
+      "operation_id": "partnerProgram.vault_export.rollout_policy.admin_action",
+      "idempotency_required": true,
+      "request_schema": "PartnerProgramVaultExportRolloutPolicyAdminActionRequest.schema.json",
+      "response_schema": "PartnerProgramVaultExportRolloutPolicyAdminActionResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
       "method": "GET",
       "path": "/partner-program/vault-export/rollout-policy-audit/export",
       "operation_id": "partnerProgram.vault_export.rollout_policy_audit.export",

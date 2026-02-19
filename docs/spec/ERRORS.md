@@ -49,3 +49,6 @@ Notes:
   - `partner_admin_required`
   - `partner_rollout_allowlist_invalid`
   - `partner_rollout_min_plan_invalid`
+  - `partner_rollout_frozen`
+  - `partner_rollout_maintenance_mode`
+  - `partner_rollout_admin_action_invalid`

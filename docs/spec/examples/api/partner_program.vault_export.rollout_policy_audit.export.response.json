@@ -18,6 +18,15 @@
     "updated_by": {
       "type": "partner",
       "id": "ops-admin"
+    },
+    "controls": {
+      "maintenance_mode_enabled": false,
+      "maintenance_reason_code": null,
+      "freeze_until": null,
+      "freeze_reason_code": null,
+      "freeze_active": false,
+      "last_admin_action_at": null,
+      "last_admin_action_by": null
     }
   },
   "total_filtered": 2,
@@ -33,16 +42,30 @@
       "policy_before": {
         "allowlist": [],
         "min_plan_id": null,
-        "version": 0
+        "version": 0,
+        "controls": {
+          "maintenance_mode_enabled": false,
+          "maintenance_reason_code": null,
+          "freeze_until": null,
+          "freeze_reason_code": null
+        }
       },
       "policy_after": {
         "allowlist": ["swapgraph"],
         "min_plan_id": "pro",
-        "version": 1
+        "version": 1,
+        "controls": {
+          "maintenance_mode_enabled": false,
+          "maintenance_reason_code": null,
+          "freeze_until": null,
+          "freeze_reason_code": null
+        }
       },
       "change_summary": {
         "allowlist_changed": true,
-        "min_plan_changed": true
+        "min_plan_changed": true,
+        "maintenance_mode_changed": false,
+        "freeze_window_changed": false
       }
     }
   ],

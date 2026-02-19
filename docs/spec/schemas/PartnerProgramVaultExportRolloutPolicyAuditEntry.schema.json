@@ -15,13 +15,19 @@
   ],
   "properties": {
     "audit_id": { "type": "string", "pattern": "^rollout_policy_[0-9]{6}$" },
-    "operation_id": { "type": "string", "const": "partnerProgram.vault_export.rollout_policy.upsert" },
+    "operation_id": {
+      "type": "string",
+      "enum": [
+        "partnerProgram.vault_export.rollout_policy.upsert",
+        "partnerProgram.vault_export.rollout_policy.admin_action"
+      ]
+    },
     "occurred_at": { "type": "string", "format": "date-time" },
     "actor": { "$ref": "ActorRef.schema.json" },
     "policy_before": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["allowlist", "min_plan_id", "version"],
+      "required": ["allowlist", "min_plan_id", "version", "controls"],
       "properties": {
         "allowlist": {
           "type": "array",
@@ -29,13 +35,24 @@
           "uniqueItems": true
         },
         "min_plan_id": { "type": ["string", "null"], "enum": [null, "starter", "pro", "enterprise"] },
-        "version": { "type": "integer", "minimum": 0 }
+        "version": { "type": "integer", "minimum": 0 },
+        "controls": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["maintenance_mode_enabled", "maintenance_reason_code", "freeze_until", "freeze_reason_code"],
+          "properties": {
+            "maintenance_mode_enabled": { "type": "boolean" },
+            "maintenance_reason_code": { "type": ["string", "null"], "minLength": 1 },
+            "freeze_until": { "type": ["string", "null"], "format": "date-time" },
+            "freeze_reason_code": { "type": ["string", "null"], "minLength": 1 }
+          }
+        }
       }
     },
     "policy_after": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["allowlist", "min_plan_id", "version"],
+      "required": ["allowlist", "min_plan_id", "version", "controls"],
       "properties": {
         "allowlist": {
           "type": "array",
@@ -43,16 +60,49 @@
           "uniqueItems": true
         },
         "min_plan_id": { "type": ["string", "null"], "enum": [null, "starter", "pro", "enterprise"] },
-        "version": { "type": "integer", "minimum": 1 }
+        "version": { "type": "integer", "minimum": 1 },
+        "controls": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["maintenance_mode_enabled", "maintenance_reason_code", "freeze_until", "freeze_reason_code"],
+          "properties": {
+            "maintenance_mode_enabled": { "type": "boolean" },
+            "maintenance_reason_code": { "type": ["string", "null"], "minLength": 1 },
+            "freeze_until": { "type": ["string", "null"], "format": "date-time" },
+            "freeze_reason_code": { "type": ["string", "null"], "minLength": 1 }
+          }
+        }
       }
     },
     "change_summary": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["allowlist_changed", "min_plan_changed"],
+      "required": [
+        "allowlist_changed",
+        "min_plan_changed",
+        "maintenance_mode_changed",
+        "freeze_window_changed"
+      ],
       "properties": {
         "allowlist_changed": { "type": "boolean" },
-        "min_plan_changed": { "type": "boolean" }
+        "min_plan_changed": { "type": "boolean" },
+        "maintenance_mode_changed": { "type": "boolean" },
+        "freeze_window_changed": { "type": "boolean" }
+      }
+    },
+    "admin_action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["action_type"],
+      "properties": {
+        "action_type": {
+          "type": "string",
+          "enum": ["set_maintenance_mode", "set_freeze_window", "clear_controls"]
+        },
+        "maintenance_mode_enabled": { "type": "boolean" },
+        "maintenance_reason_code": { "type": ["string", "null"], "minLength": 1 },
+        "freeze_until": { "type": ["string", "null"], "format": "date-time" },
+        "freeze_reason_code": { "type": ["string", "null"], "minLength": 1 }
       }
     }
   }

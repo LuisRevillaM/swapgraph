@@ -40,6 +40,11 @@
         "partner_program_enforced",
         "checkpoint_enforced",
         "checkpoint_retention_days",
+        "maintenance_mode_enabled",
+        "maintenance_reason_code",
+        "freeze_until",
+        "freeze_reason_code",
+        "freeze_active",
         "allowlist_enforced",
         "partner_allowed",
         "min_plan_id",
@@ -49,6 +54,11 @@
         "partner_program_enforced": { "type": "boolean" },
         "checkpoint_enforced": { "type": "boolean" },
         "checkpoint_retention_days": { "type": "integer", "minimum": 1 },
+        "maintenance_mode_enabled": { "type": "boolean" },
+        "maintenance_reason_code": { "type": ["string", "null"], "minLength": 1 },
+        "freeze_until": { "type": ["string", "null"], "format": "date-time" },
+        "freeze_reason_code": { "type": ["string", "null"], "minLength": 1 },
+        "freeze_active": { "type": "boolean" },
         "allowlist_enforced": { "type": "boolean" },
         "partner_allowed": { "type": "boolean" },
         "min_plan_id": { "type": ["string", "null"], "enum": [null, "starter", "pro", "enterprise"] },
@@ -67,7 +77,8 @@
           "partner_quota_exceeded",
           "partner_rollout_not_allowed",
           "partner_plan_insufficient",
-          "partner_rollout_config_invalid"
+          "partner_rollout_config_invalid",
+          "partner_rollout_maintenance_mode"
         ]
       }
     }
