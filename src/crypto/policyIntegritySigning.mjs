@@ -1003,12 +1003,16 @@ function normalizePartnerProgramRolloutPolicyDiagnosticsExportQuery(query) {
 
   if (typeof query?.include_recommended_actions === 'boolean') out.include_recommended_actions = query.include_recommended_actions;
   if (typeof query?.include_runbook_hooks === 'boolean') out.include_runbook_hooks = query.include_runbook_hooks;
+  if (typeof query?.include_automation_hints === 'boolean') out.include_automation_hints = query.include_automation_hints;
 
   const maintenanceStaleAfter = Number.parseInt(String(query?.maintenance_stale_after_minutes ?? ''), 10);
   if (Number.isFinite(maintenanceStaleAfter) && maintenanceStaleAfter > 0) out.maintenance_stale_after_minutes = maintenanceStaleAfter;
 
   const freezeExpiringSoon = Number.parseInt(String(query?.freeze_expiring_soon_minutes ?? ''), 10);
   if (Number.isFinite(freezeExpiringSoon) && freezeExpiringSoon > 0) out.freeze_expiring_soon_minutes = freezeExpiringSoon;
+
+  const automationMaxActions = Number.parseInt(String(query?.automation_max_actions ?? ''), 10);
+  if (Number.isFinite(automationMaxActions) && automationMaxActions > 0) out.automation_max_actions = automationMaxActions;
 
   if (typeof query?.attestation_after === 'string' && query.attestation_after.trim()) out.attestation_after = query.attestation_after.trim();
   if (typeof query?.checkpoint_after === 'string' && query.checkpoint_after.trim()) out.checkpoint_after = query.checkpoint_after.trim();
@@ -1124,6 +1128,36 @@ function normalizePartnerProgramRolloutPolicyDiagnosticsAlerts(alerts) {
       details
     };
   });
+}
+
+function normalizePartnerProgramRolloutPolicyDiagnosticsAutomationHints(automationHints) {
+  if (!automationHints || typeof automationHints !== 'object' || Array.isArray(automationHints)) {
+    return null;
+  }
+
+  const sourceAlertCodes = Array.isArray(automationHints.source_alert_codes)
+    ? automationHints.source_alert_codes.filter(x => typeof x === 'string' && x.trim()).map(x => x.trim())
+    : [];
+
+  const actionQueue = Array.isArray(automationHints.action_queue)
+    ? automationHints.action_queue.map(action => ({
+        hook_id: typeof action?.hook_id === 'string' ? action.hook_id : null,
+        reason_code: typeof action?.reason_code === 'string' ? action.reason_code : null,
+        priority: typeof action?.priority === 'string' ? action.priority : null
+      }))
+    : [];
+
+  const maxActionsPerRun = Number.parseInt(String(automationHints?.safety?.max_actions_per_run ?? ''), 10);
+
+  return {
+    requires_operator_confirmation: automationHints.requires_operator_confirmation === true,
+    source_alert_codes: sourceAlertCodes,
+    action_queue: actionQueue,
+    safety: {
+      idempotency_required: automationHints?.safety?.idempotency_required !== false,
+      max_actions_per_run: Number.isFinite(maxActionsPerRun) && maxActionsPerRun > 0 ? maxActionsPerRun : 1
+    }
+  };
 }
 
 function buildPartnerProgramRolloutPolicyDiagnosticsExportAttestation({ query, exportHash }) {
@@ -1318,6 +1352,9 @@ function partnerProgramRolloutPolicyDiagnosticsExportSignablePayload(payload) {
     signature: payload?.signature
   };
 
+  const automationHints = normalizePartnerProgramRolloutPolicyDiagnosticsAutomationHints(payload?.automation_hints);
+  if (automationHints) out.automation_hints = automationHints;
+
   const attestation = normalizeExportAttestation(payload?.attestation);
   if (attestation) out.attestation = attestation;
 
@@ -1334,9 +1371,10 @@ export function buildPartnerProgramRolloutPolicyDiagnosticsExportHash({
   lifecycleSignals,
   alerts,
   recommendedActions,
-  runbookHooks
+  runbookHooks,
+  automationHints
 }) {
-  return sha256HexCanonical({
+  const out = {
     query: normalizePartnerProgramRolloutPolicyDiagnosticsExportQuery(query),
     policy: normalizePartnerProgramRolloutPolicyForExport(policy),
     overlays: normalizePartnerProgramRolloutPolicyDiagnosticsOverlays(overlays),
@@ -1344,7 +1382,12 @@ export function buildPartnerProgramRolloutPolicyDiagnosticsExportHash({
     alerts: normalizePartnerProgramRolloutPolicyDiagnosticsAlerts(alerts),
     recommended_actions: normalizePartnerProgramRolloutPolicyDiagnosticsActions(recommendedActions),
     runbook_hooks: normalizePartnerProgramRolloutPolicyDiagnosticsRunbookHooks(runbookHooks)
-  });
+  };
+
+  const normalizedAutomationHints = normalizePartnerProgramRolloutPolicyDiagnosticsAutomationHints(automationHints);
+  if (normalizedAutomationHints) out.automation_hints = normalizedAutomationHints;
+
+  return sha256HexCanonical(out);
 }
 
 export function buildSignedPartnerProgramRolloutPolicyDiagnosticsExportPayload({
@@ -1356,6 +1399,7 @@ export function buildSignedPartnerProgramRolloutPolicyDiagnosticsExportPayload({
   alerts,
   recommendedActions,
   runbookHooks,
+  automationHints,
   withAttestation = false,
   withCheckpoint = false,
   keyId
@@ -1367,6 +1411,7 @@ export function buildSignedPartnerProgramRolloutPolicyDiagnosticsExportPayload({
   const normalizedAlerts = normalizePartnerProgramRolloutPolicyDiagnosticsAlerts(alerts);
   const normalizedActions = normalizePartnerProgramRolloutPolicyDiagnosticsActions(recommendedActions);
   const normalizedHooks = normalizePartnerProgramRolloutPolicyDiagnosticsRunbookHooks(runbookHooks);
+  const normalizedAutomationHints = normalizePartnerProgramRolloutPolicyDiagnosticsAutomationHints(automationHints);
 
   const exportHash = buildPartnerProgramRolloutPolicyDiagnosticsExportHash({
     query: normalizedQuery,
@@ -1375,7 +1420,8 @@ export function buildSignedPartnerProgramRolloutPolicyDiagnosticsExportPayload({
     lifecycleSignals: normalizedLifecycleSignals,
     alerts: normalizedAlerts,
     recommendedActions: normalizedActions,
-    runbookHooks: normalizedHooks
+    runbookHooks: normalizedHooks,
+    automationHints: normalizedAutomationHints
   });
 
   const payload = {
@@ -1389,6 +1435,10 @@ export function buildSignedPartnerProgramRolloutPolicyDiagnosticsExportPayload({
     runbook_hooks: normalizedHooks,
     export_hash: exportHash
   };
+
+  if (normalizedAutomationHints) {
+    payload.automation_hints = normalizedAutomationHints;
+  }
 
   if (withAttestation) {
     payload.attestation = buildPartnerProgramRolloutPolicyDiagnosticsExportAttestation({
@@ -1420,7 +1470,8 @@ export function verifyPartnerProgramRolloutPolicyDiagnosticsExportPayload(payloa
     lifecycleSignals: payload.lifecycle_signals,
     alerts: payload.alerts,
     recommendedActions: payload.recommended_actions,
-    runbookHooks: payload.runbook_hooks
+    runbookHooks: payload.runbook_hooks,
+    automationHints: payload.automation_hints
   });
 
   if (payload.export_hash !== expectedHash) {
@@ -1471,7 +1522,8 @@ export function verifyPartnerProgramRolloutPolicyDiagnosticsExportPayloadWithPub
     lifecycleSignals: payload.lifecycle_signals,
     alerts: payload.alerts,
     recommendedActions: payload.recommended_actions,
-    runbookHooks: payload.runbook_hooks
+    runbookHooks: payload.runbook_hooks,
+    automationHints: payload.automation_hints
   });
 
   if (payload.export_hash !== expectedHash) {

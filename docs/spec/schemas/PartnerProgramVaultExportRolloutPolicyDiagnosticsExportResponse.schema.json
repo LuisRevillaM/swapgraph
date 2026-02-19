@@ -28,8 +28,10 @@
         "exported_at_iso": { "type": "string", "format": "date-time" },
         "include_recommended_actions": { "type": "boolean" },
         "include_runbook_hooks": { "type": "boolean" },
+        "include_automation_hints": { "type": "boolean" },
         "maintenance_stale_after_minutes": { "type": "integer", "minimum": 1, "maximum": 10080 },
         "freeze_expiring_soon_minutes": { "type": "integer", "minimum": 1, "maximum": 10080 },
+        "automation_max_actions": { "type": "integer", "minimum": 1, "maximum": 10 },
         "attestation_after": {
           "type": "string",
           "pattern": "^[a-f0-9]{64}$"
@@ -107,6 +109,52 @@
             "enum": ["maintenance_mode_active", "freeze_window_active"]
           },
           "details": { "type": "object" }
+        }
+      }
+    },
+    "automation_hints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requires_operator_confirmation", "source_alert_codes", "action_queue", "safety"],
+      "properties": {
+        "requires_operator_confirmation": { "type": "boolean" },
+        "source_alert_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["maintenance_mode_stale", "freeze_window_expiring_soon"]
+          }
+        },
+        "action_queue": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["hook_id", "reason_code", "priority"],
+            "properties": {
+              "hook_id": {
+                "type": "string",
+                "enum": ["disable_maintenance_mode", "clear_freeze_window", "clear_controls", "observe_only"]
+              },
+              "reason_code": {
+                "type": "string",
+                "enum": ["maintenance_mode_active", "freeze_window_active", "no_action_required"]
+              },
+              "priority": {
+                "type": "string",
+                "enum": ["high", "normal"]
+              }
+            }
+          }
+        },
+        "safety": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["idempotency_required", "max_actions_per_run"],
+          "properties": {
+            "idempotency_required": { "type": "boolean" },
+            "max_actions_per_run": { "type": "integer", "minimum": 1, "maximum": 10 }
+          }
         }
       }
     },

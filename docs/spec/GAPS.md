@@ -149,7 +149,8 @@ Each item here must become at least one of:
 - Resolved (fixtures-first, partial): M61 (operator runbook hooks + deterministic signed rollout diagnostics export surface for control-plane state).
 - Resolved (fixtures-first, partial): M62 (rollout diagnostics export continuity + retention hardening: signed attestation/checkpoint chaining, stateful checkpoint continuation validation, deterministic checkpoint mismatch/expiry reason codes, and diagnostics checkpoint retention controls).
 - Resolved (fixtures-first, partial): M63 (rollout diagnostics lifecycle hardening: signed lifecycle telemetry + deterministic stale-control alerts + threshold-validated diagnostics checks with continuity compatibility).
-- Remaining: broader commercial governance controls beyond diagnostics/audit lifecycle/continuity hardening.
+- Resolved (fixtures-first, partial): M64 (rollout diagnostics automation-hints hardening: signed operator automation planning payloads + bounded action-queue controls + deterministic automation parameter validation).
+- Remaining: broader commercial governance controls beyond diagnostics/audit/automation-hints lifecycle and continuity hardening.
 
 ---
 

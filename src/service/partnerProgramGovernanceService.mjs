@@ -241,8 +241,10 @@ function checkpointContextFromPartnerProgramRolloutPolicyDiagnosticsExportQuery(
   return {
     include_recommended_actions: parseOptionalBoolean(query?.include_recommended_actions) !== false,
     include_runbook_hooks: parseOptionalBoolean(query?.include_runbook_hooks) !== false,
+    include_automation_hints: parseOptionalBoolean(query?.include_automation_hints) === true,
     maintenance_stale_after_minutes: parseOptionalInteger(query?.maintenance_stale_after_minutes),
-    freeze_expiring_soon_minutes: parseOptionalInteger(query?.freeze_expiring_soon_minutes)
+    freeze_expiring_soon_minutes: parseOptionalInteger(query?.freeze_expiring_soon_minutes),
+    automation_max_actions: parseOptionalInteger(query?.automation_max_actions)
   };
 }
 
@@ -261,6 +263,24 @@ function normalizeDiagnosticsAlertThresholdMinutes({
       error: {
         reason_code: 'partner_rollout_diagnostics_threshold_invalid',
         field: fieldName,
+        value,
+        min,
+        max
+      }
+    };
+  }
+  return { ok: true, value: parsed };
+}
+
+function normalizeDiagnosticsAutomationMaxActions({ value, defaultValue = 2, min = 1, max = 10 }) {
+  if (value === null || value === undefined || value === '') return { ok: true, value: defaultValue };
+  const parsed = parseOptionalInteger(value);
+  if (!Number.isFinite(parsed) || parsed < min || parsed > max) {
+    return {
+      ok: false,
+      error: {
+        reason_code: 'partner_rollout_diagnostics_automation_invalid',
+        field: 'automation_max_actions',
         value,
         min,
         max
@@ -348,6 +368,40 @@ function buildRolloutPolicyDiagnosticsAlerts({
   }
 
   return out;
+}
+
+function buildRolloutPolicyDiagnosticsAutomationHints({ recommendedActions, alerts, maxActions }) {
+  const queue = [];
+  const seen = new Set();
+
+  for (const action of recommendedActions ?? []) {
+    const hookId = normalizeOptionalString(action?.runbook_hook_id);
+    if (!hookId || hookId === 'observe_only' || seen.has(hookId)) continue;
+    seen.add(hookId);
+
+    const reasonCode = normalizeOptionalString(action?.reason_code) ?? 'no_action_required';
+    const priority = reasonCode === 'maintenance_mode_active' || reasonCode === 'freeze_window_active'
+      ? 'high'
+      : 'normal';
+
+    queue.push({
+      hook_id: hookId,
+      reason_code: reasonCode,
+      priority
+    });
+
+    if (queue.length >= maxActions) break;
+  }
+
+  return {
+    requires_operator_confirmation: queue.length > 0,
+    source_alert_codes: (alerts ?? []).map(alert => alert?.code).filter(x => typeof x === 'string' && x),
+    action_queue: queue,
+    safety: {
+      idempotency_required: true,
+      max_actions_per_run: maxActions
+    }
+  };
 }
 
 function checkpointContextKey(context) {
@@ -968,6 +1022,19 @@ export class PartnerProgramGovernanceService {
 
     const includeRecommendedActions = parseOptionalBoolean(query?.include_recommended_actions) !== false;
     const includeRunbookHooks = parseOptionalBoolean(query?.include_runbook_hooks) !== false;
+    const includeAutomationHints = parseOptionalBoolean(query?.include_automation_hints) === true;
+
+    const automationMaxActionsParsed = normalizeDiagnosticsAutomationMaxActions({
+      value: query?.automation_max_actions,
+      defaultValue: 2
+    });
+    if (includeAutomationHints && !automationMaxActionsParsed.ok) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'invalid diagnostics automation parameter', automationMaxActionsParsed.error)
+      };
+    }
+    const automationMaxActions = automationMaxActionsParsed.value;
 
     const maintenanceStaleThresholdParsed = normalizeDiagnosticsAlertThresholdMinutes({
       value: query?.maintenance_stale_after_minutes,
@@ -1121,6 +1188,13 @@ export class PartnerProgramGovernanceService {
     const runbookHooks = includeRunbookHooks
       ? buildRolloutPolicyDiagnosticsRunbookHooks()
       : [];
+    const automationHints = includeAutomationHints
+      ? buildRolloutPolicyDiagnosticsAutomationHints({
+          recommendedActions,
+          alerts,
+          maxActions: automationMaxActions
+        })
+      : null;
 
     const withAttestation = checkpointRequired || Boolean(attestationAfter);
     const withCheckpoint = checkpointRequired && withAttestation;
@@ -1134,6 +1208,7 @@ export class PartnerProgramGovernanceService {
       alerts,
       recommendedActions,
       runbookHooks,
+      automationHints,
       withAttestation,
       withCheckpoint
     });

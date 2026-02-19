@@ -54,3 +54,4 @@ Notes:
   - `partner_rollout_maintenance_mode`
   - `partner_rollout_admin_action_invalid`
   - `partner_rollout_diagnostics_threshold_invalid`
+  - `partner_rollout_diagnostics_automation_invalid`
