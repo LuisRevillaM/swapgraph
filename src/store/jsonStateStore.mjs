@@ -26,7 +26,9 @@ export class JsonStateStore {
       policy_audit_export_checkpoints: {},
       settlement_vault_export_checkpoints: {},
       partner_program: {},
-      partner_program_usage: {}
+      partner_program_usage: {},
+      partner_program_rollout_policy: {},
+      partner_program_rollout_policy_audit: []
     };
   }
 
@@ -49,7 +51,9 @@ export class JsonStateStore {
         policy_audit_export_checkpoints: {},
         settlement_vault_export_checkpoints: {},
         partner_program: {},
-        partner_program_usage: {}
+        partner_program_usage: {},
+        partner_program_rollout_policy: {},
+        partner_program_rollout_policy_audit: []
       };
       return;
     }
@@ -74,6 +78,8 @@ export class JsonStateStore {
     this.state.settlement_vault_export_checkpoints ||= {};
     this.state.partner_program ||= {};
     this.state.partner_program_usage ||= {};
+    this.state.partner_program_rollout_policy ||= {};
+    this.state.partner_program_rollout_policy_audit ||= [];
   }
 
   save() {

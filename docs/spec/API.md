@@ -74,6 +74,14 @@ Settlement endpoints:
   - paginated responses include `total_filtered`, optional `next_cursor`, signed `attestation`, optional signed `checkpoint`, and optional `partner_program` usage metadata when program enforcement is active
 - `GET /partner-program/vault-export`
   - partner self-serve read surface for vault export entitlement, quota usage, and rollout-policy visibility
+- `GET /partner-program/vault-export/rollout-policy`
+  - returns the effective rollout policy contract (`source`, `allowlist`, `min_plan_id`, `version`, `updated_*`)
+- `POST /partner-program/vault-export/rollout-policy`
+  - partner-admin controlled rollout policy mutation (`allowlist`, `min_plan_id`), idempotent by key
+  - writes deterministic policy-change audit entries
+- `GET /partner-program/vault-export/rollout-policy-audit/export`
+  - partner-admin signed export of rollout policy-change audit entries (`export_hash` + detached signature)
+  - supports filter/pagination (`from_iso`, `to_iso`, `limit`, `cursor_after`)
 
 Receipt endpoints:
 - `GET /receipts/{cycle_id}`

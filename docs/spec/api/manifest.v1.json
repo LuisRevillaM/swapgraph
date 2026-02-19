@@ -337,6 +337,55 @@
     },
     {
       "method": "GET",
+      "path": "/partner-program/vault-export/rollout-policy",
+      "operation_id": "partnerProgram.vault_export.rollout_policy.get",
+      "idempotency_required": false,
+      "response_schema": "PartnerProgramVaultExportRolloutPolicyGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/partner-program/vault-export/rollout-policy",
+      "operation_id": "partnerProgram.vault_export.rollout_policy.upsert",
+      "idempotency_required": true,
+      "request_schema": "PartnerProgramVaultExportRolloutPolicyUpsertRequest.schema.json",
+      "response_schema": "PartnerProgramVaultExportRolloutPolicyUpsertResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/partner-program/vault-export/rollout-policy-audit/export",
+      "operation_id": "partnerProgram.vault_export.rollout_policy_audit.export",
+      "idempotency_required": false,
+      "response_schema": "PartnerProgramVaultExportRolloutPolicyAuditExportResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
       "path": "/receipts/{cycle_id}",
       "operation_id": "receipts.get",
       "idempotency_required": false,

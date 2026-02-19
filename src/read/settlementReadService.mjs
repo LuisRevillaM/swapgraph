@@ -7,6 +7,10 @@ import {
   evaluateQuietHoursPolicy
 } from '../core/tradingPolicyBoundaries.mjs';
 import { buildSignedSettlementVaultReconciliationExportPayload } from '../crypto/policyIntegritySigning.mjs';
+import {
+  evaluateVaultExportRolloutForPartner,
+  normalizePlanId
+} from '../partnerProgram/vaultExportRolloutPolicy.mjs';
 
 function errorResponse(correlationId, code, message, details = {}) {
   return { correlation_id: correlationId, error: { code, message, details } };
@@ -269,78 +273,12 @@ function quotaDayFromIso(iso) {
   return new Date(ms).toISOString().slice(0, 10);
 }
 
-function normalizePlanId(planId) {
-  return typeof planId === 'string' && planId.trim() ? planId.trim().toLowerCase() : null;
-}
-
-function planRank(planId) {
-  if (planId === 'starter') return 1;
-  if (planId === 'pro') return 2;
-  if (planId === 'enterprise') return 3;
-  return null;
-}
-
-function parsePartnerAllowlist() {
-  const raw = process.env.SETTLEMENT_VAULT_EXPORT_PARTNER_ALLOWLIST ?? '';
-  const items = String(raw)
-    .split(',')
-    .map(x => x.trim())
-    .filter(Boolean);
-  return new Set(items);
-}
-
-function parseMinimumPartnerPlanRequirement() {
-  const raw = process.env.SETTLEMENT_VAULT_EXPORT_MIN_PLAN ?? '';
-  const normalized = normalizePlanId(raw);
-  if (!normalized) return { ok: true, min_plan_id: null };
-
-  if (planRank(normalized) === null) {
-    return {
-      ok: false,
-      error: {
-        reason_code: 'partner_rollout_config_invalid',
-        min_plan_id: normalized
-      }
-    };
-  }
-
-  return { ok: true, min_plan_id: normalized };
-}
-
-function buildPartnerRolloutPolicy({ partnerId, partnerPlanId }) {
-  const allowlist = parsePartnerAllowlist();
-  const allowlistEnforced = allowlist.size > 0;
-  const partnerAllowed = !allowlistEnforced || allowlist.has(partnerId);
-
-  const minPlanCfg = parseMinimumPartnerPlanRequirement();
-  if (!minPlanCfg.ok) {
-    return {
-      ok: false,
-      error: minPlanCfg.error,
-      policy: {
-        allowlist_enforced: allowlistEnforced,
-        partner_allowed: partnerAllowed,
-        min_plan_id: minPlanCfg.error?.min_plan_id ?? null,
-        plan_meets_minimum: null
-      }
-    };
-  }
-
-  const planIdNormalized = normalizePlanId(partnerPlanId);
-  const minPlanId = minPlanCfg.min_plan_id;
-  const planMeetsMinimum = minPlanId
-    ? (planRank(planIdNormalized) ?? -1) >= (planRank(minPlanId) ?? Number.MAX_SAFE_INTEGER)
-    : true;
-
-  return {
-    ok: true,
-    policy: {
-      allowlist_enforced: allowlistEnforced,
-      partner_allowed: partnerAllowed,
-      min_plan_id: minPlanId,
-      plan_meets_minimum: planMeetsMinimum
-    }
-  };
+function buildPartnerRolloutPolicy({ store, partnerId, partnerPlanId }) {
+  return evaluateVaultExportRolloutForPartner({
+    store,
+    partnerId,
+    partnerPlanId
+  });
 }
 
 function ensureVaultExportCheckpointState(store) {
@@ -870,6 +808,7 @@ export class SettlementReadService {
       const usedSafe = Number.isFinite(used) && used >= 0 ? used : 0;
 
       const rollout = buildPartnerRolloutPolicy({
+        store: this.store,
         partnerId: viewActor.id,
         partnerPlanId: program?.plan_id ?? null
       });
@@ -1033,6 +972,7 @@ export class SettlementReadService {
     const dailyLimit = parsePartnerProgramDailyLimit(program?.quotas?.vault_reconciliation_export_daily);
 
     const rollout = buildPartnerRolloutPolicy({
+      store: this.store,
       partnerId: actor.id,
       partnerPlanId: program?.plan_id ?? null
     });
@@ -1056,7 +996,12 @@ export class SettlementReadService {
       checkpoint_retention_days: settlementVaultExportCheckpointRetentionDays(),
       ...(
         rollout.ok
-          ? rollout.policy
+          ? {
+              allowlist_enforced: rollout.policy?.allowlist_enforced ?? false,
+              partner_allowed: rollout.policy?.partner_allowed ?? true,
+              min_plan_id: rollout.policy?.min_plan_id ?? null,
+              plan_meets_minimum: rollout.policy?.plan_meets_minimum ?? null
+            }
           : {
               allowlist_enforced: rollout.policy?.allowlist_enforced ?? false,
               partner_allowed: rollout.policy?.partner_allowed ?? true,

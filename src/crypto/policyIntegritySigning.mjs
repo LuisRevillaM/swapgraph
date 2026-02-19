@@ -729,6 +729,176 @@ export function verifyPolicyAuditExportPayloadWithPublicKeyPem({ payload, public
   });
 }
 
+function normalizePartnerProgramRolloutPolicyAuditExportQuery(query) {
+  const out = {};
+
+  if (typeof query?.from_iso === 'string' && query.from_iso.trim()) out.from_iso = query.from_iso.trim();
+  if (typeof query?.to_iso === 'string' && query.to_iso.trim()) out.to_iso = query.to_iso.trim();
+  if (typeof query?.now_iso === 'string' && query.now_iso.trim()) out.now_iso = query.now_iso.trim();
+  if (typeof query?.exported_at_iso === 'string' && query.exported_at_iso.trim()) out.exported_at_iso = query.exported_at_iso.trim();
+
+  const limit = Number.parseInt(String(query?.limit ?? ''), 10);
+  if (Number.isFinite(limit) && limit > 0) out.limit = Math.min(limit, 200);
+
+  if (typeof query?.cursor_after === 'string' && query.cursor_after.trim()) out.cursor_after = query.cursor_after.trim();
+
+  return out;
+}
+
+function normalizePartnerProgramRolloutPolicyForExport(policy) {
+  const allowlist = Array.isArray(policy?.allowlist)
+    ? Array.from(new Set(policy.allowlist.filter(x => typeof x === 'string' && x.trim()).map(x => x.trim()))).sort()
+    : [];
+
+  const updatedBy = policy?.updated_by && typeof policy.updated_by === 'object'
+    ? {
+        type: typeof policy.updated_by.type === 'string' ? policy.updated_by.type : null,
+        id: typeof policy.updated_by.id === 'string' ? policy.updated_by.id : null
+      }
+    : null;
+
+  return {
+    policy_key: typeof policy?.policy_key === 'string' && policy.policy_key.trim() ? policy.policy_key.trim() : 'vault_reconciliation_export',
+    source: typeof policy?.source === 'string' && policy.source.trim() ? policy.source.trim() : 'env',
+    allowlist,
+    allowlist_enforced: allowlist.length > 0,
+    min_plan_id: typeof policy?.min_plan_id === 'string' && policy.min_plan_id.trim() ? policy.min_plan_id.trim().toLowerCase() : null,
+    version: Number.isFinite(policy?.version) ? Number(policy.version) : null,
+    updated_at: typeof policy?.updated_at === 'string' && policy.updated_at.trim() ? policy.updated_at.trim() : null,
+    updated_by: updatedBy && updatedBy.type && updatedBy.id ? updatedBy : null
+  };
+}
+
+function partnerProgramRolloutPolicyAuditExportSignablePayload(payload) {
+  const out = {
+    exported_at: payload?.exported_at,
+    query: normalizePartnerProgramRolloutPolicyAuditExportQuery(payload?.query),
+    policy: normalizePartnerProgramRolloutPolicyForExport(payload?.policy),
+    total_filtered: Number.isFinite(payload?.total_filtered) ? Number(payload.total_filtered) : 0,
+    entries: payload?.entries ?? [],
+    export_hash: payload?.export_hash,
+    signature: payload?.signature
+  };
+
+  if (typeof payload?.next_cursor === 'string' && payload.next_cursor.trim()) out.next_cursor = payload.next_cursor.trim();
+
+  return out;
+}
+
+export function buildPartnerProgramRolloutPolicyAuditExportHash({ policy, entries, totalFiltered, query, nextCursor }) {
+  const input = {
+    policy: normalizePartnerProgramRolloutPolicyForExport(policy),
+    entries: entries ?? [],
+    total_filtered: Number.isFinite(totalFiltered) ? Number(totalFiltered) : 0,
+    query: normalizePartnerProgramRolloutPolicyAuditExportQuery(query)
+  };
+
+  if (typeof nextCursor === 'string' && nextCursor.trim()) input.next_cursor = nextCursor.trim();
+
+  return sha256HexCanonical(input);
+}
+
+export function buildSignedPartnerProgramRolloutPolicyAuditExportPayload({
+  exportedAt,
+  query,
+  policy,
+  entries,
+  totalFiltered,
+  nextCursor,
+  keyId
+}) {
+  const normalizedQuery = normalizePartnerProgramRolloutPolicyAuditExportQuery(query);
+  const normalizedPolicy = normalizePartnerProgramRolloutPolicyForExport(policy);
+  const normalizedNextCursor = typeof nextCursor === 'string' && nextCursor.trim() ? nextCursor.trim() : null;
+
+  const exportHash = buildPartnerProgramRolloutPolicyAuditExportHash({
+    policy: normalizedPolicy,
+    entries,
+    totalFiltered,
+    query: normalizedQuery,
+    nextCursor: normalizedNextCursor
+  });
+
+  const payload = {
+    exported_at: exportedAt,
+    query: normalizedQuery,
+    policy: normalizedPolicy,
+    total_filtered: Number.isFinite(totalFiltered) ? Number(totalFiltered) : 0,
+    entries: entries ?? [],
+    export_hash: exportHash
+  };
+
+  if (normalizedNextCursor) payload.next_cursor = normalizedNextCursor;
+
+  payload.signature = signPolicyIntegrityPayload(payload, { keyId });
+  return payload;
+}
+
+export function verifyPartnerProgramRolloutPolicyAuditExportPayload(payload) {
+  if (!payload || typeof payload !== 'object') {
+    return { ok: false, error: 'missing_payload' };
+  }
+
+  const expectedHash = buildPartnerProgramRolloutPolicyAuditExportHash({
+    policy: payload.policy,
+    entries: payload.entries,
+    totalFiltered: payload.total_filtered,
+    query: payload.query,
+    nextCursor: payload.next_cursor
+  });
+
+  if (payload.export_hash !== expectedHash) {
+    return {
+      ok: false,
+      error: 'hash_mismatch',
+      details: {
+        expected_hash: expectedHash,
+        provided_hash: payload.export_hash ?? null
+      }
+    };
+  }
+
+  const signable = partnerProgramRolloutPolicyAuditExportSignablePayload(payload);
+  const verified = verifyPolicyIntegrityPayloadSignature(signable);
+  if (!verified.ok) return verified;
+
+  return { ok: true };
+}
+
+export function verifyPartnerProgramRolloutPolicyAuditExportPayloadWithPublicKeyPem({ payload, publicKeyPem, keyId, alg }) {
+  if (!payload || typeof payload !== 'object') {
+    return { ok: false, error: 'missing_payload' };
+  }
+
+  const expectedHash = buildPartnerProgramRolloutPolicyAuditExportHash({
+    policy: payload.policy,
+    entries: payload.entries,
+    totalFiltered: payload.total_filtered,
+    query: payload.query,
+    nextCursor: payload.next_cursor
+  });
+
+  if (payload.export_hash !== expectedHash) {
+    return {
+      ok: false,
+      error: 'hash_mismatch',
+      details: {
+        expected_hash: expectedHash,
+        provided_hash: payload.export_hash ?? null
+      }
+    };
+  }
+
+  const signable = partnerProgramRolloutPolicyAuditExportSignablePayload(payload);
+
+  return verifyPolicyIntegrityPayloadSignatureWithPublicKeyPem({
+    payload: signable,
+    publicKeyPem,
+    keyId,
+    alg
+  });
+}
+
 function normalizeVaultReconciliationExportQuery(query) {
   const out = {};
 

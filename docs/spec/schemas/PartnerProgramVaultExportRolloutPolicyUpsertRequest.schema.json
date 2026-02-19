@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/PartnerProgramVaultExportRolloutPolicyUpsertRequest.schema.json",
+  "title": "PartnerProgramVaultExportRolloutPolicyUpsertRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["policy"],
+  "properties": {
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allowlist", "min_plan_id"],
+      "properties": {
+        "allowlist": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "min_plan_id": { "type": ["string", "null"], "enum": [null, "starter", "pro", "enterprise"] }
+      }
+    }
+  }
+}

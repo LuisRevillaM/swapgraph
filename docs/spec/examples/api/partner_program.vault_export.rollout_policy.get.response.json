@@ -1,0 +1,16 @@
+{
+  "correlation_id": "corr_partner_program_vault_export_rollout_policy",
+  "policy": {
+    "policy_key": "vault_reconciliation_export",
+    "source": "store",
+    "allowlist": ["otherpartner", "swapgraph"],
+    "allowlist_enforced": true,
+    "min_plan_id": "pro",
+    "version": 2,
+    "updated_at": "2026-02-19T06:40:00Z",
+    "updated_by": {
+      "type": "partner",
+      "id": "ops-admin"
+    }
+  }
+}

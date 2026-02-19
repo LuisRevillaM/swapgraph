@@ -1,0 +1,7 @@
+{
+  "occurred_at": "2026-02-19T06:40:00Z",
+  "policy": {
+    "allowlist": ["swapgraph", "otherpartner"],
+    "min_plan_id": "pro"
+  }
+}

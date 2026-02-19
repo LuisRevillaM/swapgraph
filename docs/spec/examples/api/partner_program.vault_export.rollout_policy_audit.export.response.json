@@ -1,0 +1,54 @@
+{
+  "correlation_id": "corr_partner_program_vault_export_rollout_policy_audit_export",
+  "exported_at": "2026-02-19T06:45:00Z",
+  "query": {
+    "from_iso": "2026-02-19T06:00:00Z",
+    "limit": 1
+  },
+  "policy": {
+    "policy_key": "vault_reconciliation_export",
+    "source": "store",
+    "allowlist": ["otherpartner", "swapgraph"],
+    "allowlist_enforced": true,
+    "min_plan_id": "pro",
+    "version": 2,
+    "updated_at": "2026-02-19T06:40:00Z",
+    "updated_by": {
+      "type": "partner",
+      "id": "ops-admin"
+    }
+  },
+  "total_filtered": 2,
+  "entries": [
+    {
+      "audit_id": "rollout_policy_000001",
+      "operation_id": "partnerProgram.vault_export.rollout_policy.upsert",
+      "occurred_at": "2026-02-19T06:30:00Z",
+      "actor": {
+        "type": "partner",
+        "id": "ops-admin"
+      },
+      "policy_before": {
+        "allowlist": [],
+        "min_plan_id": null,
+        "version": 0
+      },
+      "policy_after": {
+        "allowlist": ["swapgraph"],
+        "min_plan_id": "pro",
+        "version": 1
+      },
+      "change_summary": {
+        "allowlist_changed": true,
+        "min_plan_changed": true
+      }
+    }
+  ],
+  "next_cursor": "rollout_policy_000001",
+  "export_hash": "9c0b18d1724b0c7f9564fb05ecf71a0252ad4a5d8be6b47f3597a98a8f23c6d5",
+  "signature": {
+    "key_id": "dev-pi-k1",
+    "alg": "ed25519",
+    "sig": "MEQCIFAKE"
+  }
+}

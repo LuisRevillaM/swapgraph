@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/PartnerProgramVaultExportRolloutPolicyAuditEntry.schema.json",
+  "title": "PartnerProgramVaultExportRolloutPolicyAuditEntry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "audit_id",
+    "operation_id",
+    "occurred_at",
+    "actor",
+    "policy_before",
+    "policy_after",
+    "change_summary"
+  ],
+  "properties": {
+    "audit_id": { "type": "string", "pattern": "^rollout_policy_[0-9]{6}$" },
+    "operation_id": { "type": "string", "const": "partnerProgram.vault_export.rollout_policy.upsert" },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "actor": { "$ref": "ActorRef.schema.json" },
+    "policy_before": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allowlist", "min_plan_id", "version"],
+      "properties": {
+        "allowlist": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "min_plan_id": { "type": ["string", "null"], "enum": [null, "starter", "pro", "enterprise"] },
+        "version": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "policy_after": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allowlist", "min_plan_id", "version"],
+      "properties": {
+        "allowlist": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "min_plan_id": { "type": ["string", "null"], "enum": [null, "starter", "pro", "enterprise"] },
+        "version": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "change_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allowlist_changed", "min_plan_changed"],
+      "properties": {
+        "allowlist_changed": { "type": "boolean" },
+        "min_plan_changed": { "type": "boolean" }
+      }
+    }
+  }
+}

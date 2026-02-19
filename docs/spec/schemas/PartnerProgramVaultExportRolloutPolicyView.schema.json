@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/PartnerProgramVaultExportRolloutPolicyView.schema.json",
+  "title": "PartnerProgramVaultExportRolloutPolicyView",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "policy_key",
+    "source",
+    "allowlist",
+    "allowlist_enforced",
+    "min_plan_id",
+    "version",
+    "updated_at",
+    "updated_by"
+  ],
+  "properties": {
+    "policy_key": { "type": "string", "const": "vault_reconciliation_export" },
+    "source": { "type": "string", "enum": ["env", "store"] },
+    "allowlist": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "allowlist_enforced": { "type": "boolean" },
+    "min_plan_id": { "type": ["string", "null"], "enum": [null, "starter", "pro", "enterprise"] },
+    "version": { "type": ["integer", "null"], "minimum": 1 },
+    "updated_at": { "type": ["string", "null"], "format": "date-time" },
+    "updated_by": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": {
+        "type": { "type": "string", "enum": ["user", "partner", "agent"] },
+        "id": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

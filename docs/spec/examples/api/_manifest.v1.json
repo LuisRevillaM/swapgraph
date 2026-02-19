@@ -126,6 +126,22 @@
       "schema": "PartnerProgramVaultExportGetResponse.schema.json"
     },
     {
+      "file": "partner_program.vault_export.rollout_policy.get.response.json",
+      "schema": "PartnerProgramVaultExportRolloutPolicyGetResponse.schema.json"
+    },
+    {
+      "file": "partner_program.vault_export.rollout_policy.upsert.request.json",
+      "schema": "PartnerProgramVaultExportRolloutPolicyUpsertRequest.schema.json"
+    },
+    {
+      "file": "partner_program.vault_export.rollout_policy.upsert.response.json",
+      "schema": "PartnerProgramVaultExportRolloutPolicyUpsertResponse.schema.json"
+    },
+    {
+      "file": "partner_program.vault_export.rollout_policy_audit.export.response.json",
+      "schema": "PartnerProgramVaultExportRolloutPolicyAuditExportResponse.schema.json"
+    },
+    {
       "file": "receipts.get.response.json",
       "schema": "SwapReceiptGetResponse.schema.json"
     },

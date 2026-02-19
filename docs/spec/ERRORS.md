@@ -46,3 +46,6 @@ Notes:
   - `partner_rollout_not_allowed`
   - `partner_plan_insufficient`
   - `partner_rollout_config_invalid`
+  - `partner_admin_required`
+  - `partner_rollout_allowlist_invalid`
+  - `partner_rollout_min_plan_invalid`
