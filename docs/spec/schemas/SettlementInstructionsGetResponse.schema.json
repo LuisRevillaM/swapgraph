@@ -14,6 +14,11 @@
         "type": "object",
         "additionalProperties": true
       }
+    },
+    "vault_reconciliation": { "$ref": "SettlementVaultReconciliation.schema.json" },
+    "state_transitions": {
+      "type": "array",
+      "items": { "$ref": "SettlementStateTransitionView.schema.json" }
     }
   }
 }

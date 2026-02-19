@@ -102,7 +102,15 @@
       "schema": "SettlementInstructionsGetResponse.schema.json"
     },
     {
+      "file": "settlement.instructions.vault.response.json",
+      "schema": "SettlementInstructionsGetResponse.schema.json"
+    },
+    {
       "file": "settlement.status.response.json",
+      "schema": "SettlementStatusGetResponse.schema.json"
+    },
+    {
+      "file": "settlement.status.vault.response.json",
       "schema": "SettlementStatusGetResponse.schema.json"
     },
     {

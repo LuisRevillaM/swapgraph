@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/SettlementVaultReconciliationSummary.schema.json",
+  "title": "SettlementVaultReconciliationSummary",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["mode", "total", "withdrawn", "available", "reserved", "not_found"],
+  "properties": {
+    "mode": { "type": "string", "enum": ["full", "partial"] },
+    "total": { "type": "integer", "minimum": 1 },
+    "withdrawn": { "type": "integer", "minimum": 0 },
+    "available": { "type": "integer", "minimum": 0 },
+    "reserved": { "type": "integer", "minimum": 0 },
+    "not_found": { "type": "integer", "minimum": 0 }
+  }
+}

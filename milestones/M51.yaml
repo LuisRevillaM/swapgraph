@@ -1,0 +1,35 @@
+name: M51
+commands:
+  - cmd: "npm run verify:m51"
+artifacts:
+  - artifact: "docs/prd/M51.md"
+  - artifact: "docs/STATUS.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/GAPS.md"
+
+  - artifact: "src/read/settlementReadService.mjs"
+
+  - artifact: "docs/spec/schemas/SettlementStatusGetResponse.schema.json"
+  - artifact: "docs/spec/schemas/SettlementInstructionsGetResponse.schema.json"
+  - artifact: "docs/spec/schemas/SettlementVaultReconciliation.schema.json"
+  - artifact: "docs/spec/schemas/SettlementVaultReconciliationEntry.schema.json"
+  - artifact: "docs/spec/schemas/SettlementVaultReconciliationSummary.schema.json"
+  - artifact: "docs/spec/schemas/SettlementStateTransitionView.schema.json"
+
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+  - artifact: "docs/spec/examples/api/settlement.status.vault.response.json"
+  - artifact: "docs/spec/examples/api/settlement.instructions.vault.response.json"
+
+  - artifact: "scripts/run-m51-vault-read-surface-scenario.mjs"
+  - artifact: "fixtures/vault/m51_scenario.json"
+  - artifact: "fixtures/vault/m51_expected.json"
+
+  - artifact: "verify/m51.sh"
+
+  - artifact: "artifacts/milestones/M51/latest/commands.log"
+  - artifact: "artifacts/milestones/M51/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M51/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M51/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M51/latest/vault_read_surface_output.json"
+  - artifact: "artifacts/milestones/M51/latest/store.json"
+  - artifact: "artifacts/milestones/M51/latest/assertions.json"

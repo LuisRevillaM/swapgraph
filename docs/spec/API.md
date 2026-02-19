@@ -62,6 +62,7 @@ Settlement endpoints:
 - `POST /settlement/{cycle_id}/expire-deposit-window`
 - `GET /settlement/{cycle_id}/instructions`
 - `GET /settlement/{cycle_id}/status`
+  - partner reads on vault-backed cycles include `vault_reconciliation` (holding/leg reconciliation snapshot) and `state_transitions` (ordered `cycle.state_changed` projection)
 
 Receipt endpoints:
 - `GET /receipts/{cycle_id}`

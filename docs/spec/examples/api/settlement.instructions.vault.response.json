@@ -1,0 +1,112 @@
+{
+  "correlation_id": "corr_cycle_4f27eb196224",
+  "timeline": {
+    "cycle_id": "cycle_4f27eb196224",
+    "state": "escrow.ready",
+    "legs": [
+      {
+        "leg_id": "leg_cycle_4f27eb196224_0",
+        "intent_id": "intent_a",
+        "from_actor": { "type": "user", "id": "u1" },
+        "to_actor": { "type": "user", "id": "u3" },
+        "assets": [{ "platform": "steam", "asset_id": "assetA" }],
+        "status": "deposited",
+        "deposit_deadline_at": "2026-02-19T01:15:00Z",
+        "deposit_mode": "vault",
+        "deposit_ref": "vault:hold_a:rsv_hold_a",
+        "deposited_at": "2026-02-19T01:02:10Z",
+        "vault_holding_id": "hold_a",
+        "vault_reservation_id": "rsv_hold_a"
+      },
+      {
+        "leg_id": "leg_cycle_4f27eb196224_1",
+        "intent_id": "intent_b",
+        "from_actor": { "type": "user", "id": "u2" },
+        "to_actor": { "type": "user", "id": "u1" },
+        "assets": [{ "platform": "steam", "asset_id": "assetB" }],
+        "status": "deposited",
+        "deposit_deadline_at": "2026-02-19T01:15:00Z",
+        "deposit_mode": "vault",
+        "deposit_ref": "vault:hold_b:rsv_hold_b",
+        "deposited_at": "2026-02-19T01:02:10Z",
+        "vault_holding_id": "hold_b",
+        "vault_reservation_id": "rsv_hold_b"
+      },
+      {
+        "leg_id": "leg_cycle_4f27eb196224_2",
+        "intent_id": "intent_c",
+        "from_actor": { "type": "user", "id": "u3" },
+        "to_actor": { "type": "user", "id": "u2" },
+        "assets": [{ "platform": "steam", "asset_id": "assetC" }],
+        "status": "deposited",
+        "deposit_deadline_at": "2026-02-19T01:15:00Z",
+        "deposit_mode": "vault",
+        "deposit_ref": "vault:hold_c:rsv_hold_c",
+        "deposited_at": "2026-02-19T01:02:10Z",
+        "vault_holding_id": "hold_c",
+        "vault_reservation_id": "rsv_hold_c"
+      }
+    ],
+    "updated_at": "2026-02-19T01:02:10Z"
+  },
+  "instructions": [],
+  "vault_reconciliation": {
+    "summary": {
+      "mode": "full",
+      "total": 3,
+      "withdrawn": 0,
+      "available": 0,
+      "reserved": 3,
+      "not_found": 0
+    },
+    "entries": [
+      {
+        "intent_id": "intent_a",
+        "holding_id": "hold_a",
+        "reservation_id": "rsv_hold_a",
+        "leg_status": "deposited",
+        "holding_status": "reserved",
+        "settlement_cycle_id": "cycle_4f27eb196224",
+        "withdrawn_at": null
+      },
+      {
+        "intent_id": "intent_b",
+        "holding_id": "hold_b",
+        "reservation_id": "rsv_hold_b",
+        "leg_status": "deposited",
+        "holding_status": "reserved",
+        "settlement_cycle_id": "cycle_4f27eb196224",
+        "withdrawn_at": null
+      },
+      {
+        "intent_id": "intent_c",
+        "holding_id": "hold_c",
+        "reservation_id": "rsv_hold_c",
+        "leg_status": "deposited",
+        "holding_status": "reserved",
+        "settlement_cycle_id": "cycle_4f27eb196224",
+        "withdrawn_at": null
+      }
+    ]
+  },
+  "state_transitions": [
+    {
+      "occurred_at": "2026-02-19T01:00:12Z",
+      "from_state": "proposed",
+      "to_state": "accepted",
+      "reason_code": null
+    },
+    {
+      "occurred_at": "2026-02-19T01:02:10Z",
+      "from_state": "accepted",
+      "to_state": "escrow.pending",
+      "reason_code": null
+    },
+    {
+      "occurred_at": "2026-02-19T01:02:10Z",
+      "from_state": "escrow.pending",
+      "to_state": "escrow.ready",
+      "reason_code": null
+    }
+  ]
+}

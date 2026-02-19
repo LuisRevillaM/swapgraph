@@ -154,6 +154,63 @@ function buildDepositInstructions({ timeline, mode, viewer }) {
   return instr;
 }
 
+function buildVaultReconciliation({ timeline, store }) {
+  const legs = timeline?.legs ?? [];
+  const vaultLegs = legs.filter(leg => leg?.vault_holding_id && leg?.vault_reservation_id);
+  if (vaultLegs.length === 0) return null;
+
+  const entries = vaultLegs
+    .map(leg => {
+      const holding = store?.state?.vault_holdings?.[leg.vault_holding_id] ?? null;
+      return {
+        intent_id: leg.intent_id,
+        holding_id: leg.vault_holding_id,
+        reservation_id: leg.vault_reservation_id,
+        leg_status: leg.status,
+        holding_status: holding?.status ?? 'not_found',
+        settlement_cycle_id: holding?.settlement_cycle_id ?? null,
+        withdrawn_at: holding?.withdrawn_at ?? null
+      };
+    })
+    .sort((a, b) => String(a.intent_id).localeCompare(String(b.intent_id)));
+
+  const counts = {
+    withdrawn: 0,
+    available: 0,
+    reserved: 0,
+    not_found: 0
+  };
+
+  for (const entry of entries) {
+    counts[entry.holding_status] = (counts[entry.holding_status] ?? 0) + 1;
+  }
+
+  const mode = entries.length === legs.length ? 'full' : 'partial';
+
+  return {
+    summary: {
+      mode,
+      total: entries.length,
+      withdrawn: counts.withdrawn,
+      available: counts.available,
+      reserved: counts.reserved,
+      not_found: counts.not_found
+    },
+    entries
+  };
+}
+
+function buildStateTransitions({ store, cycleId }) {
+  return (store?.state?.events ?? [])
+    .filter(event => event?.type === 'cycle.state_changed' && event?.payload?.cycle_id === cycleId)
+    .map(event => ({
+      occurred_at: event.occurred_at,
+      from_state: event.payload?.from_state,
+      to_state: event.payload?.to_state,
+      reason_code: event.payload?.reason_code ?? null
+    }));
+}
+
 export class SettlementReadService {
   /**
    * @param {{ store: import('../store/jsonStateStore.mjs').JsonStateStore }} opts
@@ -206,8 +263,23 @@ export class SettlementReadService {
     });
     if (!policyCheck.ok) return policyCheck;
 
-    const viewTimeline = isPartner(viewActor) ? timeline : redactTimeline({ timeline, viewer: viewActor });
-    return { ok: true, body: { correlation_id: correlationId, timeline: viewTimeline } };
+    const partnerView = isPartner(viewActor);
+    const viewTimeline = partnerView ? timeline : redactTimeline({ timeline, viewer: viewActor });
+
+    const body = {
+      correlation_id: correlationId,
+      timeline: viewTimeline
+    };
+
+    if (partnerView) {
+      const vaultReconciliation = buildVaultReconciliation({ timeline, store: this.store });
+      if (vaultReconciliation) {
+        body.vault_reconciliation = vaultReconciliation;
+        body.state_transitions = buildStateTransitions({ store: this.store, cycleId });
+      }
+    }
+
+    return { ok: true, body };
   }
 
   instructions({ actor, auth, cycleId }) {
@@ -253,11 +325,26 @@ export class SettlementReadService {
     });
     if (!policyCheck.ok) return policyCheck;
 
-    const mode = isPartner(viewActor) ? 'partner' : 'participant';
+    const partnerView = isPartner(viewActor);
+    const mode = partnerView ? 'partner' : 'participant';
     const instructions = buildDepositInstructions({ timeline, mode, viewer: viewActor });
-    const viewTimeline = isPartner(viewActor) ? timeline : redactTimeline({ timeline, viewer: viewActor });
+    const viewTimeline = partnerView ? timeline : redactTimeline({ timeline, viewer: viewActor });
 
-    return { ok: true, body: { correlation_id: correlationId, timeline: viewTimeline, instructions } };
+    const body = {
+      correlation_id: correlationId,
+      timeline: viewTimeline,
+      instructions
+    };
+
+    if (partnerView) {
+      const vaultReconciliation = buildVaultReconciliation({ timeline, store: this.store });
+      if (vaultReconciliation) {
+        body.vault_reconciliation = vaultReconciliation;
+        body.state_transitions = buildStateTransitions({ store: this.store, cycleId });
+      }
+    }
+
+    return { ok: true, body };
   }
 
   receipt({ actor, auth, cycleId }) {

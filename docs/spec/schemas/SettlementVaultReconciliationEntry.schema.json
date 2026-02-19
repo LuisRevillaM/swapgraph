@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/SettlementVaultReconciliationEntry.schema.json",
+  "title": "SettlementVaultReconciliationEntry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "intent_id",
+    "holding_id",
+    "reservation_id",
+    "leg_status",
+    "holding_status",
+    "settlement_cycle_id",
+    "withdrawn_at"
+  ],
+  "properties": {
+    "intent_id": { "type": "string", "minLength": 1 },
+    "holding_id": { "type": "string", "minLength": 1 },
+    "reservation_id": { "type": "string", "minLength": 1 },
+    "leg_status": {
+      "type": "string",
+      "enum": ["pending", "deposited", "released", "refunded"]
+    },
+    "holding_status": {
+      "type": "string",
+      "enum": ["available", "reserved", "withdrawn", "not_found"]
+    },
+    "settlement_cycle_id": { "type": ["string", "null"], "minLength": 1 },
+    "withdrawn_at": { "type": ["string", "null"], "format": "date-time" }
+  }
+}

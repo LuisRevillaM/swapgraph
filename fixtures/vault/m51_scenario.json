@@ -1,0 +1,145 @@
+{
+  "actors": {
+    "partner": { "type": "partner", "id": "swapgraph" },
+    "user_u1": { "type": "user", "id": "u1" },
+    "user_u2": { "type": "user", "id": "u2" },
+    "user_u3": { "type": "user", "id": "u3" },
+    "user_u5": { "type": "user", "id": "u5" },
+    "user_u6": { "type": "user", "id": "u6" },
+    "user_outsider": { "type": "user", "id": "u999" }
+  },
+  "operations": [
+    { "op": "cycleProposals.accept", "proposal_ref": "p3", "actor_ref": "user_u1", "occurred_at": "2026-02-19T02:00:10Z", "idempotency_key": "m51_p3_u1", "auth": { "scopes": ["commits:write"] } },
+    { "op": "cycleProposals.accept", "proposal_ref": "p3", "actor_ref": "user_u2", "occurred_at": "2026-02-19T02:00:11Z", "idempotency_key": "m51_p3_u2", "auth": { "scopes": ["commits:write"] } },
+    { "op": "cycleProposals.accept", "proposal_ref": "p3", "actor_ref": "user_u3", "occurred_at": "2026-02-19T02:00:12Z", "idempotency_key": "m51_p3_u3", "auth": { "scopes": ["commits:write"] } },
+
+    {
+      "op": "vault.deposit",
+      "actor_ref": "user_u1",
+      "idempotency_key": "m51_dep_hold_a",
+      "now_iso": "2026-02-19T02:01:00Z",
+      "auth": { "scopes": ["vault:write"] },
+      "request": {
+        "holding": {
+          "holding_id": "hold_a",
+          "vault_id": "vault_u1",
+          "asset": { "platform": "steam", "asset_id": "assetA" },
+          "owner_actor": { "type": "user", "id": "u1" },
+          "deposit_id": "dep_a",
+          "deposited_at": "2026-02-19T02:01:00Z"
+        }
+      }
+    },
+    {
+      "op": "vault.deposit",
+      "actor_ref": "user_u2",
+      "idempotency_key": "m51_dep_hold_b",
+      "now_iso": "2026-02-19T02:01:10Z",
+      "auth": { "scopes": ["vault:write"] },
+      "request": {
+        "holding": {
+          "holding_id": "hold_b",
+          "vault_id": "vault_u2",
+          "asset": { "platform": "steam", "asset_id": "assetB" },
+          "owner_actor": { "type": "user", "id": "u2" },
+          "deposit_id": "dep_b",
+          "deposited_at": "2026-02-19T02:01:10Z"
+        }
+      }
+    },
+    {
+      "op": "vault.deposit",
+      "actor_ref": "user_u3",
+      "idempotency_key": "m51_dep_hold_c",
+      "now_iso": "2026-02-19T02:01:20Z",
+      "auth": { "scopes": ["vault:write"] },
+      "request": {
+        "holding": {
+          "holding_id": "hold_c",
+          "vault_id": "vault_u3",
+          "asset": { "platform": "steam", "asset_id": "assetC" },
+          "owner_actor": { "type": "user", "id": "u3" },
+          "deposit_id": "dep_c",
+          "deposited_at": "2026-02-19T02:01:20Z"
+        }
+      }
+    },
+    { "op": "vault.reserve", "actor_ref": "partner", "idempotency_key": "m51_res_hold_a", "now_iso": "2026-02-19T02:01:30Z", "auth": { "scopes": ["vault:write"] }, "request": { "holding_id": "hold_a", "reservation_id": "rsv_hold_a" } },
+    { "op": "vault.reserve", "actor_ref": "partner", "idempotency_key": "m51_res_hold_b", "now_iso": "2026-02-19T02:01:31Z", "auth": { "scopes": ["vault:write"] }, "request": { "holding_id": "hold_b", "reservation_id": "rsv_hold_b" } },
+    { "op": "vault.reserve", "actor_ref": "partner", "idempotency_key": "m51_res_hold_c", "now_iso": "2026-02-19T02:01:32Z", "auth": { "scopes": ["vault:write"] }, "request": { "holding_id": "hold_c", "reservation_id": "rsv_hold_c" } },
+
+    {
+      "op": "settlement.start",
+      "proposal_ref": "p3",
+      "actor_ref": "partner",
+      "occurred_at": "2026-02-19T02:02:00Z",
+      "auth": { "scopes": ["settlement:write"] },
+      "request_body": {
+        "deposit_deadline_at": "2026-02-19T02:15:00Z",
+        "vault_bindings": [
+          { "intent_id": "intent_a", "holding_id": "hold_a", "reservation_id": "rsv_hold_a" },
+          { "intent_id": "intent_b", "holding_id": "hold_b", "reservation_id": "rsv_hold_b" },
+          { "intent_id": "intent_c", "holding_id": "hold_c", "reservation_id": "rsv_hold_c" }
+        ]
+      }
+    },
+    { "op": "settlement.status", "proposal_ref": "p3", "actor_ref": "partner", "auth": { "scopes": ["settlement:read"] } },
+    { "op": "settlement.instructions", "proposal_ref": "p3", "actor_ref": "partner", "auth": { "scopes": ["settlement:read"] } },
+    { "op": "settlement.status", "proposal_ref": "p3", "actor_ref": "user_u1", "auth": { "scopes": ["settlement:read"] } },
+
+    { "op": "settlement.begin_execution", "proposal_ref": "p3", "actor_ref": "partner", "occurred_at": "2026-02-19T02:03:00Z", "auth": { "scopes": ["settlement:write"] }, "request_body": {} },
+    { "op": "settlement.complete", "proposal_ref": "p3", "actor_ref": "partner", "occurred_at": "2026-02-19T02:03:20Z", "auth": { "scopes": ["settlement:write"] }, "request_body": {} },
+
+    { "op": "settlement.status", "proposal_ref": "p3", "actor_ref": "partner", "auth": { "scopes": ["settlement:read"] } },
+    { "op": "settlement.instructions", "proposal_ref": "p3", "actor_ref": "partner", "auth": { "scopes": ["settlement:read"] } },
+    { "op": "settlement.status", "proposal_ref": "p3", "actor_ref": "user_outsider", "auth": { "scopes": ["settlement:read"] } },
+
+    { "op": "cycleProposals.accept", "proposal_ref": "p2", "actor_ref": "user_u5", "occurred_at": "2026-02-19T02:10:10Z", "idempotency_key": "m51_p2_u5", "auth": { "scopes": ["commits:write"] } },
+    { "op": "cycleProposals.accept", "proposal_ref": "p2", "actor_ref": "user_u6", "occurred_at": "2026-02-19T02:10:11Z", "idempotency_key": "m51_p2_u6", "auth": { "scopes": ["commits:write"] } },
+
+    {
+      "op": "vault.deposit",
+      "actor_ref": "user_u5",
+      "idempotency_key": "m51_dep_hold_d",
+      "now_iso": "2026-02-19T02:11:00Z",
+      "auth": { "scopes": ["vault:write"] },
+      "request": {
+        "holding": {
+          "holding_id": "hold_d",
+          "vault_id": "vault_u5",
+          "asset": { "platform": "steam", "asset_id": "assetD" },
+          "owner_actor": { "type": "user", "id": "u5" },
+          "deposit_id": "dep_d",
+          "deposited_at": "2026-02-19T02:11:00Z"
+        }
+      }
+    },
+    { "op": "vault.reserve", "actor_ref": "partner", "idempotency_key": "m51_res_hold_d", "now_iso": "2026-02-19T02:11:10Z", "auth": { "scopes": ["vault:write"] }, "request": { "holding_id": "hold_d", "reservation_id": "rsv_hold_d" } },
+
+    {
+      "op": "settlement.start",
+      "proposal_ref": "p2",
+      "actor_ref": "partner",
+      "occurred_at": "2026-02-19T02:12:00Z",
+      "auth": { "scopes": ["settlement:write"] },
+      "request_body": {
+        "deposit_deadline_at": "2026-02-19T02:13:00Z",
+        "vault_bindings": [
+          { "intent_id": "intent_d", "holding_id": "hold_d", "reservation_id": "rsv_hold_d" }
+        ]
+      }
+    },
+    { "op": "settlement.instructions", "proposal_ref": "p2", "actor_ref": "partner", "auth": { "scopes": ["settlement:read"] } },
+    { "op": "settlement.status", "proposal_ref": "p2", "actor_ref": "partner", "auth": { "scopes": ["settlement:read"] } },
+
+    {
+      "op": "settlement.expire_deposit_window",
+      "proposal_ref": "p2",
+      "actor_ref": "partner",
+      "auth": { "scopes": ["settlement:write"] },
+      "request_body": { "now_iso": "2026-02-19T02:14:00Z" }
+    },
+
+    { "op": "settlement.status", "proposal_ref": "p2", "actor_ref": "partner", "auth": { "scopes": ["settlement:read"] } }
+  ]
+}
