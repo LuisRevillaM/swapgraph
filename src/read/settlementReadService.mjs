@@ -20,6 +20,10 @@ function correlationIdForVaultReconciliationExport(cycleId) {
   return `corr_${cycleId}_vault_reconciliation_export`;
 }
 
+function correlationIdForPartnerProgramVaultExport() {
+  return 'corr_partner_program_vault_export';
+}
+
 // actor/policy helpers are imported from core/tradingPolicyBoundaries.mjs
 
 function isPartner(actor) {
@@ -263,6 +267,80 @@ function quotaDayFromIso(iso) {
   const ms = parseIsoMs(iso);
   if (ms === null) return null;
   return new Date(ms).toISOString().slice(0, 10);
+}
+
+function normalizePlanId(planId) {
+  return typeof planId === 'string' && planId.trim() ? planId.trim().toLowerCase() : null;
+}
+
+function planRank(planId) {
+  if (planId === 'starter') return 1;
+  if (planId === 'pro') return 2;
+  if (planId === 'enterprise') return 3;
+  return null;
+}
+
+function parsePartnerAllowlist() {
+  const raw = process.env.SETTLEMENT_VAULT_EXPORT_PARTNER_ALLOWLIST ?? '';
+  const items = String(raw)
+    .split(',')
+    .map(x => x.trim())
+    .filter(Boolean);
+  return new Set(items);
+}
+
+function parseMinimumPartnerPlanRequirement() {
+  const raw = process.env.SETTLEMENT_VAULT_EXPORT_MIN_PLAN ?? '';
+  const normalized = normalizePlanId(raw);
+  if (!normalized) return { ok: true, min_plan_id: null };
+
+  if (planRank(normalized) === null) {
+    return {
+      ok: false,
+      error: {
+        reason_code: 'partner_rollout_config_invalid',
+        min_plan_id: normalized
+      }
+    };
+  }
+
+  return { ok: true, min_plan_id: normalized };
+}
+
+function buildPartnerRolloutPolicy({ partnerId, partnerPlanId }) {
+  const allowlist = parsePartnerAllowlist();
+  const allowlistEnforced = allowlist.size > 0;
+  const partnerAllowed = !allowlistEnforced || allowlist.has(partnerId);
+
+  const minPlanCfg = parseMinimumPartnerPlanRequirement();
+  if (!minPlanCfg.ok) {
+    return {
+      ok: false,
+      error: minPlanCfg.error,
+      policy: {
+        allowlist_enforced: allowlistEnforced,
+        partner_allowed: partnerAllowed,
+        min_plan_id: minPlanCfg.error?.min_plan_id ?? null,
+        plan_meets_minimum: null
+      }
+    };
+  }
+
+  const planIdNormalized = normalizePlanId(partnerPlanId);
+  const minPlanId = minPlanCfg.min_plan_id;
+  const planMeetsMinimum = minPlanId
+    ? (planRank(planIdNormalized) ?? -1) >= (planRank(minPlanId) ?? Number.MAX_SAFE_INTEGER)
+    : true;
+
+  return {
+    ok: true,
+    policy: {
+      allowlist_enforced: allowlistEnforced,
+      partner_allowed: partnerAllowed,
+      min_plan_id: minPlanId,
+      plan_meets_minimum: planMeetsMinimum
+    }
+  };
 }
 
 function ensureVaultExportCheckpointState(store) {
@@ -791,6 +869,44 @@ export class SettlementReadService {
       const used = Number.parseInt(String(partnerProgramState.usage?.[usageKey] ?? 0), 10);
       const usedSafe = Number.isFinite(used) && used >= 0 ? used : 0;
 
+      const rollout = buildPartnerRolloutPolicy({
+        partnerId: viewActor.id,
+        partnerPlanId: program?.plan_id ?? null
+      });
+
+      if (!rollout.ok) {
+        return {
+          ok: false,
+          body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'partner rollout policy configuration is invalid', {
+            reason_code: rollout.error?.reason_code ?? 'partner_rollout_config_invalid',
+            ...rollout.error
+          })
+        };
+      }
+
+      if (!rollout.policy.partner_allowed) {
+        return {
+          ok: false,
+          body: errorResponse(correlationId, 'FORBIDDEN', 'partner is not allowed in current vault export rollout', {
+            reason_code: 'partner_rollout_not_allowed',
+            partner_id: viewActor.id,
+            allowlist_enforced: rollout.policy.allowlist_enforced
+          })
+        };
+      }
+
+      if (!rollout.policy.plan_meets_minimum) {
+        return {
+          ok: false,
+          body: errorResponse(correlationId, 'FORBIDDEN', 'partner plan does not satisfy minimum rollout requirement', {
+            reason_code: 'partner_plan_insufficient',
+            partner_id: viewActor.id,
+            plan_id: normalizePlanId(program?.plan_id),
+            required_plan_id: rollout.policy.min_plan_id
+          })
+        };
+      }
+
       if (dailyLimit !== null && usedSafe >= dailyLimit) {
         return {
           ok: false,
@@ -875,6 +991,97 @@ export class SettlementReadService {
         correlation_id: correlationId,
         ...signedPayload,
         ...(partnerProgramView ? { partner_program: partnerProgramView } : {})
+      }
+    };
+  }
+
+  vaultExportPartnerProgram({ actor, auth, query }) {
+    const correlationId = correlationIdForPartnerProgramVaultExport();
+
+    const authzOp = authorizeApiOperation({ operationId: 'partnerProgram.vault_export.get', actor, auth, store: this.store });
+    if (!authzOp.ok) {
+      return { ok: false, body: errorResponse(correlationId, authzOp.error.code, authzOp.error.message, authzOp.error.details) };
+    }
+
+    if (!isPartner(actor)) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'FORBIDDEN', 'only partner can read partner program vault export status', {
+          actor
+        })
+      };
+    }
+
+    const nowIso = query?.now_iso ?? process.env.AUTHZ_NOW_ISO ?? new Date().toISOString();
+    const quotaDay = quotaDayFromIso(nowIso);
+    if (!quotaDay) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'invalid now_iso for partner program status', {
+          now_iso: nowIso
+        })
+      };
+    }
+
+    const partnerProgramState = ensurePartnerProgramState(this.store);
+    const program = partnerProgramState.programs?.[actor.id] ?? null;
+
+    const usageKey = `${actor.id}:${quotaDay}:vault_reconciliation_export`;
+    const usedRaw = Number.parseInt(String(partnerProgramState.usage?.[usageKey] ?? 0), 10);
+    const dailyUsed = Number.isFinite(usedRaw) && usedRaw >= 0 ? usedRaw : 0;
+
+    const dailyLimit = parsePartnerProgramDailyLimit(program?.quotas?.vault_reconciliation_export_daily);
+
+    const rollout = buildPartnerRolloutPolicy({
+      partnerId: actor.id,
+      partnerPlanId: program?.plan_id ?? null
+    });
+
+    const reasons = [];
+
+    if (partnerProgramEnforced()) {
+      if (!program) reasons.push('partner_program_missing');
+      if (program && program?.features?.vault_reconciliation_export !== true) reasons.push('partner_feature_not_enabled');
+      if (dailyLimit !== null && dailyUsed >= dailyLimit) reasons.push('partner_quota_exceeded');
+      if (!rollout.ok) reasons.push(rollout.error?.reason_code ?? 'partner_rollout_config_invalid');
+      else {
+        if (!rollout.policy.partner_allowed) reasons.push('partner_rollout_not_allowed');
+        if (!rollout.policy.plan_meets_minimum) reasons.push('partner_plan_insufficient');
+      }
+    }
+
+    const rolloutPolicy = {
+      partner_program_enforced: partnerProgramEnforced(),
+      checkpoint_enforced: exportCheckpointEnforced(),
+      checkpoint_retention_days: settlementVaultExportCheckpointRetentionDays(),
+      ...(
+        rollout.ok
+          ? rollout.policy
+          : {
+              allowlist_enforced: rollout.policy?.allowlist_enforced ?? false,
+              partner_allowed: rollout.policy?.partner_allowed ?? true,
+              min_plan_id: rollout.policy?.min_plan_id ?? null,
+              plan_meets_minimum: rollout.policy?.plan_meets_minimum ?? null,
+              config_error: rollout.error?.reason_code ?? 'partner_rollout_config_invalid'
+            }
+      )
+    };
+
+    return {
+      ok: true,
+      body: {
+        correlation_id: correlationId,
+        partner_program: {
+          partner_id: actor.id,
+          plan_id: program?.plan_id ?? null,
+          feature_vault_reconciliation_export: program?.features?.vault_reconciliation_export === true,
+          quota_day: quotaDay,
+          quota_daily_limit: dailyLimit,
+          quota_daily_used: dailyUsed
+        },
+        rollout_policy: rolloutPolicy,
+        export_allowed: reasons.length === 0,
+        reasons
       }
     };
   }

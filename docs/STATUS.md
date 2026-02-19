@@ -1,6 +1,6 @@
 # Project Status — swapgraph
 
-Last updated: 2026-02-18
+Last updated: 2026-02-19
 
 ## Autopilot
 - Status: **spec hardening** (not approved)
@@ -66,9 +66,10 @@ Last updated: 2026-02-18
 - M53: ✅ partner vault reconciliation export continuity hardening (entry pagination + signed attestation chain + optional checkpoint continuity enforcement + tamper-fail checkpoint verification) (fixtures-first)
 - M54: ✅ vault reconciliation export checkpoint retention/expiry hardening (`SETTLEMENT_VAULT_EXPORT_CHECKPOINT_RETENTION_DAYS`, deterministic `checkpoint_expired` failures, opportunistic checkpoint GC) (fixtures-first)
 - M55: ✅ partner-program/commercial scaffold for vault export rollout (`SETTLEMENT_VAULT_EXPORT_PARTNER_PROGRAM_ENFORCE`, entitlement gating, daily quota enforcement, and partner usage metadata projection) (fixtures-first)
+- M56: ✅ partner program governance surfaces (`partnerProgram.vault_export.get` read API + rollout policy hooks: allowlist + minimum plan + deterministic governance reason codes) (fixtures-first)
 
 ## Next
-- M56: partner program governance surfaces (plan metadata/read APIs + rollout policy hooks) (fixtures-first)
+- M57: partner program admin-governed rollout mutation surfaces (write-path controls + signed policy-change audit projection) (fixtures-first)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.

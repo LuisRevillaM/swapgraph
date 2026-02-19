@@ -70,7 +70,10 @@ Settlement endpoints:
   - when checkpoint mode is enabled (`SETTLEMENT_VAULT_EXPORT_CHECKPOINT_ENFORCE=1`), continuation also requires `checkpoint_after`
   - checkpoint anchors have retention controls (`SETTLEMENT_VAULT_EXPORT_CHECKPOINT_RETENTION_DAYS`) and expired anchors are rejected
   - optional partner-program enforcement (`SETTLEMENT_VAULT_EXPORT_PARTNER_PROGRAM_ENFORCE=1`) gates export entitlement and daily quota usage
+  - optional rollout hooks: allowlist (`SETTLEMENT_VAULT_EXPORT_PARTNER_ALLOWLIST`) + minimum plan (`SETTLEMENT_VAULT_EXPORT_MIN_PLAN`)
   - paginated responses include `total_filtered`, optional `next_cursor`, signed `attestation`, optional signed `checkpoint`, and optional `partner_program` usage metadata when program enforcement is active
+- `GET /partner-program/vault-export`
+  - partner self-serve read surface for vault export entitlement, quota usage, and rollout-policy visibility
 
 Receipt endpoints:
 - `GET /receipts/{cycle_id}`

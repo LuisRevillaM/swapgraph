@@ -1,0 +1,34 @@
+name: M56
+commands:
+  - cmd: "npm run verify:m56"
+artifacts:
+  - artifact: "docs/prd/M56.md"
+  - artifact: "docs/STATUS.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/GAPS.md"
+
+  - artifact: "src/read/settlementReadService.mjs"
+  - artifact: "src/store/jsonStateStore.mjs"
+
+  - artifact: "docs/spec/api/manifest.v1.json"
+  - artifact: "docs/spec/schemas/PartnerProgramVaultExportGetResponse.schema.json"
+  - artifact: "docs/spec/schemas/SettlementVaultReconciliationExportResponse.schema.json"
+
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+  - artifact: "docs/spec/examples/api/partner_program.vault_export.get.response.json"
+  - artifact: "docs/spec/examples/api/settlement.vault_reconciliation.export.paginated.response.json"
+
+  - artifact: "scripts/run-m56-partner-program-governance-scenario.mjs"
+  - artifact: "fixtures/vault/m56_scenario.json"
+  - artifact: "fixtures/vault/m56_expected.json"
+
+  - artifact: "milestones/M56.yaml"
+  - artifact: "verify/m56.sh"
+
+  - artifact: "artifacts/milestones/M56/latest/commands.log"
+  - artifact: "artifacts/milestones/M56/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M56/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M56/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M56/latest/partner_program_governance_output.json"
+  - artifact: "artifacts/milestones/M56/latest/store.json"
+  - artifact: "artifacts/milestones/M56/latest/assertions.json"

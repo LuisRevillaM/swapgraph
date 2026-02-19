@@ -33,9 +33,16 @@ Notes:
 ## Notes
 - Keep messages safe (no secrets).
 - `details` must be machine-readable.
-- Delegated policy-audit export continuation may include deterministic `details.reason_code` values such as:
+- Delegated policy-audit and vault reconciliation export continuation may include deterministic `details.reason_code` values such as:
   - `checkpoint_after_not_found`
   - `checkpoint_cursor_mismatch`
   - `checkpoint_attestation_mismatch`
   - `checkpoint_query_mismatch`
   - `checkpoint_expired`
+- Partner-program/commercial rollout enforcement reason codes include:
+  - `partner_program_missing`
+  - `partner_feature_not_enabled`
+  - `partner_quota_exceeded`
+  - `partner_rollout_not_allowed`
+  - `partner_plan_insufficient`
+  - `partner_rollout_config_invalid`

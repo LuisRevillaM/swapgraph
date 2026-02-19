@@ -122,6 +122,10 @@
       "schema": "SettlementVaultReconciliationExportResponse.schema.json"
     },
     {
+      "file": "partner_program.vault_export.get.response.json",
+      "schema": "PartnerProgramVaultExportGetResponse.schema.json"
+    },
+    {
       "file": "receipts.get.response.json",
       "schema": "SwapReceiptGetResponse.schema.json"
     },

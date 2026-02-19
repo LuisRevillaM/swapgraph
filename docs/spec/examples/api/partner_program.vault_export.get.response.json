@@ -1,0 +1,22 @@
+{
+  "correlation_id": "corr_partner_program_vault_export",
+  "partner_program": {
+    "partner_id": "swapgraph",
+    "plan_id": "pro",
+    "feature_vault_reconciliation_export": true,
+    "quota_day": "2026-02-19",
+    "quota_daily_limit": 1000,
+    "quota_daily_used": 42
+  },
+  "rollout_policy": {
+    "partner_program_enforced": true,
+    "checkpoint_enforced": true,
+    "checkpoint_retention_days": 30,
+    "allowlist_enforced": true,
+    "partner_allowed": true,
+    "min_plan_id": "pro",
+    "plan_meets_minimum": true
+  },
+  "export_allowed": true,
+  "reasons": []
+}
