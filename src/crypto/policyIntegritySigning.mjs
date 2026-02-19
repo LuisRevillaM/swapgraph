@@ -741,7 +741,198 @@ function normalizeVaultReconciliationExportQuery(query) {
   if (typeof query?.now_iso === 'string' && query.now_iso.trim()) out.now_iso = query.now_iso.trim();
   if (typeof query?.exported_at_iso === 'string' && query.exported_at_iso.trim()) out.exported_at_iso = query.exported_at_iso.trim();
 
+  const limit = Number.parseInt(String(query?.limit ?? ''), 10);
+  if (Number.isFinite(limit) && limit > 0) out.limit = Math.min(limit, 200);
+
+  if (typeof query?.cursor_after === 'string' && query.cursor_after.trim()) out.cursor_after = query.cursor_after.trim();
+  if (typeof query?.attestation_after === 'string' && query.attestation_after.trim()) out.attestation_after = query.attestation_after.trim();
+  if (typeof query?.checkpoint_after === 'string' && query.checkpoint_after.trim()) out.checkpoint_after = query.checkpoint_after.trim();
+
   return out;
+}
+
+function buildSettlementVaultReconciliationExportAttestation({ query, nextCursor, exportHash }) {
+  const normalizedQuery = normalizeVaultReconciliationExportQuery(query);
+  const cursorAfter = typeof normalizedQuery.cursor_after === 'string' ? normalizedQuery.cursor_after : null;
+  const attestationAfter = typeof normalizedQuery.attestation_after === 'string' ? normalizedQuery.attestation_after : null;
+  const next = typeof nextCursor === 'string' && nextCursor.trim() ? nextCursor.trim() : null;
+
+  const attestationInput = {
+    cursor_after: cursorAfter,
+    next_cursor: next,
+    attestation_after: attestationAfter,
+    page_hash: exportHash
+  };
+
+  return {
+    ...attestationInput,
+    chain_hash: sha256HexCanonical(attestationInput)
+  };
+}
+
+function verifySettlementVaultReconciliationExportAttestation({ attestation, query, nextCursor, exportHash }) {
+  const provided = normalizeExportAttestation(attestation);
+  if (!provided) return { ok: false, error: 'attestation_missing' };
+
+  const expected = buildSettlementVaultReconciliationExportAttestation({ query, nextCursor, exportHash });
+
+  if (provided.page_hash !== expected.page_hash) {
+    return {
+      ok: false,
+      error: 'attestation_page_hash_mismatch',
+      details: {
+        expected_page_hash: expected.page_hash,
+        provided_page_hash: provided.page_hash
+      }
+    };
+  }
+
+  if (provided.cursor_after !== expected.cursor_after) {
+    return {
+      ok: false,
+      error: 'attestation_cursor_mismatch',
+      details: {
+        expected_cursor_after: expected.cursor_after,
+        provided_cursor_after: provided.cursor_after
+      }
+    };
+  }
+
+  if (provided.next_cursor !== expected.next_cursor) {
+    return {
+      ok: false,
+      error: 'attestation_next_cursor_mismatch',
+      details: {
+        expected_next_cursor: expected.next_cursor,
+        provided_next_cursor: provided.next_cursor
+      }
+    };
+  }
+
+  if (provided.attestation_after !== expected.attestation_after) {
+    return {
+      ok: false,
+      error: 'attestation_after_mismatch',
+      details: {
+        expected_attestation_after: expected.attestation_after,
+        provided_attestation_after: provided.attestation_after
+      }
+    };
+  }
+
+  if (provided.chain_hash !== expected.chain_hash) {
+    return {
+      ok: false,
+      error: 'attestation_chain_hash_mismatch',
+      details: {
+        expected_chain_hash: expected.chain_hash,
+        provided_chain_hash: provided.chain_hash
+      }
+    };
+  }
+
+  return { ok: true };
+}
+
+function buildSettlementVaultReconciliationExportCheckpoint({ query, attestation, nextCursor, entriesCount, totalFiltered }) {
+  const normalizedQuery = normalizeVaultReconciliationExportQuery(query);
+  const checkpointAfter = typeof normalizedQuery.checkpoint_after === 'string' ? normalizedQuery.checkpoint_after : null;
+  const attestationChainHash = typeof attestation?.chain_hash === 'string' ? attestation.chain_hash : null;
+  const next = typeof nextCursor === 'string' && nextCursor.trim() ? nextCursor.trim() : null;
+
+  const checkpointInput = {
+    checkpoint_after: checkpointAfter,
+    attestation_chain_hash: attestationChainHash,
+    next_cursor: next,
+    entries_count: Number.isFinite(entriesCount) ? Number(entriesCount) : 0,
+    total_filtered: Number.isFinite(totalFiltered) ? Number(totalFiltered) : 0
+  };
+
+  return {
+    ...checkpointInput,
+    checkpoint_hash: sha256HexCanonical(checkpointInput)
+  };
+}
+
+function verifySettlementVaultReconciliationExportCheckpoint({ checkpoint, query, attestation, nextCursor, entriesCount, totalFiltered }) {
+  const provided = normalizeExportCheckpoint(checkpoint);
+  if (!provided) return { ok: false, error: 'checkpoint_missing' };
+
+  const expected = buildSettlementVaultReconciliationExportCheckpoint({
+    query,
+    attestation,
+    nextCursor,
+    entriesCount,
+    totalFiltered
+  });
+
+  if (provided.checkpoint_after !== expected.checkpoint_after) {
+    return {
+      ok: false,
+      error: 'checkpoint_after_mismatch',
+      details: {
+        expected_checkpoint_after: expected.checkpoint_after,
+        provided_checkpoint_after: provided.checkpoint_after
+      }
+    };
+  }
+
+  if (provided.attestation_chain_hash !== expected.attestation_chain_hash) {
+    return {
+      ok: false,
+      error: 'checkpoint_attestation_mismatch',
+      details: {
+        expected_attestation_chain_hash: expected.attestation_chain_hash,
+        provided_attestation_chain_hash: provided.attestation_chain_hash
+      }
+    };
+  }
+
+  if (provided.next_cursor !== expected.next_cursor) {
+    return {
+      ok: false,
+      error: 'checkpoint_next_cursor_mismatch',
+      details: {
+        expected_next_cursor: expected.next_cursor,
+        provided_next_cursor: provided.next_cursor
+      }
+    };
+  }
+
+  if (provided.entries_count !== expected.entries_count) {
+    return {
+      ok: false,
+      error: 'checkpoint_entries_count_mismatch',
+      details: {
+        expected_entries_count: expected.entries_count,
+        provided_entries_count: provided.entries_count
+      }
+    };
+  }
+
+  if (provided.total_filtered !== expected.total_filtered) {
+    return {
+      ok: false,
+      error: 'checkpoint_total_filtered_mismatch',
+      details: {
+        expected_total_filtered: expected.total_filtered,
+        provided_total_filtered: provided.total_filtered
+      }
+    };
+  }
+
+  if (provided.checkpoint_hash !== expected.checkpoint_hash) {
+    return {
+      ok: false,
+      error: 'checkpoint_hash_mismatch',
+      details: {
+        expected_checkpoint_hash: expected.checkpoint_hash,
+        provided_checkpoint_hash: provided.checkpoint_hash
+      }
+    };
+  }
+
+  return { ok: true };
 }
 
 function vaultReconciliationExportSignablePayload(payload) {
@@ -759,6 +950,20 @@ function vaultReconciliationExportSignablePayload(payload) {
     out.state_transitions = payload.state_transitions;
   }
 
+  if (Number.isFinite(payload?.total_filtered)) {
+    out.total_filtered = Number(payload.total_filtered);
+  }
+
+  if (typeof payload?.next_cursor === 'string' && payload.next_cursor.trim()) {
+    out.next_cursor = payload.next_cursor.trim();
+  }
+
+  const attestation = normalizeExportAttestation(payload?.attestation);
+  if (attestation) out.attestation = attestation;
+
+  const checkpoint = normalizeExportCheckpoint(payload?.checkpoint);
+  if (checkpoint) out.checkpoint = checkpoint;
+
   return out;
 }
 
@@ -767,6 +972,8 @@ export function buildSettlementVaultReconciliationExportHash({
   timelineState,
   vaultReconciliation,
   stateTransitions,
+  totalFiltered,
+  nextCursor,
   query
 }) {
   const input = {
@@ -780,6 +987,14 @@ export function buildSettlementVaultReconciliationExportHash({
     input.state_transitions = stateTransitions;
   }
 
+  if (Number.isFinite(totalFiltered)) {
+    input.total_filtered = Number(totalFiltered);
+  }
+
+  if (typeof nextCursor === 'string' && nextCursor.trim()) {
+    input.next_cursor = nextCursor.trim();
+  }
+
   return sha256HexCanonical(input);
 }
 
@@ -789,10 +1004,16 @@ export function buildSignedSettlementVaultReconciliationExportPayload({
   timelineState,
   vaultReconciliation,
   stateTransitions,
+  totalFiltered,
+  nextCursor,
+  withAttestation,
+  withCheckpoint,
   query,
   keyId
 }) {
   const normalizedQuery = normalizeVaultReconciliationExportQuery(query);
+  const normalizedNextCursor = typeof nextCursor === 'string' && nextCursor.trim() ? nextCursor.trim() : null;
+  const normalizedTotalFiltered = Number.isFinite(totalFiltered) ? Number(totalFiltered) : null;
 
   const payload = {
     exported_at: exportedAt,
@@ -806,13 +1027,41 @@ export function buildSignedSettlementVaultReconciliationExportPayload({
     payload.state_transitions = stateTransitions;
   }
 
+  if (normalizedTotalFiltered !== null) {
+    payload.total_filtered = normalizedTotalFiltered;
+  }
+
+  if (normalizedNextCursor) {
+    payload.next_cursor = normalizedNextCursor;
+  }
+
   payload.export_hash = buildSettlementVaultReconciliationExportHash({
     cycleId,
     timelineState,
     vaultReconciliation,
     stateTransitions,
+    totalFiltered: normalizedTotalFiltered,
+    nextCursor: normalizedNextCursor,
     query: normalizedQuery
   });
+
+  if (withAttestation) {
+    payload.attestation = buildSettlementVaultReconciliationExportAttestation({
+      query: normalizedQuery,
+      nextCursor: normalizedNextCursor,
+      exportHash: payload.export_hash
+    });
+  }
+
+  if (withCheckpoint) {
+    payload.checkpoint = buildSettlementVaultReconciliationExportCheckpoint({
+      query: normalizedQuery,
+      attestation: payload.attestation ?? null,
+      nextCursor: normalizedNextCursor,
+      entriesCount: Array.isArray(vaultReconciliation?.entries) ? vaultReconciliation.entries.length : 0,
+      totalFiltered: normalizedTotalFiltered ?? 0
+    });
+  }
 
   payload.signature = signPolicyIntegrityPayload(payload, { keyId });
 
@@ -829,6 +1078,8 @@ export function verifySettlementVaultReconciliationExportPayload(payload) {
     timelineState: payload.timeline_state,
     vaultReconciliation: payload.vault_reconciliation,
     stateTransitions: payload.state_transitions,
+    totalFiltered: payload.total_filtered,
+    nextCursor: payload.next_cursor,
     query: payload.query
   });
 
@@ -841,6 +1092,28 @@ export function verifySettlementVaultReconciliationExportPayload(payload) {
         provided_hash: payload.export_hash ?? null
       }
     };
+  }
+
+  if (payload.attestation) {
+    const attest = verifySettlementVaultReconciliationExportAttestation({
+      attestation: payload.attestation,
+      query: payload.query,
+      nextCursor: payload.next_cursor,
+      exportHash: expectedHash
+    });
+    if (!attest.ok) return attest;
+  }
+
+  if (payload.checkpoint) {
+    const checkpoint = verifySettlementVaultReconciliationExportCheckpoint({
+      checkpoint: payload.checkpoint,
+      query: payload.query,
+      attestation: payload.attestation ?? null,
+      nextCursor: payload.next_cursor,
+      entriesCount: Array.isArray(payload?.vault_reconciliation?.entries) ? payload.vault_reconciliation.entries.length : 0,
+      totalFiltered: payload.total_filtered
+    });
+    if (!checkpoint.ok) return checkpoint;
   }
 
   const signable = vaultReconciliationExportSignablePayload(payload);
@@ -860,6 +1133,8 @@ export function verifySettlementVaultReconciliationExportPayloadWithPublicKeyPem
     timelineState: payload.timeline_state,
     vaultReconciliation: payload.vault_reconciliation,
     stateTransitions: payload.state_transitions,
+    totalFiltered: payload.total_filtered,
+    nextCursor: payload.next_cursor,
     query: payload.query
   });
 
@@ -872,6 +1147,28 @@ export function verifySettlementVaultReconciliationExportPayloadWithPublicKeyPem
         provided_hash: payload.export_hash ?? null
       }
     };
+  }
+
+  if (payload.attestation) {
+    const attest = verifySettlementVaultReconciliationExportAttestation({
+      attestation: payload.attestation,
+      query: payload.query,
+      nextCursor: payload.next_cursor,
+      exportHash: expectedHash
+    });
+    if (!attest.ok) return attest;
+  }
+
+  if (payload.checkpoint) {
+    const checkpoint = verifySettlementVaultReconciliationExportCheckpoint({
+      checkpoint: payload.checkpoint,
+      query: payload.query,
+      attestation: payload.attestation ?? null,
+      nextCursor: payload.next_cursor,
+      entriesCount: Array.isArray(payload?.vault_reconciliation?.entries) ? payload.vault_reconciliation.entries.length : 0,
+      totalFiltered: payload.total_filtered
+    });
+    if (!checkpoint.ok) return checkpoint;
   }
 
   const signable = vaultReconciliationExportSignablePayload(payload);

@@ -23,7 +23,8 @@ export class JsonStateStore {
       policy_spend_daily: {},
       policy_audit: [],
       policy_consent_replay: {},
-      policy_audit_export_checkpoints: {}
+      policy_audit_export_checkpoints: {},
+      settlement_vault_export_checkpoints: {}
     };
   }
 
@@ -43,7 +44,8 @@ export class JsonStateStore {
         policy_spend_daily: {},
         policy_audit: [],
         policy_consent_replay: {},
-        policy_audit_export_checkpoints: {}
+        policy_audit_export_checkpoints: {},
+        settlement_vault_export_checkpoints: {}
       };
       return;
     }
@@ -65,6 +67,7 @@ export class JsonStateStore {
     this.state.policy_audit ||= [];
     this.state.policy_consent_replay ||= {};
     this.state.policy_audit_export_checkpoints ||= {};
+    this.state.settlement_vault_export_checkpoints ||= {};
   }
 
   save() {

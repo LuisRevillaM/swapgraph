@@ -1,0 +1,32 @@
+name: M53
+commands:
+  - cmd: "npm run verify:m53"
+artifacts:
+  - artifact: "docs/prd/M53.md"
+  - artifact: "docs/STATUS.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/GAPS.md"
+
+  - artifact: "src/read/settlementReadService.mjs"
+  - artifact: "src/crypto/policyIntegritySigning.mjs"
+  - artifact: "src/store/jsonStateStore.mjs"
+
+  - artifact: "docs/spec/schemas/SettlementVaultReconciliationExportResponse.schema.json"
+
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+  - artifact: "docs/spec/examples/api/settlement.vault_reconciliation.export.paginated.response.json"
+
+  - artifact: "scripts/run-m53-vault-reconciliation-export-continuity-scenario.mjs"
+  - artifact: "fixtures/vault/m53_scenario.json"
+  - artifact: "fixtures/vault/m53_expected.json"
+
+  - artifact: "milestones/M53.yaml"
+  - artifact: "verify/m53.sh"
+
+  - artifact: "artifacts/milestones/M53/latest/commands.log"
+  - artifact: "artifacts/milestones/M53/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M53/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M53/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M53/latest/vault_reconciliation_export_continuity_output.json"
+  - artifact: "artifacts/milestones/M53/latest/store.json"
+  - artifact: "artifacts/milestones/M53/latest/assertions.json"

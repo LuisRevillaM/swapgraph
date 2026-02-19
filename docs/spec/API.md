@@ -65,6 +65,10 @@ Settlement endpoints:
   - partner reads on vault-backed cycles include `vault_reconciliation` (holding/leg reconciliation snapshot) and `state_transitions` (ordered `cycle.state_changed` projection)
 - `GET /settlement/{cycle_id}/vault-reconciliation/export`
   - partner-only signed reconciliation export payload for vault-backed cycles (`export_hash` + detached signature)
+  - supports optional pagination over reconciliation entries (`limit`, `cursor_after`)
+  - continuation requires `attestation_after` when `cursor_after` is provided
+  - when checkpoint mode is enabled (`SETTLEMENT_VAULT_EXPORT_CHECKPOINT_ENFORCE=1`), continuation also requires `checkpoint_after`
+  - paginated responses include `total_filtered`, optional `next_cursor`, signed `attestation`, and optional signed `checkpoint`
 
 Receipt endpoints:
 - `GET /receipts/{cycle_id}`

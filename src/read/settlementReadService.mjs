@@ -226,6 +226,74 @@ function parseOptionalBoolean(value) {
   return null;
 }
 
+function normalizeOptionalString(value) {
+  return typeof value === 'string' && value.trim() ? value.trim() : null;
+}
+
+function normalizeLimit(limit) {
+  const n = Number.parseInt(String(limit ?? ''), 10);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return Math.min(n, 200);
+}
+
+function exportCheckpointEnforced() {
+  return process.env.SETTLEMENT_VAULT_EXPORT_CHECKPOINT_ENFORCE === '1';
+}
+
+function ensureVaultExportCheckpointState(store) {
+  store.state.settlement_vault_export_checkpoints ||= {};
+  return store.state.settlement_vault_export_checkpoints;
+}
+
+function checkpointContextFromExportQuery({ cycleId, includeTransitions, query }) {
+  return {
+    cycle_id: cycleId,
+    include_transitions: includeTransitions,
+    limit: normalizeLimit(query?.limit)
+  };
+}
+
+function checkpointContextKey(context) {
+  return JSON.stringify(context);
+}
+
+function paginateVaultReconciliationEntries({ entries, query, correlationId }) {
+  let orderedEntries = entries;
+
+  const cursorAfter = normalizeOptionalString(query?.cursor_after);
+  if (cursorAfter) {
+    const idx = orderedEntries.findIndex(e => e?.intent_id === cursorAfter);
+    if (idx < 0) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'cursor_after not found in reconciliation entry set', {
+          cursor_after: cursorAfter
+        })
+      };
+    }
+    orderedEntries = orderedEntries.slice(idx + 1);
+  }
+
+  const totalFiltered = orderedEntries.length;
+  const limit = normalizeLimit(query?.limit);
+  let nextCursor = null;
+
+  if (limit && orderedEntries.length > limit) {
+    const page = orderedEntries.slice(0, limit);
+    nextCursor = page[page.length - 1]?.intent_id ?? null;
+    orderedEntries = page;
+  }
+
+  return {
+    ok: true,
+    entries: orderedEntries,
+    totalFiltered,
+    nextCursor,
+    cursorAfter,
+    limit
+  };
+}
+
 function parseIsoMs(iso) {
   const ms = Date.parse(String(iso ?? ''));
   return Number.isFinite(ms) ? ms : null;
@@ -240,6 +308,18 @@ function exportQueryForSigning({ cycleId, query, includeTransitions }) {
   if (typeof query?.now_iso === 'string' && query.now_iso.trim()) out.now_iso = query.now_iso.trim();
   if (typeof query?.exported_at_iso === 'string' && query.exported_at_iso.trim()) out.exported_at_iso = query.exported_at_iso.trim();
 
+  const limit = normalizeLimit(query?.limit);
+  if (limit) out.limit = limit;
+
+  const cursorAfter = normalizeOptionalString(query?.cursor_after);
+  if (cursorAfter) out.cursor_after = cursorAfter;
+
+  const attestationAfter = normalizeOptionalString(query?.attestation_after);
+  if (attestationAfter) out.attestation_after = attestationAfter;
+
+  const checkpointAfter = normalizeOptionalString(query?.checkpoint_after);
+  if (checkpointAfter) out.checkpoint_after = checkpointAfter;
+
   return out;
 }
 
@@ -250,6 +330,7 @@ export class SettlementReadService {
   constructor({ store }) {
     if (!store) throw new Error('store is required');
     this.store = store;
+    ensureVaultExportCheckpointState(this.store);
   }
 
   status({ actor, auth, cycleId }) {
@@ -455,6 +536,123 @@ export class SettlementReadService {
       };
     }
 
+    const paged = paginateVaultReconciliationEntries({
+      entries: vaultReconciliation.entries ?? [],
+      query,
+      correlationId
+    });
+    if (!paged.ok) return paged;
+
+    const attestationAfter = normalizeOptionalString(query?.attestation_after);
+    if (paged.cursorAfter && !attestationAfter) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'attestation_after is required when cursor_after is provided', {
+          cursor_after: paged.cursorAfter,
+          attestation_after: query?.attestation_after ?? null
+        })
+      };
+    }
+
+    if (!paged.cursorAfter && attestationAfter) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'attestation_after is only allowed with cursor_after', {
+          cursor_after: query?.cursor_after ?? null,
+          attestation_after: attestationAfter
+        })
+      };
+    }
+
+    const checkpointAfter = normalizeOptionalString(query?.checkpoint_after);
+    const checkpointRequired = exportCheckpointEnforced();
+    const checkpointState = ensureVaultExportCheckpointState(this.store);
+    const checkpointContext = checkpointContextFromExportQuery({ cycleId, includeTransitions, query });
+    const checkpointContextFingerprint = checkpointContextKey(checkpointContext);
+
+    if (checkpointRequired && paged.cursorAfter && !checkpointAfter) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'checkpoint_after is required when cursor_after is provided', {
+          cursor_after: paged.cursorAfter,
+          checkpoint_after: query?.checkpoint_after ?? null
+        })
+      };
+    }
+
+    if (checkpointRequired && !paged.cursorAfter && checkpointAfter) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'checkpoint_after is only allowed with cursor_after', {
+          cursor_after: query?.cursor_after ?? null,
+          checkpoint_after: checkpointAfter
+        })
+      };
+    }
+
+    if (!checkpointRequired && checkpointAfter) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'checkpoint_after is not enabled for this export contract', {
+          checkpoint_after: checkpointAfter
+        })
+      };
+    }
+
+    if (checkpointRequired && paged.cursorAfter) {
+      const priorCheckpoint = checkpointState[checkpointAfter] ?? null;
+      if (!priorCheckpoint) {
+        return {
+          ok: false,
+          body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'checkpoint_after not found for vault reconciliation export continuation', {
+            reason_code: 'checkpoint_after_not_found',
+            checkpoint_after: checkpointAfter
+          })
+        };
+      }
+
+      if (priorCheckpoint.next_cursor !== paged.cursorAfter) {
+        return {
+          ok: false,
+          body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'cursor_after does not match checkpoint continuation cursor', {
+            reason_code: 'checkpoint_cursor_mismatch',
+            checkpoint_after: checkpointAfter,
+            expected_cursor_after: priorCheckpoint.next_cursor ?? null,
+            cursor_after: paged.cursorAfter
+          })
+        };
+      }
+
+      if (priorCheckpoint.attestation_chain_hash !== attestationAfter) {
+        return {
+          ok: false,
+          body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'attestation_after does not match checkpoint continuation chain', {
+            reason_code: 'checkpoint_attestation_mismatch',
+            checkpoint_after: checkpointAfter,
+            expected_attestation_after: priorCheckpoint.attestation_chain_hash ?? null,
+            attestation_after: attestationAfter
+          })
+        };
+      }
+
+      if (priorCheckpoint.query_context_fingerprint !== checkpointContextFingerprint) {
+        return {
+          ok: false,
+          body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'vault reconciliation export continuation query does not match checkpoint context', {
+            reason_code: 'checkpoint_query_mismatch',
+            checkpoint_after: checkpointAfter,
+            expected_context: priorCheckpoint.query_context ?? null,
+            provided_context: checkpointContext
+          })
+        };
+      }
+    }
+
+    const exportVaultReconciliation = {
+      summary: vaultReconciliation.summary,
+      entries: paged.entries
+    };
+
     const stateTransitions = includeTransitions ? buildStateTransitions({ store: this.store, cycleId }) : undefined;
 
     const exportedAt = query?.exported_at_iso ?? query?.now_iso ?? process.env.AUTHZ_NOW_ISO ?? new Date().toISOString();
@@ -474,14 +672,34 @@ export class SettlementReadService {
       includeTransitions
     });
 
+    const withAttestation = Boolean(paged.limit || paged.cursorAfter || attestationAfter);
+    const withCheckpoint = checkpointRequired && withAttestation;
+
     const signedPayload = buildSignedSettlementVaultReconciliationExportPayload({
       exportedAt,
       cycleId,
       timelineState: timeline.state,
-      vaultReconciliation,
+      vaultReconciliation: exportVaultReconciliation,
       stateTransitions,
+      totalFiltered: withAttestation ? paged.totalFiltered : undefined,
+      nextCursor: withAttestation ? paged.nextCursor : undefined,
+      withAttestation,
+      withCheckpoint,
       query: signingQuery
     });
+
+    if (checkpointRequired && signedPayload?.checkpoint?.checkpoint_hash) {
+      checkpointState[signedPayload.checkpoint.checkpoint_hash] = {
+        checkpoint_hash: signedPayload.checkpoint.checkpoint_hash,
+        checkpoint_after: signedPayload.checkpoint.checkpoint_after ?? null,
+        cycle_id: cycleId,
+        next_cursor: signedPayload.checkpoint.next_cursor ?? null,
+        attestation_chain_hash: signedPayload.attestation?.chain_hash ?? null,
+        query_context_fingerprint: checkpointContextFingerprint,
+        query_context: checkpointContext,
+        exported_at: signedPayload.exported_at
+      };
+    }
 
     return {
       ok: true,
