@@ -69,7 +69,8 @@ Settlement endpoints:
   - continuation requires `attestation_after` when `cursor_after` is provided
   - when checkpoint mode is enabled (`SETTLEMENT_VAULT_EXPORT_CHECKPOINT_ENFORCE=1`), continuation also requires `checkpoint_after`
   - checkpoint anchors have retention controls (`SETTLEMENT_VAULT_EXPORT_CHECKPOINT_RETENTION_DAYS`) and expired anchors are rejected
-  - paginated responses include `total_filtered`, optional `next_cursor`, signed `attestation`, and optional signed `checkpoint`
+  - optional partner-program enforcement (`SETTLEMENT_VAULT_EXPORT_PARTNER_PROGRAM_ENFORCE=1`) gates export entitlement and daily quota usage
+  - paginated responses include `total_filtered`, optional `next_cursor`, signed `attestation`, optional signed `checkpoint`, and optional `partner_program` usage metadata when program enforcement is active
 
 Receipt endpoints:
 - `GET /receipts/{cycle_id}`

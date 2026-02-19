@@ -86,6 +86,19 @@
         "checkpoint_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
       }
     },
+    "partner_program": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["partner_id", "plan_id", "feature", "quota_day", "daily_limit", "daily_used"],
+      "properties": {
+        "partner_id": { "type": "string", "minLength": 1 },
+        "plan_id": { "type": ["string", "null"], "minLength": 1 },
+        "feature": { "type": "string", "const": "vault_reconciliation_export" },
+        "quota_day": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "daily_limit": { "type": ["integer", "null"], "minimum": 1 },
+        "daily_used": { "type": "integer", "minimum": 1 }
+      }
+    },
     "export_hash": {
       "type": "string",
       "pattern": "^[a-f0-9]{64}$"

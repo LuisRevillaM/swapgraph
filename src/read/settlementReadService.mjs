@@ -240,6 +240,31 @@ function exportCheckpointEnforced() {
   return process.env.SETTLEMENT_VAULT_EXPORT_CHECKPOINT_ENFORCE === '1';
 }
 
+function partnerProgramEnforced() {
+  return process.env.SETTLEMENT_VAULT_EXPORT_PARTNER_PROGRAM_ENFORCE === '1';
+}
+
+function ensurePartnerProgramState(store) {
+  store.state.partner_program ||= {};
+  store.state.partner_program_usage ||= {};
+  return {
+    programs: store.state.partner_program,
+    usage: store.state.partner_program_usage
+  };
+}
+
+function parsePartnerProgramDailyLimit(value) {
+  const n = Number.parseInt(String(value ?? ''), 10);
+  if (!Number.isFinite(n) || n < 1) return null;
+  return Math.min(n, 1000000);
+}
+
+function quotaDayFromIso(iso) {
+  const ms = parseIsoMs(iso);
+  if (ms === null) return null;
+  return new Date(ms).toISOString().slice(0, 10);
+}
+
 function ensureVaultExportCheckpointState(store) {
   store.state.settlement_vault_export_checkpoints ||= {};
   return store.state.settlement_vault_export_checkpoints;
@@ -360,6 +385,7 @@ export class SettlementReadService {
   constructor({ store }) {
     if (!store) throw new Error('store is required');
     this.store = store;
+    ensurePartnerProgramState(this.store);
     ensureVaultExportCheckpointState(this.store);
   }
 
@@ -543,6 +569,9 @@ export class SettlementReadService {
     });
     if (!policyCheck.ok) return policyCheck;
 
+    const partnerProgramActive = partnerProgramEnforced();
+    let partnerProgramContext = null;
+
     const includeTransitionsRaw = query?.include_transitions;
     const includeTransitionsParsed = parseOptionalBoolean(includeTransitionsRaw);
     if (includeTransitionsRaw !== undefined && includeTransitionsParsed === null) {
@@ -721,6 +750,72 @@ export class SettlementReadService {
       };
     }
 
+    if (partnerProgramActive) {
+      const partnerProgramState = ensurePartnerProgramState(this.store);
+      const program = partnerProgramState.programs?.[viewActor.id] ?? null;
+      if (!program) {
+        return {
+          ok: false,
+          body: errorResponse(correlationId, 'FORBIDDEN', 'partner program enrollment required for vault reconciliation export', {
+            reason_code: 'partner_program_missing',
+            partner_id: viewActor.id
+          })
+        };
+      }
+
+      if (program?.features?.vault_reconciliation_export !== true) {
+        return {
+          ok: false,
+          body: errorResponse(correlationId, 'FORBIDDEN', 'partner plan does not include vault reconciliation export', {
+            reason_code: 'partner_feature_not_enabled',
+            partner_id: viewActor.id,
+            plan_id: program?.plan_id ?? null,
+            feature: 'vault_reconciliation_export'
+          })
+        };
+      }
+
+      const quotaNowIso = query?.now_iso ?? process.env.AUTHZ_NOW_ISO ?? new Date().toISOString();
+      const quotaDay = quotaDayFromIso(quotaNowIso);
+      if (!quotaDay) {
+        return {
+          ok: false,
+          body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'invalid now_iso for partner program quota', {
+            now_iso: quotaNowIso
+          })
+        };
+      }
+
+      const dailyLimit = parsePartnerProgramDailyLimit(program?.quotas?.vault_reconciliation_export_daily);
+      const usageKey = `${viewActor.id}:${quotaDay}:vault_reconciliation_export`;
+      const used = Number.parseInt(String(partnerProgramState.usage?.[usageKey] ?? 0), 10);
+      const usedSafe = Number.isFinite(used) && used >= 0 ? used : 0;
+
+      if (dailyLimit !== null && usedSafe >= dailyLimit) {
+        return {
+          ok: false,
+          body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'partner daily vault export quota exceeded', {
+            reason_code: 'partner_quota_exceeded',
+            partner_id: viewActor.id,
+            plan_id: program?.plan_id ?? null,
+            feature: 'vault_reconciliation_export',
+            quota_day: quotaDay,
+            quota_used: usedSafe,
+            quota_limit: dailyLimit
+          })
+        };
+      }
+
+      partnerProgramContext = {
+        state: partnerProgramState,
+        program,
+        quotaDay,
+        dailyLimit,
+        usageKey,
+        used: usedSafe
+      };
+    }
+
     const signingQuery = exportQueryForSigning({
       cycleId,
       query,
@@ -760,11 +855,26 @@ export class SettlementReadService {
       pruneExpiredSettlementVaultExportCheckpoints({ checkpointState, nowMs: checkpointNowMs });
     }
 
+    let partnerProgramView;
+    if (partnerProgramContext) {
+      const nextUsed = partnerProgramContext.used + 1;
+      partnerProgramContext.state.usage[partnerProgramContext.usageKey] = nextUsed;
+      partnerProgramView = {
+        partner_id: viewActor.id,
+        plan_id: partnerProgramContext.program?.plan_id ?? null,
+        feature: 'vault_reconciliation_export',
+        quota_day: partnerProgramContext.quotaDay,
+        daily_limit: partnerProgramContext.dailyLimit,
+        daily_used: nextUsed
+      };
+    }
+
     return {
       ok: true,
       body: {
         correlation_id: correlationId,
-        ...signedPayload
+        ...signedPayload,
+        ...(partnerProgramView ? { partner_program: partnerProgramView } : {})
       }
     };
   }

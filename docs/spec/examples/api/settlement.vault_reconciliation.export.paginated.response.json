@@ -71,6 +71,14 @@
     "total_filtered": 3,
     "checkpoint_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
   },
+  "partner_program": {
+    "partner_id": "swapgraph",
+    "plan_id": "pro",
+    "feature": "vault_reconciliation_export",
+    "quota_day": "2026-02-19",
+    "daily_limit": 1000,
+    "daily_used": 42
+  },
   "export_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "signature": {
     "key_id": "dev-pi-k1",

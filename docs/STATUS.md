@@ -65,9 +65,10 @@ Last updated: 2026-02-18
 - M52: ✅ partner vault/settlement reconciliation export surface (`settlement.vault_reconciliation.export` signed payloads + offline verification/tamper checks) (fixtures-first)
 - M53: ✅ partner vault reconciliation export continuity hardening (entry pagination + signed attestation chain + optional checkpoint continuity enforcement + tamper-fail checkpoint verification) (fixtures-first)
 - M54: ✅ vault reconciliation export checkpoint retention/expiry hardening (`SETTLEMENT_VAULT_EXPORT_CHECKPOINT_RETENTION_DAYS`, deterministic `checkpoint_expired` failures, opportunistic checkpoint GC) (fixtures-first)
+- M55: ✅ partner-program/commercial scaffold for vault export rollout (`SETTLEMENT_VAULT_EXPORT_PARTNER_PROGRAM_ENFORCE`, entitlement gating, daily quota enforcement, and partner usage metadata projection) (fixtures-first)
 
 ## Next
-- M55: partner program/commercial layer scaffold for reconciliation export rollout (fixtures-first)
+- M56: partner program governance surfaces (plan metadata/read APIs + rollout policy hooks) (fixtures-first)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.
