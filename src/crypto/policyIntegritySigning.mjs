@@ -1004,6 +1004,12 @@ function normalizePartnerProgramRolloutPolicyDiagnosticsExportQuery(query) {
   if (typeof query?.include_recommended_actions === 'boolean') out.include_recommended_actions = query.include_recommended_actions;
   if (typeof query?.include_runbook_hooks === 'boolean') out.include_runbook_hooks = query.include_runbook_hooks;
 
+  const maintenanceStaleAfter = Number.parseInt(String(query?.maintenance_stale_after_minutes ?? ''), 10);
+  if (Number.isFinite(maintenanceStaleAfter) && maintenanceStaleAfter > 0) out.maintenance_stale_after_minutes = maintenanceStaleAfter;
+
+  const freezeExpiringSoon = Number.parseInt(String(query?.freeze_expiring_soon_minutes ?? ''), 10);
+  if (Number.isFinite(freezeExpiringSoon) && freezeExpiringSoon > 0) out.freeze_expiring_soon_minutes = freezeExpiringSoon;
+
   if (typeof query?.attestation_after === 'string' && query.attestation_after.trim()) out.attestation_after = query.attestation_after.trim();
   if (typeof query?.checkpoint_after === 'string' && query.checkpoint_after.trim()) out.checkpoint_after = query.checkpoint_after.trim();
 
@@ -1079,6 +1085,43 @@ function normalizePartnerProgramRolloutPolicyDiagnosticsRunbookHooks(hooks) {
       hook_id: typeof hook?.hook_id === 'string' ? hook.hook_id : null,
       operation_id: typeof hook?.operation_id === 'string' ? hook.operation_id : null,
       action: Object.fromEntries(Object.entries(action).filter(([, v]) => v !== undefined))
+    };
+  });
+}
+
+function normalizePartnerProgramRolloutPolicyDiagnosticsLifecycleSignals(lifecycleSignals) {
+  const maintenanceModeAgeMinutes = Number.isFinite(lifecycleSignals?.maintenance_mode_age_minutes)
+    ? Number(lifecycleSignals.maintenance_mode_age_minutes)
+    : null;
+
+  const freezeWindowRemainingMinutes = Number.isFinite(lifecycleSignals?.freeze_window_remaining_minutes)
+    ? Number(lifecycleSignals.freeze_window_remaining_minutes)
+    : null;
+
+  const freezeBucket = typeof lifecycleSignals?.freeze_window_remaining_bucket === 'string' && lifecycleSignals.freeze_window_remaining_bucket.trim()
+    ? lifecycleSignals.freeze_window_remaining_bucket.trim()
+    : 'none';
+
+  return {
+    maintenance_mode_age_minutes: maintenanceModeAgeMinutes,
+    freeze_window_remaining_minutes: freezeWindowRemainingMinutes,
+    freeze_window_remaining_bucket: freezeBucket
+  };
+}
+
+function normalizePartnerProgramRolloutPolicyDiagnosticsAlerts(alerts) {
+  if (!Array.isArray(alerts)) return [];
+
+  return alerts.map(alert => {
+    const details = alert?.details && typeof alert.details === 'object' && !Array.isArray(alert.details)
+      ? clone(alert.details)
+      : {};
+
+    return {
+      code: typeof alert?.code === 'string' ? alert.code : null,
+      severity: typeof alert?.severity === 'string' ? alert.severity : null,
+      reason_code: typeof alert?.reason_code === 'string' ? alert.reason_code : null,
+      details
     };
   });
 }
@@ -1267,6 +1310,8 @@ function partnerProgramRolloutPolicyDiagnosticsExportSignablePayload(payload) {
     query: normalizePartnerProgramRolloutPolicyDiagnosticsExportQuery(payload?.query),
     policy: normalizePartnerProgramRolloutPolicyForExport(payload?.policy),
     overlays: normalizePartnerProgramRolloutPolicyDiagnosticsOverlays(payload?.overlays),
+    lifecycle_signals: normalizePartnerProgramRolloutPolicyDiagnosticsLifecycleSignals(payload?.lifecycle_signals),
+    alerts: normalizePartnerProgramRolloutPolicyDiagnosticsAlerts(payload?.alerts),
     recommended_actions: normalizePartnerProgramRolloutPolicyDiagnosticsActions(payload?.recommended_actions),
     runbook_hooks: normalizePartnerProgramRolloutPolicyDiagnosticsRunbookHooks(payload?.runbook_hooks),
     export_hash: payload?.export_hash,
@@ -1282,11 +1327,21 @@ function partnerProgramRolloutPolicyDiagnosticsExportSignablePayload(payload) {
   return out;
 }
 
-export function buildPartnerProgramRolloutPolicyDiagnosticsExportHash({ policy, query, overlays, recommendedActions, runbookHooks }) {
+export function buildPartnerProgramRolloutPolicyDiagnosticsExportHash({
+  policy,
+  query,
+  overlays,
+  lifecycleSignals,
+  alerts,
+  recommendedActions,
+  runbookHooks
+}) {
   return sha256HexCanonical({
     query: normalizePartnerProgramRolloutPolicyDiagnosticsExportQuery(query),
     policy: normalizePartnerProgramRolloutPolicyForExport(policy),
     overlays: normalizePartnerProgramRolloutPolicyDiagnosticsOverlays(overlays),
+    lifecycle_signals: normalizePartnerProgramRolloutPolicyDiagnosticsLifecycleSignals(lifecycleSignals),
+    alerts: normalizePartnerProgramRolloutPolicyDiagnosticsAlerts(alerts),
     recommended_actions: normalizePartnerProgramRolloutPolicyDiagnosticsActions(recommendedActions),
     runbook_hooks: normalizePartnerProgramRolloutPolicyDiagnosticsRunbookHooks(runbookHooks)
   });
@@ -1297,6 +1352,8 @@ export function buildSignedPartnerProgramRolloutPolicyDiagnosticsExportPayload({
   query,
   policy,
   overlays,
+  lifecycleSignals,
+  alerts,
   recommendedActions,
   runbookHooks,
   withAttestation = false,
@@ -1306,6 +1363,8 @@ export function buildSignedPartnerProgramRolloutPolicyDiagnosticsExportPayload({
   const normalizedQuery = normalizePartnerProgramRolloutPolicyDiagnosticsExportQuery(query);
   const normalizedPolicy = normalizePartnerProgramRolloutPolicyForExport(policy);
   const normalizedOverlays = normalizePartnerProgramRolloutPolicyDiagnosticsOverlays(overlays);
+  const normalizedLifecycleSignals = normalizePartnerProgramRolloutPolicyDiagnosticsLifecycleSignals(lifecycleSignals);
+  const normalizedAlerts = normalizePartnerProgramRolloutPolicyDiagnosticsAlerts(alerts);
   const normalizedActions = normalizePartnerProgramRolloutPolicyDiagnosticsActions(recommendedActions);
   const normalizedHooks = normalizePartnerProgramRolloutPolicyDiagnosticsRunbookHooks(runbookHooks);
 
@@ -1313,6 +1372,8 @@ export function buildSignedPartnerProgramRolloutPolicyDiagnosticsExportPayload({
     query: normalizedQuery,
     policy: normalizedPolicy,
     overlays: normalizedOverlays,
+    lifecycleSignals: normalizedLifecycleSignals,
+    alerts: normalizedAlerts,
     recommendedActions: normalizedActions,
     runbookHooks: normalizedHooks
   });
@@ -1322,6 +1383,8 @@ export function buildSignedPartnerProgramRolloutPolicyDiagnosticsExportPayload({
     query: normalizedQuery,
     policy: normalizedPolicy,
     overlays: normalizedOverlays,
+    lifecycle_signals: normalizedLifecycleSignals,
+    alerts: normalizedAlerts,
     recommended_actions: normalizedActions,
     runbook_hooks: normalizedHooks,
     export_hash: exportHash
@@ -1354,6 +1417,8 @@ export function verifyPartnerProgramRolloutPolicyDiagnosticsExportPayload(payloa
     query: payload.query,
     policy: payload.policy,
     overlays: payload.overlays,
+    lifecycleSignals: payload.lifecycle_signals,
+    alerts: payload.alerts,
     recommendedActions: payload.recommended_actions,
     runbookHooks: payload.runbook_hooks
   });
@@ -1403,6 +1468,8 @@ export function verifyPartnerProgramRolloutPolicyDiagnosticsExportPayloadWithPub
     query: payload.query,
     policy: payload.policy,
     overlays: payload.overlays,
+    lifecycleSignals: payload.lifecycle_signals,
+    alerts: payload.alerts,
     recommendedActions: payload.recommended_actions,
     runbookHooks: payload.runbook_hooks
   });

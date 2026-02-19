@@ -148,7 +148,8 @@ Each item here must become at least one of:
 - Resolved (fixtures-first, partial): M60 (operator freeze-export overlay gate + rollout control observability expansion on partner status projection).
 - Resolved (fixtures-first, partial): M61 (operator runbook hooks + deterministic signed rollout diagnostics export surface for control-plane state).
 - Resolved (fixtures-first, partial): M62 (rollout diagnostics export continuity + retention hardening: signed attestation/checkpoint chaining, stateful checkpoint continuation validation, deterministic checkpoint mismatch/expiry reason codes, and diagnostics checkpoint retention controls).
-- Remaining: broader commercial governance controls beyond diagnostics/audit continuation hardening.
+- Resolved (fixtures-first, partial): M63 (rollout diagnostics lifecycle hardening: signed lifecycle telemetry + deterministic stale-control alerts + threshold-validated diagnostics checks with continuity compatibility).
+- Remaining: broader commercial governance controls beyond diagnostics/audit lifecycle/continuity hardening.
 
 ---
 

@@ -2,10 +2,12 @@
   "correlation_id": "corr_partner_program_vault_export_rollout_policy_diagnostics_export",
   "exported_at": "2026-02-19T10:00:00Z",
   "query": {
-    "now_iso": "2026-02-19T10:00:00Z",
-    "exported_at_iso": "2026-02-19T10:00:00Z",
+    "now_iso": "2026-02-19T10:25:00Z",
+    "exported_at_iso": "2026-02-19T10:25:00Z",
     "include_recommended_actions": true,
     "include_runbook_hooks": true,
+    "maintenance_stale_after_minutes": 10,
+    "freeze_expiring_soon_minutes": 10,
     "attestation_after": "7ed885251efbcf7f8e82f878f9ed0f8c0d70f149345f0c181404570a3478dbda",
     "checkpoint_after": "e0398e516d8c1289f47e2fe4ea1e8cc395f337fd77b28f6ab6dc95dc50a8ed2d"
   },
@@ -45,6 +47,32 @@
     "freeze_export_enforced": true,
     "admin_allowlist": ["ops-admin"]
   },
+  "lifecycle_signals": {
+    "maintenance_mode_age_minutes": 40,
+    "freeze_window_remaining_minutes": 5,
+    "freeze_window_remaining_bucket": "critical"
+  },
+  "alerts": [
+    {
+      "code": "maintenance_mode_stale",
+      "severity": "warning",
+      "reason_code": "maintenance_mode_active",
+      "details": {
+        "maintenance_mode_age_minutes": 40,
+        "threshold_minutes": 10
+      }
+    },
+    {
+      "code": "freeze_window_expiring_soon",
+      "severity": "info",
+      "reason_code": "freeze_window_active",
+      "details": {
+        "freeze_window_remaining_minutes": 5,
+        "threshold_minutes": 10,
+        "freeze_until": "2026-02-19T10:30:00Z"
+      }
+    }
+  ],
   "recommended_actions": [
     {
       "code": "clear_maintenance_mode",

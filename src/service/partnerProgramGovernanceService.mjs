@@ -56,6 +56,13 @@ function parseOptionalBoolean(value) {
   return null;
 }
 
+function parseOptionalInteger(value) {
+  if (value === null || value === undefined || value === '') return null;
+  const n = Number.parseInt(String(value), 10);
+  if (!Number.isFinite(n)) return null;
+  return n;
+}
+
 function isObject(value) {
   return !!value && typeof value === 'object' && !Array.isArray(value);
 }
@@ -233,8 +240,114 @@ function checkpointContextFromPartnerProgramRolloutPolicyExportQuery({ query }) 
 function checkpointContextFromPartnerProgramRolloutPolicyDiagnosticsExportQuery({ query }) {
   return {
     include_recommended_actions: parseOptionalBoolean(query?.include_recommended_actions) !== false,
-    include_runbook_hooks: parseOptionalBoolean(query?.include_runbook_hooks) !== false
+    include_runbook_hooks: parseOptionalBoolean(query?.include_runbook_hooks) !== false,
+    maintenance_stale_after_minutes: parseOptionalInteger(query?.maintenance_stale_after_minutes),
+    freeze_expiring_soon_minutes: parseOptionalInteger(query?.freeze_expiring_soon_minutes)
   };
+}
+
+function normalizeDiagnosticsAlertThresholdMinutes({
+  value,
+  defaultValue,
+  min = 1,
+  max = 10080,
+  fieldName
+}) {
+  if (value === null || value === undefined || value === '') return { ok: true, value: defaultValue };
+  const parsed = parseOptionalInteger(value);
+  if (!Number.isFinite(parsed) || parsed < min || parsed > max) {
+    return {
+      ok: false,
+      error: {
+        reason_code: 'partner_rollout_diagnostics_threshold_invalid',
+        field: fieldName,
+        value,
+        min,
+        max
+      }
+    };
+  }
+  return { ok: true, value: parsed };
+}
+
+function diagnosticsLifecycleSignals({ policy, nowIso }) {
+  const nowMs = parseIsoMs(nowIso);
+
+  let maintenanceModeAgeMinutes = null;
+  if (policy?.controls?.maintenance_mode_enabled && nowMs !== null) {
+    const lastAdminActionAtMs = parseIsoMs(policy?.controls?.last_admin_action_at);
+    if (lastAdminActionAtMs !== null) {
+      maintenanceModeAgeMinutes = Math.max(0, Math.floor((nowMs - lastAdminActionAtMs) / 60000));
+    }
+  }
+
+  const freezeUntil = normalizeOptionalString(policy?.controls?.freeze_until);
+  let freezeWindowRemainingMinutes = null;
+  if (freezeUntil && nowMs !== null) {
+    const freezeUntilMs = parseIsoMs(freezeUntil);
+    if (freezeUntilMs !== null) {
+      freezeWindowRemainingMinutes = Math.ceil((freezeUntilMs - nowMs) / 60000);
+    }
+  }
+
+  let freezeWindowRemainingBucket = 'none';
+  if (freezeWindowRemainingMinutes !== null) {
+    if (freezeWindowRemainingMinutes < 0) freezeWindowRemainingBucket = 'expired';
+    else if (freezeWindowRemainingMinutes <= 15) freezeWindowRemainingBucket = 'critical';
+    else if (freezeWindowRemainingMinutes <= 60) freezeWindowRemainingBucket = 'warning';
+    else freezeWindowRemainingBucket = 'stable';
+  }
+
+  return {
+    maintenance_mode_age_minutes: maintenanceModeAgeMinutes,
+    freeze_window_remaining_minutes: freezeWindowRemainingMinutes,
+    freeze_window_remaining_bucket: freezeWindowRemainingBucket
+  };
+}
+
+function buildRolloutPolicyDiagnosticsAlerts({
+  policy,
+  lifecycleSignals,
+  maintenanceStaleAfterMinutes,
+  freezeExpiringSoonMinutes
+}) {
+  const out = [];
+
+  if (
+    policy?.controls?.maintenance_mode_enabled &&
+    Number.isFinite(lifecycleSignals?.maintenance_mode_age_minutes) &&
+    lifecycleSignals.maintenance_mode_age_minutes >= maintenanceStaleAfterMinutes
+  ) {
+    out.push({
+      code: 'maintenance_mode_stale',
+      severity: 'warning',
+      reason_code: 'maintenance_mode_active',
+      details: {
+        maintenance_mode_age_minutes: lifecycleSignals.maintenance_mode_age_minutes,
+        threshold_minutes: maintenanceStaleAfterMinutes
+      }
+    });
+  }
+
+  if (
+    policy?.controls?.freeze_active === true &&
+    Number.isFinite(lifecycleSignals?.freeze_window_remaining_minutes) &&
+    lifecycleSignals.freeze_window_remaining_minutes >= 0 &&
+    lifecycleSignals.freeze_window_remaining_minutes <= freezeExpiringSoonMinutes
+  ) {
+    out.push({
+      code: 'freeze_window_expiring_soon',
+      severity: 'info',
+      reason_code: 'freeze_window_active',
+      details: {
+        freeze_window_remaining_minutes: lifecycleSignals.freeze_window_remaining_minutes,
+        threshold_minutes: freezeExpiringSoonMinutes,
+        freeze_until: policy?.controls?.freeze_until ?? null
+      }
+    });
+  }
+
+  return out;
 }
 
 function checkpointContextKey(context) {
@@ -856,6 +969,33 @@ export class PartnerProgramGovernanceService {
     const includeRecommendedActions = parseOptionalBoolean(query?.include_recommended_actions) !== false;
     const includeRunbookHooks = parseOptionalBoolean(query?.include_runbook_hooks) !== false;
 
+    const maintenanceStaleThresholdParsed = normalizeDiagnosticsAlertThresholdMinutes({
+      value: query?.maintenance_stale_after_minutes,
+      defaultValue: 60,
+      fieldName: 'maintenance_stale_after_minutes'
+    });
+    if (!maintenanceStaleThresholdParsed.ok) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'invalid diagnostics threshold', maintenanceStaleThresholdParsed.error)
+      };
+    }
+
+    const freezeExpiringThresholdParsed = normalizeDiagnosticsAlertThresholdMinutes({
+      value: query?.freeze_expiring_soon_minutes,
+      defaultValue: 15,
+      fieldName: 'freeze_expiring_soon_minutes'
+    });
+    if (!freezeExpiringThresholdParsed.ok) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'invalid diagnostics threshold', freezeExpiringThresholdParsed.error)
+      };
+    }
+
+    const maintenanceStaleAfterMinutes = maintenanceStaleThresholdParsed.value;
+    const freezeExpiringSoonMinutes = freezeExpiringThresholdParsed.value;
+
     const attestationAfter = normalizeOptionalString(query?.attestation_after);
     const checkpointAfter = normalizeOptionalString(query?.checkpoint_after);
     const checkpointRequired = rolloutPolicyDiagnosticsExportCheckpointEnforced();
@@ -967,6 +1107,14 @@ export class PartnerProgramGovernanceService {
 
     const policyView = vaultExportRolloutPolicyView({ policy: resolved.policy });
     const overlays = buildRolloutPolicyDiagnosticsOverlays();
+    const lifecycleSignals = diagnosticsLifecycleSignals({ policy: policyView, nowIso });
+    const alerts = buildRolloutPolicyDiagnosticsAlerts({
+      policy: policyView,
+      lifecycleSignals,
+      maintenanceStaleAfterMinutes,
+      freezeExpiringSoonMinutes
+    });
+
     const recommendedActions = includeRecommendedActions
       ? buildRolloutPolicyDiagnosticsRecommendedActions({ policy: policyView })
       : [];
@@ -982,6 +1130,8 @@ export class PartnerProgramGovernanceService {
       query,
       policy: policyView,
       overlays,
+      lifecycleSignals,
+      alerts,
       recommendedActions,
       runbookHooks,
       withAttestation,

@@ -1,0 +1,238 @@
+{
+  "actors": {
+    "admin_partner": { "type": "partner", "id": "ops-admin" },
+    "partner": { "type": "partner", "id": "swapgraph" }
+  },
+  "operations": [
+    { "op": "keys.policy_integrity_signing.get", "expect_ok": true, "expect_keys_count": 2 },
+
+    {
+      "op": "rollout_overlay.set",
+      "config": { "freeze_export_enforce": true }
+    },
+
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.upsert",
+      "actor_ref": "admin_partner",
+      "auth": { "scopes": ["settlement:write"] },
+      "idempotency_key": "m63_policy_v1",
+      "occurred_at": "2026-02-19T10:00:00Z",
+      "request": {
+        "occurred_at": "2026-02-19T10:00:00Z",
+        "policy": {
+          "allowlist": ["swapgraph"],
+          "min_plan_id": "pro"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_policy_source": "store",
+      "expect_policy_allowlist": ["swapgraph"],
+      "expect_policy_min_plan_id": "pro",
+      "expect_policy_version": 1,
+      "expect_audit_id": "rollout_policy_000001"
+    },
+
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.admin_action",
+      "actor_ref": "admin_partner",
+      "auth": { "scopes": ["settlement:write"] },
+      "idempotency_key": "m63_action_maintenance",
+      "occurred_at": "2026-02-19T10:00:30Z",
+      "request": {
+        "occurred_at": "2026-02-19T10:00:30Z",
+        "action": {
+          "action_type": "set_maintenance_mode",
+          "maintenance_mode_enabled": true,
+          "maintenance_reason_code": "maintenance_window"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_policy_source": "store",
+      "expect_policy_version": 2,
+      "expect_maintenance_mode_enabled": true,
+      "expect_maintenance_reason_code": "maintenance_window",
+      "expect_freeze_until": null,
+      "expect_freeze_reason_code": null,
+      "expect_audit_id": "rollout_policy_000002",
+      "expect_audit_action_type": "set_maintenance_mode"
+    },
+
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.admin_action",
+      "actor_ref": "admin_partner",
+      "auth": { "scopes": ["settlement:write"] },
+      "idempotency_key": "m63_action_freeze",
+      "occurred_at": "2026-02-19T10:01:00Z",
+      "request": {
+        "occurred_at": "2026-02-19T10:01:00Z",
+        "action": {
+          "action_type": "set_freeze_window",
+          "freeze_until": "2026-02-19T10:30:00Z",
+          "freeze_reason_code": "release_freeze"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_policy_source": "store",
+      "expect_policy_version": 3,
+      "expect_maintenance_mode_enabled": true,
+      "expect_maintenance_reason_code": "maintenance_window",
+      "expect_freeze_until": "2026-02-19T10:30:00Z",
+      "expect_freeze_reason_code": "release_freeze",
+      "expect_audit_id": "rollout_policy_000003",
+      "expect_audit_action_type": "set_freeze_window"
+    },
+
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export",
+      "actor_ref": "admin_partner",
+      "auth": { "scopes": ["settlement:read"] },
+      "query": {
+        "now_iso": "2026-02-19T10:25:00Z",
+        "exported_at_iso": "2026-02-19T10:25:00Z",
+        "include_recommended_actions": true,
+        "include_runbook_hooks": true,
+        "maintenance_stale_after_minutes": 10,
+        "freeze_expiring_soon_minutes": 10
+      },
+      "save_export_ref": "diag_lifecycle_alert",
+      "expect_ok": true,
+      "expect_policy_version": 3,
+      "expect_maintenance_mode_enabled": true,
+      "expect_freeze_active": true,
+      "expect_freeze_export_enforced": true,
+      "expect_partner_program_enforced": true,
+      "expect_include_recommended_actions": true,
+      "expect_include_runbook_hooks": true,
+      "expect_maintenance_stale_after_minutes": 10,
+      "expect_freeze_expiring_soon_minutes": 10,
+      "expect_lifecycle_maintenance_mode_age_minutes": 24,
+      "expect_lifecycle_freeze_window_remaining_minutes": 5,
+      "expect_lifecycle_freeze_window_remaining_bucket": "critical",
+      "expect_attestation_after": null,
+      "expect_checkpoint_after": null,
+      "expect_has_attestation": true,
+      "expect_has_checkpoint": true,
+      "expect_alert_codes": ["maintenance_mode_stale", "freeze_window_expiring_soon"],
+      "expect_recommended_action_codes": ["clear_maintenance_mode", "clear_freeze_window"],
+      "expect_runbook_hook_ids": ["disable_maintenance_mode", "clear_freeze_window", "clear_controls", "observe_only"]
+    },
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export.verify",
+      "export_ref": "diag_lifecycle_alert",
+      "expect_verify_ok": true,
+      "expect_verify_public_ok": true
+    },
+
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export",
+      "actor_ref": "admin_partner",
+      "auth": { "scopes": ["settlement:read"] },
+      "query": {
+        "now_iso": "2026-02-19T10:25:30Z",
+        "exported_at_iso": "2026-02-19T10:25:30Z",
+        "include_recommended_actions": true,
+        "include_runbook_hooks": true,
+        "maintenance_stale_after_minutes": 10,
+        "freeze_expiring_soon_minutes": 10
+      },
+      "attestation_after_ref": "diag_lifecycle_alert",
+      "checkpoint_after_ref": "diag_lifecycle_alert",
+      "save_export_ref": "diag_lifecycle_alert_cont",
+      "expect_ok": true,
+      "expect_policy_version": 3,
+      "expect_maintenance_mode_enabled": true,
+      "expect_freeze_active": true,
+      "expect_include_recommended_actions": true,
+      "expect_include_runbook_hooks": true,
+      "expect_lifecycle_maintenance_mode_age_minutes": 24,
+      "expect_lifecycle_freeze_window_remaining_minutes": 5,
+      "expect_lifecycle_freeze_window_remaining_bucket": "critical",
+      "expect_attestation_after_ref": "diag_lifecycle_alert",
+      "expect_checkpoint_after_ref": "diag_lifecycle_alert",
+      "expect_has_attestation": true,
+      "expect_has_checkpoint": true,
+      "expect_alert_codes": ["maintenance_mode_stale", "freeze_window_expiring_soon"],
+      "expect_recommended_action_codes": ["clear_maintenance_mode", "clear_freeze_window"]
+    },
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export.verify",
+      "export_ref": "diag_lifecycle_alert_cont",
+      "expect_verify_ok": true,
+      "expect_verify_public_ok": true
+    },
+
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.admin_action",
+      "actor_ref": "admin_partner",
+      "auth": { "scopes": ["settlement:write"] },
+      "idempotency_key": "m63_action_clear",
+      "occurred_at": "2026-02-19T10:26:00Z",
+      "request": {
+        "occurred_at": "2026-02-19T10:26:00Z",
+        "action": {
+          "action_type": "clear_controls"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_policy_source": "store",
+      "expect_policy_version": 4,
+      "expect_maintenance_mode_enabled": false,
+      "expect_maintenance_reason_code": null,
+      "expect_freeze_until": null,
+      "expect_freeze_reason_code": null,
+      "expect_audit_id": "rollout_policy_000004",
+      "expect_audit_action_type": "clear_controls"
+    },
+
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export",
+      "actor_ref": "admin_partner",
+      "auth": { "scopes": ["settlement:read"] },
+      "query": {
+        "now_iso": "2026-02-19T10:26:10Z",
+        "exported_at_iso": "2026-02-19T10:26:10Z",
+        "include_recommended_actions": true,
+        "include_runbook_hooks": true,
+        "maintenance_stale_after_minutes": 10,
+        "freeze_expiring_soon_minutes": 10
+      },
+      "save_export_ref": "diag_after_clear",
+      "expect_ok": true,
+      "expect_policy_version": 4,
+      "expect_maintenance_mode_enabled": false,
+      "expect_freeze_active": false,
+      "expect_include_recommended_actions": true,
+      "expect_include_runbook_hooks": true,
+      "expect_lifecycle_maintenance_mode_age_minutes": null,
+      "expect_lifecycle_freeze_window_remaining_minutes": null,
+      "expect_lifecycle_freeze_window_remaining_bucket": "none",
+      "expect_alert_codes": [],
+      "expect_recommended_action_codes": ["none"]
+    },
+
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export",
+      "actor_ref": "admin_partner",
+      "auth": { "scopes": ["settlement:read"] },
+      "query": {
+        "now_iso": "2026-02-19T10:26:20Z",
+        "exported_at_iso": "2026-02-19T10:26:20Z",
+        "maintenance_stale_after_minutes": 0
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "partner_rollout_diagnostics_threshold_invalid"
+    },
+
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export.verify_tampered",
+      "export_ref": "diag_lifecycle_alert",
+      "expect_verify_ok": false,
+      "expect_verify_error": "hash_mismatch"
+    }
+  ]
+}

@@ -10,6 +10,8 @@
     "query",
     "policy",
     "overlays",
+    "lifecycle_signals",
+    "alerts",
     "recommended_actions",
     "runbook_hooks",
     "export_hash",
@@ -26,6 +28,8 @@
         "exported_at_iso": { "type": "string", "format": "date-time" },
         "include_recommended_actions": { "type": "boolean" },
         "include_runbook_hooks": { "type": "boolean" },
+        "maintenance_stale_after_minutes": { "type": "integer", "minimum": 1, "maximum": 10080 },
+        "freeze_expiring_soon_minutes": { "type": "integer", "minimum": 1, "maximum": 10080 },
         "attestation_after": {
           "type": "string",
           "pattern": "^[a-f0-9]{64}$"
@@ -63,6 +67,46 @@
         "admin_allowlist": {
           "type": "array",
           "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "lifecycle_signals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maintenance_mode_age_minutes",
+        "freeze_window_remaining_minutes",
+        "freeze_window_remaining_bucket"
+      ],
+      "properties": {
+        "maintenance_mode_age_minutes": { "type": ["integer", "null"], "minimum": 0 },
+        "freeze_window_remaining_minutes": { "type": ["integer", "null"] },
+        "freeze_window_remaining_bucket": {
+          "type": "string",
+          "enum": ["none", "expired", "critical", "warning", "stable"]
+        }
+      }
+    },
+    "alerts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "severity", "reason_code", "details"],
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": ["maintenance_mode_stale", "freeze_window_expiring_soon"]
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["info", "warning"]
+          },
+          "reason_code": {
+            "type": "string",
+            "enum": ["maintenance_mode_active", "freeze_window_active"]
+          },
+          "details": { "type": "object" }
         }
       }
     },

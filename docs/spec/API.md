@@ -91,6 +91,8 @@ Settlement endpoints:
   - writes signed-audit-compatible admin action records
 - `GET /partner-program/vault-export/rollout-policy/diagnostics/export`
   - partner-admin signed diagnostics export for rollout control-plane state (`policy` + env overlays + runbook hooks)
+  - includes lifecycle telemetry (`lifecycle_signals`) and deterministic operator alerts (`alerts`) for stale maintenance windows and freeze windows expiring soon
+  - supports alert threshold tuning via query (`maintenance_stale_after_minutes`, `freeze_expiring_soon_minutes`)
   - provides deterministic operator action recommendations (`clear_maintenance_mode`, `clear_freeze_window`, or `none`)
   - includes runbook hook templates for `rollout_policy.admin_action`
   - supports optional compact mode via query flags (`include_recommended_actions`, `include_runbook_hooks`)
