@@ -146,6 +146,10 @@
       "schema": "PartnerProgramVaultExportRolloutPolicyAdminActionResponse.schema.json"
     },
     {
+      "file": "partner_program.vault_export.rollout_policy.diagnostics.export.response.json",
+      "schema": "PartnerProgramVaultExportRolloutPolicyDiagnosticsExportResponse.schema.json"
+    },
+    {
       "file": "partner_program.vault_export.rollout_policy_audit.export.response.json",
       "schema": "PartnerProgramVaultExportRolloutPolicyAuditExportResponse.schema.json"
     },

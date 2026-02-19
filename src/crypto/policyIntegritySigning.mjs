@@ -995,6 +995,207 @@ export function verifyPartnerProgramRolloutPolicyAuditExportPayloadWithPublicKey
   });
 }
 
+function normalizePartnerProgramRolloutPolicyDiagnosticsExportQuery(query) {
+  const out = {};
+
+  if (typeof query?.now_iso === 'string' && query.now_iso.trim()) out.now_iso = query.now_iso.trim();
+  if (typeof query?.exported_at_iso === 'string' && query.exported_at_iso.trim()) out.exported_at_iso = query.exported_at_iso.trim();
+
+  return out;
+}
+
+function normalizePartnerProgramRolloutPolicyDiagnosticsOverlays(overlays) {
+  const adminAllowlist = Array.isArray(overlays?.admin_allowlist)
+    ? Array.from(new Set(overlays.admin_allowlist.filter(x => typeof x === 'string' && x.trim()).map(x => x.trim()))).sort()
+    : [];
+
+  const settlementRetention = Number.isFinite(overlays?.settlement_export_checkpoint_retention_days)
+    ? Math.max(1, Number(overlays.settlement_export_checkpoint_retention_days))
+    : 30;
+
+  const policyAuditRetention = Number.isFinite(overlays?.rollout_policy_audit_checkpoint_retention_days)
+    ? Math.max(1, Number(overlays.rollout_policy_audit_checkpoint_retention_days))
+    : 30;
+
+  return {
+    partner_program_enforced: overlays?.partner_program_enforced === true,
+    settlement_export_checkpoint_enforced: overlays?.settlement_export_checkpoint_enforced === true,
+    settlement_export_checkpoint_retention_days: settlementRetention,
+    rollout_policy_audit_checkpoint_enforced: overlays?.rollout_policy_audit_checkpoint_enforced === true,
+    rollout_policy_audit_checkpoint_retention_days: policyAuditRetention,
+    freeze_export_enforced: overlays?.freeze_export_enforced === true,
+    admin_allowlist: adminAllowlist
+  };
+}
+
+function normalizePartnerProgramRolloutPolicyDiagnosticsActions(actions) {
+  if (!Array.isArray(actions)) return [];
+
+  return actions.map(action => {
+    const details = action?.details && typeof action.details === 'object' && !Array.isArray(action.details)
+      ? clone(action.details)
+      : {};
+
+    return {
+      code: typeof action?.code === 'string' ? action.code : null,
+      reason_code: typeof action?.reason_code === 'string' ? action.reason_code : null,
+      runbook_hook_id: typeof action?.runbook_hook_id === 'string' ? action.runbook_hook_id : null,
+      details
+    };
+  });
+}
+
+function normalizePartnerProgramRolloutPolicyDiagnosticsRunbookHooks(hooks) {
+  if (!Array.isArray(hooks)) return [];
+
+  return hooks.map(hook => {
+    const action = hook?.action && typeof hook.action === 'object' && !Array.isArray(hook.action)
+      ? {
+          action_type: typeof hook.action.action_type === 'string' ? hook.action.action_type : null,
+          maintenance_mode_enabled: typeof hook.action.maintenance_mode_enabled === 'boolean' ? hook.action.maintenance_mode_enabled : undefined,
+          maintenance_reason_code: typeof hook.action.maintenance_reason_code === 'string' && hook.action.maintenance_reason_code.trim()
+            ? hook.action.maintenance_reason_code.trim()
+            : undefined,
+          freeze_until: typeof hook.action.freeze_until === 'string' && hook.action.freeze_until.trim() ? hook.action.freeze_until.trim() : undefined,
+          freeze_reason_code: typeof hook.action.freeze_reason_code === 'string' && hook.action.freeze_reason_code.trim()
+            ? hook.action.freeze_reason_code.trim()
+            : undefined
+        }
+      : { action_type: null };
+
+    return {
+      hook_id: typeof hook?.hook_id === 'string' ? hook.hook_id : null,
+      operation_id: typeof hook?.operation_id === 'string' ? hook.operation_id : null,
+      action: Object.fromEntries(Object.entries(action).filter(([, v]) => v !== undefined))
+    };
+  });
+}
+
+function partnerProgramRolloutPolicyDiagnosticsExportSignablePayload(payload) {
+  return {
+    exported_at: payload?.exported_at,
+    query: normalizePartnerProgramRolloutPolicyDiagnosticsExportQuery(payload?.query),
+    policy: normalizePartnerProgramRolloutPolicyForExport(payload?.policy),
+    overlays: normalizePartnerProgramRolloutPolicyDiagnosticsOverlays(payload?.overlays),
+    recommended_actions: normalizePartnerProgramRolloutPolicyDiagnosticsActions(payload?.recommended_actions),
+    runbook_hooks: normalizePartnerProgramRolloutPolicyDiagnosticsRunbookHooks(payload?.runbook_hooks),
+    export_hash: payload?.export_hash,
+    signature: payload?.signature
+  };
+}
+
+export function buildPartnerProgramRolloutPolicyDiagnosticsExportHash({ policy, query, overlays, recommendedActions, runbookHooks }) {
+  return sha256HexCanonical({
+    query: normalizePartnerProgramRolloutPolicyDiagnosticsExportQuery(query),
+    policy: normalizePartnerProgramRolloutPolicyForExport(policy),
+    overlays: normalizePartnerProgramRolloutPolicyDiagnosticsOverlays(overlays),
+    recommended_actions: normalizePartnerProgramRolloutPolicyDiagnosticsActions(recommendedActions),
+    runbook_hooks: normalizePartnerProgramRolloutPolicyDiagnosticsRunbookHooks(runbookHooks)
+  });
+}
+
+export function buildSignedPartnerProgramRolloutPolicyDiagnosticsExportPayload({
+  exportedAt,
+  query,
+  policy,
+  overlays,
+  recommendedActions,
+  runbookHooks,
+  keyId
+}) {
+  const normalizedQuery = normalizePartnerProgramRolloutPolicyDiagnosticsExportQuery(query);
+  const normalizedPolicy = normalizePartnerProgramRolloutPolicyForExport(policy);
+  const normalizedOverlays = normalizePartnerProgramRolloutPolicyDiagnosticsOverlays(overlays);
+  const normalizedActions = normalizePartnerProgramRolloutPolicyDiagnosticsActions(recommendedActions);
+  const normalizedHooks = normalizePartnerProgramRolloutPolicyDiagnosticsRunbookHooks(runbookHooks);
+
+  const exportHash = buildPartnerProgramRolloutPolicyDiagnosticsExportHash({
+    query: normalizedQuery,
+    policy: normalizedPolicy,
+    overlays: normalizedOverlays,
+    recommendedActions: normalizedActions,
+    runbookHooks: normalizedHooks
+  });
+
+  const payload = {
+    exported_at: exportedAt,
+    query: normalizedQuery,
+    policy: normalizedPolicy,
+    overlays: normalizedOverlays,
+    recommended_actions: normalizedActions,
+    runbook_hooks: normalizedHooks,
+    export_hash: exportHash
+  };
+
+  payload.signature = signPolicyIntegrityPayload(payload, { keyId });
+  return payload;
+}
+
+export function verifyPartnerProgramRolloutPolicyDiagnosticsExportPayload(payload) {
+  if (!payload || typeof payload !== 'object') {
+    return { ok: false, error: 'missing_payload' };
+  }
+
+  const expectedHash = buildPartnerProgramRolloutPolicyDiagnosticsExportHash({
+    query: payload.query,
+    policy: payload.policy,
+    overlays: payload.overlays,
+    recommendedActions: payload.recommended_actions,
+    runbookHooks: payload.runbook_hooks
+  });
+
+  if (payload.export_hash !== expectedHash) {
+    return {
+      ok: false,
+      error: 'hash_mismatch',
+      details: {
+        expected_hash: expectedHash,
+        provided_hash: payload.export_hash ?? null
+      }
+    };
+  }
+
+  const signable = partnerProgramRolloutPolicyDiagnosticsExportSignablePayload(payload);
+  const verified = verifyPolicyIntegrityPayloadSignature(signable);
+  if (!verified.ok) return verified;
+
+  return { ok: true };
+}
+
+export function verifyPartnerProgramRolloutPolicyDiagnosticsExportPayloadWithPublicKeyPem({ payload, publicKeyPem, keyId, alg }) {
+  if (!payload || typeof payload !== 'object') {
+    return { ok: false, error: 'missing_payload' };
+  }
+
+  const expectedHash = buildPartnerProgramRolloutPolicyDiagnosticsExportHash({
+    query: payload.query,
+    policy: payload.policy,
+    overlays: payload.overlays,
+    recommendedActions: payload.recommended_actions,
+    runbookHooks: payload.runbook_hooks
+  });
+
+  if (payload.export_hash !== expectedHash) {
+    return {
+      ok: false,
+      error: 'hash_mismatch',
+      details: {
+        expected_hash: expectedHash,
+        provided_hash: payload.export_hash ?? null
+      }
+    };
+  }
+
+  const signable = partnerProgramRolloutPolicyDiagnosticsExportSignablePayload(payload);
+
+  return verifyPolicyIntegrityPayloadSignatureWithPublicKeyPem({
+    payload: signable,
+    publicKeyPem,
+    keyId,
+    alg
+  });
+}
+
 function normalizeVaultReconciliationExportQuery(query) {
   const out = {};
 

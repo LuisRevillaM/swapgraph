@@ -1,6 +1,9 @@
 import { idempotencyScopeKey, payloadHash } from '../core/idempotency.mjs';
 import { authorizeApiOperation } from '../core/authz.mjs';
-import { buildSignedPartnerProgramRolloutPolicyAuditExportPayload } from '../crypto/policyIntegritySigning.mjs';
+import {
+  buildSignedPartnerProgramRolloutPolicyAuditExportPayload,
+  buildSignedPartnerProgramRolloutPolicyDiagnosticsExportPayload
+} from '../crypto/policyIntegritySigning.mjs';
 import {
   ensureVaultExportRolloutPolicyState,
   ensureVaultExportRolloutPolicyAuditState,
@@ -22,6 +25,10 @@ function correlationIdForRolloutPolicy() {
 
 function correlationIdForRolloutPolicyAuditExport() {
   return 'corr_partner_program_vault_export_rollout_policy_audit_export';
+}
+
+function correlationIdForRolloutPolicyDiagnosticsExport() {
+  return 'corr_partner_program_vault_export_rollout_policy_diagnostics_export';
 }
 
 function normalizeOptionalString(value) {
@@ -123,6 +130,24 @@ function partnerProgramRolloutPolicyExportCheckpointRetentionWindowMs() {
   return partnerProgramRolloutPolicyExportCheckpointRetentionDays() * 24 * 60 * 60 * 1000;
 }
 
+function settlementVaultExportCheckpointEnforced() {
+  return process.env.SETTLEMENT_VAULT_EXPORT_CHECKPOINT_ENFORCE === '1';
+}
+
+function settlementVaultExportCheckpointRetentionDays() {
+  const raw = Number.parseInt(String(process.env.SETTLEMENT_VAULT_EXPORT_CHECKPOINT_RETENTION_DAYS ?? ''), 10);
+  if (!Number.isFinite(raw) || raw < 1) return 30;
+  return Math.min(raw, 3650);
+}
+
+function partnerProgramEnforced() {
+  return process.env.SETTLEMENT_VAULT_EXPORT_PARTNER_PROGRAM_ENFORCE === '1';
+}
+
+function freezeExportEnforced() {
+  return process.env.PARTNER_PROGRAM_ROLLOUT_POLICY_FREEZE_EXPORT_ENFORCE === '1';
+}
+
 function nowIsoForPartnerProgramRolloutPolicyExportCheckpointRetention(query) {
   return query?.now_iso ?? process.env.AUTHZ_NOW_ISO ?? new Date().toISOString();
 }
@@ -177,6 +202,91 @@ function controlsForAudit(controls) {
     freeze_until: controls?.freeze_until ?? null,
     freeze_reason_code: controls?.freeze_reason_code ?? null
   };
+}
+
+function buildRolloutPolicyDiagnosticsOverlays() {
+  return {
+    partner_program_enforced: partnerProgramEnforced(),
+    settlement_export_checkpoint_enforced: settlementVaultExportCheckpointEnforced(),
+    settlement_export_checkpoint_retention_days: settlementVaultExportCheckpointRetentionDays(),
+    rollout_policy_audit_checkpoint_enforced: rolloutPolicyAuditExportCheckpointEnforced(),
+    rollout_policy_audit_checkpoint_retention_days: partnerProgramRolloutPolicyExportCheckpointRetentionDays(),
+    freeze_export_enforced: freezeExportEnforced(),
+    admin_allowlist: [...parsePartnerProgramAdminAllowlist()].sort()
+  };
+}
+
+function buildRolloutPolicyDiagnosticsRecommendedActions({ policy }) {
+  const out = [];
+
+  if (policy?.controls?.maintenance_mode_enabled) {
+    out.push({
+      code: 'clear_maintenance_mode',
+      reason_code: 'maintenance_mode_active',
+      runbook_hook_id: 'disable_maintenance_mode',
+      details: {
+        maintenance_reason_code: policy?.controls?.maintenance_reason_code ?? null
+      }
+    });
+  }
+
+  if (policy?.controls?.freeze_active) {
+    out.push({
+      code: 'clear_freeze_window',
+      reason_code: 'freeze_window_active',
+      runbook_hook_id: 'clear_freeze_window',
+      details: {
+        freeze_until: policy?.controls?.freeze_until ?? null,
+        freeze_reason_code: policy?.controls?.freeze_reason_code ?? null
+      }
+    });
+  }
+
+  if (out.length === 0) {
+    out.push({
+      code: 'none',
+      reason_code: 'no_action_required',
+      runbook_hook_id: 'observe_only',
+      details: {}
+    });
+  }
+
+  return out;
+}
+
+function buildRolloutPolicyDiagnosticsRunbookHooks() {
+  return [
+    {
+      hook_id: 'disable_maintenance_mode',
+      operation_id: 'partnerProgram.vault_export.rollout_policy.admin_action',
+      action: {
+        action_type: 'set_maintenance_mode',
+        maintenance_mode_enabled: false
+      }
+    },
+    {
+      hook_id: 'clear_freeze_window',
+      operation_id: 'partnerProgram.vault_export.rollout_policy.admin_action',
+      action: {
+        action_type: 'set_freeze_window',
+        freeze_until: null
+      }
+    },
+    {
+      hook_id: 'clear_controls',
+      operation_id: 'partnerProgram.vault_export.rollout_policy.admin_action',
+      action: {
+        action_type: 'clear_controls'
+      }
+    },
+    {
+      hook_id: 'observe_only',
+      operation_id: 'partnerProgram.vault_export.rollout_policy.diagnostics.export',
+      action: {
+        action_type: 'observe'
+      }
+    }
+  ];
 }
 
 function applyAdminActionToControls({ controls, action, actor, occurredAtIso }) {
@@ -640,6 +750,80 @@ export class PartnerProgramGovernanceService {
       body: {
         correlation_id: correlationId,
         policy: vaultExportRolloutPolicyView({ policy: resolved.policy })
+      }
+    };
+  }
+
+  exportVaultExportRolloutPolicyDiagnostics({ actor, auth, query }) {
+    const correlationId = correlationIdForRolloutPolicyDiagnosticsExport();
+
+    const authz = authorizeApiOperation({ operationId: 'partnerProgram.vault_export.rollout_policy.diagnostics.export', actor, auth, store: this.store });
+    if (!authz.ok) {
+      return { ok: false, body: errorResponse(correlationId, authz.error.code, authz.error.message, authz.error.details) };
+    }
+
+    if (!isPartnerProgramAdminActor(actor)) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'FORBIDDEN', 'partner admin role required for rollout policy diagnostics export', {
+          reason_code: 'partner_admin_required',
+          actor,
+          admin_allowlist: [...parsePartnerProgramAdminAllowlist()].sort()
+        })
+      };
+    }
+
+    const nowIso = query?.now_iso ?? process.env.AUTHZ_NOW_ISO ?? new Date().toISOString();
+    if (parseIsoMs(nowIso) === null) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'invalid now_iso for rollout policy diagnostics export', {
+          now_iso: query?.now_iso ?? null
+        })
+      };
+    }
+
+    const exportedAt = query?.exported_at_iso ?? nowIso;
+    if (parseIsoMs(exportedAt) === null) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'invalid exported_at timestamp for rollout policy diagnostics export', {
+          exported_at_iso: query?.exported_at_iso ?? null,
+          now_iso: query?.now_iso ?? null
+        })
+      };
+    }
+
+    const resolved = resolveVaultExportRolloutPolicy({ store: this.store, nowIso });
+    if (!resolved.ok) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'rollout policy configuration is invalid', {
+          reason_code: resolved.error?.reason_code ?? 'partner_rollout_config_invalid',
+          ...resolved.error
+        })
+      };
+    }
+
+    const policyView = vaultExportRolloutPolicyView({ policy: resolved.policy });
+    const overlays = buildRolloutPolicyDiagnosticsOverlays();
+    const recommendedActions = buildRolloutPolicyDiagnosticsRecommendedActions({ policy: policyView });
+    const runbookHooks = buildRolloutPolicyDiagnosticsRunbookHooks();
+
+    const signedPayload = buildSignedPartnerProgramRolloutPolicyDiagnosticsExportPayload({
+      exportedAt,
+      query,
+      policy: policyView,
+      overlays,
+      recommendedActions,
+      runbookHooks
+    });
+
+    return {
+      ok: true,
+      body: {
+        correlation_id: correlationId,
+        ...signedPayload
       }
     };
   }

@@ -1,0 +1,33 @@
+name: M61
+commands:
+  - cmd: "npm run verify:m61"
+artifacts:
+  - artifact: "docs/prd/M61.md"
+  - artifact: "docs/STATUS.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/GAPS.md"
+
+  - artifact: "src/service/partnerProgramGovernanceService.mjs"
+  - artifact: "src/crypto/policyIntegritySigning.mjs"
+  - artifact: "src/read/settlementReadService.mjs"
+
+  - artifact: "docs/spec/api/manifest.v1.json"
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+  - artifact: "docs/spec/examples/api/partner_program.vault_export.rollout_policy.diagnostics.export.response.json"
+
+  - artifact: "docs/spec/schemas/PartnerProgramVaultExportRolloutPolicyDiagnosticsExportResponse.schema.json"
+
+  - artifact: "scripts/run-m61-rollout-diagnostics-scenario.mjs"
+  - artifact: "fixtures/vault/m61_scenario.json"
+  - artifact: "fixtures/vault/m61_expected.json"
+
+  - artifact: "milestones/M61.yaml"
+  - artifact: "verify/m61.sh"
+
+  - artifact: "artifacts/milestones/M61/latest/commands.log"
+  - artifact: "artifacts/milestones/M61/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M61/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M61/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M61/latest/rollout_diagnostics_output.json"
+  - artifact: "artifacts/milestones/M61/latest/store.json"
+  - artifact: "artifacts/milestones/M61/latest/assertions.json"

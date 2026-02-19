@@ -89,6 +89,10 @@ Settlement endpoints:
     - freeze window controls (`freeze_until`, `freeze_reason_code`)
     - clear/reset controls
   - writes signed-audit-compatible admin action records
+- `GET /partner-program/vault-export/rollout-policy/diagnostics/export`
+  - partner-admin signed diagnostics export for rollout control-plane state (`policy` + env overlays + runbook hooks)
+  - provides deterministic operator action recommendations (`clear_maintenance_mode`, `clear_freeze_window`, or `none`)
+  - includes runbook hook templates for `rollout_policy.admin_action`
 - `GET /partner-program/vault-export/rollout-policy-audit/export`
   - partner-admin signed export of rollout policy-change/admin-action audit entries (`export_hash` + detached signature)
   - supports filter/pagination (`from_iso`, `to_iso`, `limit`, `cursor_after`)

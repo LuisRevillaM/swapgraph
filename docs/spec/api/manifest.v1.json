@@ -387,6 +387,22 @@
     },
     {
       "method": "GET",
+      "path": "/partner-program/vault-export/rollout-policy/diagnostics/export",
+      "operation_id": "partnerProgram.vault_export.rollout_policy.diagnostics.export",
+      "idempotency_required": false,
+      "response_schema": "PartnerProgramVaultExportRolloutPolicyDiagnosticsExportResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
       "path": "/partner-program/vault-export/rollout-policy-audit/export",
       "operation_id": "partnerProgram.vault_export.rollout_policy_audit.export",
       "idempotency_required": false,
