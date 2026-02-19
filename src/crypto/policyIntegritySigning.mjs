@@ -1169,11 +1169,16 @@ function normalizePartnerProgramRolloutPolicyDiagnosticsAutomationHints(automati
             }
           : { action_type: null };
 
+        const requestHash = typeof request?.request_hash === 'string' && request.request_hash.trim()
+          ? request.request_hash.trim()
+          : null;
+
         return {
           step: Number.isFinite(step) && step > 0 ? step : null,
           hook_id: typeof request?.hook_id === 'string' ? request.hook_id : null,
           operation_id: typeof request?.operation_id === 'string' ? request.operation_id : null,
           idempotency_key_template: typeof request?.idempotency_key_template === 'string' ? request.idempotency_key_template : null,
+          request_hash: requestHash,
           request: {
             action: Object.fromEntries(Object.entries(action).filter(([, v]) => v !== undefined))
           }
@@ -1185,12 +1190,16 @@ function normalizePartnerProgramRolloutPolicyDiagnosticsAutomationHints(automati
   const idempotencyScope = typeof automationHints?.safety?.idempotency_scope === 'string' && automationHints.safety.idempotency_scope.trim()
     ? automationHints.safety.idempotency_scope.trim()
     : 'partnerProgram.vault_export.rollout_policy.admin_action';
+  const planHash = typeof automationHints?.plan_hash === 'string' && automationHints.plan_hash.trim()
+    ? automationHints.plan_hash.trim()
+    : null;
 
   return {
     requires_operator_confirmation: automationHints.requires_operator_confirmation === true,
     source_alert_codes: sourceAlertCodes,
     action_queue: actionQueue,
     action_requests: actionRequests,
+    plan_hash: planHash,
     safety: {
       idempotency_required: automationHints?.safety?.idempotency_required !== false,
       idempotency_scope: idempotencyScope,

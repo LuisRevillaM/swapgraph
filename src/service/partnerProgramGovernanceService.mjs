@@ -395,30 +395,50 @@ function buildRolloutPolicyDiagnosticsAutomationHints({ recommendedActions, aler
     const hookTemplate = runbookHookIndex.get(hookId);
     const step = queue.length;
     const version = Number.isFinite(policyVersion) ? Number(policyVersion) : 0;
+    const operationId = normalizeOptionalString(hookTemplate?.operation_id) ?? 'partnerProgram.vault_export.rollout_policy.admin_action';
+    const actionTemplate = clone(hookTemplate?.action ?? { action_type: 'observe' });
 
     actionRequests.push({
       step,
       hook_id: hookId,
-      operation_id: normalizeOptionalString(hookTemplate?.operation_id) ?? 'partnerProgram.vault_export.rollout_policy.admin_action',
+      operation_id: operationId,
       idempotency_key_template: `diag_auto_v${version}_${String(step).padStart(2, '0')}_${hookId}`,
+      request_hash: payloadHash({ operation_id: operationId, action: actionTemplate }),
       request: {
-        action: clone(hookTemplate?.action ?? { action_type: 'observe' })
+        action: actionTemplate
       }
     });
 
     if (queue.length >= maxActions) break;
   }
 
+  const sourceAlertCodes = (alerts ?? []).map(alert => alert?.code).filter(x => typeof x === 'string' && x);
+  const safety = {
+    idempotency_required: true,
+    idempotency_scope: 'partnerProgram.vault_export.rollout_policy.admin_action',
+    max_actions_per_run: maxActions
+  };
+
+  const planHash = payloadHash({
+    source_alert_codes: sourceAlertCodes,
+    action_queue: queue,
+    action_requests: actionRequests.map(request => ({
+      step: request.step,
+      hook_id: request.hook_id,
+      operation_id: request.operation_id,
+      idempotency_key_template: request.idempotency_key_template,
+      request_hash: request.request_hash
+    })),
+    safety
+  });
+
   return {
     requires_operator_confirmation: queue.length > 0,
-    source_alert_codes: (alerts ?? []).map(alert => alert?.code).filter(x => typeof x === 'string' && x),
+    source_alert_codes: sourceAlertCodes,
     action_queue: queue,
     action_requests: actionRequests,
-    safety: {
-      idempotency_required: true,
-      idempotency_scope: 'partnerProgram.vault_export.rollout_policy.admin_action',
-      max_actions_per_run: maxActions
-    }
+    plan_hash: planHash,
+    safety
   };
 }
 

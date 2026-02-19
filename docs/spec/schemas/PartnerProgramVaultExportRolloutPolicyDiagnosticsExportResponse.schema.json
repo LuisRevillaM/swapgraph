@@ -115,7 +115,7 @@
     "automation_hints": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["requires_operator_confirmation", "source_alert_codes", "action_queue", "action_requests", "safety"],
+      "required": ["requires_operator_confirmation", "source_alert_codes", "action_queue", "action_requests", "plan_hash", "safety"],
       "properties": {
         "requires_operator_confirmation": { "type": "boolean" },
         "source_alert_codes": {
@@ -152,7 +152,7 @@
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["step", "hook_id", "operation_id", "idempotency_key_template", "request"],
+            "required": ["step", "hook_id", "operation_id", "idempotency_key_template", "request_hash", "request"],
             "properties": {
               "step": { "type": "integer", "minimum": 1 },
               "hook_id": {
@@ -164,6 +164,7 @@
                 "const": "partnerProgram.vault_export.rollout_policy.admin_action"
               },
               "idempotency_key_template": { "type": "string", "minLength": 1 },
+              "request_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
               "request": {
                 "type": "object",
                 "additionalProperties": false,
@@ -189,6 +190,7 @@
             }
           }
         },
+        "plan_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
         "safety": {
           "type": "object",
           "additionalProperties": false,

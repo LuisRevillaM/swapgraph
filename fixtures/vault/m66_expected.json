@@ -1,0 +1,696 @@
+{
+  "final": {
+    "checkpoint_keys": [
+      "61467c097f97fb2d87f11598e879b5450d785bbe16ae09909738880bf1fd7e90",
+      "b9e8566cf85b8388413474ca71f94b8bad63408d66733a37c86c9b653078af29",
+      "fc75feb207704c680483755ec6613b74720b17d8debaff607c31b651b479d4fa",
+      "febf51a95e684e8057a62f40f8f063b92d1ab8702dfbbf8eaf96a773d7136227"
+    ],
+    "checkpoint_records": [
+      {
+        "attestation_chain_hash": "b174234ffec05c53ff842775eac8c36470fb12ec2fb686777f146d4bd3547cf0",
+        "checkpoint_after": null,
+        "checkpoint_hash": "61467c097f97fb2d87f11598e879b5450d785bbe16ae09909738880bf1fd7e90",
+        "exported_at": "2026-02-19T12:25:00Z",
+        "next_cursor": null,
+        "query_context": {
+          "automation_max_actions": 1,
+          "freeze_expiring_soon_minutes": 10,
+          "include_automation_hints": true,
+          "include_recommended_actions": true,
+          "include_runbook_hooks": true,
+          "maintenance_stale_after_minutes": 10
+        }
+      },
+      {
+        "attestation_chain_hash": "57d80a7128d3eaa2e91dd80f1a46ea06bf7b6f2ec8f189c44055e0043777a0c2",
+        "checkpoint_after": null,
+        "checkpoint_hash": "b9e8566cf85b8388413474ca71f94b8bad63408d66733a37c86c9b653078af29",
+        "exported_at": "2026-02-19T12:26:10Z",
+        "next_cursor": null,
+        "query_context": {
+          "automation_max_actions": 2,
+          "freeze_expiring_soon_minutes": 10,
+          "include_automation_hints": true,
+          "include_recommended_actions": true,
+          "include_runbook_hooks": true,
+          "maintenance_stale_after_minutes": 10
+        }
+      },
+      {
+        "attestation_chain_hash": "08eeb1dece9d033cb9d7074f9ab947ba32d0a9aa94affc1585259c0fa29bae8f",
+        "checkpoint_after": null,
+        "checkpoint_hash": "fc75feb207704c680483755ec6613b74720b17d8debaff607c31b651b479d4fa",
+        "exported_at": "2026-02-19T12:25:40Z",
+        "next_cursor": null,
+        "query_context": {
+          "automation_max_actions": 2,
+          "freeze_expiring_soon_minutes": 10,
+          "include_automation_hints": true,
+          "include_recommended_actions": true,
+          "include_runbook_hooks": true,
+          "maintenance_stale_after_minutes": 10
+        }
+      },
+      {
+        "attestation_chain_hash": "c57d66d4c76326030d2db0247b35a919c06fc006631b100bb9433b5cf6982d95",
+        "checkpoint_after": "61467c097f97fb2d87f11598e879b5450d785bbe16ae09909738880bf1fd7e90",
+        "checkpoint_hash": "febf51a95e684e8057a62f40f8f063b92d1ab8702dfbbf8eaf96a773d7136227",
+        "exported_at": "2026-02-19T12:25:30Z",
+        "next_cursor": null,
+        "query_context": {
+          "automation_max_actions": 1,
+          "freeze_expiring_soon_minutes": 10,
+          "include_automation_hints": true,
+          "include_recommended_actions": true,
+          "include_runbook_hooks": true,
+          "maintenance_stale_after_minutes": 10
+        }
+      }
+    ],
+    "idempotency": [
+      {
+        "error_code": null,
+        "ok": true,
+        "payload_hash": "f8bd2de83d046f12e38b6fcfc53436bc9228d9a138f545026912db5f3333e9ad",
+        "scope_key": "partner:ops-admin|partnerProgram.vault_export.rollout_policy.admin_action|m66_action_clear"
+      },
+      {
+        "error_code": null,
+        "ok": true,
+        "payload_hash": "149faf26918c0d10c99a7a0782f069a401f823f38ae05f2a81ea9294aa07e743",
+        "scope_key": "partner:ops-admin|partnerProgram.vault_export.rollout_policy.admin_action|m66_action_freeze"
+      },
+      {
+        "error_code": null,
+        "ok": true,
+        "payload_hash": "124a2968d00d0387cabb696bea379e81b526acede24998c6c149c29bd242004f",
+        "scope_key": "partner:ops-admin|partnerProgram.vault_export.rollout_policy.admin_action|m66_action_maintenance"
+      },
+      {
+        "error_code": null,
+        "ok": true,
+        "payload_hash": "d19f43107dfd8bba4c46e96c491606d1a4048f77a56227635c995a3db57da23f",
+        "scope_key": "partner:ops-admin|partnerProgram.vault_export.rollout_policy.upsert|m66_policy_v1"
+      }
+    ],
+    "partner_program_records": [],
+    "partner_program_usage": [],
+    "rollout_policy": {
+      "allowlist": [
+        "swapgraph"
+      ],
+      "controls": {
+        "freeze_reason_code": null,
+        "freeze_until": null,
+        "last_admin_action_at": "2026-02-19T12:26:00Z",
+        "last_admin_action_by": {
+          "id": "ops-admin",
+          "type": "partner"
+        },
+        "maintenance_mode_enabled": false,
+        "maintenance_reason_code": null
+      },
+      "min_plan_id": "pro",
+      "updated_at": "2026-02-19T12:26:00Z",
+      "updated_by": {
+        "id": "ops-admin",
+        "type": "partner"
+      },
+      "version": 4
+    },
+    "rollout_policy_audit": [
+      {
+        "actor_id": "ops-admin",
+        "admin_action_type": null,
+        "allowlist_after": [
+          "swapgraph"
+        ],
+        "audit_id": "rollout_policy_000001",
+        "freeze_until_after": null,
+        "maintenance_mode_after": false,
+        "min_plan_after": "pro",
+        "occurred_at": "2026-02-19T12:00:00Z",
+        "operation_id": "partnerProgram.vault_export.rollout_policy.upsert",
+        "version_after": 1
+      },
+      {
+        "actor_id": "ops-admin",
+        "admin_action_type": "set_maintenance_mode",
+        "allowlist_after": [
+          "swapgraph"
+        ],
+        "audit_id": "rollout_policy_000002",
+        "freeze_until_after": null,
+        "maintenance_mode_after": true,
+        "min_plan_after": "pro",
+        "occurred_at": "2026-02-19T12:00:30Z",
+        "operation_id": "partnerProgram.vault_export.rollout_policy.admin_action",
+        "version_after": 2
+      },
+      {
+        "actor_id": "ops-admin",
+        "admin_action_type": "set_freeze_window",
+        "allowlist_after": [
+          "swapgraph"
+        ],
+        "audit_id": "rollout_policy_000003",
+        "freeze_until_after": "2026-02-19T12:30:00Z",
+        "maintenance_mode_after": true,
+        "min_plan_after": "pro",
+        "occurred_at": "2026-02-19T12:01:00Z",
+        "operation_id": "partnerProgram.vault_export.rollout_policy.admin_action",
+        "version_after": 3
+      },
+      {
+        "actor_id": "ops-admin",
+        "admin_action_type": "clear_controls",
+        "allowlist_after": [
+          "swapgraph"
+        ],
+        "audit_id": "rollout_policy_000004",
+        "freeze_until_after": null,
+        "maintenance_mode_after": false,
+        "min_plan_after": "pro",
+        "occurred_at": "2026-02-19T12:26:00Z",
+        "operation_id": "partnerProgram.vault_export.rollout_policy.admin_action",
+        "version_after": 4
+      }
+    ]
+  },
+  "operations": [
+    {
+      "active_key_id": "dev-pi-k1",
+      "key_statuses": {
+        "dev-pi-k1": "active",
+        "dev-pi-k2": "verify_only"
+      },
+      "keys_count": 2,
+      "ok": true,
+      "op": "keys.policy_integrity_signing.get"
+    },
+    {
+      "freeze_export_enforce": true,
+      "op": "rollout_overlay.set"
+    },
+    {
+      "actor": {
+        "id": "ops-admin",
+        "type": "partner"
+      },
+      "audit_id": "rollout_policy_000001",
+      "error_code": null,
+      "ok": true,
+      "op": "partnerProgram.vault_export.rollout_policy.upsert",
+      "policy_allowlist": [
+        "swapgraph"
+      ],
+      "policy_min_plan_id": "pro",
+      "policy_source": "store",
+      "policy_version": 1,
+      "reason_code": null,
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "ops-admin",
+        "type": "partner"
+      },
+      "audit_action_type": "set_maintenance_mode",
+      "audit_id": "rollout_policy_000002",
+      "error_code": null,
+      "freeze_reason_code": null,
+      "freeze_until": null,
+      "maintenance_mode_enabled": true,
+      "maintenance_reason_code": "maintenance_window",
+      "ok": true,
+      "op": "partnerProgram.vault_export.rollout_policy.admin_action",
+      "policy_source": "store",
+      "policy_version": 2,
+      "reason_code": null,
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "ops-admin",
+        "type": "partner"
+      },
+      "audit_action_type": "set_freeze_window",
+      "audit_id": "rollout_policy_000003",
+      "error_code": null,
+      "freeze_reason_code": "release_freeze",
+      "freeze_until": "2026-02-19T12:30:00Z",
+      "maintenance_mode_enabled": true,
+      "maintenance_reason_code": "maintenance_window",
+      "ok": true,
+      "op": "partnerProgram.vault_export.rollout_policy.admin_action",
+      "policy_source": "store",
+      "policy_version": 3,
+      "reason_code": null,
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "ops-admin",
+        "type": "partner"
+      },
+      "alert_codes": [
+        "maintenance_mode_stale",
+        "freeze_window_expiring_soon"
+      ],
+      "attestation_after": null,
+      "attestation_chain_hash": "b174234ffec05c53ff842775eac8c36470fb12ec2fb686777f146d4bd3547cf0",
+      "automation_action_hook_ids": [
+        "disable_maintenance_mode"
+      ],
+      "automation_action_priorities": [
+        "high"
+      ],
+      "automation_action_reason_codes": [
+        "maintenance_mode_active"
+      ],
+      "automation_idempotency_scope": "partnerProgram.vault_export.rollout_policy.admin_action",
+      "automation_max_actions": 1,
+      "automation_max_actions_per_run": 1,
+      "automation_plan_hash": "de0d37328ece38e55b549d3bb7ab7824a7bc3ba8f1185001de6683063f9e2ba6",
+      "automation_request_action_types": [
+        "set_maintenance_mode"
+      ],
+      "automation_request_hashes": [
+        "f17e4d121494a3ffa1c3f57a29731bc1393fd3d1854d28805d41cbf22cd96533"
+      ],
+      "automation_request_hook_ids": [
+        "disable_maintenance_mode"
+      ],
+      "automation_request_idempotency_templates": [
+        "diag_auto_v3_01_disable_maintenance_mode"
+      ],
+      "automation_request_operation_ids": [
+        "partnerProgram.vault_export.rollout_policy.admin_action"
+      ],
+      "automation_request_steps": [
+        1
+      ],
+      "automation_requires_operator_confirmation": true,
+      "automation_source_alert_codes": [
+        "maintenance_mode_stale",
+        "freeze_window_expiring_soon"
+      ],
+      "checkpoint_after": null,
+      "checkpoint_hash": "61467c097f97fb2d87f11598e879b5450d785bbe16ae09909738880bf1fd7e90",
+      "error_code": null,
+      "export_hash": "49677d26688d9445a3582d01be21b7dca5f54d62d20ee219d9581c5620075664",
+      "freeze_active": true,
+      "freeze_expiring_soon_minutes": 10,
+      "freeze_export_enforced": true,
+      "include_automation_hints": true,
+      "include_recommended_actions": true,
+      "include_runbook_hooks": true,
+      "lifecycle_freeze_window_remaining_bucket": "critical",
+      "lifecycle_freeze_window_remaining_minutes": 5,
+      "lifecycle_maintenance_mode_age_minutes": 24,
+      "maintenance_mode_enabled": true,
+      "maintenance_stale_after_minutes": 10,
+      "ok": true,
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export",
+      "partner_program_enforced": true,
+      "policy_version": 3,
+      "reason_code": null,
+      "recommended_action_codes": [
+        "clear_maintenance_mode",
+        "clear_freeze_window"
+      ],
+      "runbook_hook_ids": [
+        "disable_maintenance_mode",
+        "clear_freeze_window",
+        "clear_controls",
+        "observe_only"
+      ],
+      "signature_key_id": "dev-pi-k1"
+    },
+    {
+      "export_ref": "diag_auto_1",
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export.verify",
+      "verify_error": null,
+      "verify_ok": true,
+      "verify_public_error": null,
+      "verify_public_ok": true
+    },
+    {
+      "actor": {
+        "id": "ops-admin",
+        "type": "partner"
+      },
+      "alert_codes": [
+        "maintenance_mode_stale",
+        "freeze_window_expiring_soon"
+      ],
+      "attestation_after": "b174234ffec05c53ff842775eac8c36470fb12ec2fb686777f146d4bd3547cf0",
+      "attestation_chain_hash": "c57d66d4c76326030d2db0247b35a919c06fc006631b100bb9433b5cf6982d95",
+      "automation_action_hook_ids": [
+        "disable_maintenance_mode"
+      ],
+      "automation_action_priorities": [
+        "high"
+      ],
+      "automation_action_reason_codes": [
+        "maintenance_mode_active"
+      ],
+      "automation_idempotency_scope": "partnerProgram.vault_export.rollout_policy.admin_action",
+      "automation_max_actions": 1,
+      "automation_max_actions_per_run": 1,
+      "automation_plan_hash": "de0d37328ece38e55b549d3bb7ab7824a7bc3ba8f1185001de6683063f9e2ba6",
+      "automation_request_action_types": [
+        "set_maintenance_mode"
+      ],
+      "automation_request_hashes": [
+        "f17e4d121494a3ffa1c3f57a29731bc1393fd3d1854d28805d41cbf22cd96533"
+      ],
+      "automation_request_hook_ids": [
+        "disable_maintenance_mode"
+      ],
+      "automation_request_idempotency_templates": [
+        "diag_auto_v3_01_disable_maintenance_mode"
+      ],
+      "automation_request_operation_ids": [
+        "partnerProgram.vault_export.rollout_policy.admin_action"
+      ],
+      "automation_request_steps": [
+        1
+      ],
+      "automation_requires_operator_confirmation": true,
+      "automation_source_alert_codes": [
+        "maintenance_mode_stale",
+        "freeze_window_expiring_soon"
+      ],
+      "checkpoint_after": "61467c097f97fb2d87f11598e879b5450d785bbe16ae09909738880bf1fd7e90",
+      "checkpoint_hash": "febf51a95e684e8057a62f40f8f063b92d1ab8702dfbbf8eaf96a773d7136227",
+      "error_code": null,
+      "export_hash": "fa2ea14a0c8de8fc1f9bab11959a9b8086837bb486b43bc77f7b6b22a49a5551",
+      "freeze_active": true,
+      "freeze_expiring_soon_minutes": 10,
+      "freeze_export_enforced": true,
+      "include_automation_hints": true,
+      "include_recommended_actions": true,
+      "include_runbook_hooks": true,
+      "lifecycle_freeze_window_remaining_bucket": "critical",
+      "lifecycle_freeze_window_remaining_minutes": 5,
+      "lifecycle_maintenance_mode_age_minutes": 24,
+      "maintenance_mode_enabled": true,
+      "maintenance_stale_after_minutes": 10,
+      "ok": true,
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export",
+      "partner_program_enforced": true,
+      "policy_version": 3,
+      "reason_code": null,
+      "recommended_action_codes": [
+        "clear_maintenance_mode",
+        "clear_freeze_window"
+      ],
+      "runbook_hook_ids": [
+        "disable_maintenance_mode",
+        "clear_freeze_window",
+        "clear_controls",
+        "observe_only"
+      ],
+      "signature_key_id": "dev-pi-k1"
+    },
+    {
+      "export_ref": "diag_auto_2",
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export.verify",
+      "verify_error": null,
+      "verify_ok": true,
+      "verify_public_error": null,
+      "verify_public_ok": true
+    },
+    {
+      "actor": {
+        "id": "ops-admin",
+        "type": "partner"
+      },
+      "alert_codes": [
+        "maintenance_mode_stale",
+        "freeze_window_expiring_soon"
+      ],
+      "attestation_after": null,
+      "attestation_chain_hash": "08eeb1dece9d033cb9d7074f9ab947ba32d0a9aa94affc1585259c0fa29bae8f",
+      "automation_action_hook_ids": [
+        "disable_maintenance_mode",
+        "clear_freeze_window"
+      ],
+      "automation_action_priorities": [
+        "high",
+        "high"
+      ],
+      "automation_action_reason_codes": [
+        "maintenance_mode_active",
+        "freeze_window_active"
+      ],
+      "automation_idempotency_scope": "partnerProgram.vault_export.rollout_policy.admin_action",
+      "automation_max_actions": 2,
+      "automation_max_actions_per_run": 2,
+      "automation_plan_hash": "ccd1f22a1c50c905d21ab30aba53461986aaf9e73360701918d280f5943117a3",
+      "automation_request_action_types": [
+        "set_maintenance_mode",
+        "set_freeze_window"
+      ],
+      "automation_request_hashes": [
+        "f17e4d121494a3ffa1c3f57a29731bc1393fd3d1854d28805d41cbf22cd96533",
+        "6a54154c6a98eba0f0bc42769e91ffd642f2dc329e18eb6582e0fcce4c179166"
+      ],
+      "automation_request_hook_ids": [
+        "disable_maintenance_mode",
+        "clear_freeze_window"
+      ],
+      "automation_request_idempotency_templates": [
+        "diag_auto_v3_01_disable_maintenance_mode",
+        "diag_auto_v3_02_clear_freeze_window"
+      ],
+      "automation_request_operation_ids": [
+        "partnerProgram.vault_export.rollout_policy.admin_action",
+        "partnerProgram.vault_export.rollout_policy.admin_action"
+      ],
+      "automation_request_steps": [
+        1,
+        2
+      ],
+      "automation_requires_operator_confirmation": true,
+      "automation_source_alert_codes": [
+        "maintenance_mode_stale",
+        "freeze_window_expiring_soon"
+      ],
+      "checkpoint_after": null,
+      "checkpoint_hash": "fc75feb207704c680483755ec6613b74720b17d8debaff607c31b651b479d4fa",
+      "error_code": null,
+      "export_hash": "c6df0bf9a3de6aeaba71c4dba0c54d58b17f34cdc8ee91a593462d454f7247dc",
+      "freeze_active": true,
+      "freeze_expiring_soon_minutes": 10,
+      "freeze_export_enforced": true,
+      "include_automation_hints": true,
+      "include_recommended_actions": true,
+      "include_runbook_hooks": true,
+      "lifecycle_freeze_window_remaining_bucket": "critical",
+      "lifecycle_freeze_window_remaining_minutes": 5,
+      "lifecycle_maintenance_mode_age_minutes": 24,
+      "maintenance_mode_enabled": true,
+      "maintenance_stale_after_minutes": 10,
+      "ok": true,
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export",
+      "partner_program_enforced": true,
+      "policy_version": 3,
+      "reason_code": null,
+      "recommended_action_codes": [
+        "clear_maintenance_mode",
+        "clear_freeze_window"
+      ],
+      "runbook_hook_ids": [
+        "disable_maintenance_mode",
+        "clear_freeze_window",
+        "clear_controls",
+        "observe_only"
+      ],
+      "signature_key_id": "dev-pi-k1"
+    },
+    {
+      "export_ref": "diag_auto_max2",
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export.verify",
+      "verify_error": null,
+      "verify_ok": true,
+      "verify_public_error": null,
+      "verify_public_ok": true
+    },
+    {
+      "actor": {
+        "id": "ops-admin",
+        "type": "partner"
+      },
+      "alert_codes": null,
+      "attestation_after": null,
+      "attestation_chain_hash": null,
+      "automation_action_hook_ids": null,
+      "automation_action_priorities": null,
+      "automation_action_reason_codes": null,
+      "automation_idempotency_scope": null,
+      "automation_max_actions": null,
+      "automation_max_actions_per_run": null,
+      "automation_plan_hash": null,
+      "automation_request_action_types": null,
+      "automation_request_hashes": null,
+      "automation_request_hook_ids": null,
+      "automation_request_idempotency_templates": null,
+      "automation_request_operation_ids": null,
+      "automation_request_steps": null,
+      "automation_requires_operator_confirmation": null,
+      "automation_source_alert_codes": null,
+      "checkpoint_after": null,
+      "checkpoint_hash": null,
+      "error_code": "CONSTRAINT_VIOLATION",
+      "export_hash": null,
+      "freeze_active": null,
+      "freeze_expiring_soon_minutes": null,
+      "freeze_export_enforced": null,
+      "include_automation_hints": null,
+      "include_recommended_actions": null,
+      "include_runbook_hooks": null,
+      "lifecycle_freeze_window_remaining_bucket": null,
+      "lifecycle_freeze_window_remaining_minutes": null,
+      "lifecycle_maintenance_mode_age_minutes": null,
+      "maintenance_mode_enabled": null,
+      "maintenance_stale_after_minutes": null,
+      "ok": false,
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export",
+      "partner_program_enforced": null,
+      "policy_version": null,
+      "reason_code": "partner_rollout_diagnostics_automation_requires_runbook_hooks",
+      "recommended_action_codes": null,
+      "runbook_hook_ids": null,
+      "signature_key_id": null
+    },
+    {
+      "actor": {
+        "id": "ops-admin",
+        "type": "partner"
+      },
+      "audit_action_type": "clear_controls",
+      "audit_id": "rollout_policy_000004",
+      "error_code": null,
+      "freeze_reason_code": null,
+      "freeze_until": null,
+      "maintenance_mode_enabled": false,
+      "maintenance_reason_code": null,
+      "ok": true,
+      "op": "partnerProgram.vault_export.rollout_policy.admin_action",
+      "policy_source": "store",
+      "policy_version": 4,
+      "reason_code": null,
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "ops-admin",
+        "type": "partner"
+      },
+      "alert_codes": [],
+      "attestation_after": null,
+      "attestation_chain_hash": "57d80a7128d3eaa2e91dd80f1a46ea06bf7b6f2ec8f189c44055e0043777a0c2",
+      "automation_action_hook_ids": [],
+      "automation_action_priorities": [],
+      "automation_action_reason_codes": [],
+      "automation_idempotency_scope": "partnerProgram.vault_export.rollout_policy.admin_action",
+      "automation_max_actions": 2,
+      "automation_max_actions_per_run": 2,
+      "automation_plan_hash": "5b4dcb2dc76c033434d16fcb1d65ad69579447c62924d0f0ce46eac12890a996",
+      "automation_request_action_types": [],
+      "automation_request_hashes": [],
+      "automation_request_hook_ids": [],
+      "automation_request_idempotency_templates": [],
+      "automation_request_operation_ids": [],
+      "automation_request_steps": [],
+      "automation_requires_operator_confirmation": false,
+      "automation_source_alert_codes": [],
+      "checkpoint_after": null,
+      "checkpoint_hash": "b9e8566cf85b8388413474ca71f94b8bad63408d66733a37c86c9b653078af29",
+      "error_code": null,
+      "export_hash": "11652c21f28693bc9a89b0ba5f99d087a74a68a608e5ae4bf60eb078c88084c6",
+      "freeze_active": false,
+      "freeze_expiring_soon_minutes": 10,
+      "freeze_export_enforced": true,
+      "include_automation_hints": true,
+      "include_recommended_actions": true,
+      "include_runbook_hooks": true,
+      "lifecycle_freeze_window_remaining_bucket": "none",
+      "lifecycle_freeze_window_remaining_minutes": null,
+      "lifecycle_maintenance_mode_age_minutes": null,
+      "maintenance_mode_enabled": false,
+      "maintenance_stale_after_minutes": 10,
+      "ok": true,
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export",
+      "partner_program_enforced": true,
+      "policy_version": 4,
+      "reason_code": null,
+      "recommended_action_codes": [
+        "none"
+      ],
+      "runbook_hook_ids": [
+        "disable_maintenance_mode",
+        "clear_freeze_window",
+        "clear_controls",
+        "observe_only"
+      ],
+      "signature_key_id": "dev-pi-k1"
+    },
+    {
+      "actor": {
+        "id": "ops-admin",
+        "type": "partner"
+      },
+      "alert_codes": null,
+      "attestation_after": null,
+      "attestation_chain_hash": null,
+      "automation_action_hook_ids": null,
+      "automation_action_priorities": null,
+      "automation_action_reason_codes": null,
+      "automation_idempotency_scope": null,
+      "automation_max_actions": null,
+      "automation_max_actions_per_run": null,
+      "automation_plan_hash": null,
+      "automation_request_action_types": null,
+      "automation_request_hashes": null,
+      "automation_request_hook_ids": null,
+      "automation_request_idempotency_templates": null,
+      "automation_request_operation_ids": null,
+      "automation_request_steps": null,
+      "automation_requires_operator_confirmation": null,
+      "automation_source_alert_codes": null,
+      "checkpoint_after": null,
+      "checkpoint_hash": null,
+      "error_code": "CONSTRAINT_VIOLATION",
+      "export_hash": null,
+      "freeze_active": null,
+      "freeze_expiring_soon_minutes": null,
+      "freeze_export_enforced": null,
+      "include_automation_hints": null,
+      "include_recommended_actions": null,
+      "include_runbook_hooks": null,
+      "lifecycle_freeze_window_remaining_bucket": null,
+      "lifecycle_freeze_window_remaining_minutes": null,
+      "lifecycle_maintenance_mode_age_minutes": null,
+      "maintenance_mode_enabled": null,
+      "maintenance_stale_after_minutes": null,
+      "ok": false,
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export",
+      "partner_program_enforced": null,
+      "policy_version": null,
+      "reason_code": "partner_rollout_diagnostics_automation_invalid",
+      "recommended_action_codes": null,
+      "runbook_hook_ids": null,
+      "signature_key_id": null
+    },
+    {
+      "export_ref": "diag_auto_1",
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export.verify_tampered",
+      "verify_error": "hash_mismatch",
+      "verify_ok": false
+    }
+  ]
+}

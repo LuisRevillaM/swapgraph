@@ -95,6 +95,7 @@ Settlement endpoints:
   - supports alert threshold tuning via query (`maintenance_stale_after_minutes`, `freeze_expiring_soon_minutes`)
   - supports optional automation planning payload (`automation_hints`) via query (`include_automation_hints=true`) with queue limit control (`automation_max_actions`)
   - automation hints include deterministic `action_requests[]` templates for `rollout_policy.admin_action` and require `include_runbook_hooks=true`
+  - each action request includes a deterministic `request_hash`; the automation bundle includes `plan_hash` for downstream execution-plan integrity checks
   - provides deterministic operator action recommendations (`clear_maintenance_mode`, `clear_freeze_window`, or `none`)
   - includes runbook hook templates for `rollout_policy.admin_action`
   - supports optional compact mode via query flags (`include_recommended_actions`, `include_runbook_hooks`)

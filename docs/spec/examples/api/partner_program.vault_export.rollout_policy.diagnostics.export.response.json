@@ -96,6 +96,7 @@
         "hook_id": "disable_maintenance_mode",
         "operation_id": "partnerProgram.vault_export.rollout_policy.admin_action",
         "idempotency_key_template": "diag_auto_v12_01_disable_maintenance_mode",
+        "request_hash": "4eaf8b255b4df5d1d3db0f25f89f9feef236ec2f149a25f3de32b4a6cb6b9f77",
         "request": {
           "action": {
             "action_type": "set_maintenance_mode",
@@ -108,6 +109,7 @@
         "hook_id": "clear_freeze_window",
         "operation_id": "partnerProgram.vault_export.rollout_policy.admin_action",
         "idempotency_key_template": "diag_auto_v12_02_clear_freeze_window",
+        "request_hash": "06fdf4b9f367598750f4a674c0e20ca427a5fbb6e78d1f5da8f6d2ae80ac56fa",
         "request": {
           "action": {
             "action_type": "set_freeze_window",
@@ -116,6 +118,7 @@
         }
       }
     ],
+    "plan_hash": "30fb85098dd7f7f9a835f29847825b861fca038fbf539ca47f9ff15b9e2a4985",
     "safety": {
       "idempotency_required": true,
       "idempotency_scope": "partnerProgram.vault_export.rollout_policy.admin_action",
