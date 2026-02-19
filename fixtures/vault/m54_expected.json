@@ -1,0 +1,501 @@
+{
+  "final": {
+    "checkpoint_keys": [
+      "2f4391e474b4957d537e29a71637f8874b8681e0ce838aea1241fcec9974f005",
+      "eabeab68141faf2658606b44eb56b92b60325ccec63f41dc446e7685303d794b"
+    ],
+    "checkpoint_records": [
+      {
+        "attestation_chain_hash": "8310b3049916fdfac7a8b0ecf36aece55b58af70606781464484498e7286dae2",
+        "checkpoint_after": "eabeab68141faf2658606b44eb56b92b60325ccec63f41dc446e7685303d794b",
+        "checkpoint_hash": "2f4391e474b4957d537e29a71637f8874b8681e0ce838aea1241fcec9974f005",
+        "cycle_id": "cycle_4f27eb196224",
+        "exported_at": "2026-02-21T03:24:05Z",
+        "next_cursor": "intent_b",
+        "query_context": {
+          "cycle_id": "cycle_4f27eb196224",
+          "include_transitions": true,
+          "limit": 1
+        }
+      },
+      {
+        "attestation_chain_hash": "14156e43b8ee93cbbb99b12967bc0ab0949d4c3d0fd7351741d044cae1a4d8a7",
+        "checkpoint_after": null,
+        "checkpoint_hash": "eabeab68141faf2658606b44eb56b92b60325ccec63f41dc446e7685303d794b",
+        "cycle_id": "cycle_4f27eb196224",
+        "exported_at": "2026-02-21T03:24:00Z",
+        "next_cursor": "intent_a",
+        "query_context": {
+          "cycle_id": "cycle_4f27eb196224",
+          "include_transitions": true,
+          "limit": 1
+        }
+      }
+    ],
+    "cycle": {
+      "cycle_id": "cycle_4f27eb196224",
+      "receipt_final_state": "completed",
+      "timeline_state": "completed"
+    },
+    "fresh_checkpoint_hash": "eabeab68141faf2658606b44eb56b92b60325ccec63f41dc446e7685303d794b",
+    "fresh_continuation_checkpoint_hash": "2f4391e474b4957d537e29a71637f8874b8681e0ce838aea1241fcec9974f005",
+    "has_fresh_checkpoint": true,
+    "has_fresh_continuation_checkpoint": true,
+    "has_old_checkpoint": false,
+    "has_old_continuation_checkpoint": false,
+    "holdings": {
+      "hold_a": {
+        "reservation_id": null,
+        "settlement_cycle_id": null,
+        "status": "withdrawn",
+        "withdrawn_at": "2026-02-19T03:22:40Z"
+      },
+      "hold_b": {
+        "reservation_id": null,
+        "settlement_cycle_id": null,
+        "status": "withdrawn",
+        "withdrawn_at": "2026-02-19T03:22:40Z"
+      },
+      "hold_c": {
+        "reservation_id": null,
+        "settlement_cycle_id": null,
+        "status": "withdrawn",
+        "withdrawn_at": "2026-02-19T03:22:40Z"
+      }
+    },
+    "old_checkpoint_hash": "c91022f0eb74b6ebea22fa574e1fc24eb4249fe30c8b5f9fd4fa441f0a894d69",
+    "old_continuation_checkpoint_hash": "bd1fcd07e3da361c8da38f5ce808178e7b04631d8bc1644468afe1de3d1e7479",
+    "remaining_intent_reservations": []
+  },
+  "operations": [
+    {
+      "active_key_id": "dev-pi-k1",
+      "key_statuses": {
+        "dev-pi-k1": "active",
+        "dev-pi-k2": "verify_only"
+      },
+      "keys_count": 2,
+      "ok": true,
+      "op": "keys.policy_integrity_signing.get"
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "commit_phase": "accept",
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.accept",
+      "reason_code": null,
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "u2",
+        "type": "user"
+      },
+      "commit_phase": "accept",
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.accept",
+      "reason_code": null,
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "u3",
+        "type": "user"
+      },
+      "commit_phase": "ready",
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "cycleProposals.accept",
+      "reason_code": null,
+      "replayed": false
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "cycle_id": null,
+      "error_code": null,
+      "holding_id": "hold_a",
+      "holding_status": "available",
+      "ok": true,
+      "op": "vault.deposit",
+      "reason_code": null,
+      "replayed": false,
+      "reservation_id": null,
+      "settlement_cycle_id": null,
+      "withdrawn_at": null
+    },
+    {
+      "actor": {
+        "id": "u2",
+        "type": "user"
+      },
+      "cycle_id": null,
+      "error_code": null,
+      "holding_id": "hold_b",
+      "holding_status": "available",
+      "ok": true,
+      "op": "vault.deposit",
+      "reason_code": null,
+      "replayed": false,
+      "reservation_id": null,
+      "settlement_cycle_id": null,
+      "withdrawn_at": null
+    },
+    {
+      "actor": {
+        "id": "u3",
+        "type": "user"
+      },
+      "cycle_id": null,
+      "error_code": null,
+      "holding_id": "hold_c",
+      "holding_status": "available",
+      "ok": true,
+      "op": "vault.deposit",
+      "reason_code": null,
+      "replayed": false,
+      "reservation_id": null,
+      "settlement_cycle_id": null,
+      "withdrawn_at": null
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "cycle_id": null,
+      "error_code": null,
+      "holding_id": "hold_a",
+      "holding_status": "reserved",
+      "ok": true,
+      "op": "vault.reserve",
+      "reason_code": null,
+      "replayed": false,
+      "reservation_id": "rsv_hold_a",
+      "settlement_cycle_id": null,
+      "withdrawn_at": null
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "cycle_id": null,
+      "error_code": null,
+      "holding_id": "hold_b",
+      "holding_status": "reserved",
+      "ok": true,
+      "op": "vault.reserve",
+      "reason_code": null,
+      "replayed": false,
+      "reservation_id": "rsv_hold_b",
+      "settlement_cycle_id": null,
+      "withdrawn_at": null
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "cycle_id": null,
+      "error_code": null,
+      "holding_id": "hold_c",
+      "holding_status": "reserved",
+      "ok": true,
+      "op": "vault.reserve",
+      "reason_code": null,
+      "replayed": false,
+      "reservation_id": "rsv_hold_c",
+      "settlement_cycle_id": null,
+      "withdrawn_at": null
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "attestation_after": null,
+      "attestation_chain_hash": null,
+      "attestation_chain_ok": null,
+      "checkpoint_after": null,
+      "checkpoint_chain_ok": null,
+      "checkpoint_hash": null,
+      "correlation_id": "corr_cycle_4f27eb196224",
+      "cycle_id": "cycle_4f27eb196224",
+      "entries_count": 0,
+      "error_code": null,
+      "export_hash": null,
+      "next_cursor": null,
+      "no_op": false,
+      "ok": true,
+      "op": "settlement.start",
+      "reason_code": null,
+      "receipt_final_state": null,
+      "receipt_id": null,
+      "reconciliation_available": null,
+      "reconciliation_mode": null,
+      "reconciliation_reserved": null,
+      "reconciliation_total": null,
+      "reconciliation_withdrawn": null,
+      "signature_key_id": null,
+      "timeline_state": "escrow.ready",
+      "total_filtered": null,
+      "transitions_count": 0
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "attestation_after": null,
+      "attestation_chain_hash": null,
+      "attestation_chain_ok": null,
+      "checkpoint_after": null,
+      "checkpoint_chain_ok": null,
+      "checkpoint_hash": null,
+      "correlation_id": "corr_cycle_4f27eb196224",
+      "cycle_id": "cycle_4f27eb196224",
+      "entries_count": 0,
+      "error_code": null,
+      "export_hash": null,
+      "next_cursor": null,
+      "no_op": false,
+      "ok": true,
+      "op": "settlement.begin_execution",
+      "reason_code": null,
+      "receipt_final_state": null,
+      "receipt_id": null,
+      "reconciliation_available": null,
+      "reconciliation_mode": null,
+      "reconciliation_reserved": null,
+      "reconciliation_total": null,
+      "reconciliation_withdrawn": null,
+      "signature_key_id": null,
+      "timeline_state": "executing",
+      "total_filtered": null,
+      "transitions_count": 0
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "attestation_after": null,
+      "attestation_chain_hash": null,
+      "attestation_chain_ok": null,
+      "checkpoint_after": null,
+      "checkpoint_chain_ok": null,
+      "checkpoint_hash": null,
+      "correlation_id": "corr_cycle_4f27eb196224",
+      "cycle_id": "cycle_4f27eb196224",
+      "entries_count": 0,
+      "error_code": null,
+      "export_hash": null,
+      "next_cursor": null,
+      "no_op": false,
+      "ok": true,
+      "op": "settlement.complete",
+      "reason_code": null,
+      "receipt_final_state": "completed",
+      "receipt_id": "receipt_02cce1dcc083",
+      "reconciliation_available": null,
+      "reconciliation_mode": null,
+      "reconciliation_reserved": null,
+      "reconciliation_total": null,
+      "reconciliation_withdrawn": null,
+      "signature_key_id": null,
+      "timeline_state": "completed",
+      "total_filtered": null,
+      "transitions_count": 0
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "attestation_after": null,
+      "attestation_chain_hash": "0fcd76f2261d0e509e6c84506e8b097aa93b6bc0d9c7d125fae5bd8654df2ea6",
+      "attestation_chain_ok": null,
+      "checkpoint_after": null,
+      "checkpoint_chain_ok": null,
+      "checkpoint_hash": "c91022f0eb74b6ebea22fa574e1fc24eb4249fe30c8b5f9fd4fa441f0a894d69",
+      "correlation_id": "corr_cycle_4f27eb196224_vault_reconciliation_export",
+      "cycle_id": "cycle_4f27eb196224",
+      "entries_count": 2,
+      "error_code": null,
+      "export_hash": "cd00748832ea90308b6250ca0f8d10d2bf58fce10e85ecd7084d11fbae27df8e",
+      "next_cursor": "intent_b",
+      "no_op": false,
+      "ok": true,
+      "op": "settlement.vault_reconciliation.export",
+      "reason_code": null,
+      "receipt_final_state": null,
+      "receipt_id": null,
+      "reconciliation_available": 0,
+      "reconciliation_mode": "full",
+      "reconciliation_reserved": 0,
+      "reconciliation_total": 3,
+      "reconciliation_withdrawn": 3,
+      "signature_key_id": "dev-pi-k1",
+      "timeline_state": "completed",
+      "total_filtered": 3,
+      "transitions_count": 5
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "attestation_after": "0fcd76f2261d0e509e6c84506e8b097aa93b6bc0d9c7d125fae5bd8654df2ea6",
+      "attestation_chain_hash": "09de91d9777e275e54dff937ba15bba72a869d1a10061aabb0729a1bae5230c0",
+      "attestation_chain_ok": true,
+      "checkpoint_after": "c91022f0eb74b6ebea22fa574e1fc24eb4249fe30c8b5f9fd4fa441f0a894d69",
+      "checkpoint_chain_ok": true,
+      "checkpoint_hash": "bd1fcd07e3da361c8da38f5ce808178e7b04631d8bc1644468afe1de3d1e7479",
+      "correlation_id": "corr_cycle_4f27eb196224_vault_reconciliation_export",
+      "cycle_id": "cycle_4f27eb196224",
+      "entries_count": 1,
+      "error_code": null,
+      "export_hash": "e9dddc6d9740d22f6aeb1316334e63c4d46e4a570d526e60e6848ae5d7c8c063",
+      "next_cursor": null,
+      "no_op": false,
+      "ok": true,
+      "op": "settlement.vault_reconciliation.export",
+      "reason_code": null,
+      "receipt_final_state": null,
+      "receipt_id": null,
+      "reconciliation_available": 0,
+      "reconciliation_mode": "full",
+      "reconciliation_reserved": 0,
+      "reconciliation_total": 3,
+      "reconciliation_withdrawn": 3,
+      "signature_key_id": "dev-pi-k1",
+      "timeline_state": "completed",
+      "total_filtered": 1,
+      "transitions_count": 5
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "attestation_after": null,
+      "attestation_chain_hash": null,
+      "attestation_chain_ok": null,
+      "checkpoint_after": null,
+      "checkpoint_chain_ok": null,
+      "checkpoint_hash": null,
+      "correlation_id": null,
+      "cycle_id": "cycle_4f27eb196224",
+      "entries_count": null,
+      "error_code": "CONSTRAINT_VIOLATION",
+      "export_hash": null,
+      "next_cursor": null,
+      "no_op": false,
+      "ok": false,
+      "op": "settlement.vault_reconciliation.export",
+      "reason_code": "checkpoint_expired",
+      "receipt_final_state": null,
+      "receipt_id": null,
+      "reconciliation_available": null,
+      "reconciliation_mode": null,
+      "reconciliation_reserved": null,
+      "reconciliation_total": null,
+      "reconciliation_withdrawn": null,
+      "signature_key_id": null,
+      "timeline_state": null,
+      "total_filtered": null,
+      "transitions_count": 0
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "attestation_after": null,
+      "attestation_chain_hash": "14156e43b8ee93cbbb99b12967bc0ab0949d4c3d0fd7351741d044cae1a4d8a7",
+      "attestation_chain_ok": null,
+      "checkpoint_after": null,
+      "checkpoint_chain_ok": null,
+      "checkpoint_hash": "eabeab68141faf2658606b44eb56b92b60325ccec63f41dc446e7685303d794b",
+      "correlation_id": "corr_cycle_4f27eb196224_vault_reconciliation_export",
+      "cycle_id": "cycle_4f27eb196224",
+      "entries_count": 1,
+      "error_code": null,
+      "export_hash": "0711ff2cc10754f66bd0f0326f0c60ac9fb2c28474e6db2ce1714ead4894fb1d",
+      "next_cursor": "intent_a",
+      "no_op": false,
+      "ok": true,
+      "op": "settlement.vault_reconciliation.export",
+      "reason_code": null,
+      "receipt_final_state": null,
+      "receipt_id": null,
+      "reconciliation_available": 0,
+      "reconciliation_mode": "full",
+      "reconciliation_reserved": 0,
+      "reconciliation_total": 3,
+      "reconciliation_withdrawn": 3,
+      "signature_key_id": "dev-pi-k1",
+      "timeline_state": "completed",
+      "total_filtered": 3,
+      "transitions_count": 5
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "attestation_after": "14156e43b8ee93cbbb99b12967bc0ab0949d4c3d0fd7351741d044cae1a4d8a7",
+      "attestation_chain_hash": "8310b3049916fdfac7a8b0ecf36aece55b58af70606781464484498e7286dae2",
+      "attestation_chain_ok": true,
+      "checkpoint_after": "eabeab68141faf2658606b44eb56b92b60325ccec63f41dc446e7685303d794b",
+      "checkpoint_chain_ok": true,
+      "checkpoint_hash": "2f4391e474b4957d537e29a71637f8874b8681e0ce838aea1241fcec9974f005",
+      "correlation_id": "corr_cycle_4f27eb196224_vault_reconciliation_export",
+      "cycle_id": "cycle_4f27eb196224",
+      "entries_count": 1,
+      "error_code": null,
+      "export_hash": "05e87ffab52c4f62c5d41d4cb40f45d80bbbc451ba096a6076a7a6636f5872d7",
+      "next_cursor": "intent_b",
+      "no_op": false,
+      "ok": true,
+      "op": "settlement.vault_reconciliation.export",
+      "reason_code": null,
+      "receipt_final_state": null,
+      "receipt_id": null,
+      "reconciliation_available": 0,
+      "reconciliation_mode": "full",
+      "reconciliation_reserved": 0,
+      "reconciliation_total": 3,
+      "reconciliation_withdrawn": 3,
+      "signature_key_id": "dev-pi-k1",
+      "timeline_state": "completed",
+      "total_filtered": 2,
+      "transitions_count": 5
+    },
+    {
+      "export_ref": "export_fresh_page_2",
+      "op": "settlement.vault_reconciliation.export.verify",
+      "verify_error": null,
+      "verify_ok": true,
+      "verify_public_error": null,
+      "verify_public_ok": true
+    },
+    {
+      "export_ref": "export_fresh_page_2",
+      "op": "settlement.vault_reconciliation.export.verify_tampered_checkpoint",
+      "verify_error": "checkpoint_hash_mismatch",
+      "verify_ok": false
+    }
+  ]
+}

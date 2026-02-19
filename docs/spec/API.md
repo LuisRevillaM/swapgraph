@@ -68,6 +68,7 @@ Settlement endpoints:
   - supports optional pagination over reconciliation entries (`limit`, `cursor_after`)
   - continuation requires `attestation_after` when `cursor_after` is provided
   - when checkpoint mode is enabled (`SETTLEMENT_VAULT_EXPORT_CHECKPOINT_ENFORCE=1`), continuation also requires `checkpoint_after`
+  - checkpoint anchors have retention controls (`SETTLEMENT_VAULT_EXPORT_CHECKPOINT_RETENTION_DAYS`) and expired anchors are rejected
   - paginated responses include `total_filtered`, optional `next_cursor`, signed `attestation`, and optional signed `checkpoint`
 
 Receipt endpoints:

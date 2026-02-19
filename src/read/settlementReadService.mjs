@@ -245,6 +245,36 @@ function ensureVaultExportCheckpointState(store) {
   return store.state.settlement_vault_export_checkpoints;
 }
 
+function settlementVaultExportCheckpointRetentionDays() {
+  const raw = Number.parseInt(String(process.env.SETTLEMENT_VAULT_EXPORT_CHECKPOINT_RETENTION_DAYS ?? ''), 10);
+  if (!Number.isFinite(raw) || raw < 1) return 30;
+  return Math.min(raw, 3650);
+}
+
+function settlementVaultExportCheckpointRetentionWindowMs() {
+  return settlementVaultExportCheckpointRetentionDays() * 24 * 60 * 60 * 1000;
+}
+
+function nowIsoForSettlementVaultExportRetention(query) {
+  return query?.now_iso ?? process.env.AUTHZ_NOW_ISO ?? new Date().toISOString();
+}
+
+function isSettlementVaultExportCheckpointExpired({ checkpointRecord, nowMs }) {
+  if (!checkpointRecord || typeof checkpointRecord !== 'object') return true;
+  const exportedAtMs = parseIsoMs(checkpointRecord.exported_at);
+  if (exportedAtMs === null) return true;
+  return nowMs > (exportedAtMs + settlementVaultExportCheckpointRetentionWindowMs());
+}
+
+function pruneExpiredSettlementVaultExportCheckpoints({ checkpointState, nowMs }) {
+  if (!checkpointState || typeof checkpointState !== 'object') return;
+  for (const [checkpointHash, checkpointRecord] of Object.entries(checkpointState)) {
+    if (isSettlementVaultExportCheckpointExpired({ checkpointRecord, nowMs })) {
+      delete checkpointState[checkpointHash];
+    }
+  }
+}
+
 function checkpointContextFromExportQuery({ cycleId, includeTransitions, query }) {
   return {
     cycle_id: cycleId,
@@ -569,6 +599,17 @@ export class SettlementReadService {
     const checkpointState = ensureVaultExportCheckpointState(this.store);
     const checkpointContext = checkpointContextFromExportQuery({ cycleId, includeTransitions, query });
     const checkpointContextFingerprint = checkpointContextKey(checkpointContext);
+    const checkpointNowIso = nowIsoForSettlementVaultExportRetention(query);
+    const checkpointNowMs = parseIsoMs(checkpointNowIso);
+
+    if (checkpointRequired && checkpointNowMs === null) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'invalid now_iso for checkpoint retention', {
+          now_iso: checkpointNowIso
+        })
+      };
+    }
 
     if (checkpointRequired && paged.cursorAfter && !checkpointAfter) {
       return {
@@ -607,6 +648,20 @@ export class SettlementReadService {
           body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'checkpoint_after not found for vault reconciliation export continuation', {
             reason_code: 'checkpoint_after_not_found',
             checkpoint_after: checkpointAfter
+          })
+        };
+      }
+
+      if (isSettlementVaultExportCheckpointExpired({ checkpointRecord: priorCheckpoint, nowMs: checkpointNowMs })) {
+        delete checkpointState[checkpointAfter];
+        return {
+          ok: false,
+          body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'checkpoint_after expired for vault reconciliation export continuation', {
+            reason_code: 'checkpoint_expired',
+            checkpoint_after: checkpointAfter,
+            exported_at: priorCheckpoint.exported_at ?? null,
+            now_iso: checkpointNowIso,
+            retention_days: settlementVaultExportCheckpointRetentionDays()
           })
         };
       }
@@ -699,6 +754,10 @@ export class SettlementReadService {
         query_context: checkpointContext,
         exported_at: signedPayload.exported_at
       };
+    }
+
+    if (checkpointRequired) {
+      pruneExpiredSettlementVaultExportCheckpoints({ checkpointState, nowMs: checkpointNowMs });
     }
 
     return {

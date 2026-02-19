@@ -1,0 +1,220 @@
+{
+  "actors": {
+    "partner": { "type": "partner", "id": "swapgraph" },
+    "user_u1": { "type": "user", "id": "u1" },
+    "user_u2": { "type": "user", "id": "u2" },
+    "user_u3": { "type": "user", "id": "u3" }
+  },
+  "operations": [
+    { "op": "keys.policy_integrity_signing.get", "expect_ok": true, "expect_keys_count": 2 },
+
+    { "op": "cycleProposals.accept", "proposal_ref": "p3", "actor_ref": "user_u1", "occurred_at": "2026-02-19T03:20:10Z", "idempotency_key": "m54_p3_u1", "auth": { "scopes": ["commits:write"] } },
+    { "op": "cycleProposals.accept", "proposal_ref": "p3", "actor_ref": "user_u2", "occurred_at": "2026-02-19T03:20:11Z", "idempotency_key": "m54_p3_u2", "auth": { "scopes": ["commits:write"] } },
+    { "op": "cycleProposals.accept", "proposal_ref": "p3", "actor_ref": "user_u3", "occurred_at": "2026-02-19T03:20:12Z", "idempotency_key": "m54_p3_u3", "auth": { "scopes": ["commits:write"] } },
+
+    {
+      "op": "vault.deposit",
+      "actor_ref": "user_u1",
+      "idempotency_key": "m54_dep_hold_a",
+      "now_iso": "2026-02-19T03:21:00Z",
+      "auth": { "scopes": ["vault:write"] },
+      "request": {
+        "holding": {
+          "holding_id": "hold_a",
+          "vault_id": "vault_u1",
+          "asset": { "platform": "steam", "asset_id": "assetA" },
+          "owner_actor": { "type": "user", "id": "u1" },
+          "deposit_id": "dep_a",
+          "deposited_at": "2026-02-19T03:21:00Z"
+        }
+      }
+    },
+    {
+      "op": "vault.deposit",
+      "actor_ref": "user_u2",
+      "idempotency_key": "m54_dep_hold_b",
+      "now_iso": "2026-02-19T03:21:10Z",
+      "auth": { "scopes": ["vault:write"] },
+      "request": {
+        "holding": {
+          "holding_id": "hold_b",
+          "vault_id": "vault_u2",
+          "asset": { "platform": "steam", "asset_id": "assetB" },
+          "owner_actor": { "type": "user", "id": "u2" },
+          "deposit_id": "dep_b",
+          "deposited_at": "2026-02-19T03:21:10Z"
+        }
+      }
+    },
+    {
+      "op": "vault.deposit",
+      "actor_ref": "user_u3",
+      "idempotency_key": "m54_dep_hold_c",
+      "now_iso": "2026-02-19T03:21:20Z",
+      "auth": { "scopes": ["vault:write"] },
+      "request": {
+        "holding": {
+          "holding_id": "hold_c",
+          "vault_id": "vault_u3",
+          "asset": { "platform": "steam", "asset_id": "assetC" },
+          "owner_actor": { "type": "user", "id": "u3" },
+          "deposit_id": "dep_c",
+          "deposited_at": "2026-02-19T03:21:20Z"
+        }
+      }
+    },
+
+    { "op": "vault.reserve", "actor_ref": "partner", "idempotency_key": "m54_res_hold_a", "now_iso": "2026-02-19T03:21:30Z", "auth": { "scopes": ["vault:write"] }, "request": { "holding_id": "hold_a", "reservation_id": "rsv_hold_a" } },
+    { "op": "vault.reserve", "actor_ref": "partner", "idempotency_key": "m54_res_hold_b", "now_iso": "2026-02-19T03:21:31Z", "auth": { "scopes": ["vault:write"] }, "request": { "holding_id": "hold_b", "reservation_id": "rsv_hold_b" } },
+    { "op": "vault.reserve", "actor_ref": "partner", "idempotency_key": "m54_res_hold_c", "now_iso": "2026-02-19T03:21:32Z", "auth": { "scopes": ["vault:write"] }, "request": { "holding_id": "hold_c", "reservation_id": "rsv_hold_c" } },
+
+    {
+      "op": "settlement.start",
+      "proposal_ref": "p3",
+      "actor_ref": "partner",
+      "occurred_at": "2026-02-19T03:22:00Z",
+      "auth": { "scopes": ["settlement:write"] },
+      "request_body": {
+        "deposit_deadline_at": "2026-02-19T03:40:00Z",
+        "vault_bindings": [
+          { "intent_id": "intent_a", "holding_id": "hold_a", "reservation_id": "rsv_hold_a" },
+          { "intent_id": "intent_b", "holding_id": "hold_b", "reservation_id": "rsv_hold_b" },
+          { "intent_id": "intent_c", "holding_id": "hold_c", "reservation_id": "rsv_hold_c" }
+        ]
+      }
+    },
+    { "op": "settlement.begin_execution", "proposal_ref": "p3", "actor_ref": "partner", "occurred_at": "2026-02-19T03:22:20Z", "auth": { "scopes": ["settlement:write"] }, "request_body": {} },
+    { "op": "settlement.complete", "proposal_ref": "p3", "actor_ref": "partner", "occurred_at": "2026-02-19T03:22:40Z", "auth": { "scopes": ["settlement:write"] }, "request_body": {} },
+
+    {
+      "op": "settlement.vault_reconciliation.export",
+      "proposal_ref": "p3",
+      "actor_ref": "partner",
+      "auth": { "scopes": ["settlement:read"] },
+      "query": {
+        "include_transitions": true,
+        "limit": 2,
+        "now_iso": "2026-02-19T03:23:00Z",
+        "exported_at_iso": "2026-02-19T03:23:00Z"
+      },
+      "save_export_ref": "export_old_page_1",
+      "expect_ok": true,
+      "expect_timeline_state": "completed",
+      "expect_reconciliation_mode": "full",
+      "expect_entries_count": 2,
+      "expect_total_filtered": 3,
+      "expect_next_cursor": "intent_b",
+      "expect_reserved": 0,
+      "expect_withdrawn": 3,
+      "expect_transitions_count": 5
+    },
+    {
+      "op": "settlement.vault_reconciliation.export",
+      "proposal_ref": "p3",
+      "actor_ref": "partner",
+      "auth": { "scopes": ["settlement:read"] },
+      "query": {
+        "include_transitions": true,
+        "limit": 2,
+        "cursor_after": "intent_b",
+        "now_iso": "2026-02-19T03:23:05Z",
+        "exported_at_iso": "2026-02-19T03:23:05Z"
+      },
+      "attestation_after_ref": "export_old_page_1",
+      "checkpoint_after_ref": "export_old_page_1",
+      "save_export_ref": "export_old_page_2",
+      "expect_ok": true,
+      "expect_timeline_state": "completed",
+      "expect_reconciliation_mode": "full",
+      "expect_entries_count": 1,
+      "expect_total_filtered": 1,
+      "expect_next_cursor": null,
+      "expect_reserved": 0,
+      "expect_withdrawn": 3,
+      "expect_transitions_count": 5,
+      "expect_attestation_chain_ok": true,
+      "expect_checkpoint_chain_ok": true
+    },
+
+    {
+      "op": "settlement.vault_reconciliation.export",
+      "proposal_ref": "p3",
+      "actor_ref": "partner",
+      "auth": { "scopes": ["settlement:read"] },
+      "query": {
+        "include_transitions": true,
+        "limit": 2,
+        "cursor_after": "intent_b",
+        "now_iso": "2026-02-21T03:23:00Z",
+        "exported_at_iso": "2026-02-21T03:23:00Z"
+      },
+      "attestation_after_ref": "export_old_page_1",
+      "checkpoint_after_ref": "export_old_page_1",
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "checkpoint_expired"
+    },
+
+    {
+      "op": "settlement.vault_reconciliation.export",
+      "proposal_ref": "p3",
+      "actor_ref": "partner",
+      "auth": { "scopes": ["settlement:read"] },
+      "query": {
+        "include_transitions": true,
+        "limit": 1,
+        "now_iso": "2026-02-21T03:24:00Z",
+        "exported_at_iso": "2026-02-21T03:24:00Z"
+      },
+      "save_export_ref": "export_fresh_page_1",
+      "expect_ok": true,
+      "expect_timeline_state": "completed",
+      "expect_reconciliation_mode": "full",
+      "expect_entries_count": 1,
+      "expect_total_filtered": 3,
+      "expect_next_cursor": "intent_a",
+      "expect_reserved": 0,
+      "expect_withdrawn": 3,
+      "expect_transitions_count": 5
+    },
+    {
+      "op": "settlement.vault_reconciliation.export",
+      "proposal_ref": "p3",
+      "actor_ref": "partner",
+      "auth": { "scopes": ["settlement:read"] },
+      "query": {
+        "include_transitions": true,
+        "limit": 1,
+        "cursor_after": "intent_a",
+        "now_iso": "2026-02-21T03:24:05Z",
+        "exported_at_iso": "2026-02-21T03:24:05Z"
+      },
+      "attestation_after_ref": "export_fresh_page_1",
+      "checkpoint_after_ref": "export_fresh_page_1",
+      "save_export_ref": "export_fresh_page_2",
+      "expect_ok": true,
+      "expect_timeline_state": "completed",
+      "expect_reconciliation_mode": "full",
+      "expect_entries_count": 1,
+      "expect_total_filtered": 2,
+      "expect_next_cursor": "intent_b",
+      "expect_reserved": 0,
+      "expect_withdrawn": 3,
+      "expect_transitions_count": 5,
+      "expect_attestation_chain_ok": true,
+      "expect_checkpoint_chain_ok": true
+    },
+    {
+      "op": "settlement.vault_reconciliation.export.verify",
+      "export_ref": "export_fresh_page_2",
+      "expect_verify_ok": true,
+      "expect_verify_public_ok": true
+    },
+    {
+      "op": "settlement.vault_reconciliation.export.verify_tampered_checkpoint",
+      "export_ref": "export_fresh_page_2",
+      "expect_verify_ok": false,
+      "expect_verify_error": "checkpoint_hash_mismatch"
+    }
+  ]
+}

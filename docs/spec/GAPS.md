@@ -139,7 +139,8 @@ Each item here must become at least one of:
 - Resolved (fixtures-first, partial): M51 (partner read surfaces for vault-backed settlement cycles: deterministic `vault_reconciliation` + ordered `state_transitions` projection on settlement status/instructions).
 - Resolved (fixtures-first, partial): M52 (partner vault reconciliation export surface: signed settlement-vault reconciliation exports with deterministic hash/signature verification and tamper-fail proofs).
 - Resolved (fixtures-first, partial): M53 (partner vault reconciliation export continuity hardening: deterministic entry pagination + signed attestation chaining + checkpoint continuity validation + tamper-fail checkpoint proofs).
-- Remaining: vault reconciliation export checkpoint retention/expiry hardening and partner-program/commercial layers.
+- Resolved (fixtures-first, partial): M54 (vault reconciliation export checkpoint retention/expiry hardening: deterministic checkpoint retention window + `checkpoint_expired` continuation failures + opportunistic checkpoint GC).
+- Remaining: partner-program/commercial layers.
 
 ---
 
