@@ -3,7 +3,11 @@
   "exported_at": "2026-02-19T10:00:00Z",
   "query": {
     "now_iso": "2026-02-19T10:00:00Z",
-    "exported_at_iso": "2026-02-19T10:00:00Z"
+    "exported_at_iso": "2026-02-19T10:00:00Z",
+    "include_recommended_actions": true,
+    "include_runbook_hooks": true,
+    "attestation_after": "7ed885251efbcf7f8e82f878f9ed0f8c0d70f149345f0c181404570a3478dbda",
+    "checkpoint_after": "e0398e516d8c1289f47e2fe4ea1e8cc395f337fd77b28f6ab6dc95dc50a8ed2d"
   },
   "policy": {
     "policy_key": "vault_reconciliation_export",
@@ -36,6 +40,8 @@
     "settlement_export_checkpoint_retention_days": 30,
     "rollout_policy_audit_checkpoint_enforced": true,
     "rollout_policy_audit_checkpoint_retention_days": 30,
+    "rollout_policy_diagnostics_checkpoint_enforced": true,
+    "rollout_policy_diagnostics_checkpoint_retention_days": 30,
     "freeze_export_enforced": true,
     "admin_allowlist": ["ops-admin"]
   },
@@ -90,6 +96,21 @@
       }
     }
   ],
+  "attestation": {
+    "cursor_after": null,
+    "next_cursor": null,
+    "attestation_after": "7ed885251efbcf7f8e82f878f9ed0f8c0d70f149345f0c181404570a3478dbda",
+    "page_hash": "043ea96ef66f04b2475f72cce2f2d63c7e4550f85cff8e0452c6d1f4a4576d64",
+    "chain_hash": "95ec67f9eb0ce1a4909878f2c904db59c3bfdf2fbb1c5cfbb79693690a6f4fec"
+  },
+  "checkpoint": {
+    "checkpoint_after": "e0398e516d8c1289f47e2fe4ea1e8cc395f337fd77b28f6ab6dc95dc50a8ed2d",
+    "attestation_chain_hash": "95ec67f9eb0ce1a4909878f2c904db59c3bfdf2fbb1c5cfbb79693690a6f4fec",
+    "next_cursor": null,
+    "entries_count": 0,
+    "total_filtered": 0,
+    "checkpoint_hash": "82de31f7b0f315e2268ddf3f36f31b54db2191a18f656f23d73f37f4f8f65f1d"
+  },
   "export_hash": "043ea96ef66f04b2475f72cce2f2d63c7e4550f85cff8e0452c6d1f4a4576d64",
   "signature": {
     "key_id": "dev-pi-k1",

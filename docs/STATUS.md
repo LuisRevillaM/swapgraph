@@ -72,9 +72,10 @@ Last updated: 2026-02-19
 - M59: ✅ rollout-policy governance controls hardening (policy freeze windows + deterministic maintenance-mode gates + signed admin-action audit overlays) (fixtures-first)
 - M60: ✅ commercial governance hardening follow-up (operator freeze-export overlay + rollout-control observability refinements on partner self-serve status) (fixtures-first)
 - M61: ✅ commercial governance continuity follow-up (operator runbook hooks + deterministic signed rollout diagnostics export surface) (fixtures-first)
+- M62: ✅ commercial governance diagnostics continuity hardening (signed diagnostics attestation/checkpoint chaining + stateful continuation locks + deterministic checkpoint expiry controls + compact diagnostics mode) (fixtures-first)
 
 ## Next
-- M62: commercial governance operational hardening (diagnostics continuity + retention checkpointing for control-plane exports) (fixtures-first)
+- M63: commercial governance diagnostics export operator lifecycle follow-up (fixtures-first)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.

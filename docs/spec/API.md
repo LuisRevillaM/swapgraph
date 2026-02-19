@@ -93,6 +93,11 @@ Settlement endpoints:
   - partner-admin signed diagnostics export for rollout control-plane state (`policy` + env overlays + runbook hooks)
   - provides deterministic operator action recommendations (`clear_maintenance_mode`, `clear_freeze_window`, or `none`)
   - includes runbook hook templates for `rollout_policy.admin_action`
+  - supports optional compact mode via query flags (`include_recommended_actions`, `include_runbook_hooks`)
+  - supports signed continuation via `attestation_after`
+  - when diagnostics checkpoint mode is enabled (`PARTNER_PROGRAM_ROLLOUT_POLICY_DIAGNOSTICS_EXPORT_CHECKPOINT_ENFORCE=1`), continuation also requires `checkpoint_after`
+  - diagnostics checkpoint anchors use retention controls (`PARTNER_PROGRAM_ROLLOUT_POLICY_DIAGNOSTICS_EXPORT_CHECKPOINT_RETENTION_DAYS`) and expired anchors are rejected
+  - continuation failures return deterministic reason codes (`checkpoint_after_not_found`, `checkpoint_attestation_mismatch`, `checkpoint_query_mismatch`, `checkpoint_expired`)
 - `GET /partner-program/vault-export/rollout-policy-audit/export`
   - partner-admin signed export of rollout policy-change/admin-action audit entries (`export_hash` + detached signature)
   - supports filter/pagination (`from_iso`, `to_iso`, `limit`, `cursor_after`)

@@ -1,0 +1,309 @@
+{
+  "actors": {
+    "admin_partner": { "type": "partner", "id": "ops-admin" },
+    "partner": { "type": "partner", "id": "swapgraph" }
+  },
+  "operations": [
+    { "op": "keys.policy_integrity_signing.get", "expect_ok": true, "expect_keys_count": 2 },
+
+    {
+      "op": "rollout_overlay.set",
+      "config": { "freeze_export_enforce": true }
+    },
+
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.upsert",
+      "actor_ref": "admin_partner",
+      "auth": { "scopes": ["settlement:write"] },
+      "idempotency_key": "m62_policy_v1",
+      "occurred_at": "2026-02-19T10:00:00Z",
+      "request": {
+        "occurred_at": "2026-02-19T10:00:00Z",
+        "policy": {
+          "allowlist": ["swapgraph"],
+          "min_plan_id": "pro"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_policy_source": "store",
+      "expect_policy_allowlist": ["swapgraph"],
+      "expect_policy_min_plan_id": "pro",
+      "expect_policy_version": 1,
+      "expect_audit_id": "rollout_policy_000001"
+    },
+
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.admin_action",
+      "actor_ref": "admin_partner",
+      "auth": { "scopes": ["settlement:write"] },
+      "idempotency_key": "m62_action_maintenance",
+      "occurred_at": "2026-02-19T10:00:30Z",
+      "request": {
+        "occurred_at": "2026-02-19T10:00:30Z",
+        "action": {
+          "action_type": "set_maintenance_mode",
+          "maintenance_mode_enabled": true,
+          "maintenance_reason_code": "maintenance_window"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_policy_source": "store",
+      "expect_policy_version": 2,
+      "expect_maintenance_mode_enabled": true,
+      "expect_maintenance_reason_code": "maintenance_window",
+      "expect_freeze_until": null,
+      "expect_freeze_reason_code": null,
+      "expect_audit_id": "rollout_policy_000002",
+      "expect_audit_action_type": "set_maintenance_mode"
+    },
+
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.admin_action",
+      "actor_ref": "admin_partner",
+      "auth": { "scopes": ["settlement:write"] },
+      "idempotency_key": "m62_action_freeze",
+      "occurred_at": "2026-02-19T10:01:00Z",
+      "request": {
+        "occurred_at": "2026-02-19T10:01:00Z",
+        "action": {
+          "action_type": "set_freeze_window",
+          "freeze_until": "2026-02-19T10:30:00Z",
+          "freeze_reason_code": "release_freeze"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_policy_source": "store",
+      "expect_policy_version": 3,
+      "expect_maintenance_mode_enabled": true,
+      "expect_maintenance_reason_code": "maintenance_window",
+      "expect_freeze_until": "2026-02-19T10:30:00Z",
+      "expect_freeze_reason_code": "release_freeze",
+      "expect_audit_id": "rollout_policy_000003",
+      "expect_audit_action_type": "set_freeze_window"
+    },
+
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export",
+      "actor_ref": "partner",
+      "auth": { "scopes": ["settlement:read"] },
+      "query": {
+        "now_iso": "2026-02-19T10:01:05Z",
+        "exported_at_iso": "2026-02-19T10:01:05Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN",
+      "expect_reason_code": "partner_admin_required"
+    },
+
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export",
+      "actor_ref": "admin_partner",
+      "auth": { "scopes": ["settlement:read"] },
+      "query": {
+        "now_iso": "2026-02-19T10:01:10Z",
+        "exported_at_iso": "2026-02-19T10:01:10Z",
+        "include_recommended_actions": true,
+        "include_runbook_hooks": true
+      },
+      "save_export_ref": "diag_page1",
+      "expect_ok": true,
+      "expect_policy_version": 3,
+      "expect_maintenance_mode_enabled": true,
+      "expect_freeze_active": true,
+      "expect_freeze_export_enforced": true,
+      "expect_partner_program_enforced": true,
+      "expect_include_recommended_actions": true,
+      "expect_include_runbook_hooks": true,
+      "expect_attestation_after": null,
+      "expect_checkpoint_after": null,
+      "expect_has_attestation": true,
+      "expect_has_checkpoint": true,
+      "expect_recommended_action_codes": ["clear_maintenance_mode", "clear_freeze_window"],
+      "expect_runbook_hook_ids": ["disable_maintenance_mode", "clear_freeze_window", "clear_controls", "observe_only"]
+    },
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export.verify",
+      "export_ref": "diag_page1",
+      "expect_verify_ok": true,
+      "expect_verify_public_ok": true
+    },
+
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export",
+      "actor_ref": "admin_partner",
+      "auth": { "scopes": ["settlement:read"] },
+      "query": {
+        "now_iso": "2026-02-19T10:01:20Z",
+        "exported_at_iso": "2026-02-19T10:01:20Z",
+        "include_recommended_actions": true,
+        "include_runbook_hooks": true
+      },
+      "attestation_after_ref": "diag_page1",
+      "checkpoint_after_ref": "diag_page1",
+      "save_export_ref": "diag_page2",
+      "expect_ok": true,
+      "expect_policy_version": 3,
+      "expect_maintenance_mode_enabled": true,
+      "expect_freeze_active": true,
+      "expect_freeze_export_enforced": true,
+      "expect_partner_program_enforced": true,
+      "expect_include_recommended_actions": true,
+      "expect_include_runbook_hooks": true,
+      "expect_attestation_after_ref": "diag_page1",
+      "expect_checkpoint_after_ref": "diag_page1",
+      "expect_has_attestation": true,
+      "expect_has_checkpoint": true,
+      "expect_recommended_action_codes": ["clear_maintenance_mode", "clear_freeze_window"],
+      "expect_runbook_hook_ids": ["disable_maintenance_mode", "clear_freeze_window", "clear_controls", "observe_only"]
+    },
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export.verify",
+      "export_ref": "diag_page2",
+      "expect_verify_ok": true,
+      "expect_verify_public_ok": true
+    },
+
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export",
+      "actor_ref": "admin_partner",
+      "auth": { "scopes": ["settlement:read"] },
+      "query": {
+        "now_iso": "2026-02-19T10:01:30Z",
+        "exported_at_iso": "2026-02-19T10:01:30Z"
+      },
+      "attestation_after_ref": "diag_page1",
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION"
+    },
+
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export",
+      "actor_ref": "admin_partner",
+      "auth": { "scopes": ["settlement:read"] },
+      "query": {
+        "now_iso": "2026-02-19T10:01:35Z",
+        "exported_at_iso": "2026-02-19T10:01:35Z",
+        "attestation_after": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "checkpoint_after": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "checkpoint_after_not_found"
+    },
+
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export",
+      "actor_ref": "admin_partner",
+      "auth": { "scopes": ["settlement:read"] },
+      "query": {
+        "now_iso": "2026-02-19T10:01:40Z",
+        "exported_at_iso": "2026-02-19T10:01:40Z",
+        "attestation_after": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      },
+      "checkpoint_after_ref": "diag_page1",
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "checkpoint_attestation_mismatch"
+    },
+
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export",
+      "actor_ref": "admin_partner",
+      "auth": { "scopes": ["settlement:read"] },
+      "query": {
+        "now_iso": "2026-02-19T10:01:45Z",
+        "exported_at_iso": "2026-02-19T10:01:45Z",
+        "include_recommended_actions": true,
+        "include_runbook_hooks": false
+      },
+      "attestation_after_ref": "diag_page1",
+      "checkpoint_after_ref": "diag_page1",
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "checkpoint_query_mismatch"
+    },
+
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export",
+      "actor_ref": "admin_partner",
+      "auth": { "scopes": ["settlement:read"] },
+      "query": {
+        "now_iso": "2026-02-19T10:01:55Z",
+        "exported_at_iso": "2026-02-19T10:01:55Z",
+        "include_recommended_actions": false,
+        "include_runbook_hooks": false
+      },
+      "save_export_ref": "diag_compact",
+      "expect_ok": true,
+      "expect_policy_version": 3,
+      "expect_maintenance_mode_enabled": true,
+      "expect_freeze_active": true,
+      "expect_include_recommended_actions": false,
+      "expect_include_runbook_hooks": false,
+      "expect_attestation_after": null,
+      "expect_checkpoint_after": null,
+      "expect_has_attestation": true,
+      "expect_has_checkpoint": true,
+      "expect_recommended_action_codes": [],
+      "expect_runbook_hook_ids": []
+    },
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export.verify",
+      "export_ref": "diag_compact",
+      "expect_verify_ok": true,
+      "expect_verify_public_ok": true
+    },
+
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export",
+      "actor_ref": "admin_partner",
+      "auth": { "scopes": ["settlement:read"] },
+      "query": {
+        "now_iso": "2026-02-21T10:02:00Z",
+        "exported_at_iso": "2026-02-21T10:02:00Z",
+        "include_recommended_actions": true,
+        "include_runbook_hooks": true
+      },
+      "attestation_after_ref": "diag_page1",
+      "checkpoint_after_ref": "diag_page1",
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "checkpoint_expired"
+    },
+
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export",
+      "actor_ref": "admin_partner",
+      "auth": { "scopes": ["settlement:read"] },
+      "query": {
+        "now_iso": "2026-02-21T10:02:10Z",
+        "exported_at_iso": "2026-02-21T10:02:10Z",
+        "include_recommended_actions": true,
+        "include_runbook_hooks": true
+      },
+      "save_export_ref": "diag_post_expiry",
+      "expect_ok": true,
+      "expect_policy_version": 3,
+      "expect_maintenance_mode_enabled": true,
+      "expect_freeze_active": false,
+      "expect_include_recommended_actions": true,
+      "expect_include_runbook_hooks": true,
+      "expect_attestation_after": null,
+      "expect_checkpoint_after": null,
+      "expect_has_attestation": true,
+      "expect_has_checkpoint": true,
+      "expect_recommended_action_codes": ["clear_maintenance_mode"],
+      "expect_runbook_hook_ids": ["disable_maintenance_mode", "clear_freeze_window", "clear_controls", "observe_only"]
+    },
+
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export.verify_tampered",
+      "export_ref": "diag_page1",
+      "expect_verify_ok": false,
+      "expect_verify_error": "hash_mismatch"
+    }
+  ]
+}

@@ -33,7 +33,7 @@ Notes:
 ## Notes
 - Keep messages safe (no secrets).
 - `details` must be machine-readable.
-- Delegated policy-audit and vault reconciliation export continuation may include deterministic `details.reason_code` values such as:
+- Delegated policy-audit, vault reconciliation export, and rollout diagnostics/audit export continuation may include deterministic `details.reason_code` values such as:
   - `checkpoint_after_not_found`
   - `checkpoint_cursor_mismatch`
   - `checkpoint_attestation_mismatch`

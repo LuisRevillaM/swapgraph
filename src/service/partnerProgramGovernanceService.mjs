@@ -46,6 +46,16 @@ function normalizeLimit(limit) {
   return Math.min(n, 200);
 }
 
+function parseOptionalBoolean(value) {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'string') {
+    const v = value.trim().toLowerCase();
+    if (v === '1' || v === 'true') return true;
+    if (v === '0' || v === 'false') return false;
+  }
+  return null;
+}
+
 function isObject(value) {
   return !!value && typeof value === 'object' && !Array.isArray(value);
 }
@@ -130,6 +140,20 @@ function partnerProgramRolloutPolicyExportCheckpointRetentionWindowMs() {
   return partnerProgramRolloutPolicyExportCheckpointRetentionDays() * 24 * 60 * 60 * 1000;
 }
 
+function rolloutPolicyDiagnosticsExportCheckpointEnforced() {
+  return process.env.PARTNER_PROGRAM_ROLLOUT_POLICY_DIAGNOSTICS_EXPORT_CHECKPOINT_ENFORCE === '1';
+}
+
+function partnerProgramRolloutPolicyDiagnosticsExportCheckpointRetentionDays() {
+  const raw = Number.parseInt(String(process.env.PARTNER_PROGRAM_ROLLOUT_POLICY_DIAGNOSTICS_EXPORT_CHECKPOINT_RETENTION_DAYS ?? ''), 10);
+  if (!Number.isFinite(raw) || raw < 1) return 30;
+  return Math.min(raw, 3650);
+}
+
+function partnerProgramRolloutPolicyDiagnosticsExportCheckpointRetentionWindowMs() {
+  return partnerProgramRolloutPolicyDiagnosticsExportCheckpointRetentionDays() * 24 * 60 * 60 * 1000;
+}
+
 function settlementVaultExportCheckpointEnforced() {
   return process.env.SETTLEMENT_VAULT_EXPORT_CHECKPOINT_ENFORCE === '1';
 }
@@ -152,9 +176,18 @@ function nowIsoForPartnerProgramRolloutPolicyExportCheckpointRetention(query) {
   return query?.now_iso ?? process.env.AUTHZ_NOW_ISO ?? new Date().toISOString();
 }
 
+function nowIsoForPartnerProgramRolloutPolicyDiagnosticsExportCheckpointRetention(query) {
+  return query?.now_iso ?? process.env.AUTHZ_NOW_ISO ?? new Date().toISOString();
+}
+
 function ensurePartnerProgramRolloutPolicyExportCheckpointState(store) {
   store.state.partner_program_rollout_policy_export_checkpoints ||= {};
   return store.state.partner_program_rollout_policy_export_checkpoints;
+}
+
+function ensurePartnerProgramRolloutPolicyDiagnosticsExportCheckpointState(store) {
+  store.state.partner_program_rollout_policy_diagnostics_export_checkpoints ||= {};
+  return store.state.partner_program_rollout_policy_diagnostics_export_checkpoints;
 }
 
 function isPartnerProgramRolloutPolicyExportCheckpointExpired({ checkpointRecord, nowMs }) {
@@ -173,11 +206,34 @@ function pruneExpiredPartnerProgramRolloutPolicyExportCheckpoints({ checkpointSt
   }
 }
 
+function isPartnerProgramRolloutPolicyDiagnosticsExportCheckpointExpired({ checkpointRecord, nowMs }) {
+  if (!checkpointRecord || typeof checkpointRecord !== 'object') return true;
+  const exportedAtMs = parseIsoMs(checkpointRecord.exported_at);
+  if (exportedAtMs === null) return true;
+  return nowMs > (exportedAtMs + partnerProgramRolloutPolicyDiagnosticsExportCheckpointRetentionWindowMs());
+}
+
+function pruneExpiredPartnerProgramRolloutPolicyDiagnosticsExportCheckpoints({ checkpointState, nowMs }) {
+  if (!checkpointState || typeof checkpointState !== 'object') return;
+  for (const [checkpointHash, checkpointRecord] of Object.entries(checkpointState)) {
+    if (isPartnerProgramRolloutPolicyDiagnosticsExportCheckpointExpired({ checkpointRecord, nowMs })) {
+      delete checkpointState[checkpointHash];
+    }
+  }
+}
+
 function checkpointContextFromPartnerProgramRolloutPolicyExportQuery({ query }) {
   return {
     from_iso: normalizeOptionalString(query?.from_iso),
     to_iso: normalizeOptionalString(query?.to_iso),
     limit: normalizeLimit(query?.limit)
+  };
+}
+
+function checkpointContextFromPartnerProgramRolloutPolicyDiagnosticsExportQuery({ query }) {
+  return {
+    include_recommended_actions: parseOptionalBoolean(query?.include_recommended_actions) !== false,
+    include_runbook_hooks: parseOptionalBoolean(query?.include_runbook_hooks) !== false
   };
 }
 
@@ -211,6 +267,8 @@ function buildRolloutPolicyDiagnosticsOverlays() {
     settlement_export_checkpoint_retention_days: settlementVaultExportCheckpointRetentionDays(),
     rollout_policy_audit_checkpoint_enforced: rolloutPolicyAuditExportCheckpointEnforced(),
     rollout_policy_audit_checkpoint_retention_days: partnerProgramRolloutPolicyExportCheckpointRetentionDays(),
+    rollout_policy_diagnostics_checkpoint_enforced: rolloutPolicyDiagnosticsExportCheckpointEnforced(),
+    rollout_policy_diagnostics_checkpoint_retention_days: partnerProgramRolloutPolicyDiagnosticsExportCheckpointRetentionDays(),
     freeze_export_enforced: freezeExportEnforced(),
     admin_allowlist: [...parsePartnerProgramAdminAllowlist()].sort()
   };
@@ -415,6 +473,7 @@ export class PartnerProgramGovernanceService {
     ensureVaultExportRolloutPolicyState(this.store);
     ensureVaultExportRolloutPolicyAuditState(this.store);
     ensurePartnerProgramRolloutPolicyExportCheckpointState(this.store);
+    ensurePartnerProgramRolloutPolicyDiagnosticsExportCheckpointState(this.store);
   }
 
   /**
@@ -794,6 +853,107 @@ export class PartnerProgramGovernanceService {
       };
     }
 
+    const includeRecommendedActions = parseOptionalBoolean(query?.include_recommended_actions) !== false;
+    const includeRunbookHooks = parseOptionalBoolean(query?.include_runbook_hooks) !== false;
+
+    const attestationAfter = normalizeOptionalString(query?.attestation_after);
+    const checkpointAfter = normalizeOptionalString(query?.checkpoint_after);
+    const checkpointRequired = rolloutPolicyDiagnosticsExportCheckpointEnforced();
+    const checkpointState = ensurePartnerProgramRolloutPolicyDiagnosticsExportCheckpointState(this.store);
+    const checkpointContext = checkpointContextFromPartnerProgramRolloutPolicyDiagnosticsExportQuery({ query });
+    const checkpointContextFingerprint = checkpointContextKey(checkpointContext);
+    const checkpointNowIso = nowIsoForPartnerProgramRolloutPolicyDiagnosticsExportCheckpointRetention(query);
+    const checkpointNowMs = parseIsoMs(checkpointNowIso);
+
+    if (checkpointRequired && checkpointNowMs === null) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'invalid now_iso for rollout diagnostics export checkpoint retention', {
+          now_iso: checkpointNowIso
+        })
+      };
+    }
+
+    if (checkpointRequired && attestationAfter && !checkpointAfter) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'checkpoint_after is required when attestation_after is provided', {
+          attestation_after: attestationAfter,
+          checkpoint_after: query?.checkpoint_after ?? null
+        })
+      };
+    }
+
+    if (checkpointRequired && !attestationAfter && checkpointAfter) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'checkpoint_after is only allowed with attestation_after', {
+          attestation_after: query?.attestation_after ?? null,
+          checkpoint_after: checkpointAfter
+        })
+      };
+    }
+
+    if (!checkpointRequired && checkpointAfter) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'checkpoint_after is not enabled for this export contract', {
+          checkpoint_after: checkpointAfter
+        })
+      };
+    }
+
+    if (checkpointRequired && attestationAfter) {
+      const priorCheckpoint = checkpointState[checkpointAfter] ?? null;
+      if (!priorCheckpoint) {
+        return {
+          ok: false,
+          body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'checkpoint_after not found for rollout diagnostics export continuation', {
+            reason_code: 'checkpoint_after_not_found',
+            checkpoint_after: checkpointAfter
+          })
+        };
+      }
+
+      if (isPartnerProgramRolloutPolicyDiagnosticsExportCheckpointExpired({ checkpointRecord: priorCheckpoint, nowMs: checkpointNowMs })) {
+        delete checkpointState[checkpointAfter];
+        return {
+          ok: false,
+          body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'checkpoint_after expired for rollout diagnostics export continuation', {
+            reason_code: 'checkpoint_expired',
+            checkpoint_after: checkpointAfter,
+            exported_at: priorCheckpoint.exported_at ?? null,
+            now_iso: checkpointNowIso,
+            retention_days: partnerProgramRolloutPolicyDiagnosticsExportCheckpointRetentionDays()
+          })
+        };
+      }
+
+      if (priorCheckpoint.attestation_chain_hash !== attestationAfter) {
+        return {
+          ok: false,
+          body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'attestation_after does not match checkpoint continuation chain', {
+            reason_code: 'checkpoint_attestation_mismatch',
+            checkpoint_after: checkpointAfter,
+            expected_attestation_after: priorCheckpoint.attestation_chain_hash ?? null,
+            attestation_after: attestationAfter
+          })
+        };
+      }
+
+      if (priorCheckpoint.query_context_fingerprint !== checkpointContextFingerprint) {
+        return {
+          ok: false,
+          body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'rollout diagnostics export continuation query does not match checkpoint context', {
+            reason_code: 'checkpoint_query_mismatch',
+            checkpoint_after: checkpointAfter,
+            expected_context: priorCheckpoint.query_context ?? null,
+            provided_context: checkpointContext
+          })
+        };
+      }
+    }
+
     const resolved = resolveVaultExportRolloutPolicy({ store: this.store, nowIso });
     if (!resolved.ok) {
       return {
@@ -807,8 +967,15 @@ export class PartnerProgramGovernanceService {
 
     const policyView = vaultExportRolloutPolicyView({ policy: resolved.policy });
     const overlays = buildRolloutPolicyDiagnosticsOverlays();
-    const recommendedActions = buildRolloutPolicyDiagnosticsRecommendedActions({ policy: policyView });
-    const runbookHooks = buildRolloutPolicyDiagnosticsRunbookHooks();
+    const recommendedActions = includeRecommendedActions
+      ? buildRolloutPolicyDiagnosticsRecommendedActions({ policy: policyView })
+      : [];
+    const runbookHooks = includeRunbookHooks
+      ? buildRolloutPolicyDiagnosticsRunbookHooks()
+      : [];
+
+    const withAttestation = checkpointRequired || Boolean(attestationAfter);
+    const withCheckpoint = checkpointRequired && withAttestation;
 
     const signedPayload = buildSignedPartnerProgramRolloutPolicyDiagnosticsExportPayload({
       exportedAt,
@@ -816,8 +983,25 @@ export class PartnerProgramGovernanceService {
       policy: policyView,
       overlays,
       recommendedActions,
-      runbookHooks
+      runbookHooks,
+      withAttestation,
+      withCheckpoint
     });
+
+    if (checkpointRequired && signedPayload?.checkpoint?.checkpoint_hash) {
+      checkpointState[signedPayload.checkpoint.checkpoint_hash] = {
+        checkpoint_hash: signedPayload.checkpoint.checkpoint_hash,
+        checkpoint_after: signedPayload.checkpoint.checkpoint_after ?? null,
+        attestation_chain_hash: signedPayload.attestation?.chain_hash ?? null,
+        query_context_fingerprint: checkpointContextFingerprint,
+        query_context: checkpointContext,
+        exported_at: signedPayload.exported_at
+      };
+    }
+
+    if (checkpointRequired) {
+      pruneExpiredPartnerProgramRolloutPolicyDiagnosticsExportCheckpoints({ checkpointState, nowMs: checkpointNowMs });
+    }
 
     return {
       ok: true,

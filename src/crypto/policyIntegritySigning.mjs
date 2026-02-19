@@ -1001,6 +1001,12 @@ function normalizePartnerProgramRolloutPolicyDiagnosticsExportQuery(query) {
   if (typeof query?.now_iso === 'string' && query.now_iso.trim()) out.now_iso = query.now_iso.trim();
   if (typeof query?.exported_at_iso === 'string' && query.exported_at_iso.trim()) out.exported_at_iso = query.exported_at_iso.trim();
 
+  if (typeof query?.include_recommended_actions === 'boolean') out.include_recommended_actions = query.include_recommended_actions;
+  if (typeof query?.include_runbook_hooks === 'boolean') out.include_runbook_hooks = query.include_runbook_hooks;
+
+  if (typeof query?.attestation_after === 'string' && query.attestation_after.trim()) out.attestation_after = query.attestation_after.trim();
+  if (typeof query?.checkpoint_after === 'string' && query.checkpoint_after.trim()) out.checkpoint_after = query.checkpoint_after.trim();
+
   return out;
 }
 
@@ -1017,12 +1023,18 @@ function normalizePartnerProgramRolloutPolicyDiagnosticsOverlays(overlays) {
     ? Math.max(1, Number(overlays.rollout_policy_audit_checkpoint_retention_days))
     : 30;
 
+  const diagnosticsRetention = Number.isFinite(overlays?.rollout_policy_diagnostics_checkpoint_retention_days)
+    ? Math.max(1, Number(overlays.rollout_policy_diagnostics_checkpoint_retention_days))
+    : 30;
+
   return {
     partner_program_enforced: overlays?.partner_program_enforced === true,
     settlement_export_checkpoint_enforced: overlays?.settlement_export_checkpoint_enforced === true,
     settlement_export_checkpoint_retention_days: settlementRetention,
     rollout_policy_audit_checkpoint_enforced: overlays?.rollout_policy_audit_checkpoint_enforced === true,
     rollout_policy_audit_checkpoint_retention_days: policyAuditRetention,
+    rollout_policy_diagnostics_checkpoint_enforced: overlays?.rollout_policy_diagnostics_checkpoint_enforced === true,
+    rollout_policy_diagnostics_checkpoint_retention_days: diagnosticsRetention,
     freeze_export_enforced: overlays?.freeze_export_enforced === true,
     admin_allowlist: adminAllowlist
   };
@@ -1071,8 +1083,186 @@ function normalizePartnerProgramRolloutPolicyDiagnosticsRunbookHooks(hooks) {
   });
 }
 
-function partnerProgramRolloutPolicyDiagnosticsExportSignablePayload(payload) {
+function buildPartnerProgramRolloutPolicyDiagnosticsExportAttestation({ query, exportHash }) {
+  const normalizedQuery = normalizePartnerProgramRolloutPolicyDiagnosticsExportQuery(query);
+  const attestationAfter = typeof normalizedQuery.attestation_after === 'string' ? normalizedQuery.attestation_after : null;
+
+  const attestationInput = {
+    cursor_after: null,
+    next_cursor: null,
+    attestation_after: attestationAfter,
+    page_hash: exportHash
+  };
+
   return {
+    ...attestationInput,
+    chain_hash: sha256HexCanonical(attestationInput)
+  };
+}
+
+function verifyPartnerProgramRolloutPolicyDiagnosticsExportAttestation({ attestation, query, exportHash }) {
+  const provided = normalizeExportAttestation(attestation);
+  if (!provided) return { ok: false, error: 'attestation_missing' };
+
+  const expected = buildPartnerProgramRolloutPolicyDiagnosticsExportAttestation({ query, exportHash });
+
+  if (provided.page_hash !== expected.page_hash) {
+    return {
+      ok: false,
+      error: 'attestation_page_hash_mismatch',
+      details: {
+        expected_page_hash: expected.page_hash,
+        provided_page_hash: provided.page_hash
+      }
+    };
+  }
+
+  if (provided.cursor_after !== expected.cursor_after) {
+    return {
+      ok: false,
+      error: 'attestation_cursor_mismatch',
+      details: {
+        expected_cursor_after: expected.cursor_after,
+        provided_cursor_after: provided.cursor_after
+      }
+    };
+  }
+
+  if (provided.next_cursor !== expected.next_cursor) {
+    return {
+      ok: false,
+      error: 'attestation_next_cursor_mismatch',
+      details: {
+        expected_next_cursor: expected.next_cursor,
+        provided_next_cursor: provided.next_cursor
+      }
+    };
+  }
+
+  if (provided.attestation_after !== expected.attestation_after) {
+    return {
+      ok: false,
+      error: 'attestation_after_mismatch',
+      details: {
+        expected_attestation_after: expected.attestation_after,
+        provided_attestation_after: provided.attestation_after
+      }
+    };
+  }
+
+  if (provided.chain_hash !== expected.chain_hash) {
+    return {
+      ok: false,
+      error: 'attestation_chain_hash_mismatch',
+      details: {
+        expected_chain_hash: expected.chain_hash,
+        provided_chain_hash: provided.chain_hash
+      }
+    };
+  }
+
+  return { ok: true };
+}
+
+function buildPartnerProgramRolloutPolicyDiagnosticsExportCheckpoint({ query, attestation }) {
+  const normalizedQuery = normalizePartnerProgramRolloutPolicyDiagnosticsExportQuery(query);
+  const checkpointAfter = typeof normalizedQuery.checkpoint_after === 'string' ? normalizedQuery.checkpoint_after : null;
+  const attestationChainHash = typeof attestation?.chain_hash === 'string' ? attestation.chain_hash : null;
+
+  const checkpointInput = {
+    checkpoint_after: checkpointAfter,
+    attestation_chain_hash: attestationChainHash,
+    next_cursor: null,
+    entries_count: 0,
+    total_filtered: 0
+  };
+
+  return {
+    ...checkpointInput,
+    checkpoint_hash: sha256HexCanonical(checkpointInput)
+  };
+}
+
+function verifyPartnerProgramRolloutPolicyDiagnosticsExportCheckpoint({ checkpoint, query, attestation }) {
+  const provided = normalizeExportCheckpoint(checkpoint);
+  if (!provided) return { ok: false, error: 'checkpoint_missing' };
+
+  const expected = buildPartnerProgramRolloutPolicyDiagnosticsExportCheckpoint({
+    query,
+    attestation
+  });
+
+  if (provided.checkpoint_after !== expected.checkpoint_after) {
+    return {
+      ok: false,
+      error: 'checkpoint_after_mismatch',
+      details: {
+        expected_checkpoint_after: expected.checkpoint_after,
+        provided_checkpoint_after: provided.checkpoint_after
+      }
+    };
+  }
+
+  if (provided.attestation_chain_hash !== expected.attestation_chain_hash) {
+    return {
+      ok: false,
+      error: 'checkpoint_attestation_mismatch',
+      details: {
+        expected_attestation_chain_hash: expected.attestation_chain_hash,
+        provided_attestation_chain_hash: provided.attestation_chain_hash
+      }
+    };
+  }
+
+  if (provided.next_cursor !== expected.next_cursor) {
+    return {
+      ok: false,
+      error: 'checkpoint_next_cursor_mismatch',
+      details: {
+        expected_next_cursor: expected.next_cursor,
+        provided_next_cursor: provided.next_cursor
+      }
+    };
+  }
+
+  if (provided.entries_count !== expected.entries_count) {
+    return {
+      ok: false,
+      error: 'checkpoint_entries_count_mismatch',
+      details: {
+        expected_entries_count: expected.entries_count,
+        provided_entries_count: provided.entries_count
+      }
+    };
+  }
+
+  if (provided.total_filtered !== expected.total_filtered) {
+    return {
+      ok: false,
+      error: 'checkpoint_total_filtered_mismatch',
+      details: {
+        expected_total_filtered: expected.total_filtered,
+        provided_total_filtered: provided.total_filtered
+      }
+    };
+  }
+
+  if (provided.checkpoint_hash !== expected.checkpoint_hash) {
+    return {
+      ok: false,
+      error: 'checkpoint_hash_mismatch',
+      details: {
+        expected_checkpoint_hash: expected.checkpoint_hash,
+        provided_checkpoint_hash: provided.checkpoint_hash
+      }
+    };
+  }
+
+  return { ok: true };
+}
+
+function partnerProgramRolloutPolicyDiagnosticsExportSignablePayload(payload) {
+  const out = {
     exported_at: payload?.exported_at,
     query: normalizePartnerProgramRolloutPolicyDiagnosticsExportQuery(payload?.query),
     policy: normalizePartnerProgramRolloutPolicyForExport(payload?.policy),
@@ -1082,6 +1272,14 @@ function partnerProgramRolloutPolicyDiagnosticsExportSignablePayload(payload) {
     export_hash: payload?.export_hash,
     signature: payload?.signature
   };
+
+  const attestation = normalizeExportAttestation(payload?.attestation);
+  if (attestation) out.attestation = attestation;
+
+  const checkpoint = normalizeExportCheckpoint(payload?.checkpoint);
+  if (checkpoint) out.checkpoint = checkpoint;
+
+  return out;
 }
 
 export function buildPartnerProgramRolloutPolicyDiagnosticsExportHash({ policy, query, overlays, recommendedActions, runbookHooks }) {
@@ -1101,6 +1299,8 @@ export function buildSignedPartnerProgramRolloutPolicyDiagnosticsExportPayload({
   overlays,
   recommendedActions,
   runbookHooks,
+  withAttestation = false,
+  withCheckpoint = false,
   keyId
 }) {
   const normalizedQuery = normalizePartnerProgramRolloutPolicyDiagnosticsExportQuery(query);
@@ -1126,6 +1326,20 @@ export function buildSignedPartnerProgramRolloutPolicyDiagnosticsExportPayload({
     runbook_hooks: normalizedHooks,
     export_hash: exportHash
   };
+
+  if (withAttestation) {
+    payload.attestation = buildPartnerProgramRolloutPolicyDiagnosticsExportAttestation({
+      query: normalizedQuery,
+      exportHash
+    });
+  }
+
+  if (withCheckpoint) {
+    payload.checkpoint = buildPartnerProgramRolloutPolicyDiagnosticsExportCheckpoint({
+      query: normalizedQuery,
+      attestation: payload.attestation ?? null
+    });
+  }
 
   payload.signature = signPolicyIntegrityPayload(payload, { keyId });
   return payload;
@@ -1153,6 +1367,24 @@ export function verifyPartnerProgramRolloutPolicyDiagnosticsExportPayload(payloa
         provided_hash: payload.export_hash ?? null
       }
     };
+  }
+
+  if (payload.attestation) {
+    const attestation = verifyPartnerProgramRolloutPolicyDiagnosticsExportAttestation({
+      attestation: payload.attestation,
+      query: payload.query,
+      exportHash: payload.export_hash
+    });
+    if (!attestation.ok) return attestation;
+  }
+
+  if (payload.checkpoint) {
+    const checkpoint = verifyPartnerProgramRolloutPolicyDiagnosticsExportCheckpoint({
+      checkpoint: payload.checkpoint,
+      query: payload.query,
+      attestation: payload.attestation ?? null
+    });
+    if (!checkpoint.ok) return checkpoint;
   }
 
   const signable = partnerProgramRolloutPolicyDiagnosticsExportSignablePayload(payload);
@@ -1184,6 +1416,24 @@ export function verifyPartnerProgramRolloutPolicyDiagnosticsExportPayloadWithPub
         provided_hash: payload.export_hash ?? null
       }
     };
+  }
+
+  if (payload.attestation) {
+    const attestation = verifyPartnerProgramRolloutPolicyDiagnosticsExportAttestation({
+      attestation: payload.attestation,
+      query: payload.query,
+      exportHash: payload.export_hash
+    });
+    if (!attestation.ok) return attestation;
+  }
+
+  if (payload.checkpoint) {
+    const checkpoint = verifyPartnerProgramRolloutPolicyDiagnosticsExportCheckpoint({
+      checkpoint: payload.checkpoint,
+      query: payload.query,
+      attestation: payload.attestation ?? null
+    });
+    if (!checkpoint.ok) return checkpoint;
   }
 
   const signable = partnerProgramRolloutPolicyDiagnosticsExportSignablePayload(payload);
