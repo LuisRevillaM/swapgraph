@@ -81,9 +81,14 @@ Last updated: 2026-02-19
 - M68: ✅ commercial governance diagnostics automation execution-attestation hardening (signed deterministic `automation_hints.execution_attestation` anchors for projected run outcomes: pre/post policy version envelope, expected-effect hash chain, request-hash chain, and attestation hash) (fixtures-first)
 - M69: ✅ commercial governance diagnostics automation attestation-consistency verification hardening (verifier-enforced deterministic recomputation of `plan_hash`, execution hash chains, and policy-version projection envelope parity checks for signed diagnostics payloads) (fixtures-first)
 - M70: ✅ commercial governance diagnostics automation attestation-continuity hardening (signed deterministic execution-continuity anchors: `continuation_attestation_after`, `continuation_checkpoint_after`, `continuation_hash` with verifier parity checks across default/public-key paths) (fixtures-first)
+- M71: ✅ commercial governance diagnostics automation continuity-window policy hardening (signed deterministic `continuation_window_minutes` + `continuation_expires_at` execution anchors bound into attestation/continuation hash verification) (fixtures-first)
+- M72: ✅ commercial governance diagnostics automation execution-receipt contract hardening (signed deterministic `receipt_steps_count` + `receipt_hash` execution attestation anchors with tamper-fail verification) (fixtures-first)
+- M73: ✅ commercial governance diagnostics automation execution-journal export hardening (signed deterministic `journal_entry_hashes` + `journal_hash` execution attestation anchors with tamper-fail verification) (fixtures-first)
+- M74: ✅ commercial governance diagnostics automation rollback-plan synthesis hardening (signed deterministic `rollback_target_policy_version` + `rollback_hash` execution attestation anchors with tamper-fail verification) (fixtures-first)
+- M75: ✅ commercial governance diagnostics automation simulation hardening (signed deterministic `simulation_projected_policy_version_after` + `simulation_risk_level` + `simulation_hash` execution attestation anchors with tamper-fail verification) (fixtures-first)
 
 ## Next
-- M71: commercial governance diagnostics automation continuity-window hardening follow-up (fixtures-first)
+- M76: commercial usage ledger normalization (fixtures-first)
 - Master remainder forecast: `docs/prd/2026-02-19_master-remaining-milestones_M71-M92.md`
 
 ## Notes

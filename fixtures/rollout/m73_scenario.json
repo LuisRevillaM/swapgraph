@@ -1,0 +1,172 @@
+{
+  "actors": {
+    "admin_partner": {
+      "type": "partner",
+      "id": "ops-admin"
+    }
+  },
+  "operations": [
+    {
+      "op": "keys.policy_integrity_signing.get",
+      "expect_ok": true,
+      "expect_keys_count": 2
+    },
+    {
+      "op": "rollout_overlay.set",
+      "config": {
+        "freeze_export_enforce": true
+      }
+    },
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.upsert",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m73_policy_v1",
+      "occurred_at": "2026-02-19T14:00:00Z",
+      "request": {
+        "occurred_at": "2026-02-19T14:00:00Z",
+        "policy": {
+          "allowlist": [
+            "swapgraph"
+          ],
+          "min_plan_id": "pro"
+        }
+      },
+      "expect_ok": true,
+      "expect_policy_version": 1,
+      "expect_audit_id": "rollout_policy_000001"
+    },
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.admin_action",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m73_action_maintenance",
+      "occurred_at": "2026-02-19T14:00:30Z",
+      "request": {
+        "occurred_at": "2026-02-19T14:00:30Z",
+        "action": {
+          "action_type": "set_maintenance_mode",
+          "maintenance_mode_enabled": true,
+          "maintenance_reason_code": "maintenance_window"
+        }
+      },
+      "expect_ok": true,
+      "expect_policy_version": 2,
+      "expect_audit_id": "rollout_policy_000002",
+      "expect_audit_action_type": "set_maintenance_mode"
+    },
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "now_iso": "2026-02-19T14:25:00Z",
+        "exported_at_iso": "2026-02-19T14:25:00Z",
+        "include_recommended_actions": true,
+        "include_runbook_hooks": true,
+        "include_automation_hints": true,
+        "maintenance_stale_after_minutes": 10,
+        "freeze_expiring_soon_minutes": 10,
+        "automation_max_actions": 1,
+        "continuation_window_minutes": 30
+      },
+      "save_export_ref": "diag_auto",
+      "expect_ok": true,
+      "expect_policy_version": 2,
+      "expect_include_automation_hints": true,
+      "expect_automation_max_actions": 1,
+      "expect_recommended_action_codes": [
+        "clear_maintenance_mode"
+      ],
+      "expect_automation_action_hook_ids": [
+        "disable_maintenance_mode"
+      ],
+      "expect_automation_request_steps": [
+        1
+      ],
+      "expect_automation_request_hook_ids": [
+        "disable_maintenance_mode"
+      ],
+      "expect_automation_request_operation_ids": [
+        "partnerProgram.vault_export.rollout_policy.admin_action"
+      ],
+      "expect_automation_request_idempotency_templates": [
+        "diag_auto_v2_01_disable_maintenance_mode"
+      ],
+      "expect_automation_request_action_types": [
+        "set_maintenance_mode"
+      ],
+      "expect_automation_request_hashes_count": 1,
+      "expect_automation_request_hashes_present": true,
+      "expect_automation_expected_policy_versions": [
+        3
+      ],
+      "expect_automation_expected_maintenance_modes": [
+        false
+      ],
+      "expect_automation_expected_freeze_until": [
+        null
+      ],
+      "expect_automation_expected_freeze_active": [
+        false
+      ],
+      "expect_automation_expected_effect_count": 1,
+      "expect_automation_expected_effect_present": true,
+      "expect_automation_plan_hash_present": true,
+      "expect_automation_idempotency_scope": "partnerProgram.vault_export.rollout_policy.admin_action",
+      "expect_automation_max_actions_per_run": 1,
+      "expect_has_attestation": true,
+      "expect_has_checkpoint": true,
+      "expect_automation_execution_policy_version_before": 2,
+      "expect_automation_execution_policy_version_after_expected": 3,
+      "expect_automation_execution_non_empty_action_plan": true,
+      "expect_automation_execution_hashes_present": true,
+      "expect_automation_execution_continuation_attestation_after": null,
+      "expect_automation_execution_continuation_checkpoint_after": null,
+      "expect_automation_execution_continuation_hash_present": true,
+      "expect_automation_execution_continuation_window_minutes": 30,
+      "expect_automation_execution_continuation_expires_at": "2026-02-19T14:55:00Z",
+      "expect_automation_execution_receipt_steps_count": 1,
+      "expect_automation_execution_receipt_hash_present": true,
+      "expect_automation_execution_journal_entry_hashes_count": 1,
+      "expect_automation_execution_journal_hash_present": true,
+      "expect_automation_execution_rollback_target_policy_version": 2,
+      "expect_automation_execution_rollback_hash_present": true,
+      "expect_automation_execution_simulation_projected_policy_version_after": 3,
+      "expect_automation_execution_simulation_risk_level": "medium",
+      "expect_automation_execution_simulation_hash_present": true
+    },
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export.verify",
+      "export_ref": "diag_auto",
+      "expect_verify_ok": true,
+      "expect_verify_public_ok": true
+    },
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export.verify_resigned_execution_journal_hash_tampered",
+      "export_ref": "diag_auto",
+      "expect_verify_ok": false,
+      "expect_verify_error": "automation_execution_journal_hash_mismatch",
+      "expect_verify_public_ok": false,
+      "expect_verify_public_error": "automation_execution_journal_hash_mismatch"
+    },
+    {
+      "op": "partnerProgram.vault_export.rollout_policy.diagnostics.export.verify_tampered",
+      "export_ref": "diag_auto",
+      "expect_verify_ok": false,
+      "expect_verify_error": "hash_mismatch"
+    }
+  ]
+}

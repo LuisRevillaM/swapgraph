@@ -56,3 +56,14 @@ Notes:
   - `partner_rollout_diagnostics_threshold_invalid`
   - `partner_rollout_diagnostics_automation_invalid`
   - `partner_rollout_diagnostics_automation_requires_runbook_hooks`
+- Rollout diagnostics automation execution-attestation verification may return deterministic mismatch errors such as:
+  - `automation_execution_expected_effect_hash_mismatch`
+  - `automation_execution_request_hash_chain_mismatch`
+  - `automation_execution_attestation_hash_mismatch`
+  - `automation_execution_continuation_hash_mismatch`
+  - `automation_execution_continuation_window_minutes_mismatch`
+  - `automation_execution_continuation_expires_at_mismatch`
+  - `automation_execution_receipt_hash_mismatch`
+  - `automation_execution_journal_hash_mismatch`
+  - `automation_execution_rollback_hash_mismatch`
+  - `automation_execution_simulation_hash_mismatch`

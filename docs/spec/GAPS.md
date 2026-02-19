@@ -156,7 +156,12 @@ Each item here must become at least one of:
 - Resolved (fixtures-first, partial): M68 (rollout diagnostics automation execution-attestation hardening: signed deterministic `execution_attestation` anchors tying `plan_hash`, expected-effect hash chain, and request-hash chain to projected policy-version outcomes).
 - Resolved (fixtures-first, partial): M69 (rollout diagnostics automation attestation-consistency verification hardening: verifier-enforced deterministic recomputation of `plan_hash`, execution hash chains, and policy-version projection envelope parity checks).
 - Resolved (fixtures-first, partial): M70 (rollout diagnostics automation attestation-continuity hardening: deterministic execution-continuity anchors binding `attestation_after`/`checkpoint_after` context to automation execution attestation with verifier parity checks).
-- Remaining: broader commercial governance controls beyond diagnostics/audit/automation continuity-window lifecycle hardening.
+- Resolved (fixtures-first, partial): M71 (rollout diagnostics automation continuity-window policy hardening: deterministic `continuation_window_minutes` + `continuation_expires_at` anchors bound into execution attestation/continuation hash verification).
+- Resolved (fixtures-first, partial): M72 (rollout diagnostics automation execution-receipt contract hardening: deterministic `receipt_steps_count` + `receipt_hash` execution attestation anchors with signed tamper-fail verification).
+- Resolved (fixtures-first, partial): M73 (rollout diagnostics automation execution-journal hardening: deterministic `journal_entry_hashes` + `journal_hash` execution attestation anchors with signed tamper-fail verification).
+- Resolved (fixtures-first, partial): M74 (rollout diagnostics automation rollback-plan synthesis hardening: deterministic `rollback_target_policy_version` + `rollback_hash` execution attestation anchors with signed tamper-fail verification).
+- Resolved (fixtures-first, partial): M75 (rollout diagnostics automation simulation hardening: deterministic `simulation_projected_policy_version_after` + `simulation_risk_level` + `simulation_hash` execution attestation anchors with signed tamper-fail verification).
+- Remaining: broader commercial governance controls beyond diagnostics/audit/automation execution-attestation anchors (M76+ commercial ledger/rev-share/SLA scope).
 
 ---
 

@@ -100,6 +100,7 @@ Settlement endpoints:
   - automation bundle includes signed `execution_attestation` anchors (`expected_effect_hash`, `request_hash_chain`, `attestation_hash`) for downstream execution-result integrity checks
   - verifier enforces internal consistency of automation anchors (`plan_hash`, execution hash chains, and policy-version projection envelope) before signature acceptance
   - execution attestation includes continuation anchors (`continuation_attestation_after`, `continuation_checkpoint_after`, `continuation_hash`) to bind automation plans to signed continuation context
+  - execution attestation also carries continuity-window + execution synthesis anchors (`continuation_window_minutes`, `continuation_expires_at`, `receipt_hash`, `journal_hash`, `rollback_hash`, `simulation_hash`)
   - provides deterministic operator action recommendations (`clear_maintenance_mode`, `clear_freeze_window`, or `none`)
   - includes runbook hook templates for `rollout_policy.admin_action`
   - supports optional compact mode via query flags (`include_recommended_actions`, `include_runbook_hooks`)

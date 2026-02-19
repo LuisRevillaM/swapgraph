@@ -10,6 +10,7 @@
     "maintenance_stale_after_minutes": 10,
     "freeze_expiring_soon_minutes": 10,
     "automation_max_actions": 2,
+    "continuation_window_minutes": 30,
     "attestation_after": "7ed885251efbcf7f8e82f878f9ed0f8c0d70f149345f0c181404570a3478dbda",
     "checkpoint_after": "e0398e516d8c1289f47e2fe4ea1e8cc395f337fd77b28f6ab6dc95dc50a8ed2d"
   },
@@ -140,7 +141,21 @@
       "attestation_hash": "f1642d258840ea7aa9c07065408eeb7f0881512198f8cc20d89cd47418f23bf6",
       "continuation_attestation_after": "7ed885251efbcf7f8e82f878f9ed0f8c0d70f149345f0c181404570a3478dbda",
       "continuation_checkpoint_after": "e0398e516d8c1289f47e2fe4ea1e8cc395f337fd77b28f6ab6dc95dc50a8ed2d",
-      "continuation_hash": "a8f58b4a291f5a8452b5af2ac70cf44a7bf0f1324313347fd7cf2f93d9382eb5"
+      "continuation_hash": "a8f58b4a291f5a8452b5af2ac70cf44a7bf0f1324313347fd7cf2f93d9382eb5",
+      "continuation_window_minutes": 30,
+      "continuation_expires_at": "2026-02-19T10:55:00Z",
+      "receipt_steps_count": 2,
+      "receipt_hash": "8ec26fb12c7034273f8e9228fc00f5378f7285f31af62d516a73e75f8189d2be",
+      "journal_entry_hashes": [
+        "e8de201634f5dc84490023db607ff60d3e4cf5f2c611f0a17cfa15ad7f9451f4",
+        "9ec4e1ec1f0eb1f0baf944ad9ce22f470b67e7276ce0348f3689058e5dfe2f9a"
+      ],
+      "journal_hash": "0c5b8e8ab35f1c3c1209e83fbacfbadf9b9187530f2f2b1766fa0fe58f3d8247",
+      "rollback_target_policy_version": 12,
+      "rollback_hash": "43d95f06da7d50b340d8f9d86aa2f13895fcd7f4a8be9f2bdc6f23ed7d8d6f27",
+      "simulation_projected_policy_version_after": 14,
+      "simulation_risk_level": "high",
+      "simulation_hash": "4c80df4f33cbf93a89e7d98d1f4b8c8713f89072a4d6d485418c6743f3b4b58c"
     },
     "safety": {
       "idempotency_required": true,

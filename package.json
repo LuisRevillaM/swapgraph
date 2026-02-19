@@ -75,6 +75,11 @@
     "verify:m68": "bash verify/m68.sh",
     "verify:m69": "bash verify/m69.sh",
     "verify:m70": "bash verify/m70.sh",
+    "verify:m71": "bash verify/m71.sh",
+    "verify:m72": "bash verify/m72.sh",
+    "verify:m73": "bash verify/m73.sh",
+    "verify:m74": "bash verify/m74.sh",
+    "verify:m75": "bash verify/m75.sh",
     "test": "node --test"
   },
   "devDependencies": {

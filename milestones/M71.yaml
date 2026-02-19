@@ -1,0 +1,33 @@
+name: M71
+commands:
+  - cmd: "npm run verify:m71"
+artifacts:
+  - artifact: "docs/prd/M71.md"
+  - artifact: "docs/STATUS.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/ERRORS.md"
+  - artifact: "docs/spec/GAPS.md"
+
+  - artifact: "src/crypto/policyIntegritySigning.mjs"
+  - artifact: "src/service/partnerProgramGovernanceService.mjs"
+
+  - artifact: "docs/spec/api/manifest.v1.json"
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+  - artifact: "docs/spec/examples/api/partner_program.vault_export.rollout_policy.diagnostics.export.response.json"
+
+  - artifact: "docs/spec/schemas/PartnerProgramVaultExportRolloutPolicyDiagnosticsExportResponse.schema.json"
+
+  - artifact: "scripts/run-m71-rollout-diagnostics-continuity-window-scenario.mjs"
+  - artifact: "fixtures/vault/m71_scenario.json"
+  - artifact: "fixtures/vault/m71_expected.json"
+
+  - artifact: "milestones/M71.yaml"
+  - artifact: "verify/m71.sh"
+
+  - artifact: "artifacts/milestones/M71/latest/commands.log"
+  - artifact: "artifacts/milestones/M71/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M71/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M71/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M71/latest/rollout_diagnostics_continuity_window_output.json"
+  - artifact: "artifacts/milestones/M71/latest/store.json"
+  - artifact: "artifacts/milestones/M71/latest/assertions.json"

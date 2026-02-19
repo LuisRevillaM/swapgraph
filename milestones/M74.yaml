@@ -1,0 +1,33 @@
+name: M74
+commands:
+  - cmd: "npm run verify:m74"
+artifacts:
+  - artifact: "docs/prd/M74.md"
+  - artifact: "docs/STATUS.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/ERRORS.md"
+  - artifact: "docs/spec/GAPS.md"
+
+  - artifact: "src/crypto/policyIntegritySigning.mjs"
+  - artifact: "src/service/partnerProgramGovernanceService.mjs"
+
+  - artifact: "docs/spec/api/manifest.v1.json"
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+  - artifact: "docs/spec/examples/api/partner_program.vault_export.rollout_policy.diagnostics.export.response.json"
+
+  - artifact: "docs/spec/schemas/PartnerProgramVaultExportRolloutPolicyDiagnosticsExportResponse.schema.json"
+
+  - artifact: "scripts/run-m74-rollout-diagnostics-rollback-plan-scenario.mjs"
+  - artifact: "fixtures/rollout/m74_scenario.json"
+  - artifact: "fixtures/rollout/m74_expected.json"
+
+  - artifact: "milestones/M74.yaml"
+  - artifact: "verify/m74.sh"
+
+  - artifact: "artifacts/milestones/M74/latest/commands.log"
+  - artifact: "artifacts/milestones/M74/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M74/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M74/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M74/latest/rollout_diagnostics_rollback_plan_output.json"
+  - artifact: "artifacts/milestones/M74/latest/store.json"
+  - artifact: "artifacts/milestones/M74/latest/assertions.json"

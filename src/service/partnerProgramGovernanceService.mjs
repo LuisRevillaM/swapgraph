@@ -244,7 +244,8 @@ function checkpointContextFromPartnerProgramRolloutPolicyDiagnosticsExportQuery(
     include_automation_hints: parseOptionalBoolean(query?.include_automation_hints) === true,
     maintenance_stale_after_minutes: parseOptionalInteger(query?.maintenance_stale_after_minutes),
     freeze_expiring_soon_minutes: parseOptionalInteger(query?.freeze_expiring_soon_minutes),
-    automation_max_actions: parseOptionalInteger(query?.automation_max_actions)
+    automation_max_actions: parseOptionalInteger(query?.automation_max_actions),
+    continuation_window_minutes: parseOptionalInteger(query?.continuation_window_minutes)
   };
 }
 
@@ -378,7 +379,9 @@ function buildRolloutPolicyDiagnosticsAutomationHints({
   policyVersion,
   policyControls,
   continuationAttestationAfter,
-  continuationCheckpointAfter
+  continuationCheckpointAfter,
+  continuationWindowMinutes,
+  exportedAt
 }) {
   const queue = [];
   const actionRequests = [];
@@ -474,23 +477,96 @@ function buildRolloutPolicyDiagnosticsAutomationHints({
     : versionBefore;
   const expectedEffectHash = payloadHash(actionRequests.map(request => ({ step: request.step, expected_effect: request.expected_effect })));
   const requestHashChain = payloadHash(actionRequests.map(request => request.request_hash));
+
+  const continuityWindowMinutes = Number.isFinite(continuationWindowMinutes)
+    ? Math.max(1, Number(continuationWindowMinutes))
+    : 30;
+  const exportedAtMs = parseIsoMs(exportedAt);
+  const continuationExpiresAt = exportedAtMs === null
+    ? (typeof exportedAt === 'string' && exportedAt.trim() ? exportedAt.trim() : new Date().toISOString())
+    : new Date(exportedAtMs + (continuityWindowMinutes * 60000)).toISOString();
+
+  const receiptStepsCount = actionRequests.length;
+  const receiptHash = payloadHash({
+    plan_hash: planHash,
+    request_hash_chain: requestHashChain,
+    steps_count: receiptStepsCount,
+    policy_version_before: versionBefore,
+    policy_version_after_expected: policyVersionAfterExpected
+  });
+
+  const journalEntryHashes = actionRequests.map(request => payloadHash({
+    step: request.step,
+    request_hash: request.request_hash,
+    expected_effect: request.expected_effect
+  }));
+  const journalHash = payloadHash({ entry_hashes: journalEntryHashes });
+
+  const rollbackTargetPolicyVersion = versionBefore;
+  const rollbackHash = payloadHash({
+    rollback_target_policy_version: rollbackTargetPolicyVersion,
+    policy_version_after_expected: policyVersionAfterExpected,
+    non_empty_action_plan: actionRequests.length > 0
+  });
+
+  const simulationProjectedPolicyVersionAfter = policyVersionAfterExpected;
+  const simulationRiskLevel = actionRequests.length === 0
+    ? 'low'
+    : (actionRequests.length === 1 ? 'medium' : 'high');
+  const simulationHash = payloadHash({
+    projected_policy_version_after: simulationProjectedPolicyVersionAfter,
+    risk_level: simulationRiskLevel,
+    expected_effect_hash: expectedEffectHash
+  });
+
   const executionAttestation = {
     policy_version_before: versionBefore,
     policy_version_after_expected: policyVersionAfterExpected,
     non_empty_action_plan: actionRequests.length > 0,
     expected_effect_hash: expectedEffectHash,
-    request_hash_chain: requestHashChain
+    request_hash_chain: requestHashChain,
+    continuation_attestation_after: normalizeOptionalString(continuationAttestationAfter),
+    continuation_checkpoint_after: normalizeOptionalString(continuationCheckpointAfter),
+    continuation_window_minutes: continuityWindowMinutes,
+    continuation_expires_at: continuationExpiresAt,
+    receipt_steps_count: receiptStepsCount,
+    receipt_hash: receiptHash,
+    journal_entry_hashes: journalEntryHashes,
+    journal_hash: journalHash,
+    rollback_target_policy_version: rollbackTargetPolicyVersion,
+    rollback_hash: rollbackHash,
+    simulation_projected_policy_version_after: simulationProjectedPolicyVersionAfter,
+    simulation_risk_level: simulationRiskLevel,
+    simulation_hash: simulationHash
   };
+
   executionAttestation.attestation_hash = payloadHash({
     plan_hash: planHash,
-    ...executionAttestation
+    policy_version_before: executionAttestation.policy_version_before,
+    policy_version_after_expected: executionAttestation.policy_version_after_expected,
+    non_empty_action_plan: executionAttestation.non_empty_action_plan,
+    expected_effect_hash: executionAttestation.expected_effect_hash,
+    request_hash_chain: executionAttestation.request_hash_chain,
+    continuation_attestation_after: executionAttestation.continuation_attestation_after,
+    continuation_checkpoint_after: executionAttestation.continuation_checkpoint_after,
+    continuation_window_minutes: executionAttestation.continuation_window_minutes,
+    continuation_expires_at: executionAttestation.continuation_expires_at,
+    receipt_steps_count: executionAttestation.receipt_steps_count,
+    receipt_hash: executionAttestation.receipt_hash,
+    journal_entry_hashes: executionAttestation.journal_entry_hashes,
+    journal_hash: executionAttestation.journal_hash,
+    rollback_target_policy_version: executionAttestation.rollback_target_policy_version,
+    rollback_hash: executionAttestation.rollback_hash,
+    simulation_projected_policy_version_after: executionAttestation.simulation_projected_policy_version_after,
+    simulation_risk_level: executionAttestation.simulation_risk_level,
+    simulation_hash: executionAttestation.simulation_hash
   });
 
-  executionAttestation.continuation_attestation_after = normalizeOptionalString(continuationAttestationAfter);
-  executionAttestation.continuation_checkpoint_after = normalizeOptionalString(continuationCheckpointAfter);
   executionAttestation.continuation_hash = payloadHash({
     attestation_after: executionAttestation.continuation_attestation_after,
     checkpoint_after: executionAttestation.continuation_checkpoint_after,
+    continuation_window_minutes: executionAttestation.continuation_window_minutes,
+    continuation_expires_at: executionAttestation.continuation_expires_at,
     plan_hash: planHash,
     attestation_hash: executionAttestation.attestation_hash
   });
@@ -1174,8 +1250,23 @@ export class PartnerProgramGovernanceService {
       };
     }
 
+    const continuationWindowParsed = normalizeDiagnosticsAlertThresholdMinutes({
+      value: query?.continuation_window_minutes,
+      defaultValue: 30,
+      min: 1,
+      max: 1440,
+      fieldName: 'continuation_window_minutes'
+    });
+    if (!continuationWindowParsed.ok) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'invalid diagnostics threshold', continuationWindowParsed.error)
+      };
+    }
+
     const maintenanceStaleAfterMinutes = maintenanceStaleThresholdParsed.value;
     const freezeExpiringSoonMinutes = freezeExpiringThresholdParsed.value;
+    const continuationWindowMinutes = continuationWindowParsed.value;
 
     const attestationAfter = normalizeOptionalString(query?.attestation_after);
     const checkpointAfter = normalizeOptionalString(query?.checkpoint_after);
@@ -1311,7 +1402,9 @@ export class PartnerProgramGovernanceService {
           policyVersion: policyView?.version ?? 0,
           policyControls: policyView?.controls ?? null,
           continuationAttestationAfter: attestationAfter,
-          continuationCheckpointAfter: checkpointAfter
+          continuationCheckpointAfter: checkpointAfter,
+          continuationWindowMinutes,
+          exportedAt
         })
       : null;
 

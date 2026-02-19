@@ -1014,6 +1014,9 @@ function normalizePartnerProgramRolloutPolicyDiagnosticsExportQuery(query) {
   const automationMaxActions = Number.parseInt(String(query?.automation_max_actions ?? ''), 10);
   if (Number.isFinite(automationMaxActions) && automationMaxActions > 0) out.automation_max_actions = automationMaxActions;
 
+  const continuationWindowMinutes = Number.parseInt(String(query?.continuation_window_minutes ?? ''), 10);
+  if (Number.isFinite(continuationWindowMinutes) && continuationWindowMinutes > 0) out.continuation_window_minutes = continuationWindowMinutes;
+
   if (typeof query?.attestation_after === 'string' && query.attestation_after.trim()) out.attestation_after = query.attestation_after.trim();
   if (typeof query?.checkpoint_after === 'string' && query.checkpoint_after.trim()) out.checkpoint_after = query.checkpoint_after.trim();
 
@@ -1225,6 +1228,31 @@ function normalizePartnerProgramRolloutPolicyDiagnosticsAutomationHints(automati
   const executionContinuationHash = typeof automationHints?.execution_attestation?.continuation_hash === 'string' && automationHints.execution_attestation.continuation_hash.trim()
     ? automationHints.execution_attestation.continuation_hash.trim()
     : null;
+  const executionContinuationWindowMinutes = Number.parseInt(String(automationHints?.execution_attestation?.continuation_window_minutes ?? ''), 10);
+  const executionContinuationExpiresAt = typeof automationHints?.execution_attestation?.continuation_expires_at === 'string' && automationHints.execution_attestation.continuation_expires_at.trim()
+    ? automationHints.execution_attestation.continuation_expires_at.trim()
+    : null;
+  const executionReceiptStepsCount = Number.parseInt(String(automationHints?.execution_attestation?.receipt_steps_count ?? ''), 10);
+  const executionReceiptHash = typeof automationHints?.execution_attestation?.receipt_hash === 'string' && automationHints.execution_attestation.receipt_hash.trim()
+    ? automationHints.execution_attestation.receipt_hash.trim()
+    : null;
+  const executionJournalEntryHashes = Array.isArray(automationHints?.execution_attestation?.journal_entry_hashes)
+    ? automationHints.execution_attestation.journal_entry_hashes.filter(x => typeof x === 'string' && x.trim()).map(x => x.trim())
+    : [];
+  const executionJournalHash = typeof automationHints?.execution_attestation?.journal_hash === 'string' && automationHints.execution_attestation.journal_hash.trim()
+    ? automationHints.execution_attestation.journal_hash.trim()
+    : null;
+  const executionRollbackTargetPolicyVersion = Number.parseInt(String(automationHints?.execution_attestation?.rollback_target_policy_version ?? ''), 10);
+  const executionRollbackHash = typeof automationHints?.execution_attestation?.rollback_hash === 'string' && automationHints.execution_attestation.rollback_hash.trim()
+    ? automationHints.execution_attestation.rollback_hash.trim()
+    : null;
+  const executionSimulationProjectedPolicyVersionAfter = Number.parseInt(String(automationHints?.execution_attestation?.simulation_projected_policy_version_after ?? ''), 10);
+  const executionSimulationRiskLevel = typeof automationHints?.execution_attestation?.simulation_risk_level === 'string' && automationHints.execution_attestation.simulation_risk_level.trim()
+    ? automationHints.execution_attestation.simulation_risk_level.trim()
+    : 'low';
+  const executionSimulationHash = typeof automationHints?.execution_attestation?.simulation_hash === 'string' && automationHints.execution_attestation.simulation_hash.trim()
+    ? automationHints.execution_attestation.simulation_hash.trim()
+    : null;
 
   return {
     requires_operator_confirmation: automationHints.requires_operator_confirmation === true,
@@ -1243,7 +1271,28 @@ function normalizePartnerProgramRolloutPolicyDiagnosticsAutomationHints(automati
       attestation_hash: executionAttestationHash,
       continuation_attestation_after: executionContinuationAttestationAfter,
       continuation_checkpoint_after: executionContinuationCheckpointAfter,
-      continuation_hash: executionContinuationHash
+      continuation_hash: executionContinuationHash,
+      continuation_window_minutes: Number.isFinite(executionContinuationWindowMinutes) && executionContinuationWindowMinutes > 0
+        ? executionContinuationWindowMinutes
+        : 30,
+      continuation_expires_at: executionContinuationExpiresAt,
+      receipt_steps_count: Number.isFinite(executionReceiptStepsCount) && executionReceiptStepsCount >= 0
+        ? executionReceiptStepsCount
+        : 0,
+      receipt_hash: executionReceiptHash,
+      journal_entry_hashes: executionJournalEntryHashes,
+      journal_hash: executionJournalHash,
+      rollback_target_policy_version: Number.isFinite(executionRollbackTargetPolicyVersion) && executionRollbackTargetPolicyVersion >= 0
+        ? executionRollbackTargetPolicyVersion
+        : 0,
+      rollback_hash: executionRollbackHash,
+      simulation_projected_policy_version_after: Number.isFinite(executionSimulationProjectedPolicyVersionAfter) && executionSimulationProjectedPolicyVersionAfter >= 0
+        ? executionSimulationProjectedPolicyVersionAfter
+        : 0,
+      simulation_risk_level: ['low', 'medium', 'high'].includes(executionSimulationRiskLevel)
+        ? executionSimulationRiskLevel
+        : 'low',
+      simulation_hash: executionSimulationHash
     },
     safety: {
       idempotency_required: automationHints?.safety?.idempotency_required !== false,
@@ -1287,25 +1336,42 @@ function buildPartnerProgramRolloutPolicyDiagnosticsAutomationExecutionAttestati
     policy_version_after_expected: executionAttestation?.policy_version_after_expected ?? 0,
     non_empty_action_plan: executionAttestation?.non_empty_action_plan === true,
     expected_effect_hash: executionAttestation?.expected_effect_hash ?? null,
-    request_hash_chain: executionAttestation?.request_hash_chain ?? null
+    request_hash_chain: executionAttestation?.request_hash_chain ?? null,
+    continuation_attestation_after: executionAttestation?.continuation_attestation_after ?? null,
+    continuation_checkpoint_after: executionAttestation?.continuation_checkpoint_after ?? null,
+    continuation_window_minutes: executionAttestation?.continuation_window_minutes ?? 30,
+    continuation_expires_at: executionAttestation?.continuation_expires_at ?? null,
+    receipt_steps_count: executionAttestation?.receipt_steps_count ?? 0,
+    receipt_hash: executionAttestation?.receipt_hash ?? null,
+    journal_entry_hashes: executionAttestation?.journal_entry_hashes ?? [],
+    journal_hash: executionAttestation?.journal_hash ?? null,
+    rollback_target_policy_version: executionAttestation?.rollback_target_policy_version ?? 0,
+    rollback_hash: executionAttestation?.rollback_hash ?? null,
+    simulation_projected_policy_version_after: executionAttestation?.simulation_projected_policy_version_after ?? 0,
+    simulation_risk_level: executionAttestation?.simulation_risk_level ?? 'low',
+    simulation_hash: executionAttestation?.simulation_hash ?? null
   });
 }
 
 function buildPartnerProgramRolloutPolicyDiagnosticsAutomationExecutionContinuationHash({
   continuationAttestationAfter,
   continuationCheckpointAfter,
+  continuationWindowMinutes,
+  continuationExpiresAt,
   planHash,
   executionAttestationHash
 }) {
   return sha256HexCanonical({
     attestation_after: continuationAttestationAfter ?? null,
     checkpoint_after: continuationCheckpointAfter ?? null,
+    continuation_window_minutes: continuationWindowMinutes ?? 30,
+    continuation_expires_at: continuationExpiresAt ?? null,
     plan_hash: planHash ?? null,
     attestation_hash: executionAttestationHash ?? null
   });
 }
 
-function verifyPartnerProgramRolloutPolicyDiagnosticsAutomationHintsConsistency({ policy, query, automationHints }) {
+function verifyPartnerProgramRolloutPolicyDiagnosticsAutomationHintsConsistency({ policy, query, exportedAt, automationHints }) {
   const normalizedAutomationHints = normalizePartnerProgramRolloutPolicyDiagnosticsAutomationHints(automationHints);
   if (!normalizedAutomationHints) {
     return { ok: true };
@@ -1442,9 +1508,168 @@ function verifyPartnerProgramRolloutPolicyDiagnosticsAutomationHintsConsistency(
     };
   }
 
+  const expectedContinuationWindowMinutes = Number.isFinite(normalizedQuery.continuation_window_minutes)
+    ? Number(normalizedQuery.continuation_window_minutes)
+    : 30;
+  if (normalizedAutomationHints.execution_attestation.continuation_window_minutes !== expectedContinuationWindowMinutes) {
+    return {
+      ok: false,
+      error: 'automation_execution_continuation_window_minutes_mismatch',
+      details: {
+        expected_continuation_window_minutes: expectedContinuationWindowMinutes,
+        provided_continuation_window_minutes: normalizedAutomationHints.execution_attestation.continuation_window_minutes
+      }
+    };
+  }
+
+  const exportedAtMs = parseIso(exportedAt);
+  const expectedContinuationExpiresAt = exportedAtMs === null
+    ? null
+    : new Date(exportedAtMs + (expectedContinuationWindowMinutes * 60000)).toISOString();
+  if (normalizedAutomationHints.execution_attestation.continuation_expires_at !== expectedContinuationExpiresAt) {
+    return {
+      ok: false,
+      error: 'automation_execution_continuation_expires_at_mismatch',
+      details: {
+        expected_continuation_expires_at: expectedContinuationExpiresAt,
+        provided_continuation_expires_at: normalizedAutomationHints.execution_attestation.continuation_expires_at
+      }
+    };
+  }
+
+  const expectedReceiptStepsCount = actionRequests.length;
+  if (normalizedAutomationHints.execution_attestation.receipt_steps_count !== expectedReceiptStepsCount) {
+    return {
+      ok: false,
+      error: 'automation_execution_receipt_steps_count_mismatch',
+      details: {
+        expected_receipt_steps_count: expectedReceiptStepsCount,
+        provided_receipt_steps_count: normalizedAutomationHints.execution_attestation.receipt_steps_count
+      }
+    };
+  }
+
+  const expectedReceiptHash = sha256HexCanonical({
+    plan_hash: normalizedAutomationHints.plan_hash,
+    request_hash_chain: normalizedAutomationHints.execution_attestation.request_hash_chain,
+    steps_count: expectedReceiptStepsCount,
+    policy_version_before: expectedPolicyVersionBefore,
+    policy_version_after_expected: expectedPolicyVersionAfterExpected
+  });
+  if (normalizedAutomationHints.execution_attestation.receipt_hash !== expectedReceiptHash) {
+    return {
+      ok: false,
+      error: 'automation_execution_receipt_hash_mismatch',
+      details: {
+        expected_receipt_hash: expectedReceiptHash,
+        provided_receipt_hash: normalizedAutomationHints.execution_attestation.receipt_hash
+      }
+    };
+  }
+
+  const expectedJournalEntryHashes = actionRequests.map(request => sha256HexCanonical({
+    step: request?.step ?? null,
+    request_hash: request?.request_hash ?? null,
+    expected_effect: request?.expected_effect ?? null
+  }));
+  if (JSON.stringify(normalizedAutomationHints.execution_attestation.journal_entry_hashes ?? []) !== JSON.stringify(expectedJournalEntryHashes)) {
+    return {
+      ok: false,
+      error: 'automation_execution_journal_entry_hashes_mismatch',
+      details: {
+        expected_journal_entry_hashes: expectedJournalEntryHashes,
+        provided_journal_entry_hashes: normalizedAutomationHints.execution_attestation.journal_entry_hashes ?? []
+      }
+    };
+  }
+
+  const expectedJournalHash = sha256HexCanonical({ entry_hashes: expectedJournalEntryHashes });
+  if (normalizedAutomationHints.execution_attestation.journal_hash !== expectedJournalHash) {
+    return {
+      ok: false,
+      error: 'automation_execution_journal_hash_mismatch',
+      details: {
+        expected_journal_hash: expectedJournalHash,
+        provided_journal_hash: normalizedAutomationHints.execution_attestation.journal_hash
+      }
+    };
+  }
+
+  const expectedRollbackTargetPolicyVersion = expectedPolicyVersionBefore;
+  if (normalizedAutomationHints.execution_attestation.rollback_target_policy_version !== expectedRollbackTargetPolicyVersion) {
+    return {
+      ok: false,
+      error: 'automation_execution_rollback_target_policy_version_mismatch',
+      details: {
+        expected_rollback_target_policy_version: expectedRollbackTargetPolicyVersion,
+        provided_rollback_target_policy_version: normalizedAutomationHints.execution_attestation.rollback_target_policy_version
+      }
+    };
+  }
+
+  const expectedRollbackHash = sha256HexCanonical({
+    rollback_target_policy_version: expectedRollbackTargetPolicyVersion,
+    policy_version_after_expected: expectedPolicyVersionAfterExpected,
+    non_empty_action_plan: expectedNonEmptyActionPlan
+  });
+  if (normalizedAutomationHints.execution_attestation.rollback_hash !== expectedRollbackHash) {
+    return {
+      ok: false,
+      error: 'automation_execution_rollback_hash_mismatch',
+      details: {
+        expected_rollback_hash: expectedRollbackHash,
+        provided_rollback_hash: normalizedAutomationHints.execution_attestation.rollback_hash
+      }
+    };
+  }
+
+  const expectedSimulationProjectedPolicyVersionAfter = expectedPolicyVersionAfterExpected;
+  if (normalizedAutomationHints.execution_attestation.simulation_projected_policy_version_after !== expectedSimulationProjectedPolicyVersionAfter) {
+    return {
+      ok: false,
+      error: 'automation_execution_simulation_projected_policy_version_after_mismatch',
+      details: {
+        expected_simulation_projected_policy_version_after: expectedSimulationProjectedPolicyVersionAfter,
+        provided_simulation_projected_policy_version_after: normalizedAutomationHints.execution_attestation.simulation_projected_policy_version_after
+      }
+    };
+  }
+
+  const expectedSimulationRiskLevel = actionRequests.length === 0
+    ? 'low'
+    : (actionRequests.length === 1 ? 'medium' : 'high');
+  if (normalizedAutomationHints.execution_attestation.simulation_risk_level !== expectedSimulationRiskLevel) {
+    return {
+      ok: false,
+      error: 'automation_execution_simulation_risk_level_mismatch',
+      details: {
+        expected_simulation_risk_level: expectedSimulationRiskLevel,
+        provided_simulation_risk_level: normalizedAutomationHints.execution_attestation.simulation_risk_level
+      }
+    };
+  }
+
+  const expectedSimulationHash = sha256HexCanonical({
+    projected_policy_version_after: expectedSimulationProjectedPolicyVersionAfter,
+    risk_level: expectedSimulationRiskLevel,
+    expected_effect_hash: expectedEffectHash
+  });
+  if (normalizedAutomationHints.execution_attestation.simulation_hash !== expectedSimulationHash) {
+    return {
+      ok: false,
+      error: 'automation_execution_simulation_hash_mismatch',
+      details: {
+        expected_simulation_hash: expectedSimulationHash,
+        provided_simulation_hash: normalizedAutomationHints.execution_attestation.simulation_hash
+      }
+    };
+  }
+
   const expectedContinuationHash = buildPartnerProgramRolloutPolicyDiagnosticsAutomationExecutionContinuationHash({
     continuationAttestationAfter: expectedContinuationAttestationAfter,
     continuationCheckpointAfter: expectedContinuationCheckpointAfter,
+    continuationWindowMinutes: expectedContinuationWindowMinutes,
+    continuationExpiresAt: expectedContinuationExpiresAt,
     planHash: normalizedAutomationHints.plan_hash,
     executionAttestationHash: normalizedAutomationHints.execution_attestation.attestation_hash
   });
@@ -1791,6 +2016,7 @@ export function verifyPartnerProgramRolloutPolicyDiagnosticsExportPayload(payloa
   const automationConsistency = verifyPartnerProgramRolloutPolicyDiagnosticsAutomationHintsConsistency({
     policy: payload.policy,
     query: payload.query,
+    exportedAt: payload.exported_at,
     automationHints: payload.automation_hints
   });
   if (!automationConsistency.ok) return automationConsistency;
@@ -1850,6 +2076,7 @@ export function verifyPartnerProgramRolloutPolicyDiagnosticsExportPayloadWithPub
   const automationConsistency = verifyPartnerProgramRolloutPolicyDiagnosticsAutomationHintsConsistency({
     policy: payload.policy,
     query: payload.query,
+    exportedAt: payload.exported_at,
     automationHints: payload.automation_hints
   });
   if (!automationConsistency.ok) return automationConsistency;
