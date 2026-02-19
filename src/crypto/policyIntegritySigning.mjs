@@ -1173,6 +1173,11 @@ function normalizePartnerProgramRolloutPolicyDiagnosticsAutomationHints(automati
           ? request.request_hash.trim()
           : null;
 
+        const policyVersionAfter = Number.parseInt(String(request?.expected_effect?.policy_version_after ?? ''), 10);
+        const freezeUntilAfter = typeof request?.expected_effect?.freeze_until === 'string' && request.expected_effect.freeze_until.trim()
+          ? request.expected_effect.freeze_until.trim()
+          : null;
+
         return {
           step: Number.isFinite(step) && step > 0 ? step : null,
           hook_id: typeof request?.hook_id === 'string' ? request.hook_id : null,
@@ -1181,6 +1186,12 @@ function normalizePartnerProgramRolloutPolicyDiagnosticsAutomationHints(automati
           request_hash: requestHash,
           request: {
             action: Object.fromEntries(Object.entries(action).filter(([, v]) => v !== undefined))
+          },
+          expected_effect: {
+            policy_version_after: Number.isFinite(policyVersionAfter) && policyVersionAfter > 0 ? policyVersionAfter : null,
+            maintenance_mode_enabled: request?.expected_effect?.maintenance_mode_enabled === true,
+            freeze_until: freezeUntilAfter,
+            freeze_active: request?.expected_effect?.freeze_active === true
           }
         };
       })

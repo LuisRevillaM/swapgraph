@@ -370,11 +370,24 @@ function buildRolloutPolicyDiagnosticsAlerts({
   return out;
 }
 
-function buildRolloutPolicyDiagnosticsAutomationHints({ recommendedActions, alerts, runbookHooks, maxActions, policyVersion }) {
+function buildRolloutPolicyDiagnosticsAutomationHints({
+  recommendedActions,
+  alerts,
+  runbookHooks,
+  maxActions,
+  policyVersion,
+  policyControls
+}) {
   const queue = [];
   const actionRequests = [];
   const seen = new Set();
   const runbookHookIndex = new Map((runbookHooks ?? []).map(hook => [hook?.hook_id, hook]));
+
+  const projectedControls = {
+    maintenance_mode_enabled: policyControls?.maintenance_mode_enabled === true,
+    freeze_until: normalizeOptionalString(policyControls?.freeze_until),
+    freeze_active: policyControls?.freeze_active === true
+  };
 
   for (const action of recommendedActions ?? []) {
     const hookId = normalizeOptionalString(action?.runbook_hook_id);
@@ -397,6 +410,21 @@ function buildRolloutPolicyDiagnosticsAutomationHints({ recommendedActions, aler
     const version = Number.isFinite(policyVersion) ? Number(policyVersion) : 0;
     const operationId = normalizeOptionalString(hookTemplate?.operation_id) ?? 'partnerProgram.vault_export.rollout_policy.admin_action';
     const actionTemplate = clone(hookTemplate?.action ?? { action_type: 'observe' });
+    const actionType = normalizeOptionalString(actionTemplate?.action_type) ?? 'observe';
+
+    if (actionType === 'set_maintenance_mode') {
+      if (typeof actionTemplate.maintenance_mode_enabled === 'boolean') {
+        projectedControls.maintenance_mode_enabled = actionTemplate.maintenance_mode_enabled;
+      }
+    } else if (actionType === 'set_freeze_window') {
+      const freezeUntil = normalizeOptionalString(actionTemplate.freeze_until);
+      projectedControls.freeze_until = freezeUntil;
+      projectedControls.freeze_active = Boolean(freezeUntil);
+    } else if (actionType === 'clear_controls') {
+      projectedControls.maintenance_mode_enabled = false;
+      projectedControls.freeze_until = null;
+      projectedControls.freeze_active = false;
+    }
 
     actionRequests.push({
       step,
@@ -406,6 +434,12 @@ function buildRolloutPolicyDiagnosticsAutomationHints({ recommendedActions, aler
       request_hash: payloadHash({ operation_id: operationId, action: actionTemplate }),
       request: {
         action: actionTemplate
+      },
+      expected_effect: {
+        policy_version_after: version + step,
+        maintenance_mode_enabled: projectedControls.maintenance_mode_enabled,
+        freeze_until: projectedControls.freeze_until,
+        freeze_active: projectedControls.freeze_active
       }
     });
 
@@ -427,7 +461,8 @@ function buildRolloutPolicyDiagnosticsAutomationHints({ recommendedActions, aler
       hook_id: request.hook_id,
       operation_id: request.operation_id,
       idempotency_key_template: request.idempotency_key_template,
-      request_hash: request.request_hash
+      request_hash: request.request_hash,
+      expected_effect: request.expected_effect
     })),
     safety
   });
@@ -1244,7 +1279,8 @@ export class PartnerProgramGovernanceService {
           alerts,
           runbookHooks,
           maxActions: automationMaxActions,
-          policyVersion: policyView?.version ?? 0
+          policyVersion: policyView?.version ?? 0,
+          policyControls: policyView?.controls ?? null
         })
       : null;
 

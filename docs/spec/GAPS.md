@@ -152,7 +152,8 @@ Each item here must become at least one of:
 - Resolved (fixtures-first, partial): M64 (rollout diagnostics automation-hints hardening: signed operator automation planning payloads + bounded action-queue controls + deterministic automation parameter validation).
 - Resolved (fixtures-first, partial): M65 (rollout diagnostics automation execution-template hardening: signed deterministic `action_requests[]` templates + idempotency scope metadata + automation/runbook coupling guardrail).
 - Resolved (fixtures-first, partial): M66 (rollout diagnostics automation plan-integrity hardening: signed deterministic per-request `request_hash` anchors + bundle-level `plan_hash` for execution-plan integrity checks).
-- Remaining: broader commercial governance controls beyond diagnostics/audit/automation execution plan-integrity lifecycle and continuity hardening.
+- Resolved (fixtures-first, partial): M67 (rollout diagnostics automation expected-effect hardening: signed deterministic per-step `expected_effect` projections for policy version/control outcomes).
+- Remaining: broader commercial governance controls beyond diagnostics/audit/automation execution expected-effect plan lifecycle and continuity hardening.
 
 ---
 
