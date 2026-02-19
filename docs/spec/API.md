@@ -98,6 +98,7 @@ Settlement endpoints:
   - each action request includes a deterministic `request_hash`; the automation bundle includes `plan_hash` for downstream execution-plan integrity checks
   - action requests include deterministic `expected_effect` projections (policy version + control-state targets) for post-execution validation
   - automation bundle includes signed `execution_attestation` anchors (`expected_effect_hash`, `request_hash_chain`, `attestation_hash`) for downstream execution-result integrity checks
+  - verifier enforces internal consistency of automation anchors (`plan_hash`, execution hash chains, and policy-version projection envelope) before signature acceptance
   - provides deterministic operator action recommendations (`clear_maintenance_mode`, `clear_freeze_window`, or `none`)
   - includes runbook hook templates for `rollout_policy.admin_action`
   - supports optional compact mode via query flags (`include_recommended_actions`, `include_runbook_hooks`)

@@ -1241,6 +1241,154 @@ function normalizePartnerProgramRolloutPolicyDiagnosticsAutomationHints(automati
   };
 }
 
+function buildPartnerProgramRolloutPolicyDiagnosticsAutomationPlanHash(automationHints) {
+  return sha256HexCanonical({
+    source_alert_codes: automationHints?.source_alert_codes ?? [],
+    action_queue: automationHints?.action_queue ?? [],
+    action_requests: (automationHints?.action_requests ?? []).map(request => ({
+      step: request?.step ?? null,
+      hook_id: request?.hook_id ?? null,
+      operation_id: request?.operation_id ?? null,
+      idempotency_key_template: request?.idempotency_key_template ?? null,
+      request_hash: request?.request_hash ?? null,
+      expected_effect: request?.expected_effect ?? null
+    })),
+    safety: automationHints?.safety ?? null
+  });
+}
+
+function buildPartnerProgramRolloutPolicyDiagnosticsAutomationExecutionExpectedEffectHash(actionRequests) {
+  return sha256HexCanonical((actionRequests ?? []).map(request => ({
+    step: request?.step ?? null,
+    expected_effect: request?.expected_effect ?? null
+  })));
+}
+
+function buildPartnerProgramRolloutPolicyDiagnosticsAutomationExecutionRequestHashChain(actionRequests) {
+  return sha256HexCanonical((actionRequests ?? []).map(request => request?.request_hash ?? null));
+}
+
+function buildPartnerProgramRolloutPolicyDiagnosticsAutomationExecutionAttestationHash({ planHash, executionAttestation }) {
+  return sha256HexCanonical({
+    plan_hash: planHash ?? null,
+    policy_version_before: executionAttestation?.policy_version_before ?? 0,
+    policy_version_after_expected: executionAttestation?.policy_version_after_expected ?? 0,
+    non_empty_action_plan: executionAttestation?.non_empty_action_plan === true,
+    expected_effect_hash: executionAttestation?.expected_effect_hash ?? null,
+    request_hash_chain: executionAttestation?.request_hash_chain ?? null
+  });
+}
+
+function verifyPartnerProgramRolloutPolicyDiagnosticsAutomationHintsConsistency({ policy, automationHints }) {
+  const normalizedAutomationHints = normalizePartnerProgramRolloutPolicyDiagnosticsAutomationHints(automationHints);
+  if (!normalizedAutomationHints) {
+    return { ok: true };
+  }
+
+  const actionRequests = Array.isArray(normalizedAutomationHints.action_requests)
+    ? normalizedAutomationHints.action_requests
+    : [];
+
+  const expectedPolicyVersionBefore = Number.isFinite(policy?.version) && policy.version > 0
+    ? Number(policy.version)
+    : 0;
+
+  if (normalizedAutomationHints.execution_attestation.policy_version_before !== expectedPolicyVersionBefore) {
+    return {
+      ok: false,
+      error: 'automation_execution_policy_version_before_mismatch',
+      details: {
+        expected_policy_version_before: expectedPolicyVersionBefore,
+        provided_policy_version_before: normalizedAutomationHints.execution_attestation.policy_version_before
+      }
+    };
+  }
+
+  const expectedPlanHash = buildPartnerProgramRolloutPolicyDiagnosticsAutomationPlanHash(normalizedAutomationHints);
+  if (normalizedAutomationHints.plan_hash !== expectedPlanHash) {
+    return {
+      ok: false,
+      error: 'automation_plan_hash_mismatch',
+      details: {
+        expected_plan_hash: expectedPlanHash,
+        provided_plan_hash: normalizedAutomationHints.plan_hash
+      }
+    };
+  }
+
+  const lastExpectedPolicyVersion = actionRequests.length > 0
+    ? actionRequests[actionRequests.length - 1]?.expected_effect?.policy_version_after
+    : null;
+  const expectedPolicyVersionAfterExpected = Number.isFinite(lastExpectedPolicyVersion) && lastExpectedPolicyVersion > 0
+    ? Number(lastExpectedPolicyVersion)
+    : expectedPolicyVersionBefore;
+
+  if (normalizedAutomationHints.execution_attestation.policy_version_after_expected !== expectedPolicyVersionAfterExpected) {
+    return {
+      ok: false,
+      error: 'automation_execution_policy_version_after_expected_mismatch',
+      details: {
+        expected_policy_version_after_expected: expectedPolicyVersionAfterExpected,
+        provided_policy_version_after_expected: normalizedAutomationHints.execution_attestation.policy_version_after_expected
+      }
+    };
+  }
+
+  const expectedNonEmptyActionPlan = actionRequests.length > 0;
+  if (normalizedAutomationHints.execution_attestation.non_empty_action_plan !== expectedNonEmptyActionPlan) {
+    return {
+      ok: false,
+      error: 'automation_execution_non_empty_action_plan_mismatch',
+      details: {
+        expected_non_empty_action_plan: expectedNonEmptyActionPlan,
+        provided_non_empty_action_plan: normalizedAutomationHints.execution_attestation.non_empty_action_plan
+      }
+    };
+  }
+
+  const expectedEffectHash = buildPartnerProgramRolloutPolicyDiagnosticsAutomationExecutionExpectedEffectHash(actionRequests);
+  if (normalizedAutomationHints.execution_attestation.expected_effect_hash !== expectedEffectHash) {
+    return {
+      ok: false,
+      error: 'automation_execution_expected_effect_hash_mismatch',
+      details: {
+        expected_expected_effect_hash: expectedEffectHash,
+        provided_expected_effect_hash: normalizedAutomationHints.execution_attestation.expected_effect_hash
+      }
+    };
+  }
+
+  const expectedRequestHashChain = buildPartnerProgramRolloutPolicyDiagnosticsAutomationExecutionRequestHashChain(actionRequests);
+  if (normalizedAutomationHints.execution_attestation.request_hash_chain !== expectedRequestHashChain) {
+    return {
+      ok: false,
+      error: 'automation_execution_request_hash_chain_mismatch',
+      details: {
+        expected_request_hash_chain: expectedRequestHashChain,
+        provided_request_hash_chain: normalizedAutomationHints.execution_attestation.request_hash_chain
+      }
+    };
+  }
+
+  const expectedAttestationHash = buildPartnerProgramRolloutPolicyDiagnosticsAutomationExecutionAttestationHash({
+    planHash: normalizedAutomationHints.plan_hash,
+    executionAttestation: normalizedAutomationHints.execution_attestation
+  });
+
+  if (normalizedAutomationHints.execution_attestation.attestation_hash !== expectedAttestationHash) {
+    return {
+      ok: false,
+      error: 'automation_execution_attestation_hash_mismatch',
+      details: {
+        expected_attestation_hash: expectedAttestationHash,
+        provided_attestation_hash: normalizedAutomationHints.execution_attestation.attestation_hash
+      }
+    };
+  }
+
+  return { ok: true };
+}
+
 function buildPartnerProgramRolloutPolicyDiagnosticsExportAttestation({ query, exportHash }) {
   const normalizedQuery = normalizePartnerProgramRolloutPolicyDiagnosticsExportQuery(query);
   const attestationAfter = typeof normalizedQuery.attestation_after === 'string' ? normalizedQuery.attestation_after : null;
@@ -1566,6 +1714,12 @@ export function verifyPartnerProgramRolloutPolicyDiagnosticsExportPayload(payloa
     };
   }
 
+  const automationConsistency = verifyPartnerProgramRolloutPolicyDiagnosticsAutomationHintsConsistency({
+    policy: payload.policy,
+    automationHints: payload.automation_hints
+  });
+  if (!automationConsistency.ok) return automationConsistency;
+
   if (payload.attestation) {
     const attestation = verifyPartnerProgramRolloutPolicyDiagnosticsExportAttestation({
       attestation: payload.attestation,
@@ -1617,6 +1771,12 @@ export function verifyPartnerProgramRolloutPolicyDiagnosticsExportPayloadWithPub
       }
     };
   }
+
+  const automationConsistency = verifyPartnerProgramRolloutPolicyDiagnosticsAutomationHintsConsistency({
+    policy: payload.policy,
+    automationHints: payload.automation_hints
+  });
+  if (!automationConsistency.ok) return automationConsistency;
 
   if (payload.attestation) {
     const attestation = verifyPartnerProgramRolloutPolicyDiagnosticsExportAttestation({
