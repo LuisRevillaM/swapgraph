@@ -155,7 +155,8 @@ Each item here must become at least one of:
 - Resolved (fixtures-first, partial): M67 (rollout diagnostics automation expected-effect hardening: signed deterministic per-step `expected_effect` projections for policy version/control outcomes).
 - Resolved (fixtures-first, partial): M68 (rollout diagnostics automation execution-attestation hardening: signed deterministic `execution_attestation` anchors tying `plan_hash`, expected-effect hash chain, and request-hash chain to projected policy-version outcomes).
 - Resolved (fixtures-first, partial): M69 (rollout diagnostics automation attestation-consistency verification hardening: verifier-enforced deterministic recomputation of `plan_hash`, execution hash chains, and policy-version projection envelope parity checks).
-- Remaining: broader commercial governance controls beyond diagnostics/audit/automation attestation consistency lifecycle and continuity hardening.
+- Resolved (fixtures-first, partial): M70 (rollout diagnostics automation attestation-continuity hardening: deterministic execution-continuity anchors binding `attestation_after`/`checkpoint_after` context to automation execution attestation with verifier parity checks).
+- Remaining: broader commercial governance controls beyond diagnostics/audit/automation continuity-window lifecycle hardening.
 
 ---
 

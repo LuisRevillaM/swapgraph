@@ -80,9 +80,10 @@ Last updated: 2026-02-19
 - M67: ✅ commercial governance diagnostics automation expected-effect hardening (signed deterministic `action_requests[].expected_effect` projections for per-step policy-control outcomes) (fixtures-first)
 - M68: ✅ commercial governance diagnostics automation execution-attestation hardening (signed deterministic `automation_hints.execution_attestation` anchors for projected run outcomes: pre/post policy version envelope, expected-effect hash chain, request-hash chain, and attestation hash) (fixtures-first)
 - M69: ✅ commercial governance diagnostics automation attestation-consistency verification hardening (verifier-enforced deterministic recomputation of `plan_hash`, execution hash chains, and policy-version projection envelope parity checks for signed diagnostics payloads) (fixtures-first)
+- M70: ✅ commercial governance diagnostics automation attestation-continuity hardening (signed deterministic execution-continuity anchors: `continuation_attestation_after`, `continuation_checkpoint_after`, `continuation_hash` with verifier parity checks across default/public-key paths) (fixtures-first)
 
 ## Next
-- M70: commercial governance diagnostics automation attestation continuity expansion follow-up (fixtures-first)
+- M71: commercial governance diagnostics automation continuity-window hardening follow-up (fixtures-first)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.

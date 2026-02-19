@@ -1216,6 +1216,15 @@ function normalizePartnerProgramRolloutPolicyDiagnosticsAutomationHints(automati
   const executionAttestationHash = typeof automationHints?.execution_attestation?.attestation_hash === 'string' && automationHints.execution_attestation.attestation_hash.trim()
     ? automationHints.execution_attestation.attestation_hash.trim()
     : null;
+  const executionContinuationAttestationAfter = typeof automationHints?.execution_attestation?.continuation_attestation_after === 'string' && automationHints.execution_attestation.continuation_attestation_after.trim()
+    ? automationHints.execution_attestation.continuation_attestation_after.trim()
+    : null;
+  const executionContinuationCheckpointAfter = typeof automationHints?.execution_attestation?.continuation_checkpoint_after === 'string' && automationHints.execution_attestation.continuation_checkpoint_after.trim()
+    ? automationHints.execution_attestation.continuation_checkpoint_after.trim()
+    : null;
+  const executionContinuationHash = typeof automationHints?.execution_attestation?.continuation_hash === 'string' && automationHints.execution_attestation.continuation_hash.trim()
+    ? automationHints.execution_attestation.continuation_hash.trim()
+    : null;
 
   return {
     requires_operator_confirmation: automationHints.requires_operator_confirmation === true,
@@ -1231,7 +1240,10 @@ function normalizePartnerProgramRolloutPolicyDiagnosticsAutomationHints(automati
       non_empty_action_plan: automationHints?.execution_attestation?.non_empty_action_plan === true,
       expected_effect_hash: executionExpectedEffectHash,
       request_hash_chain: executionRequestHashChain,
-      attestation_hash: executionAttestationHash
+      attestation_hash: executionAttestationHash,
+      continuation_attestation_after: executionContinuationAttestationAfter,
+      continuation_checkpoint_after: executionContinuationCheckpointAfter,
+      continuation_hash: executionContinuationHash
     },
     safety: {
       idempotency_required: automationHints?.safety?.idempotency_required !== false,
@@ -1279,7 +1291,21 @@ function buildPartnerProgramRolloutPolicyDiagnosticsAutomationExecutionAttestati
   });
 }
 
-function verifyPartnerProgramRolloutPolicyDiagnosticsAutomationHintsConsistency({ policy, automationHints }) {
+function buildPartnerProgramRolloutPolicyDiagnosticsAutomationExecutionContinuationHash({
+  continuationAttestationAfter,
+  continuationCheckpointAfter,
+  planHash,
+  executionAttestationHash
+}) {
+  return sha256HexCanonical({
+    attestation_after: continuationAttestationAfter ?? null,
+    checkpoint_after: continuationCheckpointAfter ?? null,
+    plan_hash: planHash ?? null,
+    attestation_hash: executionAttestationHash ?? null
+  });
+}
+
+function verifyPartnerProgramRolloutPolicyDiagnosticsAutomationHintsConsistency({ policy, query, automationHints }) {
   const normalizedAutomationHints = normalizePartnerProgramRolloutPolicyDiagnosticsAutomationHints(automationHints);
   if (!normalizedAutomationHints) {
     return { ok: true };
@@ -1288,6 +1314,7 @@ function verifyPartnerProgramRolloutPolicyDiagnosticsAutomationHintsConsistency(
   const actionRequests = Array.isArray(normalizedAutomationHints.action_requests)
     ? normalizedAutomationHints.action_requests
     : [];
+  const normalizedQuery = normalizePartnerProgramRolloutPolicyDiagnosticsExportQuery(query);
 
   const expectedPolicyVersionBefore = Number.isFinite(policy?.version) && policy.version > 0
     ? Number(policy.version)
@@ -1382,6 +1409,53 @@ function verifyPartnerProgramRolloutPolicyDiagnosticsAutomationHintsConsistency(
       details: {
         expected_attestation_hash: expectedAttestationHash,
         provided_attestation_hash: normalizedAutomationHints.execution_attestation.attestation_hash
+      }
+    };
+  }
+
+  const expectedContinuationAttestationAfter = typeof normalizedQuery.attestation_after === 'string'
+    ? normalizedQuery.attestation_after
+    : null;
+  const expectedContinuationCheckpointAfter = typeof normalizedQuery.checkpoint_after === 'string'
+    ? normalizedQuery.checkpoint_after
+    : null;
+
+  if (normalizedAutomationHints.execution_attestation.continuation_attestation_after !== expectedContinuationAttestationAfter) {
+    return {
+      ok: false,
+      error: 'automation_execution_continuation_attestation_after_mismatch',
+      details: {
+        expected_continuation_attestation_after: expectedContinuationAttestationAfter,
+        provided_continuation_attestation_after: normalizedAutomationHints.execution_attestation.continuation_attestation_after
+      }
+    };
+  }
+
+  if (normalizedAutomationHints.execution_attestation.continuation_checkpoint_after !== expectedContinuationCheckpointAfter) {
+    return {
+      ok: false,
+      error: 'automation_execution_continuation_checkpoint_after_mismatch',
+      details: {
+        expected_continuation_checkpoint_after: expectedContinuationCheckpointAfter,
+        provided_continuation_checkpoint_after: normalizedAutomationHints.execution_attestation.continuation_checkpoint_after
+      }
+    };
+  }
+
+  const expectedContinuationHash = buildPartnerProgramRolloutPolicyDiagnosticsAutomationExecutionContinuationHash({
+    continuationAttestationAfter: expectedContinuationAttestationAfter,
+    continuationCheckpointAfter: expectedContinuationCheckpointAfter,
+    planHash: normalizedAutomationHints.plan_hash,
+    executionAttestationHash: normalizedAutomationHints.execution_attestation.attestation_hash
+  });
+
+  if (normalizedAutomationHints.execution_attestation.continuation_hash !== expectedContinuationHash) {
+    return {
+      ok: false,
+      error: 'automation_execution_continuation_hash_mismatch',
+      details: {
+        expected_continuation_hash: expectedContinuationHash,
+        provided_continuation_hash: normalizedAutomationHints.execution_attestation.continuation_hash
       }
     };
   }
@@ -1716,6 +1790,7 @@ export function verifyPartnerProgramRolloutPolicyDiagnosticsExportPayload(payloa
 
   const automationConsistency = verifyPartnerProgramRolloutPolicyDiagnosticsAutomationHintsConsistency({
     policy: payload.policy,
+    query: payload.query,
     automationHints: payload.automation_hints
   });
   if (!automationConsistency.ok) return automationConsistency;
@@ -1774,6 +1849,7 @@ export function verifyPartnerProgramRolloutPolicyDiagnosticsExportPayloadWithPub
 
   const automationConsistency = verifyPartnerProgramRolloutPolicyDiagnosticsAutomationHintsConsistency({
     policy: payload.policy,
+    query: payload.query,
     automationHints: payload.automation_hints
   });
   if (!automationConsistency.ok) return automationConsistency;

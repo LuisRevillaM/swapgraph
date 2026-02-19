@@ -376,7 +376,9 @@ function buildRolloutPolicyDiagnosticsAutomationHints({
   runbookHooks,
   maxActions,
   policyVersion,
-  policyControls
+  policyControls,
+  continuationAttestationAfter,
+  continuationCheckpointAfter
 }) {
   const queue = [];
   const actionRequests = [];
@@ -482,6 +484,15 @@ function buildRolloutPolicyDiagnosticsAutomationHints({
   executionAttestation.attestation_hash = payloadHash({
     plan_hash: planHash,
     ...executionAttestation
+  });
+
+  executionAttestation.continuation_attestation_after = normalizeOptionalString(continuationAttestationAfter);
+  executionAttestation.continuation_checkpoint_after = normalizeOptionalString(continuationCheckpointAfter);
+  executionAttestation.continuation_hash = payloadHash({
+    attestation_after: executionAttestation.continuation_attestation_after,
+    checkpoint_after: executionAttestation.continuation_checkpoint_after,
+    plan_hash: planHash,
+    attestation_hash: executionAttestation.attestation_hash
   });
 
   return {
@@ -1298,7 +1309,9 @@ export class PartnerProgramGovernanceService {
           runbookHooks,
           maxActions: automationMaxActions,
           policyVersion: policyView?.version ?? 0,
-          policyControls: policyView?.controls ?? null
+          policyControls: policyView?.controls ?? null,
+          continuationAttestationAfter: attestationAfter,
+          continuationCheckpointAfter: checkpointAfter
         })
       : null;
 

@@ -211,7 +211,10 @@
             "non_empty_action_plan",
             "expected_effect_hash",
             "request_hash_chain",
-            "attestation_hash"
+            "attestation_hash",
+            "continuation_attestation_after",
+            "continuation_checkpoint_after",
+            "continuation_hash"
           ],
           "properties": {
             "policy_version_before": { "type": "integer", "minimum": 0 },
@@ -219,7 +222,10 @@
             "non_empty_action_plan": { "type": "boolean" },
             "expected_effect_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
             "request_hash_chain": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
-            "attestation_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+            "attestation_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "continuation_attestation_after": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$" },
+            "continuation_checkpoint_after": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$" },
+            "continuation_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
           }
         },
         "safety": {
