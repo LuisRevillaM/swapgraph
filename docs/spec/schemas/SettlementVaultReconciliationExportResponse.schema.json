@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/SettlementVaultReconciliationExportResponse.schema.json",
+  "title": "SettlementVaultReconciliationExportResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "exported_at",
+    "query",
+    "cycle_id",
+    "timeline_state",
+    "vault_reconciliation",
+    "export_hash",
+    "signature"
+  ],
+  "properties": {
+    "correlation_id": { "type": "string", "minLength": 1 },
+    "exported_at": { "type": "string", "format": "date-time" },
+    "query": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cycle_id", "include_transitions"],
+      "properties": {
+        "cycle_id": { "type": "string", "minLength": 1 },
+        "include_transitions": { "type": "boolean" },
+        "now_iso": { "type": "string", "format": "date-time" },
+        "exported_at_iso": { "type": "string", "format": "date-time" }
+      }
+    },
+    "cycle_id": { "type": "string", "minLength": 1 },
+    "timeline_state": {
+      "type": "string",
+      "enum": [
+        "proposed",
+        "accepted",
+        "escrow.pending",
+        "escrow.ready",
+        "executing",
+        "completed",
+        "failed"
+      ]
+    },
+    "vault_reconciliation": { "$ref": "SettlementVaultReconciliation.schema.json" },
+    "state_transitions": {
+      "type": "array",
+      "items": { "$ref": "SettlementStateTransitionView.schema.json" }
+    },
+    "export_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "signature": { "$ref": "EventSignature.schema.json" }
+  }
+}

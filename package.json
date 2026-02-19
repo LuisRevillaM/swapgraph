@@ -56,6 +56,7 @@
     "verify:m49": "bash verify/m49.sh",
     "verify:m50": "bash verify/m50.sh",
     "verify:m51": "bash verify/m51.sh",
+    "verify:m52": "bash verify/m52.sh",
     "test": "node --test"
   },
   "devDependencies": {

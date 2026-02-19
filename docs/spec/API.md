@@ -63,6 +63,8 @@ Settlement endpoints:
 - `GET /settlement/{cycle_id}/instructions`
 - `GET /settlement/{cycle_id}/status`
   - partner reads on vault-backed cycles include `vault_reconciliation` (holding/leg reconciliation snapshot) and `state_transitions` (ordered `cycle.state_changed` projection)
+- `GET /settlement/{cycle_id}/vault-reconciliation/export`
+  - partner-only signed reconciliation export payload for vault-backed cycles (`export_hash` + detached signature)
 
 Receipt endpoints:
 - `GET /receipts/{cycle_id}`

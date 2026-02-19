@@ -62,9 +62,10 @@ Last updated: 2026-02-18
 - M49: ✅ vault API auth/scope transport surface wiring (manifest endpoints + `vault:*` scopes + service-level manifest auth enforcement + deterministic auth verifier) (fixtures-first)
 - M50: ✅ vault/settlement integration contract (start-time vault bindings + mixed-mode deposit semantics + all-vault instant-ready path + terminal holding reconciliation) (fixtures-first)
 - M51: ✅ vault settlement reconciliation/event read surfaces for partners (`settlement.status`/`settlement.instructions` vault reconciliation + state transition projection) (fixtures-first)
+- M52: ✅ partner vault/settlement reconciliation export surface (`settlement.vault_reconciliation.export` signed payloads + offline verification/tamper checks) (fixtures-first)
 
 ## Next
-- M52: partner vault/settlement reconciliation export surface (fixtures-first)
+- M53: partner reconciliation export pagination/checkpoint continuity hardening (fixtures-first)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.

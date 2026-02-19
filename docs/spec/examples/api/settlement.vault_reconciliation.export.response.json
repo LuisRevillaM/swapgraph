@@ -1,0 +1,89 @@
+{
+  "correlation_id": "corr_cycle_4f27eb196224_vault_reconciliation_export",
+  "exported_at": "2026-02-19T02:20:00Z",
+  "query": {
+    "cycle_id": "cycle_4f27eb196224",
+    "include_transitions": true,
+    "now_iso": "2026-02-19T02:20:00Z",
+    "exported_at_iso": "2026-02-19T02:20:00Z"
+  },
+  "cycle_id": "cycle_4f27eb196224",
+  "timeline_state": "completed",
+  "vault_reconciliation": {
+    "summary": {
+      "mode": "full",
+      "total": 3,
+      "withdrawn": 3,
+      "available": 0,
+      "reserved": 0,
+      "not_found": 0
+    },
+    "entries": [
+      {
+        "intent_id": "intent_a",
+        "holding_id": "hold_a",
+        "reservation_id": "rsv_hold_a",
+        "leg_status": "released",
+        "holding_status": "withdrawn",
+        "settlement_cycle_id": null,
+        "withdrawn_at": "2026-02-19T02:03:20Z"
+      },
+      {
+        "intent_id": "intent_b",
+        "holding_id": "hold_b",
+        "reservation_id": "rsv_hold_b",
+        "leg_status": "released",
+        "holding_status": "withdrawn",
+        "settlement_cycle_id": null,
+        "withdrawn_at": "2026-02-19T02:03:20Z"
+      },
+      {
+        "intent_id": "intent_c",
+        "holding_id": "hold_c",
+        "reservation_id": "rsv_hold_c",
+        "leg_status": "released",
+        "holding_status": "withdrawn",
+        "settlement_cycle_id": null,
+        "withdrawn_at": "2026-02-19T02:03:20Z"
+      }
+    ]
+  },
+  "state_transitions": [
+    {
+      "occurred_at": "2026-02-19T02:00:12Z",
+      "from_state": "proposed",
+      "to_state": "accepted",
+      "reason_code": null
+    },
+    {
+      "occurred_at": "2026-02-19T02:02:00Z",
+      "from_state": "accepted",
+      "to_state": "escrow.pending",
+      "reason_code": null
+    },
+    {
+      "occurred_at": "2026-02-19T02:02:00Z",
+      "from_state": "escrow.pending",
+      "to_state": "escrow.ready",
+      "reason_code": null
+    },
+    {
+      "occurred_at": "2026-02-19T02:03:00Z",
+      "from_state": "escrow.ready",
+      "to_state": "executing",
+      "reason_code": null
+    },
+    {
+      "occurred_at": "2026-02-19T02:03:20Z",
+      "from_state": "executing",
+      "to_state": "completed",
+      "reason_code": null
+    }
+  ],
+  "export_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "signature": {
+    "key_id": "dev-pi-k1",
+    "alg": "ed25519",
+    "sig": "MEUCIQExampleVaultReconciliationExportSignatured8p4qbvMIQIgYzY="
+  }
+}

@@ -305,6 +305,22 @@
     },
     {
       "method": "GET",
+      "path": "/settlement/{cycle_id}/vault-reconciliation/export",
+      "operation_id": "settlement.vault_reconciliation.export",
+      "idempotency_required": false,
+      "response_schema": "SettlementVaultReconciliationExportResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
       "path": "/receipts/{cycle_id}",
       "operation_id": "receipts.get",
       "idempotency_required": false,

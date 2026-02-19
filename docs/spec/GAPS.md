@@ -137,7 +137,8 @@ Each item here must become at least one of:
 - Resolved (fixtures-first, partial): M49 (vault API transport/auth-scope surface wiring: manifest endpoints + `vault:read`/`vault:write` scopes + manifest-driven service auth enforcement + deterministic auth-surface verifier).
 - Resolved (fixtures-first, partial): M50 (vault/settlement integration contract: start-time vault binding validation, mixed deposit modes, instant-ready all-vault cycles, and deterministic terminal vault-holding reconciliation on complete/fail).
 - Resolved (fixtures-first, partial): M51 (partner read surfaces for vault-backed settlement cycles: deterministic `vault_reconciliation` + ordered `state_transitions` projection on settlement status/instructions).
-- Remaining: partner reconciliation/export surfaces and partner-program/commercial layers.
+- Resolved (fixtures-first, partial): M52 (partner vault reconciliation export surface: signed settlement-vault reconciliation exports with deterministic hash/signature verification and tamper-fail proofs).
+- Remaining: partner reconciliation export continuity hardening and partner-program/commercial layers.
 
 ---
 

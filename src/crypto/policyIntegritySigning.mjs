@@ -728,3 +728,158 @@ export function verifyPolicyAuditExportPayloadWithPublicKeyPem({ payload, public
     alg
   });
 }
+
+function normalizeVaultReconciliationExportQuery(query) {
+  const out = {};
+
+  if (typeof query?.cycle_id === 'string' && query.cycle_id.trim()) out.cycle_id = query.cycle_id.trim();
+
+  if (typeof query?.include_transitions === 'boolean') {
+    out.include_transitions = query.include_transitions;
+  }
+
+  if (typeof query?.now_iso === 'string' && query.now_iso.trim()) out.now_iso = query.now_iso.trim();
+  if (typeof query?.exported_at_iso === 'string' && query.exported_at_iso.trim()) out.exported_at_iso = query.exported_at_iso.trim();
+
+  return out;
+}
+
+function vaultReconciliationExportSignablePayload(payload) {
+  const out = {
+    exported_at: payload?.exported_at,
+    query: normalizeVaultReconciliationExportQuery(payload?.query),
+    cycle_id: payload?.cycle_id,
+    timeline_state: payload?.timeline_state,
+    vault_reconciliation: payload?.vault_reconciliation,
+    export_hash: payload?.export_hash,
+    signature: payload?.signature
+  };
+
+  if (Array.isArray(payload?.state_transitions)) {
+    out.state_transitions = payload.state_transitions;
+  }
+
+  return out;
+}
+
+export function buildSettlementVaultReconciliationExportHash({
+  cycleId,
+  timelineState,
+  vaultReconciliation,
+  stateTransitions,
+  query
+}) {
+  const input = {
+    cycle_id: String(cycleId ?? ''),
+    timeline_state: String(timelineState ?? ''),
+    vault_reconciliation: vaultReconciliation ?? null,
+    query: normalizeVaultReconciliationExportQuery(query)
+  };
+
+  if (Array.isArray(stateTransitions)) {
+    input.state_transitions = stateTransitions;
+  }
+
+  return sha256HexCanonical(input);
+}
+
+export function buildSignedSettlementVaultReconciliationExportPayload({
+  exportedAt,
+  cycleId,
+  timelineState,
+  vaultReconciliation,
+  stateTransitions,
+  query,
+  keyId
+}) {
+  const normalizedQuery = normalizeVaultReconciliationExportQuery(query);
+
+  const payload = {
+    exported_at: exportedAt,
+    query: normalizedQuery,
+    cycle_id: cycleId,
+    timeline_state: timelineState,
+    vault_reconciliation: vaultReconciliation
+  };
+
+  if (Array.isArray(stateTransitions)) {
+    payload.state_transitions = stateTransitions;
+  }
+
+  payload.export_hash = buildSettlementVaultReconciliationExportHash({
+    cycleId,
+    timelineState,
+    vaultReconciliation,
+    stateTransitions,
+    query: normalizedQuery
+  });
+
+  payload.signature = signPolicyIntegrityPayload(payload, { keyId });
+
+  return payload;
+}
+
+export function verifySettlementVaultReconciliationExportPayload(payload) {
+  if (!payload || typeof payload !== 'object') {
+    return { ok: false, error: 'missing_payload' };
+  }
+
+  const expectedHash = buildSettlementVaultReconciliationExportHash({
+    cycleId: payload.cycle_id,
+    timelineState: payload.timeline_state,
+    vaultReconciliation: payload.vault_reconciliation,
+    stateTransitions: payload.state_transitions,
+    query: payload.query
+  });
+
+  if (payload.export_hash !== expectedHash) {
+    return {
+      ok: false,
+      error: 'hash_mismatch',
+      details: {
+        expected_hash: expectedHash,
+        provided_hash: payload.export_hash ?? null
+      }
+    };
+  }
+
+  const signable = vaultReconciliationExportSignablePayload(payload);
+  const verified = verifyPolicyIntegrityPayloadSignature(signable);
+  if (!verified.ok) return verified;
+
+  return { ok: true };
+}
+
+export function verifySettlementVaultReconciliationExportPayloadWithPublicKeyPem({ payload, publicKeyPem, keyId, alg }) {
+  if (!payload || typeof payload !== 'object') {
+    return { ok: false, error: 'missing_payload' };
+  }
+
+  const expectedHash = buildSettlementVaultReconciliationExportHash({
+    cycleId: payload.cycle_id,
+    timelineState: payload.timeline_state,
+    vaultReconciliation: payload.vault_reconciliation,
+    stateTransitions: payload.state_transitions,
+    query: payload.query
+  });
+
+  if (payload.export_hash !== expectedHash) {
+    return {
+      ok: false,
+      error: 'hash_mismatch',
+      details: {
+        expected_hash: expectedHash,
+        provided_hash: payload.export_hash ?? null
+      }
+    };
+  }
+
+  const signable = vaultReconciliationExportSignablePayload(payload);
+
+  return verifyPolicyIntegrityPayloadSignatureWithPublicKeyPem({
+    payload: signable,
+    publicKeyPem,
+    keyId,
+    alg
+  });
+}

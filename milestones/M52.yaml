@@ -1,0 +1,31 @@
+name: M52
+commands:
+  - cmd: "npm run verify:m52"
+artifacts:
+  - artifact: "docs/prd/M52.md"
+  - artifact: "docs/STATUS.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/GAPS.md"
+  - artifact: "docs/spec/api/manifest.v1.json"
+
+  - artifact: "src/read/settlementReadService.mjs"
+  - artifact: "src/crypto/policyIntegritySigning.mjs"
+
+  - artifact: "docs/spec/schemas/SettlementVaultReconciliationExportResponse.schema.json"
+
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+  - artifact: "docs/spec/examples/api/settlement.vault_reconciliation.export.response.json"
+
+  - artifact: "scripts/run-m52-vault-reconciliation-export-scenario.mjs"
+  - artifact: "fixtures/vault/m52_scenario.json"
+  - artifact: "fixtures/vault/m52_expected.json"
+
+  - artifact: "verify/m52.sh"
+
+  - artifact: "artifacts/milestones/M52/latest/commands.log"
+  - artifact: "artifacts/milestones/M52/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M52/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M52/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M52/latest/vault_reconciliation_export_output.json"
+  - artifact: "artifacts/milestones/M52/latest/store.json"
+  - artifact: "artifacts/milestones/M52/latest/assertions.json"

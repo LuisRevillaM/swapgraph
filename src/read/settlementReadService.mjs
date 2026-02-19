@@ -6,6 +6,7 @@ import {
   evaluateProposalAgainstTradingPolicy,
   evaluateQuietHoursPolicy
 } from '../core/tradingPolicyBoundaries.mjs';
+import { buildSignedSettlementVaultReconciliationExportPayload } from '../crypto/policyIntegritySigning.mjs';
 
 function errorResponse(correlationId, code, message, details = {}) {
   return { correlation_id: correlationId, error: { code, message, details } };
@@ -13,6 +14,10 @@ function errorResponse(correlationId, code, message, details = {}) {
 
 function correlationIdForCycleId(cycleId) {
   return `corr_${cycleId}`;
+}
+
+function correlationIdForVaultReconciliationExport(cycleId) {
+  return `corr_${cycleId}_vault_reconciliation_export`;
 }
 
 // actor/policy helpers are imported from core/tradingPolicyBoundaries.mjs
@@ -211,6 +216,33 @@ function buildStateTransitions({ store, cycleId }) {
     }));
 }
 
+function parseOptionalBoolean(value) {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'string') {
+    const v = value.trim().toLowerCase();
+    if (v === '1' || v === 'true') return true;
+    if (v === '0' || v === 'false') return false;
+  }
+  return null;
+}
+
+function parseIsoMs(iso) {
+  const ms = Date.parse(String(iso ?? ''));
+  return Number.isFinite(ms) ? ms : null;
+}
+
+function exportQueryForSigning({ cycleId, query, includeTransitions }) {
+  const out = {
+    cycle_id: cycleId,
+    include_transitions: includeTransitions
+  };
+
+  if (typeof query?.now_iso === 'string' && query.now_iso.trim()) out.now_iso = query.now_iso.trim();
+  if (typeof query?.exported_at_iso === 'string' && query.exported_at_iso.trim()) out.exported_at_iso = query.exported_at_iso.trim();
+
+  return out;
+}
+
 export class SettlementReadService {
   /**
    * @param {{ store: import('../store/jsonStateStore.mjs').JsonStateStore }} opts
@@ -345,6 +377,119 @@ export class SettlementReadService {
     }
 
     return { ok: true, body };
+  }
+
+  vaultReconciliationExport({ actor, auth, cycleId, query }) {
+    const correlationId = correlationIdForVaultReconciliationExport(cycleId);
+
+    const timeline = this.store.state.timelines[cycleId];
+    if (!timeline) {
+      return { ok: false, body: errorResponse(correlationId, 'NOT_FOUND', 'settlement timeline not found', { cycle_id: cycleId }) };
+    }
+
+    const authzOp = authorizeApiOperation({ operationId: 'settlement.vault_reconciliation.export', actor, auth, store: this.store });
+    if (!authzOp.ok) {
+      return { ok: false, body: errorResponse(correlationId, authzOp.error.code, authzOp.error.message, authzOp.error.details) };
+    }
+
+    let viewActor = actor;
+    if (actor?.type === 'agent') {
+      if (!authzEnforced()) {
+        return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation', { actor }) };
+      }
+      const eff = effectiveActorForDelegation({ actor, auth });
+      if (!eff) {
+        return { ok: false, body: errorResponse(correlationId, 'FORBIDDEN', 'agent access requires delegation subject', { actor }) };
+      }
+      viewActor = eff;
+    }
+
+    if (!isPartner(viewActor)) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'FORBIDDEN', 'only partner can export vault reconciliation', {
+          actor,
+          cycle_id: cycleId
+        })
+      };
+    }
+
+    const authz = authorizeRead({ actor: viewActor, timeline, store: this.store, cycleId });
+    if (!authz.ok) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, authz.code, authz.message, { ...authz.details, cycle_id: cycleId })
+      };
+    }
+
+    const policyCheck = enforceAgentPolicyForCycle({
+      actor,
+      auth,
+      store: this.store,
+      correlationId,
+      cycleId,
+      includeQuietHours: false
+    });
+    if (!policyCheck.ok) return policyCheck;
+
+    const includeTransitionsRaw = query?.include_transitions;
+    const includeTransitionsParsed = parseOptionalBoolean(includeTransitionsRaw);
+    if (includeTransitionsRaw !== undefined && includeTransitionsParsed === null) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'invalid include_transitions flag', {
+          include_transitions: includeTransitionsRaw
+        })
+      };
+    }
+    const includeTransitions = includeTransitionsParsed ?? true;
+
+    const vaultReconciliation = buildVaultReconciliation({ timeline, store: this.store });
+    if (!vaultReconciliation) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'vault reconciliation is not available for this cycle', {
+          cycle_id: cycleId,
+          reason_code: 'vault_reconciliation_not_available'
+        })
+      };
+    }
+
+    const stateTransitions = includeTransitions ? buildStateTransitions({ store: this.store, cycleId }) : undefined;
+
+    const exportedAt = query?.exported_at_iso ?? query?.now_iso ?? process.env.AUTHZ_NOW_ISO ?? new Date().toISOString();
+    if (parseIsoMs(exportedAt) === null) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'invalid exported_at timestamp for vault reconciliation export', {
+          exported_at_iso: query?.exported_at_iso ?? null,
+          now_iso: query?.now_iso ?? null
+        })
+      };
+    }
+
+    const signingQuery = exportQueryForSigning({
+      cycleId,
+      query,
+      includeTransitions
+    });
+
+    const signedPayload = buildSignedSettlementVaultReconciliationExportPayload({
+      exportedAt,
+      cycleId,
+      timelineState: timeline.state,
+      vaultReconciliation,
+      stateTransitions,
+      query: signingQuery
+    });
+
+    return {
+      ok: true,
+      body: {
+        correlation_id: correlationId,
+        ...signedPayload
+      }
+    };
   }
 
   receipt({ actor, auth, cycleId }) {

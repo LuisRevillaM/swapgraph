@@ -114,6 +114,10 @@
       "schema": "SettlementStatusGetResponse.schema.json"
     },
     {
+      "file": "settlement.vault_reconciliation.export.response.json",
+      "schema": "SettlementVaultReconciliationExportResponse.schema.json"
+    },
+    {
       "file": "receipts.get.response.json",
       "schema": "SwapReceiptGetResponse.schema.json"
     },
