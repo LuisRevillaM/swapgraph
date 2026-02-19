@@ -84,6 +84,7 @@ Last updated: 2026-02-19
 
 ## Next
 - M71: commercial governance diagnostics automation continuity-window hardening follow-up (fixtures-first)
+- Master remainder forecast: `docs/prd/2026-02-19_master-remaining-milestones_M71-M92.md`
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.
