@@ -368,6 +368,26 @@
     {
       "file": "partner_program.risk_tier_policy.get.response.json",
       "schema": "PartnerProgramRiskTierPolicyGetResponse.schema.json"
+    },
+    {
+      "file": "partner_program.dispute.create.request.json",
+      "schema": "PartnerProgramDisputeCreateRequest.schema.json"
+    },
+    {
+      "file": "partner_program.dispute.create.response.json",
+      "schema": "PartnerProgramDisputeCreateResponse.schema.json"
+    },
+    {
+      "file": "partner_program.dispute.resolve.request.json",
+      "schema": "PartnerProgramDisputeResolveRequest.schema.json"
+    },
+    {
+      "file": "partner_program.dispute.resolve.response.json",
+      "schema": "PartnerProgramDisputeResolveResponse.schema.json"
+    },
+    {
+      "file": "partner_program.dispute.evidence_bundle.export.response.json",
+      "schema": "PartnerProgramDisputeEvidenceBundleExportResponse.schema.json"
     }
   ]
 }

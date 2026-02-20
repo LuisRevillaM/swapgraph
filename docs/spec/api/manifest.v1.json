@@ -1030,6 +1030,56 @@
           "settlement:read"
         ]
       }
+    },
+    {
+      "method": "POST",
+      "path": "/partner-program/disputes",
+      "operation_id": "partnerProgram.dispute.create",
+      "idempotency_required": true,
+      "request_schema": "PartnerProgramDisputeCreateRequest.schema.json",
+      "response_schema": "PartnerProgramDisputeCreateResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/partner-program/disputes/{dispute_id}/resolve",
+      "operation_id": "partnerProgram.dispute.resolve",
+      "idempotency_required": true,
+      "request_schema": "PartnerProgramDisputeResolveRequest.schema.json",
+      "response_schema": "PartnerProgramDisputeResolveResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/partner-program/disputes/evidence-bundles/export",
+      "operation_id": "partnerProgram.dispute.evidence_bundle.export",
+      "idempotency_required": false,
+      "response_schema": "PartnerProgramDisputeEvidenceBundleExportResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
     }
   ],
   "webhooks": {

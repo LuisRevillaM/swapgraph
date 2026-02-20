@@ -1,0 +1,17 @@
+{
+  "dispute_type": "delivery",
+  "severity": "high",
+  "subject_ref": "receipt:rcpt_123",
+  "reason_code": "delivery_missing_item",
+  "opened_at": "2026-02-20T04:00:00Z",
+  "evidence_items": [
+    {
+      "evidence_id": "ev_001",
+      "kind": "screenshot",
+      "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "metadata": {
+        "filename": "receipt.png"
+      }
+    }
+  ]
+}

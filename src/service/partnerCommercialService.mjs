@@ -6,7 +6,8 @@ import {
   buildSignedPartnerProgramCommercialUsageExportPayload,
   buildSignedPartnerProgramBillingStatementExportPayload,
   buildSignedPartnerProgramSlaBreachExportPayload,
-  buildSignedPartnerProgramWebhookDeadLetterExportPayload
+  buildSignedPartnerProgramWebhookDeadLetterExportPayload,
+  buildSignedPartnerProgramDisputeEvidenceBundleExportPayload
 } from '../crypto/policyIntegritySigning.mjs';
 
 function errorResponse(correlationId, code, message, details = {}) {
@@ -47,6 +48,7 @@ function ensureCommercialState(store) {
   store.state.partner_program_webhook_retry_policies ||= {};
   store.state.partner_program_risk_tier_policy ||= {};
   store.state.partner_program_risk_tier_usage_counters ||= {};
+  store.state.partner_program_disputes ||= [];
   store.state.oauth_clients ||= {};
   store.state.oauth_tokens ||= {};
   store.state.idempotency ||= {};
@@ -59,6 +61,7 @@ function ensureCommercialState(store) {
     webhookRetryPolicies: store.state.partner_program_webhook_retry_policies,
     riskTierPolicy: store.state.partner_program_risk_tier_policy,
     riskTierUsageCounters: store.state.partner_program_risk_tier_usage_counters,
+    disputes: store.state.partner_program_disputes,
     oauthClients: store.state.oauth_clients,
     oauthTokens: store.state.oauth_tokens,
     idempotency: store.state.idempotency
@@ -342,8 +345,85 @@ function webhookDeadLetterEntriesForPartner({ records, partnerId, fromMs = null,
   return out;
 }
 
+function normalizeDisputeEvidenceItems(items) {
+  const normalized = Array.isArray(items)
+    ? items
+      .map(item => ({
+        evidence_id: normalizeOptionalString(item?.evidence_id),
+        kind: normalizeOptionalString(item?.kind),
+        content_hash: normalizeOptionalString(item?.content_hash),
+        metadata: item?.metadata && typeof item.metadata === 'object' && !Array.isArray(item.metadata)
+          ? item.metadata
+          : {}
+      }))
+      .filter(item => item.evidence_id && item.kind && item.content_hash)
+    : [];
+
+  normalized.sort((a, b) => String(a.evidence_id).localeCompare(String(b.evidence_id)));
+  return normalized;
+}
+
+function normalizeDisputeRecord(record) {
+  return {
+    dispute_id: record.dispute_id,
+    partner_id: record.partner_id,
+    dispute_type: record.dispute_type,
+    severity: record.severity,
+    subject_ref: record.subject_ref,
+    reason_code: record.reason_code,
+    status: record.status,
+    opened_at: record.opened_at,
+    resolved_at: record.resolved_at ?? null,
+    resolution: record.resolution ?? null,
+    evidence_items: normalizeDisputeEvidenceItems(record.evidence_items)
+  };
+}
+
+function disputeEvidenceBundleCursorKey(bundle) {
+  const openedAt = normalizeOptionalString(bundle?.opened_at) ?? '';
+  const disputeId = normalizeOptionalString(bundle?.dispute_id) ?? '';
+  return `${openedAt}|${disputeId}`;
+}
+
+function disputeEvidenceBundlesForPartner({ disputes, partnerId, fromMs = null, toMs = null, includeResolved = true }) {
+  const out = [];
+
+  for (const dispute of disputes ?? []) {
+    if (!dispute || dispute.partner_id !== partnerId) continue;
+    if (!includeResolved && dispute.status === 'resolved') continue;
+
+    const openedMs = parseIsoMs(dispute.opened_at);
+    if (openedMs === null) continue;
+    if (fromMs !== null && openedMs < fromMs) continue;
+    if (toMs !== null && openedMs > toMs) continue;
+
+    const normalizedDispute = normalizeDisputeRecord(dispute);
+    out.push({
+      evidence_bundle_id: `evidence_${normalizedDispute.dispute_id}`,
+      ...normalizedDispute
+    });
+  }
+
+  out.sort((a, b) => disputeEvidenceBundleCursorKey(a).localeCompare(disputeEvidenceBundleCursorKey(b)));
+  return out;
+}
+
+function disputeSummary(disputes, bundles) {
+  const all = Array.isArray(disputes) ? disputes : [];
+  const returned = Array.isArray(bundles) ? bundles : [];
+
+  return {
+    total_disputes: all.length,
+    open_disputes: all.filter(x => x?.status !== 'resolved').length,
+    resolved_disputes: all.filter(x => x?.status === 'resolved').length,
+    total_evidence_items: all.reduce((acc, row) => acc + (Array.isArray(row?.evidence_items) ? row.evidence_items.length : 0), 0),
+    returned_count: returned.length
+  };
+}
+
 const allowedSlaEventTypes = new Set(['latency', 'availability', 'dispute_response']);
 const allowedSeverity = new Set(['low', 'medium', 'high']);
+const allowedDisputeTypes = new Set(['delivery', 'billing', 'sla']);
 const allowedRiskTiers = new Set(['low', 'medium', 'high']);
 const allowedRiskEscalationModes = new Set(['monitor', 'throttle', 'block']);
 const riskTierHighRiskWriteOps = new Set([
@@ -609,6 +689,293 @@ export class PartnerCommercialService {
         policy,
         usage_hour_bucket: bucket,
         usage_counts: usageCounts
+      }
+    };
+  }
+
+  createDispute({ actor, auth, idempotencyKey, request }) {
+    const op = 'partnerProgram.dispute.create';
+    const corr = correlationId(op);
+
+    const authz = authorizeApiOperation({ operationId: op, actor, auth, store: this.store });
+    if (!authz.ok) return { ok: false, body: errorResponse(corr, authz.error.code, authz.error.message, authz.error.details) };
+
+    if (!isPartner(actor)) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'FORBIDDEN', 'only partner can create disputes', { actor })
+      };
+    }
+
+    const disputeType = normalizeOptionalString(request?.dispute_type);
+    const severity = normalizeOptionalString(request?.severity) ?? 'medium';
+    const subjectRef = normalizeOptionalString(request?.subject_ref);
+    const reasonCode = normalizeOptionalString(request?.reason_code);
+    const openedAtRaw = normalizeOptionalString(request?.opened_at)
+      ?? normalizeOptionalString(auth?.now_iso)
+      ?? process.env.AUTHZ_NOW_ISO
+      ?? new Date().toISOString();
+    const openedAtMs = parseIsoMs(openedAtRaw);
+
+    if (!disputeType || !allowedDisputeTypes.has(disputeType) || !allowedSeverity.has(severity) || !subjectRef || !reasonCode) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid dispute payload', {
+          reason_code: 'partner_dispute_invalid'
+        })
+      };
+    }
+
+    if (openedAtMs === null) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid dispute timestamp', {
+          reason_code: 'partner_dispute_invalid_timestamp'
+        })
+      };
+    }
+
+    const evidenceItems = normalizeDisputeEvidenceItems(request?.evidence_items);
+    const state = ensureCommercialState(this.store);
+    const riskNowMs = this.resolveRiskTierNowMs({ auth, request });
+
+    return applyIdempotentMutation({
+      store: this.store,
+      actor,
+      operationId: op,
+      idempotencyKey,
+      requestPayload: request,
+      correlationId: corr,
+      beforeMutate: () => this.evaluateRiskTierWriteAccess({ actor, operationId: op, correlationId: corr, nowMs: riskNowMs }),
+      afterMutate: () => this.recordRiskTierWriteUsage({ actor, operationId: op, nowMs: riskNowMs }),
+      mutate: () => {
+        const disputeId = `dispute_${String(state.disputes.length + 1).padStart(6, '0')}`;
+        const dispute = {
+          dispute_id: disputeId,
+          partner_id: actor.id,
+          dispute_type: disputeType,
+          severity,
+          subject_ref: subjectRef,
+          reason_code: reasonCode,
+          status: 'open',
+          opened_at: new Date(openedAtMs).toISOString(),
+          resolved_at: null,
+          resolution: null,
+          evidence_items: evidenceItems
+        };
+
+        state.disputes.push(dispute);
+
+        const partnerDisputes = state.disputes.filter(row => row?.partner_id === actor.id);
+
+        return {
+          ok: true,
+          body: {
+            correlation_id: corr,
+            dispute: normalizeDisputeRecord(dispute),
+            summary: disputeSummary(partnerDisputes, partnerDisputes)
+          }
+        };
+      }
+    });
+  }
+
+  resolveDispute({ actor, auth, idempotencyKey, disputeId, request }) {
+    const op = 'partnerProgram.dispute.resolve';
+    const corr = correlationId(op);
+
+    const authz = authorizeApiOperation({ operationId: op, actor, auth, store: this.store });
+    if (!authz.ok) return { ok: false, body: errorResponse(corr, authz.error.code, authz.error.message, authz.error.details) };
+
+    if (!isPartner(actor)) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'FORBIDDEN', 'only partner can resolve disputes', { actor })
+      };
+    }
+
+    const normalizedDisputeId = normalizeOptionalString(disputeId) ?? normalizeOptionalString(request?.dispute_id);
+    if (!normalizedDisputeId) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'dispute_id is required for dispute resolve', {
+          reason_code: 'partner_dispute_id_required'
+        })
+      };
+    }
+
+    const resolutionCode = normalizeOptionalString(request?.resolution?.code);
+    const resolutionNotes = normalizeOptionalString(request?.resolution?.notes);
+    if (!resolutionCode) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid dispute resolution payload', {
+          reason_code: 'partner_dispute_resolution_invalid'
+        })
+      };
+    }
+
+    const resolvedAtRaw = normalizeOptionalString(request?.resolved_at)
+      ?? normalizeOptionalString(auth?.now_iso)
+      ?? process.env.AUTHZ_NOW_ISO
+      ?? new Date().toISOString();
+    const resolvedAtMs = parseIsoMs(resolvedAtRaw);
+    if (resolvedAtMs === null) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid dispute resolution timestamp', {
+          reason_code: 'partner_dispute_resolution_invalid_timestamp'
+        })
+      };
+    }
+
+    const state = ensureCommercialState(this.store);
+    const dispute = state.disputes.find(row => row?.partner_id === actor.id && row?.dispute_id === normalizedDisputeId) ?? null;
+
+    if (!dispute) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'NOT_FOUND', 'dispute not found', {
+          dispute_id: normalizedDisputeId
+        })
+      };
+    }
+
+    const riskNowMs = this.resolveRiskTierNowMs({ auth, request });
+
+    return applyIdempotentMutation({
+      store: this.store,
+      actor,
+      operationId: op,
+      idempotencyKey,
+      requestPayload: {
+        dispute_id: normalizedDisputeId,
+        ...(request ?? {})
+      },
+      correlationId: corr,
+      beforeMutate: () => this.evaluateRiskTierWriteAccess({ actor, operationId: op, correlationId: corr, nowMs: riskNowMs }),
+      afterMutate: () => this.recordRiskTierWriteUsage({ actor, operationId: op, nowMs: riskNowMs }),
+      mutate: () => {
+        if (dispute.status !== 'open') {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'dispute is not open', {
+              reason_code: 'partner_dispute_not_open',
+              dispute_id: normalizedDisputeId
+            })
+          };
+        }
+
+        dispute.status = 'resolved';
+        dispute.resolved_at = new Date(resolvedAtMs).toISOString();
+        dispute.resolution = {
+          code: resolutionCode,
+          ...(resolutionNotes ? { notes: resolutionNotes } : {})
+        };
+
+        const partnerDisputes = state.disputes.filter(row => row?.partner_id === actor.id);
+
+        return {
+          ok: true,
+          body: {
+            correlation_id: corr,
+            dispute: normalizeDisputeRecord(dispute),
+            summary: disputeSummary(partnerDisputes, partnerDisputes)
+          }
+        };
+      }
+    });
+  }
+
+  exportDisputeEvidenceBundles({ actor, auth, query }) {
+    const op = 'partnerProgram.dispute.evidence_bundle.export';
+    const corr = correlationId(op);
+
+    const authz = authorizeApiOperation({ operationId: op, actor, auth, store: this.store });
+    if (!authz.ok) return { ok: false, body: errorResponse(corr, authz.error.code, authz.error.message, authz.error.details) };
+
+    if (!isPartner(actor)) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'FORBIDDEN', 'only partner can export dispute evidence bundles', { actor })
+      };
+    }
+
+    const fromIso = normalizeOptionalString(query?.from_iso);
+    const toIso = normalizeOptionalString(query?.to_iso);
+    const includeResolved = query?.include_resolved !== false;
+    const limit = parsePositiveInt(query?.limit ?? 50, { min: 1, max: 200 });
+    const cursorAfter = normalizeOptionalString(query?.cursor_after);
+    const exportedAtRaw = normalizeOptionalString(query?.exported_at_iso) ?? new Date().toISOString();
+
+    const fromMs = fromIso ? parseIsoMs(fromIso) : null;
+    const toMs = toIso ? parseIsoMs(toIso) : null;
+    const exportedAtMs = parseIsoMs(exportedAtRaw);
+
+    if ((fromIso && fromMs === null) || (toIso && toMs === null) || exportedAtMs === null || limit === null) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid dispute evidence export query', {
+          reason_code: 'partner_dispute_evidence_export_query_invalid'
+        })
+      };
+    }
+
+    const state = ensureCommercialState(this.store);
+    const partnerDisputes = (state.disputes ?? []).filter(row => row?.partner_id === actor.id).map(normalizeDisputeRecord);
+
+    const allBundles = disputeEvidenceBundlesForPartner({
+      disputes: partnerDisputes,
+      partnerId: actor.id,
+      fromMs,
+      toMs,
+      includeResolved
+    });
+
+    let startIndex = 0;
+    if (cursorAfter) {
+      const idx = allBundles.findIndex(row => disputeEvidenceBundleCursorKey(row) === cursorAfter);
+      if (idx < 0) {
+        return {
+          ok: false,
+          body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'cursor_after not found in dispute evidence export window', {
+            reason_code: 'partner_dispute_evidence_cursor_not_found',
+            cursor_after: cursorAfter
+          })
+        };
+      }
+      startIndex = idx + 1;
+    }
+
+    const bundles = allBundles.slice(startIndex, startIndex + limit);
+    const nextCursor = startIndex + limit < allBundles.length
+      ? disputeEvidenceBundleCursorKey(bundles[bundles.length - 1])
+      : null;
+
+    const summary = disputeSummary(partnerDisputes, bundles);
+
+    const normalizedExportedAtIso = new Date(exportedAtMs).toISOString();
+    const signedPayload = buildSignedPartnerProgramDisputeEvidenceBundleExportPayload({
+      exportedAt: normalizedExportedAtIso,
+      query: {
+        ...(fromIso ? { from_iso: fromIso } : {}),
+        ...(toIso ? { to_iso: toIso } : {}),
+        include_resolved: includeResolved,
+        limit,
+        ...(cursorAfter ? { cursor_after: cursorAfter } : {}),
+        ...(normalizeOptionalString(query?.now_iso) ? { now_iso: normalizeOptionalString(query?.now_iso) } : {}),
+        exported_at_iso: normalizedExportedAtIso
+      },
+      summary,
+      bundles,
+      nextCursor
+    });
+
+    return {
+      ok: true,
+      body: {
+        correlation_id: corr,
+        ...signedPayload
       }
     };
   }

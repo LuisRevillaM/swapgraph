@@ -82,6 +82,14 @@ Notes:
   - `risk_tier_blocked_operation`
   - `risk_tier_manual_review_required`
   - `risk_tier_throttle_exceeded`
+  - `partner_dispute_invalid`
+  - `partner_dispute_invalid_timestamp`
+  - `partner_dispute_id_required`
+  - `partner_dispute_resolution_invalid`
+  - `partner_dispute_resolution_invalid_timestamp`
+  - `partner_dispute_not_open`
+  - `partner_dispute_evidence_export_query_invalid`
+  - `partner_dispute_evidence_cursor_not_found`
 - Rollout diagnostics automation execution-attestation verification may return deterministic mismatch errors such as:
   - `automation_execution_expected_effect_hash_mismatch`
   - `automation_execution_request_hash_chain_mismatch`

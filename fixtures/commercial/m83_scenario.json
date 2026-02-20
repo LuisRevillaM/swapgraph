@@ -1,0 +1,317 @@
+{
+  "actors": {
+    "admin_partner": {
+      "type": "partner",
+      "id": "ops-admin"
+    }
+  },
+  "operations": [
+    {
+      "op": "keys.policy_integrity_signing.get",
+      "expect_ok": true,
+      "expect_keys_count": 2
+    },
+    {
+      "op": "partnerProgram.dispute.create",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m83_dispute_create_1",
+      "request": {
+        "dispute_type": "delivery",
+        "severity": "high",
+        "subject_ref": "receipt:rcpt_123",
+        "reason_code": "delivery_missing_item",
+        "opened_at": "2026-02-20T05:00:00Z",
+        "evidence_items": [
+          {
+            "evidence_id": "ev_001",
+            "kind": "screenshot",
+            "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "metadata": {
+              "filename": "receipt.png"
+            }
+          },
+          {
+            "evidence_id": "ev_002",
+            "kind": "log_excerpt",
+            "content_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "metadata": {
+              "source": "delivery-worker"
+            }
+          }
+        ]
+      },
+      "save_dispute_ref": "d1",
+      "expect_ok": true,
+      "expect_dispute_id": "dispute_000001",
+      "expect_status": "open",
+      "expect_evidence_items_count": 2,
+      "expect_summary_total_disputes": 1,
+      "expect_summary_open_disputes": 1,
+      "expect_summary_resolved_disputes": 0,
+      "expect_summary_total_evidence_items": 2,
+      "expect_summary_returned_count": 1,
+      "expect_replayed": false
+    },
+    {
+      "op": "partnerProgram.dispute.create",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m83_dispute_create_1",
+      "request": {
+        "dispute_type": "delivery",
+        "severity": "high",
+        "subject_ref": "receipt:rcpt_123",
+        "reason_code": "delivery_missing_item",
+        "opened_at": "2026-02-20T05:00:00Z",
+        "evidence_items": [
+          {
+            "evidence_id": "ev_001",
+            "kind": "screenshot",
+            "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "metadata": {
+              "filename": "receipt.png"
+            }
+          },
+          {
+            "evidence_id": "ev_002",
+            "kind": "log_excerpt",
+            "content_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "metadata": {
+              "source": "delivery-worker"
+            }
+          }
+        ]
+      },
+      "expect_ok": true,
+      "expect_dispute_id": "dispute_000001",
+      "expect_status": "open",
+      "expect_replayed": true
+    },
+    {
+      "op": "partnerProgram.dispute.create",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m83_dispute_create_2",
+      "request": {
+        "dispute_type": "billing",
+        "severity": "medium",
+        "subject_ref": "statement:bill_2026_02",
+        "reason_code": "billing_amount_mismatch",
+        "opened_at": "2026-02-20T05:10:00Z",
+        "evidence_items": [
+          {
+            "evidence_id": "ev_003",
+            "kind": "statement_diff",
+            "content_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "metadata": {
+              "line_id": "line_003"
+            }
+          }
+        ]
+      },
+      "save_dispute_ref": "d2",
+      "expect_ok": true,
+      "expect_dispute_id": "dispute_000002",
+      "expect_status": "open",
+      "expect_evidence_items_count": 1,
+      "expect_summary_total_disputes": 2,
+      "expect_summary_open_disputes": 2,
+      "expect_summary_resolved_disputes": 0,
+      "expect_summary_total_evidence_items": 3,
+      "expect_summary_returned_count": 2,
+      "expect_replayed": false
+    },
+    {
+      "op": "partnerProgram.dispute.resolve",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m83_dispute_resolve_1",
+      "dispute_ref": "d1",
+      "request": {
+        "resolved_at": "2026-02-20T05:20:00Z",
+        "resolution": {
+          "code": "refund_issued",
+          "notes": "Refund sent to partner wallet"
+        }
+      },
+      "expect_ok": true,
+      "expect_dispute_id": "dispute_000001",
+      "expect_status": "resolved",
+      "expect_resolution_code": "refund_issued",
+      "expect_summary_total_disputes": 2,
+      "expect_summary_open_disputes": 1,
+      "expect_summary_resolved_disputes": 1,
+      "expect_summary_total_evidence_items": 3,
+      "expect_summary_returned_count": 2,
+      "expect_replayed": false
+    },
+    {
+      "op": "partnerProgram.dispute.resolve",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m83_dispute_resolve_1",
+      "dispute_ref": "d1",
+      "request": {
+        "resolved_at": "2026-02-20T05:20:00Z",
+        "resolution": {
+          "code": "refund_issued",
+          "notes": "Refund sent to partner wallet"
+        }
+      },
+      "expect_ok": true,
+      "expect_dispute_id": "dispute_000001",
+      "expect_status": "resolved",
+      "expect_resolution_code": "refund_issued",
+      "expect_replayed": true
+    },
+    {
+      "op": "partnerProgram.dispute.resolve",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m83_dispute_resolve_2",
+      "dispute_ref": "d1",
+      "request": {
+        "resolved_at": "2026-02-20T05:25:00Z",
+        "resolution": {
+          "code": "refund_issued"
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "partner_dispute_not_open"
+    },
+    {
+      "op": "partnerProgram.dispute.evidence_bundle.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-20T00:00:00Z",
+        "to_iso": "2026-02-20T06:00:00Z",
+        "include_resolved": false,
+        "limit": 50,
+        "exported_at_iso": "2026-02-20T05:30:00Z"
+      },
+      "save_export_ref": "export_open_only",
+      "expect_ok": true,
+      "expect_bundles_count": 1,
+      "expect_summary_total_disputes": 2,
+      "expect_summary_open_disputes": 1,
+      "expect_summary_resolved_disputes": 1,
+      "expect_summary_total_evidence_items": 3,
+      "expect_summary_returned_count": 1,
+      "expect_next_cursor": null
+    },
+    {
+      "op": "partnerProgram.dispute.evidence_bundle.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-20T00:00:00Z",
+        "to_iso": "2026-02-20T06:00:00Z",
+        "include_resolved": true,
+        "limit": 1,
+        "exported_at_iso": "2026-02-20T05:31:00Z"
+      },
+      "save_export_ref": "export_page_1",
+      "expect_ok": true,
+      "expect_bundles_count": 1,
+      "expect_summary_total_disputes": 2,
+      "expect_summary_open_disputes": 1,
+      "expect_summary_resolved_disputes": 1,
+      "expect_summary_total_evidence_items": 3,
+      "expect_summary_returned_count": 1,
+      "expect_next_cursor": "2026-02-20T05:00:00.000Z|dispute_000001"
+    },
+    {
+      "op": "partnerProgram.dispute.evidence_bundle.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-20T00:00:00Z",
+        "to_iso": "2026-02-20T06:00:00Z",
+        "include_resolved": true,
+        "limit": 1,
+        "exported_at_iso": "2026-02-20T05:32:00Z"
+      },
+      "cursor_from_export_ref": "export_page_1",
+      "save_export_ref": "export_page_2",
+      "expect_ok": true,
+      "expect_bundles_count": 1,
+      "expect_summary_total_disputes": 2,
+      "expect_summary_open_disputes": 1,
+      "expect_summary_resolved_disputes": 1,
+      "expect_summary_total_evidence_items": 3,
+      "expect_summary_returned_count": 1,
+      "expect_next_cursor": null
+    },
+    {
+      "op": "partnerProgram.dispute.evidence_bundle.export.verify",
+      "export_ref": "export_page_1",
+      "expect_verify_ok": true,
+      "expect_verify_public_ok": true
+    },
+    {
+      "op": "partnerProgram.dispute.evidence_bundle.export.verify_tampered",
+      "export_ref": "export_page_1",
+      "expect_verify_ok": false,
+      "expect_verify_error": "hash_mismatch"
+    },
+    {
+      "op": "partnerProgram.dispute.evidence_bundle.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-20T00:00:00Z",
+        "to_iso": "2026-02-20T06:00:00Z",
+        "include_resolved": true,
+        "limit": 10,
+        "cursor_after": "2026-02-20T05:00:00.000Z|unknown_dispute",
+        "exported_at_iso": "2026-02-20T05:33:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "partner_dispute_evidence_cursor_not_found"
+    }
+  ]
+}

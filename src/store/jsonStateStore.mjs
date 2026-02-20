@@ -37,6 +37,7 @@ export class JsonStateStore {
       partner_program_webhook_retry_policies: {},
       partner_program_risk_tier_policy: {},
       partner_program_risk_tier_usage_counters: {},
+      partner_program_disputes: [],
       oauth_clients: {},
       oauth_tokens: {}
     };
@@ -72,6 +73,7 @@ export class JsonStateStore {
         partner_program_webhook_retry_policies: {},
         partner_program_risk_tier_policy: {},
         partner_program_risk_tier_usage_counters: {},
+        partner_program_disputes: [],
         oauth_clients: {},
         oauth_tokens: {}
       };
@@ -108,6 +110,7 @@ export class JsonStateStore {
     this.state.partner_program_webhook_retry_policies ||= {};
     this.state.partner_program_risk_tier_policy ||= {};
     this.state.partner_program_risk_tier_usage_counters ||= {};
+    this.state.partner_program_disputes ||= [];
     this.state.oauth_clients ||= {};
     this.state.oauth_tokens ||= {};
   }

@@ -152,6 +152,13 @@ Settlement endpoints:
   - idempotent partner-admin risk-tier policy mutation (`tier`, `escalation_mode`, write-throttle limit, blocked operations, manual-review operations)
 - `GET /partner-program/risk-tier-policy`
   - partner-admin risk-tier policy read surface including current-hour write counters by operation
+- `POST /partner-program/disputes`
+  - idempotent dispute lifecycle create surface (typed dispute metadata + deterministic evidence-item envelopes)
+- `POST /partner-program/disputes/{dispute_id}/resolve`
+  - idempotent dispute resolution surface (resolution code/notes with terminal-state guardrails)
+- `GET /partner-program/disputes/evidence-bundles/export`
+  - signed dispute evidence-bundle export (`summary`, paginated bundles, `next_cursor`, `export_hash`, detached signature)
+  - supports deterministic continuation (`limit`, `cursor_after`) and resolved/open filtering (`include_resolved`)
 
 Receipt endpoints:
 - `GET /receipts/{cycle_id}`

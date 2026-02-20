@@ -1,0 +1,52 @@
+{
+  "correlation_id": "corr_partnerprogram_dispute_evidence_bundle_export",
+  "exported_at": "2026-02-20T05:00:00.000Z",
+  "query": {
+    "from_iso": "2026-02-20T00:00:00Z",
+    "to_iso": "2026-02-20T06:00:00Z",
+    "include_resolved": true,
+    "limit": 50,
+    "exported_at_iso": "2026-02-20T05:00:00.000Z"
+  },
+  "summary": {
+    "total_disputes": 2,
+    "open_disputes": 1,
+    "resolved_disputes": 1,
+    "total_evidence_items": 3,
+    "returned_count": 2
+  },
+  "bundles": [
+    {
+      "evidence_bundle_id": "evidence_dispute_000001",
+      "dispute_id": "dispute_000001",
+      "partner_id": "ops-admin",
+      "dispute_type": "delivery",
+      "severity": "high",
+      "subject_ref": "receipt:rcpt_123",
+      "reason_code": "delivery_missing_item",
+      "status": "resolved",
+      "opened_at": "2026-02-20T04:00:00.000Z",
+      "resolved_at": "2026-02-20T04:30:00.000Z",
+      "resolution": {
+        "code": "refund_issued",
+        "notes": "Refund sent to partner wallet"
+      },
+      "evidence_items": [
+        {
+          "evidence_id": "ev_001",
+          "kind": "screenshot",
+          "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "metadata": {
+            "filename": "receipt.png"
+          }
+        }
+      ]
+    }
+  ],
+  "export_hash": "c14f1bf53a3f989f060fcbf3a655e7b17c9121669f6fdb00e24fe4be95f96956",
+  "signature": {
+    "key_id": "pis_ed25519_v1",
+    "alg": "ed25519",
+    "sig": "base64-signature-placeholder"
+  }
+}

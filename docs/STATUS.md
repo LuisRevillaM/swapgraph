@@ -93,9 +93,10 @@ Last updated: 2026-02-19
 - M80: ✅ partner OAuth app registration + credential lifecycle contract hardening (register/rotate/revoke/introspect with deterministic token reasoning) (fixtures-first)
 - M81: ✅ webhook reliability and dead-letter replay hardening (delivery-attempt ledger + retry policy metadata + signed dead-letter export continuity + deterministic replay/backfill workflow) (fixtures-first)
 - M82: ✅ risk tier policy engine contract hardening (partner risk-tier policy upsert/read contracts with deterministic blocked/manual-review/throttle reason-code enforcement across mutating commercial write paths) (fixtures-first)
+- M83: ✅ dispute workflow and evidence-bundle contract hardening (idempotent dispute create/resolve lifecycle + signed paginated evidence-bundle export with deterministic continuation and tamper-fail verification) (fixtures-first)
 
 ## Next
-- M83: dispute workflow and evidence-bundle contracts (fixtures-first)
+- M84: Steam adapter contract hardening (fixture-only) (fixtures-first)
 - Master remainder forecast: `docs/prd/2026-02-19_master-remaining-milestones_M71-M92.md`
 
 ## Notes

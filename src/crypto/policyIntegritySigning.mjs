@@ -3157,3 +3157,179 @@ export function verifyPartnerProgramWebhookDeadLetterExportPayloadWithPublicKeyP
   const signable = partnerProgramWebhookDeadLetterExportSignablePayload(payload);
   return verifyPolicyIntegrityPayloadSignatureWithPublicKeyPem({ payload: signable, publicKeyPem, keyId, alg });
 }
+
+function normalizePartnerProgramDisputeEvidenceBundleExportQuery(query) {
+  const out = {};
+
+  if (typeof query?.from_iso === 'string' && query.from_iso.trim()) out.from_iso = query.from_iso.trim();
+  if (typeof query?.to_iso === 'string' && query.to_iso.trim()) out.to_iso = query.to_iso.trim();
+  if (typeof query?.include_resolved === 'boolean') out.include_resolved = query.include_resolved;
+
+  if (Number.isFinite(query?.limit)) out.limit = Number(query.limit);
+  else {
+    const limit = Number.parseInt(String(query?.limit ?? ''), 10);
+    if (Number.isFinite(limit)) out.limit = limit;
+  }
+
+  if (typeof query?.cursor_after === 'string' && query.cursor_after.trim()) out.cursor_after = query.cursor_after.trim();
+  if (typeof query?.now_iso === 'string' && query.now_iso.trim()) out.now_iso = query.now_iso.trim();
+  if (typeof query?.exported_at_iso === 'string' && query.exported_at_iso.trim()) out.exported_at_iso = query.exported_at_iso.trim();
+
+  return out;
+}
+
+function normalizePartnerProgramDisputeEvidenceBundleExportSummary(summary) {
+  return {
+    total_disputes: Number.isFinite(summary?.total_disputes) ? Number(summary.total_disputes) : 0,
+    open_disputes: Number.isFinite(summary?.open_disputes) ? Number(summary.open_disputes) : 0,
+    resolved_disputes: Number.isFinite(summary?.resolved_disputes) ? Number(summary.resolved_disputes) : 0,
+    total_evidence_items: Number.isFinite(summary?.total_evidence_items) ? Number(summary.total_evidence_items) : 0,
+    returned_count: Number.isFinite(summary?.returned_count) ? Number(summary.returned_count) : 0
+  };
+}
+
+function normalizePartnerProgramDisputeEvidenceItems(items) {
+  return (items ?? [])
+    .map(item => ({
+      evidence_id: typeof item?.evidence_id === 'string' ? item.evidence_id : null,
+      kind: typeof item?.kind === 'string' ? item.kind : null,
+      content_hash: typeof item?.content_hash === 'string' ? item.content_hash : null,
+      metadata: item?.metadata && typeof item.metadata === 'object' && !Array.isArray(item.metadata) ? item.metadata : {}
+    }))
+    .sort((a, b) => String(a.evidence_id ?? '').localeCompare(String(b.evidence_id ?? '')));
+}
+
+function normalizePartnerProgramDisputeResolution(resolution) {
+  if (!resolution || typeof resolution !== 'object') return null;
+
+  const code = typeof resolution?.code === 'string' && resolution.code.trim() ? resolution.code.trim() : null;
+  const notes = typeof resolution?.notes === 'string' && resolution.notes.trim() ? resolution.notes.trim() : null;
+  if (!code) return null;
+
+  return {
+    code,
+    ...(notes ? { notes } : {})
+  };
+}
+
+function normalizePartnerProgramDisputeEvidenceBundle(bundle) {
+  return {
+    evidence_bundle_id: typeof bundle?.evidence_bundle_id === 'string' ? bundle.evidence_bundle_id : null,
+    dispute_id: typeof bundle?.dispute_id === 'string' ? bundle.dispute_id : null,
+    partner_id: typeof bundle?.partner_id === 'string' ? bundle.partner_id : null,
+    dispute_type: typeof bundle?.dispute_type === 'string' ? bundle.dispute_type : null,
+    severity: typeof bundle?.severity === 'string' ? bundle.severity : null,
+    subject_ref: typeof bundle?.subject_ref === 'string' ? bundle.subject_ref : null,
+    reason_code: typeof bundle?.reason_code === 'string' ? bundle.reason_code : null,
+    status: typeof bundle?.status === 'string' ? bundle.status : null,
+    opened_at: typeof bundle?.opened_at === 'string' ? bundle.opened_at : null,
+    resolved_at: typeof bundle?.resolved_at === 'string' ? bundle.resolved_at : null,
+    resolution: normalizePartnerProgramDisputeResolution(bundle?.resolution),
+    evidence_items: normalizePartnerProgramDisputeEvidenceItems(bundle?.evidence_items)
+  };
+}
+
+function normalizePartnerProgramDisputeEvidenceBundles(bundles) {
+  return (bundles ?? [])
+    .map(normalizePartnerProgramDisputeEvidenceBundle)
+    .sort((a, b) => `${a.opened_at ?? ''}|${a.dispute_id ?? ''}`.localeCompare(`${b.opened_at ?? ''}|${b.dispute_id ?? ''}`));
+}
+
+function partnerProgramDisputeEvidenceBundleExportSignablePayload(payload) {
+  return {
+    exported_at: payload?.exported_at,
+    query: normalizePartnerProgramDisputeEvidenceBundleExportQuery(payload?.query),
+    summary: normalizePartnerProgramDisputeEvidenceBundleExportSummary(payload?.summary),
+    bundles: normalizePartnerProgramDisputeEvidenceBundles(payload?.bundles),
+    ...(typeof payload?.next_cursor === 'string' ? { next_cursor: payload.next_cursor } : {}),
+    export_hash: payload?.export_hash,
+    signature: payload?.signature
+  };
+}
+
+export function buildPartnerProgramDisputeEvidenceBundleExportHash({ query, summary, bundles, nextCursor }) {
+  return sha256HexCanonical({
+    query: normalizePartnerProgramDisputeEvidenceBundleExportQuery(query),
+    summary: normalizePartnerProgramDisputeEvidenceBundleExportSummary(summary),
+    bundles: normalizePartnerProgramDisputeEvidenceBundles(bundles),
+    ...(typeof nextCursor === 'string' ? { next_cursor: nextCursor } : {})
+  });
+}
+
+export function buildSignedPartnerProgramDisputeEvidenceBundleExportPayload({ exportedAt, query, summary, bundles, nextCursor, keyId }) {
+  const normalizedQuery = normalizePartnerProgramDisputeEvidenceBundleExportQuery(query);
+  const normalizedSummary = normalizePartnerProgramDisputeEvidenceBundleExportSummary(summary);
+  const normalizedBundles = normalizePartnerProgramDisputeEvidenceBundles(bundles);
+
+  const exportHash = buildPartnerProgramDisputeEvidenceBundleExportHash({
+    query: normalizedQuery,
+    summary: normalizedSummary,
+    bundles: normalizedBundles,
+    nextCursor
+  });
+
+  const payload = {
+    exported_at: exportedAt,
+    query: normalizedQuery,
+    summary: normalizedSummary,
+    bundles: normalizedBundles,
+    ...(typeof nextCursor === 'string' ? { next_cursor: nextCursor } : {}),
+    export_hash: exportHash
+  };
+
+  payload.signature = signPolicyIntegrityPayload(payload, { keyId });
+  return payload;
+}
+
+export function verifyPartnerProgramDisputeEvidenceBundleExportPayload(payload) {
+  if (!payload || typeof payload !== 'object') return { ok: false, error: 'missing_payload' };
+
+  const expectedHash = buildPartnerProgramDisputeEvidenceBundleExportHash({
+    query: payload.query,
+    summary: payload.summary,
+    bundles: payload.bundles,
+    nextCursor: payload.next_cursor
+  });
+
+  if (payload.export_hash !== expectedHash) {
+    return {
+      ok: false,
+      error: 'hash_mismatch',
+      details: {
+        expected_hash: expectedHash,
+        provided_hash: payload.export_hash ?? null
+      }
+    };
+  }
+
+  const signable = partnerProgramDisputeEvidenceBundleExportSignablePayload(payload);
+  const verified = verifyPolicyIntegrityPayloadSignature(signable);
+  if (!verified.ok) return verified;
+
+  return { ok: true };
+}
+
+export function verifyPartnerProgramDisputeEvidenceBundleExportPayloadWithPublicKeyPem({ payload, publicKeyPem, keyId, alg }) {
+  if (!payload || typeof payload !== 'object') return { ok: false, error: 'missing_payload' };
+
+  const expectedHash = buildPartnerProgramDisputeEvidenceBundleExportHash({
+    query: payload.query,
+    summary: payload.summary,
+    bundles: payload.bundles,
+    nextCursor: payload.next_cursor
+  });
+
+  if (payload.export_hash !== expectedHash) {
+    return {
+      ok: false,
+      error: 'hash_mismatch',
+      details: {
+        expected_hash: expectedHash,
+        provided_hash: payload.export_hash ?? null
+      }
+    };
+  }
+
+  const signable = partnerProgramDisputeEvidenceBundleExportSignablePayload(payload);
+  return verifyPolicyIntegrityPayloadSignatureWithPublicKeyPem({ payload: signable, publicKeyPem, keyId, alg });
+}

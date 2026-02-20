@@ -1,0 +1,33 @@
+{
+  "correlation_id": "corr_partnerprogram_dispute_create",
+  "dispute": {
+    "dispute_id": "dispute_000001",
+    "partner_id": "ops-admin",
+    "dispute_type": "delivery",
+    "severity": "high",
+    "subject_ref": "receipt:rcpt_123",
+    "reason_code": "delivery_missing_item",
+    "status": "open",
+    "opened_at": "2026-02-20T04:00:00.000Z",
+    "resolved_at": null,
+    "resolution": null,
+    "evidence_items": [
+      {
+        "evidence_id": "ev_001",
+        "kind": "screenshot",
+        "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "metadata": {
+          "filename": "receipt.png"
+        }
+      }
+    ]
+  },
+  "summary": {
+    "total_disputes": 1,
+    "open_disputes": 1,
+    "resolved_disputes": 0,
+    "total_evidence_items": 1,
+    "returned_count": 1
+  },
+  "replayed": false
+}
