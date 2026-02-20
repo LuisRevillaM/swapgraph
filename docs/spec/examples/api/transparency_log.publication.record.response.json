@@ -1,0 +1,30 @@
+{
+  "correlation_id": "corr_transparencylog_publication_record",
+  "publication": {
+    "publication_id": "transparency_pub_000001",
+    "publication_index": 1,
+    "partner_id": "ops-admin",
+    "source_type": "combined",
+    "source_ref": "batch_m87_001",
+    "root_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+    "previous_root_hash": null,
+    "previous_chain_hash": null,
+    "chain_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+    "entry_count": 3,
+    "artifact_refs": [
+      "dispute:bundle_m83_001",
+      "receipt:rcpt_m85_001",
+      "rollout:diag_m74_001"
+    ],
+    "linked_receipt_ids": [
+      "rcpt_m85_001"
+    ],
+    "linked_governance_artifact_ids": [
+      "diag_m74_001"
+    ],
+    "notes": "fixture transparency publication",
+    "integration_mode": "fixture_only",
+    "published_at": "2026-02-20T09:00:00.000Z"
+  },
+  "replayed": false
+}

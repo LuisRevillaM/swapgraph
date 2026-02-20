@@ -169,9 +169,9 @@ Settlement endpoints:
   - idempotent operator-gated live proof capture for Steam deposit-per-swap settlement evidence (`INTEGRATION_ENABLED=1` required)
 - `POST /adapters/steam/tier1/live-proof/vault`
   - idempotent operator-gated live proof capture for Steam vault settlement lifecycle evidence (`deposit/reserve/release/withdraw`, `INTEGRATION_ENABLED=1` required)
-- `POST /transparency-log/publication`
+- `POST /transparency-log/publications`
   - idempotent append-only publication surface linking settlement receipts and governance artifacts into a deterministic transparency chain
-- `GET /transparency-log/publication/export`
+- `GET /transparency-log/publications/export`
   - signed transparency-log export (`summary`, paginated entries, `next_cursor`, `export_hash`, detached signature)
   - supports deterministic continuation (`limit`, `cursor_after`, `attestation_after`, `checkpoint_after`)
 

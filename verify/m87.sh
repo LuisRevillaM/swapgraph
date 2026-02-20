@@ -13,7 +13,7 @@ mkdir -p "$OUT_DIR" "$LATEST_DIR"
   echo "$ node scripts/validate-schemas.mjs > $OUT_DIR/schemas_validation.json"
   echo "$ node scripts/validate-api-contract.mjs > $OUT_DIR/api_contract_validation.json"
   echo "$ node scripts/validate-api-auth.mjs > $OUT_DIR/api_auth_validation.json"
-  echo "$ AUTHZ_ENFORCE=1 TRANSPARENCY_LOG_EXPORT_CHECKPOINT_ENFORCE=1 TRANSPARENCY_LOG_EXPORT_CHECKPOINT_RETENTION_DAYS=30 OUT_DIR=$OUT_DIR node scripts/run-m87-transparency-log-publication-scenario.mjs"
+  echo "$ AUTHZ_ENFORCE=1 TRANSPARENCY_LOG_EXPORT_CHECKPOINT_ENFORCE=1 TRANSPARENCY_LOG_EXPORT_CHECKPOINT_RETENTION_DAYS=1 OUT_DIR=$OUT_DIR node scripts/run-m87-transparency-log-publication-scenario.mjs"
 } > "$OUT_DIR/commands.log"
 
 req=(
@@ -24,16 +24,17 @@ req=(
   "docs/spec/GAPS.md"
 
   "src/store/jsonStateStore.mjs"
-  "src/service/transparencyLogPublicationService.mjs"
+  "src/service/transparencyLogService.mjs"
+  "src/crypto/policyIntegritySigning.mjs"
 
   "docs/spec/api/manifest.v1.json"
   "docs/spec/examples/api/_manifest.v1.json"
-  "docs/spec/examples/api/transparency_log.publication.append.request.json"
-  "docs/spec/examples/api/transparency_log.publication.append.response.json"
+  "docs/spec/examples/api/transparency_log.publication.record.request.json"
+  "docs/spec/examples/api/transparency_log.publication.record.response.json"
   "docs/spec/examples/api/transparency_log.publication.export.response.json"
 
-  "docs/spec/schemas/TransparencyLogPublicationAppendRequest.schema.json"
-  "docs/spec/schemas/TransparencyLogPublicationAppendResponse.schema.json"
+  "docs/spec/schemas/TransparencyLogPublicationRecordRequest.schema.json"
+  "docs/spec/schemas/TransparencyLogPublicationRecordResponse.schema.json"
   "docs/spec/schemas/TransparencyLogPublicationExportResponse.schema.json"
 
   "scripts/run-m87-transparency-log-publication-scenario.mjs"
@@ -53,7 +54,11 @@ node scripts/validate-schemas.mjs > "$OUT_DIR/schemas_validation.json"
 node scripts/validate-api-contract.mjs > "$OUT_DIR/api_contract_validation.json"
 node scripts/validate-api-auth.mjs > "$OUT_DIR/api_auth_validation.json"
 
-AUTHZ_ENFORCE=1 TRANSPARENCY_LOG_EXPORT_CHECKPOINT_ENFORCE=1 TRANSPARENCY_LOG_EXPORT_CHECKPOINT_RETENTION_DAYS=30 OUT_DIR="$OUT_DIR" node scripts/run-m87-transparency-log-publication-scenario.mjs >> "$OUT_DIR/commands.log" 2>&1
+AUTHZ_ENFORCE=1 \
+TRANSPARENCY_LOG_EXPORT_CHECKPOINT_ENFORCE=1 \
+TRANSPARENCY_LOG_EXPORT_CHECKPOINT_RETENTION_DAYS=1 \
+OUT_DIR="$OUT_DIR" \
+node scripts/run-m87-transparency-log-publication-scenario.mjs >> "$OUT_DIR/commands.log" 2>&1
 
 cp "$OUT_DIR/commands.log" "$LATEST_DIR/commands.log"
 cp "$OUT_DIR/schemas_validation.json" "$LATEST_DIR/schemas_validation.json"

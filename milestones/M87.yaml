@@ -9,16 +9,17 @@ artifacts:
   - artifact: "docs/spec/GAPS.md"
 
   - artifact: "src/store/jsonStateStore.mjs"
-  - artifact: "src/service/transparencyLogPublicationService.mjs"
+  - artifact: "src/service/transparencyLogService.mjs"
+  - artifact: "src/crypto/policyIntegritySigning.mjs"
 
   - artifact: "docs/spec/api/manifest.v1.json"
   - artifact: "docs/spec/examples/api/_manifest.v1.json"
-  - artifact: "docs/spec/examples/api/transparency_log.publication.append.request.json"
-  - artifact: "docs/spec/examples/api/transparency_log.publication.append.response.json"
+  - artifact: "docs/spec/examples/api/transparency_log.publication.record.request.json"
+  - artifact: "docs/spec/examples/api/transparency_log.publication.record.response.json"
   - artifact: "docs/spec/examples/api/transparency_log.publication.export.response.json"
 
-  - artifact: "docs/spec/schemas/TransparencyLogPublicationAppendRequest.schema.json"
-  - artifact: "docs/spec/schemas/TransparencyLogPublicationAppendResponse.schema.json"
+  - artifact: "docs/spec/schemas/TransparencyLogPublicationRecordRequest.schema.json"
+  - artifact: "docs/spec/schemas/TransparencyLogPublicationRecordResponse.schema.json"
   - artifact: "docs/spec/schemas/TransparencyLogPublicationExportResponse.schema.json"
 
   - artifact: "scripts/run-m87-transparency-log-publication-scenario.mjs"

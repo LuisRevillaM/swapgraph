@@ -434,6 +434,14 @@
       "schema": "TransparencyLogPublicationAppendResponse.schema.json"
     },
     {
+      "file": "transparency_log.publication.record.request.json",
+      "schema": "TransparencyLogPublicationRecordRequest.schema.json"
+    },
+    {
+      "file": "transparency_log.publication.record.response.json",
+      "schema": "TransparencyLogPublicationRecordResponse.schema.json"
+    },
+    {
       "file": "transparency_log.publication.export.response.json",
       "schema": "TransparencyLogPublicationExportResponse.schema.json"
     }

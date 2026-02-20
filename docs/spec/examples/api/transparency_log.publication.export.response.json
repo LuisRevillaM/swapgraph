@@ -1,66 +1,66 @@
 {
   "correlation_id": "corr_transparencylog_publication_export",
-  "exported_at": "2026-02-20T09:10:00.000Z",
+  "exported_at": "2026-02-20T09:05:00.000Z",
   "query": {
-    "partner_id": "ops-admin",
-    "limit": 2
+    "source_type": "combined",
+    "limit": 1,
+    "now_iso": "2026-02-20T09:05:00Z"
   },
   "summary": {
-    "total_entries": 4,
-    "page_entries": 2,
-    "first_entry_id": "tl_entry_000001",
-    "last_entry_id": "tl_entry_000004",
-    "latest_chain_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+    "total_publications": 2,
+    "returned_count": 1,
+    "total_entries": 5,
+    "chain_head": "3333333333333333333333333333333333333333333333333333333333333333",
+    "chain_tail": "2222222222222222222222222222222222222222222222222222222222222222"
   },
-  "entries": [
+  "publications": [
     {
-      "log_index": 1,
-      "entry_id": "tl_entry_000001",
-      "publication_id": "tl_pub_000001",
+      "publication_id": "transparency_pub_000001",
+      "publication_index": 1,
       "partner_id": "ops-admin",
-      "entry_type": "receipt",
-      "entity_id": "rcpt_cycle_001",
-      "entity_hash": "1111111111111111111111111111111111111111111111111111111111111111",
-      "cycle_id": "cycle_001",
+      "source_type": "combined",
+      "source_ref": "batch_m87_001",
+      "root_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+      "previous_root_hash": null,
       "previous_chain_hash": null,
-      "published_at": "2026-02-20T09:00:00.000Z",
-      "chain_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-    },
-    {
-      "log_index": 2,
-      "entry_id": "tl_entry_000002",
-      "publication_id": "tl_pub_000001",
-      "partner_id": "ops-admin",
-      "entry_type": "governance_artifact",
-      "entity_id": "rollout_policy_v8",
-      "entity_hash": "2222222222222222222222222222222222222222222222222222222222222222",
-      "cycle_id": null,
-      "previous_chain_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      "published_at": "2026-02-20T09:00:00.000Z",
-      "chain_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      "chain_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+      "entry_count": 3,
+      "artifact_refs": [
+        "dispute:bundle_m83_001",
+        "receipt:rcpt_m85_001",
+        "rollout:diag_m74_001"
+      ],
+      "linked_receipt_ids": [
+        "rcpt_m85_001"
+      ],
+      "linked_governance_artifact_ids": [
+        "diag_m74_001"
+      ],
+      "integration_mode": "fixture_only",
+      "published_at": "2026-02-20T09:00:00.000Z"
     }
   ],
-  "total_filtered": 4,
-  "next_cursor": "tl_entry_000002",
+  "total_filtered": 2,
+  "next_cursor": "transparency_pub_000001",
   "attestation": {
     "cursor_after": null,
-    "next_cursor": "tl_entry_000002",
+    "next_cursor": "transparency_pub_000001",
     "attestation_after": null,
-    "page_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-    "chain_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    "page_hash": "4444444444444444444444444444444444444444444444444444444444444444",
+    "chain_hash": "5555555555555555555555555555555555555555555555555555555555555555"
   },
   "checkpoint": {
     "checkpoint_after": null,
-    "attestation_chain_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-    "next_cursor": "tl_entry_000002",
-    "entries_count": 2,
-    "total_filtered": 4,
-    "checkpoint_hash": "9999999999999999999999999999999999999999999999999999999999999999"
+    "attestation_chain_hash": "5555555555555555555555555555555555555555555555555555555555555555",
+    "next_cursor": "transparency_pub_000001",
+    "entries_count": 1,
+    "total_filtered": 2,
+    "checkpoint_hash": "6666666666666666666666666666666666666666666666666666666666666666"
   },
-  "export_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+  "export_hash": "4444444444444444444444444444444444444444444444444444444444444444",
   "signature": {
     "key_id": "dev-pi-k1",
     "alg": "ed25519",
-    "sig": "example-signature"
+    "sig": "base64sig"
   }
 }

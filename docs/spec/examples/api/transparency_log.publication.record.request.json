@@ -1,0 +1,21 @@
+{
+  "publication": {
+    "source_type": "combined",
+    "source_ref": "batch_m87_001",
+    "root_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+    "entry_count": 3,
+    "artifact_refs": [
+      "receipt:rcpt_m85_001",
+      "rollout:diag_m74_001",
+      "dispute:bundle_m83_001"
+    ],
+    "linked_receipt_ids": [
+      "rcpt_m85_001"
+    ],
+    "linked_governance_artifact_ids": [
+      "diag_m74_001"
+    ],
+    "notes": "fixture transparency publication"
+  },
+  "published_at": "2026-02-20T09:00:00Z"
+}

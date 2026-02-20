@@ -3,266 +3,343 @@
     "admin_partner": {
       "type": "partner",
       "id": "ops-admin"
-    },
-    "other_partner": {
-      "type": "partner",
-      "id": "partner-two"
     }
   },
   "operations": [
     {
-      "op": "transparencyLog.publication.append",
+      "op": "transparencyLog.publication.record",
       "actor_ref": "admin_partner",
       "auth": {
         "scopes": [
           "settlement:write"
         ]
       },
-      "idempotency_key": "m87_append_1",
+      "idempotency_key": "m87_pub_1",
       "request": {
-        "entries": [
-          {
-            "entry_type": "receipt",
-            "entity_id": "rcpt_cycle_m87_001",
-            "entity_hash": "1111111111111111111111111111111111111111111111111111111111111111",
-            "cycle_id": "cycle_m87_001"
-          },
-          {
-            "entry_type": "governance_artifact",
-            "entity_id": "rollout_policy_m87_v1",
-            "entity_hash": "2222222222222222222222222222222222222222222222222222222222222222"
-          }
-        ],
-        "occurred_at": "2026-02-20T09:00:00Z"
+        "publication": {
+          "source_type": "combined",
+          "source_ref": "batch_m87_001",
+          "root_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+          "entry_count": 3,
+          "artifact_refs": [
+            "receipt:rcpt_m85_001",
+            "rollout:diag_m74_001",
+            "dispute:bundle_m83_001"
+          ],
+          "linked_receipt_ids": [
+            "rcpt_m85_001"
+          ],
+          "linked_governance_artifact_ids": [
+            "diag_m74_001"
+          ],
+          "notes": "initial transparency publication"
+        },
+        "published_at": "2026-02-20T09:00:00Z"
       },
       "expect_ok": true,
-      "expect_entries_appended": 2,
-      "expect_first_entry_id": "tl_entry_000001",
-      "expect_last_entry_id": "tl_entry_000002",
+      "expect_publication_id": "transparency_pub_000001",
+      "expect_publication_index": 1,
+      "expect_source_type": "combined",
+      "expect_previous_root_hash": null,
       "expect_replayed": false
     },
     {
-      "op": "transparencyLog.publication.append",
+      "op": "transparencyLog.publication.record",
       "actor_ref": "admin_partner",
       "auth": {
         "scopes": [
           "settlement:write"
         ]
       },
-      "idempotency_key": "m87_append_1",
+      "idempotency_key": "m87_pub_1",
       "request": {
-        "entries": [
-          {
-            "entry_type": "receipt",
-            "entity_id": "rcpt_cycle_m87_001",
-            "entity_hash": "1111111111111111111111111111111111111111111111111111111111111111",
-            "cycle_id": "cycle_m87_001"
-          },
-          {
-            "entry_type": "governance_artifact",
-            "entity_id": "rollout_policy_m87_v1",
-            "entity_hash": "2222222222222222222222222222222222222222222222222222222222222222"
-          }
-        ],
-        "occurred_at": "2026-02-20T09:00:00Z"
+        "publication": {
+          "source_type": "combined",
+          "source_ref": "batch_m87_001",
+          "root_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+          "entry_count": 3,
+          "artifact_refs": [
+            "receipt:rcpt_m85_001",
+            "rollout:diag_m74_001",
+            "dispute:bundle_m83_001"
+          ],
+          "linked_receipt_ids": [
+            "rcpt_m85_001"
+          ],
+          "linked_governance_artifact_ids": [
+            "diag_m74_001"
+          ],
+          "notes": "initial transparency publication"
+        },
+        "published_at": "2026-02-20T09:00:00Z"
       },
       "expect_ok": true,
-      "expect_entries_appended": 2,
-      "expect_first_entry_id": "tl_entry_000001",
-      "expect_last_entry_id": "tl_entry_000002",
+      "expect_publication_id": "transparency_pub_000001",
+      "expect_publication_index": 1,
       "expect_replayed": true
     },
     {
-      "op": "transparencyLog.publication.append",
+      "op": "transparencyLog.publication.record",
       "actor_ref": "admin_partner",
       "auth": {
         "scopes": [
           "settlement:write"
         ]
       },
-      "idempotency_key": "m87_append_1",
+      "idempotency_key": "m87_pub_1",
       "request": {
-        "entries": [
-          {
-            "entry_type": "receipt",
-            "entity_id": "rcpt_cycle_m87_001_mutated",
-            "entity_hash": "1111111111111111111111111111111111111111111111111111111111111111",
-            "cycle_id": "cycle_m87_001"
-          }
-        ],
-        "occurred_at": "2026-02-20T09:00:00Z"
+        "publication": {
+          "source_type": "combined",
+          "source_ref": "batch_m87_001",
+          "root_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "entry_count": 3,
+          "artifact_refs": [
+            "receipt:rcpt_m85_001",
+            "rollout:diag_m74_001",
+            "dispute:bundle_m83_001"
+          ],
+          "linked_receipt_ids": [
+            "rcpt_m85_001"
+          ],
+          "linked_governance_artifact_ids": [
+            "diag_m74_001"
+          ],
+          "notes": "idempotency mismatch"
+        },
+        "published_at": "2026-02-20T09:00:00Z"
       },
       "expect_ok": false,
       "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH",
       "expect_reason_code": null
     },
     {
-      "op": "transparencyLog.publication.append",
+      "op": "transparencyLog.publication.record",
       "actor_ref": "admin_partner",
       "auth": {
         "scopes": [
           "settlement:write"
         ]
       },
-      "idempotency_key": "m87_append_2",
+      "idempotency_key": "m87_pub_2",
       "request": {
-        "entries": [
-          {
-            "entry_type": "receipt",
-            "entity_id": "rcpt_cycle_m87_002",
-            "entity_hash": "3333333333333333333333333333333333333333333333333333333333333333",
-            "cycle_id": "cycle_m87_002"
-          },
-          {
-            "entry_type": "governance_artifact",
-            "entity_id": "rollout_policy_m87_v2",
-            "entity_hash": "4444444444444444444444444444444444444444444444444444444444444444"
-          }
-        ],
-        "occurred_at": "2026-02-20T09:05:00Z"
+        "publication": {
+          "source_type": "combined",
+          "source_ref": "batch_m87_002",
+          "root_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+          "previous_root_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+          "entry_count": 2,
+          "artifact_refs": [
+            "receipt:rcpt_m86_001",
+            "rollout:diag_m75_001"
+          ],
+          "linked_receipt_ids": [
+            "rcpt_m86_001"
+          ],
+          "linked_governance_artifact_ids": [
+            "diag_m75_001"
+          ],
+          "notes": "second transparency publication"
+        },
+        "published_at": "2026-02-20T09:10:00Z"
       },
       "expect_ok": true,
-      "expect_entries_appended": 2,
-      "expect_first_entry_id": "tl_entry_000003",
-      "expect_last_entry_id": "tl_entry_000004",
+      "expect_publication_id": "transparency_pub_000002",
+      "expect_publication_index": 2,
+      "expect_source_type": "combined",
+      "expect_previous_root_hash": "1111111111111111111111111111111111111111111111111111111111111111",
       "expect_replayed": false
     },
     {
-      "op": "transparencyLog.publication.export",
-      "actor_ref": "admin_partner",
-      "auth": {
-        "scopes": [
-          "settlement:read"
-        ]
-      },
-      "query": {
-        "limit": 2,
-        "now_iso": "2026-02-20T09:10:00Z",
-        "exported_at_iso": "2026-02-20T09:10:00Z"
-      },
-      "save_export_ref": "page1",
-      "expect_ok": true,
-      "expect_entries_count": 2,
-      "expect_total_filtered": 4,
-      "expect_next_cursor": "tl_entry_000002",
-      "expect_has_attestation": true,
-      "expect_has_checkpoint": true,
-      "expect_verify_ok": true,
-      "expect_verify_public_key_ok": true
-    },
-    {
-      "op": "transparencyLog.publication.export",
-      "actor_ref": "admin_partner",
-      "auth": {
-        "scopes": [
-          "settlement:read"
-        ]
-      },
-      "query": {
-        "limit": 2,
-        "cursor_after_ref": "page1",
-        "attestation_after_ref": "page1",
-        "checkpoint_after_ref": "page1",
-        "now_iso": "2026-02-20T09:11:00Z",
-        "exported_at_iso": "2026-02-20T09:11:00Z"
-      },
-      "save_export_ref": "page2",
-      "expect_ok": true,
-      "expect_entries_count": 2,
-      "expect_total_filtered": 2,
-      "expect_next_cursor": null,
-      "expect_has_attestation": true,
-      "expect_has_checkpoint": true,
-      "expect_verify_ok": true,
-      "expect_verify_public_key_ok": true
-    },
-    {
-      "op": "transparencyLog.publication.export",
-      "actor_ref": "admin_partner",
-      "auth": {
-        "scopes": [
-          "settlement:read"
-        ]
-      },
-      "query": {
-        "limit": 2,
-        "cursor_after_ref": "page1",
-        "attestation_after_ref": "page1",
-        "checkpoint_after": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-        "now_iso": "2026-02-20T09:12:00Z",
-        "exported_at_iso": "2026-02-20T09:12:00Z"
-      },
-      "expect_ok": false,
-      "expect_error_code": "CONSTRAINT_VIOLATION",
-      "expect_reason_code": "transparency_log_checkpoint_after_not_found"
-    },
-    {
-      "op": "transparencyLog.publication.export",
-      "actor_ref": "admin_partner",
-      "auth": {
-        "scopes": [
-          "settlement:read"
-        ]
-      },
-      "query": {
-        "limit": 1,
-        "cursor_after_ref": "page1",
-        "attestation_after_ref": "page1",
-        "checkpoint_after_ref": "page1",
-        "now_iso": "2026-02-20T09:13:00Z",
-        "exported_at_iso": "2026-02-20T09:13:00Z"
-      },
-      "expect_ok": false,
-      "expect_error_code": "CONSTRAINT_VIOLATION",
-      "expect_reason_code": "transparency_log_checkpoint_query_mismatch"
-    },
-    {
-      "op": "transparencyLog.publication.export",
+      "op": "transparencyLog.publication.record",
       "actor_ref": "admin_partner",
       "auth": {
         "scopes": [
           "settlement:write"
         ]
       },
-      "query": {
-        "limit": 2,
-        "now_iso": "2026-02-20T09:14:00Z",
-        "exported_at_iso": "2026-02-20T09:14:00Z"
+      "idempotency_key": "m87_pub_bad_chain",
+      "request": {
+        "publication": {
+          "source_type": "combined",
+          "source_ref": "batch_m87_bad",
+          "root_hash": "3333333333333333333333333333333333333333333333333333333333333333",
+          "previous_root_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "entry_count": 1,
+          "artifact_refs": [
+            "receipt:rcpt_m86_002"
+          ],
+          "linked_receipt_ids": [
+            "rcpt_m86_002"
+          ],
+          "linked_governance_artifact_ids": [],
+          "notes": "bad chain"
+        },
+        "published_at": "2026-02-20T09:11:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "transparency_log_previous_root_mismatch"
+    },
+    {
+      "op": "transparencyLog.publication.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "idempotency_key": "m87_pub_scope_fail",
+      "request": {
+        "publication": {
+          "source_type": "combined",
+          "source_ref": "batch_m87_scope_fail",
+          "root_hash": "4444444444444444444444444444444444444444444444444444444444444444",
+          "previous_root_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+          "entry_count": 1,
+          "artifact_refs": [
+            "receipt:scope_fail"
+          ],
+          "linked_receipt_ids": [
+            "scope_fail"
+          ],
+          "linked_governance_artifact_ids": [],
+          "notes": "scope fail"
+        },
+        "published_at": "2026-02-20T09:12:00Z"
       },
       "expect_ok": false,
       "expect_error_code": "INSUFFICIENT_SCOPE",
       "expect_reason_code": null
     },
     {
-      "op": "transparencyLog.publication.export.verify_tampered",
-      "export_ref": "page1",
-      "tamper": {
-        "path": "entries.0.entity_hash",
-        "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-      },
-      "expect_verify_ok": false,
-      "expect_verify_error": "export_hash_mismatch"
-    },
-    {
       "op": "transparencyLog.publication.export",
-      "actor_ref": "other_partner",
+      "actor_ref": "admin_partner",
       "auth": {
         "scopes": [
           "settlement:read"
         ]
       },
       "query": {
+        "source_type": "combined",
+        "limit": 1,
         "now_iso": "2026-02-20T09:15:00Z",
         "exported_at_iso": "2026-02-20T09:15:00Z"
       },
+      "save_export_ref": "page1",
       "expect_ok": true,
-      "expect_entries_count": 0,
-      "expect_total_filtered": 0,
+      "expect_summary_total_publications": 2,
+      "expect_summary_returned_count": 1,
+      "expect_total_filtered": 2,
+      "expect_next_cursor": "transparency_pub_000001",
+      "expect_first_publication_id": "transparency_pub_000001",
+      "expect_has_attestation": true,
+      "expect_has_checkpoint": true,
+      "expect_has_signature": true,
+      "expect_attestation_after": null,
+      "expect_checkpoint_after": null
+    },
+    {
+      "op": "transparencyLog.publication.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "source_type": "combined",
+        "limit": 1,
+        "now_iso": "2026-02-20T09:16:00Z",
+        "exported_at_iso": "2026-02-20T09:16:00Z"
+      },
+      "cursor_after_ref": "page1",
+      "attestation_after_ref": "page1",
+      "checkpoint_after_ref": "page1",
+      "save_export_ref": "page2",
+      "expect_ok": true,
+      "expect_summary_total_publications": 2,
+      "expect_summary_returned_count": 1,
+      "expect_total_filtered": 1,
       "expect_next_cursor": null,
-      "expect_has_attestation": false,
-      "expect_has_checkpoint": false,
+      "expect_first_publication_id": "transparency_pub_000002",
+      "expect_has_attestation": true,
+      "expect_has_checkpoint": true,
+      "expect_has_signature": true
+    },
+    {
+      "op": "transparencyLog.publication.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "source_type": "combined",
+        "limit": 1,
+        "checkpoint_after": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "now_iso": "2026-02-20T09:17:00Z",
+        "exported_at_iso": "2026-02-20T09:17:00Z"
+      },
+      "cursor_after_ref": "page1",
+      "attestation_after_ref": "page1",
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "checkpoint_after_not_found"
+    },
+    {
+      "op": "transparencyLog.publication.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "source_type": "combined",
+        "from_iso": "2026-02-20T09:00:00Z",
+        "to_iso": "2026-02-20T09:30:00Z",
+        "limit": 1,
+        "now_iso": "2026-02-20T09:18:00Z",
+        "exported_at_iso": "2026-02-20T09:18:00Z"
+      },
+      "cursor_after_ref": "page1",
+      "attestation_after_ref": "page1",
+      "checkpoint_after_ref": "page1",
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "checkpoint_query_mismatch"
+    },
+    {
+      "op": "transparencyLog.publication.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "query": {
+        "source_type": "combined",
+        "limit": 1,
+        "now_iso": "2026-02-20T09:19:00Z",
+        "exported_at_iso": "2026-02-20T09:19:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE",
+      "expect_reason_code": null
+    },
+    {
+      "op": "transparencyLog.publication.export.verify",
+      "export_ref": "page1",
       "expect_verify_ok": true,
-      "expect_verify_public_key_ok": true
+      "expect_verify_error": null
+    },
+    {
+      "op": "transparencyLog.publication.export.verify_tampered",
+      "export_ref": "page1",
+      "tamper": "export_hash",
+      "expect_verify_ok": false,
+      "expect_verify_error": "hash_mismatch"
     }
   ]
 }

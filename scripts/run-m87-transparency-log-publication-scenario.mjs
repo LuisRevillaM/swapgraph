@@ -6,7 +6,11 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 
 import { JsonStateStore } from '../src/store/jsonStateStore.mjs';
-import { TransparencyLogPublicationService } from '../src/service/transparencyLogPublicationService.mjs';
+import { TransparencyLogService } from '../src/service/transparencyLogService.mjs';
+import {
+  verifyTransparencyLogPublicationExportPayload,
+  verifyTransparencyLogPublicationExportPayloadWithPublicKeyPem
+} from '../src/crypto/policyIntegritySigning.mjs';
 import { canonicalize } from '../src/util/canonicalJson.mjs';
 
 const MILESTONE = 'M87';
@@ -28,31 +32,6 @@ function readJson(p) {
 
 function clone(v) {
   return JSON.parse(JSON.stringify(v));
-}
-
-function setByPath(obj, dottedPath, value) {
-  const parts = String(dottedPath ?? '').split('.').filter(Boolean);
-  if (parts.length === 0) return;
-  let cur = obj;
-  for (let i = 0; i < parts.length - 1; i += 1) {
-    const k = parts[i];
-    const idx = Number.parseInt(k, 10);
-    if (Number.isFinite(idx) && String(idx) === k) {
-      cur = cur[idx];
-    } else {
-      cur = cur[k];
-    }
-    if (cur === undefined || cur === null) {
-      throw new Error(`invalid tamper path segment: ${k}`);
-    }
-  }
-  const last = parts[parts.length - 1];
-  const lastIdx = Number.parseInt(last, 10);
-  if (Number.isFinite(lastIdx) && String(lastIdx) === last) {
-    cur[lastIdx] = value;
-  } else {
-    cur[last] = value;
-  }
 }
 
 const schemasDir = path.join(root, 'docs/spec/schemas');
@@ -106,56 +85,36 @@ function applyExpectations(op, rec) {
   }
 }
 
+const keysExample = readJson(path.join(root, 'docs/spec/examples/api/keys.policy_integrity_signing.get.response.json'));
+const activeKey = (keysExample.keys ?? []).find(x => x?.status === 'active') ?? null;
+if (!activeKey?.public_key_pem) {
+  throw new Error('missing active policy integrity signing public key example');
+}
+
 const scenario = readJson(path.join(root, SCENARIO_FILE));
 const expected = readJson(path.join(root, EXPECTED_FILE));
 const actors = scenario.actors ?? {};
 
-const keySetExample = readJson(path.join(root, 'docs/spec/examples/api/keys.policy_integrity_signing.get.response.json'));
-const activeKeyId = keySetExample.active_key_id;
-const activeKey = (keySetExample.keys ?? []).find(k => k.key_id === activeKeyId);
-if (!activeKey?.public_key_pem) throw new Error('missing active policy integrity signing public key');
-
 const store = new JsonStateStore({ filePath: path.join(outDir, 'store.json') });
 store.load();
 
-const service = new TransparencyLogPublicationService({ store });
+const service = new TransparencyLogService({ store });
 const exportRefs = {};
 const operations = [];
 
 for (const op of scenario.operations ?? []) {
-  if (op.op === 'transparencyLog.publication.export.verify_tampered') {
-    const exportPayload = exportRefs?.[op.export_ref];
-    if (!exportPayload) throw new Error(`missing export_ref for tamper verify: ${op.export_ref}`);
-
-    const tampered = clone(exportPayload);
-    if (op.tamper?.path) {
-      setByPath(tampered, op.tamper.path, op.tamper.value);
-    }
-
-    const verified = service.verifyPublicationExportPayload({ payload: tampered });
-    const rec = {
-      op: op.op,
-      verify_ok: verified.ok === true,
-      verify_error: verified.ok ? null : (verified.error ?? null)
-    };
-    operations.push(rec);
-    applyExpectations(op, rec);
-    continue;
-  }
-
   const actor = op.actor_ref ? actors?.[op.actor_ref] : null;
   if (op.actor_ref && !actor) throw new Error(`unknown actor_ref: ${op.actor_ref}`);
 
-  if (op.op === 'transparencyLog.publication.append') {
-    validateApiRequest(op.op, op.request ?? {});
+  if (op.op === 'transparencyLog.publication.record') {
+    if (!op.skip_request_validation) validateApiRequest(op.op, op.request ?? {});
 
-    const response = service.appendPublicationEntries({
+    const response = service.recordPublication({
       actor,
       auth: op.auth ?? {},
       idempotencyKey: op.idempotency_key,
       request: op.request ?? {}
     });
-
     validateApiResponse(op.op, response);
 
     const rec = {
@@ -164,9 +123,10 @@ for (const op of scenario.operations ?? []) {
       error_code: response.ok ? null : response.body.error.code,
       reason_code: response.ok ? null : (response.body.error.details?.reason_code ?? null),
       publication_id: response.ok ? (response.body.publication?.publication_id ?? null) : null,
-      entries_appended: response.ok ? (response.body.publication?.entries_appended ?? null) : null,
-      first_entry_id: response.ok ? (response.body.publication?.first_entry_id ?? null) : null,
-      last_entry_id: response.ok ? (response.body.publication?.last_entry_id ?? null) : null,
+      publication_index: response.ok ? (response.body.publication?.publication_index ?? null) : null,
+      source_type: response.ok ? (response.body.publication?.source_type ?? null) : null,
+      previous_root_hash: response.ok ? (response.body.publication?.previous_root_hash ?? null) : null,
+      chain_hash: response.ok ? (response.body.publication?.chain_hash ?? null) : null,
       replayed: response.ok ? (response.body.replayed === true) : null
     };
 
@@ -178,50 +138,34 @@ for (const op of scenario.operations ?? []) {
   if (op.op === 'transparencyLog.publication.export') {
     const query = clone(op.query ?? {});
 
-    if (query.cursor_after_ref) {
-      const ref = exportRefs?.[query.cursor_after_ref];
-      if (!ref) throw new Error(`missing cursor_after_ref: ${query.cursor_after_ref}`);
-      query.cursor_after = ref.next_cursor ?? null;
-      delete query.cursor_after_ref;
+    if (op.cursor_after_ref) {
+      const ref = exportRefs[op.cursor_after_ref];
+      if (!ref?.next_cursor) throw new Error(`missing cursor ref: ${op.cursor_after_ref}`);
+      query.cursor_after = ref.next_cursor;
     }
 
-    if (query.attestation_after_ref) {
-      const ref = exportRefs?.[query.attestation_after_ref];
-      if (!ref) throw new Error(`missing attestation_after_ref: ${query.attestation_after_ref}`);
-      query.attestation_after = ref.attestation?.chain_hash ?? null;
-      delete query.attestation_after_ref;
+    if (op.attestation_after_ref) {
+      const ref = exportRefs[op.attestation_after_ref];
+      if (!ref?.attestation_chain_hash) throw new Error(`missing attestation ref: ${op.attestation_after_ref}`);
+      query.attestation_after = ref.attestation_chain_hash;
     }
 
-    if (query.checkpoint_after_ref) {
-      const ref = exportRefs?.[query.checkpoint_after_ref];
-      if (!ref) throw new Error(`missing checkpoint_after_ref: ${query.checkpoint_after_ref}`);
-      query.checkpoint_after = ref.checkpoint?.checkpoint_hash ?? null;
-      delete query.checkpoint_after_ref;
+    if (op.checkpoint_after_ref) {
+      const ref = exportRefs[op.checkpoint_after_ref];
+      if (!ref?.checkpoint_hash) throw new Error(`missing checkpoint ref: ${op.checkpoint_after_ref}`);
+      query.checkpoint_after = ref.checkpoint_hash;
     }
 
-    const response = service.exportPublicationLog({
-      actor,
-      auth: op.auth ?? {},
-      query
-    });
-
+    const response = service.exportPublications({ actor, auth: op.auth ?? {}, query });
     validateApiResponse(op.op, response);
 
     if (response.ok && op.save_export_ref) {
-      exportRefs[op.save_export_ref] = clone(response.body);
-    }
-
-    let verify = { ok: null, error: null };
-    let verifyWithPublicKey = { ok: null, error: null };
-
-    if (response.ok) {
-      verify = service.verifyPublicationExportPayload({ payload: response.body });
-      verifyWithPublicKey = service.verifyPublicationExportPayloadWithPublicKeyPem({
-        payload: response.body,
-        publicKeyPem: activeKey.public_key_pem,
-        keyId: activeKeyId,
-        alg: activeKey.alg
-      });
+      exportRefs[op.save_export_ref] = {
+        payload: clone(response.body),
+        next_cursor: response.body.next_cursor ?? null,
+        attestation_chain_hash: response.body.attestation?.chain_hash ?? null,
+        checkpoint_hash: response.body.checkpoint?.checkpoint_hash ?? null
+      };
     }
 
     const rec = {
@@ -229,17 +173,71 @@ for (const op of scenario.operations ?? []) {
       ok: response.ok,
       error_code: response.ok ? null : response.body.error.code,
       reason_code: response.ok ? null : (response.body.error.details?.reason_code ?? null),
-      entries_count: response.ok ? ((response.body.entries ?? []).length) : null,
+      summary_total_publications: response.ok ? (response.body.summary?.total_publications ?? null) : null,
+      summary_returned_count: response.ok ? (response.body.summary?.returned_count ?? null) : null,
       total_filtered: response.ok ? (response.body.total_filtered ?? null) : null,
       next_cursor: response.ok ? (response.body.next_cursor ?? null) : null,
-      has_attestation: response.ok ? Boolean(response.body.attestation) : null,
-      has_checkpoint: response.ok ? Boolean(response.body.checkpoint) : null,
-      attestation_chain_hash: response.ok ? (response.body.attestation?.chain_hash ?? null) : null,
-      checkpoint_hash: response.ok ? (response.body.checkpoint?.checkpoint_hash ?? null) : null,
-      verify_ok: response.ok ? (verify.ok === true) : null,
-      verify_error: response.ok ? (verify.ok ? null : (verify.error ?? null)) : null,
-      verify_public_key_ok: response.ok ? (verifyWithPublicKey.ok === true) : null,
-      verify_public_key_error: response.ok ? (verifyWithPublicKey.ok ? null : (verifyWithPublicKey.error ?? null)) : null
+      first_publication_id: response.ok ? (response.body.publications?.[0]?.publication_id ?? null) : null,
+      has_attestation: response.ok ? (response.body.attestation ? true : false) : null,
+      has_checkpoint: response.ok ? (response.body.checkpoint ? true : false) : null,
+      has_signature: response.ok ? (response.body.signature ? true : false) : null,
+      attestation_after: response.ok ? (response.body.attestation?.attestation_after ?? null) : null,
+      checkpoint_after: response.ok ? (response.body.checkpoint?.checkpoint_after ?? null) : null
+    };
+
+    operations.push(rec);
+    applyExpectations(op, rec);
+    continue;
+  }
+
+  if (op.op === 'transparencyLog.publication.export.verify') {
+    const ref = exportRefs[op.export_ref];
+    if (!ref?.payload) throw new Error(`missing export_ref payload: ${op.export_ref}`);
+
+    const verifyA = verifyTransparencyLogPublicationExportPayload(ref.payload);
+    const verifyB = verifyTransparencyLogPublicationExportPayloadWithPublicKeyPem({
+      payload: ref.payload,
+      publicKeyPem: activeKey.public_key_pem,
+      keyId: activeKey.key_id,
+      alg: activeKey.alg
+    });
+
+    const rec = {
+      op: op.op,
+      verify_ok: verifyA.ok === true && verifyB.ok === true,
+      verify_error: verifyA.ok ? (verifyB.ok ? null : verifyB.error) : verifyA.error
+    };
+
+    operations.push(rec);
+    applyExpectations(op, rec);
+    continue;
+  }
+
+  if (op.op === 'transparencyLog.publication.export.verify_tampered') {
+    const ref = exportRefs[op.export_ref];
+    if (!ref?.payload) throw new Error(`missing export_ref payload: ${op.export_ref}`);
+
+    const tampered = clone(ref.payload);
+    if (op.tamper === 'export_hash') {
+      tampered.export_hash = 'f'.repeat(64);
+    } else if (op.tamper === 'publication_root_hash' && Array.isArray(tampered.publications) && tampered.publications.length > 0) {
+      tampered.publications[0].root_hash = '0'.repeat(64);
+    } else {
+      tampered.export_hash = 'f'.repeat(64);
+    }
+
+    const verifyA = verifyTransparencyLogPublicationExportPayload(tampered);
+    const verifyB = verifyTransparencyLogPublicationExportPayloadWithPublicKeyPem({
+      payload: tampered,
+      publicKeyPem: activeKey.public_key_pem,
+      keyId: activeKey.key_id,
+      alg: activeKey.alg
+    });
+
+    const rec = {
+      op: op.op,
+      verify_ok: verifyA.ok === true && verifyB.ok === true,
+      verify_error: verifyA.ok ? (verifyB.ok ? null : verifyB.error) : verifyA.error
     };
 
     operations.push(rec);
@@ -254,7 +252,9 @@ store.save();
 
 const final = {
   transparency_log_publications: clone(store.state.transparency_log_publications ?? []),
-  transparency_log_export_checkpoints: clone(store.state.transparency_log_export_checkpoints ?? {})
+  transparency_log_export_checkpoints: clone(store.state.transparency_log_export_checkpoints ?? {}),
+  transparency_log_publication_counter: store.state.transparency_log_publication_counter ?? 0,
+  transparency_log_entry_counter: store.state.transparency_log_entry_counter ?? 0
 };
 
 const out = canonicalize({ operations, final });

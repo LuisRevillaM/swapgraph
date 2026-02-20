@@ -109,13 +109,15 @@ Notes:
   - `steam_live_proof_vault_lifecycle_incomplete`
   - `transparency_log_publication_invalid`
   - `transparency_log_publication_invalid_timestamp`
+  - `transparency_log_previous_root_mismatch`
   - `transparency_log_export_query_invalid`
-  - `transparency_log_cursor_not_found`
-  - `transparency_log_checkpoint_after_not_found`
-  - `transparency_log_checkpoint_expired`
-  - `transparency_log_checkpoint_cursor_mismatch`
-  - `transparency_log_checkpoint_attestation_mismatch`
-  - `transparency_log_checkpoint_query_mismatch`
+  - `transparency_log_export_invalid_timestamp`
+  - `transparency_log_export_cursor_not_found`
+  - `checkpoint_after_not_found`
+  - `checkpoint_expired`
+  - `checkpoint_cursor_mismatch`
+  - `checkpoint_attestation_mismatch`
+  - `checkpoint_query_mismatch`
 - Rollout diagnostics automation execution-attestation verification may return deterministic mismatch errors such as:
   - `automation_execution_expected_effect_hash_mismatch`
   - `automation_execution_request_hash_chain_mismatch`

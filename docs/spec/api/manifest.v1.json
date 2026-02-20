@@ -1185,7 +1185,7 @@
     },
     {
       "method": "GET",
-      "path": "/transparency-log/publication/export",
+      "path": "/transparency-log/publications/export",
       "operation_id": "transparencyLog.publication.export",
       "idempotency_required": false,
       "response_schema": "TransparencyLogPublicationExportResponse.schema.json",
@@ -1196,6 +1196,23 @@
         ],
         "required_scopes": [
           "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/transparency-log/publications",
+      "operation_id": "transparencyLog.publication.record",
+      "idempotency_required": true,
+      "request_schema": "TransparencyLogPublicationRecordRequest.schema.json",
+      "response_schema": "TransparencyLogPublicationRecordResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
         ]
       }
     }
