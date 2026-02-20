@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/InclusionProofLinkageRecordResponse.schema.json",
+  "title": "InclusionProofLinkageRecordResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "linkage",
+    "replayed"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linkage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "linkage_id",
+        "linkage_index",
+        "partner_id",
+        "cycle_id",
+        "receipt_id",
+        "receipt_hash",
+        "receipt_signature_key_id",
+        "custody_snapshot_id",
+        "custody_holding_id",
+        "custody_root_hash",
+        "custody_leaf_hash",
+        "inclusion_proof_hash",
+        "transparency_publication_id",
+        "transparency_root_hash",
+        "transparency_chain_hash",
+        "previous_linkage_hash",
+        "linkage_hash",
+        "integration_mode",
+        "recorded_at"
+      ],
+      "properties": {
+        "linkage_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "linkage_index": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cycle_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "receipt_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "receipt_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "receipt_signature_key_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "custody_snapshot_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "custody_holding_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "custody_root_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "custody_leaf_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "inclusion_proof_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "transparency_publication_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "transparency_root_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "transparency_chain_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "previous_linkage_hash": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "linkage_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        },
+        "integration_mode": {
+          "type": "string",
+          "enum": [
+            "fixture_only"
+          ]
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "replayed": {
+      "type": "boolean"
+    }
+  }
+}

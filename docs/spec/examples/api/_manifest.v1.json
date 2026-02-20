@@ -444,6 +444,18 @@
     {
       "file": "transparency_log.publication.export.response.json",
       "schema": "TransparencyLogPublicationExportResponse.schema.json"
+    },
+    {
+      "file": "inclusion_proof.linkage.record.request.json",
+      "schema": "InclusionProofLinkageRecordRequest.schema.json"
+    },
+    {
+      "file": "inclusion_proof.linkage.record.response.json",
+      "schema": "InclusionProofLinkageRecordResponse.schema.json"
+    },
+    {
+      "file": "inclusion_proof.linkage.export.response.json",
+      "schema": "InclusionProofLinkageExportResponse.schema.json"
     }
   ]
 }

@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/InclusionProofLinkageRecordRequest.schema.json",
+  "title": "InclusionProofLinkageRecordRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "linkage",
+    "occurred_at"
+  ],
+  "properties": {
+    "linkage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cycle_id",
+        "custody_snapshot_id",
+        "custody_holding_id",
+        "transparency_publication_id"
+      ],
+      "properties": {
+        "cycle_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "custody_snapshot_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "custody_holding_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "transparency_publication_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

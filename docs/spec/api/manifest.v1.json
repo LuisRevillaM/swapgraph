@@ -1215,6 +1215,39 @@
           "settlement:write"
         ]
       }
+    },
+    {
+      "method": "POST",
+      "path": "/inclusion-proof/linkages",
+      "operation_id": "inclusionProof.linkage.record",
+      "idempotency_required": true,
+      "request_schema": "InclusionProofLinkageRecordRequest.schema.json",
+      "response_schema": "InclusionProofLinkageRecordResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/inclusion-proof/linkages/export",
+      "operation_id": "inclusionProof.linkage.export",
+      "idempotency_required": false,
+      "response_schema": "InclusionProofLinkageExportResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
     }
   ],
   "webhooks": {

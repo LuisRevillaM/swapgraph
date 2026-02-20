@@ -3581,3 +3581,246 @@ export function verifyTransparencyLogPublicationExportPayloadWithPublicKeyPem({ 
   const signable = transparencyLogPublicationExportSignablePayload(payload);
   return verifyPolicyIntegrityPayloadSignatureWithPublicKeyPem({ payload: signable, publicKeyPem, keyId, alg });
 }
+
+function normalizeInclusionProofLinkageExportQuery(query) {
+  const out = {};
+
+  if (typeof query?.cycle_id === 'string' && query.cycle_id.trim()) out.cycle_id = query.cycle_id.trim();
+  if (typeof query?.from_iso === 'string' && query.from_iso.trim()) out.from_iso = query.from_iso.trim();
+  if (typeof query?.to_iso === 'string' && query.to_iso.trim()) out.to_iso = query.to_iso.trim();
+
+  if (Number.isFinite(query?.limit)) out.limit = Number(query.limit);
+  else {
+    const limit = Number.parseInt(String(query?.limit ?? ''), 10);
+    if (Number.isFinite(limit)) out.limit = limit;
+  }
+
+  if (typeof query?.cursor_after === 'string' && query.cursor_after.trim()) out.cursor_after = query.cursor_after.trim();
+  if (typeof query?.attestation_after === 'string' && query.attestation_after.trim()) out.attestation_after = query.attestation_after.trim();
+  if (typeof query?.checkpoint_after === 'string' && query.checkpoint_after.trim()) out.checkpoint_after = query.checkpoint_after.trim();
+  if (typeof query?.now_iso === 'string' && query.now_iso.trim()) out.now_iso = query.now_iso.trim();
+  if (typeof query?.exported_at_iso === 'string' && query.exported_at_iso.trim()) out.exported_at_iso = query.exported_at_iso.trim();
+
+  return out;
+}
+
+function normalizeInclusionProofLinkageExportSummary(summary) {
+  return {
+    total_linkages: Number.isFinite(summary?.total_linkages) ? Number(summary.total_linkages) : 0,
+    returned_count: Number.isFinite(summary?.returned_count) ? Number(summary.returned_count) : 0,
+    linked_receipt_count: Number.isFinite(summary?.linked_receipt_count) ? Number(summary.linked_receipt_count) : 0,
+    chain_head: typeof summary?.chain_head === 'string' ? summary.chain_head : null,
+    chain_tail: typeof summary?.chain_tail === 'string' ? summary.chain_tail : null
+  };
+}
+
+function normalizeInclusionProofLinkageRecord(linkage) {
+  return {
+    linkage_id: typeof linkage?.linkage_id === 'string' ? linkage.linkage_id : null,
+    linkage_index: Number.isFinite(linkage?.linkage_index) ? Number(linkage.linkage_index) : 0,
+    partner_id: typeof linkage?.partner_id === 'string' ? linkage.partner_id : null,
+    cycle_id: typeof linkage?.cycle_id === 'string' ? linkage.cycle_id : null,
+    receipt_id: typeof linkage?.receipt_id === 'string' ? linkage.receipt_id : null,
+    receipt_hash: typeof linkage?.receipt_hash === 'string' ? linkage.receipt_hash : null,
+    receipt_signature_key_id: typeof linkage?.receipt_signature_key_id === 'string' ? linkage.receipt_signature_key_id : null,
+    custody_snapshot_id: typeof linkage?.custody_snapshot_id === 'string' ? linkage.custody_snapshot_id : null,
+    custody_holding_id: typeof linkage?.custody_holding_id === 'string' ? linkage.custody_holding_id : null,
+    custody_root_hash: typeof linkage?.custody_root_hash === 'string' ? linkage.custody_root_hash : null,
+    custody_leaf_hash: typeof linkage?.custody_leaf_hash === 'string' ? linkage.custody_leaf_hash : null,
+    inclusion_proof_hash: typeof linkage?.inclusion_proof_hash === 'string' ? linkage.inclusion_proof_hash : null,
+    transparency_publication_id: typeof linkage?.transparency_publication_id === 'string' ? linkage.transparency_publication_id : null,
+    transparency_root_hash: typeof linkage?.transparency_root_hash === 'string' ? linkage.transparency_root_hash : null,
+    transparency_chain_hash: typeof linkage?.transparency_chain_hash === 'string' ? linkage.transparency_chain_hash : null,
+    previous_linkage_hash: typeof linkage?.previous_linkage_hash === 'string' ? linkage.previous_linkage_hash : null,
+    linkage_hash: typeof linkage?.linkage_hash === 'string' ? linkage.linkage_hash : null,
+    ...(typeof linkage?.notes === 'string' ? { notes: linkage.notes } : {}),
+    integration_mode: typeof linkage?.integration_mode === 'string' ? linkage.integration_mode : 'fixture_only',
+    recorded_at: typeof linkage?.recorded_at === 'string' ? linkage.recorded_at : null
+  };
+}
+
+function normalizeInclusionProofLinkageRecords(linkages) {
+  return (linkages ?? [])
+    .map(normalizeInclusionProofLinkageRecord)
+    .sort((a, b) => `${a.recorded_at ?? ''}|${a.linkage_id ?? ''}`.localeCompare(`${b.recorded_at ?? ''}|${b.linkage_id ?? ''}`));
+}
+
+function inclusionProofLinkageExportSignablePayload(payload) {
+  return {
+    exported_at: payload?.exported_at,
+    query: normalizeInclusionProofLinkageExportQuery(payload?.query),
+    summary: normalizeInclusionProofLinkageExportSummary(payload?.summary),
+    linkages: normalizeInclusionProofLinkageRecords(payload?.linkages),
+    total_filtered: Number.isFinite(payload?.total_filtered) ? Number(payload.total_filtered) : 0,
+    ...(typeof payload?.next_cursor === 'string' ? { next_cursor: payload.next_cursor } : {}),
+    ...(payload?.attestation ? { attestation: normalizeExportAttestation(payload.attestation) } : {}),
+    ...(payload?.checkpoint ? { checkpoint: normalizeExportCheckpoint(payload.checkpoint) } : {}),
+    export_hash: payload?.export_hash,
+    signature: payload?.signature
+  };
+}
+
+export function buildInclusionProofLinkageExportHash({ query, summary, linkages, totalFiltered, nextCursor }) {
+  return sha256HexCanonical({
+    query: normalizeInclusionProofLinkageExportQuery(query),
+    summary: normalizeInclusionProofLinkageExportSummary(summary),
+    linkages: normalizeInclusionProofLinkageRecords(linkages),
+    total_filtered: Number.isFinite(totalFiltered) ? Number(totalFiltered) : 0,
+    ...(typeof nextCursor === 'string' ? { next_cursor: nextCursor } : {})
+  });
+}
+
+export function buildSignedInclusionProofLinkageExportPayload({
+  exportedAt,
+  query,
+  summary,
+  linkages,
+  totalFiltered,
+  nextCursor,
+  withAttestation,
+  withCheckpoint,
+  keyId
+}) {
+  const normalizedQuery = normalizeInclusionProofLinkageExportQuery(query);
+  const normalizedSummary = normalizeInclusionProofLinkageExportSummary(summary);
+  const normalizedLinkages = normalizeInclusionProofLinkageRecords(linkages);
+  const normalizedTotalFiltered = Number.isFinite(totalFiltered) ? Number(totalFiltered) : 0;
+
+  const exportHash = buildInclusionProofLinkageExportHash({
+    query: normalizedQuery,
+    summary: normalizedSummary,
+    linkages: normalizedLinkages,
+    totalFiltered: normalizedTotalFiltered,
+    nextCursor
+  });
+
+  const payload = {
+    exported_at: exportedAt,
+    query: normalizedQuery,
+    summary: normalizedSummary,
+    linkages: normalizedLinkages,
+    total_filtered: normalizedTotalFiltered,
+    ...(typeof nextCursor === 'string' ? { next_cursor: nextCursor } : {}),
+    export_hash: exportHash
+  };
+
+  if (withAttestation) {
+    payload.attestation = buildPolicyAuditExportAttestation({
+      query: normalizedQuery,
+      nextCursor,
+      exportHash
+    });
+  }
+
+  if (withCheckpoint) {
+    payload.checkpoint = buildPolicyAuditExportCheckpoint({
+      query: normalizedQuery,
+      attestation: payload.attestation ?? null,
+      nextCursor,
+      entriesCount: normalizedLinkages.length,
+      totalFiltered: normalizedTotalFiltered
+    });
+  }
+
+  payload.signature = signPolicyIntegrityPayload(payload, { keyId });
+  return payload;
+}
+
+export function verifyInclusionProofLinkageExportPayload(payload) {
+  if (!payload || typeof payload !== 'object') return { ok: false, error: 'missing_payload' };
+
+  const expectedHash = buildInclusionProofLinkageExportHash({
+    query: payload.query,
+    summary: payload.summary,
+    linkages: payload.linkages,
+    totalFiltered: payload.total_filtered,
+    nextCursor: payload.next_cursor
+  });
+
+  if (payload.export_hash !== expectedHash) {
+    return {
+      ok: false,
+      error: 'hash_mismatch',
+      details: {
+        expected_hash: expectedHash,
+        provided_hash: payload.export_hash ?? null
+      }
+    };
+  }
+
+  if (payload.attestation) {
+    const attestation = verifyPolicyAuditExportAttestation({
+      attestation: payload.attestation,
+      query: payload.query,
+      nextCursor: payload.next_cursor,
+      exportHash: expectedHash
+    });
+    if (!attestation.ok) return attestation;
+  }
+
+  if (payload.checkpoint) {
+    const checkpoint = verifyPolicyAuditExportCheckpoint({
+      checkpoint: payload.checkpoint,
+      query: payload.query,
+      attestation: payload.attestation ?? null,
+      nextCursor: payload.next_cursor,
+      entriesCount: Array.isArray(payload.linkages) ? payload.linkages.length : 0,
+      totalFiltered: Number.isFinite(payload.total_filtered) ? Number(payload.total_filtered) : 0
+    });
+    if (!checkpoint.ok) return checkpoint;
+  }
+
+  const signable = inclusionProofLinkageExportSignablePayload(payload);
+  const verified = verifyPolicyIntegrityPayloadSignature(signable);
+  if (!verified.ok) return verified;
+
+  return { ok: true };
+}
+
+export function verifyInclusionProofLinkageExportPayloadWithPublicKeyPem({ payload, publicKeyPem, keyId, alg }) {
+  if (!payload || typeof payload !== 'object') return { ok: false, error: 'missing_payload' };
+
+  const expectedHash = buildInclusionProofLinkageExportHash({
+    query: payload.query,
+    summary: payload.summary,
+    linkages: payload.linkages,
+    totalFiltered: payload.total_filtered,
+    nextCursor: payload.next_cursor
+  });
+
+  if (payload.export_hash !== expectedHash) {
+    return {
+      ok: false,
+      error: 'hash_mismatch',
+      details: {
+        expected_hash: expectedHash,
+        provided_hash: payload.export_hash ?? null
+      }
+    };
+  }
+
+  if (payload.attestation) {
+    const attestation = verifyPolicyAuditExportAttestation({
+      attestation: payload.attestation,
+      query: payload.query,
+      nextCursor: payload.next_cursor,
+      exportHash: expectedHash
+    });
+    if (!attestation.ok) return attestation;
+  }
+
+  if (payload.checkpoint) {
+    const checkpoint = verifyPolicyAuditExportCheckpoint({
+      checkpoint: payload.checkpoint,
+      query: payload.query,
+      attestation: payload.attestation ?? null,
+      nextCursor: payload.next_cursor,
+      entriesCount: Array.isArray(payload.linkages) ? payload.linkages.length : 0,
+      totalFiltered: Number.isFinite(payload.total_filtered) ? Number(payload.total_filtered) : 0
+    });
+    if (!checkpoint.ok) return checkpoint;
+  }
+
+  const signable = inclusionProofLinkageExportSignablePayload(payload);
+  return verifyPolicyIntegrityPayloadSignatureWithPublicKeyPem({ payload: signable, publicKeyPem, keyId, alg });
+}

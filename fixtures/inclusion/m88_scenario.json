@@ -1,0 +1,424 @@
+{
+  "actors": {
+    "admin_partner": {
+      "type": "partner",
+      "id": "ops-admin"
+    }
+  },
+  "seed": {
+    "receipts": [
+      {
+        "cycle_id": "cycle_m88_001",
+        "receipt_id": "receipt_m88_001",
+        "final_state": "completed",
+        "completed_at": "2026-02-20T10:00:00Z"
+      },
+      {
+        "cycle_id": "cycle_m88_002",
+        "receipt_id": "receipt_m88_002",
+        "final_state": "completed",
+        "completed_at": "2026-02-20T10:05:00Z"
+      },
+      {
+        "cycle_id": "cycle_m88_bad_sig",
+        "receipt_id": "receipt_m88_bad_sig",
+        "final_state": "completed",
+        "completed_at": "2026-02-20T10:06:00Z",
+        "tamper_signature": true
+      }
+    ],
+    "custody_snapshots": [
+      {
+        "snapshot_id": "cust_snap_m88_001",
+        "recorded_at": "2026-02-20T09:58:00Z",
+        "holdings": [
+          {
+            "holding_id": "hold_m88_001",
+            "asset": {
+              "platform": "steam",
+              "asset_id": "asset_m88_001"
+            },
+            "owner_actor": {
+              "type": "user",
+              "id": "u_m88_001"
+            },
+            "vault_id": "vault_m88",
+            "deposit_id": "dep_m88_001",
+            "deposited_at": "2026-02-20T09:57:00Z"
+          }
+        ]
+      },
+      {
+        "snapshot_id": "cust_snap_m88_002",
+        "recorded_at": "2026-02-20T10:04:00Z",
+        "holdings": [
+          {
+            "holding_id": "hold_m88_002",
+            "asset": {
+              "platform": "steam",
+              "asset_id": "asset_m88_002"
+            },
+            "owner_actor": {
+              "type": "user",
+              "id": "u_m88_002"
+            },
+            "vault_id": "vault_m88",
+            "deposit_id": "dep_m88_002",
+            "deposited_at": "2026-02-20T10:03:00Z"
+          }
+        ]
+      }
+    ],
+    "transparency_publications": [
+      {
+        "publication_id": "transparency_pub_000001",
+        "publication_index": 1,
+        "partner_id": "ops-admin",
+        "source_type": "combined",
+        "source_ref": "batch_m88_001",
+        "root_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+        "previous_root_hash": null,
+        "previous_chain_hash": null,
+        "chain_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "entry_count": 2,
+        "artifact_refs": [
+          "receipt:receipt_m88_001",
+          "custody_snapshot:cust_snap_m88_001"
+        ],
+        "linked_receipt_ids": [
+          "receipt_m88_001"
+        ],
+        "linked_governance_artifact_ids": [
+          "gov_m88_001"
+        ],
+        "published_at": "2026-02-20T10:00:00Z"
+      },
+      {
+        "publication_id": "transparency_pub_000002",
+        "publication_index": 2,
+        "partner_id": "ops-admin",
+        "source_type": "combined",
+        "source_ref": "batch_m88_002",
+        "root_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+        "previous_root_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+        "previous_chain_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "chain_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "entry_count": 2,
+        "artifact_refs": [
+          "receipt:receipt_m88_002",
+          "custody_snapshot:cust_snap_m88_002"
+        ],
+        "linked_receipt_ids": [
+          "receipt_m88_002"
+        ],
+        "linked_governance_artifact_ids": [
+          "gov_m88_002"
+        ],
+        "published_at": "2026-02-20T10:05:00Z"
+      },
+      {
+        "publication_id": "transparency_pub_000003",
+        "publication_index": 3,
+        "partner_id": "ops-admin",
+        "source_type": "combined",
+        "source_ref": "batch_m88_003",
+        "root_hash": "3333333333333333333333333333333333333333333333333333333333333333",
+        "previous_root_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+        "previous_chain_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "chain_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "entry_count": 1,
+        "artifact_refs": [
+          "receipt:receipt_m88_001"
+        ],
+        "linked_receipt_ids": [
+          "receipt_m88_001"
+        ],
+        "linked_governance_artifact_ids": [],
+        "published_at": "2026-02-20T10:06:00Z"
+      }
+    ]
+  },
+  "operations": [
+    {
+      "op": "inclusionProof.linkage.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m88_linkage_1",
+      "request": {
+        "linkage": {
+          "cycle_id": "cycle_m88_001",
+          "custody_snapshot_id": "cust_snap_m88_001",
+          "custody_holding_id": "hold_m88_001",
+          "transparency_publication_id": "transparency_pub_000001",
+          "notes": "first linkage"
+        },
+        "occurred_at": "2026-02-20T10:10:00Z"
+      },
+      "expect_ok": true,
+      "expect_linkage_id": "inclusion_linkage_000001",
+      "expect_linkage_index": 1,
+      "expect_cycle_id": "cycle_m88_001",
+      "expect_receipt_id": "receipt_m88_001",
+      "expect_custody_snapshot_id": "cust_snap_m88_001",
+      "expect_transparency_publication_id": "transparency_pub_000001",
+      "expect_previous_linkage_hash": null,
+      "expect_previous_linkage_hash_present": false,
+      "expect_linkage_hash_present": true,
+      "expect_replayed": false
+    },
+    {
+      "op": "inclusionProof.linkage.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m88_linkage_1",
+      "request": {
+        "linkage": {
+          "cycle_id": "cycle_m88_001",
+          "custody_snapshot_id": "cust_snap_m88_001",
+          "custody_holding_id": "hold_m88_001",
+          "transparency_publication_id": "transparency_pub_000001",
+          "notes": "first linkage"
+        },
+        "occurred_at": "2026-02-20T10:10:00Z"
+      },
+      "expect_ok": true,
+      "expect_linkage_id": "inclusion_linkage_000001",
+      "expect_linkage_index": 1,
+      "expect_replayed": true
+    },
+    {
+      "op": "inclusionProof.linkage.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m88_linkage_1",
+      "request": {
+        "linkage": {
+          "cycle_id": "cycle_m88_001",
+          "custody_snapshot_id": "cust_snap_m88_001",
+          "custody_holding_id": "hold_m88_002",
+          "transparency_publication_id": "transparency_pub_000001",
+          "notes": "idempotency mismatch"
+        },
+        "occurred_at": "2026-02-20T10:10:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH",
+      "expect_reason_code": null
+    },
+    {
+      "op": "inclusionProof.linkage.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m88_linkage_bad_sig",
+      "request": {
+        "linkage": {
+          "cycle_id": "cycle_m88_bad_sig",
+          "custody_snapshot_id": "cust_snap_m88_001",
+          "custody_holding_id": "hold_m88_001",
+          "transparency_publication_id": "transparency_pub_000001",
+          "notes": "bad signature receipt"
+        },
+        "occurred_at": "2026-02-20T10:11:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "inclusion_linkage_receipt_signature_invalid"
+    },
+    {
+      "op": "inclusionProof.linkage.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m88_linkage_missing_artifact",
+      "request": {
+        "linkage": {
+          "cycle_id": "cycle_m88_001",
+          "custody_snapshot_id": "cust_snap_m88_001",
+          "custody_holding_id": "hold_m88_001",
+          "transparency_publication_id": "transparency_pub_000003",
+          "notes": "missing custody artifact ref"
+        },
+        "occurred_at": "2026-02-20T10:12:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "inclusion_linkage_transparency_artifact_missing"
+    },
+    {
+      "op": "inclusionProof.linkage.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m88_linkage_2",
+      "request": {
+        "linkage": {
+          "cycle_id": "cycle_m88_002",
+          "custody_snapshot_id": "cust_snap_m88_002",
+          "custody_holding_id": "hold_m88_002",
+          "transparency_publication_id": "transparency_pub_000002",
+          "notes": "second linkage"
+        },
+        "occurred_at": "2026-02-20T10:13:00Z"
+      },
+      "expect_ok": true,
+      "expect_linkage_id": "inclusion_linkage_000002",
+      "expect_linkage_index": 2,
+      "expect_cycle_id": "cycle_m88_002",
+      "expect_receipt_id": "receipt_m88_002",
+      "expect_custody_snapshot_id": "cust_snap_m88_002",
+      "expect_transparency_publication_id": "transparency_pub_000002",
+      "expect_previous_linkage_hash_present": true,
+      "expect_linkage_hash_present": true,
+      "expect_replayed": false
+    },
+    {
+      "op": "inclusionProof.linkage.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "limit": 1,
+        "now_iso": "2026-02-20T10:20:00Z",
+        "exported_at_iso": "2026-02-20T10:20:00Z"
+      },
+      "save_export_ref": "page1",
+      "expect_ok": true,
+      "expect_summary_total_linkages": 2,
+      "expect_summary_returned_count": 1,
+      "expect_summary_linked_receipt_count": 2,
+      "expect_total_filtered": 2,
+      "expect_next_cursor": "inclusion_linkage_000001",
+      "expect_first_linkage_id": "inclusion_linkage_000001",
+      "expect_has_attestation": true,
+      "expect_has_checkpoint": true,
+      "expect_has_signature": true,
+      "expect_attestation_after": null,
+      "expect_checkpoint_after": null
+    },
+    {
+      "op": "inclusionProof.linkage.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "limit": 1,
+        "now_iso": "2026-02-20T10:21:00Z",
+        "exported_at_iso": "2026-02-20T10:21:00Z"
+      },
+      "cursor_after_ref": "page1",
+      "attestation_after_ref": "page1",
+      "checkpoint_after_ref": "page1",
+      "save_export_ref": "page2",
+      "expect_ok": true,
+      "expect_summary_total_linkages": 2,
+      "expect_summary_returned_count": 1,
+      "expect_summary_linked_receipt_count": 2,
+      "expect_total_filtered": 1,
+      "expect_next_cursor": null,
+      "expect_first_linkage_id": "inclusion_linkage_000002",
+      "expect_has_attestation": true,
+      "expect_has_checkpoint": true,
+      "expect_has_signature": true
+    },
+    {
+      "op": "inclusionProof.linkage.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "limit": 1,
+        "checkpoint_after": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "now_iso": "2026-02-20T10:22:00Z",
+        "exported_at_iso": "2026-02-20T10:22:00Z"
+      },
+      "cursor_after_ref": "page1",
+      "attestation_after_ref": "page1",
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "checkpoint_after_not_found"
+    },
+    {
+      "op": "inclusionProof.linkage.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-20T10:00:00Z",
+        "to_iso": "2026-02-20T10:30:00Z",
+        "limit": 1,
+        "now_iso": "2026-02-20T10:23:00Z",
+        "exported_at_iso": "2026-02-20T10:23:00Z"
+      },
+      "cursor_after_ref": "page1",
+      "attestation_after_ref": "page1",
+      "checkpoint_after_ref": "page1",
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "checkpoint_query_mismatch"
+    },
+    {
+      "op": "inclusionProof.linkage.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "query": {
+        "limit": 1,
+        "now_iso": "2026-02-20T10:24:00Z",
+        "exported_at_iso": "2026-02-20T10:24:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE",
+      "expect_reason_code": null
+    },
+    {
+      "op": "inclusionProof.linkage.export.verify",
+      "export_ref": "page1",
+      "expect_verify_ok": true,
+      "expect_verify_error": null
+    },
+    {
+      "op": "inclusionProof.linkage.export.verify_tampered",
+      "export_ref": "page1",
+      "tamper": "export_hash",
+      "expect_verify_ok": false,
+      "expect_verify_error": "hash_mismatch"
+    }
+  ]
+}

@@ -174,6 +174,11 @@ Settlement endpoints:
 - `GET /transparency-log/publications/export`
   - signed transparency-log export (`summary`, paginated entries, `next_cursor`, `export_hash`, detached signature)
   - supports deterministic continuation (`limit`, `cursor_after`, `attestation_after`, `checkpoint_after`)
+- `POST /inclusion-proof/linkages`
+  - idempotent unified inclusion-proof linkage record (signed receipt + custody inclusion proof + transparency publication chain link)
+- `GET /inclusion-proof/linkages/export`
+  - signed inclusion-proof linkage export (`summary`, paginated `linkages`, `next_cursor`, `export_hash`, detached signature)
+  - supports deterministic continuation (`limit`, `cursor_after`, `attestation_after`, `checkpoint_after`)
 
 Receipt endpoints:
 - `GET /receipts/{cycle_id}`

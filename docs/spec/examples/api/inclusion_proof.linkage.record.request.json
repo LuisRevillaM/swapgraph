@@ -1,0 +1,10 @@
+{
+  "linkage": {
+    "cycle_id": "cycle_m88_001",
+    "custody_snapshot_id": "cust_snap_m88_001",
+    "custody_holding_id": "hold_m88_001",
+    "transparency_publication_id": "transparency_pub_000001",
+    "notes": "link custody proof to transparency publication"
+  },
+  "occurred_at": "2026-02-20T10:00:00Z"
+}

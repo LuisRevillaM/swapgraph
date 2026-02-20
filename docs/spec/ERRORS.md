@@ -118,6 +118,18 @@ Notes:
   - `checkpoint_cursor_mismatch`
   - `checkpoint_attestation_mismatch`
   - `checkpoint_query_mismatch`
+  - `inclusion_linkage_invalid`
+  - `inclusion_linkage_invalid_timestamp`
+  - `inclusion_linkage_receipt_not_found`
+  - `inclusion_linkage_receipt_signature_invalid`
+  - `inclusion_linkage_custody_snapshot_not_found`
+  - `inclusion_linkage_custody_holding_not_found`
+  - `inclusion_linkage_custody_proof_invalid`
+  - `inclusion_linkage_transparency_publication_not_found`
+  - `inclusion_linkage_transparency_artifact_missing`
+  - `inclusion_linkage_export_query_invalid`
+  - `inclusion_linkage_export_invalid_timestamp`
+  - `inclusion_linkage_export_cursor_not_found`
 - Rollout diagnostics automation execution-attestation verification may return deterministic mismatch errors such as:
   - `automation_execution_expected_effect_hash_mismatch`
   - `automation_execution_request_hash_chain_mismatch`

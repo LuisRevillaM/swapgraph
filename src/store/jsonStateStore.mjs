@@ -46,6 +46,9 @@ export class JsonStateStore {
       transparency_log_export_checkpoints: {},
       transparency_log_publication_counter: 0,
       transparency_log_entry_counter: 0,
+      inclusion_proof_linkages: [],
+      inclusion_proof_export_checkpoints: {},
+      inclusion_proof_linkage_counter: 0,
       oauth_clients: {},
       oauth_tokens: {}
     };
@@ -90,6 +93,9 @@ export class JsonStateStore {
         transparency_log_export_checkpoints: {},
         transparency_log_publication_counter: 0,
         transparency_log_entry_counter: 0,
+        inclusion_proof_linkages: [],
+        inclusion_proof_export_checkpoints: {},
+        inclusion_proof_linkage_counter: 0,
         oauth_clients: {},
         oauth_tokens: {}
       };
@@ -135,6 +141,9 @@ export class JsonStateStore {
     this.state.transparency_log_export_checkpoints ||= {};
     this.state.transparency_log_publication_counter ||= 0;
     this.state.transparency_log_entry_counter ||= 0;
+    this.state.inclusion_proof_linkages ||= [];
+    this.state.inclusion_proof_export_checkpoints ||= {};
+    this.state.inclusion_proof_linkage_counter ||= 0;
     this.state.oauth_clients ||= {};
     this.state.oauth_tokens ||= {};
   }

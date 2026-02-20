@@ -1,0 +1,62 @@
+{
+  "correlation_id": "corr_inclusionproof_linkage_export",
+  "exported_at": "2026-02-20T10:05:00.000Z",
+  "query": {
+    "cycle_id": "cycle_m88_001",
+    "limit": 1,
+    "now_iso": "2026-02-20T10:05:00Z"
+  },
+  "summary": {
+    "total_linkages": 1,
+    "returned_count": 1,
+    "linked_receipt_count": 1,
+    "chain_head": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "chain_tail": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+  },
+  "linkages": [
+    {
+      "linkage_id": "inclusion_linkage_000001",
+      "linkage_index": 1,
+      "partner_id": "ops-admin",
+      "cycle_id": "cycle_m88_001",
+      "receipt_id": "receipt_m88_001",
+      "receipt_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "receipt_signature_key_id": "dev-k1",
+      "custody_snapshot_id": "cust_snap_m88_001",
+      "custody_holding_id": "hold_m88_001",
+      "custody_root_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "custody_leaf_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "inclusion_proof_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "transparency_publication_id": "transparency_pub_000001",
+      "transparency_root_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+      "transparency_chain_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+      "previous_linkage_hash": null,
+      "linkage_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "integration_mode": "fixture_only",
+      "recorded_at": "2026-02-20T10:00:00.000Z"
+    }
+  ],
+  "total_filtered": 1,
+  "next_cursor": "inclusion_linkage_000001",
+  "attestation": {
+    "cursor_after": null,
+    "next_cursor": "inclusion_linkage_000001",
+    "attestation_after": null,
+    "page_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "chain_hash": "abababababababababababababababababababababababababababababababab"
+  },
+  "checkpoint": {
+    "checkpoint_after": null,
+    "attestation_chain_hash": "abababababababababababababababababababababababababababababababab",
+    "next_cursor": "inclusion_linkage_000001",
+    "entries_count": 1,
+    "total_filtered": 1,
+    "checkpoint_hash": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd"
+  },
+  "export_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+  "signature": {
+    "key_id": "dev-pi-k1",
+    "alg": "ed25519",
+    "sig": "base64sig"
+  }
+}
