@@ -33,6 +33,8 @@ export class JsonStateStore {
       partner_program_commercial_usage_ledger: [],
       partner_program_sla_policy: {},
       partner_program_sla_breach_events: [],
+      partner_program_webhook_delivery_attempts: [],
+      partner_program_webhook_retry_policies: {},
       oauth_clients: {},
       oauth_tokens: {}
     };
@@ -64,6 +66,8 @@ export class JsonStateStore {
         partner_program_commercial_usage_ledger: [],
         partner_program_sla_policy: {},
         partner_program_sla_breach_events: [],
+        partner_program_webhook_delivery_attempts: [],
+        partner_program_webhook_retry_policies: {},
         oauth_clients: {},
         oauth_tokens: {}
       };
@@ -96,6 +100,8 @@ export class JsonStateStore {
     this.state.partner_program_commercial_usage_ledger ||= [];
     this.state.partner_program_sla_policy ||= {};
     this.state.partner_program_sla_breach_events ||= [];
+    this.state.partner_program_webhook_delivery_attempts ||= [];
+    this.state.partner_program_webhook_retry_policies ||= {};
     this.state.oauth_clients ||= {};
     this.state.oauth_tokens ||= {};
   }

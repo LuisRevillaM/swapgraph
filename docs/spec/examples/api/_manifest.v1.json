@@ -336,6 +336,26 @@
     {
       "file": "auth.oauth_token.introspect.response.json",
       "schema": "OAuthTokenIntrospectResponse.schema.json"
+    },
+    {
+      "file": "partner_program.webhook_delivery.record.request.json",
+      "schema": "PartnerProgramWebhookDeliveryAttemptRecordRequest.schema.json"
+    },
+    {
+      "file": "partner_program.webhook_delivery.record.response.json",
+      "schema": "PartnerProgramWebhookDeliveryAttemptRecordResponse.schema.json"
+    },
+    {
+      "file": "partner_program.webhook_dead_letter.export.response.json",
+      "schema": "PartnerProgramWebhookDeadLetterExportResponse.schema.json"
+    },
+    {
+      "file": "partner_program.webhook_dead_letter.replay.request.json",
+      "schema": "PartnerProgramWebhookDeadLetterReplayRequest.schema.json"
+    },
+    {
+      "file": "partner_program.webhook_dead_letter.replay.response.json",
+      "schema": "PartnerProgramWebhookDeadLetterReplayResponse.schema.json"
     }
   ]
 }

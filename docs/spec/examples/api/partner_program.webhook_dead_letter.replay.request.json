@@ -1,0 +1,6 @@
+{
+  "delivery_id": "wh_deliv_001",
+  "replay_mode": "retry_now",
+  "replayed_at": "2026-02-20T02:20:00Z",
+  "backfill_reference": "dlq_batch_2026_02_20"
+}

@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/PartnerProgramWebhookDeliveryAttemptRecordRequest.schema.json",
+  "title": "PartnerProgramWebhookDeliveryAttemptRecordRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "delivery_id",
+    "event_type",
+    "endpoint",
+    "status",
+    "attempt_number",
+    "max_attempts",
+    "backoff_seconds",
+    "occurred_at"
+  ],
+  "properties": {
+    "delivery_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "event_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "endpoint": {
+      "type": "string",
+      "minLength": 1,
+      "format": "uri"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "failed",
+        "delivered"
+      ]
+    },
+    "attempt_number": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "max_attempts": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 20
+    },
+    "backoff_seconds": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 86400
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "next_retry_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "error_code": {
+      "type": "string",
+      "minLength": 1
+    },
+    "metadata": {
+      "type": "object"
+    }
+  }
+}

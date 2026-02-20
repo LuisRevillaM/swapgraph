@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/PartnerProgramWebhookDeadLetterReplayRequest.schema.json",
+  "title": "PartnerProgramWebhookDeadLetterReplayRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "delivery_id"
+  ],
+  "properties": {
+    "delivery_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "replay_mode": {
+      "type": "string",
+      "enum": [
+        "retry_now",
+        "backfill"
+      ]
+    },
+    "replayed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "backfill_reference": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

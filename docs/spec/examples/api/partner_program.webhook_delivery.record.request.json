@@ -1,0 +1,16 @@
+{
+  "delivery_id": "wh_deliv_001",
+  "event_type": "proposal.created",
+  "endpoint": "https://partner.example.com/webhooks/swapgraph",
+  "status": "failed",
+  "attempt_number": 1,
+  "max_attempts": 3,
+  "backoff_seconds": 300,
+  "occurred_at": "2026-02-20T02:00:00Z",
+  "next_retry_at": "2026-02-20T02:05:00Z",
+  "error_code": "http_503",
+  "metadata": {
+    "http_status": 503,
+    "request_id": "req_abc123"
+  }
+}

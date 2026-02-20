@@ -141,6 +141,13 @@ Settlement endpoints:
   - idempotent OAuth client revocation (`status=revoked`, `revoked_at`)
 - `POST /auth/oauth-token/introspect`
   - deterministic OAuth token introspection (`active`, reason code, scope envelope, issue/expiry timestamps)
+- `POST /partner-program/webhook-delivery-attempts`
+  - idempotent webhook delivery-attempt ledger write (`delivery_id`, attempt sequencing, retry policy metadata, deterministic dead-letter thresholding)
+- `GET /partner-program/webhook-dead-letter/export`
+  - signed dead-letter export surface (`summary`, paginated entries, `next_cursor`, `export_hash`, detached signature)
+  - supports deterministic continuation (`limit`, `cursor_after`) and replay visibility filtering (`include_replayed`)
+- `POST /partner-program/webhook-dead-letter/replay`
+  - idempotent dead-letter replay/backfill workflow (`replay_mode=retry_now|backfill`) with deterministic replay metadata anchoring
 
 Receipt endpoints:
 - `GET /receipts/{cycle_id}`

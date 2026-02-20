@@ -1,0 +1,51 @@
+{
+  "correlation_id": "corr_partnerprogram_webhook_dead_letter_export",
+  "exported_at": "2026-02-20T02:15:00.000Z",
+  "query": {
+    "from_iso": "2026-02-20T00:00:00Z",
+    "to_iso": "2026-02-20T03:00:00Z",
+    "include_replayed": false,
+    "limit": 50,
+    "exported_at_iso": "2026-02-20T02:15:00.000Z"
+  },
+  "summary": {
+    "total_attempts": 7,
+    "deliveries_count": 3,
+    "dead_letter_count": 2,
+    "pending_retry_count": 1,
+    "replayed_count": 0,
+    "returned_count": 2
+  },
+  "entries": [
+    {
+      "delivery_id": "wh_deliv_001",
+      "partner_id": "ops-admin",
+      "event_type": "proposal.created",
+      "endpoint": "https://partner.example.com/webhooks/swapgraph",
+      "attempt_count": 3,
+      "max_attempts": 3,
+      "first_attempt_at": "2026-02-20T02:00:00.000Z",
+      "last_attempt_at": "2026-02-20T02:12:00.000Z",
+      "next_retry_at": null,
+      "last_error_code": "http_503",
+      "last_status": "failed",
+      "dead_lettered": true,
+      "dead_lettered_at": "2026-02-20T02:12:00.000Z",
+      "replayed": false,
+      "replayed_at": null,
+      "retry_policy": {
+        "max_attempts": 3,
+        "backoff_seconds": 300
+      },
+      "metadata": {
+        "http_status": 503
+      }
+    }
+  ],
+  "export_hash": "4ea12ea6182d396378f7026bcd58c9d6f31f8f28673e34cf53e127f95a98f273",
+  "signature": {
+    "key_id": "pis_ed25519_v1",
+    "alg": "ed25519",
+    "sig": "base64-signature-placeholder"
+  }
+}

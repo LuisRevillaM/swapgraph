@@ -5,7 +5,8 @@ import { canonicalStringify } from '../util/canonicalJson.mjs';
 import {
   buildSignedPartnerProgramCommercialUsageExportPayload,
   buildSignedPartnerProgramBillingStatementExportPayload,
-  buildSignedPartnerProgramSlaBreachExportPayload
+  buildSignedPartnerProgramSlaBreachExportPayload,
+  buildSignedPartnerProgramWebhookDeadLetterExportPayload
 } from '../crypto/policyIntegritySigning.mjs';
 
 function errorResponse(correlationId, code, message, details = {}) {
@@ -42,6 +43,8 @@ function ensureCommercialState(store) {
   store.state.partner_program_commercial_usage_ledger ||= [];
   store.state.partner_program_sla_policy ||= {};
   store.state.partner_program_sla_breach_events ||= [];
+  store.state.partner_program_webhook_delivery_attempts ||= [];
+  store.state.partner_program_webhook_retry_policies ||= {};
   store.state.oauth_clients ||= {};
   store.state.oauth_tokens ||= {};
   store.state.idempotency ||= {};
@@ -50,6 +53,8 @@ function ensureCommercialState(store) {
     usageLedger: store.state.partner_program_commercial_usage_ledger,
     slaPolicy: store.state.partner_program_sla_policy,
     slaBreaches: store.state.partner_program_sla_breach_events,
+    webhookDeliveryAttempts: store.state.partner_program_webhook_delivery_attempts,
+    webhookRetryPolicies: store.state.partner_program_webhook_retry_policies,
     oauthClients: store.state.oauth_clients,
     oauthTokens: store.state.oauth_tokens,
     idempotency: store.state.idempotency
@@ -239,6 +244,79 @@ function billingStatementFromEntries({ partnerId, periodStartIso, periodEndIso, 
       platform_share_usd_micros: platformShare
     }
   };
+}
+
+function normalizeWebhookRetryPolicy(policy) {
+  return {
+    max_attempts: parsePositiveInt(policy?.max_attempts, { min: 1, max: 20 }) ?? 3,
+    backoff_seconds: parsePositiveInt(policy?.backoff_seconds, { min: 0, max: 86400 }) ?? 300
+  };
+}
+
+function normalizeWebhookDeliveryAttemptRecord(record) {
+  const retryPolicy = normalizeWebhookRetryPolicy(record?.retry_policy ?? {});
+
+  return {
+    delivery_id: typeof record?.delivery_id === 'string' ? record.delivery_id : null,
+    partner_id: typeof record?.partner_id === 'string' ? record.partner_id : null,
+    event_type: typeof record?.event_type === 'string' ? record.event_type : null,
+    endpoint: typeof record?.endpoint === 'string' ? record.endpoint : null,
+    attempt_count: Number.isFinite(record?.attempt_count) ? Number(record.attempt_count) : 0,
+    max_attempts: Number.isFinite(record?.max_attempts) ? Number(record.max_attempts) : retryPolicy.max_attempts,
+    first_attempt_at: typeof record?.first_attempt_at === 'string' ? record.first_attempt_at : null,
+    last_attempt_at: typeof record?.last_attempt_at === 'string' ? record.last_attempt_at : null,
+    next_retry_at: typeof record?.next_retry_at === 'string' ? record.next_retry_at : null,
+    last_error_code: typeof record?.last_error_code === 'string' ? record.last_error_code : null,
+    last_status: typeof record?.last_status === 'string' ? record.last_status : null,
+    dead_lettered: record?.dead_lettered === true,
+    dead_lettered_at: typeof record?.dead_lettered_at === 'string' ? record.dead_lettered_at : null,
+    replayed: record?.replayed === true,
+    replayed_at: typeof record?.replayed_at === 'string' ? record.replayed_at : null,
+    retry_policy: retryPolicy,
+    metadata: record?.metadata && typeof record.metadata === 'object' && !Array.isArray(record.metadata)
+      ? record.metadata
+      : {}
+  };
+}
+
+function webhookReliabilitySummary(records) {
+  const rows = Array.isArray(records) ? records : [];
+
+  return {
+    total_attempts: rows.reduce((acc, row) => acc + (Number.isFinite(row?.attempt_count) ? Number(row.attempt_count) : 0), 0),
+    deliveries_count: rows.length,
+    dead_letter_count: rows.filter(row => row?.dead_lettered === true).length,
+    pending_retry_count: rows.filter(row => row?.last_status === 'failed' && row?.dead_lettered !== true && parseIsoMs(row?.next_retry_at) !== null).length,
+    replayed_count: rows.filter(row => row?.replayed === true).length
+  };
+}
+
+function webhookDeadLetterCursorKey(row) {
+  const ts = normalizeOptionalString(row?.dead_lettered_at)
+    ?? normalizeOptionalString(row?.last_attempt_at)
+    ?? '';
+  const deliveryId = normalizeOptionalString(row?.delivery_id) ?? '';
+  return `${ts}|${deliveryId}`;
+}
+
+function webhookDeadLetterEntriesForPartner({ records, partnerId, fromMs = null, toMs = null, includeReplayed = false }) {
+  const out = [];
+
+  for (const row of records ?? []) {
+    if (!row || row.partner_id !== partnerId) continue;
+    if (row.dead_lettered !== true) continue;
+    if (!includeReplayed && row.replayed === true) continue;
+
+    const deadLetterMs = parseIsoMs(row.dead_lettered_at ?? row.last_attempt_at);
+    if (deadLetterMs === null) continue;
+    if (fromMs !== null && deadLetterMs < fromMs) continue;
+    if (toMs !== null && deadLetterMs > toMs) continue;
+
+    out.push(normalizeWebhookDeliveryAttemptRecord(row));
+  }
+
+  out.sort((a, b) => webhookDeadLetterCursorKey(a).localeCompare(webhookDeadLetterCursorKey(b)));
+  return out;
 }
 
 const allowedSlaEventTypes = new Set(['latency', 'availability', 'dispute_response']);
@@ -768,6 +846,343 @@ export class PartnerCommercialService {
         }
       }
     };
+  }
+
+  recordWebhookDeliveryAttempt({ actor, auth, idempotencyKey, request }) {
+    const op = 'partnerProgram.webhook_delivery.record';
+    const corr = correlationId(op);
+
+    const authz = authorizeApiOperation({ operationId: op, actor, auth, store: this.store });
+    if (!authz.ok) return { ok: false, body: errorResponse(corr, authz.error.code, authz.error.message, authz.error.details) };
+
+    if (!isPartner(actor)) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'FORBIDDEN', 'only partner can record webhook delivery attempts', { actor })
+      };
+    }
+
+    const deliveryId = normalizeOptionalString(request?.delivery_id);
+    const eventType = normalizeOptionalString(request?.event_type);
+    const endpoint = normalizeOptionalString(request?.endpoint);
+    const status = normalizeOptionalString(request?.status);
+    const attemptNumber = parsePositiveInt(request?.attempt_number, { min: 1, max: 1000000 });
+    const maxAttempts = parsePositiveInt(request?.max_attempts, { min: 1, max: 20 });
+    const backoffSeconds = parsePositiveInt(request?.backoff_seconds, { min: 0, max: 86400 });
+    const errorCode = normalizeOptionalString(request?.error_code);
+    const occurredAtRaw = normalizeOptionalString(request?.occurred_at)
+      ?? normalizeOptionalString(auth?.now_iso)
+      ?? process.env.AUTHZ_NOW_ISO
+      ?? new Date().toISOString();
+    const occurredMs = parseIsoMs(occurredAtRaw);
+    const nextRetryAtRaw = normalizeOptionalString(request?.next_retry_at);
+    const nextRetryMs = nextRetryAtRaw ? parseIsoMs(nextRetryAtRaw) : null;
+
+    if (!deliveryId || !eventType || !endpoint || !status || !['failed', 'delivered'].includes(status) || attemptNumber === null || maxAttempts === null || backoffSeconds === null) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid webhook delivery attempt payload', {
+          reason_code: 'partner_webhook_attempt_invalid'
+        })
+      };
+    }
+
+    if (occurredMs === null || (nextRetryAtRaw && nextRetryMs === null)) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid webhook delivery attempt timestamp', {
+          reason_code: 'partner_webhook_attempt_invalid_timestamp'
+        })
+      };
+    }
+
+    if (status === 'failed' && !errorCode) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'failed webhook attempts require error_code', {
+          reason_code: 'partner_webhook_attempt_error_required'
+        })
+      };
+    }
+
+    const state = ensureCommercialState(this.store);
+
+    return applyIdempotentMutation({
+      store: this.store,
+      actor,
+      operationId: op,
+      idempotencyKey,
+      requestPayload: request,
+      correlationId: corr,
+      mutate: () => {
+        const existing = state.webhookDeliveryAttempts.find(row => row?.partner_id === actor.id && row?.delivery_id === deliveryId) ?? null;
+
+        if (existing && attemptNumber <= Number(existing.attempt_count ?? 0)) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'webhook attempt number must strictly increase', {
+              reason_code: 'partner_webhook_attempt_sequence_invalid',
+              delivery_id: deliveryId,
+              prior_attempt_count: Number(existing.attempt_count ?? 0)
+            })
+          };
+        }
+
+        const occurredIso = new Date(occurredMs).toISOString();
+        const deadLettered = status === 'failed' && attemptNumber >= maxAttempts;
+        const computedNextRetryIso = status === 'failed' && !deadLettered
+          ? new Date((nextRetryMs ?? (occurredMs + (backoffSeconds * 1000)))).toISOString()
+          : null;
+
+        const record = existing ?? {
+          delivery_id: deliveryId,
+          partner_id: actor.id,
+          event_type: eventType,
+          endpoint,
+          attempt_count: 0,
+          max_attempts: maxAttempts,
+          first_attempt_at: occurredIso,
+          last_attempt_at: occurredIso,
+          next_retry_at: null,
+          last_error_code: null,
+          last_status: status,
+          dead_lettered: false,
+          dead_lettered_at: null,
+          replayed: false,
+          replayed_at: null,
+          retry_policy: normalizeWebhookRetryPolicy({ max_attempts: maxAttempts, backoff_seconds: backoffSeconds }),
+          metadata: {}
+        };
+
+        record.event_type = eventType;
+        record.endpoint = endpoint;
+        record.attempt_count = attemptNumber;
+        record.max_attempts = maxAttempts;
+        record.last_attempt_at = occurredIso;
+        record.last_status = status;
+        record.last_error_code = status === 'failed' ? errorCode : null;
+        record.dead_lettered = deadLettered;
+        record.dead_lettered_at = deadLettered ? occurredIso : null;
+        record.next_retry_at = computedNextRetryIso;
+        record.retry_policy = normalizeWebhookRetryPolicy({ max_attempts: maxAttempts, backoff_seconds: backoffSeconds });
+        record.metadata = request?.metadata && typeof request.metadata === 'object' && !Array.isArray(request.metadata)
+          ? request.metadata
+          : {};
+
+        if (!existing) state.webhookDeliveryAttempts.push(record);
+        state.webhookRetryPolicies[actor.id] = normalizeWebhookRetryPolicy({ max_attempts: maxAttempts, backoff_seconds: backoffSeconds });
+
+        const partnerRecords = state.webhookDeliveryAttempts.filter(row => row?.partner_id === actor.id);
+
+        return {
+          ok: true,
+          body: {
+            correlation_id: corr,
+            record: normalizeWebhookDeliveryAttemptRecord(record),
+            summary: webhookReliabilitySummary(partnerRecords)
+          }
+        };
+      }
+    });
+  }
+
+  exportWebhookDeadLetters({ actor, auth, query }) {
+    const op = 'partnerProgram.webhook_dead_letter.export';
+    const corr = correlationId(op);
+
+    const authz = authorizeApiOperation({ operationId: op, actor, auth, store: this.store });
+    if (!authz.ok) return { ok: false, body: errorResponse(corr, authz.error.code, authz.error.message, authz.error.details) };
+
+    if (!isPartner(actor)) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'FORBIDDEN', 'only partner can export webhook dead letters', { actor })
+      };
+    }
+
+    const fromIso = normalizeOptionalString(query?.from_iso);
+    const toIso = normalizeOptionalString(query?.to_iso);
+    const includeReplayed = query?.include_replayed === true;
+    const limit = parsePositiveInt(query?.limit ?? 50, { min: 1, max: 200 });
+    const cursorAfter = normalizeOptionalString(query?.cursor_after);
+    const exportedAtRaw = normalizeOptionalString(query?.exported_at_iso) ?? new Date().toISOString();
+
+    const fromMs = fromIso ? parseIsoMs(fromIso) : null;
+    const toMs = toIso ? parseIsoMs(toIso) : null;
+    const exportedAtMs = parseIsoMs(exportedAtRaw);
+
+    if ((fromIso && fromMs === null) || (toIso && toMs === null) || limit === null || exportedAtMs === null) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid webhook dead-letter export query', {
+          reason_code: 'partner_webhook_dead_letter_export_query_invalid'
+        })
+      };
+    }
+
+    const state = ensureCommercialState(this.store);
+    const partnerRecords = (state.webhookDeliveryAttempts ?? []).filter(row => row?.partner_id === actor.id);
+    const allDeadLetters = webhookDeadLetterEntriesForPartner({
+      records: partnerRecords,
+      partnerId: actor.id,
+      fromMs,
+      toMs,
+      includeReplayed
+    });
+
+    let startIndex = 0;
+    if (cursorAfter) {
+      const idx = allDeadLetters.findIndex(row => webhookDeadLetterCursorKey(row) === cursorAfter);
+      if (idx < 0) {
+        return {
+          ok: false,
+          body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'cursor_after not found in dead-letter export window', {
+            reason_code: 'webhook_dead_letter_cursor_not_found',
+            cursor_after: cursorAfter
+          })
+        };
+      }
+      startIndex = idx + 1;
+    }
+
+    const entries = allDeadLetters.slice(startIndex, startIndex + limit);
+    const nextCursor = startIndex + limit < allDeadLetters.length
+      ? webhookDeadLetterCursorKey(entries[entries.length - 1])
+      : null;
+
+    const reliabilitySummary = webhookReliabilitySummary(partnerRecords);
+    const summary = {
+      ...reliabilitySummary,
+      returned_count: entries.length
+    };
+
+    const normalizedExportedAtIso = new Date(exportedAtMs).toISOString();
+    const signedPayload = buildSignedPartnerProgramWebhookDeadLetterExportPayload({
+      exportedAt: normalizedExportedAtIso,
+      query: {
+        ...(fromIso ? { from_iso: fromIso } : {}),
+        ...(toIso ? { to_iso: toIso } : {}),
+        include_replayed: includeReplayed,
+        limit,
+        ...(cursorAfter ? { cursor_after: cursorAfter } : {}),
+        ...(normalizeOptionalString(query?.now_iso) ? { now_iso: normalizeOptionalString(query?.now_iso) } : {}),
+        exported_at_iso: normalizedExportedAtIso
+      },
+      summary,
+      entries,
+      nextCursor
+    });
+
+    return {
+      ok: true,
+      body: {
+        correlation_id: corr,
+        ...signedPayload
+      }
+    };
+  }
+
+  replayWebhookDeadLetter({ actor, auth, idempotencyKey, request }) {
+    const op = 'partnerProgram.webhook_dead_letter.replay';
+    const corr = correlationId(op);
+
+    const authz = authorizeApiOperation({ operationId: op, actor, auth, store: this.store });
+    if (!authz.ok) return { ok: false, body: errorResponse(corr, authz.error.code, authz.error.message, authz.error.details) };
+
+    if (!isPartner(actor)) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'FORBIDDEN', 'only partner can replay dead-letter deliveries', { actor })
+      };
+    }
+
+    const deliveryId = normalizeOptionalString(request?.delivery_id);
+    const replayMode = normalizeOptionalString(request?.replay_mode) ?? 'retry_now';
+    const replayedAtRaw = normalizeOptionalString(request?.replayed_at)
+      ?? normalizeOptionalString(auth?.now_iso)
+      ?? process.env.AUTHZ_NOW_ISO
+      ?? new Date().toISOString();
+    const replayedAtMs = parseIsoMs(replayedAtRaw);
+
+    if (!deliveryId || !['retry_now', 'backfill'].includes(replayMode)) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid dead-letter replay payload', {
+          reason_code: 'partner_webhook_dead_letter_replay_invalid'
+        })
+      };
+    }
+
+    if (replayedAtMs === null) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid replayed_at timestamp', {
+          reason_code: 'partner_webhook_dead_letter_replay_invalid_timestamp'
+        })
+      };
+    }
+
+    const state = ensureCommercialState(this.store);
+    const record = state.webhookDeliveryAttempts.find(row => row?.partner_id === actor.id && row?.delivery_id === deliveryId) ?? null;
+
+    if (!record) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'NOT_FOUND', 'webhook delivery record not found', {
+          delivery_id: deliveryId
+        })
+      };
+    }
+
+    return applyIdempotentMutation({
+      store: this.store,
+      actor,
+      operationId: op,
+      idempotencyKey,
+      requestPayload: {
+        delivery_id: deliveryId,
+        ...(request ?? {})
+      },
+      correlationId: corr,
+      mutate: () => {
+        if (record.dead_lettered !== true) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'delivery is not in dead-letter state', {
+              reason_code: 'partner_webhook_not_dead_letter',
+              delivery_id: deliveryId
+            })
+          };
+        }
+
+        const replayedAtIso = new Date(replayedAtMs).toISOString();
+        record.replayed = true;
+        record.replayed_at = replayedAtIso;
+        record.metadata = {
+          ...(record.metadata && typeof record.metadata === 'object' && !Array.isArray(record.metadata) ? record.metadata : {}),
+          replay_mode: replayMode,
+          ...(normalizeOptionalString(request?.backfill_reference)
+            ? { backfill_reference: normalizeOptionalString(request?.backfill_reference) }
+            : {})
+        };
+
+        if (replayMode === 'retry_now') {
+          record.next_retry_at = replayedAtIso;
+        }
+
+        const partnerRecords = state.webhookDeliveryAttempts.filter(row => row?.partner_id === actor.id);
+
+        return {
+          ok: true,
+          body: {
+            correlation_id: corr,
+            replay_mode: replayMode,
+            record: normalizeWebhookDeliveryAttemptRecord(record),
+            summary: webhookReliabilitySummary(partnerRecords)
+          }
+        };
+      }
+    });
   }
 
   registerOauthClient({ actor, auth, idempotencyKey, request }) {

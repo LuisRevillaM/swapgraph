@@ -1,0 +1,258 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/PartnerProgramWebhookDeadLetterExportResponse.schema.json",
+  "title": "PartnerProgramWebhookDeadLetterExportResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "exported_at",
+    "query",
+    "summary",
+    "entries",
+    "export_hash",
+    "signature"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "exported_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "query": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "include_replayed",
+        "limit",
+        "exported_at_iso"
+      ],
+      "properties": {
+        "from_iso": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "to_iso": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "include_replayed": {
+          "type": "boolean"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        },
+        "cursor_after": {
+          "type": "string",
+          "minLength": 1
+        },
+        "now_iso": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "exported_at_iso": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total_attempts",
+        "deliveries_count",
+        "dead_letter_count",
+        "pending_retry_count",
+        "replayed_count",
+        "returned_count"
+      ],
+      "properties": {
+        "total_attempts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "deliveries_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "dead_letter_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "pending_retry_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "replayed_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "returned_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "delivery_id",
+          "partner_id",
+          "event_type",
+          "endpoint",
+          "attempt_count",
+          "max_attempts",
+          "first_attempt_at",
+          "last_attempt_at",
+          "next_retry_at",
+          "last_error_code",
+          "last_status",
+          "dead_lettered",
+          "dead_lettered_at",
+          "replayed",
+          "replayed_at",
+          "retry_policy",
+          "metadata"
+        ],
+        "properties": {
+          "delivery_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "partner_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "event_type": {
+            "type": "string",
+            "minLength": 1
+          },
+          "endpoint": {
+            "type": "string",
+            "minLength": 1,
+            "format": "uri"
+          },
+          "attempt_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "max_attempts": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "first_attempt_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_attempt_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "next_retry_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "last_error_code": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "last_status": {
+            "type": "string",
+            "enum": [
+              "failed",
+              "delivered"
+            ]
+          },
+          "dead_lettered": {
+            "type": "boolean"
+          },
+          "dead_lettered_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "replayed": {
+            "type": "boolean"
+          },
+          "replayed_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "retry_policy": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "max_attempts",
+              "backoff_seconds"
+            ],
+            "properties": {
+              "max_attempts": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "backoff_seconds": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          },
+          "metadata": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": "string",
+      "minLength": 1
+    },
+    "export_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key_id",
+        "alg",
+        "sig"
+      ],
+      "properties": {
+        "key_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "alg": {
+          "type": "string",
+          "enum": [
+            "ed25519"
+          ]
+        },
+        "sig": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

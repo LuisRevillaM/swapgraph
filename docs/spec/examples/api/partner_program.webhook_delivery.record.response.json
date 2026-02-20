@@ -1,0 +1,36 @@
+{
+  "correlation_id": "corr_partnerprogram_webhook_delivery_record",
+  "record": {
+    "delivery_id": "wh_deliv_001",
+    "partner_id": "ops-admin",
+    "event_type": "proposal.created",
+    "endpoint": "https://partner.example.com/webhooks/swapgraph",
+    "attempt_count": 1,
+    "max_attempts": 3,
+    "first_attempt_at": "2026-02-20T02:00:00.000Z",
+    "last_attempt_at": "2026-02-20T02:00:00.000Z",
+    "next_retry_at": "2026-02-20T02:05:00.000Z",
+    "last_error_code": "http_503",
+    "last_status": "failed",
+    "dead_lettered": false,
+    "dead_lettered_at": null,
+    "replayed": false,
+    "replayed_at": null,
+    "retry_policy": {
+      "max_attempts": 3,
+      "backoff_seconds": 300
+    },
+    "metadata": {
+      "http_status": 503,
+      "request_id": "req_abc123"
+    }
+  },
+  "summary": {
+    "total_attempts": 1,
+    "deliveries_count": 1,
+    "dead_letter_count": 0,
+    "pending_retry_count": 1,
+    "replayed_count": 0
+  },
+  "replayed": false
+}

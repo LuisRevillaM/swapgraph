@@ -1,0 +1,434 @@
+{
+  "actors": {
+    "admin_partner": {
+      "type": "partner",
+      "id": "ops-admin"
+    }
+  },
+  "operations": [
+    {
+      "op": "keys.policy_integrity_signing.get",
+      "expect_ok": true,
+      "expect_keys_count": 2
+    },
+    {
+      "op": "partnerProgram.webhook_delivery.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m81_delivery_1_attempt_1",
+      "request": {
+        "delivery_id": "wh_deliv_001",
+        "event_type": "proposal.created",
+        "endpoint": "https://partner.example.com/webhooks/swapgraph",
+        "status": "failed",
+        "attempt_number": 1,
+        "max_attempts": 3,
+        "backoff_seconds": 300,
+        "occurred_at": "2026-02-20T02:00:00Z",
+        "next_retry_at": "2026-02-20T02:05:00Z",
+        "error_code": "http_503",
+        "metadata": {
+          "http_status": 503,
+          "request_id": "req_001"
+        }
+      },
+      "save_delivery_ref": "delivery_1",
+      "expect_ok": true,
+      "expect_delivery_id": "wh_deliv_001",
+      "expect_attempt_count": 1,
+      "expect_max_attempts": 3,
+      "expect_last_status": "failed",
+      "expect_dead_lettered": false,
+      "expect_next_retry_at": "2026-02-20T02:05:00.000Z",
+      "expect_record_replayed": false,
+      "expect_request_replayed": false,
+      "expect_dead_letter_count": 0
+    },
+    {
+      "op": "partnerProgram.webhook_delivery.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m81_delivery_1_attempt_1",
+      "request": {
+        "delivery_id": "wh_deliv_001",
+        "event_type": "proposal.created",
+        "endpoint": "https://partner.example.com/webhooks/swapgraph",
+        "status": "failed",
+        "attempt_number": 1,
+        "max_attempts": 3,
+        "backoff_seconds": 300,
+        "occurred_at": "2026-02-20T02:00:00Z",
+        "next_retry_at": "2026-02-20T02:05:00Z",
+        "error_code": "http_503",
+        "metadata": {
+          "http_status": 503,
+          "request_id": "req_001"
+        }
+      },
+      "expect_ok": true,
+      "expect_attempt_count": 1,
+      "expect_dead_lettered": false,
+      "expect_request_replayed": true
+    },
+    {
+      "op": "partnerProgram.webhook_delivery.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m81_delivery_1_attempt_2",
+      "request": {
+        "delivery_id": "wh_deliv_001",
+        "event_type": "proposal.created",
+        "endpoint": "https://partner.example.com/webhooks/swapgraph",
+        "status": "failed",
+        "attempt_number": 2,
+        "max_attempts": 3,
+        "backoff_seconds": 300,
+        "occurred_at": "2026-02-20T02:05:00Z",
+        "next_retry_at": "2026-02-20T02:10:00Z",
+        "error_code": "http_503",
+        "metadata": {
+          "http_status": 503,
+          "request_id": "req_002"
+        }
+      },
+      "expect_ok": true,
+      "expect_attempt_count": 2,
+      "expect_dead_lettered": false,
+      "expect_next_retry_at": "2026-02-20T02:10:00.000Z",
+      "expect_request_replayed": false,
+      "expect_dead_letter_count": 0
+    },
+    {
+      "op": "partnerProgram.webhook_delivery.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m81_delivery_1_attempt_3",
+      "request": {
+        "delivery_id": "wh_deliv_001",
+        "event_type": "proposal.created",
+        "endpoint": "https://partner.example.com/webhooks/swapgraph",
+        "status": "failed",
+        "attempt_number": 3,
+        "max_attempts": 3,
+        "backoff_seconds": 300,
+        "occurred_at": "2026-02-20T02:10:00Z",
+        "error_code": "http_503",
+        "metadata": {
+          "http_status": 503,
+          "request_id": "req_003"
+        }
+      },
+      "expect_ok": true,
+      "expect_attempt_count": 3,
+      "expect_dead_lettered": true,
+      "expect_next_retry_at": null,
+      "expect_request_replayed": false,
+      "expect_dead_letter_count": 1
+    },
+    {
+      "op": "partnerProgram.webhook_delivery.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m81_delivery_2_attempt_1",
+      "request": {
+        "delivery_id": "wh_deliv_002",
+        "event_type": "receipt.created",
+        "endpoint": "https://partner.example.com/webhooks/swapgraph",
+        "status": "delivered",
+        "attempt_number": 1,
+        "max_attempts": 3,
+        "backoff_seconds": 300,
+        "occurred_at": "2026-02-20T02:11:00Z",
+        "metadata": {
+          "http_status": 200,
+          "request_id": "req_004"
+        }
+      },
+      "save_delivery_ref": "delivery_2",
+      "expect_ok": true,
+      "expect_delivery_id": "wh_deliv_002",
+      "expect_attempt_count": 1,
+      "expect_last_status": "delivered",
+      "expect_dead_lettered": false,
+      "expect_next_retry_at": null,
+      "expect_dead_letter_count": 1
+    },
+    {
+      "op": "partnerProgram.webhook_delivery.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m81_delivery_3_attempt_1",
+      "request": {
+        "delivery_id": "wh_deliv_003",
+        "event_type": "cycle.state_changed",
+        "endpoint": "https://partner.example.com/webhooks/swapgraph",
+        "status": "failed",
+        "attempt_number": 1,
+        "max_attempts": 2,
+        "backoff_seconds": 120,
+        "occurred_at": "2026-02-20T02:12:00Z",
+        "next_retry_at": "2026-02-20T02:14:00Z",
+        "error_code": "timeout",
+        "metadata": {
+          "http_status": 504,
+          "request_id": "req_005"
+        }
+      },
+      "save_delivery_ref": "delivery_3",
+      "expect_ok": true,
+      "expect_delivery_id": "wh_deliv_003",
+      "expect_attempt_count": 1,
+      "expect_dead_lettered": false,
+      "expect_next_retry_at": "2026-02-20T02:14:00.000Z",
+      "expect_dead_letter_count": 1
+    },
+    {
+      "op": "partnerProgram.webhook_delivery.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m81_delivery_3_attempt_2",
+      "request": {
+        "delivery_id": "wh_deliv_003",
+        "event_type": "cycle.state_changed",
+        "endpoint": "https://partner.example.com/webhooks/swapgraph",
+        "status": "failed",
+        "attempt_number": 2,
+        "max_attempts": 2,
+        "backoff_seconds": 120,
+        "occurred_at": "2026-02-20T02:14:00Z",
+        "error_code": "timeout",
+        "metadata": {
+          "http_status": 504,
+          "request_id": "req_006"
+        }
+      },
+      "expect_ok": true,
+      "expect_attempt_count": 2,
+      "expect_dead_lettered": true,
+      "expect_next_retry_at": null,
+      "expect_dead_letter_count": 2
+    },
+    {
+      "op": "partnerProgram.webhook_dead_letter.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-20T00:00:00Z",
+        "to_iso": "2026-02-20T03:00:00Z",
+        "include_replayed": false,
+        "limit": 1,
+        "exported_at_iso": "2026-02-20T02:15:00Z"
+      },
+      "save_export_ref": "dlq_page_1",
+      "expect_ok": true,
+      "expect_entries_count": 1,
+      "expect_dead_letter_count": 2,
+      "expect_returned_count": 1,
+      "expect_next_cursor": "2026-02-20T02:10:00.000Z|wh_deliv_001"
+    },
+    {
+      "op": "partnerProgram.webhook_dead_letter.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-20T00:00:00Z",
+        "to_iso": "2026-02-20T03:00:00Z",
+        "include_replayed": false,
+        "limit": 1,
+        "exported_at_iso": "2026-02-20T02:16:00Z"
+      },
+      "cursor_from_export_ref": "dlq_page_1",
+      "save_export_ref": "dlq_page_2",
+      "expect_ok": true,
+      "expect_entries_count": 1,
+      "expect_dead_letter_count": 2,
+      "expect_returned_count": 1,
+      "expect_next_cursor": null
+    },
+    {
+      "op": "partnerProgram.webhook_dead_letter.export.verify",
+      "export_ref": "dlq_page_1",
+      "expect_verify_ok": true,
+      "expect_verify_public_ok": true
+    },
+    {
+      "op": "partnerProgram.webhook_dead_letter.export.verify_tampered",
+      "export_ref": "dlq_page_1",
+      "expect_verify_ok": false,
+      "expect_verify_error": "hash_mismatch"
+    },
+    {
+      "op": "partnerProgram.webhook_dead_letter.replay",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m81_replay_1",
+      "delivery_ref": "delivery_1",
+      "request": {
+        "replay_mode": "retry_now",
+        "replayed_at": "2026-02-20T02:20:00Z",
+        "backfill_reference": "dlq_batch_2026_02_20"
+      },
+      "expect_ok": true,
+      "expect_replay_mode": "retry_now",
+      "expect_delivery_id": "wh_deliv_001",
+      "expect_record_replayed": true,
+      "expect_request_replayed": false,
+      "expect_dead_letter_count": 2
+    },
+    {
+      "op": "partnerProgram.webhook_dead_letter.replay",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m81_replay_1",
+      "delivery_ref": "delivery_1",
+      "request": {
+        "replay_mode": "retry_now",
+        "replayed_at": "2026-02-20T02:20:00Z",
+        "backfill_reference": "dlq_batch_2026_02_20"
+      },
+      "expect_ok": true,
+      "expect_replay_mode": "retry_now",
+      "expect_record_replayed": true,
+      "expect_request_replayed": true
+    },
+    {
+      "op": "partnerProgram.webhook_dead_letter.replay",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m81_replay_2",
+      "delivery_ref": "delivery_2",
+      "request": {
+        "replay_mode": "backfill",
+        "replayed_at": "2026-02-20T02:22:00Z",
+        "backfill_reference": "dlq_batch_2026_02_20"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "partner_webhook_not_dead_letter"
+    },
+    {
+      "op": "partnerProgram.webhook_dead_letter.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-20T00:00:00Z",
+        "to_iso": "2026-02-20T03:00:00Z",
+        "include_replayed": false,
+        "limit": 50,
+        "exported_at_iso": "2026-02-20T02:23:00Z"
+      },
+      "save_export_ref": "dlq_unreplayed",
+      "expect_ok": true,
+      "expect_entries_count": 1,
+      "expect_dead_letter_count": 2,
+      "expect_returned_count": 1,
+      "expect_next_cursor": null
+    },
+    {
+      "op": "partnerProgram.webhook_dead_letter.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-20T00:00:00Z",
+        "to_iso": "2026-02-20T03:00:00Z",
+        "include_replayed": true,
+        "limit": 50,
+        "exported_at_iso": "2026-02-20T02:24:00Z"
+      },
+      "save_export_ref": "dlq_all",
+      "expect_ok": true,
+      "expect_entries_count": 2,
+      "expect_dead_letter_count": 2,
+      "expect_returned_count": 2,
+      "expect_next_cursor": null
+    },
+    {
+      "op": "partnerProgram.webhook_dead_letter.export.verify",
+      "export_ref": "dlq_all",
+      "expect_verify_ok": true,
+      "expect_verify_public_ok": true
+    },
+    {
+      "op": "partnerProgram.webhook_dead_letter.export.verify_tampered",
+      "export_ref": "dlq_all",
+      "expect_verify_ok": false,
+      "expect_verify_error": "hash_mismatch"
+    },
+    {
+      "op": "partnerProgram.webhook_dead_letter.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-20T00:00:00Z",
+        "to_iso": "2026-02-20T03:00:00Z",
+        "include_replayed": true,
+        "limit": 10,
+        "cursor_after": "2026-02-20T02:12:00.000Z|unknown",
+        "exported_at_iso": "2026-02-20T02:25:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "webhook_dead_letter_cursor_not_found"
+    }
+  ]
+}

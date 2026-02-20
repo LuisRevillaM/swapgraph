@@ -85,7 +85,8 @@
     "verify:m78": "bash verify/m78.sh",
     "verify:m79": "bash verify/m79.sh",
     "verify:m80": "bash verify/m80.sh",
-    "test": "node --test"
+    "test": "node --test",
+    "verify:m81": "bash verify/m81.sh"
   },
   "devDependencies": {
     "ajv": "8.18.0",

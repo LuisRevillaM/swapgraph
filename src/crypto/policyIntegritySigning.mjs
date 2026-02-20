@@ -2992,3 +2992,168 @@ export function verifyPartnerProgramSlaBreachExportPayloadWithPublicKeyPem({ pay
   const signable = partnerProgramSlaBreachExportSignablePayload(payload);
   return verifyPolicyIntegrityPayloadSignatureWithPublicKeyPem({ payload: signable, publicKeyPem, keyId, alg });
 }
+
+function normalizePartnerProgramWebhookDeadLetterExportQuery(query) {
+  const out = {};
+
+  if (typeof query?.from_iso === 'string' && query.from_iso.trim()) out.from_iso = query.from_iso.trim();
+  if (typeof query?.to_iso === 'string' && query.to_iso.trim()) out.to_iso = query.to_iso.trim();
+  if (typeof query?.include_replayed === 'boolean') out.include_replayed = query.include_replayed;
+
+  if (Number.isFinite(query?.limit)) out.limit = Number(query.limit);
+  else {
+    const limit = Number.parseInt(String(query?.limit ?? ''), 10);
+    if (Number.isFinite(limit)) out.limit = limit;
+  }
+
+  if (typeof query?.cursor_after === 'string' && query.cursor_after.trim()) out.cursor_after = query.cursor_after.trim();
+  if (typeof query?.now_iso === 'string' && query.now_iso.trim()) out.now_iso = query.now_iso.trim();
+  if (typeof query?.exported_at_iso === 'string' && query.exported_at_iso.trim()) out.exported_at_iso = query.exported_at_iso.trim();
+
+  return out;
+}
+
+function normalizePartnerProgramWebhookDeadLetterExportSummary(summary) {
+  return {
+    total_attempts: Number.isFinite(summary?.total_attempts) ? Number(summary.total_attempts) : 0,
+    deliveries_count: Number.isFinite(summary?.deliveries_count) ? Number(summary.deliveries_count) : 0,
+    dead_letter_count: Number.isFinite(summary?.dead_letter_count) ? Number(summary.dead_letter_count) : 0,
+    pending_retry_count: Number.isFinite(summary?.pending_retry_count) ? Number(summary.pending_retry_count) : 0,
+    replayed_count: Number.isFinite(summary?.replayed_count) ? Number(summary.replayed_count) : 0,
+    returned_count: Number.isFinite(summary?.returned_count) ? Number(summary.returned_count) : 0
+  };
+}
+
+function normalizePartnerProgramWebhookRetryPolicy(policy) {
+  return {
+    max_attempts: Number.isFinite(policy?.max_attempts) ? Number(policy.max_attempts) : 0,
+    backoff_seconds: Number.isFinite(policy?.backoff_seconds) ? Number(policy.backoff_seconds) : 0
+  };
+}
+
+function normalizePartnerProgramWebhookDeadLetterEntry(entry) {
+  return {
+    delivery_id: typeof entry?.delivery_id === 'string' ? entry.delivery_id : null,
+    partner_id: typeof entry?.partner_id === 'string' ? entry.partner_id : null,
+    event_type: typeof entry?.event_type === 'string' ? entry.event_type : null,
+    endpoint: typeof entry?.endpoint === 'string' ? entry.endpoint : null,
+    attempt_count: Number.isFinite(entry?.attempt_count) ? Number(entry.attempt_count) : 0,
+    max_attempts: Number.isFinite(entry?.max_attempts) ? Number(entry.max_attempts) : 0,
+    first_attempt_at: typeof entry?.first_attempt_at === 'string' ? entry.first_attempt_at : null,
+    last_attempt_at: typeof entry?.last_attempt_at === 'string' ? entry.last_attempt_at : null,
+    next_retry_at: typeof entry?.next_retry_at === 'string' ? entry.next_retry_at : null,
+    last_error_code: typeof entry?.last_error_code === 'string' ? entry.last_error_code : null,
+    last_status: typeof entry?.last_status === 'string' ? entry.last_status : null,
+    dead_lettered: entry?.dead_lettered === true,
+    dead_lettered_at: typeof entry?.dead_lettered_at === 'string' ? entry.dead_lettered_at : null,
+    replayed: entry?.replayed === true,
+    replayed_at: typeof entry?.replayed_at === 'string' ? entry.replayed_at : null,
+    retry_policy: normalizePartnerProgramWebhookRetryPolicy(entry?.retry_policy),
+    metadata: entry?.metadata && typeof entry.metadata === 'object' && !Array.isArray(entry.metadata) ? entry.metadata : {}
+  };
+}
+
+function normalizePartnerProgramWebhookDeadLetterEntries(entries) {
+  return (entries ?? [])
+    .map(normalizePartnerProgramWebhookDeadLetterEntry)
+    .sort((a, b) => `${a.dead_lettered_at ?? ''}|${a.delivery_id ?? ''}`.localeCompare(`${b.dead_lettered_at ?? ''}|${b.delivery_id ?? ''}`));
+}
+
+function partnerProgramWebhookDeadLetterExportSignablePayload(payload) {
+  return {
+    exported_at: payload?.exported_at,
+    query: normalizePartnerProgramWebhookDeadLetterExportQuery(payload?.query),
+    summary: normalizePartnerProgramWebhookDeadLetterExportSummary(payload?.summary),
+    entries: normalizePartnerProgramWebhookDeadLetterEntries(payload?.entries),
+    ...(typeof payload?.next_cursor === 'string' ? { next_cursor: payload.next_cursor } : {}),
+    export_hash: payload?.export_hash,
+    signature: payload?.signature
+  };
+}
+
+export function buildPartnerProgramWebhookDeadLetterExportHash({ query, summary, entries, nextCursor }) {
+  return sha256HexCanonical({
+    query: normalizePartnerProgramWebhookDeadLetterExportQuery(query),
+    summary: normalizePartnerProgramWebhookDeadLetterExportSummary(summary),
+    entries: normalizePartnerProgramWebhookDeadLetterEntries(entries),
+    ...(typeof nextCursor === 'string' ? { next_cursor: nextCursor } : {})
+  });
+}
+
+export function buildSignedPartnerProgramWebhookDeadLetterExportPayload({ exportedAt, query, summary, entries, nextCursor, keyId }) {
+  const normalizedQuery = normalizePartnerProgramWebhookDeadLetterExportQuery(query);
+  const normalizedSummary = normalizePartnerProgramWebhookDeadLetterExportSummary(summary);
+  const normalizedEntries = normalizePartnerProgramWebhookDeadLetterEntries(entries);
+
+  const exportHash = buildPartnerProgramWebhookDeadLetterExportHash({
+    query: normalizedQuery,
+    summary: normalizedSummary,
+    entries: normalizedEntries,
+    nextCursor
+  });
+
+  const payload = {
+    exported_at: exportedAt,
+    query: normalizedQuery,
+    summary: normalizedSummary,
+    entries: normalizedEntries,
+    ...(typeof nextCursor === 'string' ? { next_cursor: nextCursor } : {}),
+    export_hash: exportHash
+  };
+
+  payload.signature = signPolicyIntegrityPayload(payload, { keyId });
+  return payload;
+}
+
+export function verifyPartnerProgramWebhookDeadLetterExportPayload(payload) {
+  if (!payload || typeof payload !== 'object') return { ok: false, error: 'missing_payload' };
+
+  const expectedHash = buildPartnerProgramWebhookDeadLetterExportHash({
+    query: payload.query,
+    summary: payload.summary,
+    entries: payload.entries,
+    nextCursor: payload.next_cursor
+  });
+
+  if (payload.export_hash !== expectedHash) {
+    return {
+      ok: false,
+      error: 'hash_mismatch',
+      details: {
+        expected_hash: expectedHash,
+        provided_hash: payload.export_hash ?? null
+      }
+    };
+  }
+
+  const signable = partnerProgramWebhookDeadLetterExportSignablePayload(payload);
+  const verified = verifyPolicyIntegrityPayloadSignature(signable);
+  if (!verified.ok) return verified;
+
+  return { ok: true };
+}
+
+export function verifyPartnerProgramWebhookDeadLetterExportPayloadWithPublicKeyPem({ payload, publicKeyPem, keyId, alg }) {
+  if (!payload || typeof payload !== 'object') return { ok: false, error: 'missing_payload' };
+
+  const expectedHash = buildPartnerProgramWebhookDeadLetterExportHash({
+    query: payload.query,
+    summary: payload.summary,
+    entries: payload.entries,
+    nextCursor: payload.next_cursor
+  });
+
+  if (payload.export_hash !== expectedHash) {
+    return {
+      ok: false,
+      error: 'hash_mismatch',
+      details: {
+        expected_hash: expectedHash,
+        provided_hash: payload.export_hash ?? null
+      }
+    };
+  }
+
+  const signable = partnerProgramWebhookDeadLetterExportSignablePayload(payload);
+  return verifyPolicyIntegrityPayloadSignatureWithPublicKeyPem({ payload: signable, publicKeyPem, keyId, alg });
+}

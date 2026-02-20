@@ -947,6 +947,56 @@
           "settlement:read"
         ]
       }
+    },
+    {
+      "method": "POST",
+      "path": "/partner-program/webhook-delivery-attempts",
+      "operation_id": "partnerProgram.webhook_delivery.record",
+      "idempotency_required": true,
+      "request_schema": "PartnerProgramWebhookDeliveryAttemptRecordRequest.schema.json",
+      "response_schema": "PartnerProgramWebhookDeliveryAttemptRecordResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/partner-program/webhook-dead-letter/export",
+      "operation_id": "partnerProgram.webhook_dead_letter.export",
+      "idempotency_required": false,
+      "response_schema": "PartnerProgramWebhookDeadLetterExportResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/partner-program/webhook-dead-letter/replay",
+      "operation_id": "partnerProgram.webhook_dead_letter.replay",
+      "idempotency_required": true,
+      "request_schema": "PartnerProgramWebhookDeadLetterReplayRequest.schema.json",
+      "response_schema": "PartnerProgramWebhookDeadLetterReplayResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
     }
   ],
   "webhooks": {
