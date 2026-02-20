@@ -1,0 +1,37 @@
+name: M85
+commands:
+  - cmd: "npm run verify:m85"
+artifacts:
+  - artifact: "docs/prd/M85.md"
+  - artifact: "docs/STATUS.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/ERRORS.md"
+  - artifact: "docs/spec/GAPS.md"
+  - artifact: "ops/M85_LIVE_PROOF_RUNBOOK.md"
+
+  - artifact: "src/store/jsonStateStore.mjs"
+  - artifact: "src/service/steamAdapterContractService.mjs"
+  - artifact: "src/service/steamAdapterLiveProofService.mjs"
+
+  - artifact: "docs/spec/api/manifest.v1.json"
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+  - artifact: "docs/spec/examples/api/adapter.steam_tier1.live_proof.deposit_per_swap.record.request.json"
+  - artifact: "docs/spec/examples/api/adapter.steam_tier1.live_proof.deposit_per_swap.record.response.json"
+
+  - artifact: "docs/spec/schemas/SteamTier1DepositPerSwapLiveProofRecordRequest.schema.json"
+  - artifact: "docs/spec/schemas/SteamTier1DepositPerSwapLiveProofRecordResponse.schema.json"
+
+  - artifact: "scripts/run-m85-steam-deposit-per-swap-live-proof-scenario.mjs"
+  - artifact: "fixtures/integration/m85_scenario.json"
+  - artifact: "fixtures/integration/m85_expected.json"
+
+  - artifact: "milestones/M85.yaml"
+  - artifact: "verify/m85.sh"
+
+  - artifact: "artifacts/milestones/M85/latest/commands.log"
+  - artifact: "artifacts/milestones/M85/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M85/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M85/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M85/latest/steam_deposit_per_swap_live_proof_output.json"
+  - artifact: "artifacts/milestones/M85/latest/store.json"
+  - artifact: "artifacts/milestones/M85/latest/assertions.json"

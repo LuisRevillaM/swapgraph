@@ -1,0 +1,18 @@
+{
+  "cycle_id": "cycle_m85_001",
+  "settlement_id": "settlement_m85_001",
+  "preflight_id": "steam_preflight_000001",
+  "receipt_id": "rcpt_m85_001",
+  "steam_trade_offer_id": "trade_offer_998877",
+  "steam_trade_status": "completed",
+  "deposit_reference": "steam_deposit:offer:998877",
+  "asset_count": 2,
+  "live_mode": true,
+  "operator_ref": "ops-admin",
+  "evidence_refs": [
+    "https://staging.swapgraph.dev/evidence/m85/trade-offer-998877",
+    "https://staging.swapgraph.dev/evidence/m85/receipt-rcpt_m85_001"
+  ],
+  "notes": "staging live proof capture",
+  "occurred_at": "2026-02-20T07:30:00Z"
+}

@@ -1130,6 +1130,23 @@
           "settlement:write"
         ]
       }
+    },
+    {
+      "method": "POST",
+      "path": "/adapters/steam/tier1/live-proof/deposit-per-swap",
+      "operation_id": "adapter.steam_tier1.live_proof.deposit_per_swap.record",
+      "idempotency_required": true,
+      "request_schema": "SteamTier1DepositPerSwapLiveProofRecordRequest.schema.json",
+      "response_schema": "SteamTier1DepositPerSwapLiveProofRecordResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
     }
   ],
   "webhooks": {

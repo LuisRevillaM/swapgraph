@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/SteamTier1DepositPerSwapLiveProofRecordRequest.schema.json",
+  "title": "SteamTier1DepositPerSwapLiveProofRecordRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "cycle_id",
+    "settlement_id",
+    "receipt_id",
+    "steam_trade_offer_id",
+    "steam_trade_status",
+    "deposit_reference",
+    "asset_count",
+    "live_mode",
+    "operator_ref",
+    "evidence_refs",
+    "occurred_at"
+  ],
+  "properties": {
+    "cycle_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "settlement_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "preflight_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "receipt_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "steam_trade_offer_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "steam_trade_status": {
+      "type": "string",
+      "enum": [
+        "accepted",
+        "completed"
+      ]
+    },
+    "deposit_reference": {
+      "type": "string",
+      "minLength": 1
+    },
+    "asset_count": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100000
+    },
+    "live_mode": {
+      "type": "boolean"
+    },
+    "operator_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "notes": {
+      "type": "string",
+      "minLength": 1
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

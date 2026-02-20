@@ -99,6 +99,12 @@ Notes:
   - `steam_adapter_settlement_mode_unsupported`
   - `steam_adapter_dry_run_required`
   - `steam_adapter_batch_size_exceeded`
+  - `steam_live_proof_invalid`
+  - `steam_live_proof_invalid_timestamp`
+  - `steam_live_proof_integration_disabled`
+  - `steam_live_proof_contract_missing`
+  - `steam_live_proof_contract_unsupported_mode`
+  - `steam_live_proof_requires_live_mode`
 - Rollout diagnostics automation execution-attestation verification may return deterministic mismatch errors such as:
   - `automation_execution_expected_effect_hash_mismatch`
   - `automation_execution_request_hash_chain_mismatch`

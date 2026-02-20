@@ -40,6 +40,7 @@ export class JsonStateStore {
       partner_program_disputes: [],
       steam_tier1_adapter_contract: {},
       steam_tier1_preflight_history: [],
+      steam_tier1_live_deposit_per_swap_proofs: [],
       oauth_clients: {},
       oauth_tokens: {}
     };
@@ -78,6 +79,7 @@ export class JsonStateStore {
         partner_program_disputes: [],
         steam_tier1_adapter_contract: {},
         steam_tier1_preflight_history: [],
+        steam_tier1_live_deposit_per_swap_proofs: [],
         oauth_clients: {},
         oauth_tokens: {}
       };
@@ -117,6 +119,7 @@ export class JsonStateStore {
     this.state.partner_program_disputes ||= [];
     this.state.steam_tier1_adapter_contract ||= {};
     this.state.steam_tier1_preflight_history ||= [];
+    this.state.steam_tier1_live_deposit_per_swap_proofs ||= [];
     this.state.oauth_clients ||= {};
     this.state.oauth_tokens ||= {};
   }

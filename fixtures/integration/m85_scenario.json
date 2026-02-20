@@ -1,0 +1,328 @@
+{
+  "actors": {
+    "admin_partner": {
+      "type": "partner",
+      "id": "ops-admin"
+    }
+  },
+  "operations": [
+    {
+      "op": "adapter.steam_tier1.contract.upsert",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m85_contract_v1",
+      "request": {
+        "contract": {
+          "adapter_version": "steam-tier1.v1",
+          "steam_app_id": 730,
+          "transfer_primitive": "deposit_per_swap",
+          "escrow_mode": "direct",
+          "settlement_modes": [
+            "deposit_per_swap",
+            "vault_escrow"
+          ],
+          "capability_flags": [
+            "inventory_snapshot",
+            "trade_offer_create"
+          ],
+          "supported_regions": [
+            "EU",
+            "NA"
+          ],
+          "max_batch_size": 4,
+          "requires_trade_hold": true,
+          "requires_mobile_guard": true,
+          "dry_run_only": false,
+          "notes": "m85 live proof contract"
+        },
+        "occurred_at": "2026-02-20T07:00:00Z"
+      },
+      "expect_ok": true,
+      "expect_version": 1,
+      "expect_transfer_primitive": "deposit_per_swap",
+      "expect_max_batch_size": 4,
+      "expect_dry_run_only": false,
+      "expect_settlement_modes_count": 2,
+      "expect_replayed": false
+    },
+    {
+      "op": "adapter.steam_tier1.preflight",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m85_preflight_1",
+      "request": {
+        "cycle_id": "cycle_m85_001",
+        "settlement_mode": "deposit_per_swap",
+        "asset_count": 2,
+        "dry_run": false,
+        "requested_at": "2026-02-20T07:05:00Z"
+      },
+      "expect_ok": true,
+      "expect_preflight_id": "steam_preflight_000001",
+      "expect_contract_version": 1,
+      "expect_ready": true,
+      "expect_preflight_reason_code": null,
+      "expect_replayed": false
+    },
+    {
+      "op": "adapter.steam_tier1.live_proof.deposit_per_swap.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "integration_enabled_override": "0",
+      "idempotency_key": "m85_live_disabled",
+      "request": {
+        "cycle_id": "cycle_m85_001",
+        "settlement_id": "settlement_m85_001",
+        "preflight_id": "steam_preflight_000001",
+        "receipt_id": "rcpt_m85_001",
+        "steam_trade_offer_id": "trade_offer_998877",
+        "steam_trade_status": "completed",
+        "deposit_reference": "steam_deposit:offer:998877",
+        "asset_count": 2,
+        "live_mode": true,
+        "operator_ref": "ops-admin",
+        "evidence_refs": [
+          "https://staging.swapgraph.dev/evidence/m85/trade-offer-998877",
+          "https://staging.swapgraph.dev/evidence/m85/receipt-rcpt_m85_001"
+        ],
+        "notes": "integration gate off attempt",
+        "occurred_at": "2026-02-20T07:10:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONFLICT",
+      "expect_reason_code": "steam_live_proof_integration_disabled"
+    },
+    {
+      "op": "adapter.steam_tier1.live_proof.deposit_per_swap.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m85_live_1",
+      "request": {
+        "cycle_id": "cycle_m85_001",
+        "settlement_id": "settlement_m85_001",
+        "preflight_id": "steam_preflight_000001",
+        "receipt_id": "rcpt_m85_001",
+        "steam_trade_offer_id": "trade_offer_998877",
+        "steam_trade_status": "completed",
+        "deposit_reference": "steam_deposit:offer:998877",
+        "asset_count": 2,
+        "live_mode": true,
+        "operator_ref": "ops-admin",
+        "evidence_refs": [
+          "https://staging.swapgraph.dev/evidence/m85/trade-offer-998877",
+          "https://staging.swapgraph.dev/evidence/m85/receipt-rcpt_m85_001"
+        ],
+        "notes": "staging live proof capture",
+        "occurred_at": "2026-02-20T07:11:00Z"
+      },
+      "expect_ok": true,
+      "expect_proof_id": "steam_live_dps_000001",
+      "expect_contract_version": 1,
+      "expect_live_mode": true,
+      "expect_integration_mode": "live",
+      "expect_replayed": false
+    },
+    {
+      "op": "adapter.steam_tier1.live_proof.deposit_per_swap.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m85_live_1",
+      "request": {
+        "cycle_id": "cycle_m85_001",
+        "settlement_id": "settlement_m85_001",
+        "preflight_id": "steam_preflight_000001",
+        "receipt_id": "rcpt_m85_001",
+        "steam_trade_offer_id": "trade_offer_998877",
+        "steam_trade_status": "completed",
+        "deposit_reference": "steam_deposit:offer:998877",
+        "asset_count": 2,
+        "live_mode": true,
+        "operator_ref": "ops-admin",
+        "evidence_refs": [
+          "https://staging.swapgraph.dev/evidence/m85/trade-offer-998877",
+          "https://staging.swapgraph.dev/evidence/m85/receipt-rcpt_m85_001"
+        ],
+        "notes": "staging live proof capture",
+        "occurred_at": "2026-02-20T07:11:00Z"
+      },
+      "expect_ok": true,
+      "expect_proof_id": "steam_live_dps_000001",
+      "expect_contract_version": 1,
+      "expect_live_mode": true,
+      "expect_integration_mode": "live",
+      "expect_replayed": true
+    },
+    {
+      "op": "adapter.steam_tier1.live_proof.deposit_per_swap.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m85_live_1",
+      "request": {
+        "cycle_id": "cycle_m85_001",
+        "settlement_id": "settlement_m85_001",
+        "preflight_id": "steam_preflight_000001",
+        "receipt_id": "rcpt_m85_001_mutated",
+        "steam_trade_offer_id": "trade_offer_998877",
+        "steam_trade_status": "completed",
+        "deposit_reference": "steam_deposit:offer:998877",
+        "asset_count": 2,
+        "live_mode": true,
+        "operator_ref": "ops-admin",
+        "evidence_refs": [
+          "https://staging.swapgraph.dev/evidence/m85/trade-offer-998877",
+          "https://staging.swapgraph.dev/evidence/m85/receipt-rcpt_m85_001_mutated"
+        ],
+        "notes": "idempotency mismatch",
+        "occurred_at": "2026-02-20T07:11:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH",
+      "expect_reason_code": null
+    },
+    {
+      "op": "adapter.steam_tier1.live_proof.deposit_per_swap.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "idempotency_key": "m85_live_scope_fail",
+      "request": {
+        "cycle_id": "cycle_m85_scope_fail",
+        "settlement_id": "settlement_m85_scope_fail",
+        "receipt_id": "rcpt_m85_scope_fail",
+        "steam_trade_offer_id": "trade_offer_scope_fail",
+        "steam_trade_status": "accepted",
+        "deposit_reference": "steam_deposit:offer:scope-fail",
+        "asset_count": 1,
+        "live_mode": true,
+        "operator_ref": "ops-admin",
+        "evidence_refs": [
+          "https://staging.swapgraph.dev/evidence/m85/scope-fail"
+        ],
+        "notes": "scope validation",
+        "occurred_at": "2026-02-20T07:12:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE",
+      "expect_reason_code": null
+    },
+    {
+      "op": "adapter.steam_tier1.contract.upsert",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m85_contract_v2",
+      "request": {
+        "contract": {
+          "adapter_version": "steam-tier1.v2",
+          "steam_app_id": 730,
+          "transfer_primitive": "deposit_per_swap",
+          "escrow_mode": "direct",
+          "settlement_modes": [
+            "deposit_per_swap"
+          ],
+          "capability_flags": [
+            "inventory_snapshot",
+            "trade_offer_create"
+          ],
+          "supported_regions": [
+            "EU",
+            "NA"
+          ],
+          "max_batch_size": 4,
+          "requires_trade_hold": true,
+          "requires_mobile_guard": true,
+          "dry_run_only": true,
+          "notes": "set dry-run only to block live proof"
+        },
+        "occurred_at": "2026-02-20T07:20:00Z"
+      },
+      "expect_ok": true,
+      "expect_version": 2,
+      "expect_transfer_primitive": "deposit_per_swap",
+      "expect_max_batch_size": 4,
+      "expect_dry_run_only": true,
+      "expect_settlement_modes_count": 1,
+      "expect_replayed": false
+    },
+    {
+      "op": "adapter.steam_tier1.live_proof.deposit_per_swap.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m85_live_blocked_dry_run",
+      "request": {
+        "cycle_id": "cycle_m85_002",
+        "settlement_id": "settlement_m85_002",
+        "receipt_id": "rcpt_m85_002",
+        "steam_trade_offer_id": "trade_offer_998878",
+        "steam_trade_status": "accepted",
+        "deposit_reference": "steam_deposit:offer:998878",
+        "asset_count": 1,
+        "live_mode": true,
+        "operator_ref": "ops-admin",
+        "evidence_refs": [
+          "https://staging.swapgraph.dev/evidence/m85/trade-offer-998878"
+        ],
+        "notes": "blocked by dry-run-only contract",
+        "occurred_at": "2026-02-20T07:21:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONFLICT",
+      "expect_reason_code": "steam_live_proof_contract_unsupported_mode"
+    },
+    {
+      "op": "adapter.steam_tier1.contract.get",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "now_iso": "2026-02-20T07:22:00Z"
+      },
+      "expect_ok": true,
+      "expect_contract_version": 2,
+      "expect_contract_transfer_primitive": "deposit_per_swap",
+      "expect_contract_max_batch_size": 4,
+      "expect_contract_dry_run_only": true,
+      "expect_preflight_total_preflight_requests": 1,
+      "expect_preflight_ready_count": 1,
+      "expect_preflight_blocked_count": 0,
+      "expect_integration_mode": "fixture_only"
+    }
+  ]
+}

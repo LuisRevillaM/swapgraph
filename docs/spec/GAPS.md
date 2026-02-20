@@ -170,7 +170,8 @@ Each item here must become at least one of:
 - Resolved (fixtures-first, partial): M82 (risk tier policy engine contract: partner risk-tier policy objects + deterministic blocked/manual-review/throttle enforcement reason codes across mutating partner write paths).
 - Resolved (fixtures-first, partial): M83 (dispute workflow and evidence-bundle contracts: idempotent dispute create/resolve lifecycle + signed paginated evidence-bundle exports with deterministic continuation + tamper-fail verification).
 - Resolved (fixtures-first, partial): M84 (Steam Tier-1 adapter contract hardening, fixture-only: idempotent adapter contract upsert/read + deterministic preflight contract checks for mode support, dry-run requirements, and batch-size ceilings).
-- Remaining: integration proof and reliability conformance scope (M85+ live adapter proofs, reliability matrix).
+- Resolved (integration-gated, partial): M85 (Steam deposit-per-swap live proof: idempotent operator proof-record contract + deterministic proof-hash artifacts + runbook-driven staging evidence flow behind `INTEGRATION_ENABLED=1`).
+- Remaining: integration proof and reliability conformance scope (M86+ vault live proof, reliability matrix).
 
 ---
 
