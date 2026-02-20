@@ -44,11 +44,13 @@ function correlationId(op) {
 function ensureSteamLiveProofState(store) {
   store.state.steam_tier1_adapter_contract ||= {};
   store.state.steam_tier1_live_deposit_per_swap_proofs ||= [];
+  store.state.steam_tier1_live_vault_proofs ||= [];
   store.state.idempotency ||= {};
 
   return {
     contracts: store.state.steam_tier1_adapter_contract,
-    liveProofs: store.state.steam_tier1_live_deposit_per_swap_proofs,
+    liveDepositPerSwapProofs: store.state.steam_tier1_live_deposit_per_swap_proofs,
+    liveVaultProofs: store.state.steam_tier1_live_vault_proofs,
     idempotency: store.state.idempotency
   };
 }
@@ -82,7 +84,7 @@ function normalizeEvidenceRefs(values) {
   return Array.from(new Set(out));
 }
 
-function normalizeLiveProofRequest(request) {
+function normalizeDepositPerSwapLiveProofRequest(request) {
   if (!request || typeof request !== 'object' || Array.isArray(request)) return null;
 
   const cycleId = normalizeOptionalString(request.cycle_id);
@@ -129,7 +131,58 @@ function normalizeLiveProofRequest(request) {
   };
 }
 
-function normalizeLiveProofRecord(record) {
+function normalizeVaultLiveProofRequest(request) {
+  if (!request || typeof request !== 'object' || Array.isArray(request)) return null;
+
+  const cycleId = normalizeOptionalString(request.cycle_id);
+  const settlementId = normalizeOptionalString(request.settlement_id);
+  const preflightId = normalizeOptionalString(request.preflight_id);
+  const receiptId = normalizeOptionalString(request.receipt_id);
+  const vaultHoldingIds = normalizeStringSet(request.vault_holding_ids);
+  const vaultReservationIds = normalizeStringSet(request.vault_reservation_ids);
+  const vaultSettlementMode = normalizeOptionalString(request.vault_settlement_mode);
+  const lifecycleEvents = normalizeStringSet(request.lifecycle_events);
+  const instantReady = request.instant_ready === true;
+  const liveMode = request.live_mode === true;
+  const operatorRef = normalizeOptionalString(request.operator_ref);
+  const evidenceRefs = normalizeEvidenceRefs(request.evidence_refs);
+  const notes = normalizeOptionalString(request.notes);
+
+  const allowedSettlementModes = new Set(['vault_escrow', 'hybrid']);
+  const allowedLifecycleEvents = new Set(['deposit', 'reserve', 'release', 'withdraw']);
+
+  if (!cycleId
+    || !settlementId
+    || !receiptId
+    || vaultHoldingIds.length === 0
+    || vaultReservationIds.length === 0
+    || !vaultSettlementMode
+    || !allowedSettlementModes.has(vaultSettlementMode)
+    || lifecycleEvents.length === 0
+    || lifecycleEvents.some(x => !allowedLifecycleEvents.has(x))
+    || !operatorRef
+    || evidenceRefs.length === 0) {
+    return null;
+  }
+
+  return {
+    cycle_id: cycleId,
+    settlement_id: settlementId,
+    ...(preflightId ? { preflight_id: preflightId } : {}),
+    receipt_id: receiptId,
+    vault_holding_ids: vaultHoldingIds,
+    vault_reservation_ids: vaultReservationIds,
+    vault_settlement_mode: vaultSettlementMode,
+    lifecycle_events: lifecycleEvents,
+    instant_ready: instantReady,
+    live_mode: liveMode,
+    operator_ref: operatorRef,
+    evidence_refs: evidenceRefs,
+    ...(notes ? { notes } : {})
+  };
+}
+
+function normalizeDepositPerSwapLiveProofRecord(record) {
   return {
     proof_id: record.proof_id,
     partner_id: record.partner_id,
@@ -142,6 +195,30 @@ function normalizeLiveProofRecord(record) {
     steam_trade_status: record.steam_trade_status,
     deposit_reference: record.deposit_reference,
     asset_count: record.asset_count,
+    live_mode: record.live_mode === true,
+    operator_ref: record.operator_ref,
+    evidence_refs: normalizeEvidenceRefs(record.evidence_refs),
+    ...(normalizeOptionalString(record.notes) ? { notes: normalizeOptionalString(record.notes) } : {}),
+    integration_mode: 'live',
+    recorded_at: record.recorded_at,
+    proof_hash: record.proof_hash
+  };
+}
+
+function normalizeVaultLiveProofRecord(record) {
+  return {
+    proof_id: record.proof_id,
+    partner_id: record.partner_id,
+    contract_version: record.contract_version,
+    cycle_id: record.cycle_id,
+    settlement_id: record.settlement_id,
+    ...(record.preflight_id ? { preflight_id: record.preflight_id } : {}),
+    receipt_id: record.receipt_id,
+    vault_holding_ids: normalizeStringSet(record.vault_holding_ids),
+    vault_reservation_ids: normalizeStringSet(record.vault_reservation_ids),
+    vault_settlement_mode: record.vault_settlement_mode,
+    lifecycle_events: normalizeStringSet(record.lifecycle_events),
+    instant_ready: record.instant_ready === true,
     live_mode: record.live_mode === true,
     operator_ref: record.operator_ref,
     evidence_refs: normalizeEvidenceRefs(record.evidence_refs),
@@ -205,6 +282,16 @@ function applyIdempotentMutation({ store, actor, operationId, idempotencyKey, re
   };
 }
 
+function integrationEnabledConflict(correlation) {
+  return {
+    ok: false,
+    body: errorResponse(correlation, 'CONFLICT', 'integration gate is disabled', {
+      reason_code: 'steam_live_proof_integration_disabled',
+      required_env: 'INTEGRATION_ENABLED=1'
+    })
+  };
+}
+
 export class SteamAdapterLiveProofService {
   constructor({ store }) {
     if (!store) throw new Error('store is required');
@@ -226,17 +313,9 @@ export class SteamAdapterLiveProofService {
       };
     }
 
-    if (process.env.INTEGRATION_ENABLED !== '1') {
-      return {
-        ok: false,
-        body: errorResponse(corr, 'CONFLICT', 'integration gate is disabled', {
-          reason_code: 'steam_live_proof_integration_disabled',
-          required_env: 'INTEGRATION_ENABLED=1'
-        })
-      };
-    }
+    if (process.env.INTEGRATION_ENABLED !== '1') return integrationEnabledConflict(corr);
 
-    const normalized = normalizeLiveProofRequest(request);
+    const normalized = normalizeDepositPerSwapLiveProofRequest(request);
     if (!normalized) {
       return {
         ok: false,
@@ -298,7 +377,7 @@ export class SteamAdapterLiveProofService {
       requestPayload: request,
       correlationId: corr,
       mutate: () => {
-        const proofId = `steam_live_dps_${String(state.liveProofs.length + 1).padStart(6, '0')}`;
+        const proofId = `steam_live_dps_${String(state.liveDepositPerSwapProofs.length + 1).padStart(6, '0')}`;
         const canonicalProofPayload = {
           proof_id: proofId,
           partner_id: actor.id,
@@ -315,13 +394,134 @@ export class SteamAdapterLiveProofService {
           proof_hash: proofHash
         };
 
-        state.liveProofs.push(proofRecord);
+        state.liveDepositPerSwapProofs.push(proofRecord);
 
         return {
           ok: true,
           body: {
             correlation_id: corr,
-            proof: normalizeLiveProofRecord(proofRecord)
+            proof: normalizeDepositPerSwapLiveProofRecord(proofRecord)
+          }
+        };
+      }
+    });
+  }
+
+  recordVaultLiveProof({ actor, auth, idempotencyKey, request }) {
+    const op = 'adapter.steam_tier1.live_proof.vault.record';
+    const corr = correlationId(op);
+
+    const authz = authorizeApiOperation({ operationId: op, actor, auth, store: this.store });
+    if (!authz.ok) return { ok: false, body: errorResponse(corr, authz.error.code, authz.error.message, authz.error.details) };
+
+    if (!isPartner(actor)) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'FORBIDDEN', 'only partner can record steam vault live proof', { actor })
+      };
+    }
+
+    if (process.env.INTEGRATION_ENABLED !== '1') return integrationEnabledConflict(corr);
+
+    const normalized = normalizeVaultLiveProofRequest(request);
+    if (!normalized) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid steam vault live proof payload', {
+          reason_code: 'steam_live_proof_vault_invalid'
+        })
+      };
+    }
+
+    if (normalized.live_mode !== true) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'CONFLICT', 'steam live proof requires live_mode=true', {
+          reason_code: 'steam_live_proof_requires_live_mode'
+        })
+      };
+    }
+
+    const requiredLifecycle = ['deposit', 'reserve', 'release', 'withdraw'];
+    const missingLifecycle = requiredLifecycle.filter(x => !normalized.lifecycle_events.includes(x));
+    if (missingLifecycle.length > 0) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'CONFLICT', 'steam vault lifecycle evidence is incomplete', {
+          reason_code: 'steam_live_proof_vault_lifecycle_incomplete',
+          missing_events: missingLifecycle
+        })
+      };
+    }
+
+    const occurredAtRaw = normalizeOptionalString(request?.occurred_at)
+      ?? normalizeOptionalString(auth?.now_iso)
+      ?? process.env.AUTHZ_NOW_ISO
+      ?? new Date().toISOString();
+    const occurredAtMs = parseIsoMs(occurredAtRaw);
+    if (occurredAtMs === null) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid timestamp for steam vault live proof', {
+          reason_code: 'steam_live_proof_invalid_timestamp'
+        })
+      };
+    }
+
+    const state = ensureSteamLiveProofState(this.store);
+    const contract = normalizeStoredContract(state.contracts[actor.id] ?? null);
+    if (!contract) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'steam adapter contract missing', {
+          reason_code: 'steam_live_proof_contract_missing'
+        })
+      };
+    }
+
+    if (!contract.settlement_modes.includes(normalized.vault_settlement_mode) || contract.dry_run_only === true) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'CONFLICT', 'steam adapter contract does not allow live vault proof', {
+          reason_code: 'steam_live_proof_contract_unsupported_mode',
+          contract_version: contract.version,
+          settlement_mode: normalized.vault_settlement_mode
+        })
+      };
+    }
+
+    return applyIdempotentMutation({
+      store: this.store,
+      actor,
+      operationId: op,
+      idempotencyKey,
+      requestPayload: request,
+      correlationId: corr,
+      mutate: () => {
+        const proofId = `steam_live_vault_${String(state.liveVaultProofs.length + 1).padStart(6, '0')}`;
+        const canonicalProofPayload = {
+          proof_id: proofId,
+          partner_id: actor.id,
+          contract_version: contract.version,
+          ...normalized,
+          integration_mode: 'live',
+          recorded_at: new Date(occurredAtMs).toISOString()
+        };
+
+        const proofHash = createHash('sha256').update(canonicalStringify(canonicalProofPayload), 'utf8').digest('hex');
+
+        const proofRecord = {
+          ...canonicalProofPayload,
+          proof_hash: proofHash
+        };
+
+        state.liveVaultProofs.push(proofRecord);
+
+        return {
+          ok: true,
+          body: {
+            correlation_id: corr,
+            proof: normalizeVaultLiveProofRecord(proofRecord)
           }
         };
       }

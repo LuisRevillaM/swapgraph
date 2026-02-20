@@ -1,0 +1,39 @@
+{
+  "correlation_id": "corr_adapter_steam_tier1_live_proof_vault_record",
+  "proof": {
+    "proof_id": "steam_live_vault_000001",
+    "partner_id": "ops-admin",
+    "contract_version": 1,
+    "cycle_id": "cycle_m86_001",
+    "settlement_id": "settlement_m86_001",
+    "preflight_id": "steam_preflight_000001",
+    "receipt_id": "rcpt_m86_001",
+    "vault_holding_ids": [
+      "holding_m86_001",
+      "holding_m86_002"
+    ],
+    "vault_reservation_ids": [
+      "res_m86_001",
+      "res_m86_002"
+    ],
+    "vault_settlement_mode": "vault_escrow",
+    "lifecycle_events": [
+      "deposit",
+      "reserve",
+      "release",
+      "withdraw"
+    ],
+    "instant_ready": true,
+    "live_mode": true,
+    "operator_ref": "ops-admin",
+    "evidence_refs": [
+      "https://staging.swapgraph.dev/evidence/m86/vault-holding-m86-001",
+      "https://staging.swapgraph.dev/evidence/m86/receipt-rcpt_m86_001"
+    ],
+    "notes": "staging vault live proof capture",
+    "integration_mode": "live",
+    "recorded_at": "2026-02-20T08:20:00.000Z",
+    "proof_hash": "a5a6d1f0a5a6d1f0a5a6d1f0a5a6d1f0a5a6d1f0a5a6d1f0a5a6d1f0a5a6d1f0"
+  },
+  "replayed": false
+}

@@ -1,0 +1,37 @@
+name: M86
+commands:
+  - cmd: "npm run verify:m86"
+artifacts:
+  - artifact: "docs/prd/M86.md"
+  - artifact: "docs/STATUS.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/ERRORS.md"
+  - artifact: "docs/spec/GAPS.md"
+  - artifact: "ops/M86_VAULT_LIVE_PROOF_RUNBOOK.md"
+
+  - artifact: "src/store/jsonStateStore.mjs"
+  - artifact: "src/service/steamAdapterContractService.mjs"
+  - artifact: "src/service/steamAdapterLiveProofService.mjs"
+
+  - artifact: "docs/spec/api/manifest.v1.json"
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+  - artifact: "docs/spec/examples/api/adapter.steam_tier1.live_proof.vault.record.request.json"
+  - artifact: "docs/spec/examples/api/adapter.steam_tier1.live_proof.vault.record.response.json"
+
+  - artifact: "docs/spec/schemas/SteamTier1VaultLiveProofRecordRequest.schema.json"
+  - artifact: "docs/spec/schemas/SteamTier1VaultLiveProofRecordResponse.schema.json"
+
+  - artifact: "scripts/run-m86-steam-vault-live-proof-scenario.mjs"
+  - artifact: "fixtures/integration/m86_scenario.json"
+  - artifact: "fixtures/integration/m86_expected.json"
+
+  - artifact: "milestones/M86.yaml"
+  - artifact: "verify/m86.sh"
+
+  - artifact: "artifacts/milestones/M86/latest/commands.log"
+  - artifact: "artifacts/milestones/M86/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M86/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M86/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M86/latest/steam_vault_live_proof_output.json"
+  - artifact: "artifacts/milestones/M86/latest/store.json"
+  - artifact: "artifacts/milestones/M86/latest/assertions.json"

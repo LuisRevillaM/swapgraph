@@ -167,6 +167,8 @@ Settlement endpoints:
   - idempotent fixture preflight contract check (mode support, dry-run requirement, batch-size ceiling)
 - `POST /adapters/steam/tier1/live-proof/deposit-per-swap`
   - idempotent operator-gated live proof capture for Steam deposit-per-swap settlement evidence (`INTEGRATION_ENABLED=1` required)
+- `POST /adapters/steam/tier1/live-proof/vault`
+  - idempotent operator-gated live proof capture for Steam vault settlement lifecycle evidence (`deposit/reserve/release/withdraw`, `INTEGRATION_ENABLED=1` required)
 
 Receipt endpoints:
 - `GET /receipts/{cycle_id}`

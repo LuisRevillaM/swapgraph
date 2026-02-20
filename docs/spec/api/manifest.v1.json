@@ -1147,6 +1147,24 @@
           "settlement:write"
         ]
       }
+    },
+    {
+      "method": "POST",
+      "path": "/adapters/steam/tier1/live-proof/vault",
+      "operation_id": "adapter.steam_tier1.live_proof.vault.record",
+      "idempotency_required": true,
+      "request_schema": "SteamTier1VaultLiveProofRecordRequest.schema.json",
+      "response_schema": "SteamTier1VaultLiveProofRecordResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write",
+          "vault:write"
+        ]
+      }
     }
   ],
   "webhooks": {

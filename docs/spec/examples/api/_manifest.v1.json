@@ -416,6 +416,14 @@
     {
       "file": "adapter.steam_tier1.live_proof.deposit_per_swap.record.response.json",
       "schema": "SteamTier1DepositPerSwapLiveProofRecordResponse.schema.json"
+    },
+    {
+      "file": "adapter.steam_tier1.live_proof.vault.record.request.json",
+      "schema": "SteamTier1VaultLiveProofRecordRequest.schema.json"
+    },
+    {
+      "file": "adapter.steam_tier1.live_proof.vault.record.response.json",
+      "schema": "SteamTier1VaultLiveProofRecordResponse.schema.json"
     }
   ]
 }
