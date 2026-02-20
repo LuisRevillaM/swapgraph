@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/Tier2AdapterPreflightResponse.schema.json",
+  "title": "Tier2AdapterPreflightResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "preflight",
+    "capability",
+    "replayed"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "preflight": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "preflight_id",
+        "partner_id",
+        "contract_version",
+        "cycle_id",
+        "source_ecosystem",
+        "target_ecosystem",
+        "transfer_primitive",
+        "route_hops",
+        "dry_run",
+        "requested_at",
+        "ready",
+        "reason_code",
+        "integration_mode"
+      ],
+      "properties": {
+        "preflight_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "cycle_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_ecosystem": {
+          "type": "string",
+          "enum": [
+            "steam",
+            "polygon",
+            "solana",
+            "ethereum"
+          ]
+        },
+        "target_ecosystem": {
+          "type": "string",
+          "enum": [
+            "steam",
+            "polygon",
+            "solana",
+            "ethereum"
+          ]
+        },
+        "transfer_primitive": {
+          "type": "string",
+          "enum": [
+            "custody_proof_bridge",
+            "escrow_atomic_swap",
+            "delegated_delivery"
+          ]
+        },
+        "route_hops": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "dry_run": {
+          "type": "boolean"
+        },
+        "requested_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "ready": {
+          "type": "boolean"
+        },
+        "reason_code": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "integration_mode": {
+          "type": "string",
+          "enum": [
+            "fixture_only"
+          ]
+        }
+      }
+    },
+    "capability": {
+      "$ref": "Tier2AdapterCapabilityUpsertResponse.schema.json#/properties/capability"
+    },
+    "replayed": {
+      "type": "boolean"
+    }
+  }
+}

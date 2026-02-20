@@ -1,0 +1,33 @@
+{
+  "correlation_id": "corr_adapter_tier2_capability_upsert",
+  "capability": {
+    "partner_id": "ops-admin",
+    "version": 1,
+    "integration_mode": "fixture_only",
+    "adapter_version": "tier2-bridge.v1",
+    "source_ecosystem": "steam",
+    "target_ecosystem": "polygon",
+    "transfer_primitives": [
+      "custody_proof_bridge",
+      "delegated_delivery"
+    ],
+    "settlement_modes": [
+      "escrow_bridge",
+      "offchain_intent"
+    ],
+    "capability_flags": [
+      "delegate_attestation",
+      "proof_root_sync"
+    ],
+    "supported_regions": [
+      "EU",
+      "NA"
+    ],
+    "max_route_hops": 2,
+    "requires_trust_anchor": true,
+    "dry_run_only": true,
+    "notes": "fixture-only tier2 capability",
+    "updated_at": "2026-02-20T11:00:00.000Z"
+  },
+  "replayed": false
+}

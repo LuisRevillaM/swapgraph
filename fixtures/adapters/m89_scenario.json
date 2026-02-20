@@ -1,0 +1,472 @@
+{
+  "actors": {
+    "admin_partner": {
+      "type": "partner",
+      "id": "ops-admin"
+    }
+  },
+  "operations": [
+    {
+      "op": "adapter.tier2.capability.get",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "now_iso": "2026-02-20T11:00:00Z"
+      },
+      "expect_ok": true,
+      "expect_capability_version": null,
+      "expect_capability_source_ecosystem": null,
+      "expect_capability_target_ecosystem": null,
+      "expect_capability_max_route_hops": null,
+      "expect_capability_dry_run_only": false,
+      "expect_preflight_total_preflight_requests": 0,
+      "expect_preflight_ready_count": 0,
+      "expect_preflight_blocked_count": 0,
+      "expect_integration_mode": "fixture_only"
+    },
+    {
+      "op": "adapter.tier2.capability.upsert",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m89_upsert_v1",
+      "request": {
+        "capability": {
+          "adapter_version": "tier2-bridge.v1",
+          "source_ecosystem": "steam",
+          "target_ecosystem": "polygon",
+          "transfer_primitives": [
+            "custody_proof_bridge",
+            "delegated_delivery"
+          ],
+          "settlement_modes": [
+            "offchain_intent",
+            "escrow_bridge"
+          ],
+          "capability_flags": [
+            "proof_root_sync",
+            "delegate_attestation"
+          ],
+          "supported_regions": [
+            "EU",
+            "NA"
+          ],
+          "max_route_hops": 2,
+          "requires_trust_anchor": true,
+          "dry_run_only": true,
+          "notes": "tier2 capability v1"
+        },
+        "occurred_at": "2026-02-20T11:01:00Z"
+      },
+      "expect_ok": true,
+      "expect_version": 1,
+      "expect_source_ecosystem": "steam",
+      "expect_target_ecosystem": "polygon",
+      "expect_max_route_hops": 2,
+      "expect_dry_run_only": true,
+      "expect_transfer_primitives_count": 2,
+      "expect_replayed": false
+    },
+    {
+      "op": "adapter.tier2.capability.upsert",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m89_upsert_v1",
+      "request": {
+        "capability": {
+          "adapter_version": "tier2-bridge.v1",
+          "source_ecosystem": "steam",
+          "target_ecosystem": "polygon",
+          "transfer_primitives": [
+            "custody_proof_bridge",
+            "delegated_delivery"
+          ],
+          "settlement_modes": [
+            "offchain_intent",
+            "escrow_bridge"
+          ],
+          "capability_flags": [
+            "proof_root_sync",
+            "delegate_attestation"
+          ],
+          "supported_regions": [
+            "EU",
+            "NA"
+          ],
+          "max_route_hops": 2,
+          "requires_trust_anchor": true,
+          "dry_run_only": true,
+          "notes": "tier2 capability v1"
+        },
+        "occurred_at": "2026-02-20T11:01:00Z"
+      },
+      "expect_ok": true,
+      "expect_version": 1,
+      "expect_replayed": true
+    },
+    {
+      "op": "adapter.tier2.capability.upsert",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m89_upsert_v1",
+      "request": {
+        "capability": {
+          "adapter_version": "tier2-bridge.v1",
+          "source_ecosystem": "steam",
+          "target_ecosystem": "polygon",
+          "transfer_primitives": [
+            "custody_proof_bridge",
+            "delegated_delivery"
+          ],
+          "settlement_modes": [
+            "offchain_intent",
+            "escrow_bridge"
+          ],
+          "capability_flags": [
+            "proof_root_sync",
+            "delegate_attestation"
+          ],
+          "supported_regions": [
+            "EU",
+            "NA"
+          ],
+          "max_route_hops": 3,
+          "requires_trust_anchor": true,
+          "dry_run_only": true,
+          "notes": "tier2 capability v1"
+        },
+        "occurred_at": "2026-02-20T11:01:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    },
+    {
+      "op": "adapter.tier2.preflight",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m89_preflight_1",
+      "request": {
+        "cycle_id": "cycle_m89_001",
+        "source_ecosystem": "steam",
+        "target_ecosystem": "polygon",
+        "transfer_primitive": "custody_proof_bridge",
+        "route_hops": 2,
+        "dry_run": true,
+        "requested_at": "2026-02-20T11:10:00Z"
+      },
+      "expect_ok": true,
+      "expect_preflight_id": "tier2_preflight_000001",
+      "expect_contract_version": 1,
+      "expect_ready": true,
+      "expect_preflight_reason_code": null,
+      "expect_replayed": false
+    },
+    {
+      "op": "adapter.tier2.preflight",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m89_preflight_2",
+      "request": {
+        "cycle_id": "cycle_m89_002",
+        "source_ecosystem": "steam",
+        "target_ecosystem": "solana",
+        "transfer_primitive": "custody_proof_bridge",
+        "route_hops": 1,
+        "dry_run": true,
+        "requested_at": "2026-02-20T11:11:00Z"
+      },
+      "expect_ok": true,
+      "expect_preflight_id": "tier2_preflight_000002",
+      "expect_contract_version": 1,
+      "expect_ready": false,
+      "expect_preflight_reason_code": "adapter_tier2_ecosystem_mismatch",
+      "expect_replayed": false
+    },
+    {
+      "op": "adapter.tier2.preflight",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m89_preflight_3",
+      "request": {
+        "cycle_id": "cycle_m89_003",
+        "source_ecosystem": "steam",
+        "target_ecosystem": "polygon",
+        "transfer_primitive": "escrow_atomic_swap",
+        "route_hops": 1,
+        "dry_run": true,
+        "requested_at": "2026-02-20T11:12:00Z"
+      },
+      "expect_ok": true,
+      "expect_preflight_id": "tier2_preflight_000003",
+      "expect_contract_version": 1,
+      "expect_ready": false,
+      "expect_preflight_reason_code": "adapter_tier2_transfer_primitive_unsupported",
+      "expect_replayed": false
+    },
+    {
+      "op": "adapter.tier2.preflight",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m89_preflight_4",
+      "request": {
+        "cycle_id": "cycle_m89_004",
+        "source_ecosystem": "steam",
+        "target_ecosystem": "polygon",
+        "transfer_primitive": "delegated_delivery",
+        "route_hops": 3,
+        "dry_run": true,
+        "requested_at": "2026-02-20T11:13:00Z"
+      },
+      "expect_ok": true,
+      "expect_preflight_id": "tier2_preflight_000004",
+      "expect_contract_version": 1,
+      "expect_ready": false,
+      "expect_preflight_reason_code": "adapter_tier2_route_hops_exceeded",
+      "expect_replayed": false
+    },
+    {
+      "op": "adapter.tier2.preflight",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m89_preflight_5",
+      "request": {
+        "cycle_id": "cycle_m89_005",
+        "source_ecosystem": "steam",
+        "target_ecosystem": "polygon",
+        "transfer_primitive": "delegated_delivery",
+        "route_hops": 1,
+        "dry_run": false,
+        "requested_at": "2026-02-20T11:14:00Z"
+      },
+      "expect_ok": true,
+      "expect_preflight_id": "tier2_preflight_000005",
+      "expect_contract_version": 1,
+      "expect_ready": false,
+      "expect_preflight_reason_code": "adapter_tier2_dry_run_required",
+      "expect_replayed": false
+    },
+    {
+      "op": "adapter.tier2.capability.get",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "now_iso": "2026-02-20T11:15:00Z"
+      },
+      "expect_ok": true,
+      "expect_capability_version": 1,
+      "expect_capability_source_ecosystem": "steam",
+      "expect_capability_target_ecosystem": "polygon",
+      "expect_capability_max_route_hops": 2,
+      "expect_capability_dry_run_only": true,
+      "expect_preflight_total_preflight_requests": 5,
+      "expect_preflight_ready_count": 1,
+      "expect_preflight_blocked_count": 4,
+      "expect_integration_mode": "fixture_only"
+    },
+    {
+      "op": "adapter.tier2.capability.upsert",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m89_upsert_v2",
+      "request": {
+        "capability": {
+          "adapter_version": "tier2-bridge.v2",
+          "source_ecosystem": "steam",
+          "target_ecosystem": "polygon",
+          "transfer_primitives": [
+            "custody_proof_bridge",
+            "delegated_delivery",
+            "escrow_atomic_swap"
+          ],
+          "settlement_modes": [
+            "offchain_intent",
+            "escrow_bridge",
+            "hybrid"
+          ],
+          "capability_flags": [
+            "proof_root_sync",
+            "delegate_attestation",
+            "route_fallback"
+          ],
+          "supported_regions": [
+            "EU",
+            "NA"
+          ],
+          "max_route_hops": 4,
+          "requires_trust_anchor": true,
+          "dry_run_only": false,
+          "notes": "tier2 capability v2"
+        },
+        "occurred_at": "2026-02-20T11:20:00Z"
+      },
+      "expect_ok": true,
+      "expect_version": 2,
+      "expect_source_ecosystem": "steam",
+      "expect_target_ecosystem": "polygon",
+      "expect_max_route_hops": 4,
+      "expect_dry_run_only": false,
+      "expect_transfer_primitives_count": 3,
+      "expect_replayed": false
+    },
+    {
+      "op": "adapter.tier2.preflight",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m89_preflight_6",
+      "request": {
+        "cycle_id": "cycle_m89_006",
+        "source_ecosystem": "steam",
+        "target_ecosystem": "polygon",
+        "transfer_primitive": "escrow_atomic_swap",
+        "route_hops": 3,
+        "dry_run": false,
+        "requested_at": "2026-02-20T11:21:00Z"
+      },
+      "expect_ok": true,
+      "expect_preflight_id": "tier2_preflight_000006",
+      "expect_contract_version": 2,
+      "expect_ready": true,
+      "expect_preflight_reason_code": null,
+      "expect_replayed": false
+    },
+    {
+      "op": "adapter.tier2.capability.get",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "now_iso": "2026-02-20T11:22:00Z"
+      },
+      "expect_ok": true,
+      "expect_capability_version": 2,
+      "expect_capability_source_ecosystem": "steam",
+      "expect_capability_target_ecosystem": "polygon",
+      "expect_capability_max_route_hops": 4,
+      "expect_capability_dry_run_only": false,
+      "expect_preflight_total_preflight_requests": 6,
+      "expect_preflight_ready_count": 2,
+      "expect_preflight_blocked_count": 4,
+      "expect_integration_mode": "fixture_only"
+    },
+    {
+      "op": "adapter.tier2.capability.upsert",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "idempotency_key": "m89_upsert_scope_fail",
+      "request": {
+        "capability": {
+          "adapter_version": "tier2-bridge.v3",
+          "source_ecosystem": "steam",
+          "target_ecosystem": "polygon",
+          "transfer_primitives": [
+            "custody_proof_bridge"
+          ],
+          "settlement_modes": [
+            "offchain_intent"
+          ],
+          "capability_flags": [
+            "proof_root_sync"
+          ],
+          "supported_regions": [
+            "NA"
+          ],
+          "max_route_hops": 1,
+          "requires_trust_anchor": true,
+          "dry_run_only": true
+        },
+        "occurred_at": "2026-02-20T11:23:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    },
+    {
+      "op": "adapter.tier2.capability.get",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "query": {
+        "now_iso": "2026-02-20T11:24:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    },
+    {
+      "op": "adapter.tier2.preflight",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "idempotency_key": "m89_preflight_scope_fail",
+      "request": {
+        "cycle_id": "cycle_m89_scope_fail",
+        "source_ecosystem": "steam",
+        "target_ecosystem": "polygon",
+        "transfer_primitive": "custody_proof_bridge",
+        "route_hops": 1,
+        "dry_run": true,
+        "requested_at": "2026-02-20T11:25:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    }
+  ]
+}

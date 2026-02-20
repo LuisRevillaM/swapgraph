@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/Tier2AdapterCapabilityUpsertRequest.schema.json",
+  "title": "Tier2AdapterCapabilityUpsertRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "capability"
+  ],
+  "properties": {
+    "capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "adapter_version",
+        "source_ecosystem",
+        "target_ecosystem",
+        "transfer_primitives",
+        "settlement_modes",
+        "capability_flags",
+        "supported_regions",
+        "max_route_hops",
+        "requires_trust_anchor",
+        "dry_run_only"
+      ],
+      "properties": {
+        "adapter_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_ecosystem": {
+          "type": "string",
+          "enum": [
+            "steam",
+            "polygon",
+            "solana",
+            "ethereum"
+          ]
+        },
+        "target_ecosystem": {
+          "type": "string",
+          "enum": [
+            "steam",
+            "polygon",
+            "solana",
+            "ethereum"
+          ]
+        },
+        "transfer_primitives": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "custody_proof_bridge",
+              "escrow_atomic_swap",
+              "delegated_delivery"
+            ]
+          }
+        },
+        "settlement_modes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "offchain_intent",
+              "escrow_bridge",
+              "hybrid"
+            ]
+          }
+        },
+        "capability_flags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "supported_regions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "max_route_hops": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10
+        },
+        "requires_trust_anchor": {
+          "type": "boolean"
+        },
+        "dry_run_only": {
+          "type": "boolean"
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

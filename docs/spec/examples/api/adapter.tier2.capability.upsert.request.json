@@ -1,0 +1,28 @@
+{
+  "capability": {
+    "adapter_version": "tier2-bridge.v1",
+    "source_ecosystem": "steam",
+    "target_ecosystem": "polygon",
+    "transfer_primitives": [
+      "custody_proof_bridge",
+      "delegated_delivery"
+    ],
+    "settlement_modes": [
+      "offchain_intent",
+      "escrow_bridge"
+    ],
+    "capability_flags": [
+      "proof_root_sync",
+      "delegate_attestation"
+    ],
+    "supported_regions": [
+      "EU",
+      "NA"
+    ],
+    "max_route_hops": 2,
+    "requires_trust_anchor": true,
+    "dry_run_only": true,
+    "notes": "fixture-only tier2 capability"
+  },
+  "occurred_at": "2026-02-20T11:00:00Z"
+}

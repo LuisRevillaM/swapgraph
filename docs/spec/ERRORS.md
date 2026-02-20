@@ -99,6 +99,16 @@ Notes:
   - `steam_adapter_settlement_mode_unsupported`
   - `steam_adapter_dry_run_required`
   - `steam_adapter_batch_size_exceeded`
+  - `adapter_tier2_capability_invalid`
+  - `adapter_tier2_capability_invalid_timestamp`
+  - `adapter_tier2_capability_query_invalid`
+  - `adapter_tier2_capability_missing`
+  - `adapter_tier2_preflight_invalid`
+  - `adapter_tier2_preflight_invalid_timestamp`
+  - `adapter_tier2_ecosystem_mismatch`
+  - `adapter_tier2_transfer_primitive_unsupported`
+  - `adapter_tier2_route_hops_exceeded`
+  - `adapter_tier2_dry_run_required`
   - `steam_live_proof_invalid`
   - `steam_live_proof_invalid_timestamp`
   - `steam_live_proof_integration_disabled`

@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/Tier2AdapterPreflightRequest.schema.json",
+  "title": "Tier2AdapterPreflightRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "cycle_id",
+    "source_ecosystem",
+    "target_ecosystem",
+    "transfer_primitive",
+    "route_hops",
+    "dry_run"
+  ],
+  "properties": {
+    "cycle_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_ecosystem": {
+      "type": "string",
+      "enum": [
+        "steam",
+        "polygon",
+        "solana",
+        "ethereum"
+      ]
+    },
+    "target_ecosystem": {
+      "type": "string",
+      "enum": [
+        "steam",
+        "polygon",
+        "solana",
+        "ethereum"
+      ]
+    },
+    "transfer_primitive": {
+      "type": "string",
+      "enum": [
+        "custody_proof_bridge",
+        "escrow_atomic_swap",
+        "delegated_delivery"
+      ]
+    },
+    "route_hops": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 20
+    },
+    "dry_run": {
+      "type": "boolean"
+    },
+    "requested_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

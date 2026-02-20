@@ -49,6 +49,8 @@ export class JsonStateStore {
       inclusion_proof_linkages: [],
       inclusion_proof_export_checkpoints: {},
       inclusion_proof_linkage_counter: 0,
+      tier2_adapter_capabilities: {},
+      tier2_adapter_preflight_history: [],
       oauth_clients: {},
       oauth_tokens: {}
     };
@@ -96,6 +98,8 @@ export class JsonStateStore {
         inclusion_proof_linkages: [],
         inclusion_proof_export_checkpoints: {},
         inclusion_proof_linkage_counter: 0,
+        tier2_adapter_capabilities: {},
+        tier2_adapter_preflight_history: [],
         oauth_clients: {},
         oauth_tokens: {}
       };
@@ -144,6 +148,8 @@ export class JsonStateStore {
     this.state.inclusion_proof_linkages ||= [];
     this.state.inclusion_proof_export_checkpoints ||= {};
     this.state.inclusion_proof_linkage_counter ||= 0;
+    this.state.tier2_adapter_capabilities ||= {};
+    this.state.tier2_adapter_preflight_history ||= [];
     this.state.oauth_clients ||= {};
     this.state.oauth_tokens ||= {};
   }

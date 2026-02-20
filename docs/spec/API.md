@@ -165,6 +165,12 @@ Settlement endpoints:
   - read Steam Tier-1 adapter contract + deterministic preflight summary telemetry
 - `POST /adapters/steam/tier1/preflight`
   - idempotent fixture preflight contract check (mode support, dry-run requirement, batch-size ceiling)
+- `POST /adapters/tier2/capability`
+  - idempotent Tier-2 adapter capability contract upsert surface for cross-ecosystem handoff
+- `GET /adapters/tier2/capability`
+  - read Tier-2 adapter capability contract + deterministic preflight summary telemetry
+- `POST /adapters/tier2/preflight`
+  - idempotent cross-ecosystem preflight contract check (ecosystem pairing, transfer primitive, route-hop ceilings, dry-run policy)
 - `POST /adapters/steam/tier1/live-proof/deposit-per-swap`
   - idempotent operator-gated live proof capture for Steam deposit-per-swap settlement evidence (`INTEGRATION_ENABLED=1` required)
 - `POST /adapters/steam/tier1/live-proof/vault`

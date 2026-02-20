@@ -1248,6 +1248,56 @@
           "settlement:read"
         ]
       }
+    },
+    {
+      "method": "POST",
+      "path": "/adapters/tier2/capability",
+      "operation_id": "adapter.tier2.capability.upsert",
+      "idempotency_required": true,
+      "request_schema": "Tier2AdapterCapabilityUpsertRequest.schema.json",
+      "response_schema": "Tier2AdapterCapabilityUpsertResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/adapters/tier2/capability",
+      "operation_id": "adapter.tier2.capability.get",
+      "idempotency_required": false,
+      "response_schema": "Tier2AdapterCapabilityGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/adapters/tier2/preflight",
+      "operation_id": "adapter.tier2.preflight",
+      "idempotency_required": true,
+      "request_schema": "Tier2AdapterPreflightRequest.schema.json",
+      "response_schema": "Tier2AdapterPreflightResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
     }
   ],
   "webhooks": {

@@ -1,0 +1,41 @@
+name: M89
+commands:
+  - cmd: "npm run verify:m89"
+artifacts:
+  - artifact: "docs/prd/M89.md"
+  - artifact: "docs/STATUS.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/ERRORS.md"
+  - artifact: "docs/spec/GAPS.md"
+
+  - artifact: "src/store/jsonStateStore.mjs"
+  - artifact: "src/service/tier2AdapterCapabilityService.mjs"
+
+  - artifact: "docs/spec/api/manifest.v1.json"
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+  - artifact: "docs/spec/examples/api/adapter.tier2.capability.upsert.request.json"
+  - artifact: "docs/spec/examples/api/adapter.tier2.capability.upsert.response.json"
+  - artifact: "docs/spec/examples/api/adapter.tier2.capability.get.response.json"
+  - artifact: "docs/spec/examples/api/adapter.tier2.preflight.request.json"
+  - artifact: "docs/spec/examples/api/adapter.tier2.preflight.response.json"
+
+  - artifact: "docs/spec/schemas/Tier2AdapterCapabilityUpsertRequest.schema.json"
+  - artifact: "docs/spec/schemas/Tier2AdapterCapabilityUpsertResponse.schema.json"
+  - artifact: "docs/spec/schemas/Tier2AdapterCapabilityGetResponse.schema.json"
+  - artifact: "docs/spec/schemas/Tier2AdapterPreflightRequest.schema.json"
+  - artifact: "docs/spec/schemas/Tier2AdapterPreflightResponse.schema.json"
+
+  - artifact: "scripts/run-m89-tier2-adapter-capability-scenario.mjs"
+  - artifact: "fixtures/adapters/m89_scenario.json"
+  - artifact: "fixtures/adapters/m89_expected.json"
+
+  - artifact: "milestones/M89.yaml"
+  - artifact: "verify/m89.sh"
+
+  - artifact: "artifacts/milestones/M89/latest/commands.log"
+  - artifact: "artifacts/milestones/M89/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M89/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M89/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M89/latest/tier2_adapter_capability_output.json"
+  - artifact: "artifacts/milestones/M89/latest/store.json"
+  - artifact: "artifacts/milestones/M89/latest/assertions.json"

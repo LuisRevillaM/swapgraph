@@ -174,7 +174,8 @@ Each item here must become at least one of:
 - Resolved (integration-gated, partial): M86 (Steam vault live proof: idempotent operator vault lifecycle proof-record contract with complete deposit/reserve/release/withdraw evidence + deterministic proof-hash artifacts behind `INTEGRATION_ENABLED=1`).
 - Resolved (fixtures-first, partial): M87 (transparency-log publication contracts: idempotent append-only publication + signed paginated export with deterministic attestation/checkpoint continuation and tamper-fail verification).
 - Resolved (fixtures-first, partial): M88 (unified inclusion-proof linkage contracts: idempotent linkage recording across signed receipt + custody inclusion proof + transparency publication chain roots, with signed paginated export continuity and tamper-fail verification).
-- Remaining: cross-ecosystem adapter contract and reliability conformance scope (M89+ reliability matrix).
+- Resolved (fixtures-first, partial): M89 (Tier-2 adapter capability contracts: idempotent capability upsert/read + deterministic cross-ecosystem preflight checks for ecosystem pairing, transfer primitives, route-hop ceilings, and dry-run policy with scope-enforced auth behavior).
+- Remaining: cross-adapter cycle semantics and reliability conformance scope (M90+ reliability matrix).
 
 ---
 

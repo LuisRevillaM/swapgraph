@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/Tier2AdapterCapabilityGetResponse.schema.json",
+  "title": "Tier2AdapterCapabilityGetResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "partner_id",
+    "as_of",
+    "integration_mode",
+    "capability",
+    "preflight_summary"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "partner_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "as_of": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "integration_mode": {
+      "type": "string",
+      "enum": [
+        "fixture_only"
+      ]
+    },
+    "capability": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "Tier2AdapterCapabilityUpsertResponse.schema.json#/properties/capability"
+        }
+      ]
+    },
+    "preflight_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total_preflight_requests",
+        "ready_count",
+        "blocked_count"
+      ],
+      "properties": {
+        "total_preflight_requests": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "ready_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "blocked_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

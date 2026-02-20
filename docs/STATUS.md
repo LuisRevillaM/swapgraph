@@ -99,9 +99,10 @@ Last updated: 2026-02-19
 - M86: ✅ Steam Vault live proof (integration-gated) (idempotent vault lifecycle live-proof record contract + deterministic proof-hash artifacts + runbook-driven staging evidence flow with `settlement:write` + `vault:write`, enforced behind `INTEGRATION_ENABLED=1`) (staging integration proof)
 - M87: ✅ Transparency log publication contract (fixtures-first) (idempotent append-only publication + signed paginated export with deterministic attestation/checkpoint continuation and tamper-fail signature/hash verification) (fixtures-first)
 - M88: ✅ Unified inclusion-proof linkage (fixtures-first) (idempotent linkage recording across signed receipts + custody inclusion proofs + transparency publication chain roots, plus signed paginated linkage export with deterministic attestation/checkpoint continuation and tamper-fail verification) (fixtures-first)
+- M89: ✅ Tier-2 adapter capability contract (cross-ecosystem preflight, fixtures-first) (idempotent Tier-2 capability upsert/read + deterministic cross-ecosystem preflight checks for ecosystem pairing, transfer primitives, route-hop ceilings, and dry-run policy with scope-enforced auth proofs) (fixtures-first)
 
 ## Next
-- M89: Tier-2 adapter capability contract (cross-ecosystem preflight)
+- M90: Cross-adapter cycle semantics and receipts
 - Master remainder forecast: `docs/prd/2026-02-19_master-remaining-milestones_M71-M92.md`
 
 ## Notes

@@ -456,6 +456,26 @@
     {
       "file": "inclusion_proof.linkage.export.response.json",
       "schema": "InclusionProofLinkageExportResponse.schema.json"
+    },
+    {
+      "file": "adapter.tier2.capability.upsert.request.json",
+      "schema": "Tier2AdapterCapabilityUpsertRequest.schema.json"
+    },
+    {
+      "file": "adapter.tier2.capability.upsert.response.json",
+      "schema": "Tier2AdapterCapabilityUpsertResponse.schema.json"
+    },
+    {
+      "file": "adapter.tier2.capability.get.response.json",
+      "schema": "Tier2AdapterCapabilityGetResponse.schema.json"
+    },
+    {
+      "file": "adapter.tier2.preflight.request.json",
+      "schema": "Tier2AdapterPreflightRequest.schema.json"
+    },
+    {
+      "file": "adapter.tier2.preflight.response.json",
+      "schema": "Tier2AdapterPreflightResponse.schema.json"
     }
   ]
 }
