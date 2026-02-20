@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/DisputeCompensationLinkageUpdateResponse.schema.json",
+  "title": "DisputeCompensationLinkageUpdateResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "linkage",
+    "replayed"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linkage": {
+      "$ref": "DisputeCompensationLinkageRecordResponse.schema.json#/properties/linkage"
+    },
+    "replayed": {
+      "type": "boolean"
+    }
+  }
+}

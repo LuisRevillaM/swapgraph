@@ -1,0 +1,37 @@
+{
+  "correlation_id": "corr_compensation_dispute_linkage_update",
+  "linkage": {
+    "linkage_id": "dispute_comp_link_000001",
+    "partner_id": "ops-admin",
+    "dispute_id": "dispute_000001",
+    "case_id": "comp_case_000001",
+    "cycle_id": "cycle_cross_comp_001",
+    "cross_receipt_id": "cross_receipt_cycle_cross_comp_001",
+    "status": "compensation_recorded",
+    "ledger_entry_id": "comp_ledger_000001",
+    "decision_reason_code": "ledger_payout_recorded",
+    "opened_at": "2026-02-20T22:00:00.000Z",
+    "updated_at": "2026-02-20T22:05:00.000Z",
+    "closed_at": null,
+    "integration_mode": "fixture_only",
+    "notes": "dispute mapped to compensation workflow",
+    "history": [
+      {
+        "from_status": null,
+        "to_status": "linked",
+        "decision_reason_code": "linkage_opened",
+        "ledger_entry_id": null,
+        "occurred_at": "2026-02-20T22:00:00.000Z"
+      },
+      {
+        "from_status": "linked",
+        "to_status": "compensation_recorded",
+        "decision_reason_code": "ledger_payout_recorded",
+        "ledger_entry_id": "comp_ledger_000001",
+        "occurred_at": "2026-02-20T22:05:00.000Z",
+        "notes": "ledger payout tied to dispute"
+      }
+    ]
+  },
+  "replayed": false
+}

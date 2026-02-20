@@ -180,7 +180,8 @@ Each item here must become at least one of:
 - Resolved (fixtures-first, partial): M92 (full-plan conformance + release-readiness matrix with deterministic milestone artifact coverage checks and zero-unresolved-blocker assertions).
 - Resolved (fixtures-first, partial): M93 (cross-adapter compensation case contracts: idempotent create/update/read surfaces bound to signed cross-adapter discrepancy receipts with deterministic lifecycle transition guards and scope/idempotency enforcement).
 - Resolved (fixtures-first, partial): M94 (compensation ledger/export contracts: idempotent ledger entry recording with payable-case gating + payout ceiling enforcement, and signed paginated ledger export with continuation attestation and tamper-fail verification).
-- Remaining: dispute-linkage, auto-remediation planning, and staging evidence refresh scope (M95+).
+- Resolved (fixtures-first, partial): M95 (dispute-to-compensation linkage workflow: idempotent linkage record/update lifecycle bridging disputes to compensation cases/ledger entries with deterministic transition guardrails and signed paginated linkage exports).
+- Remaining: auto-remediation planning and staging evidence refresh scope (M96+).
 
 ---
 

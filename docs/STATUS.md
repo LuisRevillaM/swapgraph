@@ -1,6 +1,6 @@
 # Project Status — swapgraph
 
-Last updated: 2026-02-19
+Last updated: 2026-02-20
 
 ## Autopilot
 - Status: **spec hardening** (not approved)
@@ -105,9 +105,9 @@ Last updated: 2026-02-19
 - M92: ✅ Full-plan conformance and release-readiness gate (fixtures-first) (deterministic conformance matrix + milestone artifact coverage checks + release-readiness assertions with zero unresolved blocker verification) (fixtures-first)
 - M93: ✅ Cross-adapter compensation case contract (fixtures-first) (idempotent compensation case create/update/read surfaces linked to signed cross-adapter discrepancy receipts, deterministic lifecycle transitions, and scope/idempotency enforcement proofs) (fixtures-first)
 - M94: ✅ Compensation ledger + signed export (fixtures-first) (idempotent compensation-ledger recording bound to payable case state, deterministic payout ceiling enforcement, and signed paginated ledger export with continuation attestation/tamper-fail verification) (fixtures-first)
+- M95: ✅ Dispute-to-compensation linkage workflow (fixtures-first) (idempotent dispute-compensation linkage record/update lifecycle, deterministic transition guardrails, resolved-dispute close enforcement, and signed paginated linkage export with continuation/tamper-fail verification) (fixtures-first)
 
 ## Next
-- M95: Dispute-to-compensation linkage workflow
 - M96: Reliability auto-remediation planning contract
 - M97: Staging evidence refresh + operator conformance runbook pack
 - Next-batch forecast: `docs/prd/2026-02-20_master-next-batch_M93-M97.md`

@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/DisputeCompensationLinkageRecordResponse.schema.json",
+  "title": "DisputeCompensationLinkageRecordResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "linkage",
+    "replayed"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linkage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "linkage_id",
+        "partner_id",
+        "dispute_id",
+        "case_id",
+        "cycle_id",
+        "cross_receipt_id",
+        "status",
+        "ledger_entry_id",
+        "decision_reason_code",
+        "opened_at",
+        "updated_at",
+        "closed_at",
+        "integration_mode",
+        "history"
+      ],
+      "properties": {
+        "linkage_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dispute_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "case_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cycle_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cross_receipt_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "linked",
+            "compensation_recorded",
+            "closed"
+          ]
+        },
+        "ledger_entry_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "decision_reason_code": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "opened_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "closed_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "integration_mode": {
+          "type": "string",
+          "enum": [
+            "fixture_only"
+          ]
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "from_status",
+              "to_status",
+              "decision_reason_code",
+              "ledger_entry_id",
+              "occurred_at"
+            ],
+            "properties": {
+              "from_status": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "linked",
+                  "compensation_recorded",
+                  "closed",
+                  null
+                ]
+              },
+              "to_status": {
+                "type": "string",
+                "enum": [
+                  "linked",
+                  "compensation_recorded",
+                  "closed"
+                ]
+              },
+              "decision_reason_code": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "ledger_entry_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "occurred_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "notes": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "replayed": {
+      "type": "boolean"
+    }
+  }
+}

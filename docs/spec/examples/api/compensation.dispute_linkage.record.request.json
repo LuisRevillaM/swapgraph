@@ -1,0 +1,9 @@
+{
+  "linkage": {
+    "dispute_id": "dispute_000001",
+    "case_id": "comp_case_000001",
+    "decision_reason_code": "linkage_opened",
+    "notes": "dispute mapped to compensation workflow"
+  },
+  "occurred_at": "2026-02-20T22:00:00Z"
+}

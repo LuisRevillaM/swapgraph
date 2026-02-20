@@ -556,6 +556,26 @@
     {
       "file": "compensation.cross_adapter.ledger.export.response.json",
       "schema": "CrossAdapterCompensationLedgerExportResponse.schema.json"
+    },
+    {
+      "file": "compensation.dispute_linkage.record.request.json",
+      "schema": "DisputeCompensationLinkageRecordRequest.schema.json"
+    },
+    {
+      "file": "compensation.dispute_linkage.record.response.json",
+      "schema": "DisputeCompensationLinkageRecordResponse.schema.json"
+    },
+    {
+      "file": "compensation.dispute_linkage.update.request.json",
+      "schema": "DisputeCompensationLinkageUpdateRequest.schema.json"
+    },
+    {
+      "file": "compensation.dispute_linkage.update.response.json",
+      "schema": "DisputeCompensationLinkageUpdateResponse.schema.json"
+    },
+    {
+      "file": "compensation.dispute_linkage.export.response.json",
+      "schema": "DisputeCompensationLinkageExportResponse.schema.json"
     }
   ]
 }

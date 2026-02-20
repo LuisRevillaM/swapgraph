@@ -187,6 +187,12 @@ Settlement endpoints:
   - idempotent compensation-ledger entry recording contract (`payout|reversal|adjustment`) bound to payable case state
 - `GET /compensation/cross-adapter/ledger/export`
   - signed paginated compensation-ledger export (`summary`, `entries`, `next_cursor`, `attestation`, `export_hash`, detached signature)
+- `POST /compensation/dispute-linkages`
+  - idempotent dispute-to-compensation linkage creation contract
+- `POST /compensation/dispute-linkages/update`
+  - idempotent linkage lifecycle transition contract (`linked`→`compensation_recorded`→`closed`) with deterministic guardrails
+- `GET /compensation/dispute-linkages/export`
+  - signed paginated dispute-compensation linkage export (`summary`, `linkages`, `next_cursor`, `attestation`, `export_hash`, detached signature)
 - `POST /reliability/slo-metrics`
   - idempotent reliability SLO metric recording contract (availability/latency/error-budget windows)
 - `POST /reliability/incident-drills`

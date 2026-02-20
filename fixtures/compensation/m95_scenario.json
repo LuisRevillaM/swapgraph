@@ -1,0 +1,467 @@
+{
+  "actors": {
+    "admin_partner": {
+      "type": "partner",
+      "id": "ops-admin"
+    }
+  },
+  "seed_disputes": [
+    {
+      "dispute_id": "dispute_000001",
+      "partner_id": "ops-admin",
+      "dispute_type": "delivery",
+      "severity": "high",
+      "subject_ref": "receipt:receipt_cross_comp_001",
+      "reason_code": "delivery_missing_item",
+      "status": "resolved",
+      "opened_at": "2026-02-20T21:00:00Z",
+      "resolved_at": "2026-02-20T21:20:00Z",
+      "resolution": {
+        "code": "refund_issued"
+      },
+      "evidence_items": []
+    },
+    {
+      "dispute_id": "dispute_000002",
+      "partner_id": "ops-admin",
+      "dispute_type": "billing",
+      "severity": "medium",
+      "subject_ref": "statement:bill_2026_02",
+      "reason_code": "billing_amount_mismatch",
+      "status": "open",
+      "opened_at": "2026-02-20T21:05:00Z",
+      "resolved_at": null,
+      "resolution": null,
+      "evidence_items": []
+    }
+  ],
+  "seed_cases": [
+    {
+      "case_id": "comp_case_000001",
+      "partner_id": "ops-admin",
+      "cycle_id": "cycle_cross_comp_001",
+      "cross_receipt_id": "cross_receipt_cycle_cross_comp_001",
+      "discrepancy_code": "target_leg_unsettled",
+      "requested_by": {
+        "type": "user",
+        "id": "user-001"
+      },
+      "requested_amount_usd_micros": 2500000,
+      "status": "resolved",
+      "decision_reason_code": "payout_settled",
+      "approved_amount_usd_micros": 2000000,
+      "resolution_reference": "ledger_entry_001",
+      "opened_at": "2026-02-20T21:00:00Z",
+      "updated_at": "2026-02-20T21:25:00Z",
+      "resolved_at": "2026-02-20T21:25:00Z",
+      "integration_mode": "fixture_only",
+      "history": []
+    },
+    {
+      "case_id": "comp_case_000002",
+      "partner_id": "ops-admin",
+      "cycle_id": "cycle_cross_comp_002",
+      "cross_receipt_id": "cross_receipt_cycle_cross_comp_002",
+      "discrepancy_code": "source_leg_unsettled",
+      "requested_by": {
+        "type": "user",
+        "id": "user-002"
+      },
+      "requested_amount_usd_micros": 1000000,
+      "status": "approved",
+      "decision_reason_code": "policy_compensation_approved",
+      "approved_amount_usd_micros": 1000000,
+      "resolution_reference": null,
+      "opened_at": "2026-02-20T21:05:00Z",
+      "updated_at": "2026-02-20T21:12:00Z",
+      "resolved_at": null,
+      "integration_mode": "fixture_only",
+      "history": []
+    }
+  ],
+  "seed_ledger_entries": [
+    {
+      "entry_id": "comp_ledger_000001",
+      "partner_id": "ops-admin",
+      "case_id": "comp_case_000001",
+      "cycle_id": "cycle_cross_comp_001",
+      "cross_receipt_id": "cross_receipt_cycle_cross_comp_001",
+      "entry_type": "payout",
+      "amount_usd_micros": 2000000,
+      "reason_code": "policy_compensation_approved",
+      "settlement_reference": "txn_001",
+      "integration_mode": "fixture_only",
+      "recorded_at": "2026-02-20T21:30:00Z"
+    },
+    {
+      "entry_id": "comp_ledger_000002",
+      "partner_id": "ops-admin",
+      "case_id": "comp_case_000002",
+      "cycle_id": "cycle_cross_comp_002",
+      "cross_receipt_id": "cross_receipt_cycle_cross_comp_002",
+      "entry_type": "payout",
+      "amount_usd_micros": 1000000,
+      "reason_code": "policy_compensation_approved",
+      "settlement_reference": "txn_002",
+      "integration_mode": "fixture_only",
+      "recorded_at": "2026-02-20T21:31:00Z"
+    }
+  ],
+  "operations": [
+    {
+      "op": "compensation.dispute_linkage.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m95_link_record_1",
+      "request": {
+        "linkage": {
+          "dispute_id": "dispute_000001",
+          "case_id": "comp_case_000001",
+          "decision_reason_code": "linkage_opened",
+          "notes": "resolved dispute mapped to resolved case"
+        },
+        "occurred_at": "2026-02-20T22:00:00Z"
+      },
+      "expect_ok": true,
+      "expect_linkage_id": "dispute_comp_link_000001",
+      "expect_status": "linked",
+      "expect_ledger_entry_id": null,
+      "expect_closed_at_present": false,
+      "expect_history_length": 1,
+      "expect_replayed": false
+    },
+    {
+      "op": "compensation.dispute_linkage.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m95_link_record_1",
+      "request": {
+        "linkage": {
+          "dispute_id": "dispute_000001",
+          "case_id": "comp_case_000001",
+          "decision_reason_code": "linkage_opened",
+          "notes": "resolved dispute mapped to resolved case"
+        },
+        "occurred_at": "2026-02-20T22:00:00Z"
+      },
+      "expect_ok": true,
+      "expect_linkage_id": "dispute_comp_link_000001",
+      "expect_replayed": true
+    },
+    {
+      "op": "compensation.dispute_linkage.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m95_link_record_1",
+      "request": {
+        "linkage": {
+          "dispute_id": "dispute_000001",
+          "case_id": "comp_case_000001",
+          "decision_reason_code": "linkage_opened_mutated"
+        },
+        "occurred_at": "2026-02-20T22:00:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    },
+    {
+      "op": "compensation.dispute_linkage.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m95_link_record_duplicate",
+      "request": {
+        "linkage": {
+          "dispute_id": "dispute_000001",
+          "case_id": "comp_case_000001"
+        },
+        "occurred_at": "2026-02-20T22:00:30Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "cross_adapter_dispute_linkage_exists"
+    },
+    {
+      "op": "compensation.dispute_linkage.update",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m95_link_update_1",
+      "request": {
+        "linkage_update": {
+          "linkage_id": "dispute_comp_link_000001",
+          "next_status": "compensation_recorded",
+          "ledger_entry_id": "comp_ledger_000001",
+          "decision_reason_code": "ledger_payout_recorded",
+          "notes": "ledger entry linked"
+        },
+        "occurred_at": "2026-02-20T22:05:00Z"
+      },
+      "expect_ok": true,
+      "expect_linkage_id": "dispute_comp_link_000001",
+      "expect_status": "compensation_recorded",
+      "expect_ledger_entry_id": "comp_ledger_000001",
+      "expect_closed_at_present": false,
+      "expect_history_length": 2,
+      "expect_replayed": false
+    },
+    {
+      "op": "compensation.dispute_linkage.update",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m95_link_update_2",
+      "request": {
+        "linkage_update": {
+          "linkage_id": "dispute_comp_link_000001",
+          "next_status": "closed",
+          "decision_reason_code": "linkage_closed"
+        },
+        "occurred_at": "2026-02-20T22:06:00Z"
+      },
+      "expect_ok": true,
+      "expect_linkage_id": "dispute_comp_link_000001",
+      "expect_status": "closed",
+      "expect_ledger_entry_id": "comp_ledger_000001",
+      "expect_closed_at_present": true,
+      "expect_history_length": 3,
+      "expect_replayed": false
+    },
+    {
+      "op": "compensation.dispute_linkage.update",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m95_link_update_invalid_transition",
+      "request": {
+        "linkage_update": {
+          "linkage_id": "dispute_comp_link_000001",
+          "next_status": "compensation_recorded",
+          "ledger_entry_id": "comp_ledger_000001"
+        },
+        "occurred_at": "2026-02-20T22:06:30Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "cross_adapter_dispute_linkage_transition_invalid"
+    },
+    {
+      "op": "compensation.dispute_linkage.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m95_link_record_2",
+      "request": {
+        "linkage": {
+          "dispute_id": "dispute_000002",
+          "case_id": "comp_case_000002",
+          "notes": "open dispute awaiting close"
+        },
+        "occurred_at": "2026-02-20T22:07:00Z"
+      },
+      "expect_ok": true,
+      "expect_linkage_id": "dispute_comp_link_000002",
+      "expect_status": "linked",
+      "expect_ledger_entry_id": null,
+      "expect_closed_at_present": false,
+      "expect_history_length": 1,
+      "expect_replayed": false
+    },
+    {
+      "op": "compensation.dispute_linkage.update",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m95_link_update_missing_ledger",
+      "request": {
+        "linkage_update": {
+          "linkage_id": "dispute_comp_link_000002",
+          "next_status": "compensation_recorded",
+          "ledger_entry_id": "comp_ledger_999999"
+        },
+        "occurred_at": "2026-02-20T22:07:30Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "cross_adapter_dispute_linkage_ledger_not_found"
+    },
+    {
+      "op": "compensation.dispute_linkage.update",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m95_link_update_close_open_dispute",
+      "request": {
+        "linkage_update": {
+          "linkage_id": "dispute_comp_link_000002",
+          "next_status": "closed",
+          "decision_reason_code": "attempt_close"
+        },
+        "occurred_at": "2026-02-20T22:08:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "cross_adapter_dispute_linkage_close_requires_resolved_dispute"
+    },
+    {
+      "op": "compensation.dispute_linkage.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-20T21:50:00Z",
+        "to_iso": "2026-02-20T22:20:00Z",
+        "limit": 1,
+        "now_iso": "2026-02-20T22:10:00Z",
+        "exported_at_iso": "2026-02-20T22:10:00Z"
+      },
+      "expect_ok": true,
+      "expect_total_linkages": 2,
+      "expect_returned_linkages": 1,
+      "expect_linked_to_ledger_count": 1,
+      "expect_closed_count": 1,
+      "expect_total_filtered": 2,
+      "expect_linkages_count": 1,
+      "expect_first_linkage_id": "dispute_comp_link_000001",
+      "expect_last_linkage_id": "dispute_comp_link_000001",
+      "expect_next_cursor_present": true,
+      "expect_signature_valid": true,
+      "expect_tamper_signature_valid": false,
+      "expect_attestation_present": true,
+      "expect_integration_mode": "fixture_only"
+    },
+    {
+      "op": "compensation.dispute_linkage.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-20T21:50:00Z",
+        "to_iso": "2026-02-20T22:20:00Z",
+        "limit": 1,
+        "cursor_after": "2026-02-20T22:06:00.000Z|dispute_comp_link_000001",
+        "now_iso": "2026-02-20T22:11:00Z",
+        "exported_at_iso": "2026-02-20T22:11:00Z"
+      },
+      "expect_ok": true,
+      "expect_total_linkages": 2,
+      "expect_returned_linkages": 1,
+      "expect_linked_to_ledger_count": 1,
+      "expect_closed_count": 1,
+      "expect_total_filtered": 2,
+      "expect_linkages_count": 1,
+      "expect_first_linkage_id": "dispute_comp_link_000002",
+      "expect_last_linkage_id": "dispute_comp_link_000002",
+      "expect_next_cursor_present": false,
+      "expect_signature_valid": true,
+      "expect_tamper_signature_valid": false,
+      "expect_attestation_present": true,
+      "expect_integration_mode": "fixture_only"
+    },
+    {
+      "op": "compensation.dispute_linkage.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "cursor_after": "2026-02-20T22:00:00.000Z|dispute_comp_link_999999",
+        "now_iso": "2026-02-20T22:12:00Z",
+        "exported_at_iso": "2026-02-20T22:12:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "cross_adapter_dispute_linkage_cursor_not_found"
+    },
+    {
+      "op": "compensation.dispute_linkage.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "invalid",
+        "now_iso": "2026-02-20T22:13:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "cross_adapter_dispute_linkage_export_query_invalid"
+    },
+    {
+      "op": "compensation.dispute_linkage.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "idempotency_key": "m95_scope_fail_record",
+      "request": {
+        "linkage": {
+          "dispute_id": "dispute_000001",
+          "case_id": "comp_case_000001"
+        },
+        "occurred_at": "2026-02-20T22:14:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    },
+    {
+      "op": "compensation.dispute_linkage.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "query": {
+        "now_iso": "2026-02-20T22:15:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/DisputeCompensationLinkageRecordRequest.schema.json",
+  "title": "DisputeCompensationLinkageRecordRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "linkage"
+  ],
+  "properties": {
+    "linkage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dispute_id",
+        "case_id"
+      ],
+      "properties": {
+        "dispute_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "case_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "decision_reason_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

@@ -99,7 +99,8 @@
     "verify:m91": "bash verify/m91.sh",
     "verify:m92": "bash verify/m92.sh",
     "verify:m93": "bash verify/m93.sh",
-    "verify:m94": "bash verify/m94.sh"
+    "verify:m94": "bash verify/m94.sh",
+    "verify:m95": "bash verify/m95.sh"
   },
   "devDependencies": {
     "ajv": "8.18.0",

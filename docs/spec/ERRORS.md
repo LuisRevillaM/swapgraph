@@ -133,6 +133,17 @@ Notes:
   - `cross_adapter_compensation_ledger_amount_exceeds_approved`
   - `cross_adapter_compensation_ledger_export_query_invalid`
   - `cross_adapter_compensation_ledger_cursor_not_found`
+  - `cross_adapter_dispute_linkage_invalid`
+  - `cross_adapter_dispute_linkage_invalid_timestamp`
+  - `cross_adapter_dispute_linkage_dispute_not_found`
+  - `cross_adapter_dispute_linkage_case_not_found`
+  - `cross_adapter_dispute_linkage_exists`
+  - `cross_adapter_dispute_linkage_not_found`
+  - `cross_adapter_dispute_linkage_transition_invalid`
+  - `cross_adapter_dispute_linkage_ledger_not_found`
+  - `cross_adapter_dispute_linkage_close_requires_resolved_dispute`
+  - `cross_adapter_dispute_linkage_export_query_invalid`
+  - `cross_adapter_dispute_linkage_cursor_not_found`
   - `reliability_slo_metric_invalid`
   - `reliability_slo_metric_invalid_timestamp`
   - `reliability_incident_drill_invalid`

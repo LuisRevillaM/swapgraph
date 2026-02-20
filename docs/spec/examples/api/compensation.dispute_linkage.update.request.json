@@ -1,0 +1,10 @@
+{
+  "linkage_update": {
+    "linkage_id": "dispute_comp_link_000001",
+    "next_status": "compensation_recorded",
+    "ledger_entry_id": "comp_ledger_000001",
+    "decision_reason_code": "ledger_payout_recorded",
+    "notes": "ledger payout tied to dispute"
+  },
+  "occurred_at": "2026-02-20T22:05:00Z"
+}

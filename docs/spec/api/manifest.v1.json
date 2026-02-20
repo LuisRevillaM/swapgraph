@@ -1498,6 +1498,56 @@
           "settlement:read"
         ]
       }
+    },
+    {
+      "method": "POST",
+      "path": "/compensation/dispute-linkages",
+      "operation_id": "compensation.dispute_linkage.record",
+      "idempotency_required": true,
+      "request_schema": "DisputeCompensationLinkageRecordRequest.schema.json",
+      "response_schema": "DisputeCompensationLinkageRecordResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/compensation/dispute-linkages/update",
+      "operation_id": "compensation.dispute_linkage.update",
+      "idempotency_required": true,
+      "request_schema": "DisputeCompensationLinkageUpdateRequest.schema.json",
+      "response_schema": "DisputeCompensationLinkageUpdateResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/compensation/dispute-linkages/export",
+      "operation_id": "compensation.dispute_linkage.export",
+      "idempotency_required": false,
+      "response_schema": "DisputeCompensationLinkageExportResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
     }
   ],
   "webhooks": {

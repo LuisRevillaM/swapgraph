@@ -4029,3 +4029,225 @@ export function verifyCrossAdapterCompensationLedgerExportPayloadWithPublicKeyPe
   const signable = crossAdapterCompensationLedgerExportSignablePayload(payload);
   return verifyPolicyIntegrityPayloadSignatureWithPublicKeyPem({ payload: signable, publicKeyPem, keyId, alg });
 }
+
+function normalizeDisputeCompensationLinkageExportQuery(query) {
+  const out = {};
+
+  if (typeof query?.dispute_id === 'string' && query.dispute_id.trim()) out.dispute_id = query.dispute_id.trim();
+  if (typeof query?.case_id === 'string' && query.case_id.trim()) out.case_id = query.case_id.trim();
+  if (typeof query?.status === 'string' && query.status.trim()) out.status = query.status.trim();
+  if (typeof query?.from_iso === 'string' && query.from_iso.trim()) out.from_iso = query.from_iso.trim();
+  if (typeof query?.to_iso === 'string' && query.to_iso.trim()) out.to_iso = query.to_iso.trim();
+
+  if (Number.isFinite(query?.limit)) out.limit = Number(query.limit);
+  else {
+    const limit = Number.parseInt(String(query?.limit ?? ''), 10);
+    if (Number.isFinite(limit)) out.limit = limit;
+  }
+
+  if (typeof query?.cursor_after === 'string' && query.cursor_after.trim()) out.cursor_after = query.cursor_after.trim();
+  if (typeof query?.now_iso === 'string' && query.now_iso.trim()) out.now_iso = query.now_iso.trim();
+  if (typeof query?.exported_at_iso === 'string' && query.exported_at_iso.trim()) out.exported_at_iso = query.exported_at_iso.trim();
+
+  return out;
+}
+
+function normalizeDisputeCompensationLinkageHistoryEntry(entry) {
+  return {
+    from_status: entry?.from_status ?? null,
+    to_status: entry?.to_status,
+    decision_reason_code: entry?.decision_reason_code ?? null,
+    ledger_entry_id: entry?.ledger_entry_id ?? null,
+    occurred_at: entry?.occurred_at,
+    ...(typeof entry?.notes === 'string' ? { notes: entry.notes } : {})
+  };
+}
+
+function normalizeDisputeCompensationLinkageRecord(record) {
+  return {
+    linkage_id: record?.linkage_id,
+    partner_id: record?.partner_id,
+    dispute_id: record?.dispute_id,
+    case_id: record?.case_id,
+    cycle_id: record?.cycle_id,
+    cross_receipt_id: record?.cross_receipt_id,
+    status: record?.status,
+    ledger_entry_id: record?.ledger_entry_id ?? null,
+    decision_reason_code: record?.decision_reason_code ?? null,
+    opened_at: record?.opened_at,
+    updated_at: record?.updated_at,
+    closed_at: record?.closed_at ?? null,
+    integration_mode: record?.integration_mode,
+    ...(typeof record?.notes === 'string' ? { notes: record.notes } : {}),
+    history: Array.isArray(record?.history)
+      ? record.history.map(normalizeDisputeCompensationLinkageHistoryEntry)
+      : []
+  };
+}
+
+function normalizeDisputeCompensationLinkageRecords(records) {
+  return (records ?? [])
+    .map(normalizeDisputeCompensationLinkageRecord)
+    .sort((a, b) => `${a.updated_at ?? ''}|${a.linkage_id ?? ''}`.localeCompare(`${b.updated_at ?? ''}|${b.linkage_id ?? ''}`));
+}
+
+function normalizeDisputeCompensationLinkageExportSummary(summary) {
+  return {
+    total_linkages: Number.isFinite(summary?.total_linkages) ? Number(summary.total_linkages) : 0,
+    returned_linkages: Number.isFinite(summary?.returned_linkages) ? Number(summary.returned_linkages) : 0,
+    linked_to_ledger_count: Number.isFinite(summary?.linked_to_ledger_count) ? Number(summary.linked_to_ledger_count) : 0,
+    closed_count: Number.isFinite(summary?.closed_count) ? Number(summary.closed_count) : 0,
+    by_status: Array.isArray(summary?.by_status)
+      ? summary.by_status
+        .map(row => ({
+          status: row?.status,
+          count: Number.isFinite(row?.count) ? Number(row.count) : 0
+        }))
+        .sort((a, b) => String(a.status ?? '').localeCompare(String(b.status ?? '')))
+      : []
+  };
+}
+
+function disputeCompensationLinkageExportSignablePayload(payload) {
+  return {
+    exported_at: payload?.exported_at,
+    query: normalizeDisputeCompensationLinkageExportQuery(payload?.query),
+    summary: normalizeDisputeCompensationLinkageExportSummary(payload?.summary),
+    linkages: normalizeDisputeCompensationLinkageRecords(payload?.linkages),
+    total_filtered: Number.isFinite(payload?.total_filtered) ? Number(payload.total_filtered) : 0,
+    ...(typeof payload?.next_cursor === 'string' ? { next_cursor: payload.next_cursor } : {}),
+    ...(payload?.attestation ? { attestation: normalizeExportAttestation(payload.attestation) } : {}),
+    export_hash: payload?.export_hash,
+    signature: payload?.signature
+  };
+}
+
+export function buildDisputeCompensationLinkageExportHash({ query, summary, linkages, totalFiltered, nextCursor }) {
+  return sha256HexCanonical({
+    query: normalizeDisputeCompensationLinkageExportQuery(query),
+    summary: normalizeDisputeCompensationLinkageExportSummary(summary),
+    linkages: normalizeDisputeCompensationLinkageRecords(linkages),
+    total_filtered: Number.isFinite(totalFiltered) ? Number(totalFiltered) : 0,
+    ...(typeof nextCursor === 'string' ? { next_cursor: nextCursor } : {})
+  });
+}
+
+export function buildSignedDisputeCompensationLinkageExportPayload({
+  exportedAt,
+  query,
+  summary,
+  linkages,
+  totalFiltered,
+  nextCursor,
+  withAttestation,
+  keyId
+}) {
+  const normalizedQuery = normalizeDisputeCompensationLinkageExportQuery(query);
+  const normalizedSummary = normalizeDisputeCompensationLinkageExportSummary(summary);
+  const normalizedLinkages = normalizeDisputeCompensationLinkageRecords(linkages);
+  const normalizedTotalFiltered = Number.isFinite(totalFiltered) ? Number(totalFiltered) : 0;
+
+  const exportHash = buildDisputeCompensationLinkageExportHash({
+    query: normalizedQuery,
+    summary: normalizedSummary,
+    linkages: normalizedLinkages,
+    totalFiltered: normalizedTotalFiltered,
+    nextCursor
+  });
+
+  const payload = {
+    exported_at: exportedAt,
+    query: normalizedQuery,
+    summary: normalizedSummary,
+    linkages: normalizedLinkages,
+    total_filtered: normalizedTotalFiltered,
+    ...(typeof nextCursor === 'string' ? { next_cursor: nextCursor } : {}),
+    export_hash: exportHash
+  };
+
+  if (withAttestation) {
+    payload.attestation = buildPolicyAuditExportAttestation({
+      query: normalizedQuery,
+      nextCursor,
+      exportHash
+    });
+  }
+
+  payload.signature = signPolicyIntegrityPayload(payload, { keyId });
+  return payload;
+}
+
+export function verifyDisputeCompensationLinkageExportPayload(payload) {
+  if (!payload || typeof payload !== 'object') return { ok: false, error: 'missing_payload' };
+
+  const expectedHash = buildDisputeCompensationLinkageExportHash({
+    query: payload.query,
+    summary: payload.summary,
+    linkages: payload.linkages,
+    totalFiltered: payload.total_filtered,
+    nextCursor: payload.next_cursor
+  });
+
+  if (payload.export_hash !== expectedHash) {
+    return {
+      ok: false,
+      error: 'hash_mismatch',
+      details: {
+        expected_hash: expectedHash,
+        provided_hash: payload.export_hash ?? null
+      }
+    };
+  }
+
+  if (payload.attestation) {
+    const attestation = verifyPolicyAuditExportAttestation({
+      attestation: payload.attestation,
+      query: payload.query,
+      nextCursor: payload.next_cursor,
+      exportHash: expectedHash
+    });
+    if (!attestation.ok) return attestation;
+  }
+
+  const signable = disputeCompensationLinkageExportSignablePayload(payload);
+  const verified = verifyPolicyIntegrityPayloadSignature(signable);
+  if (!verified.ok) return verified;
+
+  return { ok: true };
+}
+
+export function verifyDisputeCompensationLinkageExportPayloadWithPublicKeyPem({ payload, publicKeyPem, keyId, alg }) {
+  if (!payload || typeof payload !== 'object') return { ok: false, error: 'missing_payload' };
+
+  const expectedHash = buildDisputeCompensationLinkageExportHash({
+    query: payload.query,
+    summary: payload.summary,
+    linkages: payload.linkages,
+    totalFiltered: payload.total_filtered,
+    nextCursor: payload.next_cursor
+  });
+
+  if (payload.export_hash !== expectedHash) {
+    return {
+      ok: false,
+      error: 'hash_mismatch',
+      details: {
+        expected_hash: expectedHash,
+        provided_hash: payload.export_hash ?? null
+      }
+    };
+  }
+
+  if (payload.attestation) {
+    const attestation = verifyPolicyAuditExportAttestation({
+      attestation: payload.attestation,
+      query: payload.query,
+      nextCursor: payload.next_cursor,
+      exportHash: expectedHash
+    });
+    if (!attestation.ok) return attestation;
+  }
+
+  const signable = disputeCompensationLinkageExportSignablePayload(payload);
+  return verifyPolicyIntegrityPayloadSignatureWithPublicKeyPem({ payload: signable, publicKeyPem, keyId, alg });
+}
