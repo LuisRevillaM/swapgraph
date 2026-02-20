@@ -1,0 +1,13 @@
+{
+  "replay_check": {
+    "scenario_id": "replay_suite_2026_02_20_a",
+    "recovery_mode": "full_replay",
+    "event_count": 2203,
+    "source_log_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "replay_log_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "expected_state_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "recovered_state_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "notes": "full replay parity"
+  },
+  "occurred_at": "2026-02-20T11:30:00Z"
+}

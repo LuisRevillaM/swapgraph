@@ -496,6 +496,34 @@
     {
       "file": "adapter.cross_cycle.receipt.get.response.json",
       "schema": "CrossAdapterCycleReceiptGetResponse.schema.json"
+    },
+    {
+      "file": "reliability.slo.record.request.json",
+      "schema": "ReliabilitySloMetricRecordRequest.schema.json"
+    },
+    {
+      "file": "reliability.slo.record.response.json",
+      "schema": "ReliabilitySloMetricRecordResponse.schema.json"
+    },
+    {
+      "file": "reliability.incident_drill.record.request.json",
+      "schema": "ReliabilityIncidentDrillRecordRequest.schema.json"
+    },
+    {
+      "file": "reliability.incident_drill.record.response.json",
+      "schema": "ReliabilityIncidentDrillRecordResponse.schema.json"
+    },
+    {
+      "file": "reliability.replay_check.record.request.json",
+      "schema": "ReliabilityReplayCheckRecordRequest.schema.json"
+    },
+    {
+      "file": "reliability.replay_check.record.response.json",
+      "schema": "ReliabilityReplayCheckRecordResponse.schema.json"
+    },
+    {
+      "file": "reliability.conformance.export.response.json",
+      "schema": "ReliabilityConformanceExportResponse.schema.json"
     }
   ]
 }

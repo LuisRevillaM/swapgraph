@@ -176,7 +176,8 @@ Each item here must become at least one of:
 - Resolved (fixtures-first, partial): M88 (unified inclusion-proof linkage contracts: idempotent linkage recording across signed receipt + custody inclusion proof + transparency publication chain roots, with signed paginated export continuity and tamper-fail verification).
 - Resolved (fixtures-first, partial): M89 (Tier-2 adapter capability contracts: idempotent capability upsert/read + deterministic cross-ecosystem preflight checks for ecosystem pairing, transfer primitives, route-hop ceilings, and dry-run policy with scope-enforced auth behavior).
 - Resolved (fixtures-first, partial): M90 (cross-adapter cycle semantics + signed receipts: idempotent non-atomic semantics declaration with disclosure acceptance linked to Tier-2 preflight readiness, plus signed cross-adapter receipt recording/read projection with deterministic discrepancy and signature-valid telemetry).
-- Remaining: reliability and operational conformance scope (M91+ reliability matrix).
+- Resolved (fixtures-first, partial): M91 (reliability/SLO conformance contracts: idempotent SLO metric windows + incident-drill evidence recording + replay parity checks, with signed conformance export and deterministic signature/tamper verification).
+- Remaining: full-plan conformance + release-readiness matrix (M92).
 
 ---
 

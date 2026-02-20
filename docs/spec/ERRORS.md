@@ -119,6 +119,15 @@ Notes:
   - `cross_adapter_receipt_disclosure_missing`
   - `cross_adapter_receipt_settlement_receipt_not_found`
   - `cross_adapter_receipt_settlement_signature_invalid`
+  - `reliability_slo_metric_invalid`
+  - `reliability_slo_metric_invalid_timestamp`
+  - `reliability_incident_drill_invalid`
+  - `reliability_incident_drill_invalid_timestamp`
+  - `reliability_replay_check_invalid`
+  - `reliability_replay_check_invalid_timestamp`
+  - `reliability_conformance_export_query_invalid`
+  - `replay_log_hash_mismatch`
+  - `recovery_state_hash_mismatch`
   - `steam_live_proof_invalid`
   - `steam_live_proof_invalid_timestamp`
   - `steam_live_proof_integration_disabled`

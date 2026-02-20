@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/ReliabilityConformanceExportResponse.schema.json",
+  "title": "ReliabilityConformanceExportResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "partner_id",
+    "exported_at",
+    "query",
+    "summary",
+    "slo_metrics",
+    "incident_drills",
+    "replay_checks",
+    "integration_mode",
+    "export_hash",
+    "signature"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "partner_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "exported_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "query": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "from_iso": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "to_iso": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "slo_total",
+        "slo_passing",
+        "slo_failing",
+        "drills_total",
+        "drills_passing",
+        "drills_failing",
+        "replay_checks_total",
+        "replay_checks_passing",
+        "replay_checks_failing",
+        "overall_passing"
+      ],
+      "properties": {
+        "slo_total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "slo_passing": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "slo_failing": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "drills_total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "drills_passing": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "drills_failing": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "replay_checks_total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "replay_checks_passing": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "replay_checks_failing": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "overall_passing": {
+          "type": "boolean"
+        }
+      }
+    },
+    "slo_metrics": {
+      "type": "array",
+      "items": {
+        "$ref": "ReliabilitySloMetricRecordResponse.schema.json#/properties/metric"
+      }
+    },
+    "incident_drills": {
+      "type": "array",
+      "items": {
+        "$ref": "ReliabilityIncidentDrillRecordResponse.schema.json#/properties/drill"
+      }
+    },
+    "replay_checks": {
+      "type": "array",
+      "items": {
+        "$ref": "ReliabilityReplayCheckRecordResponse.schema.json#/properties/replay_check"
+      }
+    },
+    "integration_mode": {
+      "type": "string",
+      "enum": [
+        "fixture_only"
+      ]
+    },
+    "export_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key_id",
+        "alg",
+        "sig"
+      ],
+      "properties": {
+        "key_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "alg": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sig": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

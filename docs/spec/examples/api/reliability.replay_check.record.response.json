@@ -1,0 +1,20 @@
+{
+  "correlation_id": "corr_reliability_replay_check_record",
+  "replay_check": {
+    "replay_check_id": "replay_check_000001",
+    "partner_id": "ops-admin",
+    "scenario_id": "replay_suite_2026_02_20_a",
+    "recovery_mode": "full_replay",
+    "event_count": 2203,
+    "source_log_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "replay_log_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "expected_state_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "recovered_state_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "passing": true,
+    "reason_code": null,
+    "integration_mode": "fixture_only",
+    "recorded_at": "2026-02-20T11:30:00.000Z",
+    "notes": "full replay parity"
+  },
+  "replayed": false
+}

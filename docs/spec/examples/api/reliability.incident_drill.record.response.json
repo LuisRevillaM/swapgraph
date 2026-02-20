@@ -1,0 +1,24 @@
+{
+  "correlation_id": "corr_reliability_incident_drill_record",
+  "drill": {
+    "drill_record_id": "incident_drill_000001",
+    "partner_id": "ops-admin",
+    "drill_type": "replay_recovery",
+    "severity": "sev3",
+    "outcome": "pass",
+    "started_at": "2026-02-20T11:05:00.000Z",
+    "resolved_at": "2026-02-20T11:19:00.000Z",
+    "recovery_time_minutes": 14,
+    "target_recovery_time_minutes": 20,
+    "within_target": true,
+    "runbook_ref": "runbooks/recovery/replay.md",
+    "evidence_refs": [
+      "artifact://drills/2026-02-20/replay-recovery/checklist.md",
+      "artifact://drills/2026-02-20/replay-recovery/log.txt"
+    ],
+    "integration_mode": "fixture_only",
+    "recorded_at": "2026-02-20T11:20:00.000Z",
+    "notes": "drill completed within target"
+  },
+  "replayed": false
+}

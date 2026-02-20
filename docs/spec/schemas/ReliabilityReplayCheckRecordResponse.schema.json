@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/ReliabilityReplayCheckRecordResponse.schema.json",
+  "title": "ReliabilityReplayCheckRecordResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "replay_check",
+    "replayed"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "replay_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "replay_check_id",
+        "partner_id",
+        "scenario_id",
+        "recovery_mode",
+        "event_count",
+        "source_log_hash",
+        "replay_log_hash",
+        "expected_state_hash",
+        "recovered_state_hash",
+        "passing",
+        "reason_code",
+        "integration_mode",
+        "recorded_at"
+      ],
+      "properties": {
+        "replay_check_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scenario_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "recovery_mode": {
+          "type": "string",
+          "enum": [
+            "full_replay",
+            "checkpoint_replay"
+          ]
+        },
+        "event_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000000
+        },
+        "source_log_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "replay_log_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "expected_state_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "recovered_state_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "passing": {
+          "type": "boolean"
+        },
+        "reason_code": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "replay_log_hash_mismatch",
+            "recovery_state_hash_mismatch",
+            null
+          ]
+        },
+        "integration_mode": {
+          "type": "string",
+          "enum": [
+            "fixture_only"
+          ]
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "replayed": {
+      "type": "boolean"
+    }
+  }
+}

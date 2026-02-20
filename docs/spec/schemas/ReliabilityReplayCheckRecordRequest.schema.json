@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/ReliabilityReplayCheckRecordRequest.schema.json",
+  "title": "ReliabilityReplayCheckRecordRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "replay_check"
+  ],
+  "properties": {
+    "replay_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scenario_id",
+        "recovery_mode",
+        "event_count",
+        "source_log_hash",
+        "replay_log_hash",
+        "expected_state_hash",
+        "recovered_state_hash"
+      ],
+      "properties": {
+        "scenario_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "recovery_mode": {
+          "type": "string",
+          "enum": [
+            "full_replay",
+            "checkpoint_replay"
+          ]
+        },
+        "event_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000000
+        },
+        "source_log_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "replay_log_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "expected_state_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "recovered_state_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

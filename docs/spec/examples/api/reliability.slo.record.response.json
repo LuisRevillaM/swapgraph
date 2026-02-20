@@ -1,0 +1,22 @@
+{
+  "correlation_id": "corr_reliability_slo_record",
+  "metric": {
+    "metric_id": "slo_metric_000001",
+    "partner_id": "ops-admin",
+    "service_id": "swapgraph-core",
+    "window_start_at": "2026-02-20T10:00:00.000Z",
+    "window_end_at": "2026-02-20T11:00:00.000Z",
+    "target_availability_bps": 9990,
+    "observed_availability_bps": 9995,
+    "target_p95_latency_ms": 900,
+    "observed_p95_latency_ms": 740,
+    "error_budget_consumed_bps": 4,
+    "request_count": 18234,
+    "passing": true,
+    "breach_reasons": [],
+    "integration_mode": "fixture_only",
+    "recorded_at": "2026-02-20T11:01:00.000Z",
+    "notes": "steady-state window"
+  },
+  "replayed": false
+}

@@ -1,0 +1,32 @@
+{
+  "correlation_id": "corr_reliability_conformance_export",
+  "partner_id": "ops-admin",
+  "exported_at": "2026-02-20T11:40:00.000Z",
+  "query": {
+    "from_iso": "2026-02-20T10:00:00.000Z",
+    "to_iso": "2026-02-20T11:40:00.000Z",
+    "limit": 100
+  },
+  "summary": {
+    "slo_total": 2,
+    "slo_passing": 1,
+    "slo_failing": 1,
+    "drills_total": 2,
+    "drills_passing": 1,
+    "drills_failing": 1,
+    "replay_checks_total": 2,
+    "replay_checks_passing": 1,
+    "replay_checks_failing": 1,
+    "overall_passing": false
+  },
+  "slo_metrics": [],
+  "incident_drills": [],
+  "replay_checks": [],
+  "integration_mode": "fixture_only",
+  "export_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "signature": {
+    "key_id": "dev-pi-k1",
+    "alg": "ed25519",
+    "sig": "UmVsaWFiaWxpdHlDb25mb3JtYW5jZUV4cG9ydFNpZ25hdHVyZUV4YW1wbGU="
+  }
+}

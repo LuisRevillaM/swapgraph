@@ -1,0 +1,371 @@
+{
+  "actors": {
+    "admin_partner": {
+      "type": "partner",
+      "id": "ops-admin"
+    }
+  },
+  "operations": [
+    {
+      "op": "reliability.slo.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m91_slo_1",
+      "request": {
+        "metric": {
+          "service_id": "swapgraph-core",
+          "window_start_at": "2026-02-20T13:00:00Z",
+          "window_end_at": "2026-02-20T14:00:00Z",
+          "target_availability_bps": 9990,
+          "observed_availability_bps": 9992,
+          "target_p95_latency_ms": 900,
+          "observed_p95_latency_ms": 800,
+          "error_budget_consumed_bps": 8,
+          "request_count": 20341,
+          "notes": "healthy window"
+        },
+        "occurred_at": "2026-02-20T14:01:00Z"
+      },
+      "expect_ok": true,
+      "expect_metric_id": "slo_metric_000001",
+      "expect_service_id": "swapgraph-core",
+      "expect_passing": true,
+      "expect_breach_reasons": [],
+      "expect_replayed": false
+    },
+    {
+      "op": "reliability.slo.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m91_slo_1",
+      "request": {
+        "metric": {
+          "service_id": "swapgraph-core",
+          "window_start_at": "2026-02-20T13:00:00Z",
+          "window_end_at": "2026-02-20T14:00:00Z",
+          "target_availability_bps": 9990,
+          "observed_availability_bps": 9992,
+          "target_p95_latency_ms": 900,
+          "observed_p95_latency_ms": 800,
+          "error_budget_consumed_bps": 8,
+          "request_count": 20341,
+          "notes": "healthy window"
+        },
+        "occurred_at": "2026-02-20T14:01:00Z"
+      },
+      "expect_ok": true,
+      "expect_metric_id": "slo_metric_000001",
+      "expect_passing": true,
+      "expect_replayed": true
+    },
+    {
+      "op": "reliability.slo.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m91_slo_1",
+      "request": {
+        "metric": {
+          "service_id": "swapgraph-core",
+          "window_start_at": "2026-02-20T13:00:00Z",
+          "window_end_at": "2026-02-20T14:00:00Z",
+          "target_availability_bps": 9990,
+          "observed_availability_bps": 9900,
+          "target_p95_latency_ms": 900,
+          "observed_p95_latency_ms": 800,
+          "error_budget_consumed_bps": 8,
+          "request_count": 20341,
+          "notes": "healthy window"
+        },
+        "occurred_at": "2026-02-20T14:01:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    },
+    {
+      "op": "reliability.slo.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m91_slo_2",
+      "request": {
+        "metric": {
+          "service_id": "swapgraph-core",
+          "window_start_at": "2026-02-20T14:00:00Z",
+          "window_end_at": "2026-02-20T15:00:00Z",
+          "target_availability_bps": 9990,
+          "observed_availability_bps": 9960,
+          "target_p95_latency_ms": 900,
+          "observed_p95_latency_ms": 1300,
+          "error_budget_consumed_bps": 50,
+          "request_count": 24590,
+          "notes": "degraded window"
+        },
+        "occurred_at": "2026-02-20T15:01:00Z"
+      },
+      "expect_ok": true,
+      "expect_metric_id": "slo_metric_000002",
+      "expect_service_id": "swapgraph-core",
+      "expect_passing": false,
+      "expect_breach_reasons": [
+        "availability_below_target",
+        "error_budget_exhausted",
+        "latency_above_target"
+      ],
+      "expect_replayed": false
+    },
+    {
+      "op": "reliability.incident_drill.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m91_drill_1",
+      "request": {
+        "drill": {
+          "drill_type": "replay_recovery",
+          "severity": "sev3",
+          "outcome": "pass",
+          "started_at": "2026-02-20T15:10:00Z",
+          "resolved_at": "2026-02-20T15:24:00Z",
+          "target_recovery_time_minutes": 20,
+          "runbook_ref": "runbooks/recovery/replay.md",
+          "evidence_refs": [
+            "artifact://drills/m91/replay/checklist.md",
+            "artifact://drills/m91/replay/log.txt"
+          ],
+          "notes": "replay drill succeeded"
+        },
+        "occurred_at": "2026-02-20T15:25:00Z"
+      },
+      "expect_ok": true,
+      "expect_drill_record_id": "incident_drill_000001",
+      "expect_drill_type": "replay_recovery",
+      "expect_outcome": "pass",
+      "expect_within_target": true,
+      "expect_recovery_time_minutes": 14,
+      "expect_replayed": false
+    },
+    {
+      "op": "reliability.incident_drill.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m91_drill_2",
+      "request": {
+        "drill": {
+          "drill_type": "partial_outage",
+          "severity": "sev2",
+          "outcome": "fail",
+          "started_at": "2026-02-20T15:30:00Z",
+          "resolved_at": "2026-02-20T16:20:00Z",
+          "target_recovery_time_minutes": 15,
+          "runbook_ref": "runbooks/recovery/outage.md",
+          "evidence_refs": [
+            "artifact://drills/m91/outage/timeline.md"
+          ],
+          "notes": "drill exceeded recovery target"
+        },
+        "occurred_at": "2026-02-20T16:20:30Z"
+      },
+      "expect_ok": true,
+      "expect_drill_record_id": "incident_drill_000002",
+      "expect_drill_type": "partial_outage",
+      "expect_outcome": "fail",
+      "expect_within_target": false,
+      "expect_recovery_time_minutes": 50,
+      "expect_replayed": false
+    },
+    {
+      "op": "reliability.replay_check.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m91_replay_1",
+      "request": {
+        "replay_check": {
+          "scenario_id": "recovery_suite_a",
+          "recovery_mode": "full_replay",
+          "event_count": 2044,
+          "source_log_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "replay_log_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "expected_state_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "recovered_state_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "notes": "full replay parity"
+        },
+        "occurred_at": "2026-02-20T16:30:00Z"
+      },
+      "expect_ok": true,
+      "expect_replay_check_id": "replay_check_000001",
+      "expect_scenario_id": "recovery_suite_a",
+      "expect_passing": true,
+      "expect_reason_code": null,
+      "expect_replayed": false
+    },
+    {
+      "op": "reliability.replay_check.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m91_replay_2",
+      "request": {
+        "replay_check": {
+          "scenario_id": "recovery_suite_b",
+          "recovery_mode": "checkpoint_replay",
+          "event_count": 1120,
+          "source_log_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "replay_log_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "expected_state_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "recovered_state_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "notes": "log divergence"
+        },
+        "occurred_at": "2026-02-20T16:31:00Z"
+      },
+      "expect_ok": true,
+      "expect_replay_check_id": "replay_check_000002",
+      "expect_scenario_id": "recovery_suite_b",
+      "expect_passing": false,
+      "expect_reason_code": "replay_log_hash_mismatch",
+      "expect_replayed": false
+    },
+    {
+      "op": "reliability.replay_check.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m91_replay_3",
+      "request": {
+        "replay_check": {
+          "scenario_id": "recovery_suite_c",
+          "recovery_mode": "checkpoint_replay",
+          "event_count": 890,
+          "source_log_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "replay_log_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "expected_state_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+          "recovered_state_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+          "notes": "state mismatch"
+        },
+        "occurred_at": "2026-02-20T16:32:00Z"
+      },
+      "expect_ok": true,
+      "expect_replay_check_id": "replay_check_000003",
+      "expect_scenario_id": "recovery_suite_c",
+      "expect_passing": false,
+      "expect_reason_code": "recovery_state_hash_mismatch",
+      "expect_replayed": false
+    },
+    {
+      "op": "reliability.conformance.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-20T13:00:00Z",
+        "to_iso": "2026-02-20T16:40:00Z",
+        "limit": 100,
+        "now_iso": "2026-02-20T16:40:00Z"
+      },
+      "expect_ok": true,
+      "expect_slo_total": 2,
+      "expect_slo_passing": 1,
+      "expect_slo_failing": 1,
+      "expect_drills_total": 2,
+      "expect_drills_passing": 1,
+      "expect_drills_failing": 1,
+      "expect_replay_checks_total": 3,
+      "expect_replay_checks_passing": 1,
+      "expect_replay_checks_failing": 2,
+      "expect_overall_passing": false,
+      "expect_signature_valid": true,
+      "expect_tamper_signature_valid": false,
+      "expect_integration_mode": "fixture_only"
+    },
+    {
+      "op": "reliability.conformance.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "not-an-iso",
+        "now_iso": "2026-02-20T16:41:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "reliability_conformance_export_query_invalid"
+    },
+    {
+      "op": "reliability.slo.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "idempotency_key": "m91_scope_fail_write",
+      "request": {
+        "metric": {
+          "service_id": "swapgraph-core",
+          "window_start_at": "2026-02-20T17:00:00Z",
+          "window_end_at": "2026-02-20T18:00:00Z",
+          "target_availability_bps": 9990,
+          "observed_availability_bps": 9990,
+          "target_p95_latency_ms": 900,
+          "observed_p95_latency_ms": 850,
+          "error_budget_consumed_bps": 10,
+          "request_count": 5000
+        },
+        "occurred_at": "2026-02-20T18:01:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    },
+    {
+      "op": "reliability.conformance.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "query": {
+        "now_iso": "2026-02-20T18:02:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    }
+  ]
+}

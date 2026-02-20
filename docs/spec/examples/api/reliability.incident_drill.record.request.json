@@ -1,0 +1,17 @@
+{
+  "drill": {
+    "drill_type": "replay_recovery",
+    "severity": "sev3",
+    "outcome": "pass",
+    "started_at": "2026-02-20T11:05:00Z",
+    "resolved_at": "2026-02-20T11:19:00Z",
+    "target_recovery_time_minutes": 20,
+    "runbook_ref": "runbooks/recovery/replay.md",
+    "evidence_refs": [
+      "artifact://drills/2026-02-20/replay-recovery/log.txt",
+      "artifact://drills/2026-02-20/replay-recovery/checklist.md"
+    ],
+    "notes": "drill completed within target"
+  },
+  "occurred_at": "2026-02-20T11:20:00Z"
+}

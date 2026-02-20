@@ -177,6 +177,14 @@ Settlement endpoints:
   - idempotent signed cross-adapter cycle receipt recording (leg-level settlement outcomes + discrepancy code + compensation-required flag)
 - `GET /adapters/cross/cycle-receipts`
   - read cross-adapter semantics/receipt projection for a cycle with deterministic signature-valid telemetry
+- `POST /reliability/slo-metrics`
+  - idempotent reliability SLO metric recording contract (availability/latency/error-budget windows)
+- `POST /reliability/incident-drills`
+  - idempotent reliability incident-drill evidence recording contract (drill type, severity, recovery-time target evidence)
+- `POST /reliability/replay-checks`
+  - idempotent replay-robustness/recovery verification contract (event-log hash parity + state-hash parity)
+- `GET /reliability/conformance/export`
+  - signed reliability conformance export (`summary`, `slo_metrics`, `incident_drills`, `replay_checks`, `export_hash`, detached signature)
 - `POST /adapters/steam/tier1/live-proof/deposit-per-swap`
   - idempotent operator-gated live proof capture for Steam deposit-per-swap settlement evidence (`INTEGRATION_ENABLED=1` required)
 - `POST /adapters/steam/tier1/live-proof/vault`

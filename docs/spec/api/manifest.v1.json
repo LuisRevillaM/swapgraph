@@ -1348,6 +1348,73 @@
           "settlement:read"
         ]
       }
+    },
+    {
+      "method": "POST",
+      "path": "/reliability/slo-metrics",
+      "operation_id": "reliability.slo.record",
+      "idempotency_required": true,
+      "request_schema": "ReliabilitySloMetricRecordRequest.schema.json",
+      "response_schema": "ReliabilitySloMetricRecordResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/reliability/incident-drills",
+      "operation_id": "reliability.incident_drill.record",
+      "idempotency_required": true,
+      "request_schema": "ReliabilityIncidentDrillRecordRequest.schema.json",
+      "response_schema": "ReliabilityIncidentDrillRecordResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/reliability/replay-checks",
+      "operation_id": "reliability.replay_check.record",
+      "idempotency_required": true,
+      "request_schema": "ReliabilityReplayCheckRecordRequest.schema.json",
+      "response_schema": "ReliabilityReplayCheckRecordResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/reliability/conformance/export",
+      "operation_id": "reliability.conformance.export",
+      "idempotency_required": false,
+      "response_schema": "ReliabilityConformanceExportResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
     }
   ],
   "webhooks": {

@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/ReliabilitySloMetricRecordRequest.schema.json",
+  "title": "ReliabilitySloMetricRecordRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "metric"
+  ],
+  "properties": {
+    "metric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "service_id",
+        "window_start_at",
+        "window_end_at",
+        "target_availability_bps",
+        "observed_availability_bps",
+        "target_p95_latency_ms",
+        "observed_p95_latency_ms",
+        "error_budget_consumed_bps",
+        "request_count"
+      ],
+      "properties": {
+        "service_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "window_start_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "window_end_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "target_availability_bps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "observed_availability_bps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "target_p95_latency_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 120000
+        },
+        "observed_p95_latency_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 120000
+        },
+        "error_budget_consumed_bps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "request_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
