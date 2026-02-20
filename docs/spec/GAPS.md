@@ -178,7 +178,8 @@ Each item here must become at least one of:
 - Resolved (fixtures-first, partial): M90 (cross-adapter cycle semantics + signed receipts: idempotent non-atomic semantics declaration with disclosure acceptance linked to Tier-2 preflight readiness, plus signed cross-adapter receipt recording/read projection with deterministic discrepancy and signature-valid telemetry).
 - Resolved (fixtures-first, partial): M91 (reliability/SLO conformance contracts: idempotent SLO metric windows + incident-drill evidence recording + replay parity checks, with signed conformance export and deterministic signature/tamper verification).
 - Resolved (fixtures-first, partial): M92 (full-plan conformance + release-readiness matrix with deterministic milestone artifact coverage checks and zero-unresolved-blocker assertions).
-- Remaining: none (M92 release-readiness gate passed).
+- Resolved (fixtures-first, partial): M93 (cross-adapter compensation case contracts: idempotent create/update/read surfaces bound to signed cross-adapter discrepancy receipts with deterministic lifecycle transition guards and scope/idempotency enforcement).
+- Remaining: compensation ledger/export, dispute-linkage, auto-remediation planning, and staging evidence refresh scope (M94+).
 
 ---
 

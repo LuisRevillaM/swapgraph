@@ -1,0 +1,14 @@
+{
+  "case": {
+    "cycle_id": "cycle_cross_001",
+    "cross_receipt_id": "cross_receipt_cycle_cross_001",
+    "discrepancy_code": "target_leg_unsettled",
+    "requested_by": {
+      "type": "user",
+      "id": "user-001"
+    },
+    "requested_amount_usd_micros": 2500000,
+    "notes": "target leg failed after source completion"
+  },
+  "occurred_at": "2026-02-20T21:00:00Z"
+}

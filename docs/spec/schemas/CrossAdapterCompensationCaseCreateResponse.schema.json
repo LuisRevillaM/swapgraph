@@ -1,0 +1,207 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/CrossAdapterCompensationCaseCreateResponse.schema.json",
+  "title": "CrossAdapterCompensationCaseCreateResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "case",
+    "replayed"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "partner_id",
+        "cycle_id",
+        "cross_receipt_id",
+        "discrepancy_code",
+        "requested_by",
+        "requested_amount_usd_micros",
+        "status",
+        "decision_reason_code",
+        "approved_amount_usd_micros",
+        "resolution_reference",
+        "opened_at",
+        "updated_at",
+        "resolved_at",
+        "integration_mode",
+        "history"
+      ],
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cycle_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cross_receipt_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "discrepancy_code": {
+          "type": "string",
+          "enum": [
+            "target_leg_unsettled",
+            "source_leg_unsettled",
+            "both_legs_unsettled"
+          ]
+        },
+        "requested_by": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "id"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "user",
+                "partner"
+              ]
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "requested_amount_usd_micros": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000000000
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "open",
+            "approved",
+            "rejected",
+            "resolved"
+          ]
+        },
+        "decision_reason_code": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "approved_amount_usd_micros": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1000000000000
+        },
+        "resolution_reference": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "opened_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "resolved_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "integration_mode": {
+          "type": "string",
+          "enum": [
+            "fixture_only"
+          ]
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "from_status",
+              "to_status",
+              "decision_reason_code",
+              "resolution_reference",
+              "occurred_at"
+            ],
+            "properties": {
+              "from_status": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "open",
+                  "approved",
+                  "rejected",
+                  "resolved",
+                  null
+                ]
+              },
+              "to_status": {
+                "type": "string",
+                "enum": [
+                  "open",
+                  "approved",
+                  "rejected",
+                  "resolved"
+                ]
+              },
+              "decision_reason_code": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "resolution_reference": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "occurred_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "notes": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "replayed": {
+      "type": "boolean"
+    }
+  }
+}

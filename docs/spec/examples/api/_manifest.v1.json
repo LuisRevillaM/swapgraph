@@ -524,6 +524,26 @@
     {
       "file": "reliability.conformance.export.response.json",
       "schema": "ReliabilityConformanceExportResponse.schema.json"
+    },
+    {
+      "file": "compensation.cross_adapter.case.create.request.json",
+      "schema": "CrossAdapterCompensationCaseCreateRequest.schema.json"
+    },
+    {
+      "file": "compensation.cross_adapter.case.create.response.json",
+      "schema": "CrossAdapterCompensationCaseCreateResponse.schema.json"
+    },
+    {
+      "file": "compensation.cross_adapter.case.update.request.json",
+      "schema": "CrossAdapterCompensationCaseUpdateRequest.schema.json"
+    },
+    {
+      "file": "compensation.cross_adapter.case.update.response.json",
+      "schema": "CrossAdapterCompensationCaseUpdateResponse.schema.json"
+    },
+    {
+      "file": "compensation.cross_adapter.case.get.response.json",
+      "schema": "CrossAdapterCompensationCaseGetResponse.schema.json"
     }
   ]
 }

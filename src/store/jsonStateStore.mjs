@@ -53,6 +53,8 @@ export class JsonStateStore {
       tier2_adapter_preflight_history: [],
       cross_adapter_cycle_semantics: {},
       cross_adapter_cycle_receipts: {},
+      cross_adapter_compensation_cases: {},
+      cross_adapter_compensation_case_counter: 0,
       reliability_slo_metrics: [],
       reliability_incident_drills: [],
       reliability_replay_checks: [],
@@ -107,6 +109,8 @@ export class JsonStateStore {
         tier2_adapter_preflight_history: [],
         cross_adapter_cycle_semantics: {},
         cross_adapter_cycle_receipts: {},
+        cross_adapter_compensation_cases: {},
+        cross_adapter_compensation_case_counter: 0,
         reliability_slo_metrics: [],
         reliability_incident_drills: [],
         reliability_replay_checks: [],
@@ -162,6 +166,8 @@ export class JsonStateStore {
     this.state.tier2_adapter_preflight_history ||= [];
     this.state.cross_adapter_cycle_semantics ||= {};
     this.state.cross_adapter_cycle_receipts ||= {};
+    this.state.cross_adapter_compensation_cases ||= {};
+    this.state.cross_adapter_compensation_case_counter ||= 0;
     this.state.reliability_slo_metrics ||= [];
     this.state.reliability_incident_drills ||= [];
     this.state.reliability_replay_checks ||= [];

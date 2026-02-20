@@ -1,0 +1,10 @@
+{
+  "case_update": {
+    "case_id": "comp_case_000001",
+    "next_status": "approved",
+    "decision_reason_code": "policy_compensation_approved",
+    "approved_amount_usd_micros": 2000000,
+    "notes": "approved partial compensation"
+  },
+  "occurred_at": "2026-02-20T21:10:00Z"
+}

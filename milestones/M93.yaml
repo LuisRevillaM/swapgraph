@@ -1,0 +1,41 @@
+name: M93
+commands:
+  - cmd: "npm run verify:m93"
+artifacts:
+  - artifact: "docs/prd/M93.md"
+  - artifact: "docs/STATUS.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/ERRORS.md"
+  - artifact: "docs/spec/GAPS.md"
+
+  - artifact: "src/store/jsonStateStore.mjs"
+  - artifact: "src/service/crossAdapterCompensationService.mjs"
+
+  - artifact: "docs/spec/api/manifest.v1.json"
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+  - artifact: "docs/spec/examples/api/compensation.cross_adapter.case.create.request.json"
+  - artifact: "docs/spec/examples/api/compensation.cross_adapter.case.create.response.json"
+  - artifact: "docs/spec/examples/api/compensation.cross_adapter.case.update.request.json"
+  - artifact: "docs/spec/examples/api/compensation.cross_adapter.case.update.response.json"
+  - artifact: "docs/spec/examples/api/compensation.cross_adapter.case.get.response.json"
+
+  - artifact: "docs/spec/schemas/CrossAdapterCompensationCaseCreateRequest.schema.json"
+  - artifact: "docs/spec/schemas/CrossAdapterCompensationCaseCreateResponse.schema.json"
+  - artifact: "docs/spec/schemas/CrossAdapterCompensationCaseUpdateRequest.schema.json"
+  - artifact: "docs/spec/schemas/CrossAdapterCompensationCaseUpdateResponse.schema.json"
+  - artifact: "docs/spec/schemas/CrossAdapterCompensationCaseGetResponse.schema.json"
+
+  - artifact: "scripts/run-m93-cross-adapter-compensation-case-scenario.mjs"
+  - artifact: "fixtures/compensation/m93_scenario.json"
+  - artifact: "fixtures/compensation/m93_expected.json"
+
+  - artifact: "milestones/M93.yaml"
+  - artifact: "verify/m93.sh"
+
+  - artifact: "artifacts/milestones/M93/latest/commands.log"
+  - artifact: "artifacts/milestones/M93/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M93/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M93/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M93/latest/cross_adapter_compensation_case_output.json"
+  - artifact: "artifacts/milestones/M93/latest/store.json"
+  - artifact: "artifacts/milestones/M93/latest/assertions.json"

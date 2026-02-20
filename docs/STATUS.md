@@ -103,9 +103,9 @@ Last updated: 2026-02-19
 - M90: ✅ Cross-adapter cycle semantics and receipts (fixtures-first) (idempotent non-atomic semantics declarations with disclosure acceptance linked to Tier-2 preflight readiness, plus signed cross-adapter receipt recording/read projection with deterministic discrepancy and signature-valid telemetry) (fixtures-first)
 - M91: ✅ Reliability/SLO conformance pack (fixtures-first) (idempotent SLO metric recording + incident-drill evidence recording + replay-recovery parity checks, with signed conformance export and deterministic signature/tamper verification) (fixtures-first)
 - M92: ✅ Full-plan conformance and release-readiness gate (fixtures-first) (deterministic conformance matrix + milestone artifact coverage checks + release-readiness assertions with zero unresolved blocker verification) (fixtures-first)
+- M93: ✅ Cross-adapter compensation case contract (fixtures-first) (idempotent compensation case create/update/read surfaces linked to signed cross-adapter discrepancy receipts, deterministic lifecycle transitions, and scope/idempotency enforcement proofs) (fixtures-first)
 
 ## Next
-- M93: Cross-adapter compensation case contract
 - M94: Compensation ledger + signed export
 - M95: Dispute-to-compensation linkage workflow
 - M96: Reliability auto-remediation planning contract

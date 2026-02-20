@@ -119,6 +119,14 @@ Notes:
   - `cross_adapter_receipt_disclosure_missing`
   - `cross_adapter_receipt_settlement_receipt_not_found`
   - `cross_adapter_receipt_settlement_signature_invalid`
+  - `cross_adapter_compensation_case_invalid`
+  - `cross_adapter_compensation_case_invalid_timestamp`
+  - `cross_adapter_compensation_case_discrepancy_missing`
+  - `cross_adapter_compensation_cross_receipt_signature_invalid`
+  - `cross_adapter_compensation_case_exists`
+  - `cross_adapter_compensation_case_not_found`
+  - `cross_adapter_compensation_transition_invalid`
+  - `cross_adapter_compensation_query_invalid`
   - `reliability_slo_metric_invalid`
   - `reliability_slo_metric_invalid_timestamp`
   - `reliability_incident_drill_invalid`

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/CrossAdapterCompensationCaseUpdateResponse.schema.json",
+  "title": "CrossAdapterCompensationCaseUpdateResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "case",
+    "replayed"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "case": {
+      "$ref": "CrossAdapterCompensationCaseCreateResponse.schema.json#/properties/case"
+    },
+    "replayed": {
+      "type": "boolean"
+    }
+  }
+}

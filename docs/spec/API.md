@@ -177,6 +177,12 @@ Settlement endpoints:
   - idempotent signed cross-adapter cycle receipt recording (leg-level settlement outcomes + discrepancy code + compensation-required flag)
 - `GET /adapters/cross/cycle-receipts`
   - read cross-adapter semantics/receipt projection for a cycle with deterministic signature-valid telemetry
+- `POST /compensation/cross-adapter/cases`
+  - idempotent cross-adapter compensation-case create contract for discrepancy outcomes requiring remediation
+- `POST /compensation/cross-adapter/cases/update`
+  - idempotent compensation-case lifecycle transition contract (`open`→`approved|rejected`→`resolved`) with deterministic transition guards
+- `GET /compensation/cross-adapter/cases`
+  - read compensation case projection by `case_id` or `cycle_id`
 - `POST /reliability/slo-metrics`
   - idempotent reliability SLO metric recording contract (availability/latency/error-budget windows)
 - `POST /reliability/incident-drills`

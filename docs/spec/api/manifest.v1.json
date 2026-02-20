@@ -1415,6 +1415,56 @@
           "settlement:read"
         ]
       }
+    },
+    {
+      "method": "POST",
+      "path": "/compensation/cross-adapter/cases",
+      "operation_id": "compensation.cross_adapter.case.create",
+      "idempotency_required": true,
+      "request_schema": "CrossAdapterCompensationCaseCreateRequest.schema.json",
+      "response_schema": "CrossAdapterCompensationCaseCreateResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/compensation/cross-adapter/cases/update",
+      "operation_id": "compensation.cross_adapter.case.update",
+      "idempotency_required": true,
+      "request_schema": "CrossAdapterCompensationCaseUpdateRequest.schema.json",
+      "response_schema": "CrossAdapterCompensationCaseUpdateResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/compensation/cross-adapter/cases",
+      "operation_id": "compensation.cross_adapter.case.get",
+      "idempotency_required": false,
+      "response_schema": "CrossAdapterCompensationCaseGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
     }
   ],
   "webhooks": {

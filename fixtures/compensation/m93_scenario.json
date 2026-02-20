@@ -1,0 +1,506 @@
+{
+  "actors": {
+    "admin_partner": {
+      "type": "partner",
+      "id": "ops-admin"
+    }
+  },
+  "seed_cross_receipts": [
+    {
+      "cycle_id": "cycle_cross_comp_001",
+      "receipt": {
+        "cross_receipt_id": "cross_receipt_cycle_cross_comp_001",
+        "partner_id": "ops-admin",
+        "cycle_id": "cycle_cross_comp_001",
+        "settlement_receipt_id": "receipt_cross_comp_001",
+        "settlement_receipt_signature_key_id": "dev-k1",
+        "settlement_final_state": "failed",
+        "semantics_version": 1,
+        "source_ecosystem": "steam",
+        "target_ecosystem": "polygon",
+        "transfer_primitive": "custody_proof_bridge",
+        "execution_model": "non_atomic_best_effort",
+        "non_atomicity_disclosure": {
+          "disclosure_version": "m93.v1",
+          "disclosed": true,
+          "accepted_by": {
+            "type": "user",
+            "id": "user-001"
+          },
+          "acknowledgement": "non_atomicity_accepted",
+          "accepted_at": "2026-02-20T20:58:00Z"
+        },
+        "source_leg_status": "completed",
+        "target_leg_status": "failed",
+        "discrepancy_code": "target_leg_unsettled",
+        "compensation_required": true,
+        "integration_mode": "fixture_only",
+        "created_at": "2026-02-20T20:59:00Z"
+      }
+    },
+    {
+      "cycle_id": "cycle_cross_comp_002",
+      "receipt": {
+        "cross_receipt_id": "cross_receipt_cycle_cross_comp_002",
+        "partner_id": "ops-admin",
+        "cycle_id": "cycle_cross_comp_002",
+        "settlement_receipt_id": "receipt_cross_comp_002",
+        "settlement_receipt_signature_key_id": "dev-k1",
+        "settlement_final_state": "completed",
+        "semantics_version": 1,
+        "source_ecosystem": "steam",
+        "target_ecosystem": "polygon",
+        "transfer_primitive": "custody_proof_bridge",
+        "execution_model": "non_atomic_best_effort",
+        "non_atomicity_disclosure": {
+          "disclosure_version": "m93.v1",
+          "disclosed": true,
+          "accepted_by": {
+            "type": "user",
+            "id": "user-002"
+          },
+          "acknowledgement": "non_atomicity_accepted",
+          "accepted_at": "2026-02-20T20:58:30Z"
+        },
+        "source_leg_status": "completed",
+        "target_leg_status": "completed",
+        "discrepancy_code": "none",
+        "compensation_required": false,
+        "integration_mode": "fixture_only",
+        "created_at": "2026-02-20T20:59:30Z"
+      }
+    },
+    {
+      "cycle_id": "cycle_cross_comp_003",
+      "receipt": {
+        "cross_receipt_id": "cross_receipt_cycle_cross_comp_003",
+        "partner_id": "ops-admin",
+        "cycle_id": "cycle_cross_comp_003",
+        "settlement_receipt_id": "receipt_cross_comp_003",
+        "settlement_receipt_signature_key_id": "dev-k1",
+        "settlement_final_state": "failed",
+        "semantics_version": 1,
+        "source_ecosystem": "steam",
+        "target_ecosystem": "polygon",
+        "transfer_primitive": "custody_proof_bridge",
+        "execution_model": "non_atomic_best_effort",
+        "non_atomicity_disclosure": {
+          "disclosure_version": "m93.v1",
+          "disclosed": true,
+          "accepted_by": {
+            "type": "user",
+            "id": "user-003"
+          },
+          "acknowledgement": "non_atomicity_accepted",
+          "accepted_at": "2026-02-20T20:58:45Z"
+        },
+        "source_leg_status": "failed",
+        "target_leg_status": "completed",
+        "discrepancy_code": "source_leg_unsettled",
+        "compensation_required": true,
+        "integration_mode": "fixture_only",
+        "created_at": "2026-02-20T20:59:45Z"
+      },
+      "tamper_signature": true
+    }
+  ],
+  "operations": [
+    {
+      "op": "compensation.cross_adapter.case.create",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m93_create_1",
+      "request": {
+        "case": {
+          "cycle_id": "cycle_cross_comp_001",
+          "cross_receipt_id": "cross_receipt_cycle_cross_comp_001",
+          "discrepancy_code": "target_leg_unsettled",
+          "requested_by": {
+            "type": "user",
+            "id": "user-001"
+          },
+          "requested_amount_usd_micros": 2500000,
+          "notes": "target leg failed after source completion"
+        },
+        "occurred_at": "2026-02-20T21:00:00Z"
+      },
+      "expect_ok": true,
+      "expect_case_id": "comp_case_000001",
+      "expect_status": "open",
+      "expect_decision_reason_code": "case_opened",
+      "expect_approved_amount_usd_micros": null,
+      "expect_resolution_reference": null,
+      "expect_history_length": 1,
+      "expect_replayed": false
+    },
+    {
+      "op": "compensation.cross_adapter.case.create",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m93_create_1",
+      "request": {
+        "case": {
+          "cycle_id": "cycle_cross_comp_001",
+          "cross_receipt_id": "cross_receipt_cycle_cross_comp_001",
+          "discrepancy_code": "target_leg_unsettled",
+          "requested_by": {
+            "type": "user",
+            "id": "user-001"
+          },
+          "requested_amount_usd_micros": 2500000,
+          "notes": "target leg failed after source completion"
+        },
+        "occurred_at": "2026-02-20T21:00:00Z"
+      },
+      "expect_ok": true,
+      "expect_case_id": "comp_case_000001",
+      "expect_replayed": true
+    },
+    {
+      "op": "compensation.cross_adapter.case.create",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m93_create_1",
+      "request": {
+        "case": {
+          "cycle_id": "cycle_cross_comp_001",
+          "cross_receipt_id": "cross_receipt_cycle_cross_comp_001",
+          "discrepancy_code": "target_leg_unsettled",
+          "requested_by": {
+            "type": "user",
+            "id": "user-001"
+          },
+          "requested_amount_usd_micros": 2600000,
+          "notes": "target leg failed after source completion"
+        },
+        "occurred_at": "2026-02-20T21:00:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    },
+    {
+      "op": "compensation.cross_adapter.case.get",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "case_id": "comp_case_000001",
+        "now_iso": "2026-02-20T21:01:00Z"
+      },
+      "expect_ok": true,
+      "expect_has_case": true,
+      "expect_case_id": "comp_case_000001",
+      "expect_status": "open",
+      "expect_decision_reason_code": "case_opened",
+      "expect_approved_amount_usd_micros": null,
+      "expect_resolution_reference": null,
+      "expect_integration_mode": "fixture_only"
+    },
+    {
+      "op": "compensation.cross_adapter.case.update",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m93_update_approve",
+      "request": {
+        "case_update": {
+          "case_id": "comp_case_000001",
+          "next_status": "approved",
+          "decision_reason_code": "policy_compensation_approved",
+          "approved_amount_usd_micros": 2000000,
+          "notes": "approved partial compensation"
+        },
+        "occurred_at": "2026-02-20T21:10:00Z"
+      },
+      "expect_ok": true,
+      "expect_case_id": "comp_case_000001",
+      "expect_status": "approved",
+      "expect_decision_reason_code": "policy_compensation_approved",
+      "expect_approved_amount_usd_micros": 2000000,
+      "expect_resolution_reference": null,
+      "expect_history_length": 2,
+      "expect_replayed": false
+    },
+    {
+      "op": "compensation.cross_adapter.case.update",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m93_update_approve",
+      "request": {
+        "case_update": {
+          "case_id": "comp_case_000001",
+          "next_status": "approved",
+          "decision_reason_code": "policy_compensation_approved",
+          "approved_amount_usd_micros": 2000000,
+          "notes": "approved partial compensation"
+        },
+        "occurred_at": "2026-02-20T21:10:00Z"
+      },
+      "expect_ok": true,
+      "expect_case_id": "comp_case_000001",
+      "expect_replayed": true
+    },
+    {
+      "op": "compensation.cross_adapter.case.update",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m93_update_approve",
+      "request": {
+        "case_update": {
+          "case_id": "comp_case_000001",
+          "next_status": "rejected",
+          "decision_reason_code": "policy_compensation_rejected",
+          "notes": "rejected"
+        },
+        "occurred_at": "2026-02-20T21:10:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    },
+    {
+      "op": "compensation.cross_adapter.case.update",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m93_update_invalid_transition",
+      "request": {
+        "case_update": {
+          "case_id": "comp_case_000001",
+          "next_status": "rejected",
+          "decision_reason_code": "policy_compensation_rejected"
+        },
+        "occurred_at": "2026-02-20T21:11:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "cross_adapter_compensation_transition_invalid"
+    },
+    {
+      "op": "compensation.cross_adapter.case.update",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m93_update_resolve",
+      "request": {
+        "case_update": {
+          "case_id": "comp_case_000001",
+          "next_status": "resolved",
+          "resolution_reference": "ledger_entry_001",
+          "decision_reason_code": "payout_settled",
+          "notes": "payout completed"
+        },
+        "occurred_at": "2026-02-20T21:20:00Z"
+      },
+      "expect_ok": true,
+      "expect_case_id": "comp_case_000001",
+      "expect_status": "resolved",
+      "expect_decision_reason_code": "payout_settled",
+      "expect_approved_amount_usd_micros": 2000000,
+      "expect_resolution_reference": "ledger_entry_001",
+      "expect_history_length": 3,
+      "expect_replayed": false
+    },
+    {
+      "op": "compensation.cross_adapter.case.get",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "cycle_id": "cycle_cross_comp_001",
+        "now_iso": "2026-02-20T21:21:00Z"
+      },
+      "expect_ok": true,
+      "expect_has_case": true,
+      "expect_case_id": "comp_case_000001",
+      "expect_status": "resolved",
+      "expect_decision_reason_code": "payout_settled",
+      "expect_approved_amount_usd_micros": 2000000,
+      "expect_resolution_reference": "ledger_entry_001",
+      "expect_integration_mode": "fixture_only"
+    },
+    {
+      "op": "compensation.cross_adapter.case.create",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m93_create_no_discrepancy",
+      "request": {
+        "case": {
+          "cycle_id": "cycle_cross_comp_002",
+          "cross_receipt_id": "cross_receipt_cycle_cross_comp_002",
+          "discrepancy_code": "target_leg_unsettled",
+          "requested_by": {
+            "type": "user",
+            "id": "user-002"
+          },
+          "requested_amount_usd_micros": 1000000
+        },
+        "occurred_at": "2026-02-20T21:22:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "cross_adapter_compensation_case_discrepancy_missing"
+    },
+    {
+      "op": "compensation.cross_adapter.case.create",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m93_create_bad_signature",
+      "request": {
+        "case": {
+          "cycle_id": "cycle_cross_comp_003",
+          "cross_receipt_id": "cross_receipt_cycle_cross_comp_003",
+          "discrepancy_code": "source_leg_unsettled",
+          "requested_by": {
+            "type": "user",
+            "id": "user-003"
+          },
+          "requested_amount_usd_micros": 1200000
+        },
+        "occurred_at": "2026-02-20T21:23:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "cross_adapter_compensation_cross_receipt_signature_invalid"
+    },
+    {
+      "op": "compensation.cross_adapter.case.update",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m93_update_missing",
+      "request": {
+        "case_update": {
+          "case_id": "comp_case_999999",
+          "next_status": "approved",
+          "decision_reason_code": "missing",
+          "approved_amount_usd_micros": 1000
+        },
+        "occurred_at": "2026-02-20T21:24:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "cross_adapter_compensation_case_not_found"
+    },
+    {
+      "op": "compensation.cross_adapter.case.get",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "now_iso": "2026-02-20T21:25:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "cross_adapter_compensation_query_invalid"
+    },
+    {
+      "op": "compensation.cross_adapter.case.create",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "idempotency_key": "m93_scope_fail_create",
+      "request": {
+        "case": {
+          "cycle_id": "cycle_cross_comp_001",
+          "cross_receipt_id": "cross_receipt_cycle_cross_comp_001",
+          "discrepancy_code": "target_leg_unsettled",
+          "requested_by": {
+            "type": "user",
+            "id": "user-001"
+          },
+          "requested_amount_usd_micros": 2500000
+        },
+        "occurred_at": "2026-02-20T21:26:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    },
+    {
+      "op": "compensation.cross_adapter.case.get",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "query": {
+        "case_id": "comp_case_000001",
+        "now_iso": "2026-02-20T21:27:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    },
+    {
+      "op": "compensation.cross_adapter.case.update",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "idempotency_key": "m93_scope_fail_update",
+      "request": {
+        "case_update": {
+          "case_id": "comp_case_000001",
+          "next_status": "resolved",
+          "resolution_reference": "ledger_entry_002"
+        },
+        "occurred_at": "2026-02-20T21:28:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    }
+  ]
+}
