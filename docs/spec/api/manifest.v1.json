@@ -1080,6 +1080,56 @@
           "settlement:read"
         ]
       }
+    },
+    {
+      "method": "POST",
+      "path": "/adapters/steam/tier1/contract",
+      "operation_id": "adapter.steam_tier1.contract.upsert",
+      "idempotency_required": true,
+      "request_schema": "SteamTier1AdapterContractUpsertRequest.schema.json",
+      "response_schema": "SteamTier1AdapterContractUpsertResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/adapters/steam/tier1/contract",
+      "operation_id": "adapter.steam_tier1.contract.get",
+      "idempotency_required": false,
+      "response_schema": "SteamTier1AdapterContractGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/adapters/steam/tier1/preflight",
+      "operation_id": "adapter.steam_tier1.preflight",
+      "idempotency_required": true,
+      "request_schema": "SteamTier1AdapterPreflightRequest.schema.json",
+      "response_schema": "SteamTier1AdapterPreflightResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
     }
   ],
   "webhooks": {

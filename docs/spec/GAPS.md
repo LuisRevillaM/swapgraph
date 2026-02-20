@@ -169,7 +169,8 @@ Each item here must become at least one of:
 - Resolved (fixtures-first, partial): M81 (webhook reliability hardening: delivery-attempt ledger + retry-policy metadata + signed dead-letter export continuity + deterministic replay/backfill workflow).
 - Resolved (fixtures-first, partial): M82 (risk tier policy engine contract: partner risk-tier policy objects + deterministic blocked/manual-review/throttle enforcement reason codes across mutating partner write paths).
 - Resolved (fixtures-first, partial): M83 (dispute workflow and evidence-bundle contracts: idempotent dispute create/resolve lifecycle + signed paginated evidence-bundle exports with deterministic continuation + tamper-fail verification).
-- Remaining: reliability hardening and conformance scope (M84+ adapter proofs, reliability matrix).
+- Resolved (fixtures-first, partial): M84 (Steam Tier-1 adapter contract hardening, fixture-only: idempotent adapter contract upsert/read + deterministic preflight contract checks for mode support, dry-run requirements, and batch-size ceilings).
+- Remaining: integration proof and reliability conformance scope (M85+ live adapter proofs, reliability matrix).
 
 ---
 

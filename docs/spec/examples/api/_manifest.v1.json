@@ -388,6 +388,26 @@
     {
       "file": "partner_program.dispute.evidence_bundle.export.response.json",
       "schema": "PartnerProgramDisputeEvidenceBundleExportResponse.schema.json"
+    },
+    {
+      "file": "adapter.steam_tier1.contract.upsert.request.json",
+      "schema": "SteamTier1AdapterContractUpsertRequest.schema.json"
+    },
+    {
+      "file": "adapter.steam_tier1.contract.upsert.response.json",
+      "schema": "SteamTier1AdapterContractUpsertResponse.schema.json"
+    },
+    {
+      "file": "adapter.steam_tier1.contract.get.response.json",
+      "schema": "SteamTier1AdapterContractGetResponse.schema.json"
+    },
+    {
+      "file": "adapter.steam_tier1.preflight.request.json",
+      "schema": "SteamTier1AdapterPreflightRequest.schema.json"
+    },
+    {
+      "file": "adapter.steam_tier1.preflight.response.json",
+      "schema": "SteamTier1AdapterPreflightResponse.schema.json"
     }
   ]
 }

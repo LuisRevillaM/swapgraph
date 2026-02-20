@@ -1,0 +1,44 @@
+{
+  "correlation_id": "corr_adapter_steam_tier1_preflight",
+  "preflight": {
+    "preflight_id": "steam_preflight_000001",
+    "partner_id": "ops-admin",
+    "contract_version": 1,
+    "cycle_id": "cycle_m84_001",
+    "settlement_mode": "deposit_per_swap",
+    "asset_count": 2,
+    "dry_run": true,
+    "requested_at": "2026-02-20T06:15:00.000Z",
+    "ready": true,
+    "reason_code": null,
+    "integration_mode": "fixture_only"
+  },
+  "contract": {
+    "partner_id": "ops-admin",
+    "version": 1,
+    "integration_mode": "fixture_only",
+    "adapter_version": "steam-tier1.v1",
+    "steam_app_id": 730,
+    "transfer_primitive": "deposit_per_swap",
+    "escrow_mode": "direct",
+    "settlement_modes": [
+      "deposit_per_swap",
+      "vault_escrow"
+    ],
+    "capability_flags": [
+      "inventory_snapshot",
+      "trade_offer_create"
+    ],
+    "supported_regions": [
+      "EU",
+      "NA"
+    ],
+    "max_batch_size": 2,
+    "requires_trade_hold": true,
+    "requires_mobile_guard": true,
+    "dry_run_only": true,
+    "notes": "fixture-only contract",
+    "updated_at": "2026-02-20T06:00:00.000Z"
+  },
+  "replayed": false
+}

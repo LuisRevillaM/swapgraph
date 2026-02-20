@@ -1,0 +1,7 @@
+{
+  "cycle_id": "cycle_m84_001",
+  "settlement_mode": "deposit_per_swap",
+  "asset_count": 2,
+  "dry_run": true,
+  "requested_at": "2026-02-20T06:15:00Z"
+}

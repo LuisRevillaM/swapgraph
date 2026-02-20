@@ -94,9 +94,10 @@ Last updated: 2026-02-19
 - M81: ✅ webhook reliability and dead-letter replay hardening (delivery-attempt ledger + retry policy metadata + signed dead-letter export continuity + deterministic replay/backfill workflow) (fixtures-first)
 - M82: ✅ risk tier policy engine contract hardening (partner risk-tier policy upsert/read contracts with deterministic blocked/manual-review/throttle reason-code enforcement across mutating commercial write paths) (fixtures-first)
 - M83: ✅ dispute workflow and evidence-bundle contract hardening (idempotent dispute create/resolve lifecycle + signed paginated evidence-bundle export with deterministic continuation and tamper-fail verification) (fixtures-first)
+- M84: ✅ Steam Tier-1 adapter contract hardening (fixture-only) (idempotent adapter contract upsert/read + deterministic preflight contract checks for mode/dry-run/batch constraints with scope-enforced fixture handoff readiness) (fixtures-first)
 
 ## Next
-- M84: Steam adapter contract hardening (fixture-only) (fixtures-first)
+- M85: Steam deposit-per-swap live proof (integration-gated)
 - Master remainder forecast: `docs/prd/2026-02-19_master-remaining-milestones_M71-M92.md`
 
 ## Notes

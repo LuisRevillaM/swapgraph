@@ -1,0 +1,420 @@
+{
+  "actors": {
+    "admin_partner": {
+      "type": "partner",
+      "id": "ops-admin"
+    }
+  },
+  "operations": [
+    {
+      "op": "adapter.steam_tier1.contract.get",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "now_iso": "2026-02-20T06:00:00Z"
+      },
+      "expect_ok": true,
+      "expect_contract_version": null,
+      "expect_contract_transfer_primitive": null,
+      "expect_contract_max_batch_size": null,
+      "expect_contract_dry_run_only": false,
+      "expect_preflight_total_preflight_requests": 0,
+      "expect_preflight_ready_count": 0,
+      "expect_preflight_blocked_count": 0,
+      "expect_integration_mode": "fixture_only"
+    },
+    {
+      "op": "adapter.steam_tier1.contract.upsert",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m84_upsert_v1",
+      "request": {
+        "contract": {
+          "adapter_version": "steam-tier1.v1",
+          "steam_app_id": 730,
+          "transfer_primitive": "deposit_per_swap",
+          "escrow_mode": "direct",
+          "settlement_modes": [
+            "deposit_per_swap",
+            "vault_escrow"
+          ],
+          "capability_flags": [
+            "inventory_snapshot",
+            "trade_offer_create"
+          ],
+          "supported_regions": [
+            "EU",
+            "NA"
+          ],
+          "max_batch_size": 2,
+          "requires_trade_hold": true,
+          "requires_mobile_guard": true,
+          "dry_run_only": true,
+          "notes": "fixture-only steam adapter contract"
+        },
+        "occurred_at": "2026-02-20T06:01:00Z"
+      },
+      "expect_ok": true,
+      "expect_version": 1,
+      "expect_transfer_primitive": "deposit_per_swap",
+      "expect_max_batch_size": 2,
+      "expect_dry_run_only": true,
+      "expect_settlement_modes_count": 2,
+      "expect_replayed": false
+    },
+    {
+      "op": "adapter.steam_tier1.contract.upsert",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m84_upsert_v1",
+      "request": {
+        "contract": {
+          "adapter_version": "steam-tier1.v1",
+          "steam_app_id": 730,
+          "transfer_primitive": "deposit_per_swap",
+          "escrow_mode": "direct",
+          "settlement_modes": [
+            "deposit_per_swap",
+            "vault_escrow"
+          ],
+          "capability_flags": [
+            "inventory_snapshot",
+            "trade_offer_create"
+          ],
+          "supported_regions": [
+            "EU",
+            "NA"
+          ],
+          "max_batch_size": 2,
+          "requires_trade_hold": true,
+          "requires_mobile_guard": true,
+          "dry_run_only": true,
+          "notes": "fixture-only steam adapter contract"
+        },
+        "occurred_at": "2026-02-20T06:01:00Z"
+      },
+      "expect_ok": true,
+      "expect_version": 1,
+      "expect_replayed": true
+    },
+    {
+      "op": "adapter.steam_tier1.contract.upsert",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m84_upsert_v1",
+      "request": {
+        "contract": {
+          "adapter_version": "steam-tier1.v1",
+          "steam_app_id": 730,
+          "transfer_primitive": "deposit_per_swap",
+          "escrow_mode": "direct",
+          "settlement_modes": [
+            "deposit_per_swap",
+            "vault_escrow"
+          ],
+          "capability_flags": [
+            "inventory_snapshot",
+            "trade_offer_create"
+          ],
+          "supported_regions": [
+            "EU",
+            "NA"
+          ],
+          "max_batch_size": 3,
+          "requires_trade_hold": true,
+          "requires_mobile_guard": true,
+          "dry_run_only": true,
+          "notes": "fixture-only steam adapter contract"
+        },
+        "occurred_at": "2026-02-20T06:01:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    },
+    {
+      "op": "adapter.steam_tier1.preflight",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m84_preflight_1",
+      "request": {
+        "cycle_id": "cycle_m84_001",
+        "settlement_mode": "deposit_per_swap",
+        "asset_count": 2,
+        "dry_run": true,
+        "requested_at": "2026-02-20T06:10:00Z"
+      },
+      "expect_ok": true,
+      "expect_preflight_id": "steam_preflight_000001",
+      "expect_contract_version": 1,
+      "expect_ready": true,
+      "expect_preflight_reason_code": null,
+      "expect_replayed": false
+    },
+    {
+      "op": "adapter.steam_tier1.preflight",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m84_preflight_2",
+      "request": {
+        "cycle_id": "cycle_m84_002",
+        "settlement_mode": "hybrid",
+        "asset_count": 1,
+        "dry_run": true,
+        "requested_at": "2026-02-20T06:11:00Z"
+      },
+      "expect_ok": true,
+      "expect_preflight_id": "steam_preflight_000002",
+      "expect_contract_version": 1,
+      "expect_ready": false,
+      "expect_preflight_reason_code": "steam_adapter_settlement_mode_unsupported",
+      "expect_replayed": false
+    },
+    {
+      "op": "adapter.steam_tier1.preflight",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m84_preflight_3",
+      "request": {
+        "cycle_id": "cycle_m84_003",
+        "settlement_mode": "deposit_per_swap",
+        "asset_count": 3,
+        "dry_run": true,
+        "requested_at": "2026-02-20T06:12:00Z"
+      },
+      "expect_ok": true,
+      "expect_preflight_id": "steam_preflight_000003",
+      "expect_contract_version": 1,
+      "expect_ready": false,
+      "expect_preflight_reason_code": "steam_adapter_batch_size_exceeded",
+      "expect_replayed": false
+    },
+    {
+      "op": "adapter.steam_tier1.preflight",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m84_preflight_4",
+      "request": {
+        "cycle_id": "cycle_m84_004",
+        "settlement_mode": "deposit_per_swap",
+        "asset_count": 1,
+        "dry_run": false,
+        "requested_at": "2026-02-20T06:13:00Z"
+      },
+      "expect_ok": true,
+      "expect_preflight_id": "steam_preflight_000004",
+      "expect_contract_version": 1,
+      "expect_ready": false,
+      "expect_preflight_reason_code": "steam_adapter_dry_run_required",
+      "expect_replayed": false
+    },
+    {
+      "op": "adapter.steam_tier1.contract.get",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "now_iso": "2026-02-20T06:15:00Z"
+      },
+      "expect_ok": true,
+      "expect_contract_version": 1,
+      "expect_contract_transfer_primitive": "deposit_per_swap",
+      "expect_contract_max_batch_size": 2,
+      "expect_contract_dry_run_only": true,
+      "expect_preflight_total_preflight_requests": 4,
+      "expect_preflight_ready_count": 1,
+      "expect_preflight_blocked_count": 3,
+      "expect_integration_mode": "fixture_only"
+    },
+    {
+      "op": "adapter.steam_tier1.contract.upsert",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m84_upsert_v2",
+      "request": {
+        "contract": {
+          "adapter_version": "steam-tier1.v2",
+          "steam_app_id": 730,
+          "transfer_primitive": "vault_escrow",
+          "escrow_mode": "escrow_agent",
+          "settlement_modes": [
+            "deposit_per_swap",
+            "vault_escrow",
+            "hybrid"
+          ],
+          "capability_flags": [
+            "inventory_snapshot",
+            "trade_offer_create",
+            "trade_offer_inspect"
+          ],
+          "supported_regions": [
+            "EU",
+            "NA"
+          ],
+          "max_batch_size": 4,
+          "requires_trade_hold": true,
+          "requires_mobile_guard": true,
+          "dry_run_only": false,
+          "notes": "fixture-only steam adapter contract v2"
+        },
+        "occurred_at": "2026-02-20T06:20:00Z"
+      },
+      "expect_ok": true,
+      "expect_version": 2,
+      "expect_transfer_primitive": "vault_escrow",
+      "expect_max_batch_size": 4,
+      "expect_dry_run_only": false,
+      "expect_settlement_modes_count": 3,
+      "expect_replayed": false
+    },
+    {
+      "op": "adapter.steam_tier1.preflight",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m84_preflight_5",
+      "request": {
+        "cycle_id": "cycle_m84_005",
+        "settlement_mode": "hybrid",
+        "asset_count": 3,
+        "dry_run": false,
+        "requested_at": "2026-02-20T06:21:00Z"
+      },
+      "expect_ok": true,
+      "expect_preflight_id": "steam_preflight_000005",
+      "expect_contract_version": 2,
+      "expect_ready": true,
+      "expect_preflight_reason_code": null,
+      "expect_replayed": false
+    },
+    {
+      "op": "adapter.steam_tier1.contract.get",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "now_iso": "2026-02-20T06:22:00Z"
+      },
+      "expect_ok": true,
+      "expect_contract_version": 2,
+      "expect_contract_transfer_primitive": "vault_escrow",
+      "expect_contract_max_batch_size": 4,
+      "expect_contract_dry_run_only": false,
+      "expect_preflight_total_preflight_requests": 5,
+      "expect_preflight_ready_count": 2,
+      "expect_preflight_blocked_count": 3,
+      "expect_integration_mode": "fixture_only"
+    },
+    {
+      "op": "adapter.steam_tier1.contract.upsert",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "idempotency_key": "m84_upsert_scope_fail",
+      "request": {
+        "contract": {
+          "adapter_version": "steam-tier1.v3",
+          "steam_app_id": 730,
+          "transfer_primitive": "deposit_per_swap",
+          "escrow_mode": "direct",
+          "settlement_modes": [
+            "deposit_per_swap"
+          ],
+          "capability_flags": [
+            "inventory_snapshot"
+          ],
+          "supported_regions": [
+            "NA"
+          ],
+          "max_batch_size": 1,
+          "requires_trade_hold": true,
+          "requires_mobile_guard": true,
+          "dry_run_only": true
+        },
+        "occurred_at": "2026-02-20T06:23:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    },
+    {
+      "op": "adapter.steam_tier1.contract.get",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "query": {
+        "now_iso": "2026-02-20T06:24:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    },
+    {
+      "op": "adapter.steam_tier1.preflight",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "idempotency_key": "m84_preflight_scope_fail",
+      "request": {
+        "cycle_id": "cycle_m84_scope_fail",
+        "settlement_mode": "deposit_per_swap",
+        "asset_count": 1,
+        "dry_run": true,
+        "requested_at": "2026-02-20T06:25:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    }
+  ]
+}

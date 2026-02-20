@@ -90,6 +90,15 @@ Notes:
   - `partner_dispute_not_open`
   - `partner_dispute_evidence_export_query_invalid`
   - `partner_dispute_evidence_cursor_not_found`
+  - `steam_adapter_contract_invalid`
+  - `steam_adapter_contract_invalid_timestamp`
+  - `steam_adapter_contract_query_invalid`
+  - `steam_adapter_contract_missing`
+  - `steam_adapter_preflight_invalid`
+  - `steam_adapter_preflight_invalid_timestamp`
+  - `steam_adapter_settlement_mode_unsupported`
+  - `steam_adapter_dry_run_required`
+  - `steam_adapter_batch_size_exceeded`
 - Rollout diagnostics automation execution-attestation verification may return deterministic mismatch errors such as:
   - `automation_execution_expected_effect_hash_mismatch`
   - `automation_execution_request_hash_chain_mismatch`

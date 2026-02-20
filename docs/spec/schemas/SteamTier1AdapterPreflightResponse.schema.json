@@ -1,0 +1,198 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/SteamTier1AdapterPreflightResponse.schema.json",
+  "title": "SteamTier1AdapterPreflightResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "preflight",
+    "contract",
+    "replayed"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "preflight": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "preflight_id",
+        "partner_id",
+        "contract_version",
+        "cycle_id",
+        "settlement_mode",
+        "asset_count",
+        "dry_run",
+        "requested_at",
+        "ready",
+        "reason_code",
+        "integration_mode"
+      ],
+      "properties": {
+        "preflight_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "cycle_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "settlement_mode": {
+          "type": "string",
+          "enum": [
+            "deposit_per_swap",
+            "vault_escrow",
+            "hybrid"
+          ]
+        },
+        "asset_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "dry_run": {
+          "type": "boolean"
+        },
+        "requested_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "ready": {
+          "type": "boolean"
+        },
+        "reason_code": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "integration_mode": {
+          "type": "string",
+          "enum": [
+            "fixture_only"
+          ]
+        }
+      }
+    },
+    "contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "partner_id",
+        "version",
+        "integration_mode",
+        "adapter_version",
+        "steam_app_id",
+        "transfer_primitive",
+        "escrow_mode",
+        "settlement_modes",
+        "capability_flags",
+        "supported_regions",
+        "max_batch_size",
+        "requires_trade_hold",
+        "requires_mobile_guard",
+        "dry_run_only",
+        "updated_at"
+      ],
+      "properties": {
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "integration_mode": {
+          "type": "string",
+          "enum": [
+            "fixture_only"
+          ]
+        },
+        "adapter_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "steam_app_id": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "transfer_primitive": {
+          "type": "string",
+          "enum": [
+            "deposit_per_swap",
+            "vault_escrow"
+          ]
+        },
+        "escrow_mode": {
+          "type": "string",
+          "enum": [
+            "direct",
+            "escrow_agent"
+          ]
+        },
+        "settlement_modes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "deposit_per_swap",
+              "vault_escrow",
+              "hybrid"
+            ]
+          }
+        },
+        "capability_flags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "supported_regions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "max_batch_size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "requires_trade_hold": {
+          "type": "boolean"
+        },
+        "requires_mobile_guard": {
+          "type": "boolean"
+        },
+        "dry_run_only": {
+          "type": "boolean"
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "replayed": {
+      "type": "boolean"
+    }
+  }
+}

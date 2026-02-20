@@ -38,6 +38,8 @@ export class JsonStateStore {
       partner_program_risk_tier_policy: {},
       partner_program_risk_tier_usage_counters: {},
       partner_program_disputes: [],
+      steam_tier1_adapter_contract: {},
+      steam_tier1_preflight_history: [],
       oauth_clients: {},
       oauth_tokens: {}
     };
@@ -74,6 +76,8 @@ export class JsonStateStore {
         partner_program_risk_tier_policy: {},
         partner_program_risk_tier_usage_counters: {},
         partner_program_disputes: [],
+        steam_tier1_adapter_contract: {},
+        steam_tier1_preflight_history: [],
         oauth_clients: {},
         oauth_tokens: {}
       };
@@ -111,6 +115,8 @@ export class JsonStateStore {
     this.state.partner_program_risk_tier_policy ||= {};
     this.state.partner_program_risk_tier_usage_counters ||= {};
     this.state.partner_program_disputes ||= [];
+    this.state.steam_tier1_adapter_contract ||= {};
+    this.state.steam_tier1_preflight_history ||= [];
     this.state.oauth_clients ||= {};
     this.state.oauth_tokens ||= {};
   }

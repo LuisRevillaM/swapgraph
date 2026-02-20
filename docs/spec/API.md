@@ -159,6 +159,12 @@ Settlement endpoints:
 - `GET /partner-program/disputes/evidence-bundles/export`
   - signed dispute evidence-bundle export (`summary`, paginated bundles, `next_cursor`, `export_hash`, detached signature)
   - supports deterministic continuation (`limit`, `cursor_after`) and resolved/open filtering (`include_resolved`)
+- `POST /adapters/steam/tier1/contract`
+  - idempotent Steam Tier-1 adapter contract upsert surface (fixture-only integration profile for handoff)
+- `GET /adapters/steam/tier1/contract`
+  - read Steam Tier-1 adapter contract + deterministic preflight summary telemetry
+- `POST /adapters/steam/tier1/preflight`
+  - idempotent fixture preflight contract check (mode support, dry-run requirement, batch-size ceiling)
 
 Receipt endpoints:
 - `GET /receipts/{cycle_id}`
