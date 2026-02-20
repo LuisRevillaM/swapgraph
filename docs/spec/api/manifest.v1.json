@@ -997,6 +997,39 @@
           "settlement:write"
         ]
       }
+    },
+    {
+      "method": "POST",
+      "path": "/partner-program/risk-tier-policy",
+      "operation_id": "partnerProgram.risk_tier_policy.upsert",
+      "idempotency_required": true,
+      "request_schema": "PartnerProgramRiskTierPolicyUpsertRequest.schema.json",
+      "response_schema": "PartnerProgramRiskTierPolicyUpsertResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/partner-program/risk-tier-policy",
+      "operation_id": "partnerProgram.risk_tier_policy.get",
+      "idempotency_required": false,
+      "response_schema": "PartnerProgramRiskTierPolicyGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
     }
   ],
   "webhooks": {

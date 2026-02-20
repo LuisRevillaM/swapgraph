@@ -1,0 +1,279 @@
+{
+  "actors": {
+    "admin_partner": {
+      "type": "partner",
+      "id": "ops-admin"
+    }
+  },
+  "operations": [
+    {
+      "op": "partnerProgram.risk_tier_policy.upsert",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m82_risk_policy_v1",
+      "request": {
+        "policy": {
+          "tier": "low",
+          "escalation_mode": "monitor",
+          "max_write_ops_per_hour": 10,
+          "blocked_operations": [
+            "partnerProgram.commercial_usage.record"
+          ],
+          "manual_review_operations": []
+        },
+        "occurred_at": "2026-02-20T03:00:00Z"
+      },
+      "expect_ok": true,
+      "expect_version": 1,
+      "expect_tier": "low",
+      "expect_escalation_mode": "monitor",
+      "expect_max_write_ops_per_hour": 10,
+      "expect_blocked_operations_count": 1,
+      "expect_manual_review_operations_count": 0,
+      "expect_replayed": false
+    },
+    {
+      "op": "partnerProgram.risk_tier_policy.get",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "now_iso": "2026-02-20T03:05:00Z"
+      },
+      "expect_ok": true,
+      "expect_version": 1,
+      "expect_tier": "low",
+      "expect_escalation_mode": "monitor",
+      "expect_max_write_ops_per_hour": 10,
+      "expect_usage_hour_bucket": "2026-02-20T03:00:00.000Z",
+      "expect_usage_count_commercial_usage_record": 0,
+      "expect_usage_count_oauth_client_register": 0
+    },
+    {
+      "op": "partnerProgram.commercial_usage.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m82_usage_blocked",
+      "request": {
+        "feature_code": "dashboard_api",
+        "unit_type": "request_count",
+        "units": 1,
+        "unit_price_usd_micros": 100000,
+        "occurred_at": "2026-02-20T03:06:00Z",
+        "metadata": {
+          "stage": "blocked"
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "risk_tier_blocked_operation"
+    },
+    {
+      "op": "partnerProgram.risk_tier_policy.upsert",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m82_risk_policy_v2",
+      "request": {
+        "policy": {
+          "tier": "medium",
+          "escalation_mode": "throttle",
+          "max_write_ops_per_hour": 2,
+          "blocked_operations": [],
+          "manual_review_operations": []
+        },
+        "occurred_at": "2026-02-20T03:10:00Z"
+      },
+      "expect_ok": true,
+      "expect_version": 2,
+      "expect_tier": "medium",
+      "expect_escalation_mode": "throttle",
+      "expect_max_write_ops_per_hour": 2,
+      "expect_blocked_operations_count": 0,
+      "expect_manual_review_operations_count": 0,
+      "expect_replayed": false
+    },
+    {
+      "op": "partnerProgram.commercial_usage.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m82_usage_1",
+      "request": {
+        "feature_code": "dashboard_api",
+        "unit_type": "request_count",
+        "units": 1,
+        "unit_price_usd_micros": 100000,
+        "occurred_at": "2026-02-20T03:11:00Z",
+        "metadata": {
+          "seq": 1
+        }
+      },
+      "expect_ok": true,
+      "expect_entry_id": "usage_ledger_000001",
+      "expect_replayed": false
+    },
+    {
+      "op": "partnerProgram.commercial_usage.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m82_usage_2",
+      "request": {
+        "feature_code": "dashboard_api",
+        "unit_type": "request_count",
+        "units": 1,
+        "unit_price_usd_micros": 100000,
+        "occurred_at": "2026-02-20T03:12:00Z",
+        "metadata": {
+          "seq": 2
+        }
+      },
+      "expect_ok": true,
+      "expect_entry_id": "usage_ledger_000002",
+      "expect_replayed": false
+    },
+    {
+      "op": "partnerProgram.commercial_usage.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m82_usage_3",
+      "request": {
+        "feature_code": "dashboard_api",
+        "unit_type": "request_count",
+        "units": 1,
+        "unit_price_usd_micros": 100000,
+        "occurred_at": "2026-02-20T03:13:00Z",
+        "metadata": {
+          "seq": 3
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "risk_tier_throttle_exceeded"
+    },
+    {
+      "op": "partnerProgram.risk_tier_policy.upsert",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m82_risk_policy_v3",
+      "request": {
+        "policy": {
+          "tier": "high",
+          "escalation_mode": "block",
+          "max_write_ops_per_hour": 20,
+          "blocked_operations": [],
+          "manual_review_operations": [
+            "auth.oauth_client.register"
+          ]
+        },
+        "occurred_at": "2026-02-20T03:20:00Z"
+      },
+      "expect_ok": true,
+      "expect_version": 3,
+      "expect_tier": "high",
+      "expect_escalation_mode": "block",
+      "expect_max_write_ops_per_hour": 20,
+      "expect_blocked_operations_count": 0,
+      "expect_manual_review_operations_count": 1,
+      "expect_replayed": false
+    },
+    {
+      "op": "auth.oauth_client.register",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ],
+        "now_iso": "2026-02-20T03:21:00Z"
+      },
+      "idempotency_key": "m82_oauth_register_1",
+      "request": {
+        "client_name": "Risk Tier Dashboard",
+        "redirect_uris": [
+          "https://ops.example.com/oauth/callback"
+        ],
+        "scopes": [
+          "settlement:read",
+          "settlement:write"
+        ]
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "risk_tier_manual_review_required"
+    },
+    {
+      "op": "partnerProgram.risk_tier_policy.get",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "now_iso": "2026-02-20T03:22:00Z"
+      },
+      "expect_ok": true,
+      "expect_version": 3,
+      "expect_tier": "high",
+      "expect_escalation_mode": "block",
+      "expect_max_write_ops_per_hour": 20,
+      "expect_usage_hour_bucket": "2026-02-20T03:00:00.000Z",
+      "expect_usage_count_commercial_usage_record": 2,
+      "expect_usage_count_oauth_client_register": 0
+    },
+    {
+      "op": "partnerProgram.risk_tier_policy.upsert",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m82_risk_policy_v3",
+      "request": {
+        "policy": {
+          "tier": "high",
+          "escalation_mode": "block",
+          "max_write_ops_per_hour": 20,
+          "blocked_operations": [],
+          "manual_review_operations": [
+            "auth.oauth_client.register"
+          ]
+        },
+        "occurred_at": "2026-02-20T03:20:00Z"
+      },
+      "expect_ok": true,
+      "expect_version": 3,
+      "expect_replayed": true
+    }
+  ]
+}

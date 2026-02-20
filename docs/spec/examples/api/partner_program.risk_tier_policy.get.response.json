@@ -1,0 +1,18 @@
+{
+  "correlation_id": "corr_partnerprogram_risk_tier_policy_get",
+  "partner_id": "ops-admin",
+  "policy": {
+    "partner_id": "ops-admin",
+    "version": 2,
+    "tier": "medium",
+    "escalation_mode": "throttle",
+    "max_write_ops_per_hour": 2,
+    "blocked_operations": [],
+    "manual_review_operations": [],
+    "updated_at": "2026-02-20T03:00:00.000Z"
+  },
+  "usage_hour_bucket": "2026-02-20T03:00:00.000Z",
+  "usage_counts": {
+    "partnerProgram.commercial_usage.record": 2
+  }
+}

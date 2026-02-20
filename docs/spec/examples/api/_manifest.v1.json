@@ -356,6 +356,18 @@
     {
       "file": "partner_program.webhook_dead_letter.replay.response.json",
       "schema": "PartnerProgramWebhookDeadLetterReplayResponse.schema.json"
+    },
+    {
+      "file": "partner_program.risk_tier_policy.upsert.request.json",
+      "schema": "PartnerProgramRiskTierPolicyUpsertRequest.schema.json"
+    },
+    {
+      "file": "partner_program.risk_tier_policy.upsert.response.json",
+      "schema": "PartnerProgramRiskTierPolicyUpsertResponse.schema.json"
+    },
+    {
+      "file": "partner_program.risk_tier_policy.get.response.json",
+      "schema": "PartnerProgramRiskTierPolicyGetResponse.schema.json"
     }
   ]
 }

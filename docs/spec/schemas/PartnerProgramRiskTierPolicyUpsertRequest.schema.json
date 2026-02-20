@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/PartnerProgramRiskTierPolicyUpsertRequest.schema.json",
+  "title": "PartnerProgramRiskTierPolicyUpsertRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "policy"
+  ],
+  "properties": {
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tier",
+        "escalation_mode",
+        "max_write_ops_per_hour",
+        "blocked_operations",
+        "manual_review_operations"
+      ],
+      "properties": {
+        "tier": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        "escalation_mode": {
+          "type": "string",
+          "enum": [
+            "monitor",
+            "throttle",
+            "block"
+          ]
+        },
+        "max_write_ops_per_hour": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "blocked_operations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "manual_review_operations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

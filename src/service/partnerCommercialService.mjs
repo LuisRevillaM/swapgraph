@@ -45,6 +45,8 @@ function ensureCommercialState(store) {
   store.state.partner_program_sla_breach_events ||= [];
   store.state.partner_program_webhook_delivery_attempts ||= [];
   store.state.partner_program_webhook_retry_policies ||= {};
+  store.state.partner_program_risk_tier_policy ||= {};
+  store.state.partner_program_risk_tier_usage_counters ||= {};
   store.state.oauth_clients ||= {};
   store.state.oauth_tokens ||= {};
   store.state.idempotency ||= {};
@@ -55,6 +57,8 @@ function ensureCommercialState(store) {
     slaBreaches: store.state.partner_program_sla_breach_events,
     webhookDeliveryAttempts: store.state.partner_program_webhook_delivery_attempts,
     webhookRetryPolicies: store.state.partner_program_webhook_retry_policies,
+    riskTierPolicy: store.state.partner_program_risk_tier_policy,
+    riskTierUsageCounters: store.state.partner_program_risk_tier_usage_counters,
     oauthClients: store.state.oauth_clients,
     oauthTokens: store.state.oauth_tokens,
     idempotency: store.state.idempotency
@@ -69,7 +73,17 @@ function payloadHash(payload) {
   return createHash('sha256').update(canonicalStringify(payload), 'utf8').digest('hex');
 }
 
-function applyIdempotentMutation({ store, actor, operationId, idempotencyKey, requestPayload, mutate, correlationId }) {
+function applyIdempotentMutation({
+  store,
+  actor,
+  operationId,
+  idempotencyKey,
+  requestPayload,
+  mutate,
+  correlationId,
+  beforeMutate,
+  afterMutate
+}) {
   const key = normalizeOptionalString(idempotencyKey);
   if (!key) {
     return {
@@ -105,8 +119,17 @@ function applyIdempotentMutation({ store, actor, operationId, idempotencyKey, re
     };
   }
 
+  if (typeof beforeMutate === 'function') {
+    const pre = beforeMutate();
+    if (pre && pre.ok === false) return pre;
+  }
+
   const mutated = mutate();
   if (!mutated.ok) return mutated;
+
+  if (typeof afterMutate === 'function') {
+    afterMutate(mutated.body);
+  }
 
   idemState[scopeKey] = {
     payload_hash: incomingHash,
@@ -321,12 +344,273 @@ function webhookDeadLetterEntriesForPartner({ records, partnerId, fromMs = null,
 
 const allowedSlaEventTypes = new Set(['latency', 'availability', 'dispute_response']);
 const allowedSeverity = new Set(['low', 'medium', 'high']);
+const allowedRiskTiers = new Set(['low', 'medium', 'high']);
+const allowedRiskEscalationModes = new Set(['monitor', 'throttle', 'block']);
+const riskTierHighRiskWriteOps = new Set([
+  'auth.oauth_client.register',
+  'auth.oauth_client.rotate',
+  'auth.oauth_client.revoke',
+  'partnerProgram.webhook_dead_letter.replay'
+]);
 
 export class PartnerCommercialService {
   constructor({ store }) {
     if (!store) throw new Error('store is required');
     this.store = store;
     ensureCommercialState(this.store);
+  }
+
+  resolveRiskTierNowMs({ auth, request }) {
+    const candidates = [
+      normalizeOptionalString(request?.occurred_at),
+      normalizeOptionalString(request?.replayed_at),
+      normalizeOptionalString(auth?.now_iso),
+      normalizeOptionalString(process.env.AUTHZ_NOW_ISO)
+    ];
+
+    for (const candidate of candidates) {
+      if (!candidate) continue;
+      const ms = parseIsoMs(candidate);
+      if (ms !== null) return ms;
+    }
+
+    return Date.now();
+  }
+
+  riskHourBucketIso(nowMs) {
+    return new Date(Date.UTC(
+      new Date(nowMs).getUTCFullYear(),
+      new Date(nowMs).getUTCMonth(),
+      new Date(nowMs).getUTCDate(),
+      new Date(nowMs).getUTCHours(),
+      0,
+      0,
+      0
+    )).toISOString();
+  }
+
+  normalizeRiskTierPolicyView(policy) {
+    if (!policy || typeof policy !== 'object') return null;
+
+    const blockedOperations = Array.isArray(policy.blocked_operations)
+      ? Array.from(new Set(policy.blocked_operations.filter(x => typeof x === 'string' && x.trim()).map(x => x.trim()))).sort()
+      : [];
+
+    const manualReviewOperations = Array.isArray(policy.manual_review_operations)
+      ? Array.from(new Set(policy.manual_review_operations.filter(x => typeof x === 'string' && x.trim()).map(x => x.trim()))).sort()
+      : [];
+
+    const maxWriteOpsPerHour = parsePositiveInt(policy.max_write_ops_per_hour, { min: 1, max: 1000000 });
+
+    return {
+      partner_id: typeof policy.partner_id === 'string' ? policy.partner_id : null,
+      version: Number.isFinite(policy.version) ? Number(policy.version) : null,
+      tier: typeof policy.tier === 'string' && allowedRiskTiers.has(policy.tier) ? policy.tier : 'low',
+      escalation_mode: typeof policy.escalation_mode === 'string' && allowedRiskEscalationModes.has(policy.escalation_mode)
+        ? policy.escalation_mode
+        : 'monitor',
+      max_write_ops_per_hour: maxWriteOpsPerHour,
+      blocked_operations: blockedOperations,
+      manual_review_operations: manualReviewOperations,
+      updated_at: typeof policy.updated_at === 'string' ? policy.updated_at : null
+    };
+  }
+
+  evaluateRiskTierWriteAccess({ actor, operationId, correlationId, nowMs }) {
+    const state = ensureCommercialState(this.store);
+    const policy = this.normalizeRiskTierPolicyView(state.riskTierPolicy[actor.id] ?? null);
+
+    if (!policy) return { ok: true };
+
+    if ((policy.blocked_operations ?? []).includes(operationId)) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'operation blocked by risk tier policy', {
+          reason_code: 'risk_tier_blocked_operation',
+          operation_id: operationId,
+          tier: policy.tier,
+          escalation_mode: policy.escalation_mode
+        })
+      };
+    }
+
+    const manualReview = policy.manual_review_operations.includes(operationId)
+      || (policy.tier === 'high' && riskTierHighRiskWriteOps.has(operationId));
+
+    if (manualReview) {
+      return {
+        ok: false,
+        body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'operation requires manual review under risk tier policy', {
+          reason_code: 'risk_tier_manual_review_required',
+          operation_id: operationId,
+          tier: policy.tier
+        })
+      };
+    }
+
+    const maxWriteOpsPerHour = policy.max_write_ops_per_hour;
+    if (maxWriteOpsPerHour !== null) {
+      const bucket = this.riskHourBucketIso(nowMs);
+      const partnerCounters = state.riskTierUsageCounters[actor.id] ?? {};
+      const hourCounters = partnerCounters[bucket] ?? {};
+      const observedWrites = Number.isFinite(hourCounters[operationId]) ? Number(hourCounters[operationId]) : 0;
+
+      if (observedWrites >= maxWriteOpsPerHour) {
+        return {
+          ok: false,
+          body: errorResponse(correlationId, 'CONSTRAINT_VIOLATION', 'risk tier throttle exceeded for write operation', {
+            reason_code: 'risk_tier_throttle_exceeded',
+            operation_id: operationId,
+            tier: policy.tier,
+            observed_writes_in_hour: observedWrites,
+            max_write_ops_per_hour: maxWriteOpsPerHour,
+            usage_hour_bucket: bucket
+          })
+        };
+      }
+    }
+
+    return { ok: true };
+  }
+
+  recordRiskTierWriteUsage({ actor, operationId, nowMs }) {
+    const state = ensureCommercialState(this.store);
+    const bucket = this.riskHourBucketIso(nowMs);
+
+    state.riskTierUsageCounters[actor.id] ||= {};
+    state.riskTierUsageCounters[actor.id][bucket] ||= {};
+    const prior = Number.isFinite(state.riskTierUsageCounters[actor.id][bucket][operationId])
+      ? Number(state.riskTierUsageCounters[actor.id][bucket][operationId])
+      : 0;
+    state.riskTierUsageCounters[actor.id][bucket][operationId] = prior + 1;
+  }
+
+  upsertRiskTierPolicy({ actor, auth, idempotencyKey, request }) {
+    const op = 'partnerProgram.risk_tier_policy.upsert';
+    const corr = correlationId(op);
+
+    const authz = authorizeApiOperation({ operationId: op, actor, auth, store: this.store });
+    if (!authz.ok) return { ok: false, body: errorResponse(corr, authz.error.code, authz.error.message, authz.error.details) };
+
+    if (!isPartner(actor)) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'FORBIDDEN', 'only partner can upsert risk tier policy', { actor })
+      };
+    }
+
+    const tier = normalizeOptionalString(request?.policy?.tier);
+    const escalationMode = normalizeOptionalString(request?.policy?.escalation_mode);
+    const maxWriteOpsPerHour = parsePositiveInt(request?.policy?.max_write_ops_per_hour, { min: 1, max: 1000000 });
+
+    const blockedOperations = Array.isArray(request?.policy?.blocked_operations)
+      ? Array.from(new Set(request.policy.blocked_operations.filter(x => typeof x === 'string' && x.trim()).map(x => x.trim()))).sort()
+      : [];
+
+    const manualReviewOperations = Array.isArray(request?.policy?.manual_review_operations)
+      ? Array.from(new Set(request.policy.manual_review_operations.filter(x => typeof x === 'string' && x.trim()).map(x => x.trim()))).sort()
+      : [];
+
+    if (!tier || !allowedRiskTiers.has(tier) || !escalationMode || !allowedRiskEscalationModes.has(escalationMode) || maxWriteOpsPerHour === null) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid risk tier policy payload', {
+          reason_code: 'partner_risk_tier_policy_invalid'
+        })
+      };
+    }
+
+    const updatedAtRaw = normalizeOptionalString(request?.occurred_at)
+      ?? normalizeOptionalString(auth?.now_iso)
+      ?? process.env.AUTHZ_NOW_ISO
+      ?? new Date().toISOString();
+    const updatedAtMs = parseIsoMs(updatedAtRaw);
+    if (updatedAtMs === null) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid timestamp for risk tier policy upsert', {
+          reason_code: 'partner_risk_tier_policy_invalid_timestamp'
+        })
+      };
+    }
+
+    const state = ensureCommercialState(this.store);
+
+    return applyIdempotentMutation({
+      store: this.store,
+      actor,
+      operationId: op,
+      idempotencyKey,
+      requestPayload: request,
+      correlationId: corr,
+      mutate: () => {
+        const prior = this.normalizeRiskTierPolicyView(state.riskTierPolicy[actor.id] ?? null);
+        const nextVersion = Number.isFinite(prior?.version) ? Number(prior.version) + 1 : 1;
+
+        const policy = {
+          partner_id: actor.id,
+          version: nextVersion,
+          tier,
+          escalation_mode: escalationMode,
+          max_write_ops_per_hour: maxWriteOpsPerHour,
+          blocked_operations: blockedOperations,
+          manual_review_operations: manualReviewOperations,
+          updated_at: new Date(updatedAtMs).toISOString()
+        };
+
+        state.riskTierPolicy[actor.id] = policy;
+
+        return {
+          ok: true,
+          body: {
+            correlation_id: corr,
+            policy: this.normalizeRiskTierPolicyView(policy)
+          }
+        };
+      }
+    });
+  }
+
+  getRiskTierPolicy({ actor, auth, query }) {
+    const op = 'partnerProgram.risk_tier_policy.get';
+    const corr = correlationId(op);
+
+    const authz = authorizeApiOperation({ operationId: op, actor, auth, store: this.store });
+    if (!authz.ok) return { ok: false, body: errorResponse(corr, authz.error.code, authz.error.message, authz.error.details) };
+
+    if (!isPartner(actor)) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'FORBIDDEN', 'only partner can read risk tier policy', { actor })
+      };
+    }
+
+    const nowIso = normalizeOptionalString(query?.now_iso) ?? new Date().toISOString();
+    const nowMs = parseIsoMs(nowIso);
+    if (nowMs === null) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid risk tier policy query', {
+          reason_code: 'partner_risk_tier_policy_query_invalid'
+        })
+      };
+    }
+
+    const state = ensureCommercialState(this.store);
+    const policy = this.normalizeRiskTierPolicyView(state.riskTierPolicy[actor.id] ?? null);
+    const bucket = this.riskHourBucketIso(nowMs);
+    const usageCounts = state.riskTierUsageCounters[actor.id]?.[bucket] ?? {};
+
+    return {
+      ok: true,
+      body: {
+        correlation_id: corr,
+        partner_id: actor.id,
+        policy,
+        usage_hour_bucket: bucket,
+        usage_counts: usageCounts
+      }
+    };
   }
 
   recordCommercialUsage({ actor, auth, idempotencyKey, request }) {
@@ -369,6 +653,7 @@ export class PartnerCommercialService {
     }
 
     const state = ensureCommercialState(this.store);
+    const riskNowMs = this.resolveRiskTierNowMs({ auth, request });
 
     return applyIdempotentMutation({
       store: this.store,
@@ -377,6 +662,8 @@ export class PartnerCommercialService {
       idempotencyKey,
       requestPayload: request,
       correlationId: corr,
+      beforeMutate: () => this.evaluateRiskTierWriteAccess({ actor, operationId: op, correlationId: corr, nowMs: riskNowMs }),
+      afterMutate: () => this.recordRiskTierWriteUsage({ actor, operationId: op, nowMs: riskNowMs }),
       mutate: () => {
         const entryId = `usage_ledger_${String(state.usageLedger.length + 1).padStart(6, '0')}`;
         const entry = {
@@ -582,6 +869,7 @@ export class PartnerCommercialService {
     }
 
     const state = ensureCommercialState(this.store);
+    const riskNowMs = this.resolveRiskTierNowMs({ auth, request });
 
     return applyIdempotentMutation({
       store: this.store,
@@ -590,6 +878,8 @@ export class PartnerCommercialService {
       idempotencyKey,
       requestPayload: request,
       correlationId: corr,
+      beforeMutate: () => this.evaluateRiskTierWriteAccess({ actor, operationId: op, correlationId: corr, nowMs: riskNowMs }),
+      afterMutate: () => this.recordRiskTierWriteUsage({ actor, operationId: op, nowMs: riskNowMs }),
       mutate: () => {
         const prior = state.slaPolicy[actor.id] ?? null;
         const nextVersion = Number.isFinite(prior?.version) ? Number(prior.version) + 1 : 1;
@@ -648,6 +938,7 @@ export class PartnerCommercialService {
     }
 
     const state = ensureCommercialState(this.store);
+    const riskNowMs = this.resolveRiskTierNowMs({ auth, request });
 
     return applyIdempotentMutation({
       store: this.store,
@@ -656,6 +947,8 @@ export class PartnerCommercialService {
       idempotencyKey,
       requestPayload: request,
       correlationId: corr,
+      beforeMutate: () => this.evaluateRiskTierWriteAccess({ actor, operationId: op, correlationId: corr, nowMs: riskNowMs }),
+      afterMutate: () => this.recordRiskTierWriteUsage({ actor, operationId: op, nowMs: riskNowMs }),
       mutate: () => {
         const eventId = `sla_breach_${String(state.slaBreaches.length + 1).padStart(6, '0')}`;
         const event = {
@@ -906,6 +1199,7 @@ export class PartnerCommercialService {
     }
 
     const state = ensureCommercialState(this.store);
+    const riskNowMs = this.resolveRiskTierNowMs({ auth, request });
 
     return applyIdempotentMutation({
       store: this.store,
@@ -914,6 +1208,8 @@ export class PartnerCommercialService {
       idempotencyKey,
       requestPayload: request,
       correlationId: corr,
+      beforeMutate: () => this.evaluateRiskTierWriteAccess({ actor, operationId: op, correlationId: corr, nowMs: riskNowMs }),
+      afterMutate: () => this.recordRiskTierWriteUsage({ actor, operationId: op, nowMs: riskNowMs }),
       mutate: () => {
         const existing = state.webhookDeliveryAttempts.find(row => row?.partner_id === actor.id && row?.delivery_id === deliveryId) ?? null;
 
@@ -1134,6 +1430,8 @@ export class PartnerCommercialService {
       };
     }
 
+    const riskNowMs = this.resolveRiskTierNowMs({ auth, request });
+
     return applyIdempotentMutation({
       store: this.store,
       actor,
@@ -1144,6 +1442,8 @@ export class PartnerCommercialService {
         ...(request ?? {})
       },
       correlationId: corr,
+      beforeMutate: () => this.evaluateRiskTierWriteAccess({ actor, operationId: op, correlationId: corr, nowMs: riskNowMs }),
+      afterMutate: () => this.recordRiskTierWriteUsage({ actor, operationId: op, nowMs: riskNowMs }),
       mutate: () => {
         if (record.dead_lettered !== true) {
           return {
@@ -1239,6 +1539,8 @@ export class PartnerCommercialService {
       idempotencyKey,
       requestPayload: request,
       correlationId: corr,
+      beforeMutate: () => this.evaluateRiskTierWriteAccess({ actor, operationId: op, correlationId: corr, nowMs }),
+      afterMutate: () => this.recordRiskTierWriteUsage({ actor, operationId: op, nowMs }),
       mutate: () => {
         const ordinal = Object.keys(state.oauthClients).length + 1;
         const clientId = `oc_${createHash('sha256').update(`${actor.id}:${clientName}:${ordinal}`, 'utf8').digest('hex').slice(0, 16)}`;
@@ -1337,6 +1639,8 @@ export class PartnerCommercialService {
         ...(request ?? {})
       },
       correlationId: corr,
+      beforeMutate: () => this.evaluateRiskTierWriteAccess({ actor, operationId: op, correlationId: corr, nowMs }),
+      afterMutate: () => this.recordRiskTierWriteUsage({ actor, operationId: op, nowMs }),
       mutate: () => {
         if (client.status !== 'active') {
           return {
@@ -1430,6 +1734,8 @@ export class PartnerCommercialService {
         ...(request ?? {})
       },
       correlationId: corr,
+      beforeMutate: () => this.evaluateRiskTierWriteAccess({ actor, operationId: op, correlationId: corr, nowMs }),
+      afterMutate: () => this.recordRiskTierWriteUsage({ actor, operationId: op, nowMs }),
       mutate: () => {
         const nowIso = new Date(nowMs).toISOString();
         client.status = 'revoked';

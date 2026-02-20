@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/PartnerProgramRiskTierPolicyUpsertResponse.schema.json",
+  "title": "PartnerProgramRiskTierPolicyUpsertResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "policy",
+    "replayed"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "partner_id",
+        "version",
+        "tier",
+        "escalation_mode",
+        "max_write_ops_per_hour",
+        "blocked_operations",
+        "manual_review_operations",
+        "updated_at"
+      ],
+      "properties": {
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "tier": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        "escalation_mode": {
+          "type": "string",
+          "enum": [
+            "monitor",
+            "throttle",
+            "block"
+          ]
+        },
+        "max_write_ops_per_hour": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "blocked_operations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "manual_review_operations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "replayed": {
+      "type": "boolean"
+    }
+  }
+}

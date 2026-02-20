@@ -148,6 +148,10 @@ Settlement endpoints:
   - supports deterministic continuation (`limit`, `cursor_after`) and replay visibility filtering (`include_replayed`)
 - `POST /partner-program/webhook-dead-letter/replay`
   - idempotent dead-letter replay/backfill workflow (`replay_mode=retry_now|backfill`) with deterministic replay metadata anchoring
+- `POST /partner-program/risk-tier-policy`
+  - idempotent partner-admin risk-tier policy mutation (`tier`, `escalation_mode`, write-throttle limit, blocked operations, manual-review operations)
+- `GET /partner-program/risk-tier-policy`
+  - partner-admin risk-tier policy read surface including current-hour write counters by operation
 
 Receipt endpoints:
 - `GET /receipts/{cycle_id}`

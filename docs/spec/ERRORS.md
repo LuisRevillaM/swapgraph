@@ -76,6 +76,12 @@ Notes:
   - `partner_webhook_dead_letter_replay_invalid`
   - `partner_webhook_dead_letter_replay_invalid_timestamp`
   - `partner_webhook_not_dead_letter`
+  - `partner_risk_tier_policy_invalid`
+  - `partner_risk_tier_policy_invalid_timestamp`
+  - `partner_risk_tier_policy_query_invalid`
+  - `risk_tier_blocked_operation`
+  - `risk_tier_manual_review_required`
+  - `risk_tier_throttle_exceeded`
 - Rollout diagnostics automation execution-attestation verification may return deterministic mismatch errors such as:
   - `automation_execution_expected_effect_hash_mismatch`
   - `automation_execution_request_hash_chain_mismatch`

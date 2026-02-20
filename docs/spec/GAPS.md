@@ -167,7 +167,8 @@ Each item here must become at least one of:
 - Resolved (fixtures-first, partial): M79 (partner dashboard summary API contract: deterministic usage/billing/SLA summary read surface).
 - Resolved (fixtures-first, partial): M80 (partner OAuth app registration + credential lifecycle contracts: register/rotate/revoke/introspect with deterministic token reasoning).
 - Resolved (fixtures-first, partial): M81 (webhook reliability hardening: delivery-attempt ledger + retry-policy metadata + signed dead-letter export continuity + deterministic replay/backfill workflow).
-- Remaining: reliability hardening and conformance scope (M82+ risk tiers, disputes, adapter proofs, reliability matrix).
+- Resolved (fixtures-first, partial): M82 (risk tier policy engine contract: partner risk-tier policy objects + deterministic blocked/manual-review/throttle enforcement reason codes across mutating partner write paths).
+- Remaining: reliability hardening and conformance scope (M83+ disputes, adapter proofs, reliability matrix).
 
 ---
 

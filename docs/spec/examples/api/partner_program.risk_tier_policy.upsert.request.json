@@ -1,0 +1,10 @@
+{
+  "policy": {
+    "tier": "medium",
+    "escalation_mode": "throttle",
+    "max_write_ops_per_hour": 2,
+    "blocked_operations": [],
+    "manual_review_operations": []
+  },
+  "occurred_at": "2026-02-20T03:00:00Z"
+}
