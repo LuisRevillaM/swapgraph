@@ -109,6 +109,16 @@ Notes:
   - `adapter_tier2_transfer_primitive_unsupported`
   - `adapter_tier2_route_hops_exceeded`
   - `adapter_tier2_dry_run_required`
+  - `cross_adapter_semantics_invalid`
+  - `cross_adapter_semantics_invalid_timestamp`
+  - `cross_adapter_semantics_preflight_not_ready`
+  - `cross_adapter_receipt_invalid`
+  - `cross_adapter_receipt_invalid_timestamp`
+  - `cross_adapter_receipt_query_invalid`
+  - `cross_adapter_receipt_semantics_missing`
+  - `cross_adapter_receipt_disclosure_missing`
+  - `cross_adapter_receipt_settlement_receipt_not_found`
+  - `cross_adapter_receipt_settlement_signature_invalid`
   - `steam_live_proof_invalid`
   - `steam_live_proof_invalid_timestamp`
   - `steam_live_proof_integration_disabled`

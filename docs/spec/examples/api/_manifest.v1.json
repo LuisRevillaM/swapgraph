@@ -476,6 +476,26 @@
     {
       "file": "adapter.tier2.preflight.response.json",
       "schema": "Tier2AdapterPreflightResponse.schema.json"
+    },
+    {
+      "file": "adapter.cross_cycle.semantics.record.request.json",
+      "schema": "CrossAdapterCycleSemanticsRecordRequest.schema.json"
+    },
+    {
+      "file": "adapter.cross_cycle.semantics.record.response.json",
+      "schema": "CrossAdapterCycleSemanticsRecordResponse.schema.json"
+    },
+    {
+      "file": "adapter.cross_cycle.receipt.record.request.json",
+      "schema": "CrossAdapterCycleReceiptRecordRequest.schema.json"
+    },
+    {
+      "file": "adapter.cross_cycle.receipt.record.response.json",
+      "schema": "CrossAdapterCycleReceiptRecordResponse.schema.json"
+    },
+    {
+      "file": "adapter.cross_cycle.receipt.get.response.json",
+      "schema": "CrossAdapterCycleReceiptGetResponse.schema.json"
     }
   ]
 }

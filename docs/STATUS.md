@@ -100,9 +100,10 @@ Last updated: 2026-02-19
 - M87: ✅ Transparency log publication contract (fixtures-first) (idempotent append-only publication + signed paginated export with deterministic attestation/checkpoint continuation and tamper-fail signature/hash verification) (fixtures-first)
 - M88: ✅ Unified inclusion-proof linkage (fixtures-first) (idempotent linkage recording across signed receipts + custody inclusion proofs + transparency publication chain roots, plus signed paginated linkage export with deterministic attestation/checkpoint continuation and tamper-fail verification) (fixtures-first)
 - M89: ✅ Tier-2 adapter capability contract (cross-ecosystem preflight, fixtures-first) (idempotent Tier-2 capability upsert/read + deterministic cross-ecosystem preflight checks for ecosystem pairing, transfer primitives, route-hop ceilings, and dry-run policy with scope-enforced auth proofs) (fixtures-first)
+- M90: ✅ Cross-adapter cycle semantics and receipts (fixtures-first) (idempotent non-atomic semantics declarations with disclosure acceptance linked to Tier-2 preflight readiness, plus signed cross-adapter receipt recording/read projection with deterministic discrepancy and signature-valid telemetry) (fixtures-first)
 
 ## Next
-- M90: Cross-adapter cycle semantics and receipts
+- M91: Reliability/SLO conformance pack
 - Master remainder forecast: `docs/prd/2026-02-19_master-remaining-milestones_M71-M92.md`
 
 ## Notes

@@ -1,0 +1,42 @@
+name: M90
+commands:
+  - cmd: "npm run verify:m90"
+artifacts:
+  - artifact: "docs/prd/M90.md"
+  - artifact: "docs/STATUS.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/ERRORS.md"
+  - artifact: "docs/spec/GAPS.md"
+
+  - artifact: "src/store/jsonStateStore.mjs"
+  - artifact: "src/service/tier2AdapterCapabilityService.mjs"
+  - artifact: "src/service/crossAdapterCycleService.mjs"
+
+  - artifact: "docs/spec/api/manifest.v1.json"
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+  - artifact: "docs/spec/examples/api/adapter.cross_cycle.semantics.record.request.json"
+  - artifact: "docs/spec/examples/api/adapter.cross_cycle.semantics.record.response.json"
+  - artifact: "docs/spec/examples/api/adapter.cross_cycle.receipt.record.request.json"
+  - artifact: "docs/spec/examples/api/adapter.cross_cycle.receipt.record.response.json"
+  - artifact: "docs/spec/examples/api/adapter.cross_cycle.receipt.get.response.json"
+
+  - artifact: "docs/spec/schemas/CrossAdapterCycleSemanticsRecordRequest.schema.json"
+  - artifact: "docs/spec/schemas/CrossAdapterCycleSemanticsRecordResponse.schema.json"
+  - artifact: "docs/spec/schemas/CrossAdapterCycleReceiptRecordRequest.schema.json"
+  - artifact: "docs/spec/schemas/CrossAdapterCycleReceiptRecordResponse.schema.json"
+  - artifact: "docs/spec/schemas/CrossAdapterCycleReceiptGetResponse.schema.json"
+
+  - artifact: "scripts/run-m90-cross-adapter-cycle-semantics-receipts-scenario.mjs"
+  - artifact: "fixtures/adapters/m90_scenario.json"
+  - artifact: "fixtures/adapters/m90_expected.json"
+
+  - artifact: "milestones/M90.yaml"
+  - artifact: "verify/m90.sh"
+
+  - artifact: "artifacts/milestones/M90/latest/commands.log"
+  - artifact: "artifacts/milestones/M90/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M90/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M90/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M90/latest/cross_adapter_cycle_semantics_receipts_output.json"
+  - artifact: "artifacts/milestones/M90/latest/store.json"
+  - artifact: "artifacts/milestones/M90/latest/assertions.json"

@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/CrossAdapterCycleSemanticsRecordRequest.schema.json",
+  "title": "CrossAdapterCycleSemanticsRecordRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "semantics"
+  ],
+  "properties": {
+    "semantics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cycle_id",
+        "source_ecosystem",
+        "target_ecosystem",
+        "transfer_primitive",
+        "execution_model",
+        "non_atomicity_disclosure"
+      ],
+      "properties": {
+        "cycle_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_ecosystem": {
+          "type": "string",
+          "enum": [
+            "steam",
+            "polygon",
+            "solana",
+            "ethereum"
+          ]
+        },
+        "target_ecosystem": {
+          "type": "string",
+          "enum": [
+            "steam",
+            "polygon",
+            "solana",
+            "ethereum"
+          ]
+        },
+        "transfer_primitive": {
+          "type": "string",
+          "enum": [
+            "custody_proof_bridge",
+            "escrow_atomic_swap",
+            "delegated_delivery"
+          ]
+        },
+        "execution_model": {
+          "type": "string",
+          "enum": [
+            "non_atomic_best_effort"
+          ]
+        },
+        "preflight_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "non_atomicity_disclosure": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "disclosure_version",
+            "disclosed",
+            "accepted_by",
+            "acknowledgement",
+            "accepted_at"
+          ],
+          "properties": {
+            "disclosure_version": {
+              "type": "string",
+              "minLength": 1
+            },
+            "disclosed": {
+              "type": "boolean",
+              "const": true
+            },
+            "accepted_by": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "type",
+                "id"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "user",
+                    "partner"
+                  ]
+                },
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "acknowledgement": {
+              "type": "string",
+              "enum": [
+                "non_atomicity_understood",
+                "non_atomicity_accepted"
+              ]
+            },
+            "accepted_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "notes": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

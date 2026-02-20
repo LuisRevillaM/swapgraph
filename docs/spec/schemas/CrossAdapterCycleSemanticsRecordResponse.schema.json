@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/CrossAdapterCycleSemanticsRecordResponse.schema.json",
+  "title": "CrossAdapterCycleSemanticsRecordResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "semantics",
+    "replayed"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "semantics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "semantics_id",
+        "partner_id",
+        "cycle_id",
+        "version",
+        "preflight_id",
+        "contract_version",
+        "source_ecosystem",
+        "target_ecosystem",
+        "transfer_primitive",
+        "execution_model",
+        "non_atomicity_disclosure",
+        "integration_mode",
+        "updated_at"
+      ],
+      "properties": {
+        "semantics_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cycle_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "preflight_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_ecosystem": {
+          "type": "string",
+          "enum": [
+            "steam",
+            "polygon",
+            "solana",
+            "ethereum"
+          ]
+        },
+        "target_ecosystem": {
+          "type": "string",
+          "enum": [
+            "steam",
+            "polygon",
+            "solana",
+            "ethereum"
+          ]
+        },
+        "transfer_primitive": {
+          "type": "string",
+          "enum": [
+            "custody_proof_bridge",
+            "escrow_atomic_swap",
+            "delegated_delivery"
+          ]
+        },
+        "execution_model": {
+          "type": "string",
+          "enum": [
+            "non_atomic_best_effort"
+          ]
+        },
+        "non_atomicity_disclosure": {
+          "$ref": "CrossAdapterCycleSemanticsRecordRequest.schema.json#/properties/semantics/properties/non_atomicity_disclosure"
+        },
+        "integration_mode": {
+          "type": "string",
+          "enum": [
+            "fixture_only"
+          ]
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "replayed": {
+      "type": "boolean"
+    }
+  }
+}

@@ -171,6 +171,12 @@ Settlement endpoints:
   - read Tier-2 adapter capability contract + deterministic preflight summary telemetry
 - `POST /adapters/tier2/preflight`
   - idempotent cross-ecosystem preflight contract check (ecosystem pairing, transfer primitive, route-hop ceilings, dry-run policy)
+- `POST /adapters/cross/cycle-semantics`
+  - idempotent cross-adapter cycle semantics declaration with explicit non-atomicity disclosure acceptance linked to Tier-2 preflight readiness
+- `POST /adapters/cross/cycle-receipts`
+  - idempotent signed cross-adapter cycle receipt recording (leg-level settlement outcomes + discrepancy code + compensation-required flag)
+- `GET /adapters/cross/cycle-receipts`
+  - read cross-adapter semantics/receipt projection for a cycle with deterministic signature-valid telemetry
 - `POST /adapters/steam/tier1/live-proof/deposit-per-swap`
   - idempotent operator-gated live proof capture for Steam deposit-per-swap settlement evidence (`INTEGRATION_ENABLED=1` required)
 - `POST /adapters/steam/tier1/live-proof/vault`

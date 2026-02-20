@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/CrossAdapterCycleReceiptGetResponse.schema.json",
+  "title": "CrossAdapterCycleReceiptGetResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "partner_id",
+    "cycle_id",
+    "as_of",
+    "integration_mode",
+    "semantics",
+    "cross_receipt",
+    "signature_valid"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "partner_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cycle_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "as_of": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "integration_mode": {
+      "type": "string",
+      "enum": [
+        "fixture_only"
+      ]
+    },
+    "semantics": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "CrossAdapterCycleSemanticsRecordResponse.schema.json#/properties/semantics"
+        }
+      ]
+    },
+    "cross_receipt": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "CrossAdapterCycleReceiptRecordResponse.schema.json#/properties/cross_receipt"
+        }
+      ]
+    },
+    "signature_valid": {
+      "type": "boolean"
+    }
+  }
+}

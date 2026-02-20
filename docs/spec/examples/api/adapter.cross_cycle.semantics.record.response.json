@@ -1,0 +1,29 @@
+{
+  "correlation_id": "corr_adapter_cross_cycle_semantics_record",
+  "semantics": {
+    "semantics_id": "cross_semantics_cycle_cross_001",
+    "partner_id": "ops-admin",
+    "cycle_id": "cycle_cross_001",
+    "version": 1,
+    "preflight_id": "tier2_preflight_000001",
+    "contract_version": 1,
+    "source_ecosystem": "steam",
+    "target_ecosystem": "polygon",
+    "transfer_primitive": "custody_proof_bridge",
+    "execution_model": "non_atomic_best_effort",
+    "non_atomicity_disclosure": {
+      "disclosure_version": "m90.v1",
+      "disclosed": true,
+      "accepted_by": {
+        "type": "user",
+        "id": "user-001"
+      },
+      "acknowledgement": "non_atomicity_accepted",
+      "accepted_at": "2026-02-20T12:03:00.000Z",
+      "notes": "user acknowledged partial-settlement risk"
+    },
+    "integration_mode": "fixture_only",
+    "updated_at": "2026-02-20T12:04:00.000Z"
+  },
+  "replayed": false
+}

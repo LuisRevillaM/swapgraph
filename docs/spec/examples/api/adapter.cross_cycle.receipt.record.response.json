@@ -1,0 +1,40 @@
+{
+  "correlation_id": "corr_adapter_cross_cycle_receipt_record",
+  "cross_receipt": {
+    "cross_receipt_id": "cross_receipt_cycle_cross_001",
+    "partner_id": "ops-admin",
+    "cycle_id": "cycle_cross_001",
+    "settlement_receipt_id": "receipt_cross_001",
+    "settlement_receipt_signature_key_id": "dev-k1",
+    "settlement_final_state": "failed",
+    "semantics_version": 1,
+    "source_ecosystem": "steam",
+    "target_ecosystem": "polygon",
+    "transfer_primitive": "custody_proof_bridge",
+    "execution_model": "non_atomic_best_effort",
+    "non_atomicity_disclosure": {
+      "disclosure_version": "m90.v1",
+      "disclosed": true,
+      "accepted_by": {
+        "type": "user",
+        "id": "user-001"
+      },
+      "acknowledgement": "non_atomicity_accepted",
+      "accepted_at": "2026-02-20T12:03:00.000Z",
+      "notes": "user acknowledged partial-settlement risk"
+    },
+    "source_leg_status": "completed",
+    "target_leg_status": "failed",
+    "discrepancy_code": "target_leg_unsettled",
+    "compensation_required": true,
+    "integration_mode": "fixture_only",
+    "created_at": "2026-02-20T12:10:00.000Z",
+    "notes": "target bridge leg failed after source completion",
+    "signature": {
+      "key_id": "dev-k1",
+      "alg": "ed25519",
+      "sig": "Q3Jvc3NBZGFwdGVyUmVjZWlwdFNpZ25hdHVyZUV4YW1wbGVCYXNlNjQ="
+    }
+  },
+  "replayed": false
+}

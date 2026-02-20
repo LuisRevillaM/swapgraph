@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/CrossAdapterCycleReceiptRecordResponse.schema.json",
+  "title": "CrossAdapterCycleReceiptRecordResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "cross_receipt",
+    "replayed"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cross_receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cross_receipt_id",
+        "partner_id",
+        "cycle_id",
+        "settlement_receipt_id",
+        "settlement_receipt_signature_key_id",
+        "settlement_final_state",
+        "semantics_version",
+        "source_ecosystem",
+        "target_ecosystem",
+        "transfer_primitive",
+        "execution_model",
+        "non_atomicity_disclosure",
+        "source_leg_status",
+        "target_leg_status",
+        "discrepancy_code",
+        "compensation_required",
+        "integration_mode",
+        "created_at",
+        "signature"
+      ],
+      "properties": {
+        "cross_receipt_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cycle_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "settlement_receipt_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "settlement_receipt_signature_key_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "settlement_final_state": {
+          "type": "string",
+          "enum": [
+            "completed",
+            "failed"
+          ]
+        },
+        "semantics_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_ecosystem": {
+          "type": "string",
+          "enum": [
+            "steam",
+            "polygon",
+            "solana",
+            "ethereum"
+          ]
+        },
+        "target_ecosystem": {
+          "type": "string",
+          "enum": [
+            "steam",
+            "polygon",
+            "solana",
+            "ethereum"
+          ]
+        },
+        "transfer_primitive": {
+          "type": "string",
+          "enum": [
+            "custody_proof_bridge",
+            "escrow_atomic_swap",
+            "delegated_delivery"
+          ]
+        },
+        "execution_model": {
+          "type": "string",
+          "enum": [
+            "non_atomic_best_effort"
+          ]
+        },
+        "non_atomicity_disclosure": {
+          "$ref": "CrossAdapterCycleSemanticsRecordRequest.schema.json#/properties/semantics/properties/non_atomicity_disclosure"
+        },
+        "source_leg_status": {
+          "type": "string",
+          "enum": [
+            "completed",
+            "failed",
+            "pending_compensation"
+          ]
+        },
+        "target_leg_status": {
+          "type": "string",
+          "enum": [
+            "completed",
+            "failed",
+            "pending_compensation"
+          ]
+        },
+        "discrepancy_code": {
+          "type": "string",
+          "enum": [
+            "none",
+            "target_leg_unsettled",
+            "source_leg_unsettled",
+            "both_legs_unsettled"
+          ]
+        },
+        "compensation_required": {
+          "type": "boolean"
+        },
+        "integration_mode": {
+          "type": "string",
+          "enum": [
+            "fixture_only"
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        },
+        "signature": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "key_id",
+            "alg",
+            "sig"
+          ],
+          "properties": {
+            "key_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "alg": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sig": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "replayed": {
+      "type": "boolean"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "semantics": {
+    "cycle_id": "cycle_cross_001",
+    "source_ecosystem": "steam",
+    "target_ecosystem": "polygon",
+    "transfer_primitive": "custody_proof_bridge",
+    "execution_model": "non_atomic_best_effort",
+    "preflight_id": "tier2_preflight_000001",
+    "non_atomicity_disclosure": {
+      "disclosure_version": "m90.v1",
+      "disclosed": true,
+      "accepted_by": {
+        "type": "user",
+        "id": "user-001"
+      },
+      "acknowledgement": "non_atomicity_accepted",
+      "accepted_at": "2026-02-20T12:03:00Z",
+      "notes": "user acknowledged partial-settlement risk"
+    }
+  },
+  "occurred_at": "2026-02-20T12:04:00Z"
+}

@@ -51,6 +51,8 @@ export class JsonStateStore {
       inclusion_proof_linkage_counter: 0,
       tier2_adapter_capabilities: {},
       tier2_adapter_preflight_history: [],
+      cross_adapter_cycle_semantics: {},
+      cross_adapter_cycle_receipts: {},
       oauth_clients: {},
       oauth_tokens: {}
     };
@@ -100,6 +102,8 @@ export class JsonStateStore {
         inclusion_proof_linkage_counter: 0,
         tier2_adapter_capabilities: {},
         tier2_adapter_preflight_history: [],
+        cross_adapter_cycle_semantics: {},
+        cross_adapter_cycle_receipts: {},
         oauth_clients: {},
         oauth_tokens: {}
       };
@@ -150,6 +154,8 @@ export class JsonStateStore {
     this.state.inclusion_proof_linkage_counter ||= 0;
     this.state.tier2_adapter_capabilities ||= {};
     this.state.tier2_adapter_preflight_history ||= [];
+    this.state.cross_adapter_cycle_semantics ||= {};
+    this.state.cross_adapter_cycle_receipts ||= {};
     this.state.oauth_clients ||= {};
     this.state.oauth_tokens ||= {};
   }

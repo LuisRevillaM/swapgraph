@@ -1,0 +1,10 @@
+{
+  "receipt": {
+    "cycle_id": "cycle_cross_001",
+    "source_leg_status": "completed",
+    "target_leg_status": "failed",
+    "settlement_receipt_id": "receipt_cross_001",
+    "notes": "target bridge leg failed after source completion"
+  },
+  "occurred_at": "2026-02-20T12:10:00Z"
+}

@@ -1,0 +1,556 @@
+{
+  "actors": {
+    "admin_partner": {
+      "type": "partner",
+      "id": "ops-admin"
+    }
+  },
+  "seed_settlement_receipts": [
+    {
+      "cycle_id": "cycle_cross_001",
+      "receipt": {
+        "id": "receipt_cross_001",
+        "final_state": "failed",
+        "intent_ids": [
+          "intent_cross_001_a",
+          "intent_cross_001_b"
+        ],
+        "asset_ids": [
+          "asset_cross_001_a",
+          "asset_cross_001_b"
+        ],
+        "created_at": "2026-02-20T12:05:00Z",
+        "transparency": {
+          "reason_code": "partial_settlement"
+        }
+      }
+    },
+    {
+      "cycle_id": "cycle_cross_003",
+      "receipt": {
+        "id": "receipt_cross_003",
+        "final_state": "completed",
+        "intent_ids": [
+          "intent_cross_003_a",
+          "intent_cross_003_b"
+        ],
+        "asset_ids": [
+          "asset_cross_003_a",
+          "asset_cross_003_b"
+        ],
+        "created_at": "2026-02-20T12:15:00Z"
+      },
+      "tamper_signature": true
+    }
+  ],
+  "operations": [
+    {
+      "op": "adapter.tier2.capability.upsert",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m90_tier2_contract_v1",
+      "request": {
+        "capability": {
+          "adapter_version": "tier2-bridge.v1",
+          "source_ecosystem": "steam",
+          "target_ecosystem": "polygon",
+          "transfer_primitives": [
+            "custody_proof_bridge",
+            "delegated_delivery"
+          ],
+          "settlement_modes": [
+            "offchain_intent",
+            "escrow_bridge"
+          ],
+          "capability_flags": [
+            "proof_root_sync"
+          ],
+          "supported_regions": [
+            "EU",
+            "NA"
+          ],
+          "max_route_hops": 2,
+          "requires_trust_anchor": true,
+          "dry_run_only": true,
+          "notes": "m90 tier2 baseline"
+        },
+        "occurred_at": "2026-02-20T12:00:00Z"
+      },
+      "expect_ok": true,
+      "expect_version": 1,
+      "expect_replayed": false
+    },
+    {
+      "op": "adapter.tier2.preflight",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m90_preflight_1",
+      "request": {
+        "cycle_id": "cycle_cross_001",
+        "source_ecosystem": "steam",
+        "target_ecosystem": "polygon",
+        "transfer_primitive": "custody_proof_bridge",
+        "route_hops": 2,
+        "dry_run": true,
+        "requested_at": "2026-02-20T12:01:00Z"
+      },
+      "expect_ok": true,
+      "expect_preflight_id": "tier2_preflight_000001",
+      "expect_ready": true,
+      "expect_preflight_reason_code": null,
+      "expect_replayed": false
+    },
+    {
+      "op": "adapter.tier2.preflight",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m90_preflight_2",
+      "request": {
+        "cycle_id": "cycle_cross_002",
+        "source_ecosystem": "steam",
+        "target_ecosystem": "solana",
+        "transfer_primitive": "custody_proof_bridge",
+        "route_hops": 1,
+        "dry_run": true,
+        "requested_at": "2026-02-20T12:02:00Z"
+      },
+      "expect_ok": true,
+      "expect_preflight_id": "tier2_preflight_000002",
+      "expect_ready": false,
+      "expect_preflight_reason_code": "adapter_tier2_ecosystem_mismatch",
+      "expect_replayed": false
+    },
+    {
+      "op": "adapter.cross_cycle.semantics.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m90_semantics_1",
+      "request": {
+        "semantics": {
+          "cycle_id": "cycle_cross_001",
+          "source_ecosystem": "steam",
+          "target_ecosystem": "polygon",
+          "transfer_primitive": "custody_proof_bridge",
+          "execution_model": "non_atomic_best_effort",
+          "preflight_id": "tier2_preflight_000001",
+          "non_atomicity_disclosure": {
+            "disclosure_version": "m90.v1",
+            "disclosed": true,
+            "accepted_by": {
+              "type": "user",
+              "id": "user-001"
+            },
+            "acknowledgement": "non_atomicity_accepted",
+            "accepted_at": "2026-02-20T12:03:00Z",
+            "notes": "acknowledged partial completion risk"
+          }
+        },
+        "occurred_at": "2026-02-20T12:04:00Z"
+      },
+      "expect_ok": true,
+      "expect_semantics_version": 1,
+      "expect_preflight_id": "tier2_preflight_000001",
+      "expect_execution_model": "non_atomic_best_effort",
+      "expect_replayed": false
+    },
+    {
+      "op": "adapter.cross_cycle.semantics.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m90_semantics_1",
+      "request": {
+        "semantics": {
+          "cycle_id": "cycle_cross_001",
+          "source_ecosystem": "steam",
+          "target_ecosystem": "polygon",
+          "transfer_primitive": "custody_proof_bridge",
+          "execution_model": "non_atomic_best_effort",
+          "preflight_id": "tier2_preflight_000001",
+          "non_atomicity_disclosure": {
+            "disclosure_version": "m90.v1",
+            "disclosed": true,
+            "accepted_by": {
+              "type": "user",
+              "id": "user-001"
+            },
+            "acknowledgement": "non_atomicity_accepted",
+            "accepted_at": "2026-02-20T12:03:00Z",
+            "notes": "acknowledged partial completion risk"
+          }
+        },
+        "occurred_at": "2026-02-20T12:04:00Z"
+      },
+      "expect_ok": true,
+      "expect_semantics_version": 1,
+      "expect_replayed": true
+    },
+    {
+      "op": "adapter.cross_cycle.semantics.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m90_semantics_1",
+      "request": {
+        "semantics": {
+          "cycle_id": "cycle_cross_001",
+          "source_ecosystem": "steam",
+          "target_ecosystem": "polygon",
+          "transfer_primitive": "custody_proof_bridge",
+          "execution_model": "non_atomic_best_effort",
+          "preflight_id": "tier2_preflight_000001",
+          "non_atomicity_disclosure": {
+            "disclosure_version": "m90.v1",
+            "disclosed": true,
+            "accepted_by": {
+              "type": "user",
+              "id": "user-001"
+            },
+            "acknowledgement": "non_atomicity_understood",
+            "accepted_at": "2026-02-20T12:03:00Z",
+            "notes": "acknowledged partial completion risk"
+          }
+        },
+        "occurred_at": "2026-02-20T12:04:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    },
+    {
+      "op": "adapter.cross_cycle.semantics.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m90_semantics_blocked",
+      "request": {
+        "semantics": {
+          "cycle_id": "cycle_cross_002",
+          "source_ecosystem": "steam",
+          "target_ecosystem": "solana",
+          "transfer_primitive": "custody_proof_bridge",
+          "execution_model": "non_atomic_best_effort",
+          "non_atomicity_disclosure": {
+            "disclosure_version": "m90.v1",
+            "disclosed": true,
+            "accepted_by": {
+              "type": "user",
+              "id": "user-002"
+            },
+            "acknowledgement": "non_atomicity_accepted",
+            "accepted_at": "2026-02-20T12:06:00Z"
+          }
+        },
+        "occurred_at": "2026-02-20T12:06:30Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "cross_adapter_semantics_preflight_not_ready"
+    },
+    {
+      "op": "adapter.cross_cycle.receipt.get",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "cycle_id": "cycle_cross_001",
+        "now_iso": "2026-02-20T12:07:00Z"
+      },
+      "expect_ok": true,
+      "expect_has_semantics": true,
+      "expect_has_cross_receipt": false,
+      "expect_semantics_version": 1,
+      "expect_discrepancy_code": null,
+      "expect_signature_valid": false
+    },
+    {
+      "op": "adapter.cross_cycle.receipt.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m90_cross_receipt_1",
+      "request": {
+        "receipt": {
+          "cycle_id": "cycle_cross_001",
+          "source_leg_status": "completed",
+          "target_leg_status": "failed",
+          "settlement_receipt_id": "receipt_cross_001",
+          "notes": "target leg failed after source settlement"
+        },
+        "occurred_at": "2026-02-20T12:10:00Z"
+      },
+      "expect_ok": true,
+      "expect_cross_receipt_id": "cross_receipt_cycle_cross_001",
+      "expect_semantics_version": 1,
+      "expect_settlement_receipt_id": "receipt_cross_001",
+      "expect_discrepancy_code": "target_leg_unsettled",
+      "expect_compensation_required": true,
+      "expect_signature_key_id": "dev-k1",
+      "expect_replayed": false
+    },
+    {
+      "op": "adapter.cross_cycle.receipt.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m90_cross_receipt_1",
+      "request": {
+        "receipt": {
+          "cycle_id": "cycle_cross_001",
+          "source_leg_status": "completed",
+          "target_leg_status": "failed",
+          "settlement_receipt_id": "receipt_cross_001",
+          "notes": "target leg failed after source settlement"
+        },
+        "occurred_at": "2026-02-20T12:10:00Z"
+      },
+      "expect_ok": true,
+      "expect_cross_receipt_id": "cross_receipt_cycle_cross_001",
+      "expect_replayed": true
+    },
+    {
+      "op": "adapter.cross_cycle.receipt.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m90_cross_receipt_1",
+      "request": {
+        "receipt": {
+          "cycle_id": "cycle_cross_001",
+          "source_leg_status": "completed",
+          "target_leg_status": "completed",
+          "settlement_receipt_id": "receipt_cross_001",
+          "notes": "target leg failed after source settlement"
+        },
+        "occurred_at": "2026-02-20T12:10:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    },
+    {
+      "op": "adapter.cross_cycle.receipt.get",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "cycle_id": "cycle_cross_001",
+        "now_iso": "2026-02-20T12:11:00Z"
+      },
+      "expect_ok": true,
+      "expect_has_semantics": true,
+      "expect_has_cross_receipt": true,
+      "expect_semantics_version": 1,
+      "expect_discrepancy_code": "target_leg_unsettled",
+      "expect_signature_valid": true
+    },
+    {
+      "op": "adapter.cross_cycle.receipt.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m90_cross_receipt_missing_semantics",
+      "request": {
+        "receipt": {
+          "cycle_id": "cycle_cross_404",
+          "source_leg_status": "failed",
+          "target_leg_status": "failed"
+        },
+        "occurred_at": "2026-02-20T12:12:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "cross_adapter_receipt_semantics_missing"
+    },
+    {
+      "op": "adapter.tier2.preflight",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m90_preflight_3",
+      "request": {
+        "cycle_id": "cycle_cross_003",
+        "source_ecosystem": "steam",
+        "target_ecosystem": "polygon",
+        "transfer_primitive": "custody_proof_bridge",
+        "route_hops": 1,
+        "dry_run": true,
+        "requested_at": "2026-02-20T12:13:00Z"
+      },
+      "expect_ok": true,
+      "expect_preflight_id": "tier2_preflight_000003",
+      "expect_ready": true,
+      "expect_preflight_reason_code": null,
+      "expect_replayed": false
+    },
+    {
+      "op": "adapter.cross_cycle.semantics.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m90_semantics_3",
+      "request": {
+        "semantics": {
+          "cycle_id": "cycle_cross_003",
+          "source_ecosystem": "steam",
+          "target_ecosystem": "polygon",
+          "transfer_primitive": "custody_proof_bridge",
+          "execution_model": "non_atomic_best_effort",
+          "preflight_id": "tier2_preflight_000003",
+          "non_atomicity_disclosure": {
+            "disclosure_version": "m90.v1",
+            "disclosed": true,
+            "accepted_by": {
+              "type": "user",
+              "id": "user-003"
+            },
+            "acknowledgement": "non_atomicity_accepted",
+            "accepted_at": "2026-02-20T12:14:00Z"
+          }
+        },
+        "occurred_at": "2026-02-20T12:14:30Z"
+      },
+      "expect_ok": true,
+      "expect_semantics_version": 1,
+      "expect_preflight_id": "tier2_preflight_000003",
+      "expect_replayed": false
+    },
+    {
+      "op": "adapter.cross_cycle.receipt.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m90_cross_receipt_bad_signature",
+      "request": {
+        "receipt": {
+          "cycle_id": "cycle_cross_003",
+          "source_leg_status": "completed",
+          "target_leg_status": "completed",
+          "settlement_receipt_id": "receipt_cross_003"
+        },
+        "occurred_at": "2026-02-20T12:16:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "cross_adapter_receipt_settlement_signature_invalid"
+    },
+    {
+      "op": "adapter.cross_cycle.receipt.get",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "query": {
+        "cycle_id": "cycle_cross_001",
+        "now_iso": "2026-02-20T12:17:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    },
+    {
+      "op": "adapter.cross_cycle.semantics.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "idempotency_key": "m90_scope_fail_semantics",
+      "request": {
+        "semantics": {
+          "cycle_id": "cycle_cross_777",
+          "source_ecosystem": "steam",
+          "target_ecosystem": "polygon",
+          "transfer_primitive": "custody_proof_bridge",
+          "execution_model": "non_atomic_best_effort",
+          "non_atomicity_disclosure": {
+            "disclosure_version": "m90.v1",
+            "disclosed": true,
+            "accepted_by": {
+              "type": "user",
+              "id": "user-777"
+            },
+            "acknowledgement": "non_atomicity_accepted",
+            "accepted_at": "2026-02-20T12:18:00Z"
+          }
+        },
+        "occurred_at": "2026-02-20T12:18:01Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    },
+    {
+      "op": "adapter.cross_cycle.receipt.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "idempotency_key": "m90_scope_fail_receipt",
+      "request": {
+        "receipt": {
+          "cycle_id": "cycle_cross_001",
+          "source_leg_status": "completed",
+          "target_leg_status": "completed",
+          "settlement_receipt_id": "receipt_cross_001"
+        },
+        "occurred_at": "2026-02-20T12:19:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    }
+  ]
+}

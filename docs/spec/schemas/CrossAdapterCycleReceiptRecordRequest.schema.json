@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/CrossAdapterCycleReceiptRecordRequest.schema.json",
+  "title": "CrossAdapterCycleReceiptRecordRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "receipt"
+  ],
+  "properties": {
+    "receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cycle_id",
+        "source_leg_status",
+        "target_leg_status"
+      ],
+      "properties": {
+        "cycle_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_leg_status": {
+          "type": "string",
+          "enum": [
+            "completed",
+            "failed",
+            "pending_compensation"
+          ]
+        },
+        "target_leg_status": {
+          "type": "string",
+          "enum": [
+            "completed",
+            "failed",
+            "pending_compensation"
+          ]
+        },
+        "settlement_receipt_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

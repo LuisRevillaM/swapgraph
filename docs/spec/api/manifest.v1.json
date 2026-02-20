@@ -1298,6 +1298,56 @@
           "settlement:write"
         ]
       }
+    },
+    {
+      "method": "POST",
+      "path": "/adapters/cross/cycle-semantics",
+      "operation_id": "adapter.cross_cycle.semantics.record",
+      "idempotency_required": true,
+      "request_schema": "CrossAdapterCycleSemanticsRecordRequest.schema.json",
+      "response_schema": "CrossAdapterCycleSemanticsRecordResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/adapters/cross/cycle-receipts",
+      "operation_id": "adapter.cross_cycle.receipt.record",
+      "idempotency_required": true,
+      "request_schema": "CrossAdapterCycleReceiptRecordRequest.schema.json",
+      "response_schema": "CrossAdapterCycleReceiptRecordResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/adapters/cross/cycle-receipts",
+      "operation_id": "adapter.cross_cycle.receipt.get",
+      "idempotency_required": false,
+      "response_schema": "CrossAdapterCycleReceiptGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
     }
   ],
   "webhooks": {
