@@ -1,0 +1,39 @@
+{
+  "milestones": [
+    71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92
+  ],
+  "required_files": [
+    "docs/spec/CONFORMANCE.md",
+    "docs/spec/GAPS.md",
+    "docs/STATUS.md",
+    "BLOCKERS.md",
+    "docs/prd/2026-02-19_master-remaining-milestones_M71-M92.md"
+  ],
+  "required_conformance_tokens": [
+    "M92_RELEASE_READY: true",
+    "G1",
+    "G2",
+    "G3",
+    "G4",
+    "G5",
+    "G6",
+    "G7",
+    "G8",
+    "G9",
+    "M91",
+    "M92"
+  ],
+  "required_status_tokens": [
+    "M85: ✅",
+    "M86: ✅",
+    "M91: ✅",
+    "M92: ✅"
+  ],
+  "required_gaps_tokens": [
+    "Resolved (fixtures-first, partial): M91",
+    "Remaining: none (M92 release-readiness gate passed)."
+  ],
+  "required_blockers_tokens": [
+    "None yet."
+  ]
+}

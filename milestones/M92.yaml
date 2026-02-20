@@ -1,0 +1,23 @@
+name: M92
+commands:
+  - cmd: "npm run verify:m92"
+artifacts:
+  - artifact: "docs/prd/M92.md"
+  - artifact: "docs/STATUS.md"
+  - artifact: "docs/spec/GAPS.md"
+  - artifact: "docs/spec/CONFORMANCE.md"
+  - artifact: "BLOCKERS.md"
+
+  - artifact: "scripts/run-m92-release-readiness-scenario.mjs"
+  - artifact: "fixtures/release/m92_scenario.json"
+  - artifact: "fixtures/release/m92_expected.json"
+
+  - artifact: "milestones/M92.yaml"
+  - artifact: "verify/m92.sh"
+
+  - artifact: "artifacts/milestones/M92/latest/commands.log"
+  - artifact: "artifacts/milestones/M92/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M92/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M92/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M92/latest/release_readiness_conformance_output.json"
+  - artifact: "artifacts/milestones/M92/latest/assertions.json"

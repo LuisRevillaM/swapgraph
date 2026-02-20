@@ -102,9 +102,10 @@ Last updated: 2026-02-19
 - M89: ✅ Tier-2 adapter capability contract (cross-ecosystem preflight, fixtures-first) (idempotent Tier-2 capability upsert/read + deterministic cross-ecosystem preflight checks for ecosystem pairing, transfer primitives, route-hop ceilings, and dry-run policy with scope-enforced auth proofs) (fixtures-first)
 - M90: ✅ Cross-adapter cycle semantics and receipts (fixtures-first) (idempotent non-atomic semantics declarations with disclosure acceptance linked to Tier-2 preflight readiness, plus signed cross-adapter receipt recording/read projection with deterministic discrepancy and signature-valid telemetry) (fixtures-first)
 - M91: ✅ Reliability/SLO conformance pack (fixtures-first) (idempotent SLO metric recording + incident-drill evidence recording + replay-recovery parity checks, with signed conformance export and deterministic signature/tamper verification) (fixtures-first)
+- M92: ✅ Full-plan conformance and release-readiness gate (fixtures-first) (deterministic conformance matrix + milestone artifact coverage checks + release-readiness assertions with zero unresolved blocker verification) (fixtures-first)
 
 ## Next
-- M92: Full-plan conformance and release-readiness gate
+- Ongoing hardening and any post-release follow-up deltas
 - Master remainder forecast: `docs/prd/2026-02-19_master-remaining-milestones_M71-M92.md`
 
 ## Notes
