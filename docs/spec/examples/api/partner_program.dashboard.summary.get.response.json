@@ -1,0 +1,36 @@
+{
+  "correlation_id": "corr_partnerprogram_dashboard_summary_get",
+  "partner_id": "ops-admin",
+  "as_of": "2026-02-20T00:30:00Z",
+  "usage_last_24h": {
+    "entries_count": 1,
+    "total_units": 2,
+    "total_amount_usd_micros": 1000000,
+    "feature_breakdown": [
+      {
+        "feature_code": "vault_reconciliation_export",
+        "unit_type": "export_count",
+        "units": 2,
+        "amount_usd_micros": 1000000
+      }
+    ]
+  },
+  "billing_today": {
+    "gross_amount_usd_micros": 1000000,
+    "partner_share_usd_micros": 700000,
+    "platform_share_usd_micros": 300000
+  },
+  "sla": {
+    "policy": {
+      "partner_id": "ops-admin",
+      "version": 1,
+      "updated_at": "2026-02-20T00:15:00.000Z",
+      "latency_p95_ms": 1500,
+      "availability_target_bps": 9950,
+      "dispute_response_minutes": 240,
+      "breach_threshold_minutes": 60
+    },
+    "open_breaches": 1,
+    "high_severity_open_breaches": 1
+  }
+}

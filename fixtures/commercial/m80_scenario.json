@@ -1,0 +1,156 @@
+{
+  "actors": {
+    "admin_partner": {
+      "type": "partner",
+      "id": "ops-admin"
+    }
+  },
+  "operations": [
+    {
+      "op": "auth.oauth_client.register",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ],
+        "now_iso": "2026-02-20T00:35:00Z"
+      },
+      "idempotency_key": "m80_register_1",
+      "request": {
+        "client_name": "Ops Dashboard",
+        "redirect_uris": [
+          "https://ops.example.com/callback"
+        ],
+        "scopes": [
+          "settlement:read",
+          "settlement:write"
+        ]
+      },
+      "save_client_ref": "client_1",
+      "save_token_ref": "token_v1",
+      "expect_ok": true,
+      "expect_secret_version": 1,
+      "expect_client_status": "active",
+      "expect_replayed": false
+    },
+    {
+      "op": "auth.oauth_client.register",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ],
+        "now_iso": "2026-02-20T00:35:00Z"
+      },
+      "idempotency_key": "m80_register_1",
+      "request": {
+        "client_name": "Ops Dashboard",
+        "redirect_uris": [
+          "https://ops.example.com/callback"
+        ],
+        "scopes": [
+          "settlement:read",
+          "settlement:write"
+        ]
+      },
+      "expect_ok": true,
+      "expect_secret_version": 1,
+      "expect_client_status": "active",
+      "expect_replayed": true
+    },
+    {
+      "op": "auth.oauth_client.rotate",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ],
+        "now_iso": "2026-02-20T00:40:00Z"
+      },
+      "idempotency_key": "m80_rotate_1",
+      "client_id_ref": "client_1",
+      "request": {},
+      "save_token_ref": "token_v2",
+      "expect_ok": true,
+      "expect_secret_version": 2,
+      "expect_client_status": "active",
+      "expect_replayed": false
+    },
+    {
+      "op": "auth.oauth_token.introspect",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ],
+        "now_iso": "2026-02-20T00:41:00Z"
+      },
+      "token_ref": "token_v2",
+      "expect_ok": true,
+      "expect_active": true,
+      "expect_reason_code": null
+    },
+    {
+      "op": "auth.oauth_client.revoke",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ],
+        "now_iso": "2026-02-20T00:45:00Z"
+      },
+      "idempotency_key": "m80_revoke_1",
+      "client_id_ref": "client_1",
+      "request": {},
+      "expect_ok": true,
+      "expect_client_status": "revoked",
+      "expect_replayed": false
+    },
+    {
+      "op": "auth.oauth_token.introspect",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ],
+        "now_iso": "2026-02-20T00:46:00Z"
+      },
+      "token_ref": "token_v2",
+      "expect_ok": true,
+      "expect_active": false,
+      "expect_reason_code": "client_revoked"
+    },
+    {
+      "op": "auth.oauth_client.rotate",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ],
+        "now_iso": "2026-02-20T00:47:00Z"
+      },
+      "idempotency_key": "m80_rotate_2",
+      "client_id_ref": "client_1",
+      "request": {},
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "oauth_client_not_active"
+    },
+    {
+      "op": "auth.oauth_token.introspect",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ],
+        "now_iso": "2026-02-20T00:48:00Z"
+      },
+      "request": {
+        "token": "unknown_token"
+      },
+      "expect_ok": true,
+      "expect_active": false,
+      "expect_reason_code": "token_unknown"
+    }
+  ]
+}

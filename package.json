@@ -80,6 +80,11 @@
     "verify:m73": "bash verify/m73.sh",
     "verify:m74": "bash verify/m74.sh",
     "verify:m75": "bash verify/m75.sh",
+    "verify:m76": "bash verify/m76.sh",
+    "verify:m77": "bash verify/m77.sh",
+    "verify:m78": "bash verify/m78.sh",
+    "verify:m79": "bash verify/m79.sh",
+    "verify:m80": "bash verify/m80.sh",
     "test": "node --test"
   },
   "devDependencies": {

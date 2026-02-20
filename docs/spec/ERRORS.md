@@ -56,6 +56,17 @@ Notes:
   - `partner_rollout_diagnostics_threshold_invalid`
   - `partner_rollout_diagnostics_automation_invalid`
   - `partner_rollout_diagnostics_automation_requires_runbook_hooks`
+- Commercial governance / SLA / OAuth reason codes include:
+  - `partner_commercial_usage_invalid`
+  - `partner_commercial_usage_export_query_invalid`
+  - `partner_billing_statement_export_query_invalid`
+  - `partner_sla_policy_invalid`
+  - `partner_sla_breach_invalid`
+  - `partner_sla_breach_export_query_invalid`
+  - `oauth_client_registration_invalid`
+  - `oauth_client_id_required`
+  - `oauth_client_not_active`
+  - `oauth_token_required`
 - Rollout diagnostics automation execution-attestation verification may return deterministic mismatch errors such as:
   - `automation_execution_expected_effect_hash_mismatch`
   - `automation_execution_request_hash_chain_mismatch`

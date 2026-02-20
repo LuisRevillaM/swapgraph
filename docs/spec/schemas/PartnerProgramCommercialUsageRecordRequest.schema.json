@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/PartnerProgramCommercialUsageRecordRequest.schema.json",
+  "title": "PartnerProgramCommercialUsageRecordRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "feature_code",
+    "unit_type",
+    "units",
+    "unit_price_usd_micros",
+    "occurred_at"
+  ],
+  "properties": {
+    "feature_code": {
+      "type": "string",
+      "minLength": 1
+    },
+    "unit_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "units": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "unit_price_usd_micros": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "metadata": {
+      "type": "object"
+    }
+  }
+}

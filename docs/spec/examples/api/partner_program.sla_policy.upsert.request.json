@@ -1,0 +1,9 @@
+{
+  "occurred_at": "2026-02-20T00:15:00Z",
+  "policy": {
+    "latency_p95_ms": 1500,
+    "availability_target_bps": 9950,
+    "dispute_response_minutes": 240,
+    "breach_threshold_minutes": 60
+  }
+}

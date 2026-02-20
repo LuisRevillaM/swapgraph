@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/PartnerProgramSlaPolicyUpsertRequest.schema.json",
+  "title": "PartnerProgramSlaPolicyUpsertRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "occurred_at",
+    "policy"
+  ],
+  "properties": {
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "latency_p95_ms",
+        "availability_target_bps",
+        "dispute_response_minutes",
+        "breach_threshold_minutes"
+      ],
+      "properties": {
+        "latency_p95_ms": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "availability_target_bps": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000
+        },
+        "dispute_response_minutes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "breach_threshold_minutes": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  }
+}

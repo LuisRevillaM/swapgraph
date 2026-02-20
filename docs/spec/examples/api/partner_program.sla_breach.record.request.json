@@ -1,0 +1,10 @@
+{
+  "event_type": "latency",
+  "severity": "high",
+  "reason_code": "latency_p95_exceeded",
+  "occurred_at": "2026-02-20T00:20:00Z",
+  "resolved": false,
+  "metadata": {
+    "window": "5m"
+  }
+}

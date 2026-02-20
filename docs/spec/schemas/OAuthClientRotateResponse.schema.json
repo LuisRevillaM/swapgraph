@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/OAuthClientRotateResponse.schema.json",
+  "title": "OAuthClientRotateResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "client",
+    "issued_test_token",
+    "replayed"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "client": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "client_id",
+        "owner_partner_id",
+        "client_name",
+        "redirect_uris",
+        "scopes",
+        "secret_version",
+        "secret_key_id",
+        "status",
+        "created_at",
+        "updated_at",
+        "revoked_at"
+      ],
+      "properties": {
+        "client_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "owner_partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "client_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "redirect_uris": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "scopes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "secret_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "secret_key_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "revoked"
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "revoked_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        }
+      }
+    },
+    "replayed": {
+      "type": "boolean"
+    },
+    "issued_test_token": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "correlation_id": "corr_partnerprogram_sla_breach_record",
+  "event": {
+    "event_id": "sla_breach_000001",
+    "partner_id": "ops-admin",
+    "event_type": "latency",
+    "severity": "high",
+    "reason_code": "latency_p95_exceeded",
+    "occurred_at": "2026-02-20T00:20:00.000Z",
+    "resolved": false,
+    "resolved_at": null,
+    "metadata": {
+      "window": "5m"
+    }
+  },
+  "replayed": false
+}

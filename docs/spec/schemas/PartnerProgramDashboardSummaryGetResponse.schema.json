@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/PartnerProgramDashboardSummaryGetResponse.schema.json",
+  "title": "PartnerProgramDashboardSummaryGetResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "partner_id",
+    "as_of",
+    "usage_last_24h",
+    "billing_today",
+    "sla"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "partner_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "as_of": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "usage_last_24h": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "entries_count",
+        "total_units",
+        "total_amount_usd_micros",
+        "feature_breakdown"
+      ],
+      "properties": {
+        "entries_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_units": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_amount_usd_micros": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "feature_breakdown": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "billing_today": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "gross_amount_usd_micros",
+        "partner_share_usd_micros",
+        "platform_share_usd_micros"
+      ],
+      "properties": {
+        "gross_amount_usd_micros": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "partner_share_usd_micros": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "platform_share_usd_micros": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "sla": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy",
+        "open_breaches",
+        "high_severity_open_breaches"
+      ],
+      "properties": {
+        "policy": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "open_breaches": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "high_severity_open_breaches": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

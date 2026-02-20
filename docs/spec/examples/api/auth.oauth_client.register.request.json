@@ -1,0 +1,10 @@
+{
+  "client_name": "Ops Dashboard",
+  "redirect_uris": [
+    "https://ops.example.com/callback"
+  ],
+  "scopes": [
+    "settlement:read",
+    "settlement:write"
+  ]
+}

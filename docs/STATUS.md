@@ -86,9 +86,14 @@ Last updated: 2026-02-19
 - M73: ✅ commercial governance diagnostics automation execution-journal export hardening (signed deterministic `journal_entry_hashes` + `journal_hash` execution attestation anchors with tamper-fail verification) (fixtures-first)
 - M74: ✅ commercial governance diagnostics automation rollback-plan synthesis hardening (signed deterministic `rollback_target_policy_version` + `rollback_hash` execution attestation anchors with tamper-fail verification) (fixtures-first)
 - M75: ✅ commercial governance diagnostics automation simulation hardening (signed deterministic `simulation_projected_policy_version_after` + `simulation_risk_level` + `simulation_hash` execution attestation anchors with tamper-fail verification) (fixtures-first)
+- M76: ✅ commercial governance usage ledger normalization (partner usage ledger write/export contracts with deterministic aggregation + signed export verification) (fixtures-first)
+- M77: ✅ commercial governance rev-share/billing statement export hardening (deterministic statement line synthesis + signed statement export verification) (fixtures-first)
+- M78: ✅ commercial governance SLA policy and breach-event contract hardening (policy upsert + breach recording + signed breach export verification) (fixtures-first)
+- M79: ✅ partner dashboard summary API contract hardening (deterministic usage/billing/SLA summary read surface) (fixtures-first)
+- M80: ✅ partner OAuth app registration + credential lifecycle contract hardening (register/rotate/revoke/introspect with deterministic token reasoning) (fixtures-first)
 
 ## Next
-- M76: commercial usage ledger normalization (fixtures-first)
+- M81: webhook reliability and dead-letter replay hardening (fixtures-first)
 - Master remainder forecast: `docs/prd/2026-02-19_master-remaining-milestones_M71-M92.md`
 
 ## Notes

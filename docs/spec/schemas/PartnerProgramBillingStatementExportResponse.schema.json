@@ -1,0 +1,187 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/PartnerProgramBillingStatementExportResponse.schema.json",
+  "title": "PartnerProgramBillingStatementExportResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "exported_at",
+    "query",
+    "statement",
+    "export_hash",
+    "signature"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "exported_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "query": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "period_start_iso",
+        "period_end_iso",
+        "rev_share_partner_bps",
+        "exported_at_iso"
+      ],
+      "properties": {
+        "period_start_iso": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "period_end_iso": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "rev_share_partner_bps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "now_iso": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "exported_at_iso": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "statement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "statement_id",
+        "partner_id",
+        "period_start",
+        "period_end",
+        "rev_share_partner_bps",
+        "lines",
+        "totals"
+      ],
+      "properties": {
+        "statement_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "period_start": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "period_end": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "rev_share_partner_bps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "line_id",
+              "feature_code",
+              "unit_type",
+              "unit_price_usd_micros",
+              "units",
+              "amount_usd_micros"
+            ],
+            "properties": {
+              "line_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "feature_code": {
+                "type": "string",
+                "minLength": 1
+              },
+              "unit_type": {
+                "type": "string",
+                "minLength": 1
+              },
+              "unit_price_usd_micros": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "units": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "amount_usd_micros": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "totals": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "gross_amount_usd_micros",
+            "partner_share_usd_micros",
+            "platform_share_usd_micros"
+          ],
+          "properties": {
+            "gross_amount_usd_micros": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "partner_share_usd_micros": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "platform_share_usd_micros": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    },
+    "export_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key_id",
+        "alg",
+        "sig"
+      ],
+      "properties": {
+        "key_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "alg": {
+          "type": "string",
+          "enum": [
+            "ed25519"
+          ]
+        },
+        "sig": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

@@ -161,7 +161,12 @@ Each item here must become at least one of:
 - Resolved (fixtures-first, partial): M73 (rollout diagnostics automation execution-journal hardening: deterministic `journal_entry_hashes` + `journal_hash` execution attestation anchors with signed tamper-fail verification).
 - Resolved (fixtures-first, partial): M74 (rollout diagnostics automation rollback-plan synthesis hardening: deterministic `rollback_target_policy_version` + `rollback_hash` execution attestation anchors with signed tamper-fail verification).
 - Resolved (fixtures-first, partial): M75 (rollout diagnostics automation simulation hardening: deterministic `simulation_projected_policy_version_after` + `simulation_risk_level` + `simulation_hash` execution attestation anchors with signed tamper-fail verification).
-- Remaining: broader commercial governance controls beyond diagnostics/audit/automation execution-attestation anchors (M76+ commercial ledger/rev-share/SLA scope).
+- Resolved (fixtures-first, partial): M76 (commercial usage ledger normalization: partner usage ledger write/export contracts with deterministic aggregation and signed export verification).
+- Resolved (fixtures-first, partial): M77 (rev-share and billing statement exports: deterministic statement line synthesis and signed statement export verification).
+- Resolved (fixtures-first, partial): M78 (SLA policy and breach-event contracts: partner SLA policy upsert, breach recording, and signed breach export verification).
+- Resolved (fixtures-first, partial): M79 (partner dashboard summary API contract: deterministic usage/billing/SLA summary read surface).
+- Resolved (fixtures-first, partial): M80 (partner OAuth app registration + credential lifecycle contracts: register/rotate/revoke/introspect with deterministic token reasoning).
+- Remaining: reliability hardening and conformance scope (M81+ dead-letter/replay, risk tiers, disputes, adapter proofs, reliability matrix).
 
 ---
 

@@ -2560,3 +2560,435 @@ export function verifySettlementVaultReconciliationExportPayloadWithPublicKeyPem
     alg
   });
 }
+
+function normalizePartnerProgramCommercialUsageExportQuery(query) {
+  const out = {};
+
+  if (typeof query?.from_iso === 'string' && query.from_iso.trim()) out.from_iso = query.from_iso.trim();
+  if (typeof query?.to_iso === 'string' && query.to_iso.trim()) out.to_iso = query.to_iso.trim();
+  if (typeof query?.feature_code === 'string' && query.feature_code.trim()) out.feature_code = query.feature_code.trim();
+  if (typeof query?.unit_type === 'string' && query.unit_type.trim()) out.unit_type = query.unit_type.trim();
+  if (typeof query?.now_iso === 'string' && query.now_iso.trim()) out.now_iso = query.now_iso.trim();
+  if (typeof query?.exported_at_iso === 'string' && query.exported_at_iso.trim()) out.exported_at_iso = query.exported_at_iso.trim();
+
+  return out;
+}
+
+function normalizePartnerProgramCommercialUsageLedgerSummary(summary) {
+  const breakdown = Array.isArray(summary?.feature_breakdown)
+    ? summary.feature_breakdown
+      .map(item => ({
+        feature_code: typeof item?.feature_code === 'string' ? item.feature_code : null,
+        unit_type: typeof item?.unit_type === 'string' ? item.unit_type : null,
+        units: Number.isFinite(item?.units) ? Number(item.units) : 0,
+        amount_usd_micros: Number.isFinite(item?.amount_usd_micros) ? Number(item.amount_usd_micros) : 0
+      }))
+      .sort((a, b) => `${a.feature_code}|${a.unit_type}`.localeCompare(`${b.feature_code}|${b.unit_type}`))
+    : [];
+
+  return {
+    partner_id: typeof summary?.partner_id === 'string' && summary.partner_id.trim() ? summary.partner_id.trim() : null,
+    entries_count: Number.isFinite(summary?.entries_count) ? Number(summary.entries_count) : 0,
+    total_units: Number.isFinite(summary?.total_units) ? Number(summary.total_units) : 0,
+    total_amount_usd_micros: Number.isFinite(summary?.total_amount_usd_micros) ? Number(summary.total_amount_usd_micros) : 0,
+    feature_breakdown: breakdown
+  };
+}
+
+function normalizePartnerProgramCommercialUsageEntry(entry) {
+  return {
+    entry_id: typeof entry?.entry_id === 'string' ? entry.entry_id : null,
+    partner_id: typeof entry?.partner_id === 'string' ? entry.partner_id : null,
+    feature_code: typeof entry?.feature_code === 'string' ? entry.feature_code : null,
+    unit_type: typeof entry?.unit_type === 'string' ? entry.unit_type : null,
+    units: Number.isFinite(entry?.units) ? Number(entry.units) : 0,
+    unit_price_usd_micros: Number.isFinite(entry?.unit_price_usd_micros) ? Number(entry.unit_price_usd_micros) : 0,
+    amount_usd_micros: Number.isFinite(entry?.amount_usd_micros) ? Number(entry.amount_usd_micros) : 0,
+    occurred_at: typeof entry?.occurred_at === 'string' ? entry.occurred_at : null,
+    metadata: entry?.metadata && typeof entry.metadata === 'object' && !Array.isArray(entry.metadata) ? entry.metadata : {}
+  };
+}
+
+function normalizePartnerProgramCommercialUsageEntries(entries) {
+  return (entries ?? [])
+    .map(normalizePartnerProgramCommercialUsageEntry)
+    .sort((a, b) => {
+      const aKey = `${a.occurred_at ?? ''}|${a.entry_id ?? ''}`;
+      const bKey = `${b.occurred_at ?? ''}|${b.entry_id ?? ''}`;
+      return aKey.localeCompare(bKey);
+    });
+}
+
+function partnerProgramCommercialUsageExportSignablePayload(payload) {
+  return {
+    exported_at: payload?.exported_at,
+    query: normalizePartnerProgramCommercialUsageExportQuery(payload?.query),
+    ledger_summary: normalizePartnerProgramCommercialUsageLedgerSummary(payload?.ledger_summary),
+    entries: normalizePartnerProgramCommercialUsageEntries(payload?.entries),
+    export_hash: payload?.export_hash,
+    signature: payload?.signature
+  };
+}
+
+export function buildPartnerProgramCommercialUsageExportHash({ query, ledgerSummary, entries }) {
+  return sha256HexCanonical({
+    query: normalizePartnerProgramCommercialUsageExportQuery(query),
+    ledger_summary: normalizePartnerProgramCommercialUsageLedgerSummary(ledgerSummary),
+    entries: normalizePartnerProgramCommercialUsageEntries(entries)
+  });
+}
+
+export function buildSignedPartnerProgramCommercialUsageExportPayload({ exportedAt, query, ledgerSummary, entries, keyId }) {
+  const normalizedQuery = normalizePartnerProgramCommercialUsageExportQuery(query);
+  const normalizedLedgerSummary = normalizePartnerProgramCommercialUsageLedgerSummary(ledgerSummary);
+  const normalizedEntries = normalizePartnerProgramCommercialUsageEntries(entries);
+
+  const exportHash = buildPartnerProgramCommercialUsageExportHash({
+    query: normalizedQuery,
+    ledgerSummary: normalizedLedgerSummary,
+    entries: normalizedEntries
+  });
+
+  const payload = {
+    exported_at: exportedAt,
+    query: normalizedQuery,
+    ledger_summary: normalizedLedgerSummary,
+    entries: normalizedEntries,
+    export_hash: exportHash
+  };
+
+  payload.signature = signPolicyIntegrityPayload(payload, { keyId });
+  return payload;
+}
+
+export function verifyPartnerProgramCommercialUsageExportPayload(payload) {
+  if (!payload || typeof payload !== 'object') return { ok: false, error: 'missing_payload' };
+
+  const expectedHash = buildPartnerProgramCommercialUsageExportHash({
+    query: payload.query,
+    ledgerSummary: payload.ledger_summary,
+    entries: payload.entries
+  });
+
+  if (payload.export_hash !== expectedHash) {
+    return {
+      ok: false,
+      error: 'hash_mismatch',
+      details: {
+        expected_hash: expectedHash,
+        provided_hash: payload.export_hash ?? null
+      }
+    };
+  }
+
+  const signable = partnerProgramCommercialUsageExportSignablePayload(payload);
+  const verified = verifyPolicyIntegrityPayloadSignature(signable);
+  if (!verified.ok) return verified;
+
+  return { ok: true };
+}
+
+export function verifyPartnerProgramCommercialUsageExportPayloadWithPublicKeyPem({ payload, publicKeyPem, keyId, alg }) {
+  if (!payload || typeof payload !== 'object') return { ok: false, error: 'missing_payload' };
+
+  const expectedHash = buildPartnerProgramCommercialUsageExportHash({
+    query: payload.query,
+    ledgerSummary: payload.ledger_summary,
+    entries: payload.entries
+  });
+
+  if (payload.export_hash !== expectedHash) {
+    return {
+      ok: false,
+      error: 'hash_mismatch',
+      details: {
+        expected_hash: expectedHash,
+        provided_hash: payload.export_hash ?? null
+      }
+    };
+  }
+
+  const signable = partnerProgramCommercialUsageExportSignablePayload(payload);
+  return verifyPolicyIntegrityPayloadSignatureWithPublicKeyPem({ payload: signable, publicKeyPem, keyId, alg });
+}
+
+function normalizePartnerProgramBillingStatementExportQuery(query) {
+  const out = {};
+
+  if (typeof query?.period_start_iso === 'string' && query.period_start_iso.trim()) out.period_start_iso = query.period_start_iso.trim();
+  if (typeof query?.period_end_iso === 'string' && query.period_end_iso.trim()) out.period_end_iso = query.period_end_iso.trim();
+  if (Number.isFinite(query?.rev_share_partner_bps)) out.rev_share_partner_bps = Number(query.rev_share_partner_bps);
+  else {
+    const bps = Number.parseInt(String(query?.rev_share_partner_bps ?? ''), 10);
+    if (Number.isFinite(bps)) out.rev_share_partner_bps = bps;
+  }
+  if (typeof query?.now_iso === 'string' && query.now_iso.trim()) out.now_iso = query.now_iso.trim();
+  if (typeof query?.exported_at_iso === 'string' && query.exported_at_iso.trim()) out.exported_at_iso = query.exported_at_iso.trim();
+
+  return out;
+}
+
+function normalizePartnerProgramBillingStatement(statement) {
+  const lines = Array.isArray(statement?.lines)
+    ? statement.lines
+      .map(line => ({
+        line_id: typeof line?.line_id === 'string' ? line.line_id : null,
+        feature_code: typeof line?.feature_code === 'string' ? line.feature_code : null,
+        unit_type: typeof line?.unit_type === 'string' ? line.unit_type : null,
+        unit_price_usd_micros: Number.isFinite(line?.unit_price_usd_micros) ? Number(line.unit_price_usd_micros) : 0,
+        units: Number.isFinite(line?.units) ? Number(line.units) : 0,
+        amount_usd_micros: Number.isFinite(line?.amount_usd_micros) ? Number(line.amount_usd_micros) : 0
+      }))
+      .sort((a, b) => String(a.line_id ?? '').localeCompare(String(b.line_id ?? '')))
+    : [];
+
+  return {
+    statement_id: typeof statement?.statement_id === 'string' ? statement.statement_id : null,
+    partner_id: typeof statement?.partner_id === 'string' ? statement.partner_id : null,
+    period_start: typeof statement?.period_start === 'string' ? statement.period_start : null,
+    period_end: typeof statement?.period_end === 'string' ? statement.period_end : null,
+    rev_share_partner_bps: Number.isFinite(statement?.rev_share_partner_bps) ? Number(statement.rev_share_partner_bps) : 0,
+    lines,
+    totals: {
+      gross_amount_usd_micros: Number.isFinite(statement?.totals?.gross_amount_usd_micros) ? Number(statement.totals.gross_amount_usd_micros) : 0,
+      partner_share_usd_micros: Number.isFinite(statement?.totals?.partner_share_usd_micros) ? Number(statement.totals.partner_share_usd_micros) : 0,
+      platform_share_usd_micros: Number.isFinite(statement?.totals?.platform_share_usd_micros) ? Number(statement.totals.platform_share_usd_micros) : 0
+    }
+  };
+}
+
+function partnerProgramBillingStatementExportSignablePayload(payload) {
+  return {
+    exported_at: payload?.exported_at,
+    query: normalizePartnerProgramBillingStatementExportQuery(payload?.query),
+    statement: normalizePartnerProgramBillingStatement(payload?.statement),
+    export_hash: payload?.export_hash,
+    signature: payload?.signature
+  };
+}
+
+export function buildPartnerProgramBillingStatementExportHash({ query, statement }) {
+  return sha256HexCanonical({
+    query: normalizePartnerProgramBillingStatementExportQuery(query),
+    statement: normalizePartnerProgramBillingStatement(statement)
+  });
+}
+
+export function buildSignedPartnerProgramBillingStatementExportPayload({ exportedAt, query, statement, keyId }) {
+  const normalizedQuery = normalizePartnerProgramBillingStatementExportQuery(query);
+  const normalizedStatement = normalizePartnerProgramBillingStatement(statement);
+
+  const exportHash = buildPartnerProgramBillingStatementExportHash({
+    query: normalizedQuery,
+    statement: normalizedStatement
+  });
+
+  const payload = {
+    exported_at: exportedAt,
+    query: normalizedQuery,
+    statement: normalizedStatement,
+    export_hash: exportHash
+  };
+
+  payload.signature = signPolicyIntegrityPayload(payload, { keyId });
+  return payload;
+}
+
+export function verifyPartnerProgramBillingStatementExportPayload(payload) {
+  if (!payload || typeof payload !== 'object') return { ok: false, error: 'missing_payload' };
+
+  const expectedHash = buildPartnerProgramBillingStatementExportHash({
+    query: payload.query,
+    statement: payload.statement
+  });
+
+  if (payload.export_hash !== expectedHash) {
+    return {
+      ok: false,
+      error: 'hash_mismatch',
+      details: {
+        expected_hash: expectedHash,
+        provided_hash: payload.export_hash ?? null
+      }
+    };
+  }
+
+  const signable = partnerProgramBillingStatementExportSignablePayload(payload);
+  const verified = verifyPolicyIntegrityPayloadSignature(signable);
+  if (!verified.ok) return verified;
+
+  return { ok: true };
+}
+
+export function verifyPartnerProgramBillingStatementExportPayloadWithPublicKeyPem({ payload, publicKeyPem, keyId, alg }) {
+  if (!payload || typeof payload !== 'object') return { ok: false, error: 'missing_payload' };
+
+  const expectedHash = buildPartnerProgramBillingStatementExportHash({
+    query: payload.query,
+    statement: payload.statement
+  });
+
+  if (payload.export_hash !== expectedHash) {
+    return {
+      ok: false,
+      error: 'hash_mismatch',
+      details: {
+        expected_hash: expectedHash,
+        provided_hash: payload.export_hash ?? null
+      }
+    };
+  }
+
+  const signable = partnerProgramBillingStatementExportSignablePayload(payload);
+  return verifyPolicyIntegrityPayloadSignatureWithPublicKeyPem({ payload: signable, publicKeyPem, keyId, alg });
+}
+
+function normalizePartnerProgramSlaBreachExportQuery(query) {
+  const out = {};
+
+  if (typeof query?.from_iso === 'string' && query.from_iso.trim()) out.from_iso = query.from_iso.trim();
+  if (typeof query?.to_iso === 'string' && query.to_iso.trim()) out.to_iso = query.to_iso.trim();
+  if (typeof query?.include_resolved === 'boolean') out.include_resolved = query.include_resolved;
+  if (typeof query?.now_iso === 'string' && query.now_iso.trim()) out.now_iso = query.now_iso.trim();
+  if (typeof query?.exported_at_iso === 'string' && query.exported_at_iso.trim()) out.exported_at_iso = query.exported_at_iso.trim();
+
+  return out;
+}
+
+function normalizePartnerProgramSlaPolicyForExport(policy) {
+  if (!policy || typeof policy !== 'object') return null;
+
+  return {
+    partner_id: typeof policy?.partner_id === 'string' ? policy.partner_id : null,
+    version: Number.isFinite(policy?.version) ? Number(policy.version) : null,
+    updated_at: typeof policy?.updated_at === 'string' ? policy.updated_at : null,
+    latency_p95_ms: Number.isFinite(policy?.latency_p95_ms) ? Number(policy.latency_p95_ms) : null,
+    availability_target_bps: Number.isFinite(policy?.availability_target_bps) ? Number(policy.availability_target_bps) : null,
+    dispute_response_minutes: Number.isFinite(policy?.dispute_response_minutes) ? Number(policy.dispute_response_minutes) : null,
+    breach_threshold_minutes: Number.isFinite(policy?.breach_threshold_minutes) ? Number(policy.breach_threshold_minutes) : null
+  };
+}
+
+function normalizePartnerProgramSlaBreachSummary(summary) {
+  return {
+    total_events: Number.isFinite(summary?.total_events) ? Number(summary.total_events) : 0,
+    open_events: Number.isFinite(summary?.open_events) ? Number(summary.open_events) : 0,
+    high_severity_events: Number.isFinite(summary?.high_severity_events) ? Number(summary.high_severity_events) : 0
+  };
+}
+
+function normalizePartnerProgramSlaBreachEvents(events) {
+  return (events ?? [])
+    .map(event => ({
+      event_id: typeof event?.event_id === 'string' ? event.event_id : null,
+      partner_id: typeof event?.partner_id === 'string' ? event.partner_id : null,
+      event_type: typeof event?.event_type === 'string' ? event.event_type : null,
+      severity: typeof event?.severity === 'string' ? event.severity : null,
+      reason_code: typeof event?.reason_code === 'string' ? event.reason_code : null,
+      occurred_at: typeof event?.occurred_at === 'string' ? event.occurred_at : null,
+      resolved: event?.resolved === true,
+      resolved_at: typeof event?.resolved_at === 'string' ? event.resolved_at : null,
+      metadata: event?.metadata && typeof event.metadata === 'object' && !Array.isArray(event.metadata) ? event.metadata : {}
+    }))
+    .sort((a, b) => `${a.occurred_at ?? ''}|${a.event_id ?? ''}`.localeCompare(`${b.occurred_at ?? ''}|${b.event_id ?? ''}`));
+}
+
+function partnerProgramSlaBreachExportSignablePayload(payload) {
+  return {
+    exported_at: payload?.exported_at,
+    query: normalizePartnerProgramSlaBreachExportQuery(payload?.query),
+    policy: normalizePartnerProgramSlaPolicyForExport(payload?.policy),
+    summary: normalizePartnerProgramSlaBreachSummary(payload?.summary),
+    events: normalizePartnerProgramSlaBreachEvents(payload?.events),
+    export_hash: payload?.export_hash,
+    signature: payload?.signature
+  };
+}
+
+export function buildPartnerProgramSlaBreachExportHash({ query, policy, summary, events }) {
+  return sha256HexCanonical({
+    query: normalizePartnerProgramSlaBreachExportQuery(query),
+    policy: normalizePartnerProgramSlaPolicyForExport(policy),
+    summary: normalizePartnerProgramSlaBreachSummary(summary),
+    events: normalizePartnerProgramSlaBreachEvents(events)
+  });
+}
+
+export function buildSignedPartnerProgramSlaBreachExportPayload({ exportedAt, query, policy, summary, events, keyId }) {
+  const normalizedQuery = normalizePartnerProgramSlaBreachExportQuery(query);
+  const normalizedPolicy = normalizePartnerProgramSlaPolicyForExport(policy);
+  const normalizedSummary = normalizePartnerProgramSlaBreachSummary(summary);
+  const normalizedEvents = normalizePartnerProgramSlaBreachEvents(events);
+
+  const exportHash = buildPartnerProgramSlaBreachExportHash({
+    query: normalizedQuery,
+    policy: normalizedPolicy,
+    summary: normalizedSummary,
+    events: normalizedEvents
+  });
+
+  const payload = {
+    exported_at: exportedAt,
+    query: normalizedQuery,
+    policy: normalizedPolicy,
+    summary: normalizedSummary,
+    events: normalizedEvents,
+    export_hash: exportHash
+  };
+
+  payload.signature = signPolicyIntegrityPayload(payload, { keyId });
+  return payload;
+}
+
+export function verifyPartnerProgramSlaBreachExportPayload(payload) {
+  if (!payload || typeof payload !== 'object') return { ok: false, error: 'missing_payload' };
+
+  const expectedHash = buildPartnerProgramSlaBreachExportHash({
+    query: payload.query,
+    policy: payload.policy,
+    summary: payload.summary,
+    events: payload.events
+  });
+
+  if (payload.export_hash !== expectedHash) {
+    return {
+      ok: false,
+      error: 'hash_mismatch',
+      details: {
+        expected_hash: expectedHash,
+        provided_hash: payload.export_hash ?? null
+      }
+    };
+  }
+
+  const signable = partnerProgramSlaBreachExportSignablePayload(payload);
+  const verified = verifyPolicyIntegrityPayloadSignature(signable);
+  if (!verified.ok) return verified;
+
+  return { ok: true };
+}
+
+export function verifyPartnerProgramSlaBreachExportPayloadWithPublicKeyPem({ payload, publicKeyPem, keyId, alg }) {
+  if (!payload || typeof payload !== 'object') return { ok: false, error: 'missing_payload' };
+
+  const expectedHash = buildPartnerProgramSlaBreachExportHash({
+    query: payload.query,
+    policy: payload.policy,
+    summary: payload.summary,
+    events: payload.events
+  });
+
+  if (payload.export_hash !== expectedHash) {
+    return {
+      ok: false,
+      error: 'hash_mismatch',
+      details: {
+        expected_hash: expectedHash,
+        provided_hash: payload.export_hash ?? null
+      }
+    };
+  }
+
+  const signable = partnerProgramSlaBreachExportSignablePayload(payload);
+  return verifyPolicyIntegrityPayloadSignatureWithPublicKeyPem({ payload: signable, publicKeyPem, keyId, alg });
+}

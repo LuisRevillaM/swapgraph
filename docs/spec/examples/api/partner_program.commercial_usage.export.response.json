@@ -1,0 +1,47 @@
+{
+  "correlation_id": "corr_partnerprogram_commercial_usage_export",
+  "exported_at": "2026-02-20T00:05:00Z",
+  "query": {
+    "from_iso": "2026-02-20T00:00:00Z",
+    "to_iso": "2026-02-20T23:59:59Z",
+    "feature_code": "vault_reconciliation_export",
+    "unit_type": "export_count",
+    "now_iso": "2026-02-20T00:05:00Z",
+    "exported_at_iso": "2026-02-20T00:05:00Z"
+  },
+  "ledger_summary": {
+    "partner_id": "ops-admin",
+    "entries_count": 1,
+    "total_units": 2,
+    "total_amount_usd_micros": 1000000,
+    "feature_breakdown": [
+      {
+        "feature_code": "vault_reconciliation_export",
+        "unit_type": "export_count",
+        "units": 2,
+        "amount_usd_micros": 1000000
+      }
+    ]
+  },
+  "entries": [
+    {
+      "entry_id": "usage_ledger_000001",
+      "partner_id": "ops-admin",
+      "feature_code": "vault_reconciliation_export",
+      "unit_type": "export_count",
+      "units": 2,
+      "unit_price_usd_micros": 500000,
+      "amount_usd_micros": 1000000,
+      "occurred_at": "2026-02-20T00:00:00.000Z",
+      "metadata": {
+        "cycle_id": "cycle_m76"
+      }
+    }
+  ],
+  "export_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+  "signature": {
+    "key_id": "dev-pi-k1",
+    "alg": "ed25519",
+    "sig": "ZmFrZV9zaWduYXR1cmVfZm9yX2V4YW1wbGVz"
+  }
+}

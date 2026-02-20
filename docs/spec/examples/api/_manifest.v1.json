@@ -264,6 +264,78 @@
     {
       "file": "vault.custody.proof.response.json",
       "schema": "VaultCustodyInclusionProofGetResponse.schema.json"
+    },
+    {
+      "file": "partner_program.commercial_usage.record.request.json",
+      "schema": "PartnerProgramCommercialUsageRecordRequest.schema.json"
+    },
+    {
+      "file": "partner_program.commercial_usage.record.response.json",
+      "schema": "PartnerProgramCommercialUsageRecordResponse.schema.json"
+    },
+    {
+      "file": "partner_program.commercial_usage.export.response.json",
+      "schema": "PartnerProgramCommercialUsageExportResponse.schema.json"
+    },
+    {
+      "file": "partner_program.billing_statement.export.response.json",
+      "schema": "PartnerProgramBillingStatementExportResponse.schema.json"
+    },
+    {
+      "file": "partner_program.sla_policy.upsert.request.json",
+      "schema": "PartnerProgramSlaPolicyUpsertRequest.schema.json"
+    },
+    {
+      "file": "partner_program.sla_policy.upsert.response.json",
+      "schema": "PartnerProgramSlaPolicyUpsertResponse.schema.json"
+    },
+    {
+      "file": "partner_program.sla_breach.record.request.json",
+      "schema": "PartnerProgramSlaBreachRecordRequest.schema.json"
+    },
+    {
+      "file": "partner_program.sla_breach.record.response.json",
+      "schema": "PartnerProgramSlaBreachRecordResponse.schema.json"
+    },
+    {
+      "file": "partner_program.sla_breach.export.response.json",
+      "schema": "PartnerProgramSlaBreachExportResponse.schema.json"
+    },
+    {
+      "file": "partner_program.dashboard.summary.get.response.json",
+      "schema": "PartnerProgramDashboardSummaryGetResponse.schema.json"
+    },
+    {
+      "file": "auth.oauth_client.register.request.json",
+      "schema": "OAuthClientRegisterRequest.schema.json"
+    },
+    {
+      "file": "auth.oauth_client.register.response.json",
+      "schema": "OAuthClientRegisterResponse.schema.json"
+    },
+    {
+      "file": "auth.oauth_client.rotate.request.json",
+      "schema": "OAuthClientRotateRequest.schema.json"
+    },
+    {
+      "file": "auth.oauth_client.rotate.response.json",
+      "schema": "OAuthClientRotateResponse.schema.json"
+    },
+    {
+      "file": "auth.oauth_client.revoke.request.json",
+      "schema": "OAuthClientRevokeRequest.schema.json"
+    },
+    {
+      "file": "auth.oauth_client.revoke.response.json",
+      "schema": "OAuthClientRevokeResponse.schema.json"
+    },
+    {
+      "file": "auth.oauth_token.introspect.request.json",
+      "schema": "OAuthTokenIntrospectRequest.schema.json"
+    },
+    {
+      "file": "auth.oauth_token.introspect.response.json",
+      "schema": "OAuthTokenIntrospectResponse.schema.json"
     }
   ]
 }

@@ -1,0 +1,39 @@
+{
+  "correlation_id": "corr_partnerprogram_billing_statement_export",
+  "exported_at": "2026-02-20T00:10:00Z",
+  "query": {
+    "period_start_iso": "2026-02-20T00:00:00Z",
+    "period_end_iso": "2026-02-20T23:59:59Z",
+    "rev_share_partner_bps": 7000,
+    "now_iso": "2026-02-20T00:10:00Z",
+    "exported_at_iso": "2026-02-20T00:10:00Z"
+  },
+  "statement": {
+    "statement_id": "bill_ops-admin_2026-02-20_2026-02-20",
+    "partner_id": "ops-admin",
+    "period_start": "2026-02-20T00:00:00Z",
+    "period_end": "2026-02-20T23:59:59Z",
+    "rev_share_partner_bps": 7000,
+    "lines": [
+      {
+        "line_id": "line_001",
+        "feature_code": "vault_reconciliation_export",
+        "unit_type": "export_count",
+        "unit_price_usd_micros": 500000,
+        "units": 2,
+        "amount_usd_micros": 1000000
+      }
+    ],
+    "totals": {
+      "gross_amount_usd_micros": 1000000,
+      "partner_share_usd_micros": 700000,
+      "platform_share_usd_micros": 300000
+    }
+  },
+  "export_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+  "signature": {
+    "key_id": "dev-pi-k1",
+    "alg": "ed25519",
+    "sig": "ZmFrZV9zaWduYXR1cmVfZm9yX2V4YW1wbGVz"
+  }
+}

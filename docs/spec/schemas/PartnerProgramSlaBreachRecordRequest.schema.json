@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/PartnerProgramSlaBreachRecordRequest.schema.json",
+  "title": "PartnerProgramSlaBreachRecordRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_type",
+    "severity",
+    "reason_code",
+    "occurred_at"
+  ],
+  "properties": {
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "latency",
+        "availability",
+        "dispute_response"
+      ]
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ]
+    },
+    "reason_code": {
+      "type": "string",
+      "minLength": 1
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "resolved": {
+      "type": "boolean"
+    },
+    "resolved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "metadata": {
+      "type": "object"
+    }
+  }
+}

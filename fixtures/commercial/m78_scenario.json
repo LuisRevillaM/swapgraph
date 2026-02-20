@@ -1,0 +1,136 @@
+{
+  "actors": {
+    "admin_partner": {
+      "type": "partner",
+      "id": "ops-admin"
+    }
+  },
+  "operations": [
+    {
+      "op": "keys.policy_integrity_signing.get",
+      "expect_ok": true,
+      "expect_keys_count": 2
+    },
+    {
+      "op": "partnerProgram.sla_policy.upsert",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m78_policy_1",
+      "request": {
+        "occurred_at": "2026-02-20T00:00:00Z",
+        "policy": {
+          "latency_p95_ms": 1500,
+          "availability_target_bps": 9950,
+          "dispute_response_minutes": 240,
+          "breach_threshold_minutes": 60
+        }
+      },
+      "expect_ok": true,
+      "expect_policy_version": 1,
+      "expect_replayed": false,
+      "expect_latency_p95_ms": 1500
+    },
+    {
+      "op": "partnerProgram.sla_policy.upsert",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m78_policy_1",
+      "request": {
+        "occurred_at": "2026-02-20T00:00:00Z",
+        "policy": {
+          "latency_p95_ms": 1500,
+          "availability_target_bps": 9950,
+          "dispute_response_minutes": 240,
+          "breach_threshold_minutes": 60
+        }
+      },
+      "expect_ok": true,
+      "expect_policy_version": 1,
+      "expect_replayed": true
+    },
+    {
+      "op": "partnerProgram.sla_breach.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m78_breach_1",
+      "request": {
+        "event_type": "latency",
+        "severity": "high",
+        "reason_code": "latency_p95_exceeded",
+        "occurred_at": "2026-02-20T00:05:00Z",
+        "resolved": false,
+        "metadata": {
+          "window": "5m"
+        }
+      },
+      "expect_ok": true,
+      "expect_event_id": "sla_breach_000001",
+      "expect_event_type": "latency",
+      "expect_severity": "high",
+      "expect_replayed": false
+    },
+    {
+      "op": "partnerProgram.sla_breach.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m78_breach_bad",
+      "skip_request_validation": true,
+      "request": {
+        "event_type": "foo",
+        "severity": "high",
+        "reason_code": "x",
+        "occurred_at": "2026-02-20T00:06:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "partner_sla_breach_invalid"
+    },
+    {
+      "op": "partnerProgram.sla_breach.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "include_resolved": true,
+        "exported_at_iso": "2026-02-20T00:10:00Z",
+        "now_iso": "2026-02-20T00:10:00Z"
+      },
+      "save_export_ref": "sla_export",
+      "expect_ok": true,
+      "expect_total_events": 1,
+      "expect_open_events": 1,
+      "expect_high_severity_events": 1
+    },
+    {
+      "op": "partnerProgram.sla_breach.export.verify",
+      "export_ref": "sla_export",
+      "expect_verify_ok": true,
+      "expect_verify_public_ok": true
+    },
+    {
+      "op": "partnerProgram.sla_breach.export.verify_tampered",
+      "export_ref": "sla_export",
+      "expect_verify_ok": false,
+      "expect_verify_error": "hash_mismatch"
+    }
+  ]
+}

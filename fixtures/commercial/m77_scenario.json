@@ -1,0 +1,85 @@
+{
+  "actors": {
+    "admin_partner": {
+      "type": "partner",
+      "id": "ops-admin"
+    }
+  },
+  "operations": [
+    {
+      "op": "keys.policy_integrity_signing.get",
+      "expect_ok": true,
+      "expect_keys_count": 2
+    },
+    {
+      "op": "partnerProgram.commercial_usage.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m77_usage_1",
+      "request": {
+        "feature_code": "vault_reconciliation_export",
+        "unit_type": "export_count",
+        "units": 2,
+        "unit_price_usd_micros": 500000,
+        "occurred_at": "2026-02-20T00:00:00Z"
+      },
+      "expect_ok": true
+    },
+    {
+      "op": "partnerProgram.commercial_usage.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m77_usage_2",
+      "request": {
+        "feature_code": "sla_monitor",
+        "unit_type": "event_count",
+        "units": 1,
+        "unit_price_usd_micros": 1200000,
+        "occurred_at": "2026-02-20T00:30:00Z"
+      },
+      "expect_ok": true
+    },
+    {
+      "op": "partnerProgram.billing_statement.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "period_start_iso": "2026-02-20T00:00:00Z",
+        "period_end_iso": "2026-02-20T01:00:00Z",
+        "rev_share_partner_bps": 6500,
+        "now_iso": "2026-02-20T01:05:00Z",
+        "exported_at_iso": "2026-02-20T01:05:00Z"
+      },
+      "save_export_ref": "bill_export",
+      "expect_ok": true,
+      "expect_lines_count": 2,
+      "expect_gross_amount_usd_micros": 2200000,
+      "expect_partner_share_usd_micros": 1430000,
+      "expect_platform_share_usd_micros": 770000
+    },
+    {
+      "op": "partnerProgram.billing_statement.export.verify",
+      "export_ref": "bill_export",
+      "expect_verify_ok": true,
+      "expect_verify_public_ok": true
+    },
+    {
+      "op": "partnerProgram.billing_statement.export.verify_tampered",
+      "export_ref": "bill_export",
+      "expect_verify_ok": false,
+      "expect_verify_error": "hash_mismatch"
+    }
+  ]
+}

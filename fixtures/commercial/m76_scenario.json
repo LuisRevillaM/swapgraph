@@ -1,0 +1,149 @@
+{
+  "actors": {
+    "admin_partner": {
+      "type": "partner",
+      "id": "ops-admin"
+    }
+  },
+  "operations": [
+    {
+      "op": "keys.policy_integrity_signing.get",
+      "expect_ok": true,
+      "expect_keys_count": 2
+    },
+    {
+      "op": "partnerProgram.commercial_usage.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m76_usage_1",
+      "request": {
+        "feature_code": "vault_reconciliation_export",
+        "unit_type": "export_count",
+        "units": 2,
+        "unit_price_usd_micros": 500000,
+        "occurred_at": "2026-02-20T00:00:00Z",
+        "metadata": {
+          "cycle_id": "cycle_m76"
+        }
+      },
+      "expect_ok": true,
+      "expect_entry_id": "usage_ledger_000001",
+      "expect_units": 2,
+      "expect_amount_usd_micros": 1000000,
+      "expect_ledger_entries_count": 1,
+      "expect_ledger_total_units": 2,
+      "expect_ledger_total_amount_usd_micros": 1000000,
+      "expect_replayed": false
+    },
+    {
+      "op": "partnerProgram.commercial_usage.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m76_usage_2",
+      "request": {
+        "feature_code": "dashboard_api",
+        "unit_type": "request_count",
+        "units": 3,
+        "unit_price_usd_micros": 300000,
+        "occurred_at": "2026-02-20T00:10:00Z",
+        "metadata": {
+          "api": "summary"
+        }
+      },
+      "expect_ok": true,
+      "expect_entry_id": "usage_ledger_000002",
+      "expect_units": 3,
+      "expect_amount_usd_micros": 900000,
+      "expect_ledger_entries_count": 2,
+      "expect_ledger_total_units": 5,
+      "expect_ledger_total_amount_usd_micros": 1900000,
+      "expect_replayed": false
+    },
+    {
+      "op": "partnerProgram.commercial_usage.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m76_usage_1",
+      "request": {
+        "feature_code": "vault_reconciliation_export",
+        "unit_type": "export_count",
+        "units": 2,
+        "unit_price_usd_micros": 500000,
+        "occurred_at": "2026-02-20T00:00:00Z",
+        "metadata": {
+          "cycle_id": "cycle_m76"
+        }
+      },
+      "expect_ok": true,
+      "expect_entry_id": "usage_ledger_000001",
+      "expect_ledger_entries_count": 1,
+      "expect_replayed": true
+    },
+    {
+      "op": "partnerProgram.commercial_usage.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m76_usage_1",
+      "request": {
+        "feature_code": "vault_reconciliation_export",
+        "unit_type": "export_count",
+        "units": 5,
+        "unit_price_usd_micros": 500000,
+        "occurred_at": "2026-02-20T00:00:00Z",
+        "metadata": {
+          "cycle_id": "cycle_m76"
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    },
+    {
+      "op": "partnerProgram.commercial_usage.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-20T00:00:00Z",
+        "to_iso": "2026-02-20T23:59:59Z",
+        "now_iso": "2026-02-20T00:20:00Z",
+        "exported_at_iso": "2026-02-20T00:20:00Z"
+      },
+      "save_export_ref": "usage_export",
+      "expect_ok": true,
+      "expect_entries_count": 2,
+      "expect_total_units": 5,
+      "expect_total_amount_usd_micros": 1900000
+    },
+    {
+      "op": "partnerProgram.commercial_usage.export.verify",
+      "export_ref": "usage_export",
+      "expect_verify_ok": true,
+      "expect_verify_public_ok": true
+    },
+    {
+      "op": "partnerProgram.commercial_usage.export.verify_tampered",
+      "export_ref": "usage_export",
+      "expect_verify_ok": false,
+      "expect_verify_error": "hash_mismatch"
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/PartnerProgramSlaPolicyUpsertResponse.schema.json",
+  "title": "PartnerProgramSlaPolicyUpsertResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "policy",
+    "replayed"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "partner_id",
+        "version",
+        "updated_at",
+        "latency_p95_ms",
+        "availability_target_bps",
+        "dispute_response_minutes",
+        "breach_threshold_minutes"
+      ],
+      "properties": {
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "latency_p95_ms": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "availability_target_bps": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000
+        },
+        "dispute_response_minutes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "breach_threshold_minutes": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "replayed": {
+      "type": "boolean"
+    }
+  }
+}

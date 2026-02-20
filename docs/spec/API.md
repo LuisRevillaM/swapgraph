@@ -115,6 +115,32 @@ Settlement endpoints:
   - when checkpoint mode is enabled (`PARTNER_PROGRAM_ROLLOUT_POLICY_EXPORT_CHECKPOINT_ENFORCE=1`), continuation also requires `checkpoint_after`
   - checkpoint anchors have retention controls (`PARTNER_PROGRAM_ROLLOUT_POLICY_EXPORT_CHECKPOINT_RETENTION_DAYS`) and expired anchors are rejected
   - paginated responses include signed `attestation`, optional signed `checkpoint`, and optional `next_cursor`
+- `POST /partner-program/commercial-usage`
+  - idempotent partner-admin usage ledger write (`feature_code`, `unit_type`, `units`, unit price micros)
+  - records deterministic ledger entries + running aggregate summary (`entries_count`, units, USD micros)
+- `GET /partner-program/commercial-usage/export`
+  - signed partner usage-ledger export (`ledger_summary`, entries, `export_hash`, detached signature)
+  - supports optional range/filter query (`from_iso`, `to_iso`, `feature_code`, `unit_type`)
+- `GET /partner-program/billing-statements/export`
+  - signed deterministic billing/rev-share statement export (`lines`, totals, `export_hash`, detached signature)
+  - supports period bounds + rev-share split query (`period_start_iso`, `period_end_iso`, `rev_share_partner_bps`)
+- `POST /partner-program/sla-policy`
+  - idempotent partner-admin SLA policy upsert (`latency_p95_ms`, availability target, dispute/SLA thresholds)
+- `POST /partner-program/sla-breaches`
+  - idempotent partner-admin SLA breach event recording (`event_type`, `severity`, `reason_code`, timestamps)
+- `GET /partner-program/sla-breaches/export`
+  - signed SLA breach export payload (policy snapshot + aggregate summary + events)
+  - supports optional range filtering + resolved inclusion flag
+- `GET /partner-program/dashboard/summary`
+  - partner dashboard summary surface (usage last 24h, billing totals snapshot, open SLA breach counts)
+- `POST /auth/oauth-clients`
+  - partner OAuth client registration (redirect URIs + scopes) with deterministic client metadata response
+- `POST /auth/oauth-clients/{client_id}/rotate`
+  - idempotent OAuth client secret lifecycle rotation (`secret_version` increments)
+- `POST /auth/oauth-clients/{client_id}/revoke`
+  - idempotent OAuth client revocation (`status=revoked`, `revoked_at`)
+- `POST /auth/oauth-token/introspect`
+  - deterministic OAuth token introspection (`active`, reason code, scope envelope, issue/expiry timestamps)
 
 Receipt endpoints:
 - `GET /receipts/{cycle_id}`

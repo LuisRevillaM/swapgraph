@@ -1,0 +1,22 @@
+{
+  "correlation_id": "corr_auth_oauth_client_revoke",
+  "client": {
+    "client_id": "oc_1234567890abcdef",
+    "owner_partner_id": "ops-admin",
+    "client_name": "Ops Dashboard",
+    "redirect_uris": [
+      "https://ops.example.com/callback"
+    ],
+    "scopes": [
+      "settlement:read",
+      "settlement:write"
+    ],
+    "secret_version": 2,
+    "secret_key_id": "oc_1234567890abcdef_sk_v2",
+    "status": "revoked",
+    "created_at": "2026-02-20T00:35:00Z",
+    "updated_at": "2026-02-20T00:45:00Z",
+    "revoked_at": "2026-02-20T00:45:00Z"
+  },
+  "replayed": false
+}

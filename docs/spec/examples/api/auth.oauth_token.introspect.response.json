@@ -1,0 +1,12 @@
+{
+  "correlation_id": "corr_auth_oauth_token_introspect",
+  "active": false,
+  "client_id": "oc_1234567890abcdef",
+  "reason_code": "client_revoked",
+  "scopes": [
+    "settlement:read",
+    "settlement:write"
+  ],
+  "exp": "2026-02-21T00:40:00Z",
+  "iat": "2026-02-20T00:40:00Z"
+}

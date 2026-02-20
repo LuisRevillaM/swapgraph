@@ -1,0 +1,43 @@
+{
+  "correlation_id": "corr_partnerprogram_sla_breach_export",
+  "exported_at": "2026-02-20T00:25:00Z",
+  "query": {
+    "include_resolved": true,
+    "exported_at_iso": "2026-02-20T00:25:00Z"
+  },
+  "policy": {
+    "partner_id": "ops-admin",
+    "version": 1,
+    "updated_at": "2026-02-20T00:15:00.000Z",
+    "latency_p95_ms": 1500,
+    "availability_target_bps": 9950,
+    "dispute_response_minutes": 240,
+    "breach_threshold_minutes": 60
+  },
+  "summary": {
+    "total_events": 1,
+    "open_events": 1,
+    "high_severity_events": 1
+  },
+  "events": [
+    {
+      "event_id": "sla_breach_000001",
+      "partner_id": "ops-admin",
+      "event_type": "latency",
+      "severity": "high",
+      "reason_code": "latency_p95_exceeded",
+      "occurred_at": "2026-02-20T00:20:00.000Z",
+      "resolved": false,
+      "resolved_at": null,
+      "metadata": {
+        "window": "5m"
+      }
+    }
+  ],
+  "export_hash": "3333333333333333333333333333333333333333333333333333333333333333",
+  "signature": {
+    "key_id": "dev-pi-k1",
+    "alg": "ed25519",
+    "sig": "ZmFrZV9zaWduYXR1cmVfZm9yX2V4YW1wbGVz"
+  }
+}

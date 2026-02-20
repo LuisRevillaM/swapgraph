@@ -1,0 +1,200 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/PartnerProgramCommercialUsageExportResponse.schema.json",
+  "title": "PartnerProgramCommercialUsageExportResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "exported_at",
+    "query",
+    "ledger_summary",
+    "entries",
+    "export_hash",
+    "signature"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "exported_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "query": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "from_iso": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "to_iso": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "feature_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "unit_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "now_iso": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "exported_at_iso": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "ledger_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "partner_id",
+        "entries_count",
+        "total_units",
+        "total_amount_usd_micros",
+        "feature_breakdown"
+      ],
+      "properties": {
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "entries_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_units": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_amount_usd_micros": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "feature_breakdown": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "feature_code",
+              "unit_type",
+              "units",
+              "amount_usd_micros"
+            ],
+            "properties": {
+              "feature_code": {
+                "type": "string",
+                "minLength": 1
+              },
+              "unit_type": {
+                "type": "string",
+                "minLength": 1
+              },
+              "units": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "amount_usd_micros": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "entry_id",
+          "partner_id",
+          "feature_code",
+          "unit_type",
+          "units",
+          "unit_price_usd_micros",
+          "amount_usd_micros",
+          "occurred_at",
+          "metadata"
+        ],
+        "properties": {
+          "entry_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "partner_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "feature_code": {
+            "type": "string",
+            "minLength": 1
+          },
+          "unit_type": {
+            "type": "string",
+            "minLength": 1
+          },
+          "units": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "unit_price_usd_micros": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "amount_usd_micros": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "metadata": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "export_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key_id",
+        "alg",
+        "sig"
+      ],
+      "properties": {
+        "key_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "alg": {
+          "type": "string",
+          "enum": [
+            "ed25519"
+          ]
+        },
+        "sig": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

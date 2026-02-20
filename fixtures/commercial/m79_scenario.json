@@ -1,0 +1,84 @@
+{
+  "actors": {
+    "admin_partner": {
+      "type": "partner",
+      "id": "ops-admin"
+    }
+  },
+  "operations": [
+    {
+      "op": "partnerProgram.commercial_usage.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m79_usage_1",
+      "request": {
+        "feature_code": "dashboard_api",
+        "unit_type": "request_count",
+        "units": 4,
+        "unit_price_usd_micros": 250000,
+        "occurred_at": "2026-02-20T00:00:00Z"
+      },
+      "expect_ok": true
+    },
+    {
+      "op": "partnerProgram.sla_policy.upsert",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m79_policy_1",
+      "request": {
+        "occurred_at": "2026-02-20T00:10:00Z",
+        "policy": {
+          "latency_p95_ms": 1800,
+          "availability_target_bps": 9900,
+          "dispute_response_minutes": 300,
+          "breach_threshold_minutes": 120
+        }
+      },
+      "expect_ok": true
+    },
+    {
+      "op": "partnerProgram.sla_breach.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m79_breach_1",
+      "request": {
+        "event_type": "availability",
+        "severity": "medium",
+        "reason_code": "availability_below_target",
+        "occurred_at": "2026-02-20T00:20:00Z",
+        "resolved": false
+      },
+      "expect_ok": true
+    },
+    {
+      "op": "partnerProgram.dashboard.summary.get",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "now_iso": "2026-02-20T00:30:00Z"
+      },
+      "expect_ok": true,
+      "expect_usage_entries_count": 1,
+      "expect_usage_total_units": 4,
+      "expect_usage_total_amount_usd_micros": 1000000,
+      "expect_open_breaches": 1,
+      "expect_high_severity_open_breaches": 0
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "feature_code": "vault_reconciliation_export",
+  "unit_type": "export_count",
+  "units": 2,
+  "unit_price_usd_micros": 500000,
+  "occurred_at": "2026-02-20T00:00:00Z",
+  "metadata": {
+    "cycle_id": "cycle_m76"
+  }
+}

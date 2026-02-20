@@ -1,0 +1,13 @@
+{
+  "correlation_id": "corr_partnerprogram_sla_policy_upsert",
+  "policy": {
+    "partner_id": "ops-admin",
+    "version": 1,
+    "updated_at": "2026-02-20T00:15:00.000Z",
+    "latency_p95_ms": 1500,
+    "availability_target_bps": 9950,
+    "dispute_response_minutes": 240,
+    "breach_threshold_minutes": 60
+  },
+  "replayed": false
+}
