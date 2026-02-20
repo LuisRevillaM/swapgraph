@@ -1,0 +1,76 @@
+{
+  "correlation_id": "corr_compensation_cross_adapter_ledger_export",
+  "partner_id": "ops-admin",
+  "integration_mode": "fixture_only",
+  "exported_at": "2026-02-20T21:40:00.000Z",
+  "query": {
+    "case_id": "comp_case_000001",
+    "from_iso": "2026-02-20T21:00:00.000Z",
+    "to_iso": "2026-02-20T21:40:00.000Z",
+    "limit": 100,
+    "exported_at_iso": "2026-02-20T21:40:00.000Z"
+  },
+  "summary": {
+    "total_entries": 2,
+    "returned_entries": 2,
+    "total_amount_usd_micros": 2100000,
+    "returned_amount_usd_micros": 2100000,
+    "entry_type_breakdown": [
+      {
+        "entry_type": "adjustment",
+        "entries": 1,
+        "amount_usd_micros": 100000
+      },
+      {
+        "entry_type": "payout",
+        "entries": 1,
+        "amount_usd_micros": 2000000
+      }
+    ]
+  },
+  "entries": [
+    {
+      "entry_id": "comp_ledger_000001",
+      "partner_id": "ops-admin",
+      "case_id": "comp_case_000001",
+      "cycle_id": "cycle_cross_comp_001",
+      "cross_receipt_id": "cross_receipt_cycle_cross_comp_001",
+      "entry_type": "payout",
+      "amount_usd_micros": 2000000,
+      "reason_code": "policy_compensation_approved",
+      "settlement_reference": "txn_001",
+      "integration_mode": "fixture_only",
+      "recorded_at": "2026-02-20T21:30:00.000Z",
+      "notes": "partial payout"
+    },
+    {
+      "entry_id": "comp_ledger_000002",
+      "partner_id": "ops-admin",
+      "case_id": "comp_case_000001",
+      "cycle_id": "cycle_cross_comp_001",
+      "cross_receipt_id": "cross_receipt_cycle_cross_comp_001",
+      "entry_type": "adjustment",
+      "amount_usd_micros": 100000,
+      "reason_code": "service_credit",
+      "settlement_reference": "credit_001",
+      "integration_mode": "fixture_only",
+      "recorded_at": "2026-02-20T21:31:00.000Z",
+      "notes": "goodwill credit"
+    }
+  ],
+  "total_filtered": 2,
+  "next_cursor": null,
+  "attestation": {
+    "cursor_after": null,
+    "next_cursor": null,
+    "attestation_after": null,
+    "page_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "chain_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "export_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "signature": {
+    "key_id": "dev-pi-k1",
+    "alg": "ed25519",
+    "sig": "Q29tcGVuc2F0aW9uTGVkZ2VyRXhwb3J0U2lnbmF0dXJlRXhhbXBsZQ=="
+  }
+}

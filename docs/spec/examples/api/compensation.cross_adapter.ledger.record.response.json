@@ -1,0 +1,26 @@
+{
+  "correlation_id": "corr_compensation_cross_adapter_ledger_record",
+  "entry": {
+    "entry_id": "comp_ledger_000001",
+    "partner_id": "ops-admin",
+    "case_id": "comp_case_000001",
+    "cycle_id": "cycle_cross_comp_001",
+    "cross_receipt_id": "cross_receipt_cycle_cross_comp_001",
+    "entry_type": "payout",
+    "amount_usd_micros": 2000000,
+    "reason_code": "policy_compensation_approved",
+    "settlement_reference": "txn_001",
+    "integration_mode": "fixture_only",
+    "recorded_at": "2026-02-20T21:30:00.000Z",
+    "notes": "partial payout"
+  },
+  "case": {
+    "case_id": "comp_case_000001",
+    "status": "approved",
+    "requested_amount_usd_micros": 2500000,
+    "approved_amount_usd_micros": 2000000,
+    "resolution_reference": null,
+    "updated_at": "2026-02-20T21:10:00.000Z"
+  },
+  "replayed": false
+}

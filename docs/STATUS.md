@@ -104,9 +104,9 @@ Last updated: 2026-02-19
 - M91: ✅ Reliability/SLO conformance pack (fixtures-first) (idempotent SLO metric recording + incident-drill evidence recording + replay-recovery parity checks, with signed conformance export and deterministic signature/tamper verification) (fixtures-first)
 - M92: ✅ Full-plan conformance and release-readiness gate (fixtures-first) (deterministic conformance matrix + milestone artifact coverage checks + release-readiness assertions with zero unresolved blocker verification) (fixtures-first)
 - M93: ✅ Cross-adapter compensation case contract (fixtures-first) (idempotent compensation case create/update/read surfaces linked to signed cross-adapter discrepancy receipts, deterministic lifecycle transitions, and scope/idempotency enforcement proofs) (fixtures-first)
+- M94: ✅ Compensation ledger + signed export (fixtures-first) (idempotent compensation-ledger recording bound to payable case state, deterministic payout ceiling enforcement, and signed paginated ledger export with continuation attestation/tamper-fail verification) (fixtures-first)
 
 ## Next
-- M94: Compensation ledger + signed export
 - M95: Dispute-to-compensation linkage workflow
 - M96: Reliability auto-remediation planning contract
 - M97: Staging evidence refresh + operator conformance runbook pack

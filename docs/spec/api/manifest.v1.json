@@ -1465,6 +1465,39 @@
           "settlement:read"
         ]
       }
+    },
+    {
+      "method": "POST",
+      "path": "/compensation/cross-adapter/ledger/entries",
+      "operation_id": "compensation.cross_adapter.ledger.record",
+      "idempotency_required": true,
+      "request_schema": "CrossAdapterCompensationLedgerRecordRequest.schema.json",
+      "response_schema": "CrossAdapterCompensationLedgerRecordResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/compensation/cross-adapter/ledger/export",
+      "operation_id": "compensation.cross_adapter.ledger.export",
+      "idempotency_required": false,
+      "response_schema": "CrossAdapterCompensationLedgerExportResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
     }
   ],
   "webhooks": {

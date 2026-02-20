@@ -1,0 +1,378 @@
+{
+  "actors": {
+    "admin_partner": {
+      "type": "partner",
+      "id": "ops-admin"
+    }
+  },
+  "seed_cases": [
+    {
+      "case_id": "comp_case_000001",
+      "partner_id": "ops-admin",
+      "cycle_id": "cycle_cross_comp_001",
+      "cross_receipt_id": "cross_receipt_cycle_cross_comp_001",
+      "discrepancy_code": "target_leg_unsettled",
+      "requested_by": {
+        "type": "user",
+        "id": "user-001"
+      },
+      "requested_amount_usd_micros": 2500000,
+      "status": "approved",
+      "decision_reason_code": "policy_compensation_approved",
+      "approved_amount_usd_micros": 2000000,
+      "resolution_reference": null,
+      "opened_at": "2026-02-20T21:00:00Z",
+      "updated_at": "2026-02-20T21:10:00Z",
+      "resolved_at": null,
+      "integration_mode": "fixture_only",
+      "history": []
+    },
+    {
+      "case_id": "comp_case_000002",
+      "partner_id": "ops-admin",
+      "cycle_id": "cycle_cross_comp_002",
+      "cross_receipt_id": "cross_receipt_cycle_cross_comp_002",
+      "discrepancy_code": "source_leg_unsettled",
+      "requested_by": {
+        "type": "user",
+        "id": "user-002"
+      },
+      "requested_amount_usd_micros": 1000000,
+      "status": "rejected",
+      "decision_reason_code": "policy_compensation_rejected",
+      "approved_amount_usd_micros": 0,
+      "resolution_reference": null,
+      "opened_at": "2026-02-20T21:05:00Z",
+      "updated_at": "2026-02-20T21:12:00Z",
+      "resolved_at": null,
+      "integration_mode": "fixture_only",
+      "history": []
+    },
+    {
+      "case_id": "comp_case_000003",
+      "partner_id": "ops-admin",
+      "cycle_id": "cycle_cross_comp_003",
+      "cross_receipt_id": "cross_receipt_cycle_cross_comp_003",
+      "discrepancy_code": "both_legs_unsettled",
+      "requested_by": {
+        "type": "user",
+        "id": "user-003"
+      },
+      "requested_amount_usd_micros": 3000000,
+      "status": "resolved",
+      "decision_reason_code": "payout_settled",
+      "approved_amount_usd_micros": 2800000,
+      "resolution_reference": "ledger_entry_003",
+      "opened_at": "2026-02-20T21:06:00Z",
+      "updated_at": "2026-02-20T21:20:00Z",
+      "resolved_at": "2026-02-20T21:20:00Z",
+      "integration_mode": "fixture_only",
+      "history": []
+    }
+  ],
+  "operations": [
+    {
+      "op": "compensation.cross_adapter.ledger.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m94_record_1",
+      "request": {
+        "entry": {
+          "case_id": "comp_case_000001",
+          "entry_type": "payout",
+          "amount_usd_micros": 2000000,
+          "reason_code": "policy_compensation_approved",
+          "settlement_reference": "txn_001",
+          "notes": "partial payout"
+        },
+        "occurred_at": "2026-02-20T21:30:00Z"
+      },
+      "expect_ok": true,
+      "expect_entry_id": "comp_ledger_000001",
+      "expect_case_id": "comp_case_000001",
+      "expect_case_status": "approved",
+      "expect_entry_type": "payout",
+      "expect_amount_usd_micros": 2000000,
+      "expect_replayed": false
+    },
+    {
+      "op": "compensation.cross_adapter.ledger.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m94_record_1",
+      "request": {
+        "entry": {
+          "case_id": "comp_case_000001",
+          "entry_type": "payout",
+          "amount_usd_micros": 2000000,
+          "reason_code": "policy_compensation_approved",
+          "settlement_reference": "txn_001",
+          "notes": "partial payout"
+        },
+        "occurred_at": "2026-02-20T21:30:00Z"
+      },
+      "expect_ok": true,
+      "expect_entry_id": "comp_ledger_000001",
+      "expect_replayed": true
+    },
+    {
+      "op": "compensation.cross_adapter.ledger.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m94_record_1",
+      "request": {
+        "entry": {
+          "case_id": "comp_case_000001",
+          "entry_type": "payout",
+          "amount_usd_micros": 1900000,
+          "reason_code": "policy_compensation_approved",
+          "settlement_reference": "txn_001",
+          "notes": "partial payout"
+        },
+        "occurred_at": "2026-02-20T21:30:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    },
+    {
+      "op": "compensation.cross_adapter.ledger.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m94_record_exceeds",
+      "request": {
+        "entry": {
+          "case_id": "comp_case_000001",
+          "entry_type": "payout",
+          "amount_usd_micros": 2100000,
+          "reason_code": "policy_compensation_approved"
+        },
+        "occurred_at": "2026-02-20T21:30:30Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "cross_adapter_compensation_ledger_amount_exceeds_approved"
+    },
+    {
+      "op": "compensation.cross_adapter.ledger.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m94_record_not_payable",
+      "request": {
+        "entry": {
+          "case_id": "comp_case_000002",
+          "entry_type": "payout",
+          "amount_usd_micros": 1000000,
+          "reason_code": "policy_compensation_rejected"
+        },
+        "occurred_at": "2026-02-20T21:30:40Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "cross_adapter_compensation_case_not_payable"
+    },
+    {
+      "op": "compensation.cross_adapter.ledger.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m94_record_2",
+      "request": {
+        "entry": {
+          "case_id": "comp_case_000003",
+          "entry_type": "adjustment",
+          "amount_usd_micros": 100000,
+          "reason_code": "service_credit",
+          "settlement_reference": "credit_001",
+          "notes": "goodwill credit"
+        },
+        "occurred_at": "2026-02-20T21:31:00Z"
+      },
+      "expect_ok": true,
+      "expect_entry_id": "comp_ledger_000002",
+      "expect_case_id": "comp_case_000003",
+      "expect_case_status": "resolved",
+      "expect_entry_type": "adjustment",
+      "expect_amount_usd_micros": 100000,
+      "expect_replayed": false
+    },
+    {
+      "op": "compensation.cross_adapter.ledger.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m94_record_3",
+      "request": {
+        "entry": {
+          "case_id": "comp_case_000001",
+          "entry_type": "reversal",
+          "amount_usd_micros": 50000,
+          "reason_code": "rounding_adjustment",
+          "settlement_reference": "rev_001"
+        },
+        "occurred_at": "2026-02-20T21:32:00Z"
+      },
+      "expect_ok": true,
+      "expect_entry_id": "comp_ledger_000003",
+      "expect_case_id": "comp_case_000001",
+      "expect_case_status": "approved",
+      "expect_entry_type": "reversal",
+      "expect_amount_usd_micros": 50000,
+      "expect_replayed": false
+    },
+    {
+      "op": "compensation.cross_adapter.ledger.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-20T21:00:00Z",
+        "to_iso": "2026-02-20T21:40:00Z",
+        "limit": 2,
+        "now_iso": "2026-02-20T21:40:00Z",
+        "exported_at_iso": "2026-02-20T21:40:00Z"
+      },
+      "expect_ok": true,
+      "expect_total_entries": 3,
+      "expect_returned_entries": 2,
+      "expect_total_amount_usd_micros": 2150000,
+      "expect_returned_amount_usd_micros": 2100000,
+      "expect_total_filtered": 3,
+      "expect_entries_count": 2,
+      "expect_first_entry_id": "comp_ledger_000001",
+      "expect_last_entry_id": "comp_ledger_000002",
+      "expect_next_cursor_present": true,
+      "expect_signature_valid": true,
+      "expect_tamper_signature_valid": false,
+      "expect_attestation_present": true,
+      "expect_integration_mode": "fixture_only"
+    },
+    {
+      "op": "compensation.cross_adapter.ledger.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-20T21:00:00Z",
+        "to_iso": "2026-02-20T21:40:00Z",
+        "limit": 2,
+        "cursor_after": "2026-02-20T21:31:00.000Z|comp_ledger_000002",
+        "now_iso": "2026-02-20T21:41:00Z",
+        "exported_at_iso": "2026-02-20T21:41:00Z"
+      },
+      "expect_ok": true,
+      "expect_total_entries": 3,
+      "expect_returned_entries": 1,
+      "expect_total_amount_usd_micros": 2150000,
+      "expect_returned_amount_usd_micros": 50000,
+      "expect_total_filtered": 3,
+      "expect_entries_count": 1,
+      "expect_first_entry_id": "comp_ledger_000003",
+      "expect_last_entry_id": "comp_ledger_000003",
+      "expect_next_cursor_present": false,
+      "expect_signature_valid": true,
+      "expect_tamper_signature_valid": false,
+      "expect_attestation_present": true,
+      "expect_integration_mode": "fixture_only"
+    },
+    {
+      "op": "compensation.cross_adapter.ledger.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "cursor_after": "2026-02-20T21:39:00.000Z|comp_ledger_999999",
+        "now_iso": "2026-02-20T21:42:00Z",
+        "exported_at_iso": "2026-02-20T21:42:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "cross_adapter_compensation_ledger_cursor_not_found"
+    },
+    {
+      "op": "compensation.cross_adapter.ledger.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "not-an-iso",
+        "now_iso": "2026-02-20T21:43:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "cross_adapter_compensation_ledger_export_query_invalid"
+    },
+    {
+      "op": "compensation.cross_adapter.ledger.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "idempotency_key": "m94_scope_fail_record",
+      "request": {
+        "entry": {
+          "case_id": "comp_case_000001",
+          "entry_type": "payout",
+          "amount_usd_micros": 100000,
+          "reason_code": "scope_test"
+        },
+        "occurred_at": "2026-02-20T21:44:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    },
+    {
+      "op": "compensation.cross_adapter.ledger.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "query": {
+        "now_iso": "2026-02-20T21:45:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    }
+  ]
+}

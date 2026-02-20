@@ -3824,3 +3824,208 @@ export function verifyInclusionProofLinkageExportPayloadWithPublicKeyPem({ paylo
   const signable = inclusionProofLinkageExportSignablePayload(payload);
   return verifyPolicyIntegrityPayloadSignatureWithPublicKeyPem({ payload: signable, publicKeyPem, keyId, alg });
 }
+
+function normalizeCrossAdapterCompensationLedgerExportQuery(query) {
+  const out = {};
+
+  if (typeof query?.case_id === 'string' && query.case_id.trim()) out.case_id = query.case_id.trim();
+  if (typeof query?.from_iso === 'string' && query.from_iso.trim()) out.from_iso = query.from_iso.trim();
+  if (typeof query?.to_iso === 'string' && query.to_iso.trim()) out.to_iso = query.to_iso.trim();
+
+  if (Number.isFinite(query?.limit)) out.limit = Number(query.limit);
+  else {
+    const limit = Number.parseInt(String(query?.limit ?? ''), 10);
+    if (Number.isFinite(limit)) out.limit = limit;
+  }
+
+  if (typeof query?.cursor_after === 'string' && query.cursor_after.trim()) out.cursor_after = query.cursor_after.trim();
+  if (typeof query?.now_iso === 'string' && query.now_iso.trim()) out.now_iso = query.now_iso.trim();
+  if (typeof query?.exported_at_iso === 'string' && query.exported_at_iso.trim()) out.exported_at_iso = query.exported_at_iso.trim();
+
+  return out;
+}
+
+function normalizeCrossAdapterCompensationLedgerSummary(summary) {
+  return {
+    total_entries: Number.isFinite(summary?.total_entries) ? Number(summary.total_entries) : 0,
+    returned_entries: Number.isFinite(summary?.returned_entries) ? Number(summary.returned_entries) : 0,
+    total_amount_usd_micros: Number.isFinite(summary?.total_amount_usd_micros) ? Number(summary.total_amount_usd_micros) : 0,
+    returned_amount_usd_micros: Number.isFinite(summary?.returned_amount_usd_micros) ? Number(summary.returned_amount_usd_micros) : 0,
+    entry_type_breakdown: Array.isArray(summary?.entry_type_breakdown)
+      ? summary.entry_type_breakdown
+        .map(row => ({
+          entry_type: row?.entry_type,
+          entries: Number.isFinite(row?.entries) ? Number(row.entries) : 0,
+          amount_usd_micros: Number.isFinite(row?.amount_usd_micros) ? Number(row.amount_usd_micros) : 0
+        }))
+        .sort((a, b) => String(a.entry_type ?? '').localeCompare(String(b.entry_type ?? '')))
+      : []
+  };
+}
+
+function normalizeCrossAdapterCompensationLedgerEntry(entry) {
+  return {
+    entry_id: entry?.entry_id,
+    partner_id: entry?.partner_id,
+    case_id: entry?.case_id,
+    cycle_id: entry?.cycle_id,
+    cross_receipt_id: entry?.cross_receipt_id,
+    entry_type: entry?.entry_type,
+    amount_usd_micros: Number.isFinite(entry?.amount_usd_micros) ? Number(entry.amount_usd_micros) : 0,
+    reason_code: entry?.reason_code,
+    settlement_reference: entry?.settlement_reference ?? null,
+    integration_mode: entry?.integration_mode,
+    recorded_at: entry?.recorded_at,
+    ...(typeof entry?.notes === 'string' ? { notes: entry.notes } : {})
+  };
+}
+
+function normalizeCrossAdapterCompensationLedgerEntries(entries) {
+  return (entries ?? [])
+    .map(normalizeCrossAdapterCompensationLedgerEntry)
+    .sort((a, b) => `${a.recorded_at ?? ''}|${a.entry_id ?? ''}`.localeCompare(`${b.recorded_at ?? ''}|${b.entry_id ?? ''}`));
+}
+
+function crossAdapterCompensationLedgerExportSignablePayload(payload) {
+  return {
+    exported_at: payload?.exported_at,
+    query: normalizeCrossAdapterCompensationLedgerExportQuery(payload?.query),
+    summary: normalizeCrossAdapterCompensationLedgerSummary(payload?.summary),
+    entries: normalizeCrossAdapterCompensationLedgerEntries(payload?.entries),
+    total_filtered: Number.isFinite(payload?.total_filtered) ? Number(payload.total_filtered) : 0,
+    ...(typeof payload?.next_cursor === 'string' ? { next_cursor: payload.next_cursor } : {}),
+    ...(payload?.attestation ? { attestation: normalizeExportAttestation(payload.attestation) } : {}),
+    export_hash: payload?.export_hash,
+    signature: payload?.signature
+  };
+}
+
+export function buildCrossAdapterCompensationLedgerExportHash({ query, summary, entries, totalFiltered, nextCursor }) {
+  return sha256HexCanonical({
+    query: normalizeCrossAdapterCompensationLedgerExportQuery(query),
+    summary: normalizeCrossAdapterCompensationLedgerSummary(summary),
+    entries: normalizeCrossAdapterCompensationLedgerEntries(entries),
+    total_filtered: Number.isFinite(totalFiltered) ? Number(totalFiltered) : 0,
+    ...(typeof nextCursor === 'string' ? { next_cursor: nextCursor } : {})
+  });
+}
+
+export function buildSignedCrossAdapterCompensationLedgerExportPayload({
+  exportedAt,
+  query,
+  summary,
+  entries,
+  totalFiltered,
+  nextCursor,
+  withAttestation,
+  keyId
+}) {
+  const normalizedQuery = normalizeCrossAdapterCompensationLedgerExportQuery(query);
+  const normalizedSummary = normalizeCrossAdapterCompensationLedgerSummary(summary);
+  const normalizedEntries = normalizeCrossAdapterCompensationLedgerEntries(entries);
+  const normalizedTotalFiltered = Number.isFinite(totalFiltered) ? Number(totalFiltered) : 0;
+
+  const exportHash = buildCrossAdapterCompensationLedgerExportHash({
+    query: normalizedQuery,
+    summary: normalizedSummary,
+    entries: normalizedEntries,
+    totalFiltered: normalizedTotalFiltered,
+    nextCursor
+  });
+
+  const payload = {
+    exported_at: exportedAt,
+    query: normalizedQuery,
+    summary: normalizedSummary,
+    entries: normalizedEntries,
+    total_filtered: normalizedTotalFiltered,
+    ...(typeof nextCursor === 'string' ? { next_cursor: nextCursor } : {}),
+    export_hash: exportHash
+  };
+
+  if (withAttestation) {
+    payload.attestation = buildPolicyAuditExportAttestation({
+      query: normalizedQuery,
+      nextCursor,
+      exportHash
+    });
+  }
+
+  payload.signature = signPolicyIntegrityPayload(payload, { keyId });
+  return payload;
+}
+
+export function verifyCrossAdapterCompensationLedgerExportPayload(payload) {
+  if (!payload || typeof payload !== 'object') return { ok: false, error: 'missing_payload' };
+
+  const expectedHash = buildCrossAdapterCompensationLedgerExportHash({
+    query: payload.query,
+    summary: payload.summary,
+    entries: payload.entries,
+    totalFiltered: payload.total_filtered,
+    nextCursor: payload.next_cursor
+  });
+
+  if (payload.export_hash !== expectedHash) {
+    return {
+      ok: false,
+      error: 'hash_mismatch',
+      details: {
+        expected_hash: expectedHash,
+        provided_hash: payload.export_hash ?? null
+      }
+    };
+  }
+
+  if (payload.attestation) {
+    const attestation = verifyPolicyAuditExportAttestation({
+      attestation: payload.attestation,
+      query: payload.query,
+      nextCursor: payload.next_cursor,
+      exportHash: expectedHash
+    });
+    if (!attestation.ok) return attestation;
+  }
+
+  const signable = crossAdapterCompensationLedgerExportSignablePayload(payload);
+  const verified = verifyPolicyIntegrityPayloadSignature(signable);
+  if (!verified.ok) return verified;
+
+  return { ok: true };
+}
+
+export function verifyCrossAdapterCompensationLedgerExportPayloadWithPublicKeyPem({ payload, publicKeyPem, keyId, alg }) {
+  if (!payload || typeof payload !== 'object') return { ok: false, error: 'missing_payload' };
+
+  const expectedHash = buildCrossAdapterCompensationLedgerExportHash({
+    query: payload.query,
+    summary: payload.summary,
+    entries: payload.entries,
+    totalFiltered: payload.total_filtered,
+    nextCursor: payload.next_cursor
+  });
+
+  if (payload.export_hash !== expectedHash) {
+    return {
+      ok: false,
+      error: 'hash_mismatch',
+      details: {
+        expected_hash: expectedHash,
+        provided_hash: payload.export_hash ?? null
+      }
+    };
+  }
+
+  if (payload.attestation) {
+    const attestation = verifyPolicyAuditExportAttestation({
+      attestation: payload.attestation,
+      query: payload.query,
+      nextCursor: payload.next_cursor,
+      exportHash: expectedHash
+    });
+    if (!attestation.ok) return attestation;
+  }
+
+  const signable = crossAdapterCompensationLedgerExportSignablePayload(payload);
+  return verifyPolicyIntegrityPayloadSignatureWithPublicKeyPem({ payload: signable, publicKeyPem, keyId, alg });
+}

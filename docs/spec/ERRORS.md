@@ -127,6 +127,12 @@ Notes:
   - `cross_adapter_compensation_case_not_found`
   - `cross_adapter_compensation_transition_invalid`
   - `cross_adapter_compensation_query_invalid`
+  - `cross_adapter_compensation_ledger_invalid`
+  - `cross_adapter_compensation_ledger_invalid_timestamp`
+  - `cross_adapter_compensation_case_not_payable`
+  - `cross_adapter_compensation_ledger_amount_exceeds_approved`
+  - `cross_adapter_compensation_ledger_export_query_invalid`
+  - `cross_adapter_compensation_ledger_cursor_not_found`
   - `reliability_slo_metric_invalid`
   - `reliability_slo_metric_invalid_timestamp`
   - `reliability_incident_drill_invalid`

@@ -1,0 +1,216 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/CrossAdapterCompensationLedgerExportResponse.schema.json",
+  "title": "CrossAdapterCompensationLedgerExportResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "partner_id",
+    "integration_mode",
+    "exported_at",
+    "query",
+    "summary",
+    "entries",
+    "total_filtered",
+    "attestation",
+    "export_hash",
+    "signature"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "partner_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "integration_mode": {
+      "type": "string",
+      "enum": [
+        "fixture_only"
+      ]
+    },
+    "exported_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "query": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "from_iso": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "to_iso": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        },
+        "cursor_after": {
+          "type": "string",
+          "minLength": 1
+        },
+        "now_iso": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "exported_at_iso": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total_entries",
+        "returned_entries",
+        "total_amount_usd_micros",
+        "returned_amount_usd_micros",
+        "entry_type_breakdown"
+      ],
+      "properties": {
+        "total_entries": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "returned_entries": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_amount_usd_micros": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "returned_amount_usd_micros": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "entry_type_breakdown": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "entry_type",
+              "entries",
+              "amount_usd_micros"
+            ],
+            "properties": {
+              "entry_type": {
+                "type": "string",
+                "enum": [
+                  "payout",
+                  "reversal",
+                  "adjustment"
+                ]
+              },
+              "entries": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "amount_usd_micros": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "$ref": "CrossAdapterCompensationLedgerRecordResponse.schema.json#/properties/entry"
+      }
+    },
+    "total_filtered": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "attestation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cursor_after",
+        "next_cursor",
+        "attestation_after",
+        "page_hash",
+        "chain_hash"
+      ],
+      "properties": {
+        "cursor_after": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "next_cursor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "attestation_after": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "page_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "chain_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "export_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key_id",
+        "alg",
+        "sig"
+      ],
+      "properties": {
+        "key_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "alg": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sig": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

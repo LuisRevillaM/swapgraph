@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/CrossAdapterCompensationLedgerRecordRequest.schema.json",
+  "title": "CrossAdapterCompensationLedgerRecordRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "entry"
+  ],
+  "properties": {
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "entry_type",
+        "amount_usd_micros",
+        "reason_code"
+      ],
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "entry_type": {
+          "type": "string",
+          "enum": [
+            "payout",
+            "reversal",
+            "adjustment"
+          ]
+        },
+        "amount_usd_micros": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000000000
+        },
+        "reason_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "settlement_reference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

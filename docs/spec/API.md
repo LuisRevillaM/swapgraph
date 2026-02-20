@@ -183,6 +183,10 @@ Settlement endpoints:
   - idempotent compensation-case lifecycle transition contract (`open`→`approved|rejected`→`resolved`) with deterministic transition guards
 - `GET /compensation/cross-adapter/cases`
   - read compensation case projection by `case_id` or `cycle_id`
+- `POST /compensation/cross-adapter/ledger/entries`
+  - idempotent compensation-ledger entry recording contract (`payout|reversal|adjustment`) bound to payable case state
+- `GET /compensation/cross-adapter/ledger/export`
+  - signed paginated compensation-ledger export (`summary`, `entries`, `next_cursor`, `attestation`, `export_hash`, detached signature)
 - `POST /reliability/slo-metrics`
   - idempotent reliability SLO metric recording contract (availability/latency/error-budget windows)
 - `POST /reliability/incident-drills`

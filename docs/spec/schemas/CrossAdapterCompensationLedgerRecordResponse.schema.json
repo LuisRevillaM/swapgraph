@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/CrossAdapterCompensationLedgerRecordResponse.schema.json",
+  "title": "CrossAdapterCompensationLedgerRecordResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "entry",
+    "case",
+    "replayed"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "entry_id",
+        "partner_id",
+        "case_id",
+        "cycle_id",
+        "cross_receipt_id",
+        "entry_type",
+        "amount_usd_micros",
+        "reason_code",
+        "settlement_reference",
+        "integration_mode",
+        "recorded_at"
+      ],
+      "properties": {
+        "entry_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "case_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cycle_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cross_receipt_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "entry_type": {
+          "type": "string",
+          "enum": [
+            "payout",
+            "reversal",
+            "adjustment"
+          ]
+        },
+        "amount_usd_micros": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000000000
+        },
+        "reason_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "settlement_reference": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "integration_mode": {
+          "type": "string",
+          "enum": [
+            "fixture_only"
+          ]
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "status",
+        "requested_amount_usd_micros",
+        "approved_amount_usd_micros",
+        "resolution_reference",
+        "updated_at"
+      ],
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "open",
+            "approved",
+            "rejected",
+            "resolved"
+          ]
+        },
+        "requested_amount_usd_micros": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000000000
+        },
+        "approved_amount_usd_micros": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1000000000000
+        },
+        "resolution_reference": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "replayed": {
+      "type": "boolean"
+    }
+  }
+}

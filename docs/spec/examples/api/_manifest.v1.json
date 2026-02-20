@@ -544,6 +544,18 @@
     {
       "file": "compensation.cross_adapter.case.get.response.json",
       "schema": "CrossAdapterCompensationCaseGetResponse.schema.json"
+    },
+    {
+      "file": "compensation.cross_adapter.ledger.record.request.json",
+      "schema": "CrossAdapterCompensationLedgerRecordRequest.schema.json"
+    },
+    {
+      "file": "compensation.cross_adapter.ledger.record.response.json",
+      "schema": "CrossAdapterCompensationLedgerRecordResponse.schema.json"
+    },
+    {
+      "file": "compensation.cross_adapter.ledger.export.response.json",
+      "schema": "CrossAdapterCompensationLedgerExportResponse.schema.json"
     }
   ]
 }

@@ -1,0 +1,11 @@
+{
+  "entry": {
+    "case_id": "comp_case_000001",
+    "entry_type": "payout",
+    "amount_usd_micros": 2000000,
+    "reason_code": "policy_compensation_approved",
+    "settlement_reference": "txn_001",
+    "notes": "partial payout"
+  },
+  "occurred_at": "2026-02-20T21:30:00Z"
+}
