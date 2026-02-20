@@ -42,6 +42,10 @@ export class JsonStateStore {
       steam_tier1_preflight_history: [],
       steam_tier1_live_deposit_per_swap_proofs: [],
       steam_tier1_live_vault_proofs: [],
+      transparency_log_publications: [],
+      transparency_log_export_checkpoints: {},
+      transparency_log_publication_counter: 0,
+      transparency_log_entry_counter: 0,
       oauth_clients: {},
       oauth_tokens: {}
     };
@@ -82,6 +86,10 @@ export class JsonStateStore {
         steam_tier1_preflight_history: [],
         steam_tier1_live_deposit_per_swap_proofs: [],
         steam_tier1_live_vault_proofs: [],
+        transparency_log_publications: [],
+        transparency_log_export_checkpoints: {},
+        transparency_log_publication_counter: 0,
+        transparency_log_entry_counter: 0,
         oauth_clients: {},
         oauth_tokens: {}
       };
@@ -123,6 +131,10 @@ export class JsonStateStore {
     this.state.steam_tier1_preflight_history ||= [];
     this.state.steam_tier1_live_deposit_per_swap_proofs ||= [];
     this.state.steam_tier1_live_vault_proofs ||= [];
+    this.state.transparency_log_publications ||= [];
+    this.state.transparency_log_export_checkpoints ||= {};
+    this.state.transparency_log_publication_counter ||= 0;
+    this.state.transparency_log_entry_counter ||= 0;
     this.state.oauth_clients ||= {};
     this.state.oauth_tokens ||= {};
   }

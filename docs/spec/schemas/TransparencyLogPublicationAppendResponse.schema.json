@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/TransparencyLogPublicationAppendResponse.schema.json",
+  "title": "TransparencyLogPublicationAppendResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "publication",
+    "replayed"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "publication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "publication_id",
+        "partner_id",
+        "entries_appended",
+        "first_entry_id",
+        "last_entry_id",
+        "first_chain_hash",
+        "last_chain_hash",
+        "publication_hash",
+        "published_at"
+      ],
+      "properties": {
+        "publication_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "entries_appended": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "first_entry_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "last_entry_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "first_chain_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "last_chain_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "publication_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "published_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "replayed": {
+      "type": "boolean"
+    }
+  }
+}

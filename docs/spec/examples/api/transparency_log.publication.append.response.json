@@ -1,0 +1,15 @@
+{
+  "correlation_id": "corr_transparencylog_publication_append",
+  "publication": {
+    "publication_id": "tl_pub_000001",
+    "partner_id": "ops-admin",
+    "entries_appended": 2,
+    "first_entry_id": "tl_entry_000001",
+    "last_entry_id": "tl_entry_000002",
+    "first_chain_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "last_chain_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "publication_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "published_at": "2026-02-20T09:00:00.000Z"
+  },
+  "replayed": false
+}

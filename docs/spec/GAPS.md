@@ -172,7 +172,8 @@ Each item here must become at least one of:
 - Resolved (fixtures-first, partial): M84 (Steam Tier-1 adapter contract hardening, fixture-only: idempotent adapter contract upsert/read + deterministic preflight contract checks for mode support, dry-run requirements, and batch-size ceilings).
 - Resolved (integration-gated, partial): M85 (Steam deposit-per-swap live proof: idempotent operator proof-record contract + deterministic proof-hash artifacts + runbook-driven staging evidence flow behind `INTEGRATION_ENABLED=1`).
 - Resolved (integration-gated, partial): M86 (Steam vault live proof: idempotent operator vault lifecycle proof-record contract with complete deposit/reserve/release/withdraw evidence + deterministic proof-hash artifacts behind `INTEGRATION_ENABLED=1`).
-- Remaining: transparency-log publication and reliability conformance scope (M87+ reliability matrix).
+- Resolved (fixtures-first, partial): M87 (transparency-log publication contracts: idempotent append-only publication + signed paginated export with deterministic attestation/checkpoint continuation and tamper-fail verification).
+- Remaining: inclusion-proof linkage and reliability conformance scope (M88+ reliability matrix).
 
 ---
 

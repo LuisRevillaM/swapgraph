@@ -424,6 +424,18 @@
     {
       "file": "adapter.steam_tier1.live_proof.vault.record.response.json",
       "schema": "SteamTier1VaultLiveProofRecordResponse.schema.json"
+    },
+    {
+      "file": "transparency_log.publication.append.request.json",
+      "schema": "TransparencyLogPublicationAppendRequest.schema.json"
+    },
+    {
+      "file": "transparency_log.publication.append.response.json",
+      "schema": "TransparencyLogPublicationAppendResponse.schema.json"
+    },
+    {
+      "file": "transparency_log.publication.export.response.json",
+      "schema": "TransparencyLogPublicationExportResponse.schema.json"
     }
   ]
 }

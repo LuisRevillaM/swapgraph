@@ -91,7 +91,8 @@
     "verify:m83": "bash verify/m83.sh",
     "verify:m84": "bash verify/m84.sh",
     "verify:m85": "bash verify/m85.sh",
-    "verify:m86": "bash verify/m86.sh"
+    "verify:m86": "bash verify/m86.sh",
+    "verify:m87": "bash verify/m87.sh"
   },
   "devDependencies": {
     "ajv": "8.18.0",

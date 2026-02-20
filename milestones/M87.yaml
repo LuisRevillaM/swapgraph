@@ -1,0 +1,37 @@
+name: M87
+commands:
+  - cmd: "npm run verify:m87"
+artifacts:
+  - artifact: "docs/prd/M87.md"
+  - artifact: "docs/STATUS.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/ERRORS.md"
+  - artifact: "docs/spec/GAPS.md"
+
+  - artifact: "src/store/jsonStateStore.mjs"
+  - artifact: "src/service/transparencyLogPublicationService.mjs"
+
+  - artifact: "docs/spec/api/manifest.v1.json"
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+  - artifact: "docs/spec/examples/api/transparency_log.publication.append.request.json"
+  - artifact: "docs/spec/examples/api/transparency_log.publication.append.response.json"
+  - artifact: "docs/spec/examples/api/transparency_log.publication.export.response.json"
+
+  - artifact: "docs/spec/schemas/TransparencyLogPublicationAppendRequest.schema.json"
+  - artifact: "docs/spec/schemas/TransparencyLogPublicationAppendResponse.schema.json"
+  - artifact: "docs/spec/schemas/TransparencyLogPublicationExportResponse.schema.json"
+
+  - artifact: "scripts/run-m87-transparency-log-publication-scenario.mjs"
+  - artifact: "fixtures/transparency/m87_scenario.json"
+  - artifact: "fixtures/transparency/m87_expected.json"
+
+  - artifact: "milestones/M87.yaml"
+  - artifact: "verify/m87.sh"
+
+  - artifact: "artifacts/milestones/M87/latest/commands.log"
+  - artifact: "artifacts/milestones/M87/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M87/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M87/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M87/latest/transparency_log_publication_output.json"
+  - artifact: "artifacts/milestones/M87/latest/store.json"
+  - artifact: "artifacts/milestones/M87/latest/assertions.json"

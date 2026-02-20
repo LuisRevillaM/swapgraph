@@ -97,9 +97,10 @@ Last updated: 2026-02-19
 - M84: ✅ Steam Tier-1 adapter contract hardening (fixture-only) (idempotent adapter contract upsert/read + deterministic preflight contract checks for mode/dry-run/batch constraints with scope-enforced fixture handoff readiness) (fixtures-first)
 - M85: ✅ Steam deposit-per-swap live proof (integration-gated) (idempotent live-proof record contract + deterministic proof-hash artifact generation + operator runbook, enforced behind `INTEGRATION_ENABLED=1`) (staging integration proof)
 - M86: ✅ Steam Vault live proof (integration-gated) (idempotent vault lifecycle live-proof record contract + deterministic proof-hash artifacts + runbook-driven staging evidence flow with `settlement:write` + `vault:write`, enforced behind `INTEGRATION_ENABLED=1`) (staging integration proof)
+- M87: ✅ Transparency log publication contract (fixtures-first) (idempotent append-only publication + signed paginated export with deterministic attestation/checkpoint continuation and tamper-fail signature/hash verification) (fixtures-first)
 
 ## Next
-- M87: Transparency log publication contract
+- M88: Unified inclusion-proof linkage
 - Master remainder forecast: `docs/prd/2026-02-19_master-remaining-milestones_M71-M92.md`
 
 ## Notes

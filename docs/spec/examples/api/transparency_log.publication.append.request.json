@@ -1,0 +1,16 @@
+{
+  "entries": [
+    {
+      "entry_type": "receipt",
+      "entity_id": "rcpt_cycle_001",
+      "entity_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+      "cycle_id": "cycle_001"
+    },
+    {
+      "entry_type": "governance_artifact",
+      "entity_id": "rollout_policy_v8",
+      "entity_hash": "2222222222222222222222222222222222222222222222222222222222222222"
+    }
+  ],
+  "occurred_at": "2026-02-20T09:00:00Z"
+}

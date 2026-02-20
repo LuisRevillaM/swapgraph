@@ -1,0 +1,66 @@
+{
+  "correlation_id": "corr_transparencylog_publication_export",
+  "exported_at": "2026-02-20T09:10:00.000Z",
+  "query": {
+    "partner_id": "ops-admin",
+    "limit": 2
+  },
+  "summary": {
+    "total_entries": 4,
+    "page_entries": 2,
+    "first_entry_id": "tl_entry_000001",
+    "last_entry_id": "tl_entry_000004",
+    "latest_chain_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+  },
+  "entries": [
+    {
+      "log_index": 1,
+      "entry_id": "tl_entry_000001",
+      "publication_id": "tl_pub_000001",
+      "partner_id": "ops-admin",
+      "entry_type": "receipt",
+      "entity_id": "rcpt_cycle_001",
+      "entity_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+      "cycle_id": "cycle_001",
+      "previous_chain_hash": null,
+      "published_at": "2026-02-20T09:00:00.000Z",
+      "chain_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "log_index": 2,
+      "entry_id": "tl_entry_000002",
+      "publication_id": "tl_pub_000001",
+      "partner_id": "ops-admin",
+      "entry_type": "governance_artifact",
+      "entity_id": "rollout_policy_v8",
+      "entity_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+      "cycle_id": null,
+      "previous_chain_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "published_at": "2026-02-20T09:00:00.000Z",
+      "chain_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    }
+  ],
+  "total_filtered": 4,
+  "next_cursor": "tl_entry_000002",
+  "attestation": {
+    "cursor_after": null,
+    "next_cursor": "tl_entry_000002",
+    "attestation_after": null,
+    "page_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "chain_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+  },
+  "checkpoint": {
+    "checkpoint_after": null,
+    "attestation_chain_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "next_cursor": "tl_entry_000002",
+    "entries_count": 2,
+    "total_filtered": 4,
+    "checkpoint_hash": "9999999999999999999999999999999999999999999999999999999999999999"
+  },
+  "export_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+  "signature": {
+    "key_id": "dev-pi-k1",
+    "alg": "ed25519",
+    "sig": "example-signature"
+  }
+}

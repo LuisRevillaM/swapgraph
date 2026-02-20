@@ -1165,6 +1165,39 @@
           "vault:write"
         ]
       }
+    },
+    {
+      "method": "POST",
+      "path": "/transparency-log/publication",
+      "operation_id": "transparencyLog.publication.append",
+      "idempotency_required": true,
+      "request_schema": "TransparencyLogPublicationAppendRequest.schema.json",
+      "response_schema": "TransparencyLogPublicationAppendResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/transparency-log/publication/export",
+      "operation_id": "transparencyLog.publication.export",
+      "idempotency_required": false,
+      "response_schema": "TransparencyLogPublicationExportResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
     }
   ],
   "webhooks": {
