@@ -65,5 +65,6 @@ Official development for M98+ starts only when:
 - unresolved scope questions are explicitly resolved or deferred,
 - execution order is approved.
 
-## Current review artifact
+## Current review artifacts
 - M98 closure checklist draft: `docs/prd/2026-02-21_m98-prd-review-closure.md`
+- M99 closure checklist draft: `docs/prd/2026-02-21_m99-prd-review-closure.md`
