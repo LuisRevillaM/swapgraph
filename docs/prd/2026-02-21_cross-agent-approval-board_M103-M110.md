@@ -28,6 +28,10 @@ Purpose: single checklist for cross-agent approval of the LP subsystem PRD tranc
 ## D) Implementation pause confirmation
 - [ ] Explicit statement recorded: M103+ remains PRD-only until approval
 
+## Fast sign-off helper
+- Default-decision pack: `docs/prd/2026-02-21_m103-m110-default-decision-pack.md`
+- [ ] Default pack accepted as-is, or amendments recorded per milestone decision
+
 ## Suggested ownership template
 | Item | Owner | Reviewer | Status | Notes |
 |---|---|---|---|---|
