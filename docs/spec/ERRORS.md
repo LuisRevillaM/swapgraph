@@ -151,6 +151,11 @@ Notes:
   - `reliability_replay_check_invalid`
   - `reliability_replay_check_invalid_timestamp`
   - `reliability_conformance_export_query_invalid`
+  - `reliability_remediation_plan_invalid`
+  - `reliability_remediation_plan_invalid_timestamp`
+  - `reliability_remediation_plan_export_query_invalid`
+  - `reliability_remediation_plan_cursor_not_found`
+  - `reliability_signals_missing`
   - `replay_log_hash_mismatch`
   - `recovery_state_hash_mismatch`
   - `steam_live_proof_invalid`

@@ -201,6 +201,10 @@ Settlement endpoints:
   - idempotent replay-robustness/recovery verification contract (event-log hash parity + state-hash parity)
 - `GET /reliability/conformance/export`
   - signed reliability conformance export (`summary`, `slo_metrics`, `incident_drills`, `replay_checks`, `export_hash`, detached signature)
+- `POST /reliability/remediation-plans/suggest`
+  - idempotent remediation-plan suggestion contract derived from reliability signal windows (`risk_level`, `priority_score`, `recommended_actions`, `blockers`)
+- `GET /reliability/remediation-plans/export`
+  - signed paginated remediation-plan export (`summary`, `plans`, `next_cursor`, `attestation`, `export_hash`, detached signature)
 - `POST /adapters/steam/tier1/live-proof/deposit-per-swap`
   - idempotent operator-gated live proof capture for Steam deposit-per-swap settlement evidence (`INTEGRATION_ENABLED=1` required)
 - `POST /adapters/steam/tier1/live-proof/vault`

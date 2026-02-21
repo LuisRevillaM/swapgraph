@@ -1,0 +1,39 @@
+name: M96
+commands:
+  - cmd: "npm run verify:m96"
+artifacts:
+  - artifact: "docs/prd/M96.md"
+  - artifact: "docs/STATUS.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/ERRORS.md"
+  - artifact: "docs/spec/GAPS.md"
+
+  - artifact: "src/store/jsonStateStore.mjs"
+  - artifact: "src/crypto/policyIntegritySigning.mjs"
+  - artifact: "src/service/reliabilityConformanceService.mjs"
+  - artifact: "src/service/reliabilityRemediationPlanningService.mjs"
+
+  - artifact: "docs/spec/api/manifest.v1.json"
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+  - artifact: "docs/spec/examples/api/reliability.remediation_plan.suggest.request.json"
+  - artifact: "docs/spec/examples/api/reliability.remediation_plan.suggest.response.json"
+  - artifact: "docs/spec/examples/api/reliability.remediation_plan.export.response.json"
+
+  - artifact: "docs/spec/schemas/ReliabilityRemediationPlanSuggestRequest.schema.json"
+  - artifact: "docs/spec/schemas/ReliabilityRemediationPlanSuggestResponse.schema.json"
+  - artifact: "docs/spec/schemas/ReliabilityRemediationPlanExportResponse.schema.json"
+
+  - artifact: "fixtures/reliability/m96_scenario.json"
+  - artifact: "fixtures/reliability/m96_expected.json"
+
+  - artifact: "scripts/run-m96-reliability-remediation-planning-scenario.mjs"
+  - artifact: "milestones/M96.yaml"
+  - artifact: "verify/m96.sh"
+
+  - artifact: "artifacts/milestones/M96/latest/commands.log"
+  - artifact: "artifacts/milestones/M96/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M96/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M96/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M96/latest/reliability_remediation_planning_output.json"
+  - artifact: "artifacts/milestones/M96/latest/store.json"
+  - artifact: "artifacts/milestones/M96/latest/assertions.json"

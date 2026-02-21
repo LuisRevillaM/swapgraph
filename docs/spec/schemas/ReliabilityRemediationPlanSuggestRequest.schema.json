@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/ReliabilityRemediationPlanSuggestRequest.schema.json",
+  "title": "ReliabilityRemediationPlanSuggestRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "plan_request"
+  ],
+  "properties": {
+    "plan_request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "service_id",
+        "from_iso",
+        "to_iso"
+      ],
+      "properties": {
+        "service_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "from_iso": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "to_iso": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "max_actions": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "include_drill_actions": {
+          "type": "boolean"
+        },
+        "include_replay_actions": {
+          "type": "boolean"
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

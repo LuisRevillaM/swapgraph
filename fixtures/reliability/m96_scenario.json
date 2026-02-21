@@ -1,0 +1,417 @@
+{
+  "actors": {
+    "admin_partner": {
+      "type": "partner",
+      "id": "ops-admin"
+    }
+  },
+  "operations": [
+    {
+      "op": "reliability.slo.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m96_slo_1",
+      "request": {
+        "metric": {
+          "service_id": "swapgraph-core",
+          "window_start_at": "2026-02-21T00:00:00Z",
+          "window_end_at": "2026-02-21T01:00:00Z",
+          "target_availability_bps": 9990,
+          "observed_availability_bps": 9950,
+          "target_p95_latency_ms": 900,
+          "observed_p95_latency_ms": 1400,
+          "error_budget_consumed_bps": 80,
+          "request_count": 25000,
+          "notes": "degraded reliability window"
+        },
+        "occurred_at": "2026-02-21T01:01:00Z"
+      },
+      "expect_ok": true,
+      "expect_metric_id": "slo_metric_000001",
+      "expect_passing": false
+    },
+    {
+      "op": "reliability.slo.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m96_slo_2",
+      "request": {
+        "metric": {
+          "service_id": "swapgraph-core",
+          "window_start_at": "2026-02-21T01:00:00Z",
+          "window_end_at": "2026-02-21T02:00:00Z",
+          "target_availability_bps": 9990,
+          "observed_availability_bps": 9991,
+          "target_p95_latency_ms": 900,
+          "observed_p95_latency_ms": 700,
+          "error_budget_consumed_bps": 8,
+          "request_count": 21110,
+          "notes": "healthy reliability window"
+        },
+        "occurred_at": "2026-02-21T02:01:00Z"
+      },
+      "expect_ok": true,
+      "expect_metric_id": "slo_metric_000002",
+      "expect_passing": true
+    },
+    {
+      "op": "reliability.incident_drill.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m96_drill_1",
+      "request": {
+        "drill": {
+          "drill_type": "partial_outage",
+          "severity": "sev2",
+          "outcome": "fail",
+          "started_at": "2026-02-21T01:20:00Z",
+          "resolved_at": "2026-02-21T02:05:00Z",
+          "target_recovery_time_minutes": 20,
+          "runbook_ref": "runbooks/reliability/incident-rehearsal.md",
+          "evidence_refs": [
+            "artifact://drills/m96/outage/timeline.md"
+          ],
+          "notes": "recovery exceeded target"
+        },
+        "occurred_at": "2026-02-21T02:05:10Z"
+      },
+      "expect_ok": true,
+      "expect_drill_record_id": "incident_drill_000001",
+      "expect_outcome": "fail",
+      "expect_within_target": false
+    },
+    {
+      "op": "reliability.replay_check.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m96_replay_1",
+      "request": {
+        "replay_check": {
+          "scenario_id": "m96-recovery-a",
+          "recovery_mode": "full_replay",
+          "event_count": 2200,
+          "source_log_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "replay_log_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "expected_state_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "recovered_state_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "notes": "event-log divergence"
+        },
+        "occurred_at": "2026-02-21T02:06:00Z"
+      },
+      "expect_ok": true,
+      "expect_replay_check_id": "replay_check_000001",
+      "expect_passing": false,
+      "expect_reason_code": "replay_log_hash_mismatch"
+    },
+    {
+      "op": "reliability.replay_check.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m96_replay_2",
+      "request": {
+        "replay_check": {
+          "scenario_id": "m96-recovery-b",
+          "recovery_mode": "checkpoint_replay",
+          "event_count": 1440,
+          "source_log_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "replay_log_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "expected_state_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "recovered_state_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "notes": "state mismatch"
+        },
+        "occurred_at": "2026-02-21T02:06:30Z"
+      },
+      "expect_ok": true,
+      "expect_replay_check_id": "replay_check_000002",
+      "expect_passing": false,
+      "expect_reason_code": "recovery_state_hash_mismatch"
+    },
+    {
+      "op": "reliability.remediation_plan.suggest",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m96_plan_1",
+      "request": {
+        "plan_request": {
+          "service_id": "swapgraph-core",
+          "from_iso": "2026-02-21T00:00:00Z",
+          "to_iso": "2026-02-21T03:00:00Z",
+          "max_actions": 8,
+          "include_drill_actions": true,
+          "include_replay_actions": true,
+          "notes": "derive high urgency remediation plan"
+        },
+        "occurred_at": "2026-02-21T03:10:00Z"
+      },
+      "expect_ok": true,
+      "expect_plan_id": "remediation_plan_000001",
+      "expect_status": "suggested",
+      "expect_risk_level": "critical",
+      "expect_priority_score": 95,
+      "expect_slo_total": 2,
+      "expect_slo_failing": 1,
+      "expect_drills_total": 1,
+      "expect_drills_failing": 1,
+      "expect_replay_checks_total": 2,
+      "expect_replay_checks_failing": 2,
+      "expect_signal_count": 5,
+      "expect_total_failing": 4,
+      "expect_actions_count": 6,
+      "expect_action_codes": [
+        "triage_availability_regression",
+        "enforce_error_budget_guardrail",
+        "profile_high_latency_hotpaths",
+        "schedule_incident_response_rehearsal",
+        "audit_event_log_integrity",
+        "diff_recovery_state_projection"
+      ],
+      "expect_blockers_count": 0,
+      "expect_replayed": false
+    },
+    {
+      "op": "reliability.remediation_plan.suggest",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m96_plan_1",
+      "request": {
+        "plan_request": {
+          "service_id": "swapgraph-core",
+          "from_iso": "2026-02-21T00:00:00Z",
+          "to_iso": "2026-02-21T03:00:00Z",
+          "max_actions": 8,
+          "include_drill_actions": true,
+          "include_replay_actions": true,
+          "notes": "derive high urgency remediation plan"
+        },
+        "occurred_at": "2026-02-21T03:10:00Z"
+      },
+      "expect_ok": true,
+      "expect_plan_id": "remediation_plan_000001",
+      "expect_replayed": true
+    },
+    {
+      "op": "reliability.remediation_plan.suggest",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m96_plan_1",
+      "request": {
+        "plan_request": {
+          "service_id": "swapgraph-core",
+          "from_iso": "2026-02-21T00:00:00Z",
+          "to_iso": "2026-02-21T03:00:00Z",
+          "max_actions": 4,
+          "include_drill_actions": true,
+          "include_replay_actions": true,
+          "notes": "mutated request"
+        },
+        "occurred_at": "2026-02-21T03:10:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    },
+    {
+      "op": "reliability.remediation_plan.suggest",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m96_plan_2",
+      "request": {
+        "plan_request": {
+          "service_id": "matching-engine",
+          "from_iso": "2026-02-21T00:00:00Z",
+          "to_iso": "2026-02-21T03:00:00Z",
+          "max_actions": 3,
+          "include_drill_actions": true,
+          "include_replay_actions": true,
+          "notes": "service has no reliability signals yet"
+        },
+        "occurred_at": "2026-02-21T03:15:00Z"
+      },
+      "expect_ok": true,
+      "expect_plan_id": "remediation_plan_000002",
+      "expect_status": "suggested",
+      "expect_risk_level": "low",
+      "expect_priority_score": 0,
+      "expect_actions_count": 1,
+      "expect_action_codes": [
+        "maintain_baseline_observability_watch"
+      ],
+      "expect_blockers_count": 1,
+      "expect_blocker_reason_codes": [
+        "reliability_signals_missing"
+      ],
+      "expect_replayed": false
+    },
+    {
+      "op": "reliability.remediation_plan.suggest",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "idempotency_key": "m96_scope_fail",
+      "request": {
+        "plan_request": {
+          "service_id": "swapgraph-core",
+          "from_iso": "2026-02-21T00:00:00Z",
+          "to_iso": "2026-02-21T03:00:00Z"
+        },
+        "occurred_at": "2026-02-21T03:16:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    },
+    {
+      "op": "reliability.remediation_plan.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-21T03:00:00Z",
+        "to_iso": "2026-02-21T03:30:00Z",
+        "limit": 1,
+        "now_iso": "2026-02-21T03:20:00Z",
+        "exported_at_iso": "2026-02-21T03:20:00Z"
+      },
+      "expect_ok": true,
+      "expect_total_plans": 2,
+      "expect_returned_plans": 1,
+      "expect_actionable_plans": 2,
+      "expect_critical_count": 1,
+      "expect_high_count": 0,
+      "expect_medium_count": 0,
+      "expect_low_count": 1,
+      "expect_total_filtered": 2,
+      "expect_plans_count": 1,
+      "expect_first_plan_id": "remediation_plan_000001",
+      "expect_last_plan_id": "remediation_plan_000001",
+      "expect_next_cursor_present": true,
+      "expect_signature_valid": true,
+      "expect_tamper_signature_valid": false,
+      "expect_attestation_present": true,
+      "expect_integration_mode": "fixture_only"
+    },
+    {
+      "op": "reliability.remediation_plan.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-21T03:00:00Z",
+        "to_iso": "2026-02-21T03:30:00Z",
+        "limit": 1,
+        "cursor_after": "2026-02-21T03:10:00.000Z|remediation_plan_000001",
+        "now_iso": "2026-02-21T03:21:00Z",
+        "exported_at_iso": "2026-02-21T03:21:00Z"
+      },
+      "expect_ok": true,
+      "expect_total_plans": 2,
+      "expect_returned_plans": 1,
+      "expect_actionable_plans": 2,
+      "expect_critical_count": 1,
+      "expect_high_count": 0,
+      "expect_medium_count": 0,
+      "expect_low_count": 1,
+      "expect_total_filtered": 2,
+      "expect_plans_count": 1,
+      "expect_first_plan_id": "remediation_plan_000002",
+      "expect_last_plan_id": "remediation_plan_000002",
+      "expect_next_cursor_present": false,
+      "expect_signature_valid": true,
+      "expect_tamper_signature_valid": false,
+      "expect_attestation_present": true,
+      "expect_integration_mode": "fixture_only"
+    },
+    {
+      "op": "reliability.remediation_plan.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "cursor_after": "2026-02-21T03:10:00.000Z|remediation_plan_999999",
+        "now_iso": "2026-02-21T03:22:00Z",
+        "exported_at_iso": "2026-02-21T03:22:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "reliability_remediation_plan_cursor_not_found"
+    },
+    {
+      "op": "reliability.remediation_plan.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "risk_level": "severe",
+        "now_iso": "2026-02-21T03:23:00Z",
+        "exported_at_iso": "2026-02-21T03:23:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "reliability_remediation_plan_export_query_invalid"
+    },
+    {
+      "op": "reliability.remediation_plan.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "query": {
+        "now_iso": "2026-02-21T03:24:00Z",
+        "exported_at_iso": "2026-02-21T03:24:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    }
+  ]
+}

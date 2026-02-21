@@ -1,0 +1,245 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/ReliabilityRemediationPlanExportResponse.schema.json",
+  "title": "ReliabilityRemediationPlanExportResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "partner_id",
+    "integration_mode",
+    "exported_at",
+    "query",
+    "summary",
+    "plans",
+    "total_filtered",
+    "attestation",
+    "export_hash",
+    "signature"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "partner_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "integration_mode": {
+      "type": "string",
+      "enum": [
+        "fixture_only"
+      ]
+    },
+    "exported_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "query": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "service_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "risk_level": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "suggested",
+            "approved",
+            "applied",
+            "dismissed"
+          ]
+        },
+        "from_iso": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "to_iso": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        },
+        "cursor_after": {
+          "type": "string",
+          "minLength": 1
+        },
+        "now_iso": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "exported_at_iso": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total_plans",
+        "returned_plans",
+        "actionable_plans",
+        "critical_count",
+        "high_count",
+        "medium_count",
+        "low_count",
+        "by_status"
+      ],
+      "properties": {
+        "total_plans": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "returned_plans": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "actionable_plans": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "critical_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "high_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "medium_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "low_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "by_status": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "status",
+              "count"
+            ],
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "suggested",
+                  "approved",
+                  "applied",
+                  "dismissed"
+                ]
+              },
+              "count": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "plans": {
+      "type": "array",
+      "items": {
+        "$ref": "ReliabilityRemediationPlanSuggestResponse.schema.json#/properties/plan"
+      }
+    },
+    "total_filtered": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "attestation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cursor_after",
+        "next_cursor",
+        "attestation_after",
+        "page_hash",
+        "chain_hash"
+      ],
+      "properties": {
+        "cursor_after": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "next_cursor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "attestation_after": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "page_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "chain_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "export_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key_id",
+        "alg",
+        "sig"
+      ],
+      "properties": {
+        "key_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "alg": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sig": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

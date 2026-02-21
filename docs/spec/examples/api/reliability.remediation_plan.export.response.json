@@ -1,0 +1,42 @@
+{
+  "correlation_id": "corr_reliability_remediation_plan_export",
+  "partner_id": "ops-admin",
+  "integration_mode": "fixture_only",
+  "exported_at": "2026-02-21T01:10:00.000Z",
+  "query": {
+    "service_id": "swapgraph-core",
+    "limit": 100,
+    "exported_at_iso": "2026-02-21T01:10:00.000Z"
+  },
+  "summary": {
+    "total_plans": 2,
+    "returned_plans": 2,
+    "actionable_plans": 2,
+    "critical_count": 0,
+    "high_count": 1,
+    "medium_count": 0,
+    "low_count": 1,
+    "by_status": [
+      {
+        "status": "suggested",
+        "count": 2
+      }
+    ]
+  },
+  "plans": [],
+  "total_filtered": 2,
+  "next_cursor": null,
+  "attestation": {
+    "cursor_after": null,
+    "next_cursor": null,
+    "attestation_after": null,
+    "page_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "chain_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "export_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "signature": {
+    "key_id": "dev-pi-k1",
+    "alg": "ed25519",
+    "sig": "UmVsaWFiaWxpdHlSZW1lZGlhdGlvblBsYW5FeHBvcnRTaWduYXR1cmVFeGFtcGxl"
+  }
+}

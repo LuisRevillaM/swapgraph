@@ -4251,3 +4251,269 @@ export function verifyDisputeCompensationLinkageExportPayloadWithPublicKeyPem({ 
   const signable = disputeCompensationLinkageExportSignablePayload(payload);
   return verifyPolicyIntegrityPayloadSignatureWithPublicKeyPem({ payload: signable, publicKeyPem, keyId, alg });
 }
+
+function normalizeReliabilityRemediationPlanExportQuery(query) {
+  const out = {};
+
+  if (typeof query?.service_id === 'string' && query.service_id.trim()) out.service_id = query.service_id.trim();
+  if (typeof query?.risk_level === 'string' && query.risk_level.trim()) out.risk_level = query.risk_level.trim();
+  if (typeof query?.status === 'string' && query.status.trim()) out.status = query.status.trim();
+  if (typeof query?.from_iso === 'string' && query.from_iso.trim()) out.from_iso = query.from_iso.trim();
+  if (typeof query?.to_iso === 'string' && query.to_iso.trim()) out.to_iso = query.to_iso.trim();
+
+  if (Number.isFinite(query?.limit)) out.limit = Number(query.limit);
+  else {
+    const limit = Number.parseInt(String(query?.limit ?? ''), 10);
+    if (Number.isFinite(limit)) out.limit = limit;
+  }
+
+  if (typeof query?.cursor_after === 'string' && query.cursor_after.trim()) out.cursor_after = query.cursor_after.trim();
+  if (typeof query?.now_iso === 'string' && query.now_iso.trim()) out.now_iso = query.now_iso.trim();
+  if (typeof query?.exported_at_iso === 'string' && query.exported_at_iso.trim()) out.exported_at_iso = query.exported_at_iso.trim();
+
+  return out;
+}
+
+function normalizeReliabilityRemediationPlanWindow(window) {
+  return {
+    from_iso: window?.from_iso,
+    to_iso: window?.to_iso
+  };
+}
+
+function normalizeReliabilityRemediationPlanSignalSummary(summary) {
+  return {
+    slo_total: Number.isFinite(summary?.slo_total) ? Number(summary.slo_total) : 0,
+    slo_failing: Number.isFinite(summary?.slo_failing) ? Number(summary.slo_failing) : 0,
+    drills_total: Number.isFinite(summary?.drills_total) ? Number(summary.drills_total) : 0,
+    drills_failing: Number.isFinite(summary?.drills_failing) ? Number(summary.drills_failing) : 0,
+    replay_checks_total: Number.isFinite(summary?.replay_checks_total) ? Number(summary.replay_checks_total) : 0,
+    replay_checks_failing: Number.isFinite(summary?.replay_checks_failing) ? Number(summary.replay_checks_failing) : 0,
+    availability_failures: Number.isFinite(summary?.availability_failures) ? Number(summary.availability_failures) : 0,
+    latency_failures: Number.isFinite(summary?.latency_failures) ? Number(summary.latency_failures) : 0,
+    error_budget_failures: Number.isFinite(summary?.error_budget_failures) ? Number(summary.error_budget_failures) : 0,
+    replay_log_failures: Number.isFinite(summary?.replay_log_failures) ? Number(summary.replay_log_failures) : 0,
+    replay_state_failures: Number.isFinite(summary?.replay_state_failures) ? Number(summary.replay_state_failures) : 0,
+    signal_count: Number.isFinite(summary?.signal_count) ? Number(summary.signal_count) : 0,
+    total_failing: Number.isFinite(summary?.total_failing) ? Number(summary.total_failing) : 0
+  };
+}
+
+function normalizeReliabilityRemediationAction(action) {
+  return {
+    action_id: action?.action_id,
+    action_code: action?.action_code,
+    priority: action?.priority,
+    reason_code: action?.reason_code,
+    runbook_ref: action?.runbook_ref,
+    automation_hint: action?.automation_hint,
+    evidence_hint: action?.evidence_hint,
+    ...(typeof action?.notes === 'string' ? { notes: action.notes } : {})
+  };
+}
+
+function normalizeReliabilityRemediationBlocker(blocker) {
+  return {
+    blocker_code: blocker?.blocker_code,
+    severity: blocker?.severity,
+    reason_code: blocker?.reason_code,
+    message: blocker?.message
+  };
+}
+
+function normalizeReliabilityRemediationPlanRecord(record) {
+  return {
+    plan_id: record?.plan_id,
+    partner_id: record?.partner_id,
+    service_id: record?.service_id,
+    status: record?.status,
+    risk_level: record?.risk_level,
+    priority_score: Number.isFinite(record?.priority_score) ? Number(record.priority_score) : 0,
+    window: normalizeReliabilityRemediationPlanWindow(record?.window),
+    signal_summary: normalizeReliabilityRemediationPlanSignalSummary(record?.signal_summary),
+    recommended_actions: Array.isArray(record?.recommended_actions)
+      ? record.recommended_actions
+        .map(normalizeReliabilityRemediationAction)
+        .sort((a, b) => String(a.action_code ?? '').localeCompare(String(b.action_code ?? '')))
+      : [],
+    blockers: Array.isArray(record?.blockers)
+      ? record.blockers
+        .map(normalizeReliabilityRemediationBlocker)
+        .sort((a, b) => String(a.blocker_code ?? '').localeCompare(String(b.blocker_code ?? '')))
+      : [],
+    integration_mode: record?.integration_mode,
+    created_at: record?.created_at,
+    updated_at: record?.updated_at,
+    ...(typeof record?.notes === 'string' ? { notes: record.notes } : {})
+  };
+}
+
+function normalizeReliabilityRemediationPlanRecords(records) {
+  return (records ?? [])
+    .map(normalizeReliabilityRemediationPlanRecord)
+    .sort((a, b) => `${a.updated_at ?? ''}|${a.plan_id ?? ''}`.localeCompare(`${b.updated_at ?? ''}|${b.plan_id ?? ''}`));
+}
+
+function normalizeReliabilityRemediationPlanExportSummary(summary) {
+  return {
+    total_plans: Number.isFinite(summary?.total_plans) ? Number(summary.total_plans) : 0,
+    returned_plans: Number.isFinite(summary?.returned_plans) ? Number(summary.returned_plans) : 0,
+    actionable_plans: Number.isFinite(summary?.actionable_plans) ? Number(summary.actionable_plans) : 0,
+    critical_count: Number.isFinite(summary?.critical_count) ? Number(summary.critical_count) : 0,
+    high_count: Number.isFinite(summary?.high_count) ? Number(summary.high_count) : 0,
+    medium_count: Number.isFinite(summary?.medium_count) ? Number(summary.medium_count) : 0,
+    low_count: Number.isFinite(summary?.low_count) ? Number(summary.low_count) : 0,
+    by_status: Array.isArray(summary?.by_status)
+      ? summary.by_status
+        .map(row => ({
+          status: row?.status,
+          count: Number.isFinite(row?.count) ? Number(row.count) : 0
+        }))
+        .sort((a, b) => String(a.status ?? '').localeCompare(String(b.status ?? '')))
+      : []
+  };
+}
+
+function reliabilityRemediationPlanExportSignablePayload(payload) {
+  return {
+    exported_at: payload?.exported_at,
+    query: normalizeReliabilityRemediationPlanExportQuery(payload?.query),
+    summary: normalizeReliabilityRemediationPlanExportSummary(payload?.summary),
+    plans: normalizeReliabilityRemediationPlanRecords(payload?.plans),
+    total_filtered: Number.isFinite(payload?.total_filtered) ? Number(payload.total_filtered) : 0,
+    ...(typeof payload?.next_cursor === 'string' ? { next_cursor: payload.next_cursor } : {}),
+    ...(payload?.attestation ? { attestation: normalizeExportAttestation(payload.attestation) } : {}),
+    export_hash: payload?.export_hash,
+    signature: payload?.signature
+  };
+}
+
+export function buildReliabilityRemediationPlanExportHash({ query, summary, plans, totalFiltered, nextCursor }) {
+  return sha256HexCanonical({
+    query: normalizeReliabilityRemediationPlanExportQuery(query),
+    summary: normalizeReliabilityRemediationPlanExportSummary(summary),
+    plans: normalizeReliabilityRemediationPlanRecords(plans),
+    total_filtered: Number.isFinite(totalFiltered) ? Number(totalFiltered) : 0,
+    ...(typeof nextCursor === 'string' ? { next_cursor: nextCursor } : {})
+  });
+}
+
+export function buildSignedReliabilityRemediationPlanExportPayload({
+  exportedAt,
+  query,
+  summary,
+  plans,
+  totalFiltered,
+  nextCursor,
+  withAttestation,
+  keyId
+}) {
+  const normalizedQuery = normalizeReliabilityRemediationPlanExportQuery(query);
+  const normalizedSummary = normalizeReliabilityRemediationPlanExportSummary(summary);
+  const normalizedPlans = normalizeReliabilityRemediationPlanRecords(plans);
+  const normalizedTotalFiltered = Number.isFinite(totalFiltered) ? Number(totalFiltered) : 0;
+
+  const exportHash = buildReliabilityRemediationPlanExportHash({
+    query: normalizedQuery,
+    summary: normalizedSummary,
+    plans: normalizedPlans,
+    totalFiltered: normalizedTotalFiltered,
+    nextCursor
+  });
+
+  const payload = {
+    exported_at: exportedAt,
+    query: normalizedQuery,
+    summary: normalizedSummary,
+    plans: normalizedPlans,
+    total_filtered: normalizedTotalFiltered,
+    ...(typeof nextCursor === 'string' ? { next_cursor: nextCursor } : {}),
+    export_hash: exportHash
+  };
+
+  if (withAttestation) {
+    payload.attestation = buildPolicyAuditExportAttestation({
+      query: normalizedQuery,
+      nextCursor,
+      exportHash
+    });
+  }
+
+  payload.signature = signPolicyIntegrityPayload(payload, { keyId });
+  return payload;
+}
+
+export function verifyReliabilityRemediationPlanExportPayload(payload) {
+  if (!payload || typeof payload !== 'object') return { ok: false, error: 'missing_payload' };
+
+  const expectedHash = buildReliabilityRemediationPlanExportHash({
+    query: payload.query,
+    summary: payload.summary,
+    plans: payload.plans,
+    totalFiltered: payload.total_filtered,
+    nextCursor: payload.next_cursor
+  });
+
+  if (payload.export_hash !== expectedHash) {
+    return {
+      ok: false,
+      error: 'hash_mismatch',
+      details: {
+        expected_hash: expectedHash,
+        provided_hash: payload.export_hash ?? null
+      }
+    };
+  }
+
+  if (payload.attestation) {
+    const attestation = verifyPolicyAuditExportAttestation({
+      attestation: payload.attestation,
+      query: payload.query,
+      nextCursor: payload.next_cursor,
+      exportHash: expectedHash
+    });
+    if (!attestation.ok) return attestation;
+  }
+
+  const signable = reliabilityRemediationPlanExportSignablePayload(payload);
+  const verified = verifyPolicyIntegrityPayloadSignature(signable);
+  if (!verified.ok) return verified;
+
+  return { ok: true };
+}
+
+export function verifyReliabilityRemediationPlanExportPayloadWithPublicKeyPem({ payload, publicKeyPem, keyId, alg }) {
+  if (!payload || typeof payload !== 'object') return { ok: false, error: 'missing_payload' };
+
+  const expectedHash = buildReliabilityRemediationPlanExportHash({
+    query: payload.query,
+    summary: payload.summary,
+    plans: payload.plans,
+    totalFiltered: payload.total_filtered,
+    nextCursor: payload.next_cursor
+  });
+
+  if (payload.export_hash !== expectedHash) {
+    return {
+      ok: false,
+      error: 'hash_mismatch',
+      details: {
+        expected_hash: expectedHash,
+        provided_hash: payload.export_hash ?? null
+      }
+    };
+  }
+
+  if (payload.attestation) {
+    const attestation = verifyPolicyAuditExportAttestation({
+      attestation: payload.attestation,
+      query: payload.query,
+      nextCursor: payload.next_cursor,
+      exportHash: expectedHash
+    });
+    if (!attestation.ok) return attestation;
+  }
+
+  const signable = reliabilityRemediationPlanExportSignablePayload(payload);
+  return verifyPolicyIntegrityPayloadSignatureWithPublicKeyPem({ payload: signable, publicKeyPem, keyId, alg });
+}

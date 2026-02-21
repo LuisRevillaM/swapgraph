@@ -1,0 +1,47 @@
+{
+  "correlation_id": "corr_reliability_remediation_plan_suggest",
+  "plan": {
+    "plan_id": "remediation_plan_000001",
+    "partner_id": "ops-admin",
+    "service_id": "swapgraph-core",
+    "status": "suggested",
+    "risk_level": "high",
+    "priority_score": 65,
+    "window": {
+      "from_iso": "2026-02-21T00:00:00.000Z",
+      "to_iso": "2026-02-21T01:00:00.000Z"
+    },
+    "signal_summary": {
+      "slo_total": 2,
+      "slo_failing": 1,
+      "drills_total": 1,
+      "drills_failing": 1,
+      "replay_checks_total": 2,
+      "replay_checks_failing": 1,
+      "availability_failures": 1,
+      "latency_failures": 1,
+      "error_budget_failures": 1,
+      "replay_log_failures": 1,
+      "replay_state_failures": 0,
+      "signal_count": 5,
+      "total_failing": 3
+    },
+    "recommended_actions": [
+      {
+        "action_id": "remediation_action_001",
+        "action_code": "triage_availability_regression",
+        "priority": "critical",
+        "reason_code": "availability_below_target",
+        "runbook_ref": "runbooks/reliability/availability-triage.md",
+        "automation_hint": "rollback_latest_risky_change",
+        "evidence_hint": "artifact://reliability/availability/regression-timeline.json"
+      }
+    ],
+    "blockers": [],
+    "integration_mode": "fixture_only",
+    "created_at": "2026-02-21T01:01:00.000Z",
+    "updated_at": "2026-02-21T01:01:00.000Z",
+    "notes": "derive remediation plan from latest reliability window"
+  },
+  "replayed": false
+}

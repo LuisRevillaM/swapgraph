@@ -1,0 +1,277 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/ReliabilityRemediationPlanSuggestResponse.schema.json",
+  "title": "ReliabilityRemediationPlanSuggestResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "plan",
+    "replayed"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "plan_id",
+        "partner_id",
+        "service_id",
+        "status",
+        "risk_level",
+        "priority_score",
+        "window",
+        "signal_summary",
+        "recommended_actions",
+        "blockers",
+        "integration_mode",
+        "created_at",
+        "updated_at"
+      ],
+      "properties": {
+        "plan_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "service_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "suggested",
+            "approved",
+            "applied",
+            "dismissed"
+          ]
+        },
+        "risk_level": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ]
+        },
+        "priority_score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "window": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "from_iso",
+            "to_iso"
+          ],
+          "properties": {
+            "from_iso": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "to_iso": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "signal_summary": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "slo_total",
+            "slo_failing",
+            "drills_total",
+            "drills_failing",
+            "replay_checks_total",
+            "replay_checks_failing",
+            "availability_failures",
+            "latency_failures",
+            "error_budget_failures",
+            "replay_log_failures",
+            "replay_state_failures",
+            "signal_count",
+            "total_failing"
+          ],
+          "properties": {
+            "slo_total": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "slo_failing": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "drills_total": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "drills_failing": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "replay_checks_total": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "replay_checks_failing": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "availability_failures": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "latency_failures": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "error_budget_failures": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "replay_log_failures": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "replay_state_failures": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "signal_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "total_failing": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "recommended_actions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "action_id",
+              "action_code",
+              "priority",
+              "reason_code",
+              "runbook_ref",
+              "automation_hint",
+              "evidence_hint"
+            ],
+            "properties": {
+              "action_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "action_code": {
+                "type": "string",
+                "minLength": 1
+              },
+              "priority": {
+                "type": "string",
+                "enum": [
+                  "low",
+                  "medium",
+                  "high",
+                  "critical"
+                ]
+              },
+              "reason_code": {
+                "type": "string",
+                "minLength": 1
+              },
+              "runbook_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "automation_hint": {
+                "type": "string",
+                "minLength": 1
+              },
+              "evidence_hint": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "blockers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "blocker_code",
+              "severity",
+              "reason_code",
+              "message"
+            ],
+            "properties": {
+              "blocker_code": {
+                "type": "string",
+                "minLength": 1
+              },
+              "severity": {
+                "type": "string",
+                "enum": [
+                  "low",
+                  "medium",
+                  "high",
+                  "critical"
+                ]
+              },
+              "reason_code": {
+                "type": "string",
+                "minLength": 1
+              },
+              "message": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "integration_mode": {
+          "type": "string",
+          "enum": [
+            "fixture_only"
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "replayed": {
+      "type": "boolean"
+    }
+  }
+}

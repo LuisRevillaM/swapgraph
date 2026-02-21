@@ -62,6 +62,8 @@ export class JsonStateStore {
       reliability_slo_metrics: [],
       reliability_incident_drills: [],
       reliability_replay_checks: [],
+      reliability_remediation_plans: [],
+      reliability_remediation_plan_counter: 0,
       oauth_clients: {},
       oauth_tokens: {}
     };
@@ -122,6 +124,8 @@ export class JsonStateStore {
         reliability_slo_metrics: [],
         reliability_incident_drills: [],
         reliability_replay_checks: [],
+        reliability_remediation_plans: [],
+        reliability_remediation_plan_counter: 0,
         oauth_clients: {},
         oauth_tokens: {}
       };
@@ -183,6 +187,8 @@ export class JsonStateStore {
     this.state.reliability_slo_metrics ||= [];
     this.state.reliability_incident_drills ||= [];
     this.state.reliability_replay_checks ||= [];
+    this.state.reliability_remediation_plans ||= [];
+    this.state.reliability_remediation_plan_counter ||= 0;
     this.state.oauth_clients ||= {};
     this.state.oauth_tokens ||= {};
   }

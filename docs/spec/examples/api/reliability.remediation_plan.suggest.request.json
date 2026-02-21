@@ -1,0 +1,12 @@
+{
+  "plan_request": {
+    "service_id": "swapgraph-core",
+    "from_iso": "2026-02-21T00:00:00Z",
+    "to_iso": "2026-02-21T01:00:00Z",
+    "max_actions": 5,
+    "include_drill_actions": true,
+    "include_replay_actions": true,
+    "notes": "derive remediation plan from latest reliability window"
+  },
+  "occurred_at": "2026-02-21T01:01:00Z"
+}

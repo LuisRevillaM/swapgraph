@@ -576,6 +576,18 @@
     {
       "file": "compensation.dispute_linkage.export.response.json",
       "schema": "DisputeCompensationLinkageExportResponse.schema.json"
+    },
+    {
+      "file": "reliability.remediation_plan.suggest.request.json",
+      "schema": "ReliabilityRemediationPlanSuggestRequest.schema.json"
+    },
+    {
+      "file": "reliability.remediation_plan.suggest.response.json",
+      "schema": "ReliabilityRemediationPlanSuggestResponse.schema.json"
+    },
+    {
+      "file": "reliability.remediation_plan.export.response.json",
+      "schema": "ReliabilityRemediationPlanExportResponse.schema.json"
     }
   ]
 }

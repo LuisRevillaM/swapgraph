@@ -1548,6 +1548,39 @@
           "settlement:read"
         ]
       }
+    },
+    {
+      "method": "POST",
+      "path": "/reliability/remediation-plans/suggest",
+      "operation_id": "reliability.remediation_plan.suggest",
+      "idempotency_required": true,
+      "request_schema": "ReliabilityRemediationPlanSuggestRequest.schema.json",
+      "response_schema": "ReliabilityRemediationPlanSuggestResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/reliability/remediation-plans/export",
+      "operation_id": "reliability.remediation_plan.export",
+      "idempotency_required": false,
+      "response_schema": "ReliabilityRemediationPlanExportResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
     }
   ],
   "webhooks": {
