@@ -61,7 +61,11 @@ Each brief should include: hypothesis, target cohort, success metric, failure cr
 ## Seed artifacts added (2026-02-21)
 - BRD-01: `docs/brd/2026-02-21_BRD-01_business-outcomes-kpi-bands.md`
 - BRD-02: `docs/brd/2026-02-21_BRD-02_trust-safety-operating-policy.md`
+- BRD-03: `docs/brd/2026-02-21_BRD-03_commercial-packaging-strategy.md`
+- BRD-04: `docs/brd/2026-02-21_BRD-04_partner-segmentation-rollout-strategy.md`
 - Discovery pack: `docs/prd/2026-02-21_web-first-discovery-brief-pack_D-W1-D-W5.md`
+- Cross-agent approval board: `docs/prd/2026-02-21_cross-agent-approval-board_M98-M102.md`
+- BRD index: `docs/brd/README.md`
 
 ## Cross-agent handoff acceptance
 Before implementation approval for M98+:

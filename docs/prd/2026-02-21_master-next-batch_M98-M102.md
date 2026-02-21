@@ -69,7 +69,11 @@ Official development for M98+ starts only when:
 - Handoff + web-first BRD/discovery split guidance: `docs/prd/2026-02-21_handoff-web-first_brd-vs-discovery.md`
 - BRD-01 (business outcomes + KPI bands): `docs/brd/2026-02-21_BRD-01_business-outcomes-kpi-bands.md`
 - BRD-02 (trust/safety operating policy): `docs/brd/2026-02-21_BRD-02_trust-safety-operating-policy.md`
+- BRD-03 (commercial packaging strategy): `docs/brd/2026-02-21_BRD-03_commercial-packaging-strategy.md`
+- BRD-04 (partner segmentation/rollout strategy): `docs/brd/2026-02-21_BRD-04_partner-segmentation-rollout-strategy.md`
 - Web-first discovery brief pack (D-W1..D-W5): `docs/prd/2026-02-21_web-first-discovery-brief-pack_D-W1-D-W5.md`
+- Cross-agent approval board: `docs/prd/2026-02-21_cross-agent-approval-board_M98-M102.md`
+- BRD index: `docs/brd/README.md`
 
 ## Current review artifacts
 - M98 closure checklist draft: `docs/prd/2026-02-21_m98-prd-review-closure.md`
