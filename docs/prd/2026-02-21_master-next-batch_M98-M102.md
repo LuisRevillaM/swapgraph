@@ -64,3 +64,6 @@ Official development for M98+ starts only when:
 - PRDs M98–M102 are accepted as source-of-truth,
 - unresolved scope questions are explicitly resolved or deferred,
 - execution order is approved.
+
+## Current review artifact
+- M98 closure checklist draft: `docs/prd/2026-02-21_m98-prd-review-closure.md`
