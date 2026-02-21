@@ -1,0 +1,20 @@
+{
+  "bundle": {
+    "milestone_id": "M97",
+    "environment": "staging",
+    "runbook_ref": "ops/M97_STAGING_EVIDENCE_CONFORMANCE_RUNBOOK.md",
+    "conformance_ref": "docs/spec/CONFORMANCE.md",
+    "release_ref": "main@70fde88",
+    "collected_at": "2026-02-21T03:40:00Z",
+    "evidence_items": [
+      {
+        "artifact_ref": "artifacts/milestones/M96/latest/commands.log",
+        "artifact_kind": "verify_log",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "captured_at": "2026-02-21T03:39:30Z"
+      }
+    ],
+    "notes": "staging evidence refresh after m96"
+  },
+  "occurred_at": "2026-02-21T03:40:30Z"
+}

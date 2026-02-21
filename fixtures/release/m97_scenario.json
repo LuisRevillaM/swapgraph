@@ -1,0 +1,435 @@
+{
+  "actors": {
+    "admin_partner": {
+      "type": "partner",
+      "id": "ops-admin"
+    }
+  },
+  "operations": [
+    {
+      "op": "staging.evidence_bundle.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m97_bundle_1",
+      "request": {
+        "bundle": {
+          "milestone_id": "M96",
+          "environment": "staging",
+          "runbook_ref": "ops/M97_STAGING_EVIDENCE_CONFORMANCE_RUNBOOK.md",
+          "conformance_ref": "docs/spec/CONFORMANCE.md",
+          "release_ref": "main@70fde88",
+          "collected_at": "2026-02-21T03:41:00Z",
+          "evidence_items": [
+            {
+              "artifact_ref": "artifacts/milestones/M96/latest/commands.log",
+              "artifact_kind": "verify_log",
+              "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "captured_at": "2026-02-21T03:40:10Z"
+            },
+            {
+              "artifact_ref": "artifacts/milestones/M96/latest/reliability_remediation_planning_output.json",
+              "artifact_kind": "fixture_output",
+              "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "captured_at": "2026-02-21T03:40:20Z"
+            }
+          ],
+          "notes": "refresh evidence after m96 push"
+        },
+        "occurred_at": "2026-02-21T03:41:30Z"
+      },
+      "expect_ok": true,
+      "expect_bundle_id": "staging_evidence_bundle_000001",
+      "expect_milestone_id": "M96",
+      "expect_evidence_count": 2,
+      "expect_manifest_hash_valid": true,
+      "expect_checkpoint_hash_valid": true,
+      "expect_checkpoint_after_present": false,
+      "expect_replayed": false
+    },
+    {
+      "op": "staging.evidence_bundle.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m97_bundle_1",
+      "request": {
+        "bundle": {
+          "milestone_id": "M96",
+          "environment": "staging",
+          "runbook_ref": "ops/M97_STAGING_EVIDENCE_CONFORMANCE_RUNBOOK.md",
+          "conformance_ref": "docs/spec/CONFORMANCE.md",
+          "release_ref": "main@70fde88",
+          "collected_at": "2026-02-21T03:41:00Z",
+          "evidence_items": [
+            {
+              "artifact_ref": "artifacts/milestones/M96/latest/commands.log",
+              "artifact_kind": "verify_log",
+              "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "captured_at": "2026-02-21T03:40:10Z"
+            },
+            {
+              "artifact_ref": "artifacts/milestones/M96/latest/reliability_remediation_planning_output.json",
+              "artifact_kind": "fixture_output",
+              "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "captured_at": "2026-02-21T03:40:20Z"
+            }
+          ],
+          "notes": "refresh evidence after m96 push"
+        },
+        "occurred_at": "2026-02-21T03:41:30Z"
+      },
+      "expect_ok": true,
+      "expect_bundle_id": "staging_evidence_bundle_000001",
+      "expect_replayed": true
+    },
+    {
+      "op": "staging.evidence_bundle.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m97_bundle_1",
+      "request": {
+        "bundle": {
+          "milestone_id": "M96",
+          "environment": "staging",
+          "runbook_ref": "ops/M97_STAGING_EVIDENCE_CONFORMANCE_RUNBOOK.md",
+          "conformance_ref": "docs/spec/CONFORMANCE.md",
+          "release_ref": "main@70fde88",
+          "collected_at": "2026-02-21T03:41:00Z",
+          "evidence_items": [
+            {
+              "artifact_ref": "artifacts/milestones/M96/latest/commands.log",
+              "artifact_kind": "verify_log",
+              "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            }
+          ],
+          "notes": "mutated request"
+        },
+        "occurred_at": "2026-02-21T03:41:30Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    },
+    {
+      "op": "staging.evidence_bundle.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m97_bundle_1_duplicate",
+      "request": {
+        "bundle": {
+          "milestone_id": "M96",
+          "environment": "staging",
+          "runbook_ref": "ops/M97_STAGING_EVIDENCE_CONFORMANCE_RUNBOOK.md",
+          "conformance_ref": "docs/spec/CONFORMANCE.md",
+          "release_ref": "main@70fde88",
+          "collected_at": "2026-02-21T03:41:00Z",
+          "evidence_items": [
+            {
+              "artifact_ref": "artifacts/milestones/M96/latest/commands.log",
+              "artifact_kind": "verify_log",
+              "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "captured_at": "2026-02-21T03:40:10Z"
+            },
+            {
+              "artifact_ref": "artifacts/milestones/M96/latest/reliability_remediation_planning_output.json",
+              "artifact_kind": "fixture_output",
+              "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "captured_at": "2026-02-21T03:40:20Z"
+            }
+          ],
+          "notes": "refresh evidence after m96 push"
+        },
+        "occurred_at": "2026-02-21T03:41:30Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "staging_evidence_bundle_exists"
+    },
+    {
+      "op": "staging.evidence_bundle.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m97_bundle_2",
+      "request": {
+        "bundle": {
+          "milestone_id": "M97",
+          "environment": "staging",
+          "runbook_ref": "ops/M97_STAGING_EVIDENCE_CONFORMANCE_RUNBOOK.md",
+          "conformance_ref": "docs/spec/CONFORMANCE.md",
+          "release_ref": "main@70fde88",
+          "collected_at": "2026-02-21T03:43:00Z",
+          "evidence_items": [
+            {
+              "artifact_ref": "artifacts/milestones/M97/latest/commands.log",
+              "artifact_kind": "verify_log",
+              "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "captured_at": "2026-02-21T03:42:10Z"
+            },
+            {
+              "artifact_ref": "artifacts/milestones/M97/latest/staging_evidence_conformance_output.json",
+              "artifact_kind": "fixture_output",
+              "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+              "captured_at": "2026-02-21T03:42:20Z"
+            },
+            {
+              "artifact_ref": "ops/M97_STAGING_EVIDENCE_CONFORMANCE_RUNBOOK.md",
+              "artifact_kind": "runbook_note",
+              "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+              "captured_at": "2026-02-21T03:42:30Z"
+            }
+          ],
+          "notes": "evidence for m97 completion"
+        },
+        "occurred_at": "2026-02-21T03:43:30Z"
+      },
+      "expect_ok": true,
+      "expect_bundle_id": "staging_evidence_bundle_000002",
+      "expect_milestone_id": "M97",
+      "expect_evidence_count": 3,
+      "expect_manifest_hash_valid": true,
+      "expect_checkpoint_hash_valid": true,
+      "expect_checkpoint_after_present": true,
+      "expect_replayed": false
+    },
+    {
+      "op": "staging.evidence_bundle.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m97_invalid_sha",
+      "skip_request_validation": true,
+      "request": {
+        "bundle": {
+          "milestone_id": "M97",
+          "environment": "staging",
+          "runbook_ref": "ops/M97_STAGING_EVIDENCE_CONFORMANCE_RUNBOOK.md",
+          "collected_at": "2026-02-21T03:44:00Z",
+          "evidence_items": [
+            {
+              "artifact_ref": "artifacts/milestones/M97/latest/store.json",
+              "artifact_kind": "fixture_output",
+              "sha256": "not-a-hash"
+            }
+          ]
+        },
+        "occurred_at": "2026-02-21T03:44:30Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "staging_evidence_bundle_invalid"
+    },
+    {
+      "op": "staging.evidence_bundle.record",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "idempotency_key": "m97_scope_fail",
+      "request": {
+        "bundle": {
+          "milestone_id": "M97",
+          "environment": "staging",
+          "runbook_ref": "ops/M97_STAGING_EVIDENCE_CONFORMANCE_RUNBOOK.md",
+          "collected_at": "2026-02-21T03:44:00Z",
+          "evidence_items": [
+            {
+              "artifact_ref": "artifact://dummy",
+              "artifact_kind": "runbook_note",
+              "sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+            }
+          ]
+        },
+        "occurred_at": "2026-02-21T03:44:40Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    },
+    {
+      "op": "staging.evidence_bundle.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-21T03:40:00Z",
+        "to_iso": "2026-02-21T03:50:00Z",
+        "limit": 1,
+        "environment": "staging",
+        "now_iso": "2026-02-21T03:45:00Z",
+        "exported_at_iso": "2026-02-21T03:45:00Z"
+      },
+      "expect_ok": true,
+      "expect_total_bundles": 2,
+      "expect_returned_bundles": 1,
+      "expect_total_evidence_items": 5,
+      "expect_returned_evidence_items": 2,
+      "expect_total_filtered": 2,
+      "expect_bundles_count": 1,
+      "expect_first_bundle_id": "staging_evidence_bundle_000001",
+      "expect_last_bundle_id": "staging_evidence_bundle_000001",
+      "expect_next_cursor_present": true,
+      "expect_signature_valid": true,
+      "expect_tamper_signature_valid": false,
+      "expect_attestation_present": true,
+      "expect_checkpoint_present": true,
+      "expect_manifest_integrity_valid": true,
+      "expect_checkpoint_integrity_valid": true,
+      "expect_integration_mode": "fixture_only"
+    },
+    {
+      "op": "staging.evidence_bundle.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-21T03:40:00Z",
+        "to_iso": "2026-02-21T03:50:00Z",
+        "limit": 1,
+        "environment": "staging",
+        "cursor_after": "2026-02-21T03:41:30.000Z|staging_evidence_bundle_000001",
+        "now_iso": "2026-02-21T03:45:30Z",
+        "exported_at_iso": "2026-02-21T03:45:30Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "staging_evidence_checkpoint_required"
+    },
+    {
+      "op": "staging.evidence_bundle.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-21T03:40:00Z",
+        "to_iso": "2026-02-21T03:50:00Z",
+        "limit": 1,
+        "environment": "staging",
+        "cursor_after": "2026-02-21T03:41:30.000Z|staging_evidence_bundle_000001",
+        "checkpoint_after": "1234123412341234123412341234123412341234123412341234123412341234",
+        "now_iso": "2026-02-21T03:45:40Z",
+        "exported_at_iso": "2026-02-21T03:45:40Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "staging_evidence_checkpoint_mismatch"
+    },
+    {
+      "op": "staging.evidence_bundle.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-21T03:40:00Z",
+        "to_iso": "2026-02-21T03:50:00Z",
+        "limit": 1,
+        "environment": "staging",
+        "cursor_after": "2026-02-21T03:41:30.000Z|staging_evidence_bundle_000001",
+        "now_iso": "2026-02-21T03:46:00Z",
+        "exported_at_iso": "2026-02-21T03:46:00Z"
+      },
+      "checkpoint_after_from_bundle_id": "staging_evidence_bundle_000001",
+      "expect_ok": true,
+      "expect_total_bundles": 2,
+      "expect_returned_bundles": 1,
+      "expect_total_evidence_items": 5,
+      "expect_returned_evidence_items": 3,
+      "expect_total_filtered": 2,
+      "expect_bundles_count": 1,
+      "expect_first_bundle_id": "staging_evidence_bundle_000002",
+      "expect_last_bundle_id": "staging_evidence_bundle_000002",
+      "expect_next_cursor_present": false,
+      "expect_signature_valid": true,
+      "expect_tamper_signature_valid": false,
+      "expect_attestation_present": true,
+      "expect_checkpoint_present": true,
+      "expect_manifest_integrity_valid": true,
+      "expect_checkpoint_integrity_valid": true,
+      "expect_integration_mode": "fixture_only"
+    },
+    {
+      "op": "staging.evidence_bundle.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "cursor_after": "2026-02-21T03:41:30.000Z|staging_evidence_bundle_999999",
+        "checkpoint_after": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "now_iso": "2026-02-21T03:46:30Z",
+        "exported_at_iso": "2026-02-21T03:46:30Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "staging_evidence_cursor_not_found"
+    },
+    {
+      "op": "staging.evidence_bundle.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "environment": "production",
+        "now_iso": "2026-02-21T03:47:00Z",
+        "exported_at_iso": "2026-02-21T03:47:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "staging_evidence_export_query_invalid"
+    },
+    {
+      "op": "staging.evidence_bundle.export",
+      "actor_ref": "admin_partner",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "query": {
+        "environment": "staging",
+        "now_iso": "2026-02-21T03:47:30Z",
+        "exported_at_iso": "2026-02-21T03:47:30Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    }
+  ]
+}

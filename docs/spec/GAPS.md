@@ -182,7 +182,8 @@ Each item here must become at least one of:
 - Resolved (fixtures-first, partial): M94 (compensation ledger/export contracts: idempotent ledger entry recording with payable-case gating + payout ceiling enforcement, and signed paginated ledger export with continuation attestation and tamper-fail verification).
 - Resolved (fixtures-first, partial): M95 (dispute-to-compensation linkage workflow: idempotent linkage record/update lifecycle bridging disputes to compensation cases/ledger entries with deterministic transition guardrails and signed paginated linkage exports).
 - Resolved (fixtures-first, partial): M96 (reliability auto-remediation planning contracts: idempotent remediation-plan suggestion workflow derived from reliability signals + deterministic risk/action synthesis + signed paginated remediation-plan export with continuation attestation and tamper-fail verification).
-- Remaining: staging evidence refresh scope (M97+).
+- Resolved (fixtures-first, partial): M97 (staging evidence refresh + operator conformance runbook pack: idempotent staging evidence manifest/checkpoint recording contracts, checkpoint-gated continuation export contracts, and verifier-backed proof-bundle integrity checks).
+- Remaining: none for M93–M97 tranche (next planning batch required).
 
 ---
 

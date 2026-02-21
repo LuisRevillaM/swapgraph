@@ -4517,3 +4517,266 @@ export function verifyReliabilityRemediationPlanExportPayloadWithPublicKeyPem({ 
   const signable = reliabilityRemediationPlanExportSignablePayload(payload);
   return verifyPolicyIntegrityPayloadSignatureWithPublicKeyPem({ payload: signable, publicKeyPem, keyId, alg });
 }
+
+function normalizeStagingEvidenceBundleExportQuery(query) {
+  const out = {};
+
+  if (typeof query?.milestone_id === 'string' && query.milestone_id.trim()) out.milestone_id = query.milestone_id.trim();
+  if (typeof query?.environment === 'string' && query.environment.trim()) out.environment = query.environment.trim();
+  if (typeof query?.from_iso === 'string' && query.from_iso.trim()) out.from_iso = query.from_iso.trim();
+  if (typeof query?.to_iso === 'string' && query.to_iso.trim()) out.to_iso = query.to_iso.trim();
+
+  if (Number.isFinite(query?.limit)) out.limit = Number(query.limit);
+  else {
+    const limit = Number.parseInt(String(query?.limit ?? ''), 10);
+    if (Number.isFinite(limit)) out.limit = limit;
+  }
+
+  if (typeof query?.cursor_after === 'string' && query.cursor_after.trim()) out.cursor_after = query.cursor_after.trim();
+  if (typeof query?.attestation_after === 'string' && query.attestation_after.trim()) out.attestation_after = query.attestation_after.trim();
+  if (typeof query?.checkpoint_after === 'string' && query.checkpoint_after.trim()) out.checkpoint_after = query.checkpoint_after.trim();
+  if (typeof query?.now_iso === 'string' && query.now_iso.trim()) out.now_iso = query.now_iso.trim();
+  if (typeof query?.exported_at_iso === 'string' && query.exported_at_iso.trim()) out.exported_at_iso = query.exported_at_iso.trim();
+
+  return out;
+}
+
+function normalizeStagingEvidenceItem(item) {
+  return {
+    artifact_ref: item?.artifact_ref,
+    artifact_kind: item?.artifact_kind,
+    sha256: item?.sha256,
+    captured_at: item?.captured_at ?? null
+  };
+}
+
+function normalizeStagingEvidenceItems(items) {
+  return (items ?? [])
+    .map(normalizeStagingEvidenceItem)
+    .sort((a, b) => `${a.artifact_ref ?? ''}|${a.artifact_kind ?? ''}|${a.sha256 ?? ''}`.localeCompare(`${b.artifact_ref ?? ''}|${b.artifact_kind ?? ''}|${b.sha256 ?? ''}`));
+}
+
+function normalizeStagingEvidenceBundleRecord(record) {
+  return {
+    bundle_id: record?.bundle_id,
+    partner_id: record?.partner_id,
+    milestone_id: record?.milestone_id,
+    environment: record?.environment,
+    runbook_ref: record?.runbook_ref,
+    conformance_ref: record?.conformance_ref ?? null,
+    release_ref: record?.release_ref ?? null,
+    collected_at: record?.collected_at,
+    evidence_items: normalizeStagingEvidenceItems(record?.evidence_items),
+    evidence_count: Number.isFinite(record?.evidence_count) ? Number(record.evidence_count) : 0,
+    manifest_hash: record?.manifest_hash,
+    checkpoint_after: record?.checkpoint_after ?? null,
+    checkpoint_hash: record?.checkpoint_hash,
+    integration_mode: record?.integration_mode,
+    recorded_at: record?.recorded_at,
+    ...(typeof record?.notes === 'string' ? { notes: record.notes } : {})
+  };
+}
+
+function normalizeStagingEvidenceBundleRecords(records) {
+  return (records ?? [])
+    .map(normalizeStagingEvidenceBundleRecord)
+    .sort((a, b) => `${a.recorded_at ?? ''}|${a.bundle_id ?? ''}`.localeCompare(`${b.recorded_at ?? ''}|${b.bundle_id ?? ''}`));
+}
+
+function normalizeStagingEvidenceBundleExportSummary(summary) {
+  return {
+    total_bundles: Number.isFinite(summary?.total_bundles) ? Number(summary.total_bundles) : 0,
+    returned_bundles: Number.isFinite(summary?.returned_bundles) ? Number(summary.returned_bundles) : 0,
+    total_evidence_items: Number.isFinite(summary?.total_evidence_items) ? Number(summary.total_evidence_items) : 0,
+    returned_evidence_items: Number.isFinite(summary?.returned_evidence_items) ? Number(summary.returned_evidence_items) : 0,
+    latest_checkpoint_hash: typeof summary?.latest_checkpoint_hash === 'string' ? summary.latest_checkpoint_hash : null,
+    by_milestone: Array.isArray(summary?.by_milestone)
+      ? summary.by_milestone
+        .map(row => ({
+          milestone_id: row?.milestone_id,
+          count: Number.isFinite(row?.count) ? Number(row.count) : 0
+        }))
+        .sort((a, b) => String(a.milestone_id ?? '').localeCompare(String(b.milestone_id ?? '')))
+      : []
+  };
+}
+
+function stagingEvidenceBundleExportSignablePayload(payload) {
+  return {
+    exported_at: payload?.exported_at,
+    query: normalizeStagingEvidenceBundleExportQuery(payload?.query),
+    summary: normalizeStagingEvidenceBundleExportSummary(payload?.summary),
+    bundles: normalizeStagingEvidenceBundleRecords(payload?.bundles),
+    total_filtered: Number.isFinite(payload?.total_filtered) ? Number(payload.total_filtered) : 0,
+    ...(typeof payload?.next_cursor === 'string' ? { next_cursor: payload.next_cursor } : {}),
+    ...(payload?.attestation ? { attestation: normalizeExportAttestation(payload.attestation) } : {}),
+    ...(payload?.checkpoint ? { checkpoint: normalizeExportCheckpoint(payload.checkpoint) } : {}),
+    export_hash: payload?.export_hash,
+    signature: payload?.signature
+  };
+}
+
+export function buildStagingEvidenceBundleExportHash({ query, summary, bundles, totalFiltered, nextCursor }) {
+  return sha256HexCanonical({
+    query: normalizeStagingEvidenceBundleExportQuery(query),
+    summary: normalizeStagingEvidenceBundleExportSummary(summary),
+    bundles: normalizeStagingEvidenceBundleRecords(bundles),
+    total_filtered: Number.isFinite(totalFiltered) ? Number(totalFiltered) : 0,
+    ...(typeof nextCursor === 'string' ? { next_cursor: nextCursor } : {})
+  });
+}
+
+export function buildSignedStagingEvidenceBundleExportPayload({
+  exportedAt,
+  query,
+  summary,
+  bundles,
+  totalFiltered,
+  nextCursor,
+  withAttestation,
+  withCheckpoint,
+  keyId
+}) {
+  const normalizedQuery = normalizeStagingEvidenceBundleExportQuery(query);
+  const normalizedSummary = normalizeStagingEvidenceBundleExportSummary(summary);
+  const normalizedBundles = normalizeStagingEvidenceBundleRecords(bundles);
+  const normalizedTotalFiltered = Number.isFinite(totalFiltered) ? Number(totalFiltered) : 0;
+
+  const exportHash = buildStagingEvidenceBundleExportHash({
+    query: normalizedQuery,
+    summary: normalizedSummary,
+    bundles: normalizedBundles,
+    totalFiltered: normalizedTotalFiltered,
+    nextCursor
+  });
+
+  const payload = {
+    exported_at: exportedAt,
+    query: normalizedQuery,
+    summary: normalizedSummary,
+    bundles: normalizedBundles,
+    total_filtered: normalizedTotalFiltered,
+    ...(typeof nextCursor === 'string' ? { next_cursor: nextCursor } : {}),
+    export_hash: exportHash
+  };
+
+  if (withAttestation) {
+    payload.attestation = buildPolicyAuditExportAttestation({
+      query: normalizedQuery,
+      nextCursor,
+      exportHash
+    });
+  }
+
+  if (withCheckpoint) {
+    payload.checkpoint = buildPolicyAuditExportCheckpoint({
+      query: normalizedQuery,
+      attestation: payload.attestation ?? null,
+      nextCursor,
+      entriesCount: normalizedBundles.length,
+      totalFiltered: normalizedTotalFiltered
+    });
+  }
+
+  payload.signature = signPolicyIntegrityPayload(payload, { keyId });
+  return payload;
+}
+
+export function verifyStagingEvidenceBundleExportPayload(payload) {
+  if (!payload || typeof payload !== 'object') return { ok: false, error: 'missing_payload' };
+
+  const expectedHash = buildStagingEvidenceBundleExportHash({
+    query: payload.query,
+    summary: payload.summary,
+    bundles: payload.bundles,
+    totalFiltered: payload.total_filtered,
+    nextCursor: payload.next_cursor
+  });
+
+  if (payload.export_hash !== expectedHash) {
+    return {
+      ok: false,
+      error: 'hash_mismatch',
+      details: {
+        expected_hash: expectedHash,
+        provided_hash: payload.export_hash ?? null
+      }
+    };
+  }
+
+  if (payload.attestation) {
+    const attestation = verifyPolicyAuditExportAttestation({
+      attestation: payload.attestation,
+      query: payload.query,
+      nextCursor: payload.next_cursor,
+      exportHash: expectedHash
+    });
+    if (!attestation.ok) return attestation;
+  }
+
+  if (payload.checkpoint) {
+    const checkpoint = verifyPolicyAuditExportCheckpoint({
+      checkpoint: payload.checkpoint,
+      query: payload.query,
+      attestation: payload.attestation ?? null,
+      nextCursor: payload.next_cursor,
+      entriesCount: Array.isArray(payload.bundles) ? payload.bundles.length : 0,
+      totalFiltered: Number.isFinite(payload.total_filtered) ? Number(payload.total_filtered) : 0
+    });
+    if (!checkpoint.ok) return checkpoint;
+  }
+
+  const signable = stagingEvidenceBundleExportSignablePayload(payload);
+  const verified = verifyPolicyIntegrityPayloadSignature(signable);
+  if (!verified.ok) return verified;
+
+  return { ok: true };
+}
+
+export function verifyStagingEvidenceBundleExportPayloadWithPublicKeyPem({ payload, publicKeyPem, keyId, alg }) {
+  if (!payload || typeof payload !== 'object') return { ok: false, error: 'missing_payload' };
+
+  const expectedHash = buildStagingEvidenceBundleExportHash({
+    query: payload.query,
+    summary: payload.summary,
+    bundles: payload.bundles,
+    totalFiltered: payload.total_filtered,
+    nextCursor: payload.next_cursor
+  });
+
+  if (payload.export_hash !== expectedHash) {
+    return {
+      ok: false,
+      error: 'hash_mismatch',
+      details: {
+        expected_hash: expectedHash,
+        provided_hash: payload.export_hash ?? null
+      }
+    };
+  }
+
+  if (payload.attestation) {
+    const attestation = verifyPolicyAuditExportAttestation({
+      attestation: payload.attestation,
+      query: payload.query,
+      nextCursor: payload.next_cursor,
+      exportHash: expectedHash
+    });
+    if (!attestation.ok) return attestation;
+  }
+
+  if (payload.checkpoint) {
+    const checkpoint = verifyPolicyAuditExportCheckpoint({
+      checkpoint: payload.checkpoint,
+      query: payload.query,
+      attestation: payload.attestation ?? null,
+      nextCursor: payload.next_cursor,
+      entriesCount: Array.isArray(payload.bundles) ? payload.bundles.length : 0,
+      totalFiltered: Number.isFinite(payload.total_filtered) ? Number(payload.total_filtered) : 0
+    });
+    if (!checkpoint.ok) return checkpoint;
+  }
+
+  const signable = stagingEvidenceBundleExportSignablePayload(payload);
+  return verifyPolicyIntegrityPayloadSignatureWithPublicKeyPem({ payload: signable, publicKeyPem, keyId, alg });
+}

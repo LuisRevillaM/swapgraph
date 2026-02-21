@@ -64,6 +64,8 @@ export class JsonStateStore {
       reliability_replay_checks: [],
       reliability_remediation_plans: [],
       reliability_remediation_plan_counter: 0,
+      staging_evidence_bundles: [],
+      staging_evidence_bundle_counter: 0,
       oauth_clients: {},
       oauth_tokens: {}
     };
@@ -126,6 +128,8 @@ export class JsonStateStore {
         reliability_replay_checks: [],
         reliability_remediation_plans: [],
         reliability_remediation_plan_counter: 0,
+        staging_evidence_bundles: [],
+        staging_evidence_bundle_counter: 0,
         oauth_clients: {},
         oauth_tokens: {}
       };
@@ -189,6 +193,8 @@ export class JsonStateStore {
     this.state.reliability_replay_checks ||= [];
     this.state.reliability_remediation_plans ||= [];
     this.state.reliability_remediation_plan_counter ||= 0;
+    this.state.staging_evidence_bundles ||= [];
+    this.state.staging_evidence_bundle_counter ||= 0;
     this.state.oauth_clients ||= {};
     this.state.oauth_tokens ||= {};
   }

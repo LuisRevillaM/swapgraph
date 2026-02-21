@@ -14,7 +14,9 @@ Capture operator-attested live evidence for Steam Tier-1 Vault settlement lifecy
 2. Capture lifecycle evidence refs for `deposit`, `reserve`, `release`, and `withdraw` events.
 3. Record vault live proof via `adapter.steam_tier1.live_proof.vault.record` with idempotency key.
 4. Re-run same idempotency key to confirm replay semantics.
-5. Archive verifier artifacts from `artifacts/milestones/M86/latest/*`.
+5. Capture deterministic checksums (`sha256sum`) for `artifacts/milestones/M86/latest/*` evidence files.
+6. Record/update staging evidence bundle manifest via `staging.evidence_bundle.record` (M97 contract) using this runbook as `runbook_ref`.
+7. Archive verifier artifacts from `artifacts/milestones/M86/latest/*`.
 
 ## Validation
 - `INTEGRATION_ENABLED=1 npm run verify:m86`

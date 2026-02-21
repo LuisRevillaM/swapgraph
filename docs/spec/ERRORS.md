@@ -156,6 +156,13 @@ Notes:
   - `reliability_remediation_plan_export_query_invalid`
   - `reliability_remediation_plan_cursor_not_found`
   - `reliability_signals_missing`
+  - `staging_evidence_bundle_invalid`
+  - `staging_evidence_bundle_invalid_timestamp`
+  - `staging_evidence_bundle_exists`
+  - `staging_evidence_export_query_invalid`
+  - `staging_evidence_cursor_not_found`
+  - `staging_evidence_checkpoint_required`
+  - `staging_evidence_checkpoint_mismatch`
   - `replay_log_hash_mismatch`
   - `recovery_state_hash_mismatch`
   - `steam_live_proof_invalid`

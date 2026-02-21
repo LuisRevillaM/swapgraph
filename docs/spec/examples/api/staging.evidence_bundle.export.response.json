@@ -1,0 +1,49 @@
+{
+  "correlation_id": "corr_staging_evidence_bundle_export",
+  "partner_id": "ops-admin",
+  "integration_mode": "fixture_only",
+  "exported_at": "2026-02-21T03:45:00.000Z",
+  "query": {
+    "milestone_id": "M97",
+    "environment": "staging",
+    "limit": 100,
+    "exported_at_iso": "2026-02-21T03:45:00.000Z"
+  },
+  "summary": {
+    "total_bundles": 2,
+    "returned_bundles": 2,
+    "total_evidence_items": 5,
+    "returned_evidence_items": 5,
+    "latest_checkpoint_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "by_milestone": [
+      {
+        "milestone_id": "M97",
+        "count": 2
+      }
+    ]
+  },
+  "bundles": [],
+  "total_filtered": 2,
+  "next_cursor": null,
+  "attestation": {
+    "cursor_after": null,
+    "next_cursor": null,
+    "attestation_after": null,
+    "page_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "chain_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+  },
+  "checkpoint": {
+    "checkpoint_after": null,
+    "attestation_chain_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "next_cursor": null,
+    "entries_count": 2,
+    "total_filtered": 2,
+    "checkpoint_hash": "1111111111111111111111111111111111111111111111111111111111111111"
+  },
+  "export_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+  "signature": {
+    "key_id": "dev-pi-k1",
+    "alg": "ed25519",
+    "sig": "U3RhZ2luZ0V2aWRlbmNlQnVuZGxlRXhwb3J0U2lnbmF0dXJlRXhhbXBsZQ=="
+  }
+}

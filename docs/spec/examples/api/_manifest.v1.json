@@ -588,6 +588,18 @@
     {
       "file": "reliability.remediation_plan.export.response.json",
       "schema": "ReliabilityRemediationPlanExportResponse.schema.json"
+    },
+    {
+      "file": "staging.evidence_bundle.record.request.json",
+      "schema": "StagingEvidenceBundleRecordRequest.schema.json"
+    },
+    {
+      "file": "staging.evidence_bundle.record.response.json",
+      "schema": "StagingEvidenceBundleRecordResponse.schema.json"
+    },
+    {
+      "file": "staging.evidence_bundle.export.response.json",
+      "schema": "StagingEvidenceBundleExportResponse.schema.json"
     }
   ]
 }

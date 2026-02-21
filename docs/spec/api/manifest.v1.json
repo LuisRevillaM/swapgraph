@@ -1581,6 +1581,39 @@
           "settlement:read"
         ]
       }
+    },
+    {
+      "method": "POST",
+      "path": "/staging/evidence-bundles",
+      "operation_id": "staging.evidence_bundle.record",
+      "idempotency_required": true,
+      "request_schema": "StagingEvidenceBundleRecordRequest.schema.json",
+      "response_schema": "StagingEvidenceBundleRecordResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/staging/evidence-bundles/export",
+      "operation_id": "staging.evidence_bundle.export",
+      "idempotency_required": false,
+      "response_schema": "StagingEvidenceBundleExportResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
     }
   ],
   "webhooks": {

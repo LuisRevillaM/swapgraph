@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/StagingEvidenceBundleRecordResponse.schema.json",
+  "title": "StagingEvidenceBundleRecordResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "bundle",
+    "replayed"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "bundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bundle_id",
+        "partner_id",
+        "milestone_id",
+        "environment",
+        "runbook_ref",
+        "conformance_ref",
+        "release_ref",
+        "collected_at",
+        "evidence_items",
+        "evidence_count",
+        "manifest_hash",
+        "checkpoint_after",
+        "checkpoint_hash",
+        "integration_mode",
+        "recorded_at"
+      ],
+      "properties": {
+        "bundle_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "milestone_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "environment": {
+          "type": "string",
+          "enum": [
+            "staging"
+          ]
+        },
+        "runbook_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "conformance_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "release_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "collected_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "evidence_items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "artifact_ref",
+              "artifact_kind",
+              "sha256",
+              "captured_at"
+            ],
+            "properties": {
+              "artifact_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "artifact_kind": {
+                "type": "string",
+                "enum": [
+                  "verify_log",
+                  "runner_report",
+                  "fixture_output",
+                  "runbook_note",
+                  "integration_proof",
+                  "conformance_report"
+                ]
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "captured_at": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              }
+            }
+          }
+        },
+        "evidence_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "manifest_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "checkpoint_after": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "checkpoint_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "integration_mode": {
+          "type": "string",
+          "enum": [
+            "fixture_only"
+          ]
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "replayed": {
+      "type": "boolean"
+    }
+  }
+}

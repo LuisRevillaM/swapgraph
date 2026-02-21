@@ -205,6 +205,11 @@ Settlement endpoints:
   - idempotent remediation-plan suggestion contract derived from reliability signal windows (`risk_level`, `priority_score`, `recommended_actions`, `blockers`)
 - `GET /reliability/remediation-plans/export`
   - signed paginated remediation-plan export (`summary`, `plans`, `next_cursor`, `attestation`, `export_hash`, detached signature)
+- `POST /staging/evidence-bundles`
+  - idempotent staging evidence-manifest checkpoint recording contract (`manifest_hash`, checkpoint-chain anchors, runbook/conformance refs)
+- `GET /staging/evidence-bundles/export`
+  - signed paginated staging evidence export (`summary`, `bundles`, `next_cursor`, `attestation`, `checkpoint`, `export_hash`, detached signature)
+  - continuation requires `checkpoint_after` when `cursor_after` is provided
 - `POST /adapters/steam/tier1/live-proof/deposit-per-swap`
   - idempotent operator-gated live proof capture for Steam deposit-per-swap settlement evidence (`INTEGRATION_ENABLED=1` required)
 - `POST /adapters/steam/tier1/live-proof/vault`

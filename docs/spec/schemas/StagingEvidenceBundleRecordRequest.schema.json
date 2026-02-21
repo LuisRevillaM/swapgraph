@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/StagingEvidenceBundleRecordRequest.schema.json",
+  "title": "StagingEvidenceBundleRecordRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "bundle"
+  ],
+  "properties": {
+    "bundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "milestone_id",
+        "runbook_ref",
+        "collected_at",
+        "evidence_items"
+      ],
+      "properties": {
+        "milestone_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "environment": {
+          "type": "string",
+          "enum": [
+            "staging"
+          ]
+        },
+        "runbook_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "conformance_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "release_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "collected_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "evidence_items": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "artifact_ref",
+              "artifact_kind",
+              "sha256"
+            ],
+            "properties": {
+              "artifact_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "artifact_kind": {
+                "type": "string",
+                "enum": [
+                  "verify_log",
+                  "runner_report",
+                  "fixture_output",
+                  "runbook_note",
+                  "integration_proof",
+                  "conformance_report"
+                ]
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "captured_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

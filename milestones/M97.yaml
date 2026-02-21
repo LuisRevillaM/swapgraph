@@ -1,0 +1,43 @@
+name: M97
+commands:
+  - cmd: "npm run verify:m97"
+artifacts:
+  - artifact: "docs/prd/M97.md"
+  - artifact: "docs/STATUS.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/ERRORS.md"
+  - artifact: "docs/spec/GAPS.md"
+  - artifact: "docs/spec/CONFORMANCE.md"
+
+  - artifact: "ops/M85_LIVE_PROOF_RUNBOOK.md"
+  - artifact: "ops/M86_VAULT_LIVE_PROOF_RUNBOOK.md"
+  - artifact: "ops/M97_STAGING_EVIDENCE_CONFORMANCE_RUNBOOK.md"
+
+  - artifact: "src/store/jsonStateStore.mjs"
+  - artifact: "src/crypto/policyIntegritySigning.mjs"
+  - artifact: "src/service/stagingEvidenceConformanceService.mjs"
+
+  - artifact: "docs/spec/api/manifest.v1.json"
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+  - artifact: "docs/spec/examples/api/staging.evidence_bundle.record.request.json"
+  - artifact: "docs/spec/examples/api/staging.evidence_bundle.record.response.json"
+  - artifact: "docs/spec/examples/api/staging.evidence_bundle.export.response.json"
+
+  - artifact: "docs/spec/schemas/StagingEvidenceBundleRecordRequest.schema.json"
+  - artifact: "docs/spec/schemas/StagingEvidenceBundleRecordResponse.schema.json"
+  - artifact: "docs/spec/schemas/StagingEvidenceBundleExportResponse.schema.json"
+
+  - artifact: "fixtures/release/m97_scenario.json"
+  - artifact: "fixtures/release/m97_expected.json"
+
+  - artifact: "scripts/run-m97-staging-evidence-conformance-scenario.mjs"
+  - artifact: "milestones/M97.yaml"
+  - artifact: "verify/m97.sh"
+
+  - artifact: "artifacts/milestones/M97/latest/commands.log"
+  - artifact: "artifacts/milestones/M97/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M97/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M97/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M97/latest/staging_evidence_conformance_output.json"
+  - artifact: "artifacts/milestones/M97/latest/store.json"
+  - artifact: "artifacts/milestones/M97/latest/assertions.json"

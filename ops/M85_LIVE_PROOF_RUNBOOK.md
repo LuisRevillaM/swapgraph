@@ -14,7 +14,9 @@ Capture operator-attested live evidence for Steam Tier-1 deposit-per-swap settle
 2. Capture live evidence refs (trade-offer evidence URL, receipt evidence URL, operator reference).
 3. Record live proof via `adapter.steam_tier1.live_proof.deposit_per_swap.record` with idempotency key.
 4. Re-run same idempotency key to verify deterministic replay semantics.
-5. Archive verifier artifacts from `artifacts/milestones/M85/latest/*`.
+5. Capture deterministic checksums (`sha256sum`) for `artifacts/milestones/M85/latest/*` evidence files.
+6. Record/update staging evidence bundle manifest via `staging.evidence_bundle.record` (M97 contract) using this runbook as `runbook_ref`.
+7. Archive verifier artifacts from `artifacts/milestones/M85/latest/*`.
 
 ## Validation
 - `INTEGRATION_ENABLED=1 npm run verify:m85`
