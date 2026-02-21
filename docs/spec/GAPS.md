@@ -183,7 +183,7 @@ Each item here must become at least one of:
 - Resolved (fixtures-first, partial): M95 (dispute-to-compensation linkage workflow: idempotent linkage record/update lifecycle bridging disputes to compensation cases/ledger entries with deterministic transition guardrails and signed paginated linkage exports).
 - Resolved (fixtures-first, partial): M96 (reliability auto-remediation planning contracts: idempotent remediation-plan suggestion workflow derived from reliability signals + deterministic risk/action synthesis + signed paginated remediation-plan export with continuation attestation and tamper-fail verification).
 - Resolved (fixtures-first, partial): M97 (staging evidence refresh + operator conformance runbook pack: idempotent staging evidence manifest/checkpoint recording contracts, checkpoint-gated continuation export contracts, and verifier-backed proof-bundle integrity checks).
-- Remaining (planned): M98–M102 PRD tranche (`docs/prd/2026-02-21_master-next-batch_M98-M102.md`) covering v2 residual scope (API/event completion, trust/safety iteration, metrics/network health, product-surface readiness, commercial packaging contracts).
+- Remaining (planned): M98–M102 PRD tranche (`docs/prd/2026-02-21_master-next-batch_M98-M102.md`) covering v2 residual scope (API/event completion, trust/safety iteration, metrics/network health, product-surface readiness, commercial packaging contracts); currently in PRD-only mode pending explicit implementation approval.
 
 ---
 

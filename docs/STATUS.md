@@ -111,7 +111,8 @@ Last updated: 2026-02-21
 
 ## Next
 - PRD batch defined: `docs/prd/2026-02-21_master-next-batch_M98-M102.md`
-- Next execution target: M98 (API + event surface completion contracts)
+- Current mode: PRD-only for M98–M102 (official implementation paused pending explicit approval)
+- Immediate target: PRD review/approval for M98 first, then M99–M102
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.
