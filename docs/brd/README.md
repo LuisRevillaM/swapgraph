@@ -24,3 +24,5 @@ Mode: PRD-only for implementation; BRDs define business posture and constraints 
 - M100 ↔ BRD-01
 - M101 ↔ BRD-01 + BRD-04 + discovery pack
 - M102 ↔ BRD-01 + BRD-02 + BRD-03 + BRD-04
+- M109 ↔ BRD-02 + BRD-03 + BRD-04
+- M110 ↔ BRD-01 + BRD-04 + discovery pack

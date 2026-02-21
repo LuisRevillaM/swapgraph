@@ -73,6 +73,8 @@ Official development for M98+ starts only when:
 - BRD-04 (partner segmentation/rollout strategy): `docs/brd/2026-02-21_BRD-04_partner-segmentation-rollout-strategy.md`
 - Web-first discovery brief pack (D-W1..D-W5): `docs/prd/2026-02-21_web-first-discovery-brief-pack_D-W1-D-W5.md`
 - Cross-agent approval board: `docs/prd/2026-02-21_cross-agent-approval-board_M98-M102.md`
+- Additive LP subsystem PRD tranche (M103–M110): `docs/prd/2026-02-21_master-liquidity-provider-subsystem_M103-M110.md`
+- LP subsystem approval board: `docs/prd/2026-02-21_cross-agent-approval-board_M103-M110.md`
 - BRD index: `docs/brd/README.md`
 
 ## Current review artifacts
