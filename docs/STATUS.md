@@ -112,7 +112,7 @@ Last updated: 2026-02-21
 ## Next
 - PRD batch defined: `docs/prd/2026-02-21_master-next-batch_M98-M102.md`
 - Current mode: PRD-only for M98–M102 (official implementation paused pending explicit approval)
-- Immediate target: M100 PRD closure review (`docs/prd/2026-02-21_m100-prd-review-closure.md`) after M99 closure artifact draft
+- Immediate target: batch approval checkpoint for M98–M102 closure artifacts (`docs/prd/2026-02-21_m98-prd-review-closure.md` … `docs/prd/2026-02-21_m102-prd-review-closure.md`)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.

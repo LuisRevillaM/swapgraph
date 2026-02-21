@@ -69,3 +69,5 @@ Official development for M98+ starts only when:
 - M98 closure checklist draft: `docs/prd/2026-02-21_m98-prd-review-closure.md`
 - M99 closure checklist draft: `docs/prd/2026-02-21_m99-prd-review-closure.md`
 - M100 closure checklist draft: `docs/prd/2026-02-21_m100-prd-review-closure.md`
+- M101 closure checklist draft: `docs/prd/2026-02-21_m101-prd-review-closure.md`
+- M102 closure checklist draft: `docs/prd/2026-02-21_m102-prd-review-closure.md`
