@@ -58,6 +58,11 @@ Prioritize discovery in this order:
 
 Each brief should include: hypothesis, target cohort, success metric, failure criteria, and go/no-go recommendation.
 
+## Seed artifacts added (2026-02-21)
+- BRD-01: `docs/brd/2026-02-21_BRD-01_business-outcomes-kpi-bands.md`
+- BRD-02: `docs/brd/2026-02-21_BRD-02_trust-safety-operating-policy.md`
+- Discovery pack: `docs/prd/2026-02-21_web-first-discovery-brief-pack_D-W1-D-W5.md`
+
 ## Cross-agent handoff acceptance
 Before implementation approval for M98+:
 1. M98–M102 closure checklists are approved (or amended/approved).
