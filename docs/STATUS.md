@@ -110,7 +110,8 @@ Last updated: 2026-02-21
 - M97: ✅ Staging evidence refresh + operator conformance runbook pack (fixtures-first) (idempotent staging evidence-bundle manifest recording, checkpoint-gated continuation exports, signed bundle integrity verification, and refreshed M85/M86 evidence capture runbook flow) (fixtures-first)
 
 ## Next
-- Next PRD batch planning (post M93–M97 tranche)
+- PRD batch defined: `docs/prd/2026-02-21_master-next-batch_M98-M102.md`
+- Next execution target: M98 (API + event surface completion contracts)
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.
