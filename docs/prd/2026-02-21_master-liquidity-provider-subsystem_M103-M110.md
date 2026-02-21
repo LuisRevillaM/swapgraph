@@ -98,4 +98,4 @@ Implementation planning for M103+ begins only when:
 - M108 closure checklist draft: `docs/prd/2026-02-21_m108-prd-review-closure.md`
 - M109 closure checklist draft: `docs/prd/2026-02-21_m109-prd-review-closure.md`
 - M110 closure checklist draft: `docs/prd/2026-02-21_m110-prd-review-closure.md`
-- Fast sign-off defaults pack: `docs/prd/2026-02-21_m103-m110-default-decision-pack.md`
+- Fast sign-off proposed review baseline: `docs/prd/2026-02-21_m103-m110-proposed-review-baseline.md`
