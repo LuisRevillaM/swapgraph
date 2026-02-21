@@ -6,14 +6,14 @@ Status: Draft approval board (PRD-only mode)
 Purpose: single checklist for cross-agent approval of the LP subsystem PRD tranche before any M103+ implementation starts.
 
 ## A) PRD approvals
-- [ ] M103 approved (`docs/prd/M103.md`)
-- [ ] M104 approved (`docs/prd/M104.md`)
-- [ ] M105 approved (`docs/prd/M105.md`)
-- [ ] M106 approved (`docs/prd/M106.md`)
-- [ ] M107 approved (`docs/prd/M107.md`)
-- [ ] M108 approved (`docs/prd/M108.md`)
-- [ ] M109 approved (`docs/prd/M109.md`)
-- [ ] M110 approved (`docs/prd/M110.md`)
+- [ ] M103 closure + PRD approved (`docs/prd/2026-02-21_m103-prd-review-closure.md`, `docs/prd/M103.md`)
+- [ ] M104 closure + PRD approved (`docs/prd/2026-02-21_m104-prd-review-closure.md`, `docs/prd/M104.md`)
+- [ ] M105 closure + PRD approved (`docs/prd/2026-02-21_m105-prd-review-closure.md`, `docs/prd/M105.md`)
+- [ ] M106 closure + PRD approved (`docs/prd/2026-02-21_m106-prd-review-closure.md`, `docs/prd/M106.md`)
+- [ ] M107 closure + PRD approved (`docs/prd/2026-02-21_m107-prd-review-closure.md`, `docs/prd/M107.md`)
+- [ ] M108 closure + PRD approved (`docs/prd/2026-02-21_m108-prd-review-closure.md`, `docs/prd/M108.md`)
+- [ ] M109 closure + PRD approved (`docs/prd/2026-02-21_m109-prd-review-closure.md`, `docs/prd/M109.md`)
+- [ ] M110 closure + PRD approved (`docs/prd/2026-02-21_m110-prd-review-closure.md`, `docs/prd/M110.md`)
 
 ## B) Dependency gate
 - [ ] M98–M102 approval board complete (`docs/prd/2026-02-21_cross-agent-approval-board_M98-M102.md`)

@@ -67,6 +67,7 @@ Each brief should include: hypothesis, target cohort, success metric, failure cr
 - Cross-agent approval board: `docs/prd/2026-02-21_cross-agent-approval-board_M98-M102.md`
 - LP subsystem PRD tranche (M103–M110): `docs/prd/2026-02-21_master-liquidity-provider-subsystem_M103-M110.md`
 - LP subsystem approval board: `docs/prd/2026-02-21_cross-agent-approval-board_M103-M110.md`
+- LP closure checklists (M103–M110): `docs/prd/2026-02-21_m103-prd-review-closure.md` … `docs/prd/2026-02-21_m110-prd-review-closure.md`
 - BRD index: `docs/brd/README.md`
 
 ## Cross-agent handoff acceptance

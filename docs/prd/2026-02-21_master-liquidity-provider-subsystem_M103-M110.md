@@ -88,3 +88,13 @@ Implementation planning for M103+ begins only when:
 
 ## Approval board
 - `docs/prd/2026-02-21_cross-agent-approval-board_M103-M110.md`
+
+## Current review artifacts
+- M103 closure checklist draft: `docs/prd/2026-02-21_m103-prd-review-closure.md`
+- M104 closure checklist draft: `docs/prd/2026-02-21_m104-prd-review-closure.md`
+- M105 closure checklist draft: `docs/prd/2026-02-21_m105-prd-review-closure.md`
+- M106 closure checklist draft: `docs/prd/2026-02-21_m106-prd-review-closure.md`
+- M107 closure checklist draft: `docs/prd/2026-02-21_m107-prd-review-closure.md`
+- M108 closure checklist draft: `docs/prd/2026-02-21_m108-prd-review-closure.md`
+- M109 closure checklist draft: `docs/prd/2026-02-21_m109-prd-review-closure.md`
+- M110 closure checklist draft: `docs/prd/2026-02-21_m110-prd-review-closure.md`
