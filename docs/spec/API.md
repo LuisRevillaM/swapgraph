@@ -466,6 +466,15 @@ Signing key endpoints:
 
 (Implementation remains fixtures-first for milestones; a local runtime HTTP shell is now available via `npm run start:api`.)
 
+Runtime persistence controls (M112):
+- `STATE_BACKEND=json|sqlite` selects the runtime persistence backend (default `json`).
+- `STATE_FILE=<path>` overrides backend-specific default state path.
+- `GET /healthz` includes `store_backend` and `persistence_mode` diagnostics (`json_file` or `sqlite_wal`).
+- Deterministic migration/backup/restore tooling:
+  - `node scripts/migrate-state-store.mjs --from-backend json --to-backend sqlite --force`
+  - `node scripts/migrate-state-store.mjs --from-backend sqlite --to-backend json --to-state-file artifacts/runtime-backup.json --force`
+  - `node scripts/migrate-json-state-to-sqlite.mjs --force`
+
 ## Webhooks (v1)
 Partners can receive:
 - `proposal.created`

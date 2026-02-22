@@ -10,12 +10,14 @@ if (!Number.isFinite(port) || port <= 0) {
 
 const host = process.env.HOST ?? '127.0.0.1';
 const storePath = process.env.STATE_FILE;
-
-const runtime = createRuntimeApiServer({ host, port, storePath });
+const stateBackend = process.env.STATE_BACKEND ?? 'json';
+let runtime = null;
 
 async function main() {
+  runtime = createRuntimeApiServer({ host, port, storePath, stateBackend });
   await runtime.listen();
   console.log(`[runtime-api] listening on http://${runtime.host}:${runtime.port}`);
+  console.log(`[runtime-api] state backend: ${runtime.storeBackend} (${runtime.persistenceMode})`);
   console.log(`[runtime-api] state file: ${runtime.storePath}`);
 }
 
@@ -26,6 +28,9 @@ main().catch(err => {
 
 for (const signal of ['SIGINT', 'SIGTERM']) {
   process.on(signal, async () => {
+    if (!runtime) {
+      process.exit(0);
+    }
     try {
       await runtime.close();
       process.exit(0);

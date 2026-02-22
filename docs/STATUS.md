@@ -3,7 +3,7 @@
 Last updated: 2026-02-22
 
 ## Autopilot
-- Status: **implementation closure** (M111 verifier-complete)
+- Status: **implementation closure** (M112 verifier-complete)
 - Canonical plan: `docs/source/LATEST.md` (v2.0)
 
 ## Milestones (progress)
@@ -122,15 +122,16 @@ Last updated: 2026-02-22
 - M109: ✅ Partner LP onboarding and governance contracts (fixtures-first) (partner-LP onboarding/get/status/eligibility/rollout contracts, deterministic segment/capability gating with downgrade triggers, and signed checkpointed governance rollout export continuity) (fixtures-first)
 - M110: ✅ Swarm transparency and user-control contracts (fixtures-first) (public-safe liquidity directory/persona disclosure surfaces, idempotent counterparty preference controls with deterministic conflict/no-match signaling, and proposal/receipt counterparty disclosure projections with explicit LP labeling) (fixtures-first)
 - M111: ✅ Marketplace execution loop contracts (fixtures-first) (idempotent matching-run and run-read API surfaces, deterministic proposal replace+expiry lifecycle accounting, and runtime integration for user-intent-to-proposal generation) (fixtures-first)
+- M112: ✅ Storage hardening and SQLite migration path (fixtures-first) (runtime backend selector + SQLite state-store activation, deterministic JSON<->SQLite migration tooling, and restart durability/backup-restore verifier coverage) (fixtures-first)
 
 ## Next
 - PRD batch defined: `docs/prd/2026-02-21_master-next-batch_M98-M102.md`
 - Additive LP subsystem PRD batch defined: `docs/prd/2026-02-21_master-liquidity-provider-subsystem_M103-M110.md`
-- Storage hardening PRD drafted: `docs/prd/M112.md`
-- Current mode: M98–M111 implementation tranche complete with verifier closure.
-- Immediate target: M112 storage hardening (SQLite migration-ready path) and deployment hardening.
+- Storage hardening PRD implemented: `docs/prd/M112.md`
+- Current mode: M98–M112 implementation tranche complete with verifier closure.
+- Immediate target: deployment rehearsal + runtime operability hardening on top of M112 backend controls.
 - Runtime shell available for request/response validation: `npm run start:api` (`src/server/runtimeApiServer.mjs`).
-- CI baseline gate added: `.github/workflows/verify-baseline.yml` (includes `verify:m0`, baseline tranche, `verify:m98`, `verify:m99`, `verify:m100`, `verify:m101`, `verify:m102`, `verify:m103`, `verify:m104`, `verify:m105`, `verify:m106`, `verify:m107`, `verify:m108`, `verify:m109`, `verify:m110`, and `verify:m111`).
+- CI baseline gate added: `.github/workflows/verify-baseline.yml` (includes `verify:m0`, baseline tranche, `verify:m98`, `verify:m99`, `verify:m100`, `verify:m101`, `verify:m102`, `verify:m103`, `verify:m104`, `verify:m105`, `verify:m106`, `verify:m107`, `verify:m108`, `verify:m109`, `verify:m110`, `verify:m111`, and `verify:m112`).
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.

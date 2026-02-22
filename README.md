@@ -26,9 +26,33 @@ This repo now includes a thin HTTP transport over the existing service layer so 
 npm run start:api
 ```
 
+SQLite runtime mode:
+```bash
+STATE_BACKEND=sqlite npm run start:api
+```
+
+Custom state file:
+```bash
+STATE_BACKEND=sqlite STATE_FILE=./data/runtime-api-state.sqlite npm run start:api
+```
+
 Health:
 ```bash
 curl -s http://127.0.0.1:3005/healthz | jq
+```
+
+Migrate state (JSON -> SQLite):
+```bash
+npm run migrate:json-to-sqlite -- --force
+```
+
+Generic migration/backup/restore:
+```bash
+# JSON -> SQLite
+npm run migrate:state -- --from-backend json --to-backend sqlite --force
+
+# SQLite -> JSON backup
+npm run migrate:state -- --from-backend sqlite --to-backend json --to-state-file ./artifacts/runtime-backup.json --force
 ```
 
 Seed deterministic demo fixtures (M5 intents + proposals):

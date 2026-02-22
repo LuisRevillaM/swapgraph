@@ -1,0 +1,86 @@
+{
+  "actor": {
+    "type": "user",
+    "id": "user_m112"
+  },
+  "scopes": [
+    "swap_intents:write",
+    "swap_intents:read"
+  ],
+  "intent_requests": [
+    {
+      "idempotency_key": "m112-create-intent-a",
+      "request": {
+        "intent": {
+          "id": "intent_m112_a",
+          "actor": { "type": "user", "id": "user_m112" },
+          "offer": [
+            {
+              "platform": "steam",
+              "app_id": 730,
+              "context_id": 2,
+              "asset_id": "1001",
+              "class_id": "2001",
+              "instance_id": "0",
+              "metadata": { "float": 0.11 },
+              "proof": { "inventory_snapshot_id": "snap_m112_a", "verified_at": "2026-02-22T00:00:00Z" }
+            }
+          ],
+          "want_spec": {
+            "type": "set",
+            "any_of": [
+              {
+                "type": "category",
+                "platform": "steam",
+                "app_id": 730,
+                "category": "knife",
+                "constraints": { "min_condition": "FT" }
+              }
+            ]
+          },
+          "value_band": { "min_usd": 50, "max_usd": 300, "pricing_source": "market_median" },
+          "trust_constraints": { "max_cycle_length": 3, "min_counterparty_reliability": 0 },
+          "time_constraints": { "expires_at": "2027-02-22T00:00:00Z", "urgency": "normal" },
+          "settlement_preferences": { "require_escrow": true }
+        }
+      }
+    },
+    {
+      "idempotency_key": "m112-create-intent-b",
+      "request": {
+        "intent": {
+          "id": "intent_m112_b",
+          "actor": { "type": "user", "id": "user_m112" },
+          "offer": [
+            {
+              "platform": "steam",
+              "app_id": 730,
+              "context_id": 2,
+              "asset_id": "1002",
+              "class_id": "2002",
+              "instance_id": "0",
+              "metadata": { "float": 0.09 },
+              "proof": { "inventory_snapshot_id": "snap_m112_b", "verified_at": "2026-02-22T00:01:00Z" }
+            }
+          ],
+          "want_spec": {
+            "type": "set",
+            "any_of": [
+              {
+                "type": "category",
+                "platform": "steam",
+                "app_id": 730,
+                "category": "glove",
+                "constraints": { "min_condition": "FT" }
+              }
+            ]
+          },
+          "value_band": { "min_usd": 40, "max_usd": 250, "pricing_source": "market_median" },
+          "trust_constraints": { "max_cycle_length": 3, "min_counterparty_reliability": 0 },
+          "time_constraints": { "expires_at": "2027-02-23T00:00:00Z", "urgency": "normal" },
+          "settlement_preferences": { "require_escrow": true }
+        }
+      }
+    }
+  ]
+}

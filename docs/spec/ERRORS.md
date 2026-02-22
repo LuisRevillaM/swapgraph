@@ -284,6 +284,11 @@ Notes:
   - `marketplace_matching_invalid_request`
   - `marketplace_matching_asset_values_missing`
   - `marketplace_matching_run_not_found`
+  - `state_backend_unsupported`
+  - `sqlite_unavailable`
+  - `state_migration_source_missing`
+  - `state_migration_target_exists`
+  - `state_migration_hash_mismatch`
 - Rollout diagnostics automation execution-attestation verification may return deterministic mismatch errors such as:
   - `automation_execution_expected_effect_hash_mismatch`
   - `automation_execution_request_hash_chain_mismatch`

@@ -15,6 +15,9 @@ artifacts/**
 
 # Local runtime state
 data/runtime-api-state.json
+data/runtime-api-state.sqlite
+data/runtime-api-state.sqlite-shm
+data/runtime-api-state.sqlite-wal
 
 # OS
 .DS_Store

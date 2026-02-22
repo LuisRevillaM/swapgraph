@@ -26,7 +26,7 @@ import { ProductSurfaceReadinessService } from '../service/productSurfaceReadine
 import { SettlementWriteApiService } from '../service/settlementWriteApiService.mjs';
 import { SwapIntentsService } from '../service/swapIntentsService.mjs';
 import { TrustSafetyService } from '../service/trustSafetyService.mjs';
-import { JsonStateStore } from '../store/jsonStateStore.mjs';
+import { createStateStore, resolveStateStorePath } from '../store/createStateStore.mjs';
 
 const MAX_BODY_BYTES = 1024 * 1024;
 const ALLOWED_ACTOR_TYPES = new Set(['user', 'partner', 'agent']);
@@ -243,9 +243,9 @@ function loadJson(filePath) {
   return JSON.parse(readFileSync(filePath, 'utf8'));
 }
 
-function seedM5Fixtures({ store, reset, partnerId }) {
+function seedM5Fixtures({ store, reset, partnerId, storeBackend }) {
   if (reset) {
-    const fresh = new JsonStateStore({ filePath: store.filePath });
+    const fresh = createStateStore({ backend: storeBackend, filePath: store.filePath });
     store.state = fresh.state;
   }
 
@@ -271,11 +271,14 @@ function seedM5Fixtures({ store, reset, partnerId }) {
 
 export function createRuntimeApiServer({
   storePath,
+  stateBackend = 'json',
   host = '127.0.0.1',
   port = 3005
 }) {
-  const resolvedStorePath = path.resolve(storePath ?? path.join(repoRoot(), 'data/runtime-api-state.json'));
-  const store = new JsonStateStore({ filePath: resolvedStorePath });
+  const resolvedStorePath = resolveStateStorePath({ backend: stateBackend, rootDir: repoRoot(), storePath });
+  const store = createStateStore({ backend: stateBackend, filePath: resolvedStorePath });
+  const resolvedStoreBackend = String(stateBackend ?? 'json').trim().toLowerCase();
+  const persistenceMode = resolvedStoreBackend === 'sqlite' ? 'sqlite_wal' : 'json_file';
   store.load();
 
   const swapIntents = new SwapIntentsService({ store });
@@ -317,6 +320,8 @@ export function createRuntimeApiServer({
             correlation_id: correlationId,
             ok: true,
             uptime_ms: Date.now() - startedAt,
+            store_backend: resolvedStoreBackend,
+            persistence_mode: persistenceMode,
             store_path: resolvedStorePath,
             state: summarizeState(store)
           }
@@ -327,7 +332,7 @@ export function createRuntimeApiServer({
         const body = await readJsonBody(req);
         const reset = body?.reset !== false;
         const partnerId = trimOrNull(body?.partner_id) ?? 'partner_demo';
-        const seedStats = seedM5Fixtures({ store, reset, partnerId });
+        const seedStats = seedM5Fixtures({ store, reset, partnerId, storeBackend: resolvedStoreBackend });
         store.save();
         return sendJson({
           res,
@@ -1504,23 +1509,38 @@ export function createRuntimeApiServer({
     }
   });
 
-  return {
+  const runtime = {
     host,
     port,
+    storeBackend: resolvedStoreBackend,
+    persistenceMode,
     storePath: resolvedStorePath,
     listen() {
       return new Promise((resolve, reject) => {
         server.once('error', reject);
         server.listen(port, host, () => {
           server.off('error', reject);
+          const address = server.address();
+          if (address && typeof address === 'object' && typeof address.port === 'number') {
+            runtime.port = address.port;
+          }
           resolve();
         });
       });
     },
     close() {
       return new Promise((resolve, reject) => {
-        server.close(err => (err ? reject(err) : resolve()));
+        server.close(err => {
+          if (err && err.code !== 'ERR_SERVER_NOT_RUNNING') return reject(err);
+          try {
+            if (typeof store.close === 'function') store.close();
+            resolve();
+          } catch (closeErr) {
+            reject(closeErr);
+          }
+        });
       });
     }
   };
+  return runtime;
 }
