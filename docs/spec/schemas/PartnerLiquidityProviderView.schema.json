@@ -1,0 +1,255 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/PartnerLiquidityProviderView.schema.json",
+  "title": "PartnerLiquidityProviderView",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "provider_id",
+    "owner_actor",
+    "external_provider_id",
+    "legal_entity_name",
+    "trust_contact_email",
+    "disclosure_text",
+    "segment_tier",
+    "status",
+    "governance",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "provider_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "owner_actor": {
+      "$ref": "ActorRef.schema.json"
+    },
+    "external_provider_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "legal_entity_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "trust_contact_email": {
+      "type": "string",
+      "minLength": 3
+    },
+    "disclosure_text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "segment_tier": {
+      "type": "string",
+      "enum": [
+        "S0",
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending_review",
+        "active",
+        "restricted",
+        "offboarded"
+      ]
+    },
+    "governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "trust_safety_baseline_passed",
+        "reliability_baseline_passed",
+        "audit_conformance_passed",
+        "unresolved_critical_violations"
+      ],
+      "properties": {
+        "trust_safety_baseline_passed": {
+          "type": "boolean"
+        },
+        "reliability_baseline_passed": {
+          "type": "boolean"
+        },
+        "audit_conformance_passed": {
+          "type": "boolean"
+        },
+        "unresolved_critical_violations": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "rollout_policy_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rollout_version",
+        "rollout_status",
+        "effective_segment_tier",
+        "capabilities_hash"
+      ],
+      "properties": {
+        "rollout_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "rollout_status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "paused",
+            "blocked"
+          ]
+        },
+        "effective_segment_tier": {
+          "type": "string",
+          "enum": [
+            "S0",
+            "S1",
+            "S2",
+            "S3"
+          ]
+        },
+        "capabilities_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      }
+    },
+    "last_eligibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evaluation_id",
+        "verdict",
+        "reason_codes",
+        "requested_segment_tier",
+        "current_segment_tier",
+        "recommended_status",
+        "evaluated_at",
+        "inputs"
+      ],
+      "properties": {
+        "evaluation_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "verdict": {
+          "type": "string",
+          "enum": [
+            "allow",
+            "deny"
+          ]
+        },
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "requested_segment_tier": {
+          "type": "string",
+          "enum": [
+            "S0",
+            "S1",
+            "S2",
+            "S3"
+          ]
+        },
+        "current_segment_tier": {
+          "type": "string",
+          "enum": [
+            "S0",
+            "S1",
+            "S2",
+            "S3"
+          ]
+        },
+        "recommended_status": {
+          "type": "string",
+          "enum": [
+            "pending_review",
+            "active",
+            "restricted",
+            "offboarded"
+          ]
+        },
+        "evaluated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "inputs": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "requested_segment_tier",
+            "trust_safety_baseline_passed",
+            "reliability_baseline_passed",
+            "audit_conformance_passed",
+            "unresolved_critical_violations",
+            "consecutive_compliant_windows",
+            "capability_family",
+            "remediation_closed"
+          ],
+          "properties": {
+            "requested_segment_tier": {
+              "type": "string",
+              "enum": [
+                "S0",
+                "S1",
+                "S2",
+                "S3"
+              ]
+            },
+            "trust_safety_baseline_passed": {
+              "type": "boolean"
+            },
+            "reliability_baseline_passed": {
+              "type": "boolean"
+            },
+            "audit_conformance_passed": {
+              "type": "boolean"
+            },
+            "unresolved_critical_violations": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "consecutive_compliant_windows": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "capability_family": {
+              "type": "string",
+              "enum": [
+                "core",
+                "advanced",
+                "high_risk"
+              ]
+            },
+            "remediation_closed": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "rollout": {
+      "$ref": "PartnerLiquidityProviderRolloutPolicyView.schema.json"
+    }
+  }
+}

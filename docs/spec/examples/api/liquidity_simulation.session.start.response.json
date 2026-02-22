@@ -1,0 +1,26 @@
+{
+  "correlation_id": "corr_liquiditysimulation_session_start",
+  "session": {
+    "session_id": "lsim_demo_alpha",
+    "simulation": true,
+    "simulation_session_id": "lsim_demo_alpha",
+    "owner_actor": {
+      "type": "partner",
+      "id": "partner_alpha"
+    },
+    "mode": "simulation",
+    "label": "Alpha LP Strategy Dry Run",
+    "seed": "seed-alpha-001",
+    "status": "active",
+    "started_at": "2026-02-22T09:00:00Z",
+    "updated_at": "2026-02-22T09:00:00Z",
+    "stopped_at": null,
+    "counters": {
+      "sync_calls": 0,
+      "intents_synced_total": 0,
+      "active_intents_count": 0,
+      "cycles_generated_total": 0,
+      "receipts_generated_total": 0
+    }
+  }
+}

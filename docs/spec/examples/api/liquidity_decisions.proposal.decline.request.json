@@ -1,0 +1,18 @@
+{
+  "decision": {
+    "decision_reason_codes": [
+      "spread_below_floor",
+      "risk_cap_exceeded"
+    ],
+    "policy_ref": {
+      "policy_id": "lp_policy_alpha",
+      "policy_version": 3,
+      "policy_mode": "constrained_auto",
+      "constraints_hash": "sha256:lp-policy-alpha-v3"
+    },
+    "confidence_score_bps": 6700,
+    "risk_tier_snapshot": "medium",
+    "correlation_id": "corr_lp_decision_alpha_002",
+    "recorded_at": "2026-02-22T12:15:00Z"
+  }
+}

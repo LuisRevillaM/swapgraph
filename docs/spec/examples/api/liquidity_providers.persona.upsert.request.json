@@ -1,0 +1,10 @@
+{
+  "persona": {
+    "persona_id": "persona_alpha_mm",
+    "display_name": "Alpha MM",
+    "strategy_summary": "Passive spread capture for balanced cycle completion.",
+    "disclosure_text": "Automated house-liquidity participant.",
+    "active": true
+  },
+  "recorded_at": "2026-02-21T14:00:00Z"
+}

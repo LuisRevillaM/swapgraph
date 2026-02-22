@@ -1,0 +1,41 @@
+{
+  "correlation_id": "corr_notifications_inbox_list",
+  "notifications": [
+    {
+      "notification_id": "notif_4b6e71917199570f",
+      "type": "settlement.deposit_required",
+      "urgency": "high",
+      "occurred_at": "2026-02-21T14:00:00Z",
+      "title": "Deposit required",
+      "body": "Cycle cycle_alpha is waiting for deposit confirmation.",
+      "refs": {
+        "cycle_id": "cycle_alpha"
+      }
+    },
+    {
+      "notification_id": "notif_9f39a3ce5de7b6f5",
+      "type": "proposal.expiring",
+      "urgency": "high",
+      "occurred_at": "2026-02-21T18:00:00Z",
+      "title": "Proposal expires soon",
+      "body": "Cycle cycle_beta requires action before expiry.",
+      "refs": {
+        "proposal_id": "cycle_beta",
+        "cycle_id": "cycle_beta",
+        "deadline_at": "2026-02-21T18:00:00Z"
+      }
+    }
+  ],
+  "total_filtered": 2,
+  "taxonomy": [
+    "proposal.created",
+    "proposal.expiring",
+    "settlement.deposit_required",
+    "settlement.deposit_deadline_approaching",
+    "cycle.executing",
+    "cycle.completed",
+    "cycle.failed",
+    "refund.completed",
+    "intent.demand_signal"
+  ]
+}

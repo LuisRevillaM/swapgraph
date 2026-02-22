@@ -1,0 +1,65 @@
+{
+  "correlation_id": "corr_liquidityinventory_release_batch",
+  "provider_id": "lp_house_alpha",
+  "outcomes": [
+    {
+      "request_index": 0,
+      "reservation_id": "lpinv_res_alpha_001",
+      "ok": true,
+      "reason_code": null,
+      "previous_status": "reserved",
+      "status": "in_settlement",
+      "reservation": {
+        "reservation_id": "lpinv_res_alpha_001",
+        "provider_id": "lp_house_alpha",
+        "holding_id": "steam:asset_ak47_redline",
+        "asset_id": "asset_ak47_redline",
+        "platform": "steam",
+        "quantity": 1,
+        "cycle_id": "cycle_lp_alpha_001",
+        "context_ref": "proposal_alpha_001",
+        "status": "in_settlement",
+        "owner_actor": {
+          "type": "partner",
+          "id": "partner_alpha"
+        },
+        "created_at": "2026-02-22T11:05:00Z",
+        "updated_at": "2026-02-22T11:10:00Z",
+        "released_at": null
+      }
+    },
+    {
+      "request_index": 1,
+      "reservation_id": "lpinv_res_alpha_002",
+      "ok": true,
+      "reason_code": null,
+      "previous_status": "reserved",
+      "status": "released",
+      "reservation": {
+        "reservation_id": "lpinv_res_alpha_002",
+        "provider_id": "lp_house_alpha",
+        "holding_id": "steam:asset_awp_asiimov",
+        "asset_id": "asset_awp_asiimov",
+        "platform": "steam",
+        "quantity": 1,
+        "cycle_id": "cycle_lp_alpha_001",
+        "context_ref": "proposal_alpha_001",
+        "status": "released",
+        "owner_actor": {
+          "type": "partner",
+          "id": "partner_alpha"
+        },
+        "created_at": "2026-02-22T11:05:00Z",
+        "updated_at": "2026-02-22T11:10:00Z",
+        "released_at": "2026-02-22T11:10:00Z"
+      }
+    }
+  ],
+  "summary": {
+    "requested_count": 2,
+    "success_count": 2,
+    "context_mismatch_count": 0,
+    "asset_not_found_count": 0,
+    "active_reservations_count": 1
+  }
+}

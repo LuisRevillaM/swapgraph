@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquiditySimulationSessionStoppedPayload.schema.json",
+  "title": "LiquiditySimulationSessionStoppedPayload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "session_id",
+    "stopped_at"
+  ],
+  "properties": {
+    "session_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stopped_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

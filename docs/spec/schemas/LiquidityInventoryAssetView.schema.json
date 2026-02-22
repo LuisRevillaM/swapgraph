@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquidityInventoryAssetView.schema.json",
+  "title": "LiquidityInventoryAssetView",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "holding_id",
+    "asset_id",
+    "platform",
+    "total_quantity",
+    "metadata",
+    "snapshot_id",
+    "captured_at"
+  ],
+  "properties": {
+    "holding_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "asset_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "platform": {
+      "type": "string",
+      "minLength": 1
+    },
+    "total_quantity": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "metadata": {
+      "type": "object"
+    },
+    "snapshot_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "captured_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

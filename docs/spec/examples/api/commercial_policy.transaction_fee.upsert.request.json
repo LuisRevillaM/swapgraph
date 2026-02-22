@@ -1,0 +1,9 @@
+{
+  "policy": {
+    "fee_model": "bps",
+    "fee_bps": 180,
+    "min_fee_usd": 0,
+    "max_fee_usd": 7
+  },
+  "recorded_at": "2026-02-21T16:00:00Z"
+}

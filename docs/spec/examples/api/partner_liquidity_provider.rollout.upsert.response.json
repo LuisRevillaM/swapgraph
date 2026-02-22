@@ -1,0 +1,44 @@
+{
+  "correlation_id": "corr_partnerliquidityprovider_rollout_upsert",
+  "provider_id": "plp_000001",
+  "rollout": {
+    "provider_id": "plp_000001",
+    "rollout_version": 1,
+    "rollout_status": "active",
+    "effective_segment_tier": "S2",
+    "capability_matrix": [
+      {
+        "capability": "listing_publish",
+        "min_segment_tier": "S1",
+        "requested_enabled": true,
+        "effective_enabled": true
+      },
+      {
+        "capability": "proposal_auto_accept",
+        "min_segment_tier": "S2",
+        "requested_enabled": true,
+        "effective_enabled": true
+      },
+      {
+        "capability": "settlement_execute",
+        "min_segment_tier": "S3",
+        "requested_enabled": false,
+        "effective_enabled": false
+      }
+    ],
+    "reason_codes": [
+      "promotion_approved"
+    ],
+    "eligibility_ref": {
+      "evaluation_id": "plpelig_a7f89c227eec0c2d",
+      "verdict": "allow",
+      "evaluated_at": "2026-02-22T16:20:00.000Z"
+    },
+    "capabilities_hash": "sha256:65787ec7401553f69d31dc1dd3d3ec6725f09a0cc4324e337373289ed40623d8",
+    "updated_at": "2026-02-22T16:30:00.000Z",
+    "updated_by": {
+      "type": "partner",
+      "id": "partner_alpha"
+    }
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquidityPolicyUpsertRequest.schema.json",
+  "title": "LiquidityPolicyUpsertRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "policy"
+  ],
+  "properties": {
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "precedence_assertion",
+        "max_spread_bps",
+        "max_daily_value_usd",
+        "max_counterparty_exposure_usd",
+        "min_price_confidence_bps",
+        "blocked_asset_liquidity_tiers",
+        "high_volatility_mode"
+      ],
+      "properties": {
+        "policy_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "policy_mode": {
+          "type": "string",
+          "enum": [
+            "simulation",
+            "operator_assisted",
+            "constrained_auto",
+            "manual"
+          ]
+        },
+        "precedence_assertion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "max_spread_bps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "max_daily_value_usd": {
+          "type": "number",
+          "minimum": 0
+        },
+        "max_counterparty_exposure_usd": {
+          "type": "number",
+          "minimum": 0
+        },
+        "min_price_confidence_bps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "blocked_asset_liquidity_tiers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "high_volatility_mode": {
+          "type": "string",
+          "enum": [
+            "tighten",
+            "pause",
+            "quote_only"
+          ]
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

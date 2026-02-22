@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/InventoryAssetListResponse.schema.json",
+  "title": "InventoryAssetListResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "assets"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "platform",
+          "asset_id",
+          "quantity",
+          "metadata",
+          "snapshot_id",
+          "captured_at"
+        ],
+        "properties": {
+          "platform": {
+            "type": "string",
+            "minLength": 1
+          },
+          "asset_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "metadata": {
+            "type": "object"
+          },
+          "snapshot_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "captured_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  }
+}

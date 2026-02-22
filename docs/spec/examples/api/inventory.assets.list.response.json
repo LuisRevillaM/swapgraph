@@ -1,0 +1,23 @@
+{
+  "correlation_id": "corr_inventory_assets_list",
+  "assets": [
+    {
+      "platform": "steam",
+      "asset_id": "assetA",
+      "quantity": 1,
+      "metadata": {
+        "wear": "fn"
+      },
+      "snapshot_id": "inv_snapshot_000001",
+      "captured_at": "2026-02-21T12:10:00Z"
+    },
+    {
+      "platform": "steam",
+      "asset_id": "assetB",
+      "quantity": 2,
+      "metadata": {},
+      "snapshot_id": "inv_snapshot_000001",
+      "captured_at": "2026-02-21T12:10:00Z"
+    }
+  ]
+}

@@ -20,6 +20,51 @@ export class JsonStateStore {
       tenancy: { cycles: {}, proposals: {} },
       events: [],
       idempotency: {},
+      liquidity_providers: {},
+      liquidity_provider_personas: {},
+      liquidity_provider_counter: 0,
+      liquidity_provider_persona_counter: 0,
+      liquidity_simulation_sessions: {},
+      liquidity_simulation_events: [],
+      liquidity_simulation_session_counter: 0,
+      liquidity_inventory_snapshots: {},
+      liquidity_inventory_assets: {},
+      liquidity_inventory_reservations: {},
+      liquidity_inventory_reconciliation_events: [],
+      liquidity_inventory_snapshot_counter: 0,
+      liquidity_inventory_reservation_counter: 0,
+      liquidity_inventory_reconciliation_counter: 0,
+      liquidity_listings: {},
+      liquidity_decisions: {},
+      liquidity_decision_counter: 0,
+      liquidity_execution_modes: {},
+      liquidity_execution_requests: {},
+      liquidity_execution_request_counter: 0,
+      liquidity_execution_export_checkpoints: {},
+      liquidity_policies: {},
+      liquidity_policy_decision_audit: [],
+      liquidity_policy_decision_audit_counter: 0,
+      liquidity_policy_export_checkpoints: {},
+      liquidity_policy_daily_usage: {},
+      liquidity_policy_counterparty_exposure: {},
+      partner_liquidity_providers: {},
+      partner_liquidity_provider_counter: 0,
+      partner_liquidity_provider_rollout_policies: {},
+      partner_liquidity_provider_governance_audit: [],
+      partner_liquidity_provider_governance_audit_counter: 0,
+      partner_liquidity_provider_rollout_export_checkpoints: {},
+      platform_connections: {},
+      inventory_snapshots: {},
+      trust_safety_signals: {},
+      trust_safety_signal_counter: 0,
+      trust_safety_decisions: {},
+      trust_safety_decision_counter: 0,
+      trust_safety_export_checkpoints: {},
+      metrics_network_health_export_checkpoints: {},
+      notification_preferences: {},
+      commercial_policies: {},
+      commercial_policy_audit: [],
+      commercial_policy_export_checkpoints: {},
       policy_spend_daily: {},
       policy_audit: [],
       policy_consent_replay: {},
@@ -84,6 +129,51 @@ export class JsonStateStore {
         tenancy: { cycles: {}, proposals: {} },
         events: [],
         idempotency: {},
+        liquidity_providers: {},
+        liquidity_provider_personas: {},
+        liquidity_provider_counter: 0,
+        liquidity_provider_persona_counter: 0,
+        liquidity_simulation_sessions: {},
+        liquidity_simulation_events: [],
+        liquidity_simulation_session_counter: 0,
+        liquidity_inventory_snapshots: {},
+        liquidity_inventory_assets: {},
+        liquidity_inventory_reservations: {},
+        liquidity_inventory_reconciliation_events: [],
+        liquidity_inventory_snapshot_counter: 0,
+        liquidity_inventory_reservation_counter: 0,
+        liquidity_inventory_reconciliation_counter: 0,
+        liquidity_listings: {},
+        liquidity_decisions: {},
+        liquidity_decision_counter: 0,
+        liquidity_execution_modes: {},
+        liquidity_execution_requests: {},
+        liquidity_execution_request_counter: 0,
+        liquidity_execution_export_checkpoints: {},
+        liquidity_policies: {},
+        liquidity_policy_decision_audit: [],
+        liquidity_policy_decision_audit_counter: 0,
+        liquidity_policy_export_checkpoints: {},
+        liquidity_policy_daily_usage: {},
+        liquidity_policy_counterparty_exposure: {},
+        partner_liquidity_providers: {},
+        partner_liquidity_provider_counter: 0,
+        partner_liquidity_provider_rollout_policies: {},
+        partner_liquidity_provider_governance_audit: [],
+        partner_liquidity_provider_governance_audit_counter: 0,
+        partner_liquidity_provider_rollout_export_checkpoints: {},
+        platform_connections: {},
+        inventory_snapshots: {},
+        trust_safety_signals: {},
+        trust_safety_signal_counter: 0,
+        trust_safety_decisions: {},
+        trust_safety_decision_counter: 0,
+        trust_safety_export_checkpoints: {},
+        metrics_network_health_export_checkpoints: {},
+        notification_preferences: {},
+        commercial_policies: {},
+        commercial_policy_audit: [],
+        commercial_policy_export_checkpoints: {},
         policy_spend_daily: {},
         policy_audit: [],
         policy_consent_replay: {},
@@ -149,6 +239,51 @@ export class JsonStateStore {
     this.state.tenancy.proposals ||= {};
     this.state.events ||= [];
     this.state.idempotency ||= {};
+    this.state.liquidity_providers ||= {};
+    this.state.liquidity_provider_personas ||= {};
+    this.state.liquidity_provider_counter ||= 0;
+    this.state.liquidity_provider_persona_counter ||= 0;
+    this.state.liquidity_simulation_sessions ||= {};
+    this.state.liquidity_simulation_events ||= [];
+    this.state.liquidity_simulation_session_counter ||= 0;
+    this.state.liquidity_inventory_snapshots ||= {};
+    this.state.liquidity_inventory_assets ||= {};
+    this.state.liquidity_inventory_reservations ||= {};
+    this.state.liquidity_inventory_reconciliation_events ||= [];
+    this.state.liquidity_inventory_snapshot_counter ||= 0;
+    this.state.liquidity_inventory_reservation_counter ||= 0;
+    this.state.liquidity_inventory_reconciliation_counter ||= 0;
+    this.state.liquidity_listings ||= {};
+    this.state.liquidity_decisions ||= {};
+    this.state.liquidity_decision_counter ||= 0;
+    this.state.liquidity_execution_modes ||= {};
+    this.state.liquidity_execution_requests ||= {};
+    this.state.liquidity_execution_request_counter ||= 0;
+    this.state.liquidity_execution_export_checkpoints ||= {};
+    this.state.liquidity_policies ||= {};
+    this.state.liquidity_policy_decision_audit ||= [];
+    this.state.liquidity_policy_decision_audit_counter ||= 0;
+    this.state.liquidity_policy_export_checkpoints ||= {};
+    this.state.liquidity_policy_daily_usage ||= {};
+    this.state.liquidity_policy_counterparty_exposure ||= {};
+    this.state.partner_liquidity_providers ||= {};
+    this.state.partner_liquidity_provider_counter ||= 0;
+    this.state.partner_liquidity_provider_rollout_policies ||= {};
+    this.state.partner_liquidity_provider_governance_audit ||= [];
+    this.state.partner_liquidity_provider_governance_audit_counter ||= 0;
+    this.state.partner_liquidity_provider_rollout_export_checkpoints ||= {};
+    this.state.platform_connections ||= {};
+    this.state.inventory_snapshots ||= {};
+    this.state.trust_safety_signals ||= {};
+    this.state.trust_safety_signal_counter ||= 0;
+    this.state.trust_safety_decisions ||= {};
+    this.state.trust_safety_decision_counter ||= 0;
+    this.state.trust_safety_export_checkpoints ||= {};
+    this.state.metrics_network_health_export_checkpoints ||= {};
+    this.state.notification_preferences ||= {};
+    this.state.commercial_policies ||= {};
+    this.state.commercial_policy_audit ||= [];
+    this.state.commercial_policy_export_checkpoints ||= {};
     this.state.policy_spend_daily ||= {};
     this.state.policy_audit ||= [];
     this.state.policy_consent_replay ||= {};

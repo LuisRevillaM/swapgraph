@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquidityProviderRegisteredPayload.schema.json",
+  "title": "LiquidityProviderRegisteredPayload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "provider_id",
+    "provider_type",
+    "owner_actor",
+    "is_automated",
+    "is_house_inventory",
+    "label_required",
+    "display_label",
+    "disclosure_text",
+    "registered_at"
+  ],
+  "properties": {
+    "provider_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider_type": {
+      "type": "string",
+      "enum": [
+        "user",
+        "house_bot",
+        "partner_lp"
+      ]
+    },
+    "owner_actor": {
+      "$ref": "ActorRef.schema.json"
+    },
+    "is_automated": {
+      "type": "boolean"
+    },
+    "is_house_inventory": {
+      "type": "boolean"
+    },
+    "label_required": {
+      "type": "boolean"
+    },
+    "display_label": {
+      "type": "string",
+      "minLength": 1
+    },
+    "disclosure_text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "registered_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

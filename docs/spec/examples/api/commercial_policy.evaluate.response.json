@@ -1,0 +1,41 @@
+{
+  "correlation_id": "corr_commercialpolicy_evaluate",
+  "evaluation": {
+    "evaluation_id": "cmpeval_47c3f5f708acbf7d",
+    "operation_id": "swapIntents.create",
+    "enforced_precedence": "safety>trust>commercial>preference",
+    "verdict": "allow",
+    "evaluated_at": "2026-02-21T16:12:00Z",
+    "projected_quota_usage_units": 110,
+    "quota_remaining_units": 10,
+    "effective": {
+      "transaction_fee": {
+        "fee_model": "bps",
+        "fee_bps": 180,
+        "fee_flat_usd": null,
+        "min_fee_usd": 0,
+        "max_fee_usd": 7
+      },
+      "subscription_tier": {
+        "tier": "pro",
+        "trust_milestone_required": "established_history",
+        "max_cycle_notional_usd": 1200,
+        "max_open_intents": 120,
+        "mobile_contract_notes": [
+          "App Store entitlements are advisory in v1 contracts.",
+          "Server-side trust milestones remain authoritative for caps."
+        ]
+      },
+      "boost": {
+        "enabled": true,
+        "max_multiplier": 1.5
+      },
+      "quota": {
+        "monthly_quota_units": 120,
+        "overage_enabled": true,
+        "overage_unit_price_usd": 0.35,
+        "hard_stop_on_quota_exceeded": true
+      }
+    }
+  }
+}

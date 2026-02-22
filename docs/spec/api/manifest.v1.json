@@ -97,6 +97,1220 @@
     },
     {
       "method": "GET",
+      "path": "/platform-connections",
+      "operation_id": "platform.connections.list",
+      "idempotency_required": false,
+      "response_schema": "PlatformConnectionListResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/platform-connections",
+      "operation_id": "platform.connections.upsert",
+      "idempotency_required": true,
+      "request_schema": "PlatformConnectionUpsertRequest.schema.json",
+      "response_schema": "PlatformConnectionUpsertResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/inventory/snapshots",
+      "operation_id": "inventory.snapshots.record",
+      "idempotency_required": true,
+      "request_schema": "InventorySnapshotRecordRequest.schema.json",
+      "response_schema": "InventorySnapshotRecordResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/inventory/assets",
+      "operation_id": "inventory.assets.list",
+      "idempotency_required": false,
+      "response_schema": "InventoryAssetListResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/disputes",
+      "operation_id": "disputes.create",
+      "idempotency_required": true,
+      "request_schema": "DisputeCreateRequest.schema.json",
+      "response_schema": "DisputeCreateResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/disputes/{dispute_id}",
+      "operation_id": "disputes.get",
+      "idempotency_required": false,
+      "response_schema": "DisputeGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/trust-safety/signals",
+      "operation_id": "trustSafety.signal.record",
+      "idempotency_required": true,
+      "request_schema": "TrustSafetySignalRecordRequest.schema.json",
+      "response_schema": "TrustSafetySignalRecordResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/trust-safety/decisions",
+      "operation_id": "trustSafety.decision.record",
+      "idempotency_required": true,
+      "request_schema": "TrustSafetyDecisionRecordRequest.schema.json",
+      "response_schema": "TrustSafetyDecisionRecordResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/trust-safety/decisions/{decision_id}",
+      "operation_id": "trustSafety.decision.get",
+      "idempotency_required": false,
+      "response_schema": "TrustSafetyDecisionGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/trust-safety/decisions/export",
+      "operation_id": "trustSafety.decision.export",
+      "idempotency_required": false,
+      "response_schema": "TrustSafetyDecisionExportResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/metrics/north-star",
+      "operation_id": "metrics.north_star.get",
+      "idempotency_required": false,
+      "response_schema": "MetricsNorthStarGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/metrics/marketplace-funnel",
+      "operation_id": "metrics.marketplace_funnel.get",
+      "idempotency_required": false,
+      "response_schema": "MetricsMarketplaceFunnelGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/metrics/partner-health",
+      "operation_id": "metrics.partner_health.get",
+      "idempotency_required": false,
+      "response_schema": "MetricsPartnerHealthGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/metrics/safety-health",
+      "operation_id": "metrics.safety_health.get",
+      "idempotency_required": false,
+      "response_schema": "MetricsSafetyHealthGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/metrics/network-health/export",
+      "operation_id": "metrics.network_health.export",
+      "idempotency_required": false,
+      "response_schema": "MetricsNetworkHealthExportResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/notifications/preferences",
+      "operation_id": "notifications.preferences.get",
+      "idempotency_required": false,
+      "response_schema": "NotificationPreferencesGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/notifications/preferences",
+      "operation_id": "notifications.preferences.upsert",
+      "idempotency_required": true,
+      "request_schema": "NotificationPreferencesUpsertRequest.schema.json",
+      "response_schema": "NotificationPreferencesUpsertResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/notifications/inbox",
+      "operation_id": "notifications.inbox.list",
+      "idempotency_required": false,
+      "response_schema": "NotificationInboxListResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/product-projections/inventory-awakening",
+      "operation_id": "productProjection.inventory_awakening.get",
+      "idempotency_required": false,
+      "response_schema": "InventoryAwakeningProjectionResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/product-projections/cycle-inbox",
+      "operation_id": "productProjection.cycle_inbox.list",
+      "idempotency_required": false,
+      "response_schema": "CycleInboxProjectionListResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/product-projections/settlement-timeline/{cycle_id}",
+      "operation_id": "productProjection.settlement_timeline.get",
+      "idempotency_required": false,
+      "response_schema": "SettlementTimelineDigestResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/product-projections/receipt-share/{receipt_id}",
+      "operation_id": "productProjection.receipt_share.get",
+      "idempotency_required": false,
+      "response_schema": "ReceiptShareProjectionResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "receipts:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/partner-ui/capabilities",
+      "operation_id": "partnerUi.capabilities.get",
+      "idempotency_required": false,
+      "response_schema": "PartnerUiCapabilitiesGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/partner-ui/bundles/{surface}",
+      "operation_id": "partnerUi.bundle.get",
+      "idempotency_required": false,
+      "response_schema": "PartnerUiBundleGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/commercial/policies/transaction-fee",
+      "operation_id": "commercialPolicy.transaction_fee.get",
+      "idempotency_required": false,
+      "response_schema": "CommercialTransactionFeePolicyGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/commercial/policies/transaction-fee",
+      "operation_id": "commercialPolicy.transaction_fee.upsert",
+      "idempotency_required": true,
+      "request_schema": "CommercialTransactionFeePolicyUpsertRequest.schema.json",
+      "response_schema": "CommercialTransactionFeePolicyUpsertResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/commercial/policies/subscription-tier",
+      "operation_id": "commercialPolicy.subscription_tier.get",
+      "idempotency_required": false,
+      "response_schema": "CommercialSubscriptionTierPolicyGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/commercial/policies/subscription-tier",
+      "operation_id": "commercialPolicy.subscription_tier.upsert",
+      "idempotency_required": true,
+      "request_schema": "CommercialSubscriptionTierPolicyUpsertRequest.schema.json",
+      "response_schema": "CommercialSubscriptionTierPolicyUpsertResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/commercial/policies/boost",
+      "operation_id": "commercialPolicy.boost_policy.get",
+      "idempotency_required": false,
+      "response_schema": "CommercialBoostPolicyGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/commercial/policies/boost",
+      "operation_id": "commercialPolicy.boost_policy.upsert",
+      "idempotency_required": true,
+      "request_schema": "CommercialBoostPolicyUpsertRequest.schema.json",
+      "response_schema": "CommercialBoostPolicyUpsertResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/commercial/policies/quota",
+      "operation_id": "commercialPolicy.quota_policy.get",
+      "idempotency_required": false,
+      "response_schema": "CommercialQuotaPolicyGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/commercial/policies/quota",
+      "operation_id": "commercialPolicy.quota_policy.upsert",
+      "idempotency_required": true,
+      "request_schema": "CommercialQuotaPolicyUpsertRequest.schema.json",
+      "response_schema": "CommercialQuotaPolicyUpsertResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/commercial/policies/evaluate",
+      "operation_id": "commercialPolicy.evaluate",
+      "idempotency_required": true,
+      "request_schema": "CommercialPolicyEvaluateRequest.schema.json",
+      "response_schema": "CommercialPolicyEvaluateResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/commercial/policies/export",
+      "operation_id": "commercialPolicy.export",
+      "idempotency_required": false,
+      "response_schema": "CommercialPolicyExportResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/partner-liquidity-providers",
+      "operation_id": "partnerLiquidityProvider.onboard",
+      "idempotency_required": true,
+      "request_schema": "PartnerLiquidityProviderOnboardRequest.schema.json",
+      "response_schema": "PartnerLiquidityProviderOnboardResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/partner-liquidity-providers/{provider_id}",
+      "operation_id": "partnerLiquidityProvider.get",
+      "idempotency_required": false,
+      "response_schema": "PartnerLiquidityProviderGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/partner-liquidity-providers/{provider_id}/status",
+      "operation_id": "partnerLiquidityProvider.status.upsert",
+      "idempotency_required": true,
+      "request_schema": "PartnerLiquidityProviderStatusUpsertRequest.schema.json",
+      "response_schema": "PartnerLiquidityProviderStatusUpsertResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/partner-liquidity-providers/{provider_id}/eligibility/evaluate",
+      "operation_id": "partnerLiquidityProvider.eligibility.evaluate",
+      "idempotency_required": true,
+      "request_schema": "PartnerLiquidityProviderEligibilityEvaluateRequest.schema.json",
+      "response_schema": "PartnerLiquidityProviderEligibilityEvaluateResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/partner-liquidity-providers/{provider_id}/rollout",
+      "operation_id": "partnerLiquidityProvider.rollout.upsert",
+      "idempotency_required": true,
+      "request_schema": "PartnerLiquidityProviderRolloutUpsertRequest.schema.json",
+      "response_schema": "PartnerLiquidityProviderRolloutUpsertResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/partner-liquidity-providers/{provider_id}/rollout/export",
+      "operation_id": "partnerLiquidityProvider.rollout.export",
+      "idempotency_required": false,
+      "response_schema": "PartnerLiquidityProviderRolloutExportResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/liquidity-providers",
+      "operation_id": "liquidityProviders.register",
+      "idempotency_required": true,
+      "request_schema": "LiquidityProviderRegisterRequest.schema.json",
+      "response_schema": "LiquidityProviderRegisterResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/liquidity-providers/{provider_id}",
+      "operation_id": "liquidityProviders.get",
+      "idempotency_required": false,
+      "response_schema": "LiquidityProviderGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/liquidity-providers",
+      "operation_id": "liquidityProviders.list",
+      "idempotency_required": false,
+      "response_schema": "LiquidityProviderListResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/liquidity-providers/{provider_id}/persona",
+      "operation_id": "liquidityProviders.persona.upsert",
+      "idempotency_required": true,
+      "request_schema": "LiquidityProviderPersonaUpsertRequest.schema.json",
+      "response_schema": "LiquidityProviderPersonaUpsertResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/liquidity-providers/{provider_id}/policies",
+      "operation_id": "liquidityPolicy.upsert",
+      "idempotency_required": true,
+      "request_schema": "LiquidityPolicyUpsertRequest.schema.json",
+      "response_schema": "LiquidityPolicyUpsertResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/liquidity-providers/{provider_id}/policies",
+      "operation_id": "liquidityPolicy.get",
+      "idempotency_required": false,
+      "response_schema": "LiquidityPolicyGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/liquidity-providers/{provider_id}/policies/evaluate",
+      "operation_id": "liquidityPolicy.evaluate",
+      "idempotency_required": true,
+      "request_schema": "LiquidityPolicyEvaluateRequest.schema.json",
+      "response_schema": "LiquidityPolicyEvaluateResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/liquidity-providers/{provider_id}/decision-audit",
+      "operation_id": "liquidityDecision.audit.list",
+      "idempotency_required": false,
+      "response_schema": "LiquidityDecisionAuditListResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/liquidity-providers/{provider_id}/decision-audit/export",
+      "operation_id": "liquidityDecision.audit.export",
+      "idempotency_required": false,
+      "response_schema": "LiquidityDecisionAuditExportResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/liquidity-providers/{provider_id}/inventory/snapshots",
+      "operation_id": "liquidityInventory.snapshot.record",
+      "idempotency_required": true,
+      "request_schema": "LiquidityInventorySnapshotRecordRequest.schema.json",
+      "response_schema": "LiquidityInventorySnapshotRecordResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/liquidity-providers/{provider_id}/inventory/assets",
+      "operation_id": "liquidityInventory.assets.list",
+      "idempotency_required": false,
+      "response_schema": "LiquidityInventoryAssetListResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/liquidity-providers/{provider_id}/inventory/availability",
+      "operation_id": "liquidityInventory.availability.get",
+      "idempotency_required": false,
+      "response_schema": "LiquidityInventoryAvailabilityGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/liquidity-providers/{provider_id}/inventory/reservations",
+      "operation_id": "liquidityInventory.reserve.batch",
+      "idempotency_required": true,
+      "request_schema": "LiquidityInventoryReservationBatchRequest.schema.json",
+      "response_schema": "LiquidityInventoryReservationBatchResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/liquidity-providers/{provider_id}/inventory/reservations/release",
+      "operation_id": "liquidityInventory.release.batch",
+      "idempotency_required": true,
+      "request_schema": "LiquidityInventoryReleaseBatchRequest.schema.json",
+      "response_schema": "LiquidityInventoryReleaseBatchResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/liquidity-providers/{provider_id}/inventory/reconciliation/export",
+      "operation_id": "liquidityInventory.reconciliation.export",
+      "idempotency_required": false,
+      "response_schema": "LiquidityInventoryReconciliationExportResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/liquidity-providers/{provider_id}/listings",
+      "operation_id": "liquidityListings.upsert",
+      "idempotency_required": true,
+      "request_schema": "LiquidityListingUpsertRequest.schema.json",
+      "response_schema": "LiquidityListingUpsertResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/liquidity-providers/{provider_id}/listings/{intent_id}/cancel",
+      "operation_id": "liquidityListings.cancel",
+      "idempotency_required": true,
+      "request_schema": "LiquidityListingCancelRequest.schema.json",
+      "response_schema": "LiquidityListingCancelResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/liquidity-providers/{provider_id}/listings",
+      "operation_id": "liquidityListings.list",
+      "idempotency_required": false,
+      "response_schema": "LiquidityListingListResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/liquidity-providers/{provider_id}/proposals/{proposal_id}/accept",
+      "operation_id": "liquidityDecisions.proposal.accept",
+      "idempotency_required": true,
+      "request_schema": "LiquidityProposalDecisionAcceptRequest.schema.json",
+      "response_schema": "LiquidityProposalDecisionAcceptResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/liquidity-providers/{provider_id}/proposals/{proposal_id}/decline",
+      "operation_id": "liquidityDecisions.proposal.decline",
+      "idempotency_required": true,
+      "request_schema": "LiquidityProposalDecisionDeclineRequest.schema.json",
+      "response_schema": "LiquidityProposalDecisionDeclineResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/liquidity-providers/{provider_id}/decisions/{decision_id}",
+      "operation_id": "liquidityDecisions.get",
+      "idempotency_required": false,
+      "response_schema": "LiquidityDecisionGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/liquidity-providers/{provider_id}/execution-mode",
+      "operation_id": "liquidityExecution.mode.upsert",
+      "idempotency_required": true,
+      "request_schema": "LiquidityExecutionModeUpsertRequest.schema.json",
+      "response_schema": "LiquidityExecutionModeUpsertResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/liquidity-providers/{provider_id}/execution-mode",
+      "operation_id": "liquidityExecution.mode.get",
+      "idempotency_required": false,
+      "response_schema": "LiquidityExecutionModeGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/liquidity-providers/{provider_id}/execution-requests",
+      "operation_id": "liquidityExecution.request.record",
+      "idempotency_required": true,
+      "request_schema": "LiquidityExecutionRequestRecordRequest.schema.json",
+      "response_schema": "LiquidityExecutionRequestRecordResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/liquidity-providers/{provider_id}/execution-requests/{request_id}/approve",
+      "operation_id": "liquidityExecution.request.approve",
+      "idempotency_required": true,
+      "request_schema": "LiquidityExecutionRequestApproveRequest.schema.json",
+      "response_schema": "LiquidityExecutionRequestApproveResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/liquidity-providers/{provider_id}/execution-requests/{request_id}/reject",
+      "operation_id": "liquidityExecution.request.reject",
+      "idempotency_required": true,
+      "request_schema": "LiquidityExecutionRequestRejectRequest.schema.json",
+      "response_schema": "LiquidityExecutionRequestRejectResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/liquidity-providers/{provider_id}/execution-requests/export",
+      "operation_id": "liquidityExecution.export",
+      "idempotency_required": false,
+      "response_schema": "LiquidityExecutionRequestExportResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/liquidity-simulation/sessions",
+      "operation_id": "liquiditySimulation.session.start",
+      "idempotency_required": true,
+      "request_schema": "LiquiditySimulationSessionStartRequest.schema.json",
+      "response_schema": "LiquiditySimulationSessionStartResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/liquidity-simulation/sessions/{session_id}",
+      "operation_id": "liquiditySimulation.session.get",
+      "idempotency_required": false,
+      "response_schema": "LiquiditySimulationSessionGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/liquidity-simulation/sessions/{session_id}/stop",
+      "operation_id": "liquiditySimulation.session.stop",
+      "idempotency_required": true,
+      "request_schema": "LiquiditySimulationSessionStopRequest.schema.json",
+      "response_schema": "LiquiditySimulationSessionGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/liquidity-simulation/sessions/{session_id}/intents/sync",
+      "operation_id": "liquiditySimulation.intent.sync",
+      "idempotency_required": true,
+      "request_schema": "LiquiditySimulationIntentSyncRequest.schema.json",
+      "response_schema": "LiquiditySimulationIntentSyncResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/liquidity-simulation/sessions/{session_id}/cycles/export",
+      "operation_id": "liquiditySimulation.cycle.export",
+      "idempotency_required": false,
+      "response_schema": "LiquiditySimulationCycleExportResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/liquidity-simulation/sessions/{session_id}/receipts/export",
+      "operation_id": "liquiditySimulation.receipt.export",
+      "idempotency_required": false,
+      "response_schema": "LiquiditySimulationReceiptExportResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
       "path": "/cycle-proposals",
       "operation_id": "cycleProposals.list",
       "idempotency_required": false,

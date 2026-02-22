@@ -1,0 +1,25 @@
+{
+  "correlation_id": "corr_liquidityproviders_register",
+  "provider": {
+    "provider_id": "lp_house_alpha",
+    "provider_type": "house_bot",
+    "owner_actor": {
+      "type": "partner",
+      "id": "partner_alpha"
+    },
+    "is_automated": true,
+    "is_house_inventory": true,
+    "label_required": true,
+    "display_label": "Alpha Market Maker",
+    "disclosure_text": "Automated house-liquidity participant.",
+    "active": true,
+    "policy_ref": {
+      "policy_id": "lp_policy_alpha",
+      "policy_version": 3,
+      "policy_mode": "constrained_auto",
+      "constraints_hash": "sha256:0b9d6f"
+    },
+    "created_at": "2026-02-21T12:00:00Z",
+    "updated_at": "2026-02-21T12:00:00Z"
+  }
+}

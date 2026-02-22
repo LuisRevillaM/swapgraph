@@ -1,7 +1,7 @@
 # M108 PRD Review Closure — Decision Checklist
 
 Date: 2026-02-21
-Status: Draft for approval (PRD-only mode)
+Status: Approved and implemented (fixtures-first, verifier-closed on 2026-02-22)
 
 Purpose: close LP autonomy-policy decisions so automated LP behavior remains deterministic, safe, and auditable.
 
@@ -49,3 +49,8 @@ Purpose: close LP autonomy-policy decisions so automated LP behavior remains det
 
 ## PRD approval gate (M108)
 M108 is ready for implementation planning only when D1–D7 are explicitly approved or amended.
+
+## Implementation closure evidence
+- `npm run verify:m108` exits 0.
+- `node verify/runner.mjs milestones/M108.yaml` returns `overall=true`.
+- Canonical output hash locked in `fixtures/release/m108_expected.json` and artifacts published under `artifacts/milestones/M108/latest/*`.

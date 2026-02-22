@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/NotificationInboxListResponse.schema.json",
+  "title": "NotificationInboxListResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "notifications",
+    "total_filtered",
+    "taxonomy"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "notifications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "notification_id",
+          "type",
+          "urgency",
+          "occurred_at",
+          "title",
+          "body",
+          "refs"
+        ],
+        "properties": {
+          "notification_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "proposal.created",
+              "proposal.expiring",
+              "settlement.deposit_required",
+              "settlement.deposit_deadline_approaching",
+              "cycle.executing",
+              "cycle.completed",
+              "cycle.failed",
+              "refund.completed",
+              "intent.demand_signal"
+            ]
+          },
+          "urgency": {
+            "type": "string",
+            "enum": [
+              "low",
+              "normal",
+              "high",
+              "critical"
+            ]
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1
+          },
+          "refs": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    "total_filtered": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "taxonomy": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "proposal.created",
+          "proposal.expiring",
+          "settlement.deposit_required",
+          "settlement.deposit_deadline_approaching",
+          "cycle.executing",
+          "cycle.completed",
+          "cycle.failed",
+          "refund.completed",
+          "intent.demand_signal"
+        ]
+      }
+    }
+  }
+}

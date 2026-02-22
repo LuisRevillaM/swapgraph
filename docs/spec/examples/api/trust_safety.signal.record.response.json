@@ -1,0 +1,17 @@
+{
+  "correlation_id": "corr_trustsafety_signal_record",
+  "signal": {
+    "signal_id": "ts_signal_000001",
+    "category": "fraud_velocity_spike",
+    "subject_actor_type": "user",
+    "subject_actor_id": "u1",
+    "severity": "high",
+    "confidence_score_bps": 8700,
+    "observed_at": "2026-02-21T13:00:00.000Z",
+    "recorded_at": "2026-02-21T13:00:05.000Z",
+    "metadata": {
+      "window_minutes": 15,
+      "velocity_multiplier": 3.4
+    }
+  }
+}

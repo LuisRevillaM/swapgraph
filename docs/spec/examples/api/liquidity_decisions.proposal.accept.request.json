@@ -1,0 +1,18 @@
+{
+  "decision": {
+    "decision_reason_codes": [
+      "spread_target_met",
+      "inventory_available"
+    ],
+    "policy_ref": {
+      "policy_id": "lp_policy_alpha",
+      "policy_version": 3,
+      "policy_mode": "constrained_auto",
+      "constraints_hash": "sha256:lp-policy-alpha-v3"
+    },
+    "confidence_score_bps": 9100,
+    "risk_tier_snapshot": "low",
+    "correlation_id": "corr_lp_decision_alpha_001",
+    "recorded_at": "2026-02-22T12:10:00Z"
+  }
+}

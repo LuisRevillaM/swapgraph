@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquidityPolicyRef.schema.json",
+  "title": "LiquidityPolicyRef",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "policy_id",
+    "policy_version",
+    "policy_mode",
+    "constraints_hash"
+  ],
+  "properties": {
+    "policy_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "policy_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "policy_mode": {
+      "type": "string",
+      "enum": [
+        "simulation",
+        "operator_assisted",
+        "constrained_auto",
+        "manual"
+      ]
+    },
+    "constraints_hash": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

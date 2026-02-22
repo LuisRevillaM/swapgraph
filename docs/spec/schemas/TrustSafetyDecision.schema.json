@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/TrustSafetyDecision.schema.json",
+  "title": "TrustSafetyDecision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "decision_id",
+    "subject_actor_type",
+    "subject_actor_id",
+    "decision",
+    "reason_codes",
+    "contributing_signal_ids",
+    "severity",
+    "confidence_score_bps",
+    "recorded_at",
+    "correlation_id",
+    "dispute_id",
+    "reliability_ref"
+  ],
+  "properties": {
+    "decision_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "subject_actor_type": {
+      "type": "string",
+      "enum": [
+        "partner",
+        "user"
+      ]
+    },
+    "subject_actor_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "subject_redacted": {
+      "type": "boolean"
+    },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "allow",
+        "manual_review",
+        "block"
+      ]
+    },
+    "reason_codes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "contributing_signal_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ]
+    },
+    "confidence_score_bps": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 10000
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dispute_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "reliability_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "correlation_id": "corr_metrics_partner_health_get",
+  "partner_id": "partner_demo",
+  "window": {
+    "from_iso": "2026-02-20T00:00:00Z",
+    "to_iso": "2026-02-21T00:00:00Z",
+    "bucket": "day"
+  },
+  "partner_health": {
+    "proposal_delivery_success_bps": 9500,
+    "proposal_delivery_success_numerator": 19,
+    "proposal_delivery_success_denominator": 20,
+    "commit_to_completion_bps": 8000,
+    "commit_to_completion_numerator": 4,
+    "commit_to_completion_denominator": 5,
+    "webhook_delivery_success_bps": 9000,
+    "webhook_delivery_success_numerator": 9,
+    "webhook_delivery_success_denominator": 10,
+    "webhook_dead_letter_rate_bps": 1000,
+    "webhook_dead_letter_numerator": 1,
+    "webhook_dead_letter_denominator": 10
+  }
+}

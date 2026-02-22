@@ -1,7 +1,7 @@
 # M106 PRD Review Closure — Decision Checklist
 
 Date: 2026-02-21
-Status: Draft for approval (PRD-only mode)
+Status: Approved and implemented (fixtures-first, verifier-closed on 2026-02-22)
 
 Purpose: close listing/decision contract decisions so house LP participation is explicit, explainable, and auditable.
 
@@ -49,3 +49,8 @@ Purpose: close listing/decision contract decisions so house LP participation is 
 
 ## PRD approval gate (M106)
 M106 is ready for implementation planning only when D1–D7 are explicitly approved or amended.
+
+## Implementation closure evidence
+- `npm run verify:m106` exits 0.
+- `node verify/runner.mjs milestones/M106.yaml` returns `overall=true`.
+- Canonical output hash locked in `fixtures/release/m106_expected.json` and artifacts published under `artifacts/milestones/M106/latest/*`.

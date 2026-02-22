@@ -1,0 +1,14 @@
+{
+  "decision": {
+    "operator_actor": {
+      "type": "partner",
+      "id": "partner_alpha"
+    },
+    "reason_codes": [
+      "risk_review_failed",
+      "platform_policy_pending"
+    ],
+    "correlation_id": "corr_lpexec_reject_000002",
+    "rejected_at": "2026-02-22T12:30:00Z"
+  }
+}

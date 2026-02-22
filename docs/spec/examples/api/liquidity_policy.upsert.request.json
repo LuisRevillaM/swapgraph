@@ -1,0 +1,17 @@
+{
+  "policy": {
+    "policy_id": "lp_policy_alpha",
+    "policy_mode": "constrained_auto",
+    "precedence_assertion": "safety>trust>lp_autonomy_policy>commercial>preference",
+    "max_spread_bps": 320,
+    "max_daily_value_usd": 18000,
+    "max_counterparty_exposure_usd": 4500,
+    "min_price_confidence_bps": 7600,
+    "blocked_asset_liquidity_tiers": [
+      "critical"
+    ],
+    "high_volatility_mode": "quote_only",
+    "updated_at": "2026-02-22T14:00:00Z"
+  },
+  "recorded_at": "2026-02-22T14:00:00Z"
+}

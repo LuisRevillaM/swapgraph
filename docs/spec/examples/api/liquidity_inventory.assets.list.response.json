@@ -1,0 +1,30 @@
+{
+  "correlation_id": "corr_liquidityinventory_assets_list",
+  "provider_id": "lp_house_alpha",
+  "assets": [
+    {
+      "holding_id": "steam:asset_ak47_redline",
+      "asset_id": "asset_ak47_redline",
+      "platform": "steam",
+      "total_quantity": 2,
+      "metadata": {
+        "app_id": "730",
+        "market_hash_name": "AK-47 | Redline (Field-Tested)"
+      },
+      "snapshot_id": "lpinv_snapshot_alpha_001",
+      "captured_at": "2026-02-22T11:00:00Z"
+    },
+    {
+      "holding_id": "steam:asset_awp_asiimov",
+      "asset_id": "asset_awp_asiimov",
+      "platform": "steam",
+      "total_quantity": 1,
+      "metadata": {
+        "app_id": "730",
+        "market_hash_name": "AWP | Asiimov (Battle-Scarred)"
+      },
+      "snapshot_id": "lpinv_snapshot_alpha_001",
+      "captured_at": "2026-02-22T11:00:00Z"
+    }
+  ]
+}

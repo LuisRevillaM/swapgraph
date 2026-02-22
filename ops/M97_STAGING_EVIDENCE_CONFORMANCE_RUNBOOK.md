@@ -12,7 +12,7 @@ Provide a deterministic operator procedure for refreshing staging proof bundles 
 ## Evidence bundle workflow
 1. Execute milestone verification:
    - `npm run verify:mxx`
-   - `node verify/runner.ts milestones/Mxx.yaml`
+   - `node verify/runner.mjs milestones/Mxx.yaml`
 2. Collect evidence files from `artifacts/milestones/Mxx/latest/*`.
 3. Compute deterministic checksums:
    - `sha256sum <artifact files>`
@@ -27,7 +27,7 @@ Provide a deterministic operator procedure for refreshing staging proof bundles 
 
 ## Validation
 - `npm run verify:m97`
-- `node verify/runner.ts milestones/M97.yaml`
+- `node verify/runner.mjs milestones/M97.yaml`
 - Confirm `artifacts/milestones/M97/latest/staging_evidence_conformance_output.json` includes:
   - deterministic `manifest_hash` and `checkpoint_hash` values,
   - continuation checkpoint enforcement (`staging_evidence_checkpoint_required` / mismatch proof),

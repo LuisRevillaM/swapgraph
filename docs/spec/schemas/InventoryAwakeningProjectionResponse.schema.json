@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/InventoryAwakeningProjectionResponse.schema.json",
+  "title": "InventoryAwakeningProjectionResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "projection"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "projection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "swappability_summary",
+        "recommended_first_intents"
+      ],
+      "properties": {
+        "swappability_summary": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "intents_total",
+            "active_intents",
+            "cycle_opportunities",
+            "average_confidence_bps"
+          ],
+          "properties": {
+            "intents_total": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "active_intents": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "cycle_opportunities": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "average_confidence_bps": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000
+            }
+          }
+        },
+        "recommended_first_intents": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "recommendation_id",
+              "cycle_id",
+              "suggested_give_asset_id",
+              "suggested_get_asset_id",
+              "confidence_bps",
+              "rationale"
+            ],
+            "properties": {
+              "recommendation_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "cycle_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "suggested_give_asset_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "minLength": 1
+              },
+              "suggested_get_asset_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "minLength": 1
+              },
+              "confidence_bps": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10000
+              },
+              "rationale": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

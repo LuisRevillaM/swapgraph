@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/TrustSafetyDecisionRecordResponse.schema.json",
+  "title": "TrustSafetyDecisionRecordResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "decision"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "decision": {
+      "$ref": "TrustSafetyDecision.schema.json"
+    }
+  }
+}

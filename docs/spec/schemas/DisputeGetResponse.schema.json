@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/DisputeGetResponse.schema.json",
+  "title": "DisputeGetResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "dispute"
+  ],
+  "$defs": {
+    "dispute": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dispute_id",
+        "partner_id",
+        "dispute_type",
+        "severity",
+        "subject_ref",
+        "reason_code",
+        "status",
+        "opened_at",
+        "resolved_at",
+        "resolution",
+        "evidence_items"
+      ],
+      "properties": {
+        "dispute_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dispute_type": {
+          "type": "string",
+          "enum": [
+            "delivery",
+            "billing",
+            "sla"
+          ]
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        "subject_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "open",
+            "resolved"
+          ]
+        },
+        "opened_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "resolved_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "resolution": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          ]
+        },
+        "evidence_items": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  },
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dispute": {
+      "$ref": "#/$defs/dispute"
+    }
+  }
+}

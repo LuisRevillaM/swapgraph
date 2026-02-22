@@ -1,0 +1,60 @@
+{
+  "correlation_id": "corr_trustsafety_decision_export",
+  "exported_at": "2026-02-21T13:10:00.000Z",
+  "query": {
+    "subject_actor_id": "u1",
+    "decision": "manual_review",
+    "from_iso": "2026-02-21T00:00:00Z",
+    "to_iso": "2026-02-21T23:59:59Z",
+    "now_iso": "2026-02-21T13:10:00Z",
+    "limit": 50,
+    "retention_days": 180,
+    "redact_subject": true,
+    "exported_at_iso": "2026-02-21T13:10:00.000Z"
+  },
+  "total_filtered": 1,
+  "entries": [
+    {
+      "decision_id": "ts_decision_000001",
+      "subject_actor_type": "user",
+      "subject_actor_id": "redacted_3f6dbf6df6ac",
+      "subject_redacted": true,
+      "decision": "manual_review",
+      "reason_codes": [
+        "ato_device_drift",
+        "fraud_velocity_spike"
+      ],
+      "contributing_signal_ids": [
+        "ts_signal_000001",
+        "ts_signal_000002"
+      ],
+      "severity": "high",
+      "confidence_score_bps": 9100,
+      "recorded_at": "2026-02-21T13:01:00.000Z",
+      "correlation_id": "risk_eval_7f3a",
+      "dispute_id": "dispute_000001",
+      "reliability_ref": "user_reliability:u1:v12"
+    }
+  ],
+  "attestation": {
+    "cursor_after": null,
+    "next_cursor": null,
+    "attestation_after": null,
+    "page_hash": "8ba95eb6ebf7566f16e790ec1c4ef68a4f5e8a5c7758b6f0664e2cfaf3224f67",
+    "chain_hash": "81389ebfca32731abcaa51f263716de4938e6e92ce40938e425c205b5b61896b"
+  },
+  "checkpoint": {
+    "checkpoint_after": null,
+    "attestation_chain_hash": "81389ebfca32731abcaa51f263716de4938e6e92ce40938e425c205b5b61896b",
+    "next_cursor": null,
+    "entries_count": 1,
+    "total_filtered": 1,
+    "checkpoint_hash": "ea57a8e36f18920baebca4382fce57fa7f8d4d4e5f322e653f2f95ad6eaef510"
+  },
+  "export_hash": "f7dccf0716c257987a263be1ceec06d6af20c73bbfef6e00fd8b1936f77794ff",
+  "signature": {
+    "key_id": "dev-pi-k1",
+    "alg": "ed25519",
+    "sig": "nByQpKygSbaE6VvQbdHfLkKVcf9i49uPrp8sM8eJQfTlIOEpdJad7neU8MReE3V9AFMH0xxnE8ScwNw2lSAjDQ=="
+  }
+}

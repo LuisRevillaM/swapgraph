@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquidityInventoryReservationOutcome.schema.json",
+  "title": "LiquidityInventoryReservationOutcome",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_index",
+    "ok",
+    "reason_code",
+    "reservation"
+  ],
+  "properties": {
+    "request_index": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "reason_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "reservation": {
+      "anyOf": [
+        {
+          "$ref": "LiquidityInventoryReservationView.schema.json"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

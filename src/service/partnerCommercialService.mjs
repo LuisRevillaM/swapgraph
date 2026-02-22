@@ -737,7 +737,14 @@ export class PartnerCommercialService {
 
     const evidenceItems = normalizeDisputeEvidenceItems(request?.evidence_items);
     const state = ensureCommercialState(this.store);
-    const riskNowMs = this.resolveRiskTierNowMs({ auth, request });
+    // Keep risk-tier usage bucketing deterministic for dispute scenarios.
+    const riskNowMs = this.resolveRiskTierNowMs({
+      auth,
+      request: {
+        ...request,
+        occurred_at: normalizeOptionalString(request?.occurred_at) ?? normalizeOptionalString(request?.opened_at)
+      }
+    });
 
     return applyIdempotentMutation({
       store: this.store,
@@ -841,7 +848,14 @@ export class PartnerCommercialService {
       };
     }
 
-    const riskNowMs = this.resolveRiskTierNowMs({ auth, request });
+    // Keep risk-tier usage bucketing deterministic for dispute scenarios.
+    const riskNowMs = this.resolveRiskTierNowMs({
+      auth,
+      request: {
+        ...request,
+        occurred_at: normalizeOptionalString(request?.occurred_at) ?? normalizeOptionalString(request?.resolved_at)
+      }
+    });
 
     return applyIdempotentMutation({
       store: this.store,

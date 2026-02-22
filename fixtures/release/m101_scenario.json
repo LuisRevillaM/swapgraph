@@ -1,0 +1,786 @@
+{
+  "actors": {
+    "partner_demo": {
+      "type": "partner",
+      "id": "partner_demo"
+    },
+    "partner_other": {
+      "type": "partner",
+      "id": "partner_other"
+    },
+    "user_u1": {
+      "type": "user",
+      "id": "u1"
+    },
+    "user_u9": {
+      "type": "user",
+      "id": "u9"
+    }
+  },
+  "seed_state": {
+    "tenancy": {
+      "cycles": {
+        "cycle_alpha": {
+          "partner_id": "partner_demo"
+        },
+        "cycle_beta": {
+          "partner_id": "partner_demo"
+        },
+        "cycle_gamma": {
+          "partner_id": "partner_other"
+        }
+      },
+      "proposals": {
+        "cycle_alpha": {
+          "partner_id": "partner_demo"
+        },
+        "cycle_beta": {
+          "partner_id": "partner_demo"
+        },
+        "cycle_gamma": {
+          "partner_id": "partner_other"
+        }
+      }
+    },
+    "proposals": {
+      "cycle_alpha": {
+        "id": "cycle_alpha",
+        "created_at": "2026-02-21T13:00:00Z",
+        "expires_at": "2026-02-21T22:00:00Z",
+        "confidence_score": 0.86,
+        "explainability": [
+          "Inventory overlap",
+          "Delivery reliability"
+        ],
+        "fee_breakdown": [
+          {
+            "participant_id": "u1",
+            "fee_usd": 0.55
+          },
+          {
+            "participant_id": "u2",
+            "fee_usd": 0.7
+          }
+        ],
+        "participants": [
+          {
+            "intent_id": "intent_u1_a",
+            "actor": {
+              "type": "user",
+              "id": "u1"
+            },
+            "give": [
+              {
+                "platform": "steam",
+                "asset_id": "asset_a"
+              }
+            ],
+            "get": [
+              {
+                "platform": "steam",
+                "asset_id": "asset_b"
+              }
+            ]
+          },
+          {
+            "intent_id": "intent_u2_a",
+            "actor": {
+              "type": "user",
+              "id": "u2"
+            },
+            "give": [
+              {
+                "platform": "steam",
+                "asset_id": "asset_b"
+              }
+            ],
+            "get": [
+              {
+                "platform": "steam",
+                "asset_id": "asset_a"
+              }
+            ]
+          }
+        ]
+      },
+      "cycle_beta": {
+        "id": "cycle_beta",
+        "created_at": "2026-02-21T14:00:00Z",
+        "expires_at": "2026-02-21T18:00:00Z",
+        "confidence_score": 0.8,
+        "explainability": [
+          "Demand signal alignment"
+        ],
+        "fee_breakdown": [
+          {
+            "participant_id": "u1",
+            "fee_usd": 0.45
+          },
+          {
+            "participant_id": "u3",
+            "fee_usd": 0.5
+          }
+        ],
+        "participants": [
+          {
+            "intent_id": "intent_u1_b",
+            "actor": {
+              "type": "user",
+              "id": "u1"
+            },
+            "give": [
+              {
+                "platform": "steam",
+                "asset_id": "asset_c"
+              }
+            ],
+            "get": [
+              {
+                "platform": "steam",
+                "asset_id": "asset_d"
+              }
+            ]
+          },
+          {
+            "intent_id": "intent_u3_a",
+            "actor": {
+              "type": "user",
+              "id": "u3"
+            },
+            "give": [
+              {
+                "platform": "steam",
+                "asset_id": "asset_d"
+              }
+            ],
+            "get": [
+              {
+                "platform": "steam",
+                "asset_id": "asset_c"
+              }
+            ]
+          }
+        ]
+      },
+      "cycle_gamma": {
+        "id": "cycle_gamma",
+        "created_at": "2026-02-21T10:00:00Z",
+        "expires_at": "2026-02-22T10:00:00Z",
+        "confidence_score": 0.91,
+        "explainability": [
+          "Non-overlapping tenancy"
+        ],
+        "fee_breakdown": [
+          {
+            "participant_id": "u9",
+            "fee_usd": 0.4
+          }
+        ],
+        "participants": [
+          {
+            "intent_id": "intent_u9_a",
+            "actor": {
+              "type": "user",
+              "id": "u9"
+            },
+            "give": [
+              {
+                "platform": "steam",
+                "asset_id": "asset_x"
+              }
+            ],
+            "get": [
+              {
+                "platform": "steam",
+                "asset_id": "asset_y"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "timelines": {
+      "cycle_alpha": {
+        "cycle_id": "cycle_alpha",
+        "state": "escrow.pending",
+        "updated_at": "2026-02-21T14:30:00Z",
+        "legs": [
+          {
+            "intent_id": "intent_u1_a",
+            "from_actor": {
+              "type": "user",
+              "id": "u1"
+            },
+            "to_actor": {
+              "type": "user",
+              "id": "u2"
+            },
+            "status": "pending",
+            "deposit_deadline_at": "2026-02-21T15:30:00Z"
+          },
+          {
+            "intent_id": "intent_u2_a",
+            "from_actor": {
+              "type": "user",
+              "id": "u2"
+            },
+            "to_actor": {
+              "type": "user",
+              "id": "u1"
+            },
+            "status": "pending",
+            "deposit_deadline_at": "2026-02-21T16:00:00Z"
+          }
+        ]
+      },
+      "cycle_beta": {
+        "cycle_id": "cycle_beta",
+        "state": "failed",
+        "updated_at": "2026-02-21T16:00:00Z",
+        "legs": [
+          {
+            "intent_id": "intent_u1_b",
+            "from_actor": {
+              "type": "user",
+              "id": "u1"
+            },
+            "to_actor": {
+              "type": "user",
+              "id": "u3"
+            },
+            "status": "refunded",
+            "deposit_deadline_at": "2026-02-21T15:00:00Z"
+          },
+          {
+            "intent_id": "intent_u3_a",
+            "from_actor": {
+              "type": "user",
+              "id": "u3"
+            },
+            "to_actor": {
+              "type": "user",
+              "id": "u1"
+            },
+            "status": "refunded",
+            "deposit_deadline_at": "2026-02-21T15:00:00Z"
+          }
+        ]
+      },
+      "cycle_gamma": {
+        "cycle_id": "cycle_gamma",
+        "state": "completed",
+        "updated_at": "2026-02-21T12:00:00Z",
+        "legs": [
+          {
+            "intent_id": "intent_u9_a",
+            "from_actor": {
+              "type": "user",
+              "id": "u9"
+            },
+            "to_actor": {
+              "type": "user",
+              "id": "u8"
+            },
+            "status": "released",
+            "deposit_deadline_at": "2026-02-21T11:00:00Z"
+          }
+        ]
+      }
+    },
+    "receipts": {
+      "cycle_beta": {
+        "id": "receipt_beta",
+        "cycle_id": "cycle_beta",
+        "final_state": "failed",
+        "created_at": "2026-02-21T16:00:00Z",
+        "asset_ids": [
+          "asset_c",
+          "asset_d"
+        ],
+        "intent_ids": [
+          "intent_u1_b",
+          "intent_u3_a"
+        ]
+      },
+      "cycle_gamma": {
+        "id": "receipt_gamma",
+        "cycle_id": "cycle_gamma",
+        "final_state": "completed",
+        "created_at": "2026-02-21T12:00:00Z",
+        "asset_ids": [
+          "asset_x"
+        ],
+        "intent_ids": [
+          "intent_u9_a"
+        ]
+      }
+    },
+    "intents": {
+      "intent_u1_a": {
+        "id": "intent_u1_a",
+        "actor": {
+          "type": "user",
+          "id": "u1"
+        },
+        "created_at": "2026-02-21T12:00:00Z",
+        "status": "active"
+      },
+      "intent_u1_b": {
+        "id": "intent_u1_b",
+        "actor": {
+          "type": "user",
+          "id": "u1"
+        },
+        "created_at": "2026-02-21T12:30:00Z",
+        "status": "active"
+      },
+      "intent_u2_a": {
+        "id": "intent_u2_a",
+        "actor": {
+          "type": "user",
+          "id": "u2"
+        },
+        "created_at": "2026-02-21T12:10:00Z",
+        "status": "active"
+      },
+      "intent_u3_a": {
+        "id": "intent_u3_a",
+        "actor": {
+          "type": "user",
+          "id": "u3"
+        },
+        "created_at": "2026-02-21T12:20:00Z",
+        "status": "active"
+      },
+      "intent_u9_a": {
+        "id": "intent_u9_a",
+        "actor": {
+          "type": "user",
+          "id": "u9"
+        },
+        "created_at": "2026-02-21T11:00:00Z",
+        "status": "active"
+      }
+    }
+  },
+  "operations": [
+    {
+      "op": "notifications.preferences.get",
+      "actor_ref": "user_u1",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ],
+        "now_iso": "2026-02-21T14:45:00Z"
+      },
+      "expect_ok": true,
+      "expect_actor_type": "user",
+      "expect_urgency_threshold": "normal",
+      "expect_demand_signal_opt_in": false,
+      "expect_quiet_hours_enabled": true
+    },
+    {
+      "op": "notifications.preferences.upsert",
+      "actor_ref": "user_u1",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m101_pref_u1",
+      "request": {
+        "preferences": {
+          "quiet_hours": {
+            "enabled": false,
+            "start_hour_utc": 22,
+            "end_hour_utc": 7
+          },
+          "urgency_threshold": "high",
+          "category_opt_in": {
+            "proposal.created": false,
+            "proposal.expiring": true,
+            "settlement.deposit_required": true,
+            "settlement.deposit_deadline_approaching": true,
+            "cycle.executing": false,
+            "cycle.completed": false,
+            "cycle.failed": true,
+            "refund.completed": true,
+            "intent.demand_signal": true
+          },
+          "demand_signal_opt_in": true
+        },
+        "recorded_at": "2026-02-21T14:46:00Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_urgency_threshold": "high",
+      "expect_demand_signal_opt_in": true,
+      "expect_quiet_hours_enabled": false
+    },
+    {
+      "op": "notifications.preferences.upsert",
+      "actor_ref": "user_u1",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m101_pref_u1",
+      "request": {
+        "preferences": {
+          "quiet_hours": {
+            "enabled": false,
+            "start_hour_utc": 22,
+            "end_hour_utc": 7
+          },
+          "urgency_threshold": "high",
+          "category_opt_in": {
+            "proposal.created": false,
+            "proposal.expiring": true,
+            "settlement.deposit_required": true,
+            "settlement.deposit_deadline_approaching": true,
+            "cycle.executing": false,
+            "cycle.completed": false,
+            "cycle.failed": true,
+            "refund.completed": true,
+            "intent.demand_signal": true
+          },
+          "demand_signal_opt_in": true
+        },
+        "recorded_at": "2026-02-21T14:46:00Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": true,
+      "expect_urgency_threshold": "high",
+      "expect_demand_signal_opt_in": true,
+      "expect_quiet_hours_enabled": false
+    },
+    {
+      "op": "notifications.preferences.upsert",
+      "actor_ref": "user_u1",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m101_pref_u1",
+      "request": {
+        "preferences": {
+          "quiet_hours": {
+            "enabled": false,
+            "start_hour_utc": 22,
+            "end_hour_utc": 7
+          },
+          "urgency_threshold": "critical",
+          "category_opt_in": {
+            "proposal.created": false,
+            "proposal.expiring": true,
+            "settlement.deposit_required": true,
+            "settlement.deposit_deadline_approaching": true,
+            "cycle.executing": false,
+            "cycle.completed": false,
+            "cycle.failed": true,
+            "refund.completed": true,
+            "intent.demand_signal": true
+          },
+          "demand_signal_opt_in": true
+        },
+        "recorded_at": "2026-02-21T14:46:30Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    },
+    {
+      "op": "notifications.preferences.upsert",
+      "actor_ref": "user_u1",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m101_pref_invalid",
+      "skip_request_validation": true,
+      "request": {
+        "preferences": {
+          "quiet_hours": {
+            "enabled": true,
+            "start_hour_utc": 25,
+            "end_hour_utc": 7
+          },
+          "urgency_threshold": "urgent",
+          "category_opt_in": {},
+          "demand_signal_opt_in": "yes"
+        },
+        "recorded_at": "2026-02-21T14:47:00Z"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "notification_preferences_invalid"
+    },
+    {
+      "op": "notifications.preferences.upsert",
+      "actor_ref": "user_u1",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m101_pref_invalid_ts",
+      "skip_request_validation": true,
+      "request": {
+        "preferences": {
+          "quiet_hours": {
+            "enabled": false,
+            "start_hour_utc": 22,
+            "end_hour_utc": 7
+          },
+          "urgency_threshold": "high",
+          "category_opt_in": {
+            "proposal.created": false,
+            "proposal.expiring": true,
+            "settlement.deposit_required": true,
+            "settlement.deposit_deadline_approaching": true,
+            "cycle.executing": false,
+            "cycle.completed": false,
+            "cycle.failed": true,
+            "refund.completed": true,
+            "intent.demand_signal": true
+          },
+          "demand_signal_opt_in": true
+        },
+        "recorded_at": "not-an-iso"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "notification_preferences_invalid_timestamp"
+    },
+    {
+      "op": "notifications.inbox.list",
+      "actor_ref": "user_u1",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "now_iso": "2026-02-21T14:45:00Z",
+        "limit": 20
+      },
+      "expect_ok": true,
+      "expect_notifications_count": 5,
+      "expect_total_filtered": 5,
+      "expect_taxonomy_count": 9,
+      "expect_first_type": "proposal.expiring"
+    },
+    {
+      "op": "notifications.inbox.list",
+      "actor_ref": "user_u1",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "category": "invalid.category"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "notification_inbox_query_invalid"
+    },
+    {
+      "op": "productProjection.inventory_awakening.get",
+      "actor_ref": "user_u1",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "limit": 2
+      },
+      "expect_ok": true,
+      "expect_intents_total": 2,
+      "expect_cycle_opportunities": 2,
+      "expect_average_confidence_bps": 8300,
+      "expect_recommendations_count": 2
+    },
+    {
+      "op": "productProjection.inventory_awakening.get",
+      "actor_ref": "user_u1",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "unsupported": "x"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "product_projection_query_invalid"
+    },
+    {
+      "op": "productProjection.cycle_inbox.list",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "limit": 10
+      },
+      "expect_ok": true,
+      "expect_cards_count": 2,
+      "expect_total_filtered": 2,
+      "expect_first_cycle_id": "cycle_alpha"
+    },
+    {
+      "op": "productProjection.settlement_timeline.get",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "cycle_id": "cycle_alpha",
+      "query": {},
+      "expect_ok": true,
+      "expect_cycle_id": "cycle_alpha",
+      "expect_state": "escrow.pending",
+      "expect_next_required_action": "confirm_deposit",
+      "expect_legs_total": 2
+    },
+    {
+      "op": "productProjection.settlement_timeline.get",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "cycle_id": "cycle_missing",
+      "query": {},
+      "expect_ok": false,
+      "expect_reason_code": "settlement_timeline_not_found"
+    },
+    {
+      "op": "productProjection.settlement_timeline.get",
+      "actor_ref": "partner_other",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "cycle_id": "cycle_alpha",
+      "query": {},
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN"
+    },
+    {
+      "op": "productProjection.receipt_share.get",
+      "actor_ref": "user_u1",
+      "auth": {
+        "scopes": [
+          "receipts:read"
+        ]
+      },
+      "receipt_id": "receipt_beta",
+      "query": {},
+      "expect_ok": true,
+      "expect_receipt_id": "receipt_beta",
+      "expect_final_state": "failed",
+      "expect_privacy_default_mode": "public_safe"
+    },
+    {
+      "op": "productProjection.receipt_share.get",
+      "actor_ref": "user_u1",
+      "auth": {
+        "scopes": [
+          "receipts:read"
+        ]
+      },
+      "receipt_id": "receipt_missing",
+      "query": {},
+      "expect_ok": false,
+      "expect_reason_code": "receipt_share_not_found"
+    },
+    {
+      "op": "productProjection.receipt_share.get",
+      "actor_ref": "user_u9",
+      "auth": {
+        "scopes": [
+          "receipts:read"
+        ]
+      },
+      "receipt_id": "receipt_beta",
+      "query": {},
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN"
+    },
+    {
+      "op": "partnerUi.capabilities.get",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "expect_ok": true,
+      "expect_surfaces_count": 4,
+      "expect_first_surface": "cycle-proposal-cards"
+    },
+    {
+      "op": "partnerUi.capabilities.get",
+      "actor_ref": "user_u1",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN"
+    },
+    {
+      "op": "partnerUi.bundle.get",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "surface": "intent-composer",
+      "query": {
+        "locale": "en-US"
+      },
+      "expect_ok": true,
+      "expect_surface": "intent-composer",
+      "expect_locale": "en-US",
+      "expect_required_operations_count": 2
+    },
+    {
+      "op": "partnerUi.bundle.get",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "surface": "unknown-surface",
+      "query": {},
+      "expect_ok": false,
+      "expect_reason_code": "partner_ui_surface_unknown"
+    },
+    {
+      "op": "partnerUi.bundle.get",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "surface": "intent-composer",
+      "query": {
+        "bad": "x"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "product_projection_query_invalid"
+    }
+  ]
+}

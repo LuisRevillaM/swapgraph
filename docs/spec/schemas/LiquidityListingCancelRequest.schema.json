@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquidityListingCancelRequest.schema.json",
+  "title": "LiquidityListingCancelRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "cancel"
+  ],
+  "properties": {
+    "cancel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reason_code",
+        "cancelled_at"
+      ],
+      "properties": {
+        "reason_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cancelled_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

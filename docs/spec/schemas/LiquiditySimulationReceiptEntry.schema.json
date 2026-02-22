@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquiditySimulationReceiptEntry.schema.json",
+  "title": "LiquiditySimulationReceiptEntry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "receipt_id",
+    "cycle_id",
+    "simulation",
+    "simulation_session_id",
+    "final_state",
+    "created_at",
+    "intent_ids",
+    "liquidity_provider_summary"
+  ],
+  "properties": {
+    "receipt_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cycle_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "simulation": {
+      "type": "boolean",
+      "const": true
+    },
+    "simulation_session_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "final_state": {
+      "type": "string",
+      "enum": [
+        "completed",
+        "failed"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "intent_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "liquidity_provider_summary": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "provider",
+          "participant_count",
+          "counterparty_intent_ids"
+        ],
+        "properties": {
+          "provider": {
+            "$ref": "LiquidityProviderRef.schema.json"
+          },
+          "participant_count": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "counterparty_intent_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}

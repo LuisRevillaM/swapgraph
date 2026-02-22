@@ -4,9 +4,11 @@ Date: 2026-02-21
 
 Goal: define the post-M97 tranche so all remaining v2 areas are fully PRD-scoped before official development starts.
 
+Update (2026-02-21): M98, M99, M100, M101, and M102 implementations have been completed with verifier closure.
+
 ## Operating mode (explicit)
-- **This tranche is PRD-first and PRD-only until explicit approval for implementation.**
-- No feature implementation starts from M98+ until PRD acceptance checkpoint is confirmed.
+- **This tranche started PRD-first and is now implementation-active through M102.**
+- M98–M102 implementation closure is complete; LP subsystem work (`M103+`) is now the next execution target.
 
 ## Source anchors (v2)
 - API/event residuals: v2 section 11 (`docs/source/SwapGraph_System_Plan_v2.0_Feb2026.md`)
@@ -40,15 +42,16 @@ Goal: define the post-M97 tranche so all remaining v2 areas are fully PRD-scoped
 - Deterministic metric surfaces for north star, funnel, partner/API, and safety metrics.
 - Signed metrics export + continuity/tamper checks.
 
-### M101 — Product-surface readiness contracts (**discovery-first PRD**)
-- Contract surfaces required for web marketplace, iOS reference client, and embedded partner UI.
-- Notification taxonomy/preferences + projection payloads + UI embed payload schemas.
-- No client implementation in this milestone.
+### M101 — Product-surface readiness contracts (**implemented, fixtures-first**)
+- Implemented contract surfaces for web marketplace, iOS reference client, and embedded partner UI readiness.
+- Includes notification taxonomy/preferences + projection payload contracts + partner UI capability/bundle payload schemas.
+- Closure evidence: `npm run verify:m101`, `node verify/runner.mjs milestones/M101.yaml`, and `artifacts/milestones/M101/latest/*`.
 
-### M102 — Commercial packaging and policy contracts (**discovery-first PRD**)
-- Transaction-fee, subscription tier, boost-priority, and quota/overage contract definitions.
-- Safety invariant enforcement: no commercial bypass of trust/risk policy gates.
-- No pricing rollout implementation in this milestone.
+### M102 — Commercial packaging and policy contracts (**implemented, fixtures-first**)
+- Implemented transaction-fee, subscription tier, boost guardrail, and quota/overage contract surfaces.
+- Implemented deterministic policy evaluation precedence (`safety>trust>commercial>preference`) and non-bypass invariants.
+- Implemented signed policy export continuation with attestation/checkpoint continuity and tamper-fail verification.
+- Closure evidence: `npm run verify:m102`, `node verify/runner.mjs milestones/M102.yaml`, and `artifacts/milestones/M102/latest/*`.
 
 ## PRD completion checklist (required per milestone)
 Each M98–M102 PRD must include:
@@ -83,5 +86,5 @@ Official development for M98+ starts only when:
 - M98 closure checklist draft: `docs/prd/2026-02-21_m98-prd-review-closure.md`
 - M99 closure checklist draft: `docs/prd/2026-02-21_m99-prd-review-closure.md`
 - M100 closure checklist draft: `docs/prd/2026-02-21_m100-prd-review-closure.md`
-- M101 closure checklist draft: `docs/prd/2026-02-21_m101-prd-review-closure.md`
-- M102 closure checklist draft: `docs/prd/2026-02-21_m102-prd-review-closure.md`
+- M101 closure checklist approved/implemented: `docs/prd/2026-02-21_m101-prd-review-closure.md`
+- M102 closure checklist approved/implemented: `docs/prd/2026-02-21_m102-prd-review-closure.md`

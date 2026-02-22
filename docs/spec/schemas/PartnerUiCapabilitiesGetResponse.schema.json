@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/PartnerUiCapabilitiesGetResponse.schema.json",
+  "title": "PartnerUiCapabilitiesGetResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "capabilities"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "api_version",
+        "integration_modes",
+        "surfaces"
+      ],
+      "properties": {
+        "api_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "integration_modes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "api_only",
+              "embedded_ui"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "surfaces": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "surface",
+              "version",
+              "status",
+              "required_operations"
+            ],
+            "properties": {
+              "surface": {
+                "type": "string",
+                "enum": [
+                  "intent-composer",
+                  "cycle-proposal-cards",
+                  "settlement-checklist",
+                  "receipt-renderer"
+                ]
+              },
+              "version": {
+                "type": "string",
+                "minLength": 1
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "ga"
+                ]
+              },
+              "required_operations": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

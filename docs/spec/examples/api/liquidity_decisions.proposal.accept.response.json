@@ -1,0 +1,33 @@
+{
+  "correlation_id": "corr_liquiditydecisions_proposal_accept",
+  "provider_id": "lp_house_alpha",
+  "decision": {
+    "decision_id": "lpdec_000001",
+    "provider_id": "lp_house_alpha",
+    "proposal_id": "proposal_lp_alpha_001",
+    "intent_ids": [
+      "intent_lp_alpha_002"
+    ],
+    "commit_id": "commit_32fc2186e35e",
+    "decision": "accept",
+    "decision_reason_codes": [
+      "inventory_available",
+      "spread_target_met"
+    ],
+    "policy_ref": {
+      "policy_id": "lp_policy_alpha",
+      "policy_version": 3,
+      "policy_mode": "constrained_auto",
+      "constraints_hash": "sha256:lp-policy-alpha-v3"
+    },
+    "confidence_score_bps": 9100,
+    "risk_tier_snapshot": "low",
+    "correlation_id": "corr_lp_decision_alpha_001",
+    "recorded_at": "2026-02-22T12:10:00Z",
+    "recorded_by": {
+      "type": "partner",
+      "id": "partner_alpha"
+    },
+    "trust_safety_decision_id": "ts_decision_alpha_allow_001"
+  }
+}

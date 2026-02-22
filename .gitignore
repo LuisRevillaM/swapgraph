@@ -13,5 +13,8 @@ artifacts/**
 !artifacts/.gitkeep
 !artifacts/milestones/.gitkeep
 
+# Local runtime state
+data/runtime-api-state.json
+
 # OS
 .DS_Store

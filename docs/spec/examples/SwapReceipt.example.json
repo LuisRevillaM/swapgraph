@@ -5,6 +5,40 @@
   "intent_ids": ["intent_a", "intent_b", "intent_c"],
   "asset_ids": ["assetA", "assetB", "assetC"],
   "fees": [{ "actor": { "type": "user", "id": "u1" }, "fee_usd": 9.5 }],
+  "liquidity_provider_summary": [
+    {
+      "provider": {
+        "provider_id": "lp_house_alpha",
+        "provider_type": "house_bot",
+        "owner_actor": { "type": "partner", "id": "partner_alpha" },
+        "is_automated": true,
+        "is_house_inventory": true,
+        "label_required": true,
+        "display_label": "Alpha Market Maker",
+        "disclosure_text": "Automated house-liquidity participant.",
+        "active": true,
+        "policy_ref": {
+          "policy_id": "lp_policy_alpha",
+          "policy_version": 3,
+          "policy_mode": "constrained_auto",
+          "constraints_hash": "sha256:0b9d6f"
+        },
+        "persona_ref": {
+          "provider_id": "lp_house_alpha",
+          "persona_id": "persona_alpha_mm",
+          "display_name": "Alpha MM",
+          "strategy_summary": "Passive spread capture for balanced cycle completion.",
+          "disclosure_text": "Automated house-liquidity participant.",
+          "active": true,
+          "updated_at": "2026-02-21T14:00:00Z"
+        },
+        "created_at": "2026-02-21T12:00:00Z",
+        "updated_at": "2026-02-21T14:00:00Z"
+      },
+      "participant_count": 1,
+      "counterparty_intent_ids": ["intent_a"]
+    }
+  ],
   "created_at": "2026-02-16T00:00:00Z",
   "signature": { "key_id": "dev-k1", "alg": "ed25519", "sig": "b+YZo9UzAz6acTvb/oyhBJX0Fp0o13nVBn6NPcdrrrLuaZULd4ozLbbz0ibrqWfWMYqGDVTyxr4ntRaXwLUNBw==" }
 }

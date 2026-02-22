@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MetricsMarketplaceFunnelGetResponse.schema.json",
+  "title": "MetricsMarketplaceFunnelGetResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "partner_id",
+    "window",
+    "funnel"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "partner_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "window": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "from_iso",
+        "to_iso",
+        "bucket"
+      ],
+      "properties": {
+        "from_iso": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "to_iso": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "bucket": {
+          "type": "string",
+          "enum": [
+            "hour",
+            "day",
+            "week"
+          ]
+        }
+      }
+    },
+    "funnel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "counts",
+        "conversions_bps",
+        "denominators"
+      ],
+      "properties": {
+        "counts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "connect",
+            "sync",
+            "intent",
+            "proposal_viewed",
+            "accepted",
+            "deposited",
+            "completed"
+          ],
+          "properties": {
+            "connect": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "sync": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "intent": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "proposal_viewed": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "accepted": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "deposited": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "completed": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "conversions_bps": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "connect_to_sync_bps",
+            "sync_to_intent_bps",
+            "intent_to_proposal_viewed_bps",
+            "proposal_to_accept_bps",
+            "accept_to_deposited_bps",
+            "deposited_to_completed_bps"
+          ],
+          "properties": {
+            "connect_to_sync_bps": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000
+            },
+            "sync_to_intent_bps": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000
+            },
+            "intent_to_proposal_viewed_bps": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000
+            },
+            "proposal_to_accept_bps": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000
+            },
+            "accept_to_deposited_bps": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000
+            },
+            "deposited_to_completed_bps": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000
+            }
+          }
+        },
+        "denominators": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "connect_to_sync_denominator",
+            "sync_to_intent_denominator",
+            "intent_to_proposal_viewed_denominator",
+            "proposal_to_accept_denominator",
+            "accept_to_deposited_denominator",
+            "deposited_to_completed_denominator"
+          ],
+          "properties": {
+            "connect_to_sync_denominator": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "sync_to_intent_denominator": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "intent_to_proposal_viewed_denominator": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "proposal_to_accept_denominator": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "accept_to_deposited_denominator": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "deposited_to_completed_denominator": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    }
+  }
+}

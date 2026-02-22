@@ -5,8 +5,12 @@ Date: 2026-02-21
 Goal: define an additive PRD tranche that makes a liquidity provider subsystem (house bots + partner LPs) a first-class part of the platform, without breaking the current API-first architecture.
 
 ## Operating mode (explicit)
-- This tranche is **PRD-only** until explicit implementation approval.
-- No M103+ code implementation starts before closure approvals.
+- M103 is implementation-closed (fixtures-first).
+- M104–M106 are implementation-closed (fixtures-first).
+- M107 is implementation-closed (fixtures-first, integration-gated verifier mode).
+- M108 is implementation-closed (fixtures-first).
+- M109 is implementation-closed (fixtures-first).
+- M110 remains **PRD-only** until explicit implementation approval.
 - This tranche is **additive** to v2 coverage (M0–M102), not a replacement.
 
 ## Why this tranche exists
@@ -54,17 +58,17 @@ The system already has a strong clearing core (intents, proposals, commit, settl
 - Define decision capture contracts (`accept|decline`) with reason lineage and correlation.
 - Require explainable LP decisions in auditable records.
 
-### M107 — Operator-assisted settlement and Steam-safe execution controls (**implementation-ready PRD, integration-gated**) 
+### M107 — Operator-assisted settlement and Steam-safe execution controls (**implemented, integration-gated verifier mode**) 
 - Define execution modes: `simulation`, `operator_assisted`, `constrained_auto`.
 - Require operator approval contracts for high-risk/platform-restricted flows.
 - Tie to runbook-driven controls and deterministic denial reasons.
 
-### M108 — LP autonomy policy + anti-farming controls (**implementation-ready PRD**)
+### M108 — LP autonomy policy + anti-farming controls (**implemented, fixtures-first**)
 - Define policy-evaluation contracts for LP actions (value/risk/velocity constraints).
 - Add anti-farming safeguards and exposure caps.
 - Add signed LP decision audit export continuity contracts.
 
-### M109 — Partner LP onboarding and governance contracts (**discovery-first PRD**)
+### M109 — Partner LP onboarding and governance contracts (**implemented, fixtures-first**)
 - Define partner LP onboarding/eligibility contracts.
 - Bind BRD-03/BRD-04 policy and segmentation to LP governance contracts.
 - Define rollout, downgrade, and offboarding policy surfaces.
@@ -80,10 +84,10 @@ The system already has a strong clearing core (intents, proposals, commit, settl
 - M101: web-first projections for LP transparency and controls.
 - M102: commercial and policy precedence for partner LP monetization.
 
-## Entry gate for implementation planning (M103+)
-Implementation planning for M103+ begins only when:
+## Entry gate for implementation planning (M110+)
+Implementation planning for M110+ begins only when:
 1. M98–M102 approval board is complete,
-2. M103–M110 PRDs are approved (or amended/approved),
+2. M103–M109 implementation closures are complete and M110 PRD is approved (or amended/approved),
 3. explicit user approval to implement is given.
 
 ## Approval board
@@ -94,8 +98,8 @@ Implementation planning for M103+ begins only when:
 - M104 closure checklist draft: `docs/prd/2026-02-21_m104-prd-review-closure.md`
 - M105 closure checklist draft: `docs/prd/2026-02-21_m105-prd-review-closure.md`
 - M106 closure checklist draft: `docs/prd/2026-02-21_m106-prd-review-closure.md`
-- M107 closure checklist draft: `docs/prd/2026-02-21_m107-prd-review-closure.md`
-- M108 closure checklist draft: `docs/prd/2026-02-21_m108-prd-review-closure.md`
-- M109 closure checklist draft: `docs/prd/2026-02-21_m109-prd-review-closure.md`
+- M107 closure checklist: `docs/prd/2026-02-21_m107-prd-review-closure.md`
+- M108 closure checklist: `docs/prd/2026-02-21_m108-prd-review-closure.md`
+- M109 closure checklist: `docs/prd/2026-02-21_m109-prd-review-closure.md`
 - M110 closure checklist draft: `docs/prd/2026-02-21_m110-prd-review-closure.md`
 - Fast sign-off proposed review baseline: `docs/prd/2026-02-21_m103-m110-proposed-review-baseline.md`

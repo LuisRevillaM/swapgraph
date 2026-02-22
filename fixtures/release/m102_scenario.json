@@ -1,0 +1,933 @@
+{
+  "actors": {
+    "partner_demo": {
+      "type": "partner",
+      "id": "partner_demo"
+    },
+    "user_u1": {
+      "type": "user",
+      "id": "u1"
+    }
+  },
+  "operations": [
+    {
+      "op": "keys.policy_integrity_signing.get",
+      "expect_ok": true,
+      "expect_keys_count": 2,
+      "expect_active_key_id": "dev-pi-k1"
+    },
+    {
+      "op": "commercialPolicy.transaction_fee.get",
+      "actor_ref": "user_u1",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN"
+    },
+    {
+      "op": "commercialPolicy.transaction_fee.get",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "expect_ok": true,
+      "expect_policy_version": 1,
+      "expect_fee_model": "bps",
+      "expect_fee_bps": 250,
+      "expect_max_fee_usd": null
+    },
+    {
+      "op": "commercialPolicy.transaction_fee.upsert",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m102_fee_1",
+      "request": {
+        "policy": {
+          "fee_model": "bps",
+          "fee_bps": 180,
+          "min_fee_usd": 0,
+          "max_fee_usd": 7
+        },
+        "recorded_at": "2026-02-21T16:00:00Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_policy_version": 1,
+      "expect_fee_model": "bps",
+      "expect_fee_bps": 180,
+      "expect_max_fee_usd": 7
+    },
+    {
+      "op": "commercialPolicy.transaction_fee.upsert",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m102_fee_1",
+      "request": {
+        "policy": {
+          "fee_model": "bps",
+          "fee_bps": 180,
+          "min_fee_usd": 0,
+          "max_fee_usd": 7
+        },
+        "recorded_at": "2026-02-21T16:00:00Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": true,
+      "expect_policy_version": 1,
+      "expect_fee_model": "bps",
+      "expect_fee_bps": 180,
+      "expect_max_fee_usd": 7
+    },
+    {
+      "op": "commercialPolicy.transaction_fee.upsert",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m102_fee_1",
+      "request": {
+        "policy": {
+          "fee_model": "bps",
+          "fee_bps": 220,
+          "min_fee_usd": 0,
+          "max_fee_usd": 9
+        },
+        "recorded_at": "2026-02-21T16:01:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    },
+    {
+      "op": "commercialPolicy.transaction_fee.upsert",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m102_fee_invalid",
+      "skip_request_validation": true,
+      "request": {
+        "policy": {
+          "fee_model": "bps",
+          "fee_bps": -10,
+          "min_fee_usd": 0,
+          "max_fee_usd": 5
+        },
+        "recorded_at": "2026-02-21T16:02:00Z"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "commercial_policy_invalid"
+    },
+    {
+      "op": "commercialPolicy.transaction_fee.upsert",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m102_fee_invalid_ts",
+      "skip_request_validation": true,
+      "request": {
+        "policy": {
+          "fee_model": "bps",
+          "fee_bps": 175,
+          "min_fee_usd": 0,
+          "max_fee_usd": 6
+        },
+        "recorded_at": "not-an-iso"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "commercial_policy_invalid_timestamp"
+    },
+    {
+      "op": "commercialPolicy.transaction_fee.get",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "expect_ok": true,
+      "expect_policy_version": 1,
+      "expect_fee_model": "bps",
+      "expect_fee_bps": 180,
+      "expect_max_fee_usd": 7
+    },
+    {
+      "op": "commercialPolicy.subscription_tier.upsert",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m102_sub_1",
+      "request": {
+        "policy": {
+          "tier": "pro",
+          "monthly_subscription_usd": 99,
+          "trust_milestone_required": "established_history",
+          "max_cycle_notional_usd": 1200,
+          "max_open_intents": 120,
+          "mobile_contract_notes": [
+            "App Store entitlements are advisory in v1 contracts.",
+            "Server-side trust milestones remain authoritative for caps."
+          ]
+        },
+        "recorded_at": "2026-02-21T16:05:00Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_policy_version": 1,
+      "expect_tier": "pro",
+      "expect_trust_milestone_required": "established_history",
+      "expect_max_open_intents": 120
+    },
+    {
+      "op": "commercialPolicy.subscription_tier.upsert",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m102_sub_precedence",
+      "request": {
+        "policy": {
+          "tier": "pro",
+          "monthly_subscription_usd": 149,
+          "trust_milestone_required": "none",
+          "max_cycle_notional_usd": 1500,
+          "max_open_intents": 180,
+          "mobile_contract_notes": [
+            "Unsafe without trust milestone"
+          ]
+        },
+        "recorded_at": "2026-02-21T16:05:30Z"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "commercial_policy_precedence_violation"
+    },
+    {
+      "op": "commercialPolicy.subscription_tier.upsert",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m102_sub_invalid_ts",
+      "skip_request_validation": true,
+      "request": {
+        "policy": {
+          "tier": "enterprise",
+          "monthly_subscription_usd": 299,
+          "trust_milestone_required": "established_history",
+          "max_cycle_notional_usd": 5000,
+          "max_open_intents": 500,
+          "mobile_contract_notes": [
+            "Enterprise tier policy"
+          ]
+        },
+        "recorded_at": "bad-timestamp"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "commercial_policy_invalid_timestamp"
+    },
+    {
+      "op": "commercialPolicy.subscription_tier.upsert",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m102_sub_invalid",
+      "skip_request_validation": true,
+      "request": {
+        "policy": {
+          "tier": "pro",
+          "monthly_subscription_usd": 99,
+          "trust_milestone_required": "established_history",
+          "max_cycle_notional_usd": 1200,
+          "max_open_intents": 120,
+          "mobile_contract_notes": []
+        },
+        "recorded_at": "2026-02-21T16:06:00Z"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "commercial_policy_invalid"
+    },
+    {
+      "op": "commercialPolicy.subscription_tier.get",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "expect_ok": true,
+      "expect_policy_version": 1,
+      "expect_tier": "pro",
+      "expect_trust_milestone_required": "established_history",
+      "expect_max_open_intents": 120
+    },
+    {
+      "op": "commercialPolicy.boost_policy.upsert",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m102_boost_1",
+      "request": {
+        "policy": {
+          "enabled": true,
+          "max_multiplier": 1.5,
+          "allow_safety_bypass": false,
+          "allow_trust_bypass": false,
+          "allow_settlement_constraint_bypass": false
+        },
+        "recorded_at": "2026-02-21T16:07:00Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_policy_version": 1,
+      "expect_enabled": true,
+      "expect_max_multiplier": 1.5
+    },
+    {
+      "op": "commercialPolicy.boost_policy.upsert",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m102_boost_safety",
+      "request": {
+        "policy": {
+          "enabled": true,
+          "max_multiplier": 1.5,
+          "allow_safety_bypass": true,
+          "allow_trust_bypass": false,
+          "allow_settlement_constraint_bypass": false
+        },
+        "recorded_at": "2026-02-21T16:07:30Z"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "commercial_policy_safety_bypass_denied"
+    },
+    {
+      "op": "commercialPolicy.boost_policy.upsert",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m102_boost_trust",
+      "request": {
+        "policy": {
+          "enabled": true,
+          "max_multiplier": 1.5,
+          "allow_safety_bypass": false,
+          "allow_trust_bypass": true,
+          "allow_settlement_constraint_bypass": false
+        },
+        "recorded_at": "2026-02-21T16:07:40Z"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "commercial_policy_trust_gate_denied"
+    },
+    {
+      "op": "commercialPolicy.boost_policy.upsert",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m102_boost_guardrail",
+      "request": {
+        "policy": {
+          "enabled": true,
+          "max_multiplier": 1.5,
+          "allow_safety_bypass": false,
+          "allow_trust_bypass": false,
+          "allow_settlement_constraint_bypass": true
+        },
+        "recorded_at": "2026-02-21T16:07:50Z"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "commercial_policy_boost_guardrail_denied"
+    },
+    {
+      "op": "commercialPolicy.boost_policy.upsert",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m102_boost_invalid_ts",
+      "skip_request_validation": true,
+      "request": {
+        "policy": {
+          "enabled": true,
+          "max_multiplier": 1.2,
+          "allow_safety_bypass": false,
+          "allow_trust_bypass": false,
+          "allow_settlement_constraint_bypass": false
+        },
+        "recorded_at": "invalid-ts"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "commercial_policy_invalid_timestamp"
+    },
+    {
+      "op": "commercialPolicy.boost_policy.upsert",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m102_boost_invalid",
+      "skip_request_validation": true,
+      "request": {
+        "policy": {
+          "enabled": true,
+          "max_multiplier": 10,
+          "allow_safety_bypass": false,
+          "allow_trust_bypass": false,
+          "allow_settlement_constraint_bypass": false
+        },
+        "recorded_at": "2026-02-21T16:08:00Z"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "commercial_policy_invalid"
+    },
+    {
+      "op": "commercialPolicy.boost_policy.get",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "expect_ok": true,
+      "expect_policy_version": 1,
+      "expect_enabled": true,
+      "expect_max_multiplier": 1.5
+    },
+    {
+      "op": "commercialPolicy.quota_policy.upsert",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m102_quota_1",
+      "request": {
+        "policy": {
+          "monthly_quota_units": 120,
+          "overage_enabled": true,
+          "overage_unit_price_usd": 0.35,
+          "hard_stop_on_quota_exceeded": true
+        },
+        "recorded_at": "2026-02-21T16:09:00Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_policy_version": 1,
+      "expect_monthly_quota_units": 120,
+      "expect_overage_enabled": true,
+      "expect_hard_stop_on_quota_exceeded": true
+    },
+    {
+      "op": "commercialPolicy.quota_policy.upsert",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m102_quota_invalid_ts",
+      "skip_request_validation": true,
+      "request": {
+        "policy": {
+          "monthly_quota_units": 120,
+          "overage_enabled": true,
+          "overage_unit_price_usd": 0.35,
+          "hard_stop_on_quota_exceeded": true
+        },
+        "recorded_at": "bad-ts"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "commercial_policy_invalid_timestamp"
+    },
+    {
+      "op": "commercialPolicy.quota_policy.upsert",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m102_quota_invalid",
+      "skip_request_validation": true,
+      "request": {
+        "policy": {
+          "monthly_quota_units": -1,
+          "overage_enabled": true,
+          "overage_unit_price_usd": 0.35,
+          "hard_stop_on_quota_exceeded": true
+        },
+        "recorded_at": "2026-02-21T16:09:10Z"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "commercial_policy_invalid"
+    },
+    {
+      "op": "commercialPolicy.quota_policy.get",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "expect_ok": true,
+      "expect_policy_version": 1,
+      "expect_monthly_quota_units": 120,
+      "expect_overage_enabled": true,
+      "expect_hard_stop_on_quota_exceeded": true
+    },
+    {
+      "op": "commercialPolicy.evaluate",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m102_eval_allow",
+      "request": {
+        "evaluation": {
+          "operation_id": "swapIntents.create",
+          "precedence_assertion": "safety>trust>commercial>preference",
+          "safety_gate_passed": true,
+          "trust_gate_passed": true,
+          "settlement_guardrail_passed": true,
+          "requested_boost_multiplier": 1.25,
+          "current_quota_usage_units": 100,
+          "requested_quota_units": 10,
+          "subscription_upgrade_requested": true,
+          "requested_tier": "pro"
+        },
+        "recorded_at": "2026-02-21T16:12:00Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_verdict": "allow",
+      "expect_enforced_precedence": "safety>trust>commercial>preference",
+      "expect_projected_quota_usage_units": 110,
+      "expect_quota_remaining_units": 10
+    },
+    {
+      "op": "commercialPolicy.evaluate",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m102_eval_allow",
+      "request": {
+        "evaluation": {
+          "operation_id": "swapIntents.create",
+          "precedence_assertion": "safety>trust>commercial>preference",
+          "safety_gate_passed": true,
+          "trust_gate_passed": true,
+          "settlement_guardrail_passed": true,
+          "requested_boost_multiplier": 1.25,
+          "current_quota_usage_units": 100,
+          "requested_quota_units": 10,
+          "subscription_upgrade_requested": true,
+          "requested_tier": "pro"
+        },
+        "recorded_at": "2026-02-21T16:12:00Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": true,
+      "expect_verdict": "allow",
+      "expect_enforced_precedence": "safety>trust>commercial>preference",
+      "expect_projected_quota_usage_units": 110,
+      "expect_quota_remaining_units": 10
+    },
+    {
+      "op": "commercialPolicy.evaluate",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m102_eval_allow",
+      "request": {
+        "evaluation": {
+          "operation_id": "swapIntents.create",
+          "precedence_assertion": "safety>trust>commercial>preference",
+          "safety_gate_passed": true,
+          "trust_gate_passed": true,
+          "settlement_guardrail_passed": true,
+          "requested_boost_multiplier": 1.3,
+          "current_quota_usage_units": 100,
+          "requested_quota_units": 11
+        },
+        "recorded_at": "2026-02-21T16:12:10Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    },
+    {
+      "op": "commercialPolicy.evaluate",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m102_eval_invalid",
+      "skip_request_validation": true,
+      "request": {
+        "evaluation": {
+          "operation_id": ""
+        },
+        "recorded_at": "2026-02-21T16:12:20Z"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "commercial_policy_invalid"
+    },
+    {
+      "op": "commercialPolicy.evaluate",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m102_eval_invalid_ts",
+      "skip_request_validation": true,
+      "request": {
+        "evaluation": {
+          "operation_id": "swapIntents.create",
+          "precedence_assertion": "safety>trust>commercial>preference",
+          "safety_gate_passed": true,
+          "trust_gate_passed": true,
+          "settlement_guardrail_passed": true,
+          "requested_boost_multiplier": 1.2,
+          "current_quota_usage_units": 10,
+          "requested_quota_units": 1
+        },
+        "recorded_at": "not-an-iso"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "commercial_policy_invalid_timestamp"
+    },
+    {
+      "op": "commercialPolicy.evaluate",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m102_eval_precedence",
+      "request": {
+        "evaluation": {
+          "operation_id": "swapIntents.create",
+          "precedence_assertion": "trust>safety>commercial>preference",
+          "safety_gate_passed": true,
+          "trust_gate_passed": true,
+          "settlement_guardrail_passed": true,
+          "requested_boost_multiplier": 1.2,
+          "current_quota_usage_units": 10,
+          "requested_quota_units": 1
+        },
+        "recorded_at": "2026-02-21T16:12:30Z"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "commercial_policy_precedence_violation"
+    },
+    {
+      "op": "commercialPolicy.evaluate",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m102_eval_safety",
+      "request": {
+        "evaluation": {
+          "operation_id": "swapIntents.create",
+          "precedence_assertion": "safety>trust>commercial>preference",
+          "safety_gate_passed": false,
+          "trust_gate_passed": true,
+          "settlement_guardrail_passed": true,
+          "requested_boost_multiplier": 1.2,
+          "current_quota_usage_units": 10,
+          "requested_quota_units": 1
+        },
+        "recorded_at": "2026-02-21T16:12:40Z"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "commercial_policy_safety_bypass_denied"
+    },
+    {
+      "op": "commercialPolicy.evaluate",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m102_eval_trust",
+      "request": {
+        "evaluation": {
+          "operation_id": "swapIntents.create",
+          "precedence_assertion": "safety>trust>commercial>preference",
+          "safety_gate_passed": true,
+          "trust_gate_passed": false,
+          "settlement_guardrail_passed": true,
+          "requested_boost_multiplier": 1.2,
+          "current_quota_usage_units": 10,
+          "requested_quota_units": 1
+        },
+        "recorded_at": "2026-02-21T16:12:50Z"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "commercial_policy_trust_gate_denied"
+    },
+    {
+      "op": "commercialPolicy.evaluate",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m102_eval_boost",
+      "request": {
+        "evaluation": {
+          "operation_id": "swapIntents.create",
+          "precedence_assertion": "safety>trust>commercial>preference",
+          "safety_gate_passed": true,
+          "trust_gate_passed": true,
+          "settlement_guardrail_passed": true,
+          "requested_boost_multiplier": 2,
+          "current_quota_usage_units": 10,
+          "requested_quota_units": 1
+        },
+        "recorded_at": "2026-02-21T16:13:00Z"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "commercial_policy_boost_guardrail_denied"
+    },
+    {
+      "op": "commercialPolicy.evaluate",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m102_eval_quota",
+      "request": {
+        "evaluation": {
+          "operation_id": "swapIntents.create",
+          "precedence_assertion": "safety>trust>commercial>preference",
+          "safety_gate_passed": true,
+          "trust_gate_passed": true,
+          "settlement_guardrail_passed": true,
+          "requested_boost_multiplier": 1.2,
+          "current_quota_usage_units": 119,
+          "requested_quota_units": 2
+        },
+        "recorded_at": "2026-02-21T16:13:10Z"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "commercial_policy_quota_exceeded"
+    },
+    {
+      "op": "commercialPolicy.export",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "bad": "x"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "commercial_policy_export_query_invalid"
+    },
+    {
+      "op": "commercialPolicy.export",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-21T16:00:00Z",
+        "to_iso": "2026-02-21T17:00:00Z",
+        "limit": 2,
+        "now_iso": "2026-02-21T16:15:00Z",
+        "exported_at_iso": "2026-02-21T16:15:00Z"
+      },
+      "save_export_ref": "page1",
+      "expect_tamper_fail": true,
+      "expect_ok": true,
+      "expect_entries_count": 2,
+      "expect_total_filtered": 4,
+      "expect_next_cursor_present": true,
+      "expect_first_policy_type": "transaction_fee",
+      "expect_last_policy_type": "subscription_tier",
+      "expect_default_verify_ok": true,
+      "expect_public_key_verify_ok": true,
+      "expect_tamper_fail_verified": true
+    },
+    {
+      "op": "commercialPolicy.export",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "cursor_ref": "page1",
+      "attestation_ref": "page1",
+      "query": {
+        "from_iso": "2026-02-21T16:00:00Z",
+        "to_iso": "2026-02-21T17:00:00Z",
+        "limit": 2,
+        "now_iso": "2026-02-21T16:16:00Z",
+        "exported_at_iso": "2026-02-21T16:16:00Z"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "commercial_policy_export_query_invalid"
+    },
+    {
+      "op": "commercialPolicy.export",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-21T16:00:00Z",
+        "to_iso": "2026-02-21T17:00:00Z",
+        "limit": 2,
+        "cursor_after": "2026-02-21T16:05:00.000Z|cmpol_missing",
+        "now_iso": "2026-02-21T16:16:00Z",
+        "exported_at_iso": "2026-02-21T16:16:00Z"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "commercial_policy_export_cursor_not_found"
+    },
+    {
+      "op": "commercialPolicy.export",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "cursor_ref": "page1",
+      "attestation_ref": "page1",
+      "query": {
+        "from_iso": "2026-02-21T16:00:00Z",
+        "to_iso": "2026-02-21T17:00:00Z",
+        "limit": 2,
+        "checkpoint_after": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "now_iso": "2026-02-21T16:16:30Z",
+        "exported_at_iso": "2026-02-21T16:16:30Z"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "commercial_policy_export_query_invalid"
+    },
+    {
+      "op": "commercialPolicy.export",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "cursor_ref": "page1",
+      "attestation_ref": "page1",
+      "checkpoint_ref": "page1",
+      "query": {
+        "from_iso": "2026-02-21T16:00:00Z",
+        "to_iso": "2026-02-21T17:00:00Z",
+        "limit": 3,
+        "now_iso": "2026-02-21T16:17:00Z",
+        "exported_at_iso": "2026-02-21T16:17:00Z"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "commercial_policy_export_query_invalid"
+    },
+    {
+      "op": "commercialPolicy.export",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "cursor_ref": "page1",
+      "attestation_ref": "page1",
+      "checkpoint_ref": "page1",
+      "query": {
+        "from_iso": "2026-02-21T16:00:00Z",
+        "to_iso": "2026-02-21T17:00:00Z",
+        "limit": 2,
+        "now_iso": "2026-02-21T16:17:30Z",
+        "exported_at_iso": "2026-02-21T16:17:30Z"
+      },
+      "save_export_ref": "page2",
+      "expect_ok": true,
+      "expect_entries_count": 2,
+      "expect_total_filtered": 4,
+      "expect_next_cursor_present": false,
+      "expect_first_policy_type": "boost",
+      "expect_last_policy_type": "quota",
+      "expect_default_verify_ok": true,
+      "expect_public_key_verify_ok": true
+    }
+  ]
+}

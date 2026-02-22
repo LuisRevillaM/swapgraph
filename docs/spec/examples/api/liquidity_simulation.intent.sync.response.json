@@ -1,0 +1,33 @@
+{
+  "correlation_id": "corr_liquiditysimulation_intent_sync",
+  "session_id": "lsim_demo_alpha",
+  "simulation": true,
+  "simulation_session_id": "lsim_demo_alpha",
+  "synced_intents_count": 2,
+  "active_intents_count": 2,
+  "generated_cycle_id": "sim_cycle_lsim_demo_alpha_0001",
+  "generated_receipt_id": "sim_receipt_lsim_demo_alpha_0001",
+  "session": {
+    "session_id": "lsim_demo_alpha",
+    "simulation": true,
+    "simulation_session_id": "lsim_demo_alpha",
+    "owner_actor": {
+      "type": "partner",
+      "id": "partner_alpha"
+    },
+    "mode": "simulation",
+    "label": "Alpha LP Strategy Dry Run",
+    "seed": "seed-alpha-001",
+    "status": "active",
+    "started_at": "2026-02-22T09:00:00Z",
+    "updated_at": "2026-02-22T09:10:00Z",
+    "stopped_at": null,
+    "counters": {
+      "sync_calls": 1,
+      "intents_synced_total": 2,
+      "active_intents_count": 2,
+      "cycles_generated_total": 1,
+      "receipts_generated_total": 1
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "evaluation": {
+    "operation_id": "swapIntents.create",
+    "precedence_assertion": "safety>trust>commercial>preference",
+    "safety_gate_passed": true,
+    "trust_gate_passed": true,
+    "settlement_guardrail_passed": true,
+    "requested_boost_multiplier": 1.25,
+    "current_quota_usage_units": 100,
+    "requested_quota_units": 10,
+    "subscription_upgrade_requested": true,
+    "requested_tier": "pro"
+  },
+  "recorded_at": "2026-02-21T16:12:00Z"
+}

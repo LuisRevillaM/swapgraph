@@ -1,0 +1,19 @@
+{
+  "evaluation": {
+    "operation_id": "liquidityDecisions.proposal.accept",
+    "precedence_assertion": "safety>trust>lp_autonomy_policy>commercial>preference",
+    "safety_gate_passed": true,
+    "trust_gate_passed": true,
+    "commercial_gate_passed": true,
+    "action_type": "accept",
+    "spread_bps": 180,
+    "quote_value_usd": 220,
+    "daily_value_usd": 3100,
+    "counterparty_actor_id": "user_001",
+    "counterparty_exposure_usd": 900,
+    "price_confidence_bps": 8400,
+    "asset_liquidity_tier": "medium",
+    "high_volatility": false
+  },
+  "recorded_at": "2026-02-22T14:05:00Z"
+}

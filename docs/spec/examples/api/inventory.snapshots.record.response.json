@@ -1,0 +1,24 @@
+{
+  "correlation_id": "corr_inventory_snapshots_record",
+  "snapshot": {
+    "snapshot_id": "inv_snapshot_000001",
+    "partner_id": "partner_demo",
+    "platform": "steam",
+    "captured_at": "2026-02-21T12:10:00Z",
+    "recorded_at": "2026-02-21T12:10:30Z",
+    "assets": [
+      {
+        "asset_id": "assetA",
+        "quantity": 1,
+        "metadata": {
+          "wear": "fn"
+        }
+      },
+      {
+        "asset_id": "assetB",
+        "quantity": 2,
+        "metadata": {}
+      }
+    ]
+  }
+}

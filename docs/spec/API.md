@@ -40,6 +40,162 @@ Auth headers (see `docs/spec/AUTH.md` for details):
   - `GET /swap-intents` (list)
   - delegated agent writes are policy-gated (per-swap cap, daily cap, and optional high-value consent hook with proof binding/signature/anti-replay/challenge controls)
 
+- `PlatformConnection`
+  - `GET /platform-connections` (list)
+  - `POST /platform-connections` (upsert)
+
+- `Inventory`
+  - `POST /inventory/snapshots` (record partner snapshot)
+  - `GET /inventory/assets` (list latest normalized partner assets; optional `platform` filter)
+
+- `Disputes` (canonical facade)
+  - `POST /disputes` (create)
+  - `GET /disputes/{dispute_id}` (get)
+
+- `TrustSafety`
+  - `POST /trust-safety/signals` (record risk signal)
+  - `POST /trust-safety/decisions` (record policy decision)
+  - `GET /trust-safety/decisions/{decision_id}` (get decision projection)
+  - `GET /trust-safety/decisions/export` (signed paginated decision export)
+    - supports filters (`subject_actor_id`, `decision`, `from_iso`, `to_iso`)
+    - supports continuation (`limit`, `cursor_after`, `attestation_after`, `checkpoint_after`)
+    - supports retention and redaction hooks (`retention_days`, `redact_subject`)
+
+- `Metrics`
+  - `GET /metrics/north-star`
+  - `GET /metrics/marketplace-funnel`
+  - `GET /metrics/partner-health`
+  - `GET /metrics/safety-health`
+  - `GET /metrics/network-health/export`
+    - deterministic UTC window semantics (`from_iso` inclusive, `to_iso` exclusive) with `bucket` (`hour|day|week`)
+    - partner-tenant scoped reads only (partner cannot request other partner metrics)
+    - signed paginated export with continuation anchors (`limit`, `cursor_after`, `attestation_after`, `checkpoint_after`)
+    - continuation enforces checkpoint continuity for deterministic export replay (`metrics_export_checkpoint_required`, `metrics_export_checkpoint_mismatch`)
+
+- `Notifications`
+  - `GET /notifications/preferences` (get actor notification controls)
+  - `POST /notifications/preferences` (idempotent upsert of quiet-hours, urgency threshold, and category controls)
+  - `GET /notifications/inbox` (notification inbox projection with taxonomy filtering)
+
+- `ProductProjection`
+  - `GET /product-projections/inventory-awakening`
+  - `GET /product-projections/cycle-inbox`
+  - `GET /product-projections/settlement-timeline/{cycle_id}`
+  - `GET /product-projections/receipt-share/{receipt_id}`
+  - projection query validation failures use deterministic reason code `product_projection_query_invalid`
+
+- `PartnerUi`
+  - `GET /partner-ui/capabilities` (supported embedded surfaces/version matrix for partner actors)
+  - `GET /partner-ui/bundles/{surface}` (surface payload bundle for partner embedding mode)
+  - unknown surfaces return deterministic reason code `partner_ui_surface_unknown`
+
+- `CommercialPolicy`
+  - `GET /commercial/policies/transaction-fee`
+  - `POST /commercial/policies/transaction-fee`
+  - `GET /commercial/policies/subscription-tier`
+  - `POST /commercial/policies/subscription-tier`
+  - `GET /commercial/policies/boost`
+  - `POST /commercial/policies/boost`
+  - `GET /commercial/policies/quota`
+  - `POST /commercial/policies/quota`
+  - `POST /commercial/policies/evaluate`
+    - deterministic precedence invariant: `safety>trust>commercial>preference`
+    - enforces non-bypass guards for safety/trust/settlement constraints
+  - `GET /commercial/policies/export`
+    - signed policy-audit export payload with attestation/checkpoint continuity
+    - continuation uses `limit`, `cursor_after`, `attestation_after`, `checkpoint_after`
+    - continuation context mismatch and unknown anchors return deterministic export reason codes
+
+- `PartnerLiquidityProvider`
+  - `POST /partner-liquidity-providers` (onboard partner-owned LP with deterministic governance defaults)
+  - `GET /partner-liquidity-providers/{provider_id}` (read partner-owned LP governance profile)
+  - `POST /partner-liquidity-providers/{provider_id}/status` (upsert governance status, segment tier, and baseline posture)
+  - `POST /partner-liquidity-providers/{provider_id}/eligibility/evaluate` (deterministic segment/capability eligibility evaluation)
+  - `POST /partner-liquidity-providers/{provider_id}/rollout` (upsert capability rollout policy bound to eligibility gates)
+  - `GET /partner-liquidity-providers/{provider_id}/rollout/export` (signed partner LP governance export with checkpoint continuity)
+  - governance invariants:
+    - active rollout requires latest eligibility verdict `allow`
+    - segment/capability gating blocks rollout when requested capabilities exceed effective segment tier
+    - critical violations and baseline failures trigger deterministic downgrade reason-code paths
+
+- `LiquidityProvider`
+  - `POST /liquidity-providers` (register provider profile with disclosure + policy refs)
+  - `GET /liquidity-providers/{provider_id}` (get provider profile)
+  - `GET /liquidity-providers` (list partner-owned provider profiles; optional `provider_type` filter)
+  - `POST /liquidity-providers/{provider_id}/persona` (upsert bot/persona disclosure profile)
+  - Attribution surfaces:
+    - `SwapIntent` supports optional `liquidity_provider_ref`, `persona_ref`, and `liquidity_policy_ref`
+    - `CycleProposal.participants[]` supports optional LP attribution refs
+    - `SwapReceipt` supports optional `liquidity_provider_summary[]` disclosure lineage
+
+- `LiquiditySimulation`
+  - `POST /liquidity-simulation/sessions` (start a simulation-only session)
+  - `GET /liquidity-simulation/sessions/{session_id}` (get simulation session state)
+  - `POST /liquidity-simulation/sessions/{session_id}/stop` (idempotent stop)
+  - `POST /liquidity-simulation/sessions/{session_id}/intents/sync` (sync simulated intents into session)
+  - `GET /liquidity-simulation/sessions/{session_id}/cycles/export` (signed simulated cycle export)
+  - `GET /liquidity-simulation/sessions/{session_id}/receipts/export` (signed simulated receipt export)
+  - simulation invariants:
+    - all simulation responses include `simulation=true` and `simulation_session_id`
+    - simulated sessions/cycles/receipts are isolated from production settlement and receipt chains
+
+- `LiquidityInventory`
+  - `POST /liquidity-providers/{provider_id}/inventory/snapshots` (record provider-scoped inventory snapshot)
+  - `GET /liquidity-providers/{provider_id}/inventory/assets` (list current inventory holdings)
+  - `GET /liquidity-providers/{provider_id}/inventory/availability` (project available vs reserved/in-settlement quantities)
+  - `POST /liquidity-providers/{provider_id}/inventory/reservations` (batch reserve holdings with per-item deterministic outcomes)
+  - `POST /liquidity-providers/{provider_id}/inventory/reservations/release` (batch release/transition reservations with per-item deterministic outcomes)
+  - `GET /liquidity-providers/{provider_id}/inventory/reconciliation/export` (signed inventory reconciliation export)
+  - inventory invariants:
+    - one active reservation (`reserved|in_settlement`) per holding
+    - reservation context binds provider, holding, and cycle
+    - reconciliation export provides signed attestation/checkpoint continuity
+
+- `LiquidityListings`
+  - `POST /liquidity-providers/{provider_id}/listings` (upsert provider-owned LP listing intent with policy binding)
+  - `POST /liquidity-providers/{provider_id}/listings/{intent_id}/cancel` (idempotent listing cancellation with deterministic reason code)
+  - `GET /liquidity-providers/{provider_id}/listings` (list provider listings; optional `status` and `limit`)
+
+- `LiquidityDecisions`
+  - `POST /liquidity-providers/{provider_id}/proposals/{proposal_id}/accept` (record LP accept decision with mandatory explainability payload)
+  - `POST /liquidity-providers/{provider_id}/proposals/{proposal_id}/decline` (record LP decline decision with mandatory explainability payload)
+  - `GET /liquidity-providers/{provider_id}/decisions/{decision_id}` (read deterministic decision record)
+  - decision invariants:
+    - idempotency scope binds `provider_id + operation_id + proposal_id + idempotency_key`
+    - decision writes require `decision_reason_codes[]`, `policy_ref`, `confidence_score_bps`, `risk_tier_snapshot`, and `correlation_id`
+    - trust/safety policy outcomes are hard precedence; LP decisions are denied when no current `allow` policy decision exists
+    - recorded decisions include intent/proposal/commit lineage for auditability
+
+- `LiquidityExecution`
+  - `POST /liquidity-providers/{provider_id}/execution-mode` (idempotent execution-mode upsert for `simulation|operator_assisted|constrained_auto`)
+  - `GET /liquidity-providers/{provider_id}/execution-mode` (read effective execution mode, defaulting to `operator_assisted` in restricted contexts)
+  - `POST /liquidity-providers/{provider_id}/execution-requests` (record operator-reviewed execution request with mode/risk snapshot)
+  - `POST /liquidity-providers/{provider_id}/execution-requests/{request_id}/approve` (record explicit operator approval)
+  - `POST /liquidity-providers/{provider_id}/execution-requests/{request_id}/reject` (record explicit operator rejection)
+  - `GET /liquidity-providers/{provider_id}/execution-requests/export` (signed execution-request export with attestation/checkpoint continuity)
+  - execution invariants:
+    - restricted adapter contexts default to `operator_assisted`; `constrained_auto` requires explicit override policy records
+    - high-risk/platform-blocked execution requests fail deterministically with stable reason codes
+    - approval/rejection records require explicit operator actor + reason-code lineage
+    - export continuation binds cursor/attestation/checkpoint continuity and query context
+
+- `LiquidityPolicy`
+  - `POST /liquidity-providers/{provider_id}/policies` (idempotent LP autonomy policy upsert)
+  - `GET /liquidity-providers/{provider_id}/policies` (read effective LP autonomy policy)
+  - `POST /liquidity-providers/{provider_id}/policies/evaluate` (deterministic LP policy evaluation for candidate execution context)
+  - policy invariants:
+    - precedence enforcement is deterministic: `safety>trust>lp_autonomy_policy>commercial>preference`
+    - anti-farming floor includes spread/daily value/counterparty exposure/confidence/tier volatility constraints
+    - policy writes and evaluations are provider-scoped and partner-owned
+
+- `LiquidityDecisionAudit`
+  - `GET /liquidity-providers/{provider_id}/decision-audit` (list deterministic LP decision-policy audit records)
+  - `GET /liquidity-providers/{provider_id}/decision-audit/export` (signed audit export with continuation anchors)
+  - audit invariants:
+    - continuation binds `cursor_after`, `attestation_after`, and `checkpoint_after` with query-context continuity
+    - export/list queries enforce deterministic retention and redaction hooks
+    - invalid query anchors and context mismatch fail with stable reason codes
+
 - `CycleProposal`
   - `GET /cycle-proposals` (list)
   - `GET /cycle-proposals/{id}`
@@ -277,7 +433,7 @@ Signing key endpoints:
 - `GET /keys/receipt-signing` (public keys for verifying `SwapReceipt.signature`)
 - `GET /keys/event-signing` (public keys for verifying `EventEnvelope.signature`)
 
-(Implementation is fixtures-first; server transport comes later.)
+(Implementation remains fixtures-first for milestones; a local runtime HTTP shell is now available via `npm run start:api`.)
 
 ## Webhooks (v1)
 Partners can receive:

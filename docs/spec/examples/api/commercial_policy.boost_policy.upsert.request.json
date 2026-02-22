@@ -1,0 +1,10 @@
+{
+  "policy": {
+    "enabled": true,
+    "max_multiplier": 1.5,
+    "allow_safety_bypass": false,
+    "allow_trust_bypass": false,
+    "allow_settlement_constraint_bypass": false
+  },
+  "recorded_at": "2026-02-21T16:07:00Z"
+}

@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquidityListingView.schema.json",
+  "title": "LiquidityListingView",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "intent_id",
+    "provider_id",
+    "status",
+    "intent",
+    "policy_ref",
+    "listed_at",
+    "updated_at",
+    "cancelled_at",
+    "cancel_reason_code"
+  ],
+  "properties": {
+    "intent_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "cancelled"
+      ]
+    },
+    "intent": {
+      "$ref": "SwapIntent.schema.json"
+    },
+    "policy_ref": {
+      "$ref": "LiquidityPolicyRef.schema.json"
+    },
+    "listed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "cancelled_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "cancel_reason_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    }
+  }
+}

@@ -28,6 +28,12 @@ const schemaFiles = [
   'VaultEvent.schema.json'
 ];
 
+const refOnlySchemaFiles = [
+  'BotPersonaRef.schema.json',
+  'LiquidityPolicyRef.schema.json',
+  'LiquidityProviderRef.schema.json'
+];
+
 const exampleMap = {
   'ActorRef.schema.json': 'ActorRef.example.json',
   'AssetRef.schema.json': 'AssetRef.example.json',
@@ -53,7 +59,7 @@ const ajv = new Ajv2020({ strict: true, allErrors: true });
 addFormats(ajv);
 
 // Preload all schemas so $ref resolves via their $id values.
-for (const sf of schemaFiles) {
+for (const sf of Array.from(new Set([...schemaFiles, ...refOnlySchemaFiles]))) {
   const schemaPath = path.join(schemasDir, sf);
   const schema = JSON.parse(readFileSync(schemaPath, 'utf8'));
   ajv.addSchema(schema);

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquidityInventoryAssetListResponse.schema.json",
+  "title": "LiquidityInventoryAssetListResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "provider_id",
+    "assets"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "assets": {
+      "type": "array",
+      "items": {
+        "$ref": "LiquidityInventoryAssetView.schema.json"
+      }
+    }
+  }
+}

@@ -20,7 +20,7 @@ Capture operator-attested live evidence for Steam Tier-1 deposit-per-swap settle
 
 ## Validation
 - `INTEGRATION_ENABLED=1 npm run verify:m85`
-- `INTEGRATION_ENABLED=1 node verify/runner.ts milestones/M85.yaml`
+- `INTEGRATION_ENABLED=1 node verify/runner.mjs milestones/M85.yaml`
 - Confirm `steam_deposit_per_swap_live_proof_output.json` contains at least one `integration_mode=live` proof and a stable `proof_hash`.
 
 ## Rollback / Incident Notes

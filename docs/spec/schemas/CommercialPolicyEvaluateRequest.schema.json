@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/CommercialPolicyEvaluateRequest.schema.json",
+  "title": "CommercialPolicyEvaluateRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["evaluation"],
+  "properties": {
+    "evaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operation_id",
+        "precedence_assertion",
+        "safety_gate_passed",
+        "trust_gate_passed",
+        "settlement_guardrail_passed",
+        "requested_boost_multiplier",
+        "current_quota_usage_units",
+        "requested_quota_units"
+      ],
+      "properties": {
+        "operation_id": { "type": "string", "minLength": 1 },
+        "precedence_assertion": { "type": "string", "minLength": 1 },
+        "safety_gate_passed": { "type": "boolean" },
+        "trust_gate_passed": { "type": "boolean" },
+        "settlement_guardrail_passed": { "type": "boolean" },
+        "requested_boost_multiplier": { "type": "number", "minimum": 1 },
+        "current_quota_usage_units": { "type": "integer", "minimum": 0 },
+        "requested_quota_units": { "type": "integer", "minimum": 0 },
+        "subscription_upgrade_requested": { "type": "boolean" },
+        "requested_tier": { "type": "string", "enum": ["free", "pro", "enterprise"] }
+      }
+    },
+    "recorded_at": { "type": "string", "format": "date-time" }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "cancel": {
+    "reason_code": "operator_cancelled",
+    "cancelled_at": "2026-02-22T12:05:00Z"
+  }
+}

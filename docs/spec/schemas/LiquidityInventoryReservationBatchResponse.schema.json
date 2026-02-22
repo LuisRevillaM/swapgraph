@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquidityInventoryReservationBatchResponse.schema.json",
+  "title": "LiquidityInventoryReservationBatchResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "provider_id",
+    "outcomes",
+    "summary"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "outcomes": {
+      "type": "array",
+      "items": {
+        "$ref": "LiquidityInventoryReservationOutcome.schema.json"
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requested_count",
+        "success_count",
+        "conflict_count",
+        "not_available_count",
+        "context_mismatch_count",
+        "asset_not_found_count",
+        "active_reservations_count"
+      ],
+      "properties": {
+        "requested_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "success_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "conflict_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "not_available_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "context_mismatch_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "asset_not_found_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "active_reservations_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/TrustSafetySignalRecordRequest.schema.json",
+  "title": "TrustSafetySignalRecordRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "signal"
+  ],
+  "properties": {
+    "signal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "category",
+        "subject_actor_type",
+        "subject_actor_id",
+        "severity",
+        "confidence_score_bps",
+        "observed_at"
+      ],
+      "properties": {
+        "signal_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "fraud_value_anomaly",
+            "fraud_velocity_spike",
+            "fraud_cycle_abuse_pattern",
+            "ato_device_drift",
+            "ato_session_geo_impossible",
+            "ato_credential_reuse_suspected"
+          ]
+        },
+        "subject_actor_type": {
+          "type": "string",
+          "enum": [
+            "partner",
+            "user"
+          ]
+        },
+        "subject_actor_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ]
+        },
+        "confidence_score_bps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "metadata": {
+          "type": "object"
+        }
+      }
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

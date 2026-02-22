@@ -1,0 +1,20 @@
+{
+  "correlation_id": "corr_partnerliquidityprovider_status_upsert",
+  "provider_id": "plp_000001",
+  "status": {
+    "status": "active",
+    "segment_tier": "S1",
+    "trust_safety_baseline_passed": true,
+    "reliability_baseline_passed": true,
+    "audit_conformance_passed": true,
+    "unresolved_critical_violations": 0,
+    "reason_codes": [
+      "manual_review_complete"
+    ],
+    "updated_at": "2026-02-22T16:10:00.000Z",
+    "updated_by": {
+      "type": "partner",
+      "id": "partner_alpha"
+    }
+  }
+}

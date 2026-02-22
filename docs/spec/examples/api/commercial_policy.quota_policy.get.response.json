@@ -1,0 +1,16 @@
+{
+  "correlation_id": "corr_commercialpolicy_quota_policy_get",
+  "policy": {
+    "partner_id": "partner_demo",
+    "version": 2,
+    "monthly_quota_units": 120,
+    "overage_enabled": true,
+    "overage_unit_price_usd": 0.35,
+    "hard_stop_on_quota_exceeded": true,
+    "updated_at": "2026-02-21T16:09:00Z",
+    "updated_by": {
+      "type": "partner",
+      "id": "partner_demo"
+    }
+  }
+}

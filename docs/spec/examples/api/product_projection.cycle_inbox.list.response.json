@@ -1,0 +1,43 @@
+{
+  "correlation_id": "corr_productprojection_cycle_inbox_list",
+  "cards": [
+    {
+      "cycle_id": "cycle_alpha",
+      "give_assets": [
+        "asset_a"
+      ],
+      "get_assets": [
+        "asset_b"
+      ],
+      "confidence_score_bps": 8600,
+      "explainability": [
+        "Inventory overlap",
+        "Historical fill rate"
+      ],
+      "deadline_at": "2026-02-21T18:00:00Z",
+      "fee_summary": {
+        "total_fee_usd": 1.25,
+        "participant_fee_count": 2
+      }
+    },
+    {
+      "cycle_id": "cycle_beta",
+      "give_assets": [
+        "asset_c"
+      ],
+      "get_assets": [
+        "asset_d"
+      ],
+      "confidence_score_bps": 8000,
+      "explainability": [
+        "Demand signal alignment"
+      ],
+      "deadline_at": "2026-02-21T20:00:00Z",
+      "fee_summary": {
+        "total_fee_usd": 0.95,
+        "participant_fee_count": 2
+      }
+    }
+  ],
+  "total_filtered": 2
+}

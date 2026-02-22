@@ -1,0 +1,20 @@
+{
+  "correlation_id": "corr_partnerui_bundle_get",
+  "surface_bundle": {
+    "surface": "intent-composer",
+    "version": "1.0.0",
+    "integration_modes": [
+      "api_only",
+      "embedded_ui"
+    ],
+    "locale": "en-US",
+    "payload": {
+      "title": "Intent Composer",
+      "description": "Compose and refine swap intents with policy-aware defaults.",
+      "required_operations": [
+        "swapIntents.create",
+        "swapIntents.update"
+      ]
+    }
+  }
+}

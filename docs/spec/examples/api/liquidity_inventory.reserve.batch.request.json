@@ -1,0 +1,23 @@
+{
+  "reservations": [
+    {
+      "reservation_id": "lpinv_res_alpha_001",
+      "holding_id": "steam:asset_ak47_redline",
+      "asset_id": "asset_ak47_redline",
+      "platform": "steam",
+      "quantity": 1,
+      "cycle_id": "cycle_lp_alpha_001",
+      "context_ref": "proposal_alpha_001"
+    },
+    {
+      "reservation_id": "lpinv_res_alpha_002",
+      "holding_id": "steam:asset_awp_asiimov",
+      "asset_id": "asset_awp_asiimov",
+      "platform": "steam",
+      "quantity": 1,
+      "cycle_id": "cycle_lp_alpha_001",
+      "context_ref": "proposal_alpha_001"
+    }
+  ],
+  "recorded_at": "2026-02-22T11:05:00Z"
+}

@@ -6,7 +6,50 @@
       "intent_id": "intent_a",
       "actor": { "type": "user", "id": "u1" },
       "give": [{ "platform": "steam", "asset_id": "assetA" }],
-      "get": [{ "platform": "steam", "asset_id": "assetB" }]
+      "get": [{ "platform": "steam", "asset_id": "assetB" }],
+      "liquidity_provider_ref": {
+        "provider_id": "lp_house_alpha",
+        "provider_type": "house_bot",
+        "owner_actor": { "type": "partner", "id": "partner_alpha" },
+        "is_automated": true,
+        "is_house_inventory": true,
+        "label_required": true,
+        "display_label": "Alpha Market Maker",
+        "disclosure_text": "Automated house-liquidity participant.",
+        "active": true,
+        "policy_ref": {
+          "policy_id": "lp_policy_alpha",
+          "policy_version": 3,
+          "policy_mode": "constrained_auto",
+          "constraints_hash": "sha256:0b9d6f"
+        },
+        "persona_ref": {
+          "provider_id": "lp_house_alpha",
+          "persona_id": "persona_alpha_mm",
+          "display_name": "Alpha MM",
+          "strategy_summary": "Passive spread capture for balanced cycle completion.",
+          "disclosure_text": "Automated house-liquidity participant.",
+          "active": true,
+          "updated_at": "2026-02-21T14:00:00Z"
+        },
+        "created_at": "2026-02-21T12:00:00Z",
+        "updated_at": "2026-02-21T14:00:00Z"
+      },
+      "persona_ref": {
+        "provider_id": "lp_house_alpha",
+        "persona_id": "persona_alpha_mm",
+        "display_name": "Alpha MM",
+        "strategy_summary": "Passive spread capture for balanced cycle completion.",
+        "disclosure_text": "Automated house-liquidity participant.",
+        "active": true,
+        "updated_at": "2026-02-21T14:00:00Z"
+      },
+      "liquidity_policy_ref": {
+        "policy_id": "lp_policy_alpha",
+        "policy_version": 3,
+        "policy_mode": "constrained_auto",
+        "constraints_hash": "sha256:0b9d6f"
+      }
     },
     {
       "intent_id": "intent_b",

@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquidityDecisionAuditListResponse.schema.json",
+  "title": "LiquidityDecisionAuditListResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "provider_id",
+    "query",
+    "total_filtered",
+    "entries"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "query": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "from_iso": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "to_iso": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "verdict": {
+          "type": "string",
+          "enum": [
+            "allow",
+            "deny"
+          ]
+        },
+        "counterparty_actor_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        },
+        "cursor_after": {
+          "type": "string",
+          "minLength": 1
+        },
+        "retention_days": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3650
+        },
+        "now_iso": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "redact_counterparty": {
+          "type": "boolean"
+        }
+      }
+    },
+    "total_filtered": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "$ref": "LiquidityDecisionAuditEntry.schema.json"
+      }
+    },
+    "next_cursor": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

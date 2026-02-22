@@ -1,0 +1,59 @@
+{
+  "correlation_id": "corr_liquiditysimulation_cycle_export",
+  "session_id": "lsim_demo_alpha",
+  "simulation": true,
+  "simulation_session_id": "lsim_demo_alpha",
+  "export": {
+    "exported_at": "2026-02-22T09:20:00Z",
+    "query": {
+      "limit": 50
+    },
+    "total_filtered": 1,
+    "entries": [
+      {
+        "cycle_id": "sim_cycle_lsim_demo_alpha_0001",
+        "simulation": true,
+        "simulation_session_id": "lsim_demo_alpha",
+        "completed_at": "2026-02-22T09:10:00Z",
+        "confidence_score": 0.75,
+        "participants": [
+          {
+            "intent_id": "intent_sim_1",
+            "actor": {
+              "type": "user",
+              "id": "u1"
+            }
+          },
+          {
+            "intent_id": "intent_sim_2",
+            "actor": {
+              "type": "user",
+              "id": "u2"
+            }
+          }
+        ]
+      }
+    ],
+    "attestation": {
+      "cursor_after": null,
+      "next_cursor": null,
+      "attestation_after": null,
+      "page_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+      "chain_hash": "2222222222222222222222222222222222222222222222222222222222222222"
+    },
+    "checkpoint": {
+      "checkpoint_after": null,
+      "attestation_chain_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+      "next_cursor": null,
+      "entries_count": 1,
+      "total_filtered": 1,
+      "checkpoint_hash": "3333333333333333333333333333333333333333333333333333333333333333"
+    },
+    "export_hash": "4444444444444444444444444444444444444444444444444444444444444444",
+    "signature": {
+      "key_id": "sig-k1",
+      "alg": "ed25519",
+      "sig": "BASE64_SIGNATURE_EXAMPLE"
+    }
+  }
+}

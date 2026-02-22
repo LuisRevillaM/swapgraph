@@ -1,0 +1,19 @@
+{
+  "correlation_id": "corr_productprojection_settlement_timeline_get",
+  "digest": {
+    "cycle_id": "cycle_alpha",
+    "state": "escrow.pending",
+    "updated_at": "2026-02-21T14:00:00Z",
+    "completed_steps": [
+      "cycle_started"
+    ],
+    "next_required_action": "confirm_deposit",
+    "next_action_deadline_at": "2026-02-21T15:00:00.000Z",
+    "progress": {
+      "legs_total": 2,
+      "legs_deposited": 0,
+      "legs_released": 0,
+      "legs_refunded": 0
+    }
+  }
+}

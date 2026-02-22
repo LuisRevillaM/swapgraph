@@ -1,0 +1,1184 @@
+{
+  "actors": {
+    "partner_alpha": {
+      "type": "partner",
+      "id": "partner_alpha"
+    },
+    "partner_beta": {
+      "type": "partner",
+      "id": "partner_beta"
+    }
+  },
+  "seed_state": {
+    "liquidity_providers": {
+      "lp_house_alpha": {
+        "provider_id": "lp_house_alpha",
+        "provider_type": "house_bot",
+        "owner_actor": {
+          "type": "partner",
+          "id": "partner_alpha"
+        },
+        "is_automated": true,
+        "is_house_inventory": true,
+        "label_required": true,
+        "display_label": "Alpha Market Maker",
+        "disclosure_text": "Automated house-liquidity participant.",
+        "active": true,
+        "policy_ref": {
+          "policy_id": "lp_policy_alpha",
+          "policy_version": 3,
+          "policy_mode": "constrained_auto",
+          "constraints_hash": "sha256:lp-policy-alpha-v3"
+        },
+        "created_at": "2026-02-21T12:00:00Z",
+        "updated_at": "2026-02-21T12:00:00Z"
+      },
+      "lp_house_beta": {
+        "provider_id": "lp_house_beta",
+        "provider_type": "house_bot",
+        "owner_actor": {
+          "type": "partner",
+          "id": "partner_beta"
+        },
+        "is_automated": true,
+        "is_house_inventory": true,
+        "label_required": true,
+        "display_label": "Beta Market Maker",
+        "disclosure_text": "Automated house-liquidity participant.",
+        "active": true,
+        "policy_ref": {
+          "policy_id": "lp_policy_beta",
+          "policy_version": 2,
+          "policy_mode": "constrained_auto",
+          "constraints_hash": "sha256:lp-policy-beta-v2"
+        },
+        "created_at": "2026-02-21T12:00:00Z",
+        "updated_at": "2026-02-21T12:00:00Z"
+      }
+    },
+    "proposals": {
+      "proposal_lp_alpha_001": {
+        "id": "proposal_lp_alpha_001",
+        "expires_at": "2026-02-23T00:00:00Z",
+        "participants": [
+          {
+            "intent_id": "intent_lp_alpha_002",
+            "actor": {
+              "type": "partner",
+              "id": "partner_alpha"
+            },
+            "give": [
+              {
+                "platform": "steam",
+                "asset_id": "asset_ak47_redline"
+              }
+            ],
+            "get": [
+              {
+                "platform": "steam",
+                "asset_id": "asset_awp_asiimov"
+              }
+            ],
+            "liquidity_provider_ref": {
+              "provider_id": "lp_house_alpha",
+              "provider_type": "house_bot",
+              "owner_actor": {
+                "type": "partner",
+                "id": "partner_alpha"
+              },
+              "is_automated": true,
+              "is_house_inventory": true,
+              "label_required": true,
+              "display_label": "Alpha Market Maker",
+              "disclosure_text": "Automated house-liquidity participant.",
+              "active": true,
+              "policy_ref": {
+                "policy_id": "lp_policy_alpha",
+                "policy_version": 3,
+                "policy_mode": "constrained_auto",
+                "constraints_hash": "sha256:lp-policy-alpha-v3"
+              },
+              "created_at": "2026-02-21T12:00:00Z",
+              "updated_at": "2026-02-21T12:00:00Z"
+            }
+          },
+          {
+            "intent_id": "intent_user_001",
+            "actor": {
+              "type": "user",
+              "id": "user_001"
+            },
+            "give": [
+              {
+                "platform": "steam",
+                "asset_id": "asset_awp_asiimov"
+              }
+            ],
+            "get": [
+              {
+                "platform": "steam",
+                "asset_id": "asset_ak47_redline"
+              }
+            ]
+          }
+        ],
+        "confidence_score": 0.86,
+        "value_spread": 0.04,
+        "fee_breakdown": [
+          {
+            "actor": {
+              "type": "partner",
+              "id": "partner_alpha"
+            },
+            "fee_usd": 1.25
+          }
+        ],
+        "explainability": [
+          "Liquidity inventory available",
+          "Proposal is within configured spread guardrails"
+        ]
+      },
+      "proposal_lp_beta_001": {
+        "id": "proposal_lp_beta_001",
+        "expires_at": "2026-02-23T00:00:00Z",
+        "participants": [
+          {
+            "intent_id": "intent_lp_beta_001",
+            "actor": {
+              "type": "partner",
+              "id": "partner_beta"
+            },
+            "give": [
+              {
+                "platform": "steam",
+                "asset_id": "asset_m4_howl"
+              }
+            ],
+            "get": [
+              {
+                "platform": "steam",
+                "asset_id": "asset_awp_dragon_lore"
+              }
+            ],
+            "liquidity_provider_ref": {
+              "provider_id": "lp_house_beta",
+              "provider_type": "house_bot",
+              "owner_actor": {
+                "type": "partner",
+                "id": "partner_beta"
+              },
+              "is_automated": true,
+              "is_house_inventory": true,
+              "label_required": true,
+              "display_label": "Beta Market Maker",
+              "disclosure_text": "Automated house-liquidity participant.",
+              "active": true,
+              "policy_ref": {
+                "policy_id": "lp_policy_beta",
+                "policy_version": 2,
+                "policy_mode": "constrained_auto",
+                "constraints_hash": "sha256:lp-policy-beta-v2"
+              },
+              "created_at": "2026-02-21T12:00:00Z",
+              "updated_at": "2026-02-21T12:00:00Z"
+            }
+          },
+          {
+            "intent_id": "intent_user_002",
+            "actor": {
+              "type": "user",
+              "id": "user_002"
+            },
+            "give": [
+              {
+                "platform": "steam",
+                "asset_id": "asset_awp_dragon_lore"
+              }
+            ],
+            "get": [
+              {
+                "platform": "steam",
+                "asset_id": "asset_m4_howl"
+              }
+            ]
+          }
+        ],
+        "confidence_score": 0.75,
+        "value_spread": 0.05,
+        "fee_breakdown": [
+          {
+            "actor": {
+              "type": "partner",
+              "id": "partner_beta"
+            },
+            "fee_usd": 1.0
+          }
+        ],
+        "explainability": [
+          "Beta LP available inventory",
+          "Counterparty match found"
+        ]
+      }
+    },
+    "commits": {
+      "commit_b2def3e5e865": {
+        "id": "commit_b2def3e5e865",
+        "cycle_id": "proposal_lp_alpha_001",
+        "phase": "accept",
+        "participants": [
+          {
+            "actor": {
+              "type": "partner",
+              "id": "partner_alpha"
+            },
+            "status": "accepted",
+            "commit_token": "tok_commit_b2def3e5e865_partner_alpha"
+          },
+          {
+            "actor": {
+              "type": "user",
+              "id": "user_001"
+            },
+            "status": "pending"
+          }
+        ],
+        "created_at": "2026-02-22T12:00:00Z",
+        "updated_at": "2026-02-22T12:00:00Z"
+      }
+    },
+    "trust_safety_decisions": {
+      "ts_decision_alpha_allow_001": {
+        "decision_id": "ts_decision_alpha_allow_001",
+        "subject_actor_type": "partner",
+        "subject_actor_id": "partner_alpha",
+        "decision": "allow",
+        "reason_codes": [
+          "manual_review_cleared"
+        ],
+        "contributing_signal_ids": [],
+        "severity": "low",
+        "confidence_score_bps": 9400,
+        "recorded_at": "2026-02-22T11:50:00Z",
+        "correlation_id": "corr_ts_alpha_allow_001",
+        "dispute_id": null,
+        "reliability_ref": null,
+        "recorded_by": {
+          "type": "partner",
+          "id": "partner_alpha"
+        }
+      }
+    }
+  },
+  "operations": [
+    {
+      "op": "liquidityListings.upsert",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id": "lp_house_alpha",
+      "idempotency_key": "m106_listing_upsert_1",
+      "request": {
+        "listing": {
+          "intent": {
+            "id": "intent_lp_alpha_001",
+            "actor": {
+              "type": "partner",
+              "id": "partner_alpha"
+            },
+            "offer": [
+              {
+                "platform": "steam",
+                "app_id": 730,
+                "context_id": 2,
+                "asset_id": "asset_ak47_redline",
+                "class_id": "456",
+                "instance_id": "0",
+                "metadata": {
+                  "float": 0.12
+                },
+                "proof": {
+                  "inventory_snapshot_id": "lpinv_snapshot_alpha_001",
+                  "verified_at": "2026-02-22T11:00:00Z"
+                }
+              }
+            ],
+            "want_spec": {
+              "type": "set",
+              "any_of": [
+                {
+                  "type": "category",
+                  "platform": "steam",
+                  "app_id": 730,
+                  "category": "rifle",
+                  "constraints": {
+                    "min_condition": "FT"
+                  }
+                }
+              ]
+            },
+            "value_band": {
+              "min_usd": 80,
+              "max_usd": 150,
+              "pricing_source": "market_median"
+            },
+            "trust_constraints": {
+              "max_cycle_length": 3,
+              "min_counterparty_reliability": 0
+            },
+            "time_constraints": {
+              "expires_at": "2026-02-23T00:00:00Z",
+              "urgency": "normal"
+            },
+            "settlement_preferences": {
+              "require_escrow": true
+            },
+            "liquidity_provider_ref": {
+              "provider_id": "lp_house_alpha",
+              "provider_type": "house_bot",
+              "owner_actor": {
+                "type": "partner",
+                "id": "partner_alpha"
+              },
+              "is_automated": true,
+              "is_house_inventory": true,
+              "label_required": true,
+              "display_label": "Alpha Market Maker",
+              "disclosure_text": "Automated house-liquidity participant.",
+              "active": true,
+              "policy_ref": {
+                "policy_id": "lp_policy_alpha",
+                "policy_version": 3,
+                "policy_mode": "constrained_auto",
+                "constraints_hash": "sha256:lp-policy-alpha-v3"
+              },
+              "created_at": "2026-02-21T12:00:00Z",
+              "updated_at": "2026-02-21T12:00:00Z"
+            },
+            "liquidity_policy_ref": {
+              "policy_id": "lp_policy_alpha",
+              "policy_version": 3,
+              "policy_mode": "constrained_auto",
+              "constraints_hash": "sha256:lp-policy-alpha-v3"
+            }
+          },
+          "policy_ref": {
+            "policy_id": "lp_policy_alpha",
+            "policy_version": 3,
+            "policy_mode": "constrained_auto",
+            "constraints_hash": "sha256:lp-policy-alpha-v3"
+          },
+          "listed_at": "2026-02-22T12:00:00Z"
+        }
+      },
+      "save_provider_ref": "provider_alpha",
+      "save_intent_ref": "listing_intent_alpha_001",
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_provider_id": "lp_house_alpha",
+      "expect_intent_id": "intent_lp_alpha_001",
+      "expect_listing_status": "active"
+    },
+    {
+      "op": "liquidityListings.upsert",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "idempotency_key": "m106_listing_upsert_1",
+      "request": {
+        "listing": {
+          "intent": {
+            "id": "intent_lp_alpha_001",
+            "actor": {
+              "type": "partner",
+              "id": "partner_alpha"
+            },
+            "offer": [
+              {
+                "platform": "steam",
+                "app_id": 730,
+                "context_id": 2,
+                "asset_id": "asset_ak47_redline",
+                "class_id": "456",
+                "instance_id": "0",
+                "metadata": {
+                  "float": 0.12
+                },
+                "proof": {
+                  "inventory_snapshot_id": "lpinv_snapshot_alpha_001",
+                  "verified_at": "2026-02-22T11:00:00Z"
+                }
+              }
+            ],
+            "want_spec": {
+              "type": "set",
+              "any_of": [
+                {
+                  "type": "category",
+                  "platform": "steam",
+                  "app_id": 730,
+                  "category": "rifle",
+                  "constraints": {
+                    "min_condition": "FT"
+                  }
+                }
+              ]
+            },
+            "value_band": {
+              "min_usd": 80,
+              "max_usd": 150,
+              "pricing_source": "market_median"
+            },
+            "trust_constraints": {
+              "max_cycle_length": 3,
+              "min_counterparty_reliability": 0
+            },
+            "time_constraints": {
+              "expires_at": "2026-02-23T00:00:00Z",
+              "urgency": "normal"
+            },
+            "settlement_preferences": {
+              "require_escrow": true
+            },
+            "liquidity_provider_ref": {
+              "provider_id": "lp_house_alpha",
+              "provider_type": "house_bot",
+              "owner_actor": {
+                "type": "partner",
+                "id": "partner_alpha"
+              },
+              "is_automated": true,
+              "is_house_inventory": true,
+              "label_required": true,
+              "display_label": "Alpha Market Maker",
+              "disclosure_text": "Automated house-liquidity participant.",
+              "active": true,
+              "policy_ref": {
+                "policy_id": "lp_policy_alpha",
+                "policy_version": 3,
+                "policy_mode": "constrained_auto",
+                "constraints_hash": "sha256:lp-policy-alpha-v3"
+              },
+              "created_at": "2026-02-21T12:00:00Z",
+              "updated_at": "2026-02-21T12:00:00Z"
+            },
+            "liquidity_policy_ref": {
+              "policy_id": "lp_policy_alpha",
+              "policy_version": 3,
+              "policy_mode": "constrained_auto",
+              "constraints_hash": "sha256:lp-policy-alpha-v3"
+            }
+          },
+          "policy_ref": {
+            "policy_id": "lp_policy_alpha",
+            "policy_version": 3,
+            "policy_mode": "constrained_auto",
+            "constraints_hash": "sha256:lp-policy-alpha-v3"
+          },
+          "listed_at": "2026-02-22T12:00:00Z"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": true,
+      "expect_listing_status": "active"
+    },
+    {
+      "op": "liquidityListings.upsert",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "idempotency_key": "m106_listing_upsert_1",
+      "request": {
+        "listing": {
+          "intent": {
+            "id": "intent_lp_alpha_001",
+            "actor": {
+              "type": "partner",
+              "id": "partner_alpha"
+            },
+            "offer": [
+              {
+                "platform": "steam",
+                "app_id": 730,
+                "context_id": 2,
+                "asset_id": "asset_ak47_redline",
+                "class_id": "456",
+                "instance_id": "0",
+                "metadata": {
+                  "float": 0.12
+                },
+                "proof": {
+                  "inventory_snapshot_id": "lpinv_snapshot_alpha_001",
+                  "verified_at": "2026-02-22T11:00:00Z"
+                }
+              }
+            ],
+            "want_spec": {
+              "type": "set",
+              "any_of": [
+                {
+                  "type": "category",
+                  "platform": "steam",
+                  "app_id": 730,
+                  "category": "rifle",
+                  "constraints": {
+                    "min_condition": "FT"
+                  }
+                }
+              ]
+            },
+            "value_band": {
+              "min_usd": 80,
+              "max_usd": 155,
+              "pricing_source": "market_median"
+            },
+            "trust_constraints": {
+              "max_cycle_length": 3,
+              "min_counterparty_reliability": 0
+            },
+            "time_constraints": {
+              "expires_at": "2026-02-23T00:00:00Z",
+              "urgency": "normal"
+            },
+            "settlement_preferences": {
+              "require_escrow": true
+            }
+          },
+          "policy_ref": {
+            "policy_id": "lp_policy_alpha",
+            "policy_version": 3,
+            "policy_mode": "constrained_auto",
+            "constraints_hash": "sha256:lp-policy-alpha-v3"
+          },
+          "listed_at": "2026-02-22T12:00:00Z"
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    },
+    {
+      "op": "liquidityListings.list",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "expect_ok": true,
+      "expect_provider_id": "lp_house_alpha",
+      "expect_listings_count": 1,
+      "expect_active_count": 1,
+      "expect_cancelled_count": 0,
+      "expect_first_intent_id": "intent_lp_alpha_001"
+    },
+    {
+      "op": "liquidityListings.cancel",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "intent_id_ref": "listing_intent_alpha_001",
+      "idempotency_key": "m106_listing_cancel_1",
+      "request": {
+        "cancel": {
+          "reason_code": "operator_cancelled",
+          "cancelled_at": "2026-02-22T12:05:00Z"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_listing_status": "cancelled",
+      "expect_cancel_reason_code": "operator_cancelled"
+    },
+    {
+      "op": "liquidityListings.cancel",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "intent_id_ref": "listing_intent_alpha_001",
+      "idempotency_key": "m106_listing_cancel_1",
+      "request": {
+        "cancel": {
+          "reason_code": "operator_cancelled",
+          "cancelled_at": "2026-02-22T12:05:00Z"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": true,
+      "expect_listing_status": "cancelled",
+      "expect_cancel_reason_code": "operator_cancelled"
+    },
+    {
+      "op": "liquidityListings.cancel",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "intent_id": "intent_missing",
+      "idempotency_key": "m106_listing_cancel_missing",
+      "request": {
+        "cancel": {
+          "reason_code": "operator_cancelled",
+          "cancelled_at": "2026-02-22T12:06:00Z"
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "NOT_FOUND",
+      "expect_reason_code": "liquidity_listing_not_found"
+    },
+    {
+      "op": "liquidityListings.upsert",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "idempotency_key": "m106_listing_policy_violation",
+      "request": {
+        "listing": {
+          "intent": {
+            "id": "intent_lp_alpha_bad_policy",
+            "actor": {
+              "type": "partner",
+              "id": "partner_alpha"
+            },
+            "offer": [
+              {
+                "platform": "steam",
+                "app_id": 730,
+                "context_id": 2,
+                "asset_id": "asset_ak47_redline",
+                "class_id": "456",
+                "instance_id": "0",
+                "metadata": {
+                  "float": 0.12
+                },
+                "proof": {
+                  "inventory_snapshot_id": "lpinv_snapshot_alpha_001",
+                  "verified_at": "2026-02-22T11:00:00Z"
+                }
+              }
+            ],
+            "want_spec": {
+              "type": "set",
+              "any_of": [
+                {
+                  "type": "category",
+                  "platform": "steam",
+                  "app_id": 730,
+                  "category": "rifle",
+                  "constraints": {
+                    "min_condition": "FT"
+                  }
+                }
+              ]
+            },
+            "value_band": {
+              "min_usd": 80,
+              "max_usd": 150,
+              "pricing_source": "market_median"
+            },
+            "trust_constraints": {
+              "max_cycle_length": 3,
+              "min_counterparty_reliability": 0
+            },
+            "time_constraints": {
+              "expires_at": "2026-02-23T00:00:00Z",
+              "urgency": "normal"
+            },
+            "settlement_preferences": {
+              "require_escrow": true
+            }
+          },
+          "policy_ref": {
+            "policy_id": "lp_policy_alpha",
+            "policy_version": 99,
+            "policy_mode": "constrained_auto",
+            "constraints_hash": "sha256:lp-policy-alpha-v99"
+          },
+          "listed_at": "2026-02-22T12:06:00Z"
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN",
+      "expect_reason_code": "liquidity_listing_policy_violation"
+    },
+    {
+      "op": "liquidityListings.upsert",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "idempotency_key": "m106_listing_invalid",
+      "skip_request_validation": true,
+      "request": {
+        "listing": {
+          "policy_ref": {
+            "policy_id": "lp_policy_alpha",
+            "policy_version": 3,
+            "policy_mode": "constrained_auto",
+            "constraints_hash": "sha256:lp-policy-alpha-v3"
+          },
+          "listed_at": "2026-02-22T12:06:30Z"
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "liquidity_listing_invalid"
+    },
+    {
+      "op": "liquidityListings.upsert",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "idempotency_key": "m106_listing_upsert_2",
+      "request": {
+        "listing": {
+          "intent": {
+            "id": "intent_lp_alpha_002",
+            "actor": {
+              "type": "partner",
+              "id": "partner_alpha"
+            },
+            "offer": [
+              {
+                "platform": "steam",
+                "app_id": 730,
+                "context_id": 2,
+                "asset_id": "asset_awp_asiimov",
+                "class_id": "789",
+                "instance_id": "0",
+                "metadata": {
+                  "float": 0.35
+                },
+                "proof": {
+                  "inventory_snapshot_id": "lpinv_snapshot_alpha_001",
+                  "verified_at": "2026-02-22T11:00:00Z"
+                }
+              }
+            ],
+            "want_spec": {
+              "type": "set",
+              "any_of": [
+                {
+                  "type": "category",
+                  "platform": "steam",
+                  "app_id": 730,
+                  "category": "sniper_rifle",
+                  "constraints": {
+                    "min_condition": "BS"
+                  }
+                }
+              ]
+            },
+            "value_band": {
+              "min_usd": 120,
+              "max_usd": 220,
+              "pricing_source": "market_median"
+            },
+            "trust_constraints": {
+              "max_cycle_length": 3,
+              "min_counterparty_reliability": 0
+            },
+            "time_constraints": {
+              "expires_at": "2026-02-23T00:00:00Z",
+              "urgency": "normal"
+            },
+            "settlement_preferences": {
+              "require_escrow": true
+            },
+            "liquidity_provider_ref": {
+              "provider_id": "lp_house_alpha",
+              "provider_type": "house_bot",
+              "owner_actor": {
+                "type": "partner",
+                "id": "partner_alpha"
+              },
+              "is_automated": true,
+              "is_house_inventory": true,
+              "label_required": true,
+              "display_label": "Alpha Market Maker",
+              "disclosure_text": "Automated house-liquidity participant.",
+              "active": true,
+              "policy_ref": {
+                "policy_id": "lp_policy_alpha",
+                "policy_version": 3,
+                "policy_mode": "constrained_auto",
+                "constraints_hash": "sha256:lp-policy-alpha-v3"
+              },
+              "created_at": "2026-02-21T12:00:00Z",
+              "updated_at": "2026-02-21T12:00:00Z"
+            },
+            "liquidity_policy_ref": {
+              "policy_id": "lp_policy_alpha",
+              "policy_version": 3,
+              "policy_mode": "constrained_auto",
+              "constraints_hash": "sha256:lp-policy-alpha-v3"
+            }
+          },
+          "policy_ref": {
+            "policy_id": "lp_policy_alpha",
+            "policy_version": 3,
+            "policy_mode": "constrained_auto",
+            "constraints_hash": "sha256:lp-policy-alpha-v3"
+          },
+          "listed_at": "2026-02-22T12:07:00Z"
+        }
+      },
+      "save_intent_ref": "listing_intent_alpha_002",
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_listing_status": "active"
+    },
+    {
+      "op": "liquidityListings.list",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "expect_ok": true,
+      "expect_listings_count": 2,
+      "expect_active_count": 1,
+      "expect_cancelled_count": 1,
+      "expect_first_intent_id": "intent_lp_alpha_001"
+    },
+    {
+      "op": "liquidityDecisions.proposal.accept",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "proposal_id": "proposal_lp_alpha_001",
+      "idempotency_key": "m106_decision_accept_1",
+      "request": {
+        "decision": {
+          "decision_reason_codes": [
+            "spread_target_met",
+            "inventory_available"
+          ],
+          "policy_ref": {
+            "policy_id": "lp_policy_alpha",
+            "policy_version": 3,
+            "policy_mode": "constrained_auto",
+            "constraints_hash": "sha256:lp-policy-alpha-v3"
+          },
+          "confidence_score_bps": 9100,
+          "risk_tier_snapshot": "low",
+          "correlation_id": "corr_lp_decision_alpha_001",
+          "recorded_at": "2026-02-22T12:10:00Z"
+        }
+      },
+      "save_decision_ref": "decision_accept_alpha",
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_decision": "accept",
+      "expect_proposal_id": "proposal_lp_alpha_001",
+      "expect_intent_ids_count": 1,
+      "expect_commit_id": "commit_b2def3e5e865",
+      "expect_trust_safety_decision_id": "ts_decision_alpha_allow_001"
+    },
+    {
+      "op": "liquidityDecisions.proposal.accept",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "proposal_id": "proposal_lp_alpha_001",
+      "idempotency_key": "m106_decision_accept_1",
+      "request": {
+        "decision": {
+          "decision_reason_codes": [
+            "spread_target_met",
+            "inventory_available"
+          ],
+          "policy_ref": {
+            "policy_id": "lp_policy_alpha",
+            "policy_version": 3,
+            "policy_mode": "constrained_auto",
+            "constraints_hash": "sha256:lp-policy-alpha-v3"
+          },
+          "confidence_score_bps": 9100,
+          "risk_tier_snapshot": "low",
+          "correlation_id": "corr_lp_decision_alpha_001",
+          "recorded_at": "2026-02-22T12:10:00Z"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": true,
+      "expect_decision": "accept"
+    },
+    {
+      "op": "liquidityDecisions.proposal.accept",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "proposal_id": "proposal_lp_alpha_001",
+      "idempotency_key": "m106_decision_accept_1",
+      "request": {
+        "decision": {
+          "decision_reason_codes": [
+            "spread_target_met",
+            "inventory_available"
+          ],
+          "policy_ref": {
+            "policy_id": "lp_policy_alpha",
+            "policy_version": 3,
+            "policy_mode": "constrained_auto",
+            "constraints_hash": "sha256:lp-policy-alpha-v3"
+          },
+          "confidence_score_bps": 9200,
+          "risk_tier_snapshot": "low",
+          "correlation_id": "corr_lp_decision_alpha_001",
+          "recorded_at": "2026-02-22T12:10:00Z"
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    },
+    {
+      "op": "liquidityDecisions.get",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "decision_id_ref": "decision_accept_alpha",
+      "expect_ok": true,
+      "expect_decision": "accept",
+      "expect_proposal_id": "proposal_lp_alpha_001"
+    },
+    {
+      "op": "liquidityDecisions.proposal.decline",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "proposal_id": "proposal_lp_alpha_001",
+      "idempotency_key": "m106_decision_decline_1",
+      "request": {
+        "decision": {
+          "decision_reason_codes": [
+            "spread_below_floor",
+            "risk_cap_exceeded"
+          ],
+          "policy_ref": {
+            "policy_id": "lp_policy_alpha",
+            "policy_version": 3,
+            "policy_mode": "constrained_auto",
+            "constraints_hash": "sha256:lp-policy-alpha-v3"
+          },
+          "confidence_score_bps": 6700,
+          "risk_tier_snapshot": "medium",
+          "correlation_id": "corr_lp_decision_alpha_002",
+          "recorded_at": "2026-02-22T12:15:00Z"
+        }
+      },
+      "save_decision_ref": "decision_decline_alpha",
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_decision": "decline",
+      "expect_proposal_id": "proposal_lp_alpha_001",
+      "expect_intent_ids_count": 1,
+      "expect_commit_id": "commit_b2def3e5e865",
+      "expect_trust_safety_decision_id": "ts_decision_alpha_allow_001"
+    },
+    {
+      "op": "liquidityDecisions.get",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "decision_id": "lpdec_missing",
+      "expect_ok": false,
+      "expect_error_code": "NOT_FOUND",
+      "expect_reason_code": "liquidity_decision_not_found"
+    },
+    {
+      "op": "liquidityDecisions.proposal.accept",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "proposal_id": "proposal_lp_alpha_001",
+      "idempotency_key": "m106_decision_invalid",
+      "skip_request_validation": true,
+      "request": {
+        "decision": {
+          "policy_ref": {
+            "policy_id": "lp_policy_alpha",
+            "policy_version": 3,
+            "policy_mode": "constrained_auto",
+            "constraints_hash": "sha256:lp-policy-alpha-v3"
+          },
+          "confidence_score_bps": 9100,
+          "risk_tier_snapshot": "low",
+          "correlation_id": "corr_lp_decision_alpha_003",
+          "recorded_at": "2026-02-22T12:20:00Z"
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "liquidity_decision_invalid"
+    },
+    {
+      "op": "liquidityDecisions.proposal.accept",
+      "actor_ref": "partner_beta",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id": "lp_house_beta",
+      "proposal_id": "proposal_lp_beta_001",
+      "idempotency_key": "m106_decision_policy_missing",
+      "request": {
+        "decision": {
+          "decision_reason_codes": [
+            "inventory_available"
+          ],
+          "policy_ref": {
+            "policy_id": "lp_policy_beta",
+            "policy_version": 2,
+            "policy_mode": "constrained_auto",
+            "constraints_hash": "sha256:lp-policy-beta-v2"
+          },
+          "confidence_score_bps": 8000,
+          "risk_tier_snapshot": "medium",
+          "correlation_id": "corr_lp_decision_beta_001",
+          "recorded_at": "2026-02-22T12:25:00Z"
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN",
+      "expect_reason_code": "liquidity_decision_policy_missing"
+    },
+    {
+      "op": "liquidityDecisions.proposal.accept",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "proposal_id": "proposal_lp_beta_001",
+      "idempotency_key": "m106_decision_not_found",
+      "request": {
+        "decision": {
+          "decision_reason_codes": [
+            "inventory_available"
+          ],
+          "policy_ref": {
+            "policy_id": "lp_policy_alpha",
+            "policy_version": 3,
+            "policy_mode": "constrained_auto",
+            "constraints_hash": "sha256:lp-policy-alpha-v3"
+          },
+          "confidence_score_bps": 8100,
+          "risk_tier_snapshot": "low",
+          "correlation_id": "corr_lp_decision_alpha_004",
+          "recorded_at": "2026-02-22T12:30:00Z"
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "NOT_FOUND",
+      "expect_reason_code": "liquidity_decision_not_found"
+    }
+  ],
+  "event_payload_checks": [
+    {
+      "type": "liquidity.listing.published",
+      "payload": {
+        "provider_id": "lp_house_alpha",
+        "intent_id": "intent_lp_alpha_001",
+        "status": "active",
+        "policy_ref": {
+          "policy_id": "lp_policy_alpha",
+          "policy_version": 3,
+          "policy_mode": "constrained_auto",
+          "constraints_hash": "sha256:lp-policy-alpha-v3"
+        },
+        "listed_at": "2026-02-22T12:00:00Z"
+      },
+      "expect_ok": true
+    },
+    {
+      "type": "liquidity.decision.recorded",
+      "payload": {
+        "decision_id": "lpdec_000001",
+        "provider_id": "lp_house_alpha",
+        "proposal_id": "proposal_lp_alpha_001",
+        "decision": "accept",
+        "decision_reason_codes": [
+          "inventory_available",
+          "spread_target_met"
+        ],
+        "policy_ref": {
+          "policy_id": "lp_policy_alpha",
+          "policy_version": 3,
+          "policy_mode": "constrained_auto",
+          "constraints_hash": "sha256:lp-policy-alpha-v3"
+        },
+        "confidence_score_bps": 9100,
+        "risk_tier_snapshot": "low",
+        "correlation_id": "corr_lp_decision_alpha_001",
+        "recorded_at": "2026-02-22T12:10:00Z"
+      },
+      "expect_ok": true
+    }
+  ]
+}

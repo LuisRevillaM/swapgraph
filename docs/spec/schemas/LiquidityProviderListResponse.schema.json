@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquidityProviderListResponse.schema.json",
+  "title": "LiquidityProviderListResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "providers"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "providers": {
+      "type": "array",
+      "items": {
+        "$ref": "LiquidityProviderRef.schema.json"
+      }
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "correlation_id": "corr_commercialpolicy_boost_policy_get",
+  "policy": {
+    "partner_id": "partner_demo",
+    "version": 1,
+    "enabled": true,
+    "max_multiplier": 1.5,
+    "allow_safety_bypass": false,
+    "allow_trust_bypass": false,
+    "allow_settlement_constraint_bypass": false,
+    "updated_at": "2026-02-21T16:07:00Z",
+    "updated_by": {
+      "type": "partner",
+      "id": "partner_demo"
+    }
+  }
+}

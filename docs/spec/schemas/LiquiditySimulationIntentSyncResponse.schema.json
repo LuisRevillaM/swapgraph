@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquiditySimulationIntentSyncResponse.schema.json",
+  "title": "LiquiditySimulationIntentSyncResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "session_id",
+    "simulation",
+    "simulation_session_id",
+    "synced_intents_count",
+    "active_intents_count",
+    "generated_cycle_id",
+    "generated_receipt_id",
+    "session"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "session_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "simulation": {
+      "type": "boolean",
+      "const": true
+    },
+    "simulation_session_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "synced_intents_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "active_intents_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "generated_cycle_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "generated_receipt_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "session": {
+      "$ref": "LiquiditySimulationSessionView.schema.json"
+    }
+  }
+}

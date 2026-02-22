@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/PartnerLiquidityProviderEligibilityEvaluateResponse.schema.json",
+  "title": "PartnerLiquidityProviderEligibilityEvaluateResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "provider_id",
+    "eligibility"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "eligibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evaluation_id",
+        "verdict",
+        "reason_codes",
+        "requested_segment_tier",
+        "current_segment_tier",
+        "recommended_status",
+        "evaluated_at",
+        "inputs"
+      ],
+      "properties": {
+        "evaluation_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "verdict": {
+          "type": "string",
+          "enum": [
+            "allow",
+            "deny"
+          ]
+        },
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "requested_segment_tier": {
+          "type": "string",
+          "enum": [
+            "S0",
+            "S1",
+            "S2",
+            "S3"
+          ]
+        },
+        "current_segment_tier": {
+          "type": "string",
+          "enum": [
+            "S0",
+            "S1",
+            "S2",
+            "S3"
+          ]
+        },
+        "recommended_status": {
+          "type": "string",
+          "enum": [
+            "pending_review",
+            "active",
+            "restricted",
+            "offboarded"
+          ]
+        },
+        "evaluated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "inputs": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "requested_segment_tier",
+            "trust_safety_baseline_passed",
+            "reliability_baseline_passed",
+            "audit_conformance_passed",
+            "unresolved_critical_violations",
+            "consecutive_compliant_windows",
+            "capability_family",
+            "remediation_closed"
+          ],
+          "properties": {
+            "requested_segment_tier": {
+              "type": "string",
+              "enum": [
+                "S0",
+                "S1",
+                "S2",
+                "S3"
+              ]
+            },
+            "trust_safety_baseline_passed": {
+              "type": "boolean"
+            },
+            "reliability_baseline_passed": {
+              "type": "boolean"
+            },
+            "audit_conformance_passed": {
+              "type": "boolean"
+            },
+            "unresolved_critical_violations": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "consecutive_compliant_windows": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "capability_family": {
+              "type": "string",
+              "enum": [
+                "core",
+                "advanced",
+                "high_risk"
+              ]
+            },
+            "remediation_closed": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/NotificationPreferencesUpsertResponse.schema.json",
+  "title": "NotificationPreferencesUpsertResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "preference"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "preference": {
+      "$ref": "NotificationPreferencesGetResponse.schema.json#/properties/preference"
+    }
+  }
+}

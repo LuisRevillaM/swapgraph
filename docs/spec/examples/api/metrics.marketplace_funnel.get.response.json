@@ -1,0 +1,36 @@
+{
+  "correlation_id": "corr_metrics_marketplace_funnel_get",
+  "partner_id": "partner_demo",
+  "window": {
+    "from_iso": "2026-02-20T00:00:00Z",
+    "to_iso": "2026-02-21T00:00:00Z",
+    "bucket": "day"
+  },
+  "funnel": {
+    "counts": {
+      "connect": 12,
+      "sync": 10,
+      "intent": 8,
+      "proposal_viewed": 6,
+      "accepted": 4,
+      "deposited": 4,
+      "completed": 3
+    },
+    "conversions_bps": {
+      "connect_to_sync_bps": 8333,
+      "sync_to_intent_bps": 8000,
+      "intent_to_proposal_viewed_bps": 7500,
+      "proposal_to_accept_bps": 6667,
+      "accept_to_deposited_bps": 10000,
+      "deposited_to_completed_bps": 7500
+    },
+    "denominators": {
+      "connect_to_sync_denominator": 12,
+      "sync_to_intent_denominator": 10,
+      "intent_to_proposal_viewed_denominator": 8,
+      "proposal_to_accept_denominator": 6,
+      "accept_to_deposited_denominator": 4,
+      "deposited_to_completed_denominator": 4
+    }
+  }
+}

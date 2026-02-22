@@ -1,0 +1,702 @@
+{
+  "actors": {
+    "partner_demo": {
+      "type": "partner",
+      "id": "partner_demo"
+    }
+  },
+  "seed_state": {
+    "tenancy": {
+      "cycles": {
+        "cycle_alpha": {
+          "partner_id": "partner_demo"
+        },
+        "cycle_beta": {
+          "partner_id": "partner_demo"
+        }
+      },
+      "proposals": {
+        "cycle_alpha": {
+          "partner_id": "partner_demo"
+        },
+        "cycle_beta": {
+          "partner_id": "partner_demo"
+        }
+      }
+    },
+    "proposals": {
+      "cycle_alpha": {
+        "id": "cycle_alpha",
+        "created_at": "2026-02-20T01:00:00Z",
+        "expires_at": "2026-02-21T01:00:00Z",
+        "participants": [
+          {
+            "intent_id": "intent_a",
+            "actor": {
+              "type": "user",
+              "id": "u1"
+            },
+            "give": [
+              {
+                "platform": "steam",
+                "asset_id": "assetA"
+              }
+            ],
+            "get": [
+              {
+                "platform": "steam",
+                "asset_id": "assetB"
+              }
+            ]
+          },
+          {
+            "intent_id": "intent_b",
+            "actor": {
+              "type": "user",
+              "id": "u2"
+            },
+            "give": [
+              {
+                "platform": "steam",
+                "asset_id": "assetB"
+              }
+            ],
+            "get": [
+              {
+                "platform": "steam",
+                "asset_id": "assetA"
+              }
+            ]
+          }
+        ]
+      },
+      "cycle_beta": {
+        "id": "cycle_beta",
+        "created_at": "2026-02-21T01:00:00Z",
+        "expires_at": "2026-02-22T01:00:00Z",
+        "participants": [
+          {
+            "intent_id": "intent_c",
+            "actor": {
+              "type": "user",
+              "id": "u3"
+            },
+            "give": [
+              {
+                "platform": "steam",
+                "asset_id": "assetC"
+              }
+            ],
+            "get": [
+              {
+                "platform": "steam",
+                "asset_id": "assetD"
+              }
+            ]
+          },
+          {
+            "intent_id": "intent_d",
+            "actor": {
+              "type": "user",
+              "id": "u4"
+            },
+            "give": [
+              {
+                "platform": "steam",
+                "asset_id": "assetD"
+              }
+            ],
+            "get": [
+              {
+                "platform": "steam",
+                "asset_id": "assetC"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "intents": {
+      "intent_a": {
+        "id": "intent_a",
+        "actor": {
+          "type": "user",
+          "id": "u1"
+        },
+        "created_at": "2026-02-20T00:10:00Z",
+        "status": "active"
+      },
+      "intent_b": {
+        "id": "intent_b",
+        "actor": {
+          "type": "user",
+          "id": "u2"
+        },
+        "created_at": "2026-02-20T00:11:00Z",
+        "status": "active"
+      },
+      "intent_c": {
+        "id": "intent_c",
+        "actor": {
+          "type": "user",
+          "id": "u3"
+        },
+        "created_at": "2026-02-19T23:10:00Z",
+        "status": "active"
+      },
+      "intent_d": {
+        "id": "intent_d",
+        "actor": {
+          "type": "user",
+          "id": "u4"
+        },
+        "created_at": "2026-02-19T23:11:00Z",
+        "status": "active"
+      }
+    },
+    "events": [
+      {
+        "event_id": "evt_1",
+        "type": "cycle.state_changed",
+        "occurred_at": "2026-02-20T02:00:00Z",
+        "correlation_id": "corr_cycle_alpha",
+        "payload": {
+          "cycle_id": "cycle_alpha",
+          "from_state": "proposed",
+          "to_state": "accepted"
+        }
+      },
+      {
+        "event_id": "evt_2",
+        "type": "cycle.state_changed",
+        "occurred_at": "2026-02-20T02:05:00Z",
+        "correlation_id": "corr_cycle_alpha",
+        "payload": {
+          "cycle_id": "cycle_alpha",
+          "from_state": "accepted",
+          "to_state": "escrow.pending"
+        }
+      },
+      {
+        "event_id": "evt_3",
+        "type": "cycle.state_changed",
+        "occurred_at": "2026-02-20T02:20:00Z",
+        "correlation_id": "corr_cycle_alpha",
+        "payload": {
+          "cycle_id": "cycle_alpha",
+          "from_state": "escrow.pending",
+          "to_state": "escrow.ready"
+        }
+      },
+      {
+        "event_id": "evt_4",
+        "type": "cycle.state_changed",
+        "occurred_at": "2026-02-20T03:00:00Z",
+        "correlation_id": "corr_cycle_alpha",
+        "payload": {
+          "cycle_id": "cycle_alpha",
+          "from_state": "executing",
+          "to_state": "completed"
+        }
+      },
+      {
+        "event_id": "evt_5",
+        "type": "cycle.state_changed",
+        "occurred_at": "2026-02-21T02:00:00Z",
+        "correlation_id": "corr_cycle_beta",
+        "payload": {
+          "cycle_id": "cycle_beta",
+          "from_state": "proposed",
+          "to_state": "accepted"
+        }
+      },
+      {
+        "event_id": "evt_6",
+        "type": "cycle.state_changed",
+        "occurred_at": "2026-02-21T02:05:00Z",
+        "correlation_id": "corr_cycle_beta",
+        "payload": {
+          "cycle_id": "cycle_beta",
+          "from_state": "accepted",
+          "to_state": "escrow.pending"
+        }
+      },
+      {
+        "event_id": "evt_7",
+        "type": "cycle.state_changed",
+        "occurred_at": "2026-02-21T05:00:00Z",
+        "correlation_id": "corr_cycle_beta",
+        "payload": {
+          "cycle_id": "cycle_beta",
+          "from_state": "escrow.pending",
+          "to_state": "failed",
+          "reason_code": "deposit_timeout"
+        }
+      }
+    ],
+    "receipts": {
+      "cycle_alpha": {
+        "id": "receipt_alpha",
+        "cycle_id": "cycle_alpha",
+        "final_state": "completed",
+        "created_at": "2026-02-20T03:00:00Z"
+      },
+      "cycle_beta": {
+        "id": "receipt_beta",
+        "cycle_id": "cycle_beta",
+        "final_state": "failed",
+        "created_at": "2026-02-21T05:00:00Z"
+      }
+    },
+    "platform_connections": {
+      "partner:partner_demo": {
+        "steam|acct_1": {
+          "connection_id": "conn_1",
+          "actor": {
+            "type": "partner",
+            "id": "partner_demo"
+          },
+          "platform": "steam",
+          "account_ref": "acct_1",
+          "status": "connected",
+          "connected_at": "2026-02-20T00:00:00Z",
+          "updated_at": "2026-02-20T00:00:00Z",
+          "metadata": {}
+        },
+        "steam|acct_2": {
+          "connection_id": "conn_2",
+          "actor": {
+            "type": "partner",
+            "id": "partner_demo"
+          },
+          "platform": "steam",
+          "account_ref": "acct_2",
+          "status": "connected",
+          "connected_at": "2026-02-20T06:00:00Z",
+          "updated_at": "2026-02-20T06:00:00Z",
+          "metadata": {}
+        },
+        "steam|acct_3": {
+          "connection_id": "conn_3",
+          "actor": {
+            "type": "partner",
+            "id": "partner_demo"
+          },
+          "platform": "steam",
+          "account_ref": "acct_3",
+          "status": "connected",
+          "connected_at": "2026-02-21T06:00:00Z",
+          "updated_at": "2026-02-21T06:00:00Z",
+          "metadata": {}
+        }
+      }
+    },
+    "inventory_snapshots": {
+      "partner_demo": [
+        {
+          "snapshot_id": "snap_1",
+          "partner_id": "partner_demo",
+          "platform": "steam",
+          "captured_at": "2026-02-20T00:30:00Z",
+          "recorded_at": "2026-02-20T00:31:00Z",
+          "assets": [
+            {
+              "asset_id": "assetA",
+              "quantity": 1,
+              "metadata": {}
+            }
+          ]
+        },
+        {
+          "snapshot_id": "snap_2",
+          "partner_id": "partner_demo",
+          "platform": "steam",
+          "captured_at": "2026-02-21T00:30:00Z",
+          "recorded_at": "2026-02-21T00:31:00Z",
+          "assets": [
+            {
+              "asset_id": "assetB",
+              "quantity": 2,
+              "metadata": {}
+            }
+          ]
+        }
+      ]
+    },
+    "partner_program_webhook_delivery_attempts": [
+      {
+        "delivery_id": "dlv_1",
+        "partner_id": "partner_demo",
+        "event_type": "proposal.created",
+        "endpoint": "https://example.com/webhooks",
+        "attempt_count": 1,
+        "max_attempts": 3,
+        "first_attempt_at": "2026-02-20T01:20:00Z",
+        "last_attempt_at": "2026-02-20T01:20:00Z",
+        "last_status": "delivered",
+        "error_code": null,
+        "dead_lettered": false,
+        "dead_lettered_at": null
+      },
+      {
+        "delivery_id": "dlv_2",
+        "partner_id": "partner_demo",
+        "event_type": "proposal.expiring",
+        "endpoint": "https://example.com/webhooks",
+        "attempt_count": 3,
+        "max_attempts": 3,
+        "first_attempt_at": "2026-02-20T01:21:00Z",
+        "last_attempt_at": "2026-02-20T01:40:00Z",
+        "last_status": "failed",
+        "error_code": "timeout",
+        "dead_lettered": true,
+        "dead_lettered_at": "2026-02-20T01:40:00Z"
+      },
+      {
+        "delivery_id": "dlv_3",
+        "partner_id": "partner_demo",
+        "event_type": "cycle.state_changed",
+        "endpoint": "https://example.com/webhooks",
+        "attempt_count": 1,
+        "max_attempts": 3,
+        "first_attempt_at": "2026-02-21T01:20:00Z",
+        "last_attempt_at": "2026-02-21T01:20:00Z",
+        "last_status": "delivered",
+        "error_code": null,
+        "dead_lettered": false,
+        "dead_lettered_at": null
+      }
+    ],
+    "trust_safety_signals": {
+      "ts_signal_000001": {
+        "signal_id": "ts_signal_000001",
+        "category": "fraud_velocity_spike",
+        "subject_actor_type": "user",
+        "subject_actor_id": "u1",
+        "severity": "high",
+        "confidence_score_bps": 9800,
+        "observed_at": "2026-02-20T04:00:00Z",
+        "recorded_at": "2026-02-20T04:00:05Z",
+        "metadata": {},
+        "recorded_by": {
+          "type": "partner",
+          "id": "partner_demo"
+        }
+      },
+      "ts_signal_000002": {
+        "signal_id": "ts_signal_000002",
+        "category": "ato_device_drift",
+        "subject_actor_type": "user",
+        "subject_actor_id": "u2",
+        "severity": "medium",
+        "confidence_score_bps": 8700,
+        "observed_at": "2026-02-20T04:10:00Z",
+        "recorded_at": "2026-02-20T04:10:05Z",
+        "metadata": {},
+        "recorded_by": {
+          "type": "partner",
+          "id": "partner_demo"
+        }
+      }
+    },
+    "trust_safety_decisions": {
+      "ts_decision_000001": {
+        "decision_id": "ts_decision_000001",
+        "subject_actor_type": "user",
+        "subject_actor_id": "u1",
+        "decision": "block",
+        "reason_codes": [
+          "fraud_velocity"
+        ],
+        "contributing_signal_ids": [
+          "ts_signal_000001"
+        ],
+        "severity": "high",
+        "confidence_score_bps": 9600,
+        "recorded_at": "2026-02-20T04:20:00Z",
+        "correlation_id": "corr_ts_1",
+        "dispute_id": null,
+        "reliability_ref": null,
+        "recorded_by": {
+          "type": "partner",
+          "id": "partner_demo"
+        }
+      },
+      "ts_decision_000002": {
+        "decision_id": "ts_decision_000002",
+        "subject_actor_type": "user",
+        "subject_actor_id": "u2",
+        "decision": "allow",
+        "reason_codes": [
+          "manual_review_passed"
+        ],
+        "contributing_signal_ids": [
+          "ts_signal_000002"
+        ],
+        "severity": "low",
+        "confidence_score_bps": 7000,
+        "recorded_at": "2026-02-20T04:21:00Z",
+        "correlation_id": "corr_ts_2",
+        "dispute_id": null,
+        "reliability_ref": null,
+        "recorded_by": {
+          "type": "partner",
+          "id": "partner_demo"
+        }
+      }
+    }
+  },
+  "operations": [
+    {
+      "op": "keys.policy_integrity_signing.get",
+      "expect_ok": true
+    },
+    {
+      "op": "metrics.north_star.get",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-20T00:00:00Z",
+        "to_iso": "2026-02-22T00:00:00Z",
+        "bucket": "day"
+      },
+      "expect_ok": true,
+      "expect_weekly_successful_swaps_per_active_trader": 0.25,
+      "expect_fill_rate_7d_bps": 5000,
+      "expect_proposal_to_accept_bps": 10000,
+      "expect_accept_to_complete_bps": 5000,
+      "expect_webhook_delivery_success_bps": 6667,
+      "expect_fraud_flags_per_1000_intents": 500,
+      "expect_unwind_rate_bps": 5000
+    },
+    {
+      "op": "metrics.marketplace_funnel.get",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-20T00:00:00Z",
+        "to_iso": "2026-02-22T00:00:00Z",
+        "bucket": "day"
+      },
+      "expect_ok": true,
+      "expect_connect_count": 3,
+      "expect_sync_count": 2,
+      "expect_intent_count": 2,
+      "expect_proposal_viewed_count": 2,
+      "expect_accepted_count": 2,
+      "expect_deposited_count": 1,
+      "expect_completed_count": 1
+    },
+    {
+      "op": "metrics.partner_health.get",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-20T00:00:00Z",
+        "to_iso": "2026-02-22T00:00:00Z",
+        "bucket": "day"
+      },
+      "expect_ok": true,
+      "expect_proposal_delivery_success_bps": 5000,
+      "expect_commit_to_completion_bps": 5000,
+      "expect_webhook_delivery_success_bps": 6667,
+      "expect_webhook_dead_letter_rate_bps": 3333
+    },
+    {
+      "op": "metrics.safety_health.get",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-20T00:00:00Z",
+        "to_iso": "2026-02-22T00:00:00Z",
+        "bucket": "day"
+      },
+      "expect_ok": true,
+      "expect_fraud_flags_count": 1,
+      "expect_confirmed_abuse_count": 1,
+      "expect_unwind_rate_bps": 5000,
+      "expect_felt_safe_proxy_bps": 5000,
+      "expect_fraud_flags_per_1000_intents": 500
+    },
+    {
+      "op": "metrics.north_star.get",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-22T00:00:00Z",
+        "to_iso": "2026-02-20T00:00:00Z",
+        "bucket": "day"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "metrics_window_invalid"
+    },
+    {
+      "op": "metrics.safety_health.get",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-20T00:00:00Z",
+        "to_iso": "2026-02-22T00:00:00Z",
+        "bucket": "month"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "metrics_bucket_invalid"
+    },
+    {
+      "op": "metrics.marketplace_funnel.get",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-20T00:00:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "metrics_query_invalid"
+    },
+    {
+      "op": "metrics.network_health.export",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-20T00:00:00Z",
+        "to_iso": "2026-02-22T00:00:00Z",
+        "bucket": "day",
+        "limit": 1,
+        "now_iso": "2026-02-22T00:00:00Z"
+      },
+      "save_export_ref": "page1",
+      "expect_tamper_fail": true,
+      "expect_ok": true,
+      "expect_entries_count": 1,
+      "expect_total_filtered": 2,
+      "expect_next_cursor": "2026-02-20T00:00:00.000Z|2026-02-21T00:00:00.000Z",
+      "expect_default_verify_ok": true,
+      "expect_public_key_verify_ok": true,
+      "expect_tamper_fail_verified": true
+    },
+    {
+      "op": "metrics.network_health.export",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "cursor_ref": "page1",
+      "attestation_ref": "page1",
+      "query": {
+        "from_iso": "2026-02-20T00:00:00Z",
+        "to_iso": "2026-02-22T00:00:00Z",
+        "bucket": "day",
+        "limit": 1,
+        "now_iso": "2026-02-22T00:00:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "metrics_export_checkpoint_required"
+    },
+    {
+      "op": "metrics.network_health.export",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "cursor_ref": "page1",
+      "attestation_ref": "page1",
+      "query": {
+        "from_iso": "2026-02-20T00:00:00Z",
+        "to_iso": "2026-02-22T00:00:00Z",
+        "bucket": "day",
+        "limit": 1,
+        "now_iso": "2026-02-22T00:00:00Z",
+        "checkpoint_after": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "metrics_export_checkpoint_mismatch"
+    },
+    {
+      "op": "metrics.network_health.export",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "cursor_ref": "page1",
+      "attestation_ref": "page1",
+      "checkpoint_ref": "page1",
+      "query": {
+        "from_iso": "2026-02-20T00:00:00Z",
+        "to_iso": "2026-02-22T00:00:00Z",
+        "bucket": "day",
+        "limit": 1,
+        "now_iso": "2026-02-22T00:00:00Z"
+      },
+      "expect_ok": true,
+      "expect_entries_count": 1,
+      "expect_total_filtered": 1,
+      "expect_next_cursor": null,
+      "expect_default_verify_ok": true,
+      "expect_public_key_verify_ok": true
+    },
+    {
+      "op": "metrics.network_health.export",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "from_iso": "2026-02-20T00:00:00Z",
+        "to_iso": "2026-02-22T00:00:00Z",
+        "bucket": "day",
+        "limit": 1,
+        "now_iso": "2026-02-22T00:00:00Z",
+        "cursor_after": "2026-02-01T00:00:00.000Z|2026-02-02T00:00:00.000Z",
+        "attestation_after": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "checkpoint_after": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "metrics_export_cursor_not_found"
+    }
+  ]
+}

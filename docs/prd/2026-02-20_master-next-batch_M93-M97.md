@@ -29,5 +29,5 @@ For each milestone M93–M97:
 1. `docs/prd/Mxx.md` finalized first
 2. Scoped implementation
 3. `npm run verify:mxx`
-4. `node verify/runner.ts milestones/Mxx.yaml`
+4. `node verify/runner.mjs milestones/Mxx.yaml`
 5. Commit/push only when both gates pass

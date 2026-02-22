@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquidityInventoryAvailabilityGetResponse.schema.json",
+  "title": "LiquidityInventoryAvailabilityGetResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "provider_id",
+    "assets",
+    "summary"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "assets": {
+      "type": "array",
+      "items": {
+        "$ref": "LiquidityInventoryAvailabilityAsset.schema.json"
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assets_count",
+        "available_assets_count",
+        "reserved_assets_count",
+        "in_settlement_assets_count",
+        "not_available_assets_count"
+      ],
+      "properties": {
+        "assets_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "available_assets_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reserved_assets_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "in_settlement_assets_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "not_available_assets_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

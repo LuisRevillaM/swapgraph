@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquiditySimulationIntentSyncRequest.schema.json",
+  "title": "LiquiditySimulationIntentSyncRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sync"
+  ],
+  "properties": {
+    "sync": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "intents"
+      ],
+      "properties": {
+        "synced_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "intents": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "intent_id",
+              "actor",
+              "value_usd"
+            ],
+            "properties": {
+              "intent_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "actor": {
+                "$ref": "ActorRef.schema.json"
+              },
+              "value_usd": {
+                "type": "number",
+                "minimum": 0
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "active",
+                  "cancelled"
+                ]
+              },
+              "liquidity_provider_ref": {
+                "$ref": "LiquidityProviderRef.schema.json"
+              },
+              "persona_ref": {
+                "$ref": "BotPersonaRef.schema.json"
+              },
+              "liquidity_policy_ref": {
+                "$ref": "LiquidityPolicyRef.schema.json"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

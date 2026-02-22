@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/CommercialTransactionFeePolicyUpsertRequest.schema.json",
+  "title": "CommercialTransactionFeePolicyUpsertRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["policy"],
+  "properties": {
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fee_model"],
+      "properties": {
+        "fee_model": { "type": "string", "enum": ["bps", "flat_usd"] },
+        "fee_bps": { "type": "integer", "minimum": 0, "maximum": 10000 },
+        "fee_flat_usd": { "type": "number", "minimum": 0 },
+        "min_fee_usd": { "type": "number", "minimum": 0 },
+        "max_fee_usd": { "type": ["number", "null"], "minimum": 0 }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "fee_model": { "const": "bps" } }, "required": ["fee_model"] },
+          "then": {
+            "required": ["fee_bps"],
+            "properties": {
+              "fee_bps": { "type": "integer", "minimum": 0, "maximum": 10000 }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "fee_model": { "const": "flat_usd" } }, "required": ["fee_model"] },
+          "then": {
+            "required": ["fee_flat_usd"],
+            "properties": {
+              "fee_flat_usd": { "type": "number", "minimum": 0 }
+            }
+          }
+        }
+      ]
+    },
+    "recorded_at": { "type": "string", "format": "date-time" }
+  }
+}

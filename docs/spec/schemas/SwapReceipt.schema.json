@@ -23,6 +23,33 @@
         }
       }
     },
+    "liquidity_provider_summary": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "provider",
+          "participant_count"
+        ],
+        "properties": {
+          "provider": {
+            "$ref": "LiquidityProviderRef.schema.json"
+          },
+          "participant_count": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "counterparty_intent_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
     "created_at": { "type": "string", "format": "date-time" },
     "signature": {
       "type": "object",

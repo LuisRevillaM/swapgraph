@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquidityInventoryAvailabilityAsset.schema.json",
+  "title": "LiquidityInventoryAvailabilityAsset",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "holding_id",
+    "asset_id",
+    "platform",
+    "total_quantity",
+    "available_quantity",
+    "reserved_quantity",
+    "in_settlement_quantity",
+    "active_reservation_id",
+    "status",
+    "snapshot_id",
+    "captured_at"
+  ],
+  "properties": {
+    "holding_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "asset_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "platform": {
+      "type": "string",
+      "minLength": 1
+    },
+    "total_quantity": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "available_quantity": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "reserved_quantity": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "in_settlement_quantity": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "active_reservation_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "available",
+        "reserved",
+        "in_settlement",
+        "not_available"
+      ]
+    },
+    "snapshot_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "captured_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

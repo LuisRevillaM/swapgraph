@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/BotPersonaRef.schema.json",
+  "title": "BotPersonaRef",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "provider_id",
+    "persona_id",
+    "display_name",
+    "strategy_summary",
+    "disclosure_text",
+    "active",
+    "updated_at"
+  ],
+  "properties": {
+    "provider_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "persona_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "display_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "strategy_summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "disclosure_text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "active": {
+      "type": "boolean"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

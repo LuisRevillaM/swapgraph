@@ -1,0 +1,66 @@
+name: Verify Baseline
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify bootstrap
+        run: npm run verify:m0
+
+      - name: Verify release baseline
+        run: npm run verify:baseline
+
+      - name: Verify M98 contracts
+        run: npm run verify:m98
+
+      - name: Verify M99 contracts
+        run: npm run verify:m99
+
+      - name: Verify M100 contracts
+        run: npm run verify:m100
+
+      - name: Verify M101 contracts
+        run: npm run verify:m101
+
+      - name: Verify M102 contracts
+        run: npm run verify:m102
+
+      - name: Verify M103 contracts
+        run: npm run verify:m103
+
+      - name: Verify M104 contracts
+        run: npm run verify:m104
+
+      - name: Verify M105 contracts
+        run: npm run verify:m105
+
+      - name: Verify M106 contracts
+        run: npm run verify:m106
+
+      - name: Verify M107 contracts
+        run: npm run verify:m107
+
+      - name: Verify M108 contracts
+        run: npm run verify:m108
+
+      - name: Verify M109 contracts
+        run: npm run verify:m109

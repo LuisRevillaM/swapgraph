@@ -1,0 +1,635 @@
+{
+  "actors": {
+    "partner_alpha": {
+      "type": "partner",
+      "id": "partner_alpha"
+    }
+  },
+  "seed_state": {
+    "liquidity_providers": {
+      "lp_house_alpha": {
+        "provider_id": "lp_house_alpha",
+        "provider_type": "house_bot",
+        "owner_actor": {
+          "type": "partner",
+          "id": "partner_alpha"
+        },
+        "is_automated": true,
+        "is_house_inventory": true,
+        "label_required": true,
+        "display_label": "Alpha Market Maker",
+        "disclosure_text": "Automated house-liquidity participant.",
+        "active": true,
+        "policy_ref": {
+          "policy_id": "lp_policy_alpha",
+          "policy_version": 3,
+          "policy_mode": "constrained_auto",
+          "constraints_hash": "sha256:lp-policy-alpha-v3"
+        },
+        "created_at": "2026-02-22T11:55:00Z",
+        "updated_at": "2026-02-22T11:55:00Z"
+      }
+    }
+  },
+  "operations": [
+    {
+      "op": "liquidityExecution.mode.get",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "provider_id": "lp_house_alpha",
+      "expect_ok": true,
+      "expect_provider_id": "lp_house_alpha",
+      "expect_mode": "operator_assisted",
+      "expect_restricted_adapter_context": true,
+      "expect_override_policy_present": false
+    },
+    {
+      "op": "liquidityExecution.mode.upsert",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id": "lp_house_alpha",
+      "idempotency_key": "m107_mode_invalid_1",
+      "skip_request_validation": true,
+      "request": {
+        "mode": {
+          "mode": "autonomous",
+          "updated_at": "2026-02-22T12:00:00Z"
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "liquidity_execution_mode_invalid"
+    },
+    {
+      "op": "liquidityExecution.mode.upsert",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id": "lp_house_alpha",
+      "idempotency_key": "m107_mode_restricted_1",
+      "request": {
+        "mode": {
+          "mode": "constrained_auto",
+          "restricted_adapter_context": true,
+          "updated_at": "2026-02-22T12:01:00Z"
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN",
+      "expect_reason_code": "liquidity_execution_mode_restricted"
+    },
+    {
+      "op": "liquidityExecution.mode.upsert",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id": "lp_house_alpha",
+      "idempotency_key": "m107_mode_simulation_1",
+      "request": {
+        "mode": {
+          "mode": "simulation",
+          "restricted_adapter_context": true,
+          "updated_at": "2026-02-22T12:02:00Z"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_provider_id": "lp_house_alpha",
+      "expect_mode": "simulation",
+      "expect_override_policy_present": false
+    },
+    {
+      "op": "liquidityExecution.mode.upsert",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id": "lp_house_alpha",
+      "idempotency_key": "m107_mode_simulation_1",
+      "request": {
+        "mode": {
+          "mode": "simulation",
+          "restricted_adapter_context": true,
+          "updated_at": "2026-02-22T12:02:00Z"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": true,
+      "expect_mode": "simulation"
+    },
+    {
+      "op": "liquidityExecution.mode.upsert",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id": "lp_house_alpha",
+      "idempotency_key": "m107_mode_simulation_1",
+      "request": {
+        "mode": {
+          "mode": "operator_assisted",
+          "restricted_adapter_context": true,
+          "updated_at": "2026-02-22T12:03:00Z"
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    },
+    {
+      "op": "liquidityExecution.mode.upsert",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id": "lp_house_alpha",
+      "idempotency_key": "m107_mode_constrained_auto_1",
+      "request": {
+        "mode": {
+          "mode": "constrained_auto",
+          "restricted_adapter_context": true,
+          "override_policy": {
+            "override_id": "override_lp_alpha_001",
+            "approved_by": {
+              "type": "partner",
+              "id": "partner_alpha"
+            },
+            "approved_at": "2026-02-22T12:04:00Z",
+            "reason_codes": [
+              "manual_governance_approved"
+            ],
+            "expires_at": "2026-03-22T12:04:00Z"
+          },
+          "updated_at": "2026-02-22T12:05:00Z"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_mode": "constrained_auto",
+      "expect_override_policy_present": true
+    },
+    {
+      "op": "liquidityExecution.request.record",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id": "lp_house_alpha",
+      "idempotency_key": "m107_record_invalid_1",
+      "skip_request_validation": true,
+      "request": {
+        "execution_request": {
+          "request_id": "lpexec_req_invalid",
+          "risk_class": "high",
+          "reason_codes": [
+            "high_value_path"
+          ],
+          "correlation_id": "corr_lpexec_invalid_001",
+          "requested_at": "2026-02-22T12:06:00Z"
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "liquidity_execution_request_invalid"
+    },
+    {
+      "op": "liquidityExecution.request.record",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id": "lp_house_alpha",
+      "idempotency_key": "m107_record_blocked_1",
+      "request": {
+        "execution_request": {
+          "request_id": "lpexec_req_blocked",
+          "proposal_id": "proposal_lp_alpha_blocked",
+          "cycle_id": "cycle_lp_alpha_blocked",
+          "intent_ids": [
+            "intent_lp_alpha_blocked"
+          ],
+          "action_type": "settlement_execute",
+          "risk_class": "high",
+          "reason_codes": [
+            "platform_restriction"
+          ],
+          "correlation_id": "corr_lpexec_blocked_001",
+          "requested_at": "2026-02-22T12:07:00Z",
+          "platform_policy_blocked": true
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONFLICT",
+      "expect_reason_code": "liquidity_execution_platform_policy_blocked"
+    },
+    {
+      "op": "liquidityExecution.request.record",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id": "lp_house_alpha",
+      "idempotency_key": "m107_record_high_1",
+      "request": {
+        "execution_request": {
+          "proposal_id": "proposal_lp_alpha_001",
+          "cycle_id": "cycle_lp_alpha_001",
+          "intent_ids": [
+            "intent_lp_alpha_001"
+          ],
+          "action_type": "settlement_execute",
+          "risk_class": "high",
+          "reason_codes": [
+            "high_value_path",
+            "steam_adapter_restricted"
+          ],
+          "correlation_id": "corr_lpexec_req_000001",
+          "requested_at": "2026-02-22T12:10:00Z",
+          "auto_execute": false,
+          "metadata": {
+            "platform": "steam"
+          }
+        }
+      },
+      "save_request_ref": "req_high_1",
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_status": "pending",
+      "expect_decision": null
+    },
+    {
+      "op": "liquidityExecution.request.approve",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id": "lp_house_alpha",
+      "request_id_ref": "req_high_1",
+      "idempotency_key": "m107_approve_missing_operator_1",
+      "skip_request_validation": true,
+      "request": {
+        "decision": {
+          "reason_codes": [
+            "manual_review_complete"
+          ],
+          "correlation_id": "corr_lpexec_approve_missing_operator",
+          "approved_at": "2026-02-22T12:12:00Z"
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN",
+      "expect_reason_code": "liquidity_execution_operator_approval_required"
+    },
+    {
+      "op": "liquidityExecution.request.approve",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id": "lp_house_alpha",
+      "request_id_ref": "req_high_1",
+      "idempotency_key": "m107_approve_ok_1",
+      "request": {
+        "decision": {
+          "operator_actor": {
+            "type": "partner",
+            "id": "partner_alpha"
+          },
+          "reason_codes": [
+            "manual_review_complete",
+            "risk_acknowledged"
+          ],
+          "correlation_id": "corr_lpexec_approve_000001",
+          "approved_at": "2026-02-22T12:13:00Z"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_status": "approved",
+      "expect_decision": "approve",
+      "expect_operator_actor_id": "partner_alpha"
+    },
+    {
+      "op": "liquidityExecution.request.approve",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id": "lp_house_alpha",
+      "request_id_ref": "req_high_1",
+      "idempotency_key": "m107_approve_ok_1",
+      "request": {
+        "decision": {
+          "operator_actor": {
+            "type": "partner",
+            "id": "partner_alpha"
+          },
+          "reason_codes": [
+            "manual_review_complete",
+            "risk_acknowledged"
+          ],
+          "correlation_id": "corr_lpexec_approve_000001",
+          "approved_at": "2026-02-22T12:13:00Z"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": true,
+      "expect_status": "approved",
+      "expect_decision": "approve"
+    },
+    {
+      "op": "liquidityExecution.request.approve",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id": "lp_house_alpha",
+      "request_id_ref": "req_high_1",
+      "idempotency_key": "m107_approve_ok_1",
+      "request": {
+        "decision": {
+          "operator_actor": {
+            "type": "partner",
+            "id": "partner_alpha"
+          },
+          "reason_codes": [
+            "manual_review_complete",
+            "override_note_changed"
+          ],
+          "correlation_id": "corr_lpexec_approve_000001",
+          "approved_at": "2026-02-22T12:13:00Z"
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    },
+    {
+      "op": "liquidityExecution.request.record",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id": "lp_house_alpha",
+      "idempotency_key": "m107_record_low_1",
+      "request": {
+        "execution_request": {
+          "proposal_id": "proposal_lp_alpha_002",
+          "cycle_id": "cycle_lp_alpha_002",
+          "intent_ids": [
+            "intent_lp_alpha_002"
+          ],
+          "action_type": "settlement_cancel",
+          "risk_class": "medium",
+          "reason_codes": [
+            "inventory_shift",
+            "counterparty_unresponsive"
+          ],
+          "correlation_id": "corr_lpexec_req_000002",
+          "requested_at": "2026-02-22T12:20:00Z",
+          "metadata": {
+            "platform": "steam"
+          }
+        }
+      },
+      "save_request_ref": "req_low_1",
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_status": "pending",
+      "expect_decision": null
+    },
+    {
+      "op": "liquidityExecution.request.reject",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id": "lp_house_alpha",
+      "request_id_ref": "req_low_1",
+      "idempotency_key": "m107_reject_ok_1",
+      "request": {
+        "decision": {
+          "operator_actor": {
+            "type": "partner",
+            "id": "partner_alpha"
+          },
+          "reason_codes": [
+            "risk_review_failed",
+            "platform_policy_pending"
+          ],
+          "correlation_id": "corr_lpexec_reject_000002",
+          "rejected_at": "2026-02-22T12:21:00Z"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_status": "rejected",
+      "expect_decision": "reject",
+      "expect_operator_actor_id": "partner_alpha"
+    },
+    {
+      "op": "liquidityExecution.request.reject",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id": "lp_house_alpha",
+      "request_id": "lpexec_req_missing",
+      "idempotency_key": "m107_reject_missing_1",
+      "request": {
+        "decision": {
+          "operator_actor": {
+            "type": "partner",
+            "id": "partner_alpha"
+          },
+          "reason_codes": [
+            "missing_request"
+          ],
+          "correlation_id": "corr_lpexec_reject_missing",
+          "rejected_at": "2026-02-22T12:22:00Z"
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "NOT_FOUND",
+      "expect_reason_code": "liquidity_execution_request_not_found"
+    },
+    {
+      "op": "liquidityExecution.export",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "provider_id": "lp_house_alpha",
+      "query": {
+        "limit": 1,
+        "now_iso": "2026-02-22T12:30:00Z",
+        "exported_at_iso": "2026-02-22T12:30:00Z"
+      },
+      "save_cursor_ref": "export_cursor_1",
+      "save_attestation_ref": "export_att_1",
+      "save_checkpoint_ref": "export_chk_1",
+      "expect_ok": true,
+      "expect_total_filtered": 2,
+      "expect_entries_count": 1,
+      "expect_first_request_id": "lpexec_req_000001",
+      "expect_next_cursor": "2026-02-22T12:10:00.000Z|lpexec_req_000001"
+    },
+    {
+      "op": "liquidityExecution.export",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "provider_id": "lp_house_alpha",
+      "query": {
+        "limit": 1,
+        "cursor_after_ref": "export_cursor_1",
+        "attestation_after": "deadbeef",
+        "checkpoint_after_ref": "export_chk_1",
+        "now_iso": "2026-02-22T12:31:00Z",
+        "exported_at_iso": "2026-02-22T12:31:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "liquidity_execution_request_invalid"
+    },
+    {
+      "op": "liquidityExecution.export",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "provider_id": "lp_house_alpha",
+      "query": {
+        "limit": 1,
+        "cursor_after_ref": "export_cursor_1",
+        "attestation_after_ref": "export_att_1",
+        "checkpoint_after_ref": "export_chk_1",
+        "now_iso": "2026-02-22T12:32:00Z",
+        "exported_at_iso": "2026-02-22T12:32:00Z"
+      },
+      "expect_ok": true,
+      "expect_total_filtered": 1,
+      "expect_entries_count": 1,
+      "expect_first_request_id": "lpexec_req_000002",
+      "expect_next_cursor": null
+    },
+    {
+      "op": "liquidityExecution.mode.get",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "provider_id": "lp_house_alpha",
+      "expect_ok": true,
+      "expect_mode": "constrained_auto",
+      "expect_override_policy_present": true
+    }
+  ],
+  "event_payload_checks": [
+    {
+      "type": "liquidity.execution_mode.updated",
+      "payload": {
+        "provider_id": "lp_house_alpha",
+        "mode": "constrained_auto",
+        "restricted_adapter_context": true,
+        "override_policy": {
+          "override_id": "override_lp_alpha_001",
+          "approved_by": {
+            "type": "partner",
+            "id": "partner_alpha"
+          },
+          "approved_at": "2026-02-22T12:04:00Z",
+          "reason_codes": [
+            "manual_governance_approved"
+          ],
+          "expires_at": "2026-03-22T12:04:00Z"
+        },
+        "updated_at": "2026-02-22T12:05:00Z"
+      },
+      "expect_ok": true
+    },
+    {
+      "type": "liquidity.execution_request.recorded",
+      "payload": {
+        "request_id": "lpexec_req_000001",
+        "provider_id": "lp_house_alpha",
+        "action_type": "settlement_execute",
+        "risk_class": "high",
+        "status": "pending",
+        "reason_codes": [
+          "high_value_path",
+          "steam_adapter_restricted"
+        ],
+        "correlation_id": "corr_lpexec_req_000001",
+        "requested_at": "2026-02-22T12:10:00Z"
+      },
+      "expect_ok": true
+    },
+    {
+      "type": "liquidity.execution_request.decided",
+      "payload": {
+        "request_id": "lpexec_req_000001",
+        "provider_id": "lp_house_alpha",
+        "decision": "approve",
+        "operator_actor": {
+          "type": "partner",
+          "id": "partner_alpha"
+        },
+        "decision_reason_codes": [
+          "manual_review_complete",
+          "risk_acknowledged"
+        ],
+        "decision_correlation_id": "corr_lpexec_approve_000001",
+        "decided_at": "2026-02-22T12:13:00Z"
+      },
+      "expect_ok": true
+    }
+  ]
+}

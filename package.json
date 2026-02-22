@@ -4,6 +4,10 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
+    "start:api": "node scripts/run-api-server.mjs",
+    "start:api:strict": "AUTHZ_ENFORCE=1 node scripts/run-api-server.mjs",
+    "verify:baseline": "bash scripts/verify-release-baseline.sh",
+    "verify:runner": "node verify/runner.mjs",
     "verify:m0": "bash verify/m0.sh",
     "verify:m1": "bash verify/m1.sh",
     "verify:m2": "bash verify/m2.sh",
@@ -102,7 +106,19 @@
     "verify:m94": "bash verify/m94.sh",
     "verify:m95": "bash verify/m95.sh",
     "verify:m96": "bash verify/m96.sh",
-    "verify:m97": "bash verify/m97.sh"
+    "verify:m97": "bash verify/m97.sh",
+    "verify:m98": "bash verify/m98.sh",
+    "verify:m99": "bash verify/m99.sh",
+    "verify:m100": "bash verify/m100.sh",
+    "verify:m101": "bash verify/m101.sh",
+    "verify:m102": "bash verify/m102.sh",
+    "verify:m103": "bash verify/m103.sh",
+    "verify:m104": "bash verify/m104.sh",
+    "verify:m105": "bash verify/m105.sh",
+    "verify:m106": "bash verify/m106.sh",
+    "verify:m107": "bash verify/m107.sh",
+    "verify:m108": "bash verify/m108.sh",
+    "verify:m109": "bash verify/m109.sh"
   },
   "devDependencies": {
     "ajv": "8.18.0",

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/CommercialQuotaPolicyGetResponse.schema.json",
+  "title": "CommercialQuotaPolicyGetResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["correlation_id", "policy"],
+  "properties": {
+    "correlation_id": { "type": "string", "minLength": 1 },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "partner_id",
+        "version",
+        "monthly_quota_units",
+        "overage_enabled",
+        "overage_unit_price_usd",
+        "hard_stop_on_quota_exceeded",
+        "updated_at",
+        "updated_by"
+      ],
+      "properties": {
+        "partner_id": { "type": "string", "minLength": 1 },
+        "version": { "type": "integer", "minimum": 1 },
+        "monthly_quota_units": { "type": "integer", "minimum": 0 },
+        "overage_enabled": { "type": "boolean" },
+        "overage_unit_price_usd": { "type": "number", "minimum": 0 },
+        "hard_stop_on_quota_exceeded": { "type": "boolean" },
+        "updated_at": { "type": "string", "format": "date-time" },
+        "updated_by": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "id"],
+          "properties": {
+            "type": { "type": "string", "enum": ["partner"] },
+            "id": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    }
+  }
+}

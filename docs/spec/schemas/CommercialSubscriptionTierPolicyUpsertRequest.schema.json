@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/CommercialSubscriptionTierPolicyUpsertRequest.schema.json",
+  "title": "CommercialSubscriptionTierPolicyUpsertRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["policy"],
+  "properties": {
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tier",
+        "monthly_subscription_usd",
+        "trust_milestone_required",
+        "max_cycle_notional_usd",
+        "max_open_intents",
+        "mobile_contract_notes"
+      ],
+      "properties": {
+        "tier": { "type": "string", "enum": ["free", "pro", "enterprise"] },
+        "monthly_subscription_usd": { "type": "number", "minimum": 0 },
+        "trust_milestone_required": { "type": "string", "enum": ["none", "verified_identity", "established_history"] },
+        "max_cycle_notional_usd": { "type": "number", "minimum": 0 },
+        "max_open_intents": { "type": "integer", "minimum": 1 },
+        "mobile_contract_notes": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1
+        }
+      }
+    },
+    "recorded_at": { "type": "string", "format": "date-time" }
+  }
+}

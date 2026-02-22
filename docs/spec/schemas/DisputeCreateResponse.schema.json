@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/DisputeCreateResponse.schema.json",
+  "title": "DisputeCreateResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "dispute"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dispute": {
+      "$ref": "https://swapgraph.dev/schemas/DisputeGetResponse.schema.json#/$defs/dispute"
+    }
+  }
+}

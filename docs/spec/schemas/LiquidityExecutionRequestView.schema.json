@@ -1,0 +1,185 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquidityExecutionRequestView.schema.json",
+  "title": "LiquidityExecutionRequestView",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_id",
+    "provider_id",
+    "proposal_id",
+    "cycle_id",
+    "intent_ids",
+    "action_type",
+    "risk_class",
+    "reason_codes",
+    "correlation_id",
+    "requested_at",
+    "requested_by",
+    "mode_snapshot",
+    "metadata",
+    "status",
+    "decision",
+    "operator_actor",
+    "decision_reason_codes",
+    "decision_correlation_id",
+    "decided_at"
+  ],
+  "properties": {
+    "request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "proposal_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "cycle_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "intent_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "action_type": {
+      "type": "string",
+      "enum": [
+        "settlement_execute",
+        "settlement_cancel",
+        "settlement_retry",
+        "inventory_release"
+      ]
+    },
+    "risk_class": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ]
+    },
+    "reason_codes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "requested_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "requested_by": {
+      "$ref": "ActorRef.schema.json"
+    },
+    "mode_snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "restricted_adapter_context",
+        "override_policy"
+      ],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "simulation",
+            "operator_assisted",
+            "constrained_auto"
+          ]
+        },
+        "restricted_adapter_context": {
+          "type": "boolean"
+        },
+        "override_policy": {
+          "anyOf": [
+            {
+              "$ref": "LiquidityExecutionOverridePolicy.schema.json"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "metadata": {
+      "type": "object"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ]
+    },
+    "decision": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "approve",
+        "reject",
+        null
+      ]
+    },
+    "operator_actor": {
+      "anyOf": [
+        {
+          "$ref": "ActorRef.schema.json"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "decision_reason_codes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "decision_correlation_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "decided_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time",
+      "minLength": 1
+    }
+  }
+}

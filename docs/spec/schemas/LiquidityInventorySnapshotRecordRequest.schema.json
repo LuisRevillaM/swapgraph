@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquidityInventorySnapshotRecordRequest.schema.json",
+  "title": "LiquidityInventorySnapshotRecordRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "snapshot"
+  ],
+  "properties": {
+    "snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "platform",
+        "captured_at",
+        "assets"
+      ],
+      "properties": {
+        "snapshot_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "platform": {
+          "type": "string",
+          "minLength": 1
+        },
+        "captured_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "assets": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "asset_id",
+              "quantity"
+            ],
+            "properties": {
+              "holding_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "asset_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "quantity": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "metadata": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

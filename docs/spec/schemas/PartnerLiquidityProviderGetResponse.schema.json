@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/PartnerLiquidityProviderGetResponse.schema.json",
+  "title": "PartnerLiquidityProviderGetResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "provider"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider": {
+      "$ref": "PartnerLiquidityProviderView.schema.json"
+    }
+  }
+}

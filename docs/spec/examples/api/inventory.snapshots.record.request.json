@@ -1,0 +1,21 @@
+{
+  "snapshot": {
+    "platform": "steam",
+    "captured_at": "2026-02-21T12:10:00Z",
+    "assets": [
+      {
+        "asset_id": "assetA",
+        "quantity": 1,
+        "metadata": {
+          "wear": "fn"
+        }
+      },
+      {
+        "asset_id": "assetB",
+        "quantity": 2,
+        "metadata": {}
+      }
+    ]
+  },
+  "recorded_at": "2026-02-21T12:10:30Z"
+}

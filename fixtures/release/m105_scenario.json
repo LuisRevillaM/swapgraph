@@ -1,0 +1,677 @@
+{
+  "actors": {
+    "partner_alpha": {
+      "type": "partner",
+      "id": "partner_alpha"
+    },
+    "partner_beta": {
+      "type": "partner",
+      "id": "partner_beta"
+    }
+  },
+  "seed_state": {
+    "liquidity_providers": {
+      "lp_house_alpha": {
+        "provider_id": "lp_house_alpha",
+        "provider_type": "house_bot",
+        "owner_actor": {
+          "type": "partner",
+          "id": "partner_alpha"
+        },
+        "is_automated": true,
+        "is_house_inventory": true,
+        "label_required": true,
+        "display_label": "Alpha Market Maker",
+        "disclosure_text": "Automated house-liquidity participant.",
+        "active": true,
+        "created_at": "2026-02-21T12:00:00Z",
+        "updated_at": "2026-02-21T12:00:00Z"
+      }
+    }
+  },
+  "operations": [
+    {
+      "op": "keys.policy_integrity_signing.get",
+      "expect_ok": true
+    },
+    {
+      "op": "liquidityInventory.snapshot.record",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id": "lp_house_alpha",
+      "idempotency_key": "m105_snapshot_1",
+      "request": {
+        "snapshot": {
+          "snapshot_id": "lpinv_snapshot_alpha_001",
+          "platform": "steam",
+          "captured_at": "2026-02-22T11:00:00Z",
+          "assets": [
+            {
+              "holding_id": "steam:asset_ak47_redline",
+              "asset_id": "asset_ak47_redline",
+              "quantity": 2,
+              "metadata": {
+                "app_id": "730",
+                "market_hash_name": "AK-47 | Redline (Field-Tested)"
+              }
+            },
+            {
+              "holding_id": "steam:asset_awp_asiimov",
+              "asset_id": "asset_awp_asiimov",
+              "quantity": 1,
+              "metadata": {
+                "app_id": "730",
+                "market_hash_name": "AWP | Asiimov (Battle-Scarred)"
+              }
+            }
+          ]
+        },
+        "recorded_at": "2026-02-22T11:00:05Z"
+      },
+      "save_provider_ref": "provider_alpha",
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_provider_id": "lp_house_alpha",
+      "expect_snapshot_id": "lpinv_snapshot_alpha_001",
+      "expect_snapshot_assets_count": 2
+    },
+    {
+      "op": "liquidityInventory.snapshot.record",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "idempotency_key": "m105_snapshot_1",
+      "request": {
+        "snapshot": {
+          "snapshot_id": "lpinv_snapshot_alpha_001",
+          "platform": "steam",
+          "captured_at": "2026-02-22T11:00:00Z",
+          "assets": [
+            {
+              "holding_id": "steam:asset_ak47_redline",
+              "asset_id": "asset_ak47_redline",
+              "quantity": 2,
+              "metadata": {
+                "app_id": "730",
+                "market_hash_name": "AK-47 | Redline (Field-Tested)"
+              }
+            },
+            {
+              "holding_id": "steam:asset_awp_asiimov",
+              "asset_id": "asset_awp_asiimov",
+              "quantity": 1,
+              "metadata": {
+                "app_id": "730",
+                "market_hash_name": "AWP | Asiimov (Battle-Scarred)"
+              }
+            }
+          ]
+        },
+        "recorded_at": "2026-02-22T11:00:05Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": true,
+      "expect_provider_id": "lp_house_alpha",
+      "expect_snapshot_id": "lpinv_snapshot_alpha_001"
+    },
+    {
+      "op": "liquidityInventory.snapshot.record",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "idempotency_key": "m105_snapshot_1",
+      "request": {
+        "snapshot": {
+          "snapshot_id": "lpinv_snapshot_alpha_001",
+          "platform": "steam",
+          "captured_at": "2026-02-22T11:00:00Z",
+          "assets": [
+            {
+              "holding_id": "steam:asset_ak47_redline",
+              "asset_id": "asset_ak47_redline",
+              "quantity": 3
+            }
+          ]
+        },
+        "recorded_at": "2026-02-22T11:00:05Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    },
+    {
+      "op": "liquidityInventory.assets.list",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "expect_ok": true,
+      "expect_provider_id": "lp_house_alpha",
+      "expect_assets_count": 2,
+      "expect_first_holding_id": "steam:asset_ak47_redline"
+    },
+    {
+      "op": "liquidityInventory.availability.get",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "expect_ok": true,
+      "expect_provider_id": "lp_house_alpha",
+      "expect_assets_count": 2,
+      "expect_available_assets_count": 2,
+      "expect_reserved_assets_count": 0,
+      "expect_in_settlement_assets_count": 0,
+      "expect_not_available_assets_count": 0
+    },
+    {
+      "op": "liquidityInventory.reserve.batch",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "idempotency_key": "m105_reserve_1",
+      "request": {
+        "reservations": [
+          {
+            "reservation_id": "lpinv_res_alpha_001",
+            "holding_id": "steam:asset_ak47_redline",
+            "asset_id": "asset_ak47_redline",
+            "platform": "steam",
+            "quantity": 1,
+            "cycle_id": "cycle_lp_alpha_001",
+            "context_ref": "proposal_lp_alpha_001"
+          },
+          {
+            "reservation_id": "lpinv_res_alpha_002",
+            "holding_id": "steam:asset_awp_asiimov",
+            "asset_id": "asset_awp_asiimov",
+            "platform": "steam",
+            "quantity": 1,
+            "cycle_id": "cycle_lp_alpha_001",
+            "context_ref": "proposal_lp_alpha_001"
+          }
+        ],
+        "recorded_at": "2026-02-22T11:05:00Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_success_count": 2,
+      "expect_conflict_count": 0,
+      "expect_not_available_count": 0,
+      "expect_context_mismatch_count": 0,
+      "expect_asset_not_found_count": 0,
+      "expect_active_reservations_count": 2
+    },
+    {
+      "op": "liquidityInventory.reserve.batch",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "idempotency_key": "m105_reserve_1",
+      "request": {
+        "reservations": [
+          {
+            "reservation_id": "lpinv_res_alpha_001",
+            "holding_id": "steam:asset_ak47_redline",
+            "asset_id": "asset_ak47_redline",
+            "platform": "steam",
+            "quantity": 1,
+            "cycle_id": "cycle_lp_alpha_001",
+            "context_ref": "proposal_lp_alpha_001"
+          },
+          {
+            "reservation_id": "lpinv_res_alpha_002",
+            "holding_id": "steam:asset_awp_asiimov",
+            "asset_id": "asset_awp_asiimov",
+            "platform": "steam",
+            "quantity": 1,
+            "cycle_id": "cycle_lp_alpha_001",
+            "context_ref": "proposal_lp_alpha_001"
+          }
+        ],
+        "recorded_at": "2026-02-22T11:05:00Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": true,
+      "expect_success_count": 2,
+      "expect_active_reservations_count": 2
+    },
+    {
+      "op": "liquidityInventory.reserve.batch",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "idempotency_key": "m105_reserve_1",
+      "request": {
+        "reservations": [
+          {
+            "reservation_id": "lpinv_res_alpha_001",
+            "holding_id": "steam:asset_ak47_redline",
+            "asset_id": "asset_ak47_redline",
+            "platform": "steam",
+            "quantity": 2,
+            "cycle_id": "cycle_lp_alpha_001"
+          }
+        ],
+        "recorded_at": "2026-02-22T11:05:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    },
+    {
+      "op": "liquidityInventory.reserve.batch",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "idempotency_key": "m105_reserve_conflict",
+      "request": {
+        "reservations": [
+          {
+            "reservation_id": "lpinv_res_alpha_003",
+            "holding_id": "steam:asset_ak47_redline",
+            "asset_id": "asset_ak47_redline",
+            "platform": "steam",
+            "quantity": 1,
+            "cycle_id": "cycle_lp_alpha_002",
+            "context_ref": "proposal_lp_alpha_002"
+          }
+        ],
+        "recorded_at": "2026-02-22T11:06:00Z"
+      },
+      "expect_ok": true,
+      "expect_success_count": 0,
+      "expect_conflict_count": 1,
+      "expect_first_failed_reason": "liquidity_inventory_reservation_conflict"
+    },
+    {
+      "op": "liquidityInventory.reserve.batch",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "idempotency_key": "m105_reserve_not_available",
+      "request": {
+        "reservations": [
+          {
+            "reservation_id": "lpinv_res_alpha_002",
+            "holding_id": "steam:asset_awp_asiimov",
+            "asset_id": "asset_awp_asiimov",
+            "platform": "steam",
+            "quantity": 2,
+            "cycle_id": "cycle_lp_alpha_002",
+            "context_ref": "proposal_lp_alpha_002"
+          }
+        ],
+        "recorded_at": "2026-02-22T11:06:30Z"
+      },
+      "expect_ok": true,
+      "expect_success_count": 0,
+      "expect_not_available_count": 1,
+      "expect_first_failed_reason": "liquidity_inventory_not_available"
+    },
+    {
+      "op": "liquidityInventory.reserve.batch",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "idempotency_key": "m105_reserve_asset_missing",
+      "request": {
+        "reservations": [
+          {
+            "reservation_id": "lpinv_res_alpha_005",
+            "holding_id": "steam:asset_missing",
+            "asset_id": "asset_missing",
+            "platform": "steam",
+            "quantity": 1,
+            "cycle_id": "cycle_lp_alpha_003",
+            "context_ref": "proposal_lp_alpha_003"
+          }
+        ],
+        "recorded_at": "2026-02-22T11:07:00Z"
+      },
+      "expect_ok": true,
+      "expect_success_count": 0,
+      "expect_asset_not_found_count": 1,
+      "expect_first_failed_reason": "liquidity_inventory_asset_not_found"
+    },
+    {
+      "op": "liquidityInventory.release.batch",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "idempotency_key": "m105_release_1",
+      "request": {
+        "releases": [
+          {
+            "reservation_id": "lpinv_res_alpha_001",
+            "target_status": "in_settlement",
+            "cycle_id": "cycle_lp_alpha_001",
+            "holding_id": "steam:asset_ak47_redline"
+          },
+          {
+            "reservation_id": "lpinv_res_alpha_002",
+            "target_status": "released",
+            "cycle_id": "cycle_lp_alpha_001",
+            "holding_id": "steam:asset_awp_asiimov"
+          }
+        ],
+        "recorded_at": "2026-02-22T11:10:00Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_success_count": 2,
+      "expect_context_mismatch_count": 0,
+      "expect_asset_not_found_count": 0,
+      "expect_active_reservations_count": 1
+    },
+    {
+      "op": "liquidityInventory.release.batch",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "idempotency_key": "m105_release_1",
+      "request": {
+        "releases": [
+          {
+            "reservation_id": "lpinv_res_alpha_001",
+            "target_status": "in_settlement",
+            "cycle_id": "cycle_lp_alpha_001",
+            "holding_id": "steam:asset_ak47_redline"
+          },
+          {
+            "reservation_id": "lpinv_res_alpha_002",
+            "target_status": "released",
+            "cycle_id": "cycle_lp_alpha_001",
+            "holding_id": "steam:asset_awp_asiimov"
+          }
+        ],
+        "recorded_at": "2026-02-22T11:10:00Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": true,
+      "expect_success_count": 2,
+      "expect_active_reservations_count": 1
+    },
+    {
+      "op": "liquidityInventory.release.batch",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "idempotency_key": "m105_release_1",
+      "request": {
+        "releases": [
+          {
+            "reservation_id": "lpinv_res_alpha_001",
+            "target_status": "released",
+            "cycle_id": "cycle_lp_alpha_001",
+            "holding_id": "steam:asset_ak47_redline"
+          }
+        ],
+        "recorded_at": "2026-02-22T11:11:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    },
+    {
+      "op": "liquidityInventory.release.batch",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "idempotency_key": "m105_release_context_mismatch",
+      "request": {
+        "releases": [
+          {
+            "reservation_id": "lpinv_res_alpha_001",
+            "target_status": "released",
+            "cycle_id": "cycle_lp_alpha_wrong"
+          }
+        ],
+        "recorded_at": "2026-02-22T11:11:30Z"
+      },
+      "expect_ok": true,
+      "expect_success_count": 0,
+      "expect_context_mismatch_count": 1,
+      "expect_first_failed_reason": "liquidity_inventory_reservation_context_mismatch"
+    },
+    {
+      "op": "liquidityInventory.release.batch",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "idempotency_key": "m105_release_asset_not_found",
+      "request": {
+        "releases": [
+          {
+            "reservation_id": "lpinv_res_missing",
+            "target_status": "released"
+          }
+        ],
+        "recorded_at": "2026-02-22T11:11:45Z"
+      },
+      "expect_ok": true,
+      "expect_success_count": 0,
+      "expect_asset_not_found_count": 1,
+      "expect_first_failed_reason": "liquidity_inventory_asset_not_found"
+    },
+    {
+      "op": "liquidityInventory.availability.get",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "expect_ok": true,
+      "expect_assets_count": 2,
+      "expect_available_assets_count": 1,
+      "expect_reserved_assets_count": 0,
+      "expect_in_settlement_assets_count": 1,
+      "expect_not_available_assets_count": 0
+    },
+    {
+      "op": "liquidityInventory.reconciliation.export",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "query": {
+        "limit": 2
+      },
+      "save_export_ref": "recon_export_page_1",
+      "expect_ok": true,
+      "expect_entries_count": 2,
+      "expect_total_filtered": 8,
+      "expect_next_cursor_present": true,
+      "expect_default_verify_ok": true,
+      "expect_public_key_verify_ok": true,
+      "expect_tamper_fail": true,
+      "expect_tamper_fail_verified": true
+    },
+    {
+      "op": "liquidityInventory.reconciliation.export",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "query": {
+        "limit": 2
+      },
+      "cursor_ref": "recon_export_page_1",
+      "save_export_ref": "recon_export_page_2",
+      "expect_ok": true,
+      "expect_entries_count": 2,
+      "expect_total_filtered": 8,
+      "expect_next_cursor_present": true,
+      "expect_default_verify_ok": true,
+      "expect_public_key_verify_ok": true
+    },
+    {
+      "op": "liquidityInventory.reconciliation.export",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "query": {
+        "limit": 10
+      },
+      "cursor_ref": "recon_export_page_2",
+      "expect_ok": true,
+      "expect_entries_count": 4,
+      "expect_total_filtered": 8,
+      "expect_next_cursor_present": false,
+      "expect_default_verify_ok": true,
+      "expect_public_key_verify_ok": true
+    },
+    {
+      "op": "liquidityInventory.reconciliation.export",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "query": {
+        "unsupported": "1"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "liquidity_inventory_reconciliation_query_invalid"
+    },
+    {
+      "op": "liquidityInventory.reconciliation.export",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "query": {
+        "cursor_after": "lpinv_evt_missing"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "liquidity_inventory_reconciliation_query_invalid"
+    },
+    {
+      "op": "liquidityInventory.reserve.batch",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "idempotency_key": "m105_reserve_invalid_payload",
+      "skip_request_validation": true,
+      "request": {
+        "reservations": [
+          {
+            "asset_id": "asset_ak47_redline"
+          }
+        ],
+        "recorded_at": "2026-02-22T11:18:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "liquidity_inventory_snapshot_invalid"
+    },
+    {
+      "op": "liquidityInventory.assets.list",
+      "actor_ref": "partner_beta",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN",
+      "expect_reason_code": "liquidity_provider_actor_mismatch"
+    },
+    {
+      "op": "liquidityInventory.availability.get",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "provider_id": "lp_missing",
+      "expect_ok": false,
+      "expect_error_code": "NOT_FOUND",
+      "expect_reason_code": "liquidity_provider_not_found"
+    }
+  ]
+}

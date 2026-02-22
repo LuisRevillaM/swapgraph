@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/PartnerLiquidityProviderEligibilityEvaluateRequest.schema.json",
+  "title": "PartnerLiquidityProviderEligibilityEvaluateRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "eligibility"
+  ],
+  "properties": {
+    "eligibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requested_segment_tier",
+        "trust_safety_baseline_passed",
+        "reliability_baseline_passed",
+        "audit_conformance_passed",
+        "unresolved_critical_violations",
+        "consecutive_compliant_windows",
+        "capability_family"
+      ],
+      "properties": {
+        "requested_segment_tier": {
+          "type": "string",
+          "enum": [
+            "S0",
+            "S1",
+            "S2",
+            "S3"
+          ]
+        },
+        "trust_safety_baseline_passed": {
+          "type": "boolean"
+        },
+        "reliability_baseline_passed": {
+          "type": "boolean"
+        },
+        "audit_conformance_passed": {
+          "type": "boolean"
+        },
+        "unresolved_critical_violations": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "consecutive_compliant_windows": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "capability_family": {
+          "type": "string",
+          "enum": [
+            "core",
+            "advanced",
+            "high_risk"
+          ]
+        },
+        "remediation_closed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

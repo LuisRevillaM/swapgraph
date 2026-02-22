@@ -20,7 +20,7 @@ Capture operator-attested live evidence for Steam Tier-1 Vault settlement lifecy
 
 ## Validation
 - `INTEGRATION_ENABLED=1 npm run verify:m86`
-- `INTEGRATION_ENABLED=1 node verify/runner.ts milestones/M86.yaml`
+- `INTEGRATION_ENABLED=1 node verify/runner.mjs milestones/M86.yaml`
 - Confirm `steam_vault_live_proof_output.json` includes at least one `integration_mode=live` proof with complete lifecycle events and stable `proof_hash`.
 
 ## Rollback / Incident Notes

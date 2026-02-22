@@ -1,0 +1,15 @@
+{
+  "status": {
+    "status": "active",
+    "segment_tier": "S1",
+    "trust_safety_baseline_passed": true,
+    "reliability_baseline_passed": true,
+    "audit_conformance_passed": true,
+    "unresolved_critical_violations": 0,
+    "reason_codes": [
+      "manual_review_complete"
+    ],
+    "operator_note": "Initial governance checklist verified."
+  },
+  "recorded_at": "2026-02-22T16:10:00Z"
+}

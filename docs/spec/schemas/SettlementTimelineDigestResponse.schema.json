@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/SettlementTimelineDigestResponse.schema.json",
+  "title": "SettlementTimelineDigestResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "digest"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "digest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cycle_id",
+        "state",
+        "updated_at",
+        "completed_steps",
+        "next_required_action",
+        "next_action_deadline_at",
+        "progress"
+      ],
+      "properties": {
+        "cycle_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "escrow.pending",
+            "escrow.ready",
+            "executing",
+            "completed",
+            "failed"
+          ]
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "completed_steps": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "next_required_action": {
+          "type": "string",
+          "enum": [
+            "confirm_deposit",
+            "begin_execution",
+            "complete_settlement",
+            "none"
+          ]
+        },
+        "next_action_deadline_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "progress": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "legs_total",
+            "legs_deposited",
+            "legs_released",
+            "legs_refunded"
+          ],
+          "properties": {
+            "legs_total": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "legs_deposited": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "legs_released": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "legs_refunded": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    }
+  }
+}

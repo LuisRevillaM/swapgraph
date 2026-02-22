@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/PartnerLiquidityProviderStatusUpsertResponse.schema.json",
+  "title": "PartnerLiquidityProviderStatusUpsertResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "provider_id",
+    "status"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "segment_tier",
+        "trust_safety_baseline_passed",
+        "reliability_baseline_passed",
+        "audit_conformance_passed",
+        "unresolved_critical_violations",
+        "reason_codes",
+        "updated_at",
+        "updated_by"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending_review",
+            "active",
+            "restricted",
+            "offboarded"
+          ]
+        },
+        "segment_tier": {
+          "type": "string",
+          "enum": [
+            "S0",
+            "S1",
+            "S2",
+            "S3"
+          ]
+        },
+        "trust_safety_baseline_passed": {
+          "type": "boolean"
+        },
+        "reliability_baseline_passed": {
+          "type": "boolean"
+        },
+        "audit_conformance_passed": {
+          "type": "boolean"
+        },
+        "unresolved_critical_violations": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_by": {
+          "$ref": "ActorRef.schema.json"
+        }
+      }
+    }
+  }
+}

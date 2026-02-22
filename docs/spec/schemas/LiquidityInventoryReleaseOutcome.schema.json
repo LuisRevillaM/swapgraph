@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquidityInventoryReleaseOutcome.schema.json",
+  "title": "LiquidityInventoryReleaseOutcome",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_index",
+    "reservation_id",
+    "ok",
+    "reason_code",
+    "previous_status",
+    "status",
+    "reservation"
+  ],
+  "properties": {
+    "request_index": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "reservation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "reason_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "previous_status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "reserved",
+        "in_settlement",
+        "released",
+        "refunded",
+        "withdrawn",
+        null
+      ]
+    },
+    "status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "reserved",
+        "in_settlement",
+        "released",
+        "refunded",
+        "withdrawn",
+        null
+      ]
+    },
+    "reservation": {
+      "anyOf": [
+        {
+          "$ref": "LiquidityInventoryReservationView.schema.json"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

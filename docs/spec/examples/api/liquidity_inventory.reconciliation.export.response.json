@@ -1,0 +1,75 @@
+{
+  "correlation_id": "corr_liquidityinventory_reconciliation_export",
+  "provider_id": "lp_house_alpha",
+  "export": {
+    "exported_at": "2026-02-22T11:20:00Z",
+    "query": {
+      "provider_id": "lp_house_alpha",
+      "limit": 50
+    },
+    "total_filtered": 2,
+    "entries": [
+      {
+        "entry_id": "lpinv_evt_000001",
+        "provider_id": "lp_house_alpha",
+        "occurred_at": "2026-02-22T11:00:05Z",
+        "event_type": "snapshot_recorded",
+        "holding_id": "steam:asset_ak47_redline",
+        "asset_id": "asset_ak47_redline",
+        "quantity": 2,
+        "reservation_id": null,
+        "cycle_id": null,
+        "snapshot_id": "lpinv_snapshot_alpha_001",
+        "status_from": null,
+        "status_to": null,
+        "owner_actor": {
+          "type": "partner",
+          "id": "partner_alpha"
+        },
+        "details": {
+          "platform": "steam"
+        }
+      },
+      {
+        "entry_id": "lpinv_evt_000002",
+        "provider_id": "lp_house_alpha",
+        "occurred_at": "2026-02-22T11:05:00Z",
+        "event_type": "reserved",
+        "holding_id": "steam:asset_ak47_redline",
+        "asset_id": "asset_ak47_redline",
+        "quantity": 1,
+        "reservation_id": "lpinv_res_alpha_001",
+        "cycle_id": "cycle_lp_alpha_001",
+        "snapshot_id": null,
+        "status_from": "available",
+        "status_to": "reserved",
+        "owner_actor": {
+          "type": "partner",
+          "id": "partner_alpha"
+        },
+        "details": {}
+      }
+    ],
+    "attestation": {
+      "cursor_after": null,
+      "next_cursor": null,
+      "attestation_after": null,
+      "page_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+      "chain_hash": "2222222222222222222222222222222222222222222222222222222222222222"
+    },
+    "checkpoint": {
+      "checkpoint_after": null,
+      "attestation_chain_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+      "next_cursor": null,
+      "entries_count": 2,
+      "total_filtered": 2,
+      "checkpoint_hash": "3333333333333333333333333333333333333333333333333333333333333333"
+    },
+    "export_hash": "4444444444444444444444444444444444444444444444444444444444444444",
+    "signature": {
+      "key_id": "sig-k1",
+      "alg": "ed25519",
+      "sig": "BASE64_SIGNATURE_EXAMPLE"
+    }
+  }
+}

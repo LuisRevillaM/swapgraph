@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/CommercialPolicyEvaluateResponse.schema.json",
+  "title": "CommercialPolicyEvaluateResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["correlation_id", "evaluation"],
+  "properties": {
+    "correlation_id": { "type": "string", "minLength": 1 },
+    "evaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evaluation_id",
+        "operation_id",
+        "enforced_precedence",
+        "verdict",
+        "evaluated_at",
+        "projected_quota_usage_units",
+        "quota_remaining_units",
+        "effective"
+      ],
+      "properties": {
+        "evaluation_id": { "type": "string", "minLength": 1 },
+        "operation_id": { "type": "string", "minLength": 1 },
+        "enforced_precedence": { "type": "string", "minLength": 1 },
+        "verdict": { "type": "string", "enum": ["allow"] },
+        "evaluated_at": { "type": "string", "format": "date-time" },
+        "projected_quota_usage_units": { "type": "integer", "minimum": 0 },
+        "quota_remaining_units": { "type": "integer", "minimum": 0 },
+        "effective": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["transaction_fee", "subscription_tier", "boost", "quota"],
+          "properties": {
+            "transaction_fee": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["fee_model", "fee_bps", "fee_flat_usd", "min_fee_usd", "max_fee_usd"],
+              "properties": {
+                "fee_model": { "type": "string", "enum": ["bps", "flat_usd"] },
+                "fee_bps": { "type": ["integer", "null"], "minimum": 0, "maximum": 10000 },
+                "fee_flat_usd": { "type": ["number", "null"], "minimum": 0 },
+                "min_fee_usd": { "type": "number", "minimum": 0 },
+                "max_fee_usd": { "type": ["number", "null"], "minimum": 0 }
+              }
+            },
+            "subscription_tier": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["tier", "trust_milestone_required", "max_cycle_notional_usd", "max_open_intents", "mobile_contract_notes"],
+              "properties": {
+                "tier": { "type": "string", "enum": ["free", "pro", "enterprise"] },
+                "trust_milestone_required": { "type": "string", "enum": ["none", "verified_identity", "established_history"] },
+                "max_cycle_notional_usd": { "type": "number", "minimum": 0 },
+                "max_open_intents": { "type": "integer", "minimum": 1 },
+                "mobile_contract_notes": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 },
+                  "minItems": 1
+                }
+              }
+            },
+            "boost": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["enabled", "max_multiplier"],
+              "properties": {
+                "enabled": { "type": "boolean" },
+                "max_multiplier": { "type": "number", "minimum": 1, "maximum": 5 }
+              }
+            },
+            "quota": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["monthly_quota_units", "overage_enabled", "overage_unit_price_usd", "hard_stop_on_quota_exceeded"],
+              "properties": {
+                "monthly_quota_units": { "type": "integer", "minimum": 0 },
+                "overage_enabled": { "type": "boolean" },
+                "overage_unit_price_usd": { "type": "number", "minimum": 0 },
+                "hard_stop_on_quota_exceeded": { "type": "boolean" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

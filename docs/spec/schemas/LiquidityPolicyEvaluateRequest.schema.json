@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquidityPolicyEvaluateRequest.schema.json",
+  "title": "LiquidityPolicyEvaluateRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "evaluation"
+  ],
+  "properties": {
+    "evaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operation_id",
+        "precedence_assertion",
+        "safety_gate_passed",
+        "trust_gate_passed",
+        "commercial_gate_passed",
+        "action_type",
+        "spread_bps",
+        "quote_value_usd",
+        "daily_value_usd",
+        "counterparty_actor_id",
+        "counterparty_exposure_usd",
+        "price_confidence_bps",
+        "asset_liquidity_tier",
+        "high_volatility"
+      ],
+      "properties": {
+        "operation_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "precedence_assertion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "safety_gate_passed": {
+          "type": "boolean"
+        },
+        "trust_gate_passed": {
+          "type": "boolean"
+        },
+        "commercial_gate_passed": {
+          "type": "boolean"
+        },
+        "action_type": {
+          "type": "string",
+          "enum": [
+            "quote",
+            "accept",
+            "execute"
+          ]
+        },
+        "spread_bps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "quote_value_usd": {
+          "type": "number",
+          "minimum": 0
+        },
+        "daily_value_usd": {
+          "type": "number",
+          "minimum": 0
+        },
+        "counterparty_actor_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "counterparty_exposure_usd": {
+          "type": "number",
+          "minimum": 0
+        },
+        "price_confidence_bps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "asset_liquidity_tier": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ]
+        },
+        "high_volatility": {
+          "type": "boolean"
+        }
+      }
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

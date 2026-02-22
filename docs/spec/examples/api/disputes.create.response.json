@@ -1,0 +1,21 @@
+{
+  "correlation_id": "corr_disputes_create",
+  "dispute": {
+    "dispute_id": "dispute_000001",
+    "partner_id": "partner_demo",
+    "dispute_type": "delivery",
+    "severity": "medium",
+    "subject_ref": "cycle_4f27eb196224",
+    "reason_code": "delivery_timeout",
+    "status": "open",
+    "opened_at": "2026-02-21T12:20:00Z",
+    "resolved_at": null,
+    "resolution": null,
+    "evidence_items": [
+      {
+        "artifact_ref": "receipt://rcpt_123",
+        "kind": "receipt_ref"
+      }
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "correlation_id": "corr_commercialpolicy_transaction_fee_upsert",
+  "policy": {
+    "partner_id": "partner_demo",
+    "version": 2,
+    "fee_model": "bps",
+    "fee_bps": 180,
+    "fee_flat_usd": null,
+    "min_fee_usd": 0,
+    "max_fee_usd": 7,
+    "updated_at": "2026-02-21T16:00:00Z",
+    "updated_by": {
+      "type": "partner",
+      "id": "partner_demo"
+    }
+  }
+}

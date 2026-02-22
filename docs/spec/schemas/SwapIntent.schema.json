@@ -69,6 +69,18 @@
       "properties": {
         "require_escrow": { "type": "boolean" }
       }
+    },
+
+    "liquidity_provider_ref": {
+      "$ref": "LiquidityProviderRef.schema.json"
+    },
+
+    "persona_ref": {
+      "$ref": "BotPersonaRef.schema.json"
+    },
+
+    "liquidity_policy_ref": {
+      "$ref": "LiquidityPolicyRef.schema.json"
     }
   }
 }

@@ -1,7 +1,7 @@
 # M105 PRD Review Closure — Decision Checklist
 
 Date: 2026-02-21
-Status: Draft for approval (PRD-only mode)
+Status: Approved and implemented (fixtures-first, verifier-closed on 2026-02-22)
 
 Purpose: close LP inventory/reservation lifecycle decisions to guarantee fulfillment and avoid reservation conflicts.
 
@@ -48,3 +48,8 @@ Purpose: close LP inventory/reservation lifecycle decisions to guarantee fulfill
 
 ## PRD approval gate (M105)
 M105 is ready for implementation planning only when D1–D7 are explicitly approved or amended.
+
+## Implementation closure evidence
+- `npm run verify:m105` exits 0.
+- `node verify/runner.mjs milestones/M105.yaml` returns `overall=true`.
+- Canonical output hash locked in `fixtures/release/m105_expected.json` and artifacts published under `artifacts/milestones/M105/latest/*`.

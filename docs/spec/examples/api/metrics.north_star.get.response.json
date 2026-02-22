@@ -1,0 +1,33 @@
+{
+  "correlation_id": "corr_metrics_north_star_get",
+  "partner_id": "partner_demo",
+  "window": {
+    "from_iso": "2026-02-20T00:00:00Z",
+    "to_iso": "2026-02-21T00:00:00Z",
+    "bucket": "day"
+  },
+  "summary": {
+    "weekly_successful_swaps_per_active_trader": 0.75,
+    "fill_rate_7d_bps": 7500,
+    "proposal_to_accept_bps": 6667,
+    "accept_to_complete_bps": 7500,
+    "webhook_delivery_success_bps": 9000,
+    "fraud_flags_per_1000_intents": 125,
+    "unwind_rate_bps": 2500,
+    "weekly_successful_swaps_count_7d": 3,
+    "active_trader_count_7d": 4,
+    "fill_rate_7d_numerator_completed": 3,
+    "fill_rate_7d_denominator_terminal": 4,
+    "proposal_to_accept_numerator": 2,
+    "proposal_to_accept_denominator": 3,
+    "accept_to_complete_numerator": 3,
+    "accept_to_complete_denominator": 4,
+    "webhook_delivery_success_numerator": 9,
+    "webhook_delivery_success_denominator": 10,
+    "fraud_flags_numerator": 1,
+    "fraud_flags_denominator_intents": 8,
+    "unwind_numerator": 1,
+    "unwind_denominator_terminal": 4,
+    "primary_metric": "weekly_successful_swaps_per_active_trader"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "snapshot": {
+    "snapshot_id": "lpinv_snapshot_alpha_001",
+    "platform": "steam",
+    "captured_at": "2026-02-22T11:00:00Z",
+    "assets": [
+      {
+        "holding_id": "steam:asset_ak47_redline",
+        "asset_id": "asset_ak47_redline",
+        "quantity": 2,
+        "metadata": {
+          "app_id": "730",
+          "market_hash_name": "AK-47 | Redline (Field-Tested)"
+        }
+      },
+      {
+        "holding_id": "steam:asset_awp_asiimov",
+        "asset_id": "asset_awp_asiimov",
+        "quantity": 1,
+        "metadata": {
+          "app_id": "730",
+          "market_hash_name": "AWP | Asiimov (Battle-Scarred)"
+        }
+      }
+    ]
+  },
+  "recorded_at": "2026-02-22T11:00:05Z"
+}

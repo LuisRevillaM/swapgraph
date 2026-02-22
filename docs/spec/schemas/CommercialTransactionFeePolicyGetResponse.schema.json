@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/CommercialTransactionFeePolicyGetResponse.schema.json",
+  "title": "CommercialTransactionFeePolicyGetResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["correlation_id", "policy"],
+  "properties": {
+    "correlation_id": { "type": "string", "minLength": 1 },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "partner_id",
+        "version",
+        "fee_model",
+        "fee_bps",
+        "fee_flat_usd",
+        "min_fee_usd",
+        "max_fee_usd",
+        "updated_at",
+        "updated_by"
+      ],
+      "properties": {
+        "partner_id": { "type": "string", "minLength": 1 },
+        "version": { "type": "integer", "minimum": 1 },
+        "fee_model": { "type": "string", "enum": ["bps", "flat_usd"] },
+        "fee_bps": { "type": ["integer", "null"], "minimum": 0, "maximum": 10000 },
+        "fee_flat_usd": { "type": ["number", "null"], "minimum": 0 },
+        "min_fee_usd": { "type": "number", "minimum": 0 },
+        "max_fee_usd": { "type": ["number", "null"], "minimum": 0 },
+        "updated_at": { "type": "string", "format": "date-time" },
+        "updated_by": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "id"],
+          "properties": {
+            "type": { "type": "string", "enum": ["partner"] },
+            "id": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "correlation_id": "corr_productprojection_receipt_share_get",
+  "receipt_share": {
+    "receipt_id": "receipt_beta",
+    "cycle_id": "cycle_beta",
+    "final_state": "failed",
+    "created_at": "2026-02-21T16:00:00Z",
+    "public_summary": {
+      "asset_count": 2,
+      "intent_count": 2,
+      "final_state": "failed"
+    },
+    "share_payload": {
+      "title": "Swap cycle cycle_beta",
+      "subtitle": "Final state: failed",
+      "badge": "failed"
+    },
+    "privacy": {
+      "default_mode": "public_safe",
+      "modes": [
+        "public_safe",
+        "private"
+      ],
+      "redacted_fields": [
+        "intent_ids",
+        "asset_ids"
+      ],
+      "toggle_allowed": true
+    }
+  }
+}

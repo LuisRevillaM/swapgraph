@@ -1,7 +1,7 @@
 # M107 PRD Review Closure — Decision Checklist
 
 Date: 2026-02-21
-Status: Draft for approval (PRD-only mode)
+Status: Approved and implemented (fixtures-first, verifier-closed on 2026-02-22)
 
 Purpose: close execution-governance decisions so LP settlement can operate safely under operator-assisted controls, especially for Steam-first constraints.
 
@@ -48,3 +48,8 @@ Purpose: close execution-governance decisions so LP settlement can operate safel
 
 ## PRD approval gate (M107)
 M107 is ready for implementation planning only when D1–D7 are explicitly approved or amended.
+
+## Implementation closure evidence
+- `INTEGRATION_ENABLED=1 npm run verify:m107` exits 0.
+- `node verify/runner.mjs milestones/M107.yaml` returns `overall=true`.
+- Canonical output hash locked in `fixtures/release/m107_expected.json` and artifacts published under `artifacts/milestones/M107/latest/*`.

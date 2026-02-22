@@ -1,0 +1,30 @@
+{
+  "correlation_id": "corr_liquiditypolicy_upsert",
+  "provider_id": "lp_house_alpha",
+  "policy": {
+    "provider_id": "lp_house_alpha",
+    "policy_id": "lp_policy_alpha",
+    "version": 4,
+    "policy_mode": "constrained_auto",
+    "precedence_assertion": "safety>trust>lp_autonomy_policy>commercial>preference",
+    "max_spread_bps": 320,
+    "max_daily_value_usd": 18000,
+    "max_counterparty_exposure_usd": 4500,
+    "min_price_confidence_bps": 7600,
+    "blocked_asset_liquidity_tiers": [
+      "critical"
+    ],
+    "high_volatility_mode": "quote_only",
+    "policy_ref": {
+      "policy_id": "lp_policy_alpha",
+      "policy_version": 4,
+      "policy_mode": "constrained_auto",
+      "constraints_hash": "sha256:0a3f37f94b37d905d8644f7428ea8ed6f1a34ff5c93f8a8a2f4406d476ca2e1f"
+    },
+    "updated_at": "2026-02-22T14:00:00Z",
+    "updated_by": {
+      "type": "partner",
+      "id": "partner_alpha"
+    }
+  }
+}

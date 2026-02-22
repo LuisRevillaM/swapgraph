@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/CommercialQuotaPolicyUpsertRequest.schema.json",
+  "title": "CommercialQuotaPolicyUpsertRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["policy"],
+  "properties": {
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "monthly_quota_units",
+        "overage_enabled",
+        "overage_unit_price_usd",
+        "hard_stop_on_quota_exceeded"
+      ],
+      "properties": {
+        "monthly_quota_units": { "type": "integer", "minimum": 0 },
+        "overage_enabled": { "type": "boolean" },
+        "overage_unit_price_usd": { "type": "number", "minimum": 0 },
+        "hard_stop_on_quota_exceeded": { "type": "boolean" }
+      }
+    },
+    "recorded_at": { "type": "string", "format": "date-time" }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "mode": {
+    "mode": "constrained_auto",
+    "restricted_adapter_context": true,
+    "override_policy": {
+      "override_id": "override_lp_alpha_001",
+      "approved_by": {
+        "type": "partner",
+        "id": "partner_alpha"
+      },
+      "approved_at": "2026-02-22T12:00:00Z",
+      "reason_codes": [
+        "manual_governance_approved"
+      ],
+      "expires_at": "2026-03-22T12:00:00Z"
+    },
+    "updated_at": "2026-02-22T12:05:00Z"
+  }
+}

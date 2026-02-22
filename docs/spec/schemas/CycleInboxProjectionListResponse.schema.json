@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/CycleInboxProjectionListResponse.schema.json",
+  "title": "CycleInboxProjectionListResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "cards",
+    "total_filtered"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cards": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "cycle_id",
+          "give_assets",
+          "get_assets",
+          "confidence_score_bps",
+          "explainability",
+          "deadline_at",
+          "fee_summary"
+        ],
+        "properties": {
+          "cycle_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "give_assets": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "get_assets": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "confidence_score_bps": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000
+          },
+          "explainability": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "deadline_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "fee_summary": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "total_fee_usd",
+              "participant_fee_count"
+            ],
+            "properties": {
+              "total_fee_usd": {
+                "type": "number",
+                "minimum": 0
+              },
+              "participant_fee_count": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "total_filtered": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

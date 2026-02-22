@@ -1,0 +1,21 @@
+{
+  "correlation_id": "corr_commercialpolicy_subscription_tier_get",
+  "policy": {
+    "partner_id": "partner_demo",
+    "version": 3,
+    "tier": "pro",
+    "monthly_subscription_usd": 99,
+    "trust_milestone_required": "established_history",
+    "max_cycle_notional_usd": 1200,
+    "max_open_intents": 120,
+    "mobile_contract_notes": [
+      "App Store entitlements are advisory in v1 contracts.",
+      "Server-side trust milestones remain authoritative for caps."
+    ],
+    "updated_at": "2026-02-21T16:05:00Z",
+    "updated_by": {
+      "type": "partner",
+      "id": "partner_demo"
+    }
+  }
+}

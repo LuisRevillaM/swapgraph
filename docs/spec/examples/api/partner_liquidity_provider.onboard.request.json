@@ -1,0 +1,15 @@
+{
+  "provider": {
+    "external_provider_id": "ext_lp_alpha",
+    "owner_actor": {
+      "type": "partner",
+      "id": "partner_alpha"
+    },
+    "legal_entity_name": "Alpha Liquidity LLC",
+    "trust_contact_email": "risk@alpha-liquidity.example",
+    "disclosure_text": "External partner LP routed through deterministic governance gates.",
+    "segment_tier": "S1",
+    "status": "pending_review"
+  },
+  "recorded_at": "2026-02-22T16:00:00Z"
+}

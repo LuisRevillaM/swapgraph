@@ -1,0 +1,41 @@
+name: M100
+commands:
+  - cmd: "npm run verify:m100"
+artifacts:
+  - artifact: "docs/prd/M100.md"
+  - artifact: "docs/STATUS.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/ERRORS.md"
+  - artifact: "docs/spec/GAPS.md"
+  - artifact: "docs/spec/CONFORMANCE.md"
+
+  - artifact: "docs/spec/api/manifest.v1.json"
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+  - artifact: "docs/spec/examples/api/metrics.north_star.get.response.json"
+  - artifact: "docs/spec/examples/api/metrics.marketplace_funnel.get.response.json"
+  - artifact: "docs/spec/examples/api/metrics.partner_health.get.response.json"
+  - artifact: "docs/spec/examples/api/metrics.safety_health.get.response.json"
+  - artifact: "docs/spec/examples/api/metrics.network_health.export.response.json"
+
+  - artifact: "docs/spec/schemas/MetricsNorthStarGetResponse.schema.json"
+  - artifact: "docs/spec/schemas/MetricsMarketplaceFunnelGetResponse.schema.json"
+  - artifact: "docs/spec/schemas/MetricsPartnerHealthGetResponse.schema.json"
+  - artifact: "docs/spec/schemas/MetricsSafetyHealthGetResponse.schema.json"
+  - artifact: "docs/spec/schemas/MetricsNetworkHealthExportResponse.schema.json"
+
+  - artifact: "src/service/metricsNetworkHealthService.mjs"
+  - artifact: "src/server/runtimeApiServer.mjs"
+  - artifact: "src/store/jsonStateStore.mjs"
+  - artifact: "scripts/run-m100-metrics-network-health-scenario.mjs"
+  - artifact: "fixtures/release/m100_scenario.json"
+  - artifact: "fixtures/release/m100_expected.json"
+  - artifact: "milestones/M100.yaml"
+  - artifact: "verify/m100.sh"
+
+  - artifact: "artifacts/milestones/M100/latest/commands.log"
+  - artifact: "artifacts/milestones/M100/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M100/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M100/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M100/latest/metrics_network_health_output.json"
+  - artifact: "artifacts/milestones/M100/latest/store.json"
+  - artifact: "artifacts/milestones/M100/latest/assertions.json"

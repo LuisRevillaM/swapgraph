@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MetricsSafetyHealthGetResponse.schema.json",
+  "title": "MetricsSafetyHealthGetResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "partner_id",
+    "window",
+    "safety_health"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "partner_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "window": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "from_iso",
+        "to_iso",
+        "bucket"
+      ],
+      "properties": {
+        "from_iso": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "to_iso": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "bucket": {
+          "type": "string",
+          "enum": [
+            "hour",
+            "day",
+            "week"
+          ]
+        }
+      }
+    },
+    "safety_health": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fraud_flags_count",
+        "confirmed_abuse_count",
+        "unwind_rate_bps",
+        "felt_safe_proxy_bps",
+        "felt_safe_proxy_numerator",
+        "felt_safe_proxy_denominator",
+        "fraud_flags_per_1000_intents",
+        "fraud_flags_per_1000_intents_numerator",
+        "fraud_flags_per_1000_intents_denominator"
+      ],
+      "properties": {
+        "fraud_flags_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "confirmed_abuse_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unwind_rate_bps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "felt_safe_proxy_bps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "felt_safe_proxy_numerator": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "felt_safe_proxy_denominator": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "fraud_flags_per_1000_intents": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "fraud_flags_per_1000_intents_numerator": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "fraud_flags_per_1000_intents_denominator": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/ReceiptShareProjectionResponse.schema.json",
+  "title": "ReceiptShareProjectionResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "receipt_share"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "receipt_share": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "receipt_id",
+        "cycle_id",
+        "final_state",
+        "created_at",
+        "public_summary",
+        "share_payload",
+        "privacy"
+      ],
+      "properties": {
+        "receipt_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cycle_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "final_state": {
+          "type": "string",
+          "enum": [
+            "completed",
+            "failed"
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "public_summary": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "asset_count",
+            "intent_count",
+            "final_state"
+          ],
+          "properties": {
+            "asset_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "intent_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "final_state": {
+              "type": "string",
+              "enum": [
+                "completed",
+                "failed"
+              ]
+            }
+          }
+        },
+        "share_payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "title",
+            "subtitle",
+            "badge"
+          ],
+          "properties": {
+            "title": {
+              "type": "string",
+              "minLength": 1
+            },
+            "subtitle": {
+              "type": "string",
+              "minLength": 1
+            },
+            "badge": {
+              "type": "string",
+              "enum": [
+                "completed",
+                "failed"
+              ]
+            }
+          }
+        },
+        "privacy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "default_mode",
+            "modes",
+            "redacted_fields",
+            "toggle_allowed"
+          ],
+          "properties": {
+            "default_mode": {
+              "type": "string",
+              "enum": [
+                "public_safe",
+                "private"
+              ]
+            },
+            "modes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "public_safe",
+                  "private"
+                ]
+              },
+              "uniqueItems": true
+            },
+            "redacted_fields": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "toggle_allowed": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    }
+  }
+}

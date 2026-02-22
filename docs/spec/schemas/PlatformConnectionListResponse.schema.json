@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/PlatformConnectionListResponse.schema.json",
+  "title": "PlatformConnectionListResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "connections"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "connections": {
+      "type": "array",
+      "items": {
+        "$ref": "https://swapgraph.dev/schemas/PlatformConnection.schema.json"
+      }
+    }
+  }
+}

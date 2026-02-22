@@ -1,0 +1,14 @@
+{
+  "decision": {
+    "operator_actor": {
+      "type": "partner",
+      "id": "partner_alpha"
+    },
+    "reason_codes": [
+      "risk_review_cleared",
+      "operator_confirmed"
+    ],
+    "correlation_id": "corr_lpexec_approve_000001",
+    "approved_at": "2026-02-22T12:20:00Z"
+  }
+}

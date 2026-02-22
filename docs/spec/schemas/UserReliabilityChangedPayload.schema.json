@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/UserReliabilityChangedPayload.schema.json",
+  "title": "UserReliabilityChangedPayload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "user_id",
+    "from_tier",
+    "to_tier",
+    "reason_code",
+    "changed_at"
+  ],
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "from_tier": {
+      "type": "string",
+      "minLength": 1
+    },
+    "to_tier": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reason_code": {
+      "type": "string",
+      "minLength": 1
+    },
+    "changed_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

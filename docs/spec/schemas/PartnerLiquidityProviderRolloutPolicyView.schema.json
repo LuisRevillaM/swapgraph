@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/PartnerLiquidityProviderRolloutPolicyView.schema.json",
+  "title": "PartnerLiquidityProviderRolloutPolicyView",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "provider_id",
+    "rollout_version",
+    "rollout_status",
+    "effective_segment_tier",
+    "capability_matrix",
+    "reason_codes",
+    "eligibility_ref",
+    "capabilities_hash",
+    "updated_at",
+    "updated_by"
+  ],
+  "properties": {
+    "provider_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rollout_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "rollout_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "paused",
+        "blocked"
+      ]
+    },
+    "effective_segment_tier": {
+      "type": "string",
+      "enum": [
+        "S0",
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    "capability_matrix": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "capability",
+          "min_segment_tier",
+          "requested_enabled",
+          "effective_enabled"
+        ],
+        "properties": {
+          "capability": {
+            "type": "string",
+            "minLength": 1
+          },
+          "min_segment_tier": {
+            "type": "string",
+            "enum": [
+              "S0",
+              "S1",
+              "S2",
+              "S3"
+            ]
+          },
+          "requested_enabled": {
+            "type": "boolean"
+          },
+          "effective_enabled": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "eligibility_ref": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "evaluation_id",
+        "verdict",
+        "evaluated_at"
+      ],
+      "properties": {
+        "evaluation_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "verdict": {
+          "type": "string",
+          "enum": [
+            "allow",
+            "deny"
+          ]
+        },
+        "evaluated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "capabilities_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_by": {
+      "$ref": "ActorRef.schema.json"
+    }
+  }
+}

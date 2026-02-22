@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquidityInventoryReconciliationEntry.schema.json",
+  "title": "LiquidityInventoryReconciliationEntry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "entry_id",
+    "provider_id",
+    "occurred_at",
+    "event_type",
+    "holding_id",
+    "asset_id",
+    "quantity",
+    "reservation_id",
+    "cycle_id",
+    "snapshot_id",
+    "status_from",
+    "status_to",
+    "owner_actor",
+    "details"
+  ],
+  "properties": {
+    "entry_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "snapshot_recorded",
+        "reserved",
+        "in_settlement",
+        "released",
+        "refunded",
+        "withdrawn",
+        "reservation_conflict",
+        "not_available"
+      ]
+    },
+    "holding_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "asset_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "quantity": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "reservation_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "cycle_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "snapshot_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "status_from": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "available",
+        "reserved",
+        "in_settlement",
+        "released",
+        "refunded",
+        "withdrawn",
+        null
+      ]
+    },
+    "status_to": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "available",
+        "reserved",
+        "in_settlement",
+        "released",
+        "refunded",
+        "withdrawn",
+        null
+      ]
+    },
+    "owner_actor": {
+      "$ref": "ActorRef.schema.json"
+    },
+    "details": {
+      "type": "object"
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "sync": {
+    "synced_at": "2026-02-22T09:10:00Z",
+    "intents": [
+      {
+        "intent_id": "intent_sim_1",
+        "actor": {
+          "type": "user",
+          "id": "u1"
+        },
+        "value_usd": 220.5,
+        "status": "active",
+        "liquidity_provider_ref": {
+          "provider_id": "lp_house_alpha",
+          "provider_type": "house_bot",
+          "owner_actor": {
+            "type": "partner",
+            "id": "partner_alpha"
+          },
+          "is_automated": true,
+          "is_house_inventory": true,
+          "label_required": true,
+          "display_label": "Alpha Market Maker",
+          "disclosure_text": "Automated house-liquidity participant.",
+          "active": true,
+          "created_at": "2026-02-21T12:00:00Z",
+          "updated_at": "2026-02-21T12:00:00Z"
+        }
+      },
+      {
+        "intent_id": "intent_sim_2",
+        "actor": {
+          "type": "user",
+          "id": "u2"
+        },
+        "value_usd": 224.75,
+        "status": "active"
+      }
+    ]
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/PlatformConnectionUpsertRequest.schema.json",
+  "title": "PlatformConnectionUpsertRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "connection"
+  ],
+  "properties": {
+    "connection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "platform",
+        "account_ref",
+        "status"
+      ],
+      "properties": {
+        "platform": {
+          "type": "string",
+          "minLength": 1
+        },
+        "account_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "connected",
+            "disconnected",
+            "degraded"
+          ]
+        },
+        "connected_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "metadata": {
+          "type": "object"
+        }
+      }
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

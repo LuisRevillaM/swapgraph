@@ -1,0 +1,23 @@
+{
+  "correlation_id": "corr_trustsafety_decision_record",
+  "decision": {
+    "decision_id": "ts_decision_000001",
+    "subject_actor_type": "user",
+    "subject_actor_id": "u1",
+    "decision": "manual_review",
+    "reason_codes": [
+      "ato_device_drift",
+      "fraud_velocity_spike"
+    ],
+    "contributing_signal_ids": [
+      "ts_signal_000001",
+      "ts_signal_000002"
+    ],
+    "severity": "high",
+    "confidence_score_bps": 9100,
+    "recorded_at": "2026-02-21T13:01:00.000Z",
+    "correlation_id": "risk_eval_7f3a",
+    "dispute_id": "dispute_000001",
+    "reliability_ref": "user_reliability:u1:v12"
+  }
+}

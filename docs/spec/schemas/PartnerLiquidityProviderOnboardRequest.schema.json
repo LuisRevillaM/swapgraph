@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/PartnerLiquidityProviderOnboardRequest.schema.json",
+  "title": "PartnerLiquidityProviderOnboardRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "provider"
+  ],
+  "properties": {
+    "provider": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner_actor",
+        "external_provider_id",
+        "legal_entity_name",
+        "trust_contact_email",
+        "disclosure_text",
+        "segment_tier"
+      ],
+      "properties": {
+        "provider_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "owner_actor": {
+          "$ref": "ActorRef.schema.json"
+        },
+        "external_provider_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "legal_entity_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "trust_contact_email": {
+          "type": "string",
+          "minLength": 3
+        },
+        "disclosure_text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "segment_tier": {
+          "type": "string",
+          "enum": [
+            "S0",
+            "S1",
+            "S2",
+            "S3"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending_review",
+            "active",
+            "restricted",
+            "offboarded"
+          ]
+        }
+      }
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

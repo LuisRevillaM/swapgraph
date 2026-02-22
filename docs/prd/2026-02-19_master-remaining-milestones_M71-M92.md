@@ -16,7 +16,7 @@ Provide one forward plan for **all remaining milestones** so execution can conti
 - **G1 Contract Gate**: PRD + API/spec/schema/example updates in repo.
 - **G2 Deterministic Fixture Gate**: scenario + expected fixture + assertions artifact.
 - **G3 Verifier Gate**: `npm run verify:mXX` passes.
-- **G4 Runner Gate**: `node verify/runner.ts milestones/MXX.yaml` returns `overall=true`.
+- **G4 Runner Gate**: `node verify/runner.mjs milestones/MXX.yaml` returns `overall=true`.
 - **G5 Integrity Gate**: hash/signature/tamper-fail checks where payloads are signed.
 - **G6 Authz Gate**: scope/tenancy/role enforcement proofs where endpoint is privileged.
 - **G7 Continuity Gate**: attestation/checkpoint/retention proofs for paginated export surfaces.
@@ -132,5 +132,5 @@ When **M92** passes, the repo has coverage across:
 For each milestone above, continue current process unchanged:
 1. implement scoped delta,
 2. run `npm run verify:mXX`,
-3. run `node verify/runner.ts milestones/MXX.yaml`,
+3. run `node verify/runner.mjs milestones/MXX.yaml`,
 4. commit + push to `main` only after both gates pass.

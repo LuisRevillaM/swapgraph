@@ -1,0 +1,17 @@
+{
+  "releases": [
+    {
+      "reservation_id": "lpinv_res_alpha_001",
+      "target_status": "in_settlement",
+      "cycle_id": "cycle_lp_alpha_001",
+      "holding_id": "steam:asset_ak47_redline"
+    },
+    {
+      "reservation_id": "lpinv_res_alpha_002",
+      "target_status": "released",
+      "cycle_id": "cycle_lp_alpha_001",
+      "holding_id": "steam:asset_awp_asiimov"
+    }
+  ],
+  "recorded_at": "2026-02-22T11:10:00Z"
+}

@@ -1,0 +1,49 @@
+{
+  "correlation_id": "corr_partnerliquidityprovider_get",
+  "provider": {
+    "provider_id": "plp_000001",
+    "owner_actor": {
+      "type": "partner",
+      "id": "partner_alpha"
+    },
+    "external_provider_id": "ext_lp_alpha",
+    "legal_entity_name": "Alpha Liquidity LLC",
+    "trust_contact_email": "risk@alpha-liquidity.example",
+    "disclosure_text": "External partner LP routed through deterministic governance gates.",
+    "segment_tier": "S1",
+    "status": "active",
+    "governance": {
+      "trust_safety_baseline_passed": true,
+      "reliability_baseline_passed": true,
+      "audit_conformance_passed": true,
+      "unresolved_critical_violations": 0
+    },
+    "rollout_policy_ref": {
+      "rollout_version": 1,
+      "rollout_status": "active",
+      "effective_segment_tier": "S2",
+      "capabilities_hash": "sha256:65787ec7401553f69d31dc1dd3d3ec6725f09a0cc4324e337373289ed40623d8"
+    },
+    "last_eligibility": {
+      "evaluation_id": "plpelig_a7f89c227eec0c2d",
+      "verdict": "allow",
+      "reason_codes": [],
+      "requested_segment_tier": "S2",
+      "current_segment_tier": "S1",
+      "recommended_status": "active",
+      "evaluated_at": "2026-02-22T16:20:00.000Z",
+      "inputs": {
+        "requested_segment_tier": "S2",
+        "trust_safety_baseline_passed": true,
+        "reliability_baseline_passed": true,
+        "audit_conformance_passed": true,
+        "unresolved_critical_violations": 0,
+        "consecutive_compliant_windows": 2,
+        "capability_family": "advanced",
+        "remediation_closed": true
+      }
+    },
+    "created_at": "2026-02-22T16:00:00.000Z",
+    "updated_at": "2026-02-22T16:30:00.000Z"
+  }
+}

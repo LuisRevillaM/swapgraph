@@ -1,0 +1,261 @@
+{
+  "actors": {
+    "user_u1": {
+      "type": "user",
+      "id": "u1"
+    },
+    "partner_demo": {
+      "type": "partner",
+      "id": "partner_demo"
+    }
+  },
+  "operations": [
+    {
+      "op": "platform.connections.upsert",
+      "actor_ref": "user_u1",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m98_pc_1",
+      "request": {
+        "connection": {
+          "platform": "steam",
+          "account_ref": "steam:u_001",
+          "status": "connected",
+          "connected_at": "2026-02-21T12:00:00Z",
+          "metadata": {
+            "region": "us-east"
+          }
+        },
+        "recorded_at": "2026-02-21T12:00:05Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_status": "connected"
+    },
+    {
+      "op": "platform.connections.upsert",
+      "actor_ref": "user_u1",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m98_pc_1",
+      "request": {
+        "connection": {
+          "platform": "steam",
+          "account_ref": "steam:u_001",
+          "status": "connected",
+          "connected_at": "2026-02-21T12:00:00Z",
+          "metadata": {
+            "region": "us-east"
+          }
+        },
+        "recorded_at": "2026-02-21T12:00:05Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": true,
+      "expect_status": "connected"
+    },
+    {
+      "op": "platform.connections.upsert",
+      "actor_ref": "user_u1",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m98_pc_1",
+      "request": {
+        "connection": {
+          "platform": "steam",
+          "account_ref": "steam:u_001",
+          "status": "degraded",
+          "connected_at": "2026-02-21T12:00:00Z",
+          "metadata": {
+            "region": "us-east"
+          }
+        },
+        "recorded_at": "2026-02-21T12:00:05Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    },
+    {
+      "op": "platform.connections.list",
+      "actor_ref": "user_u1",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "expect_ok": true,
+      "expect_connections_count": 1
+    },
+    {
+      "op": "inventory.snapshots.record",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m98_inv_1",
+      "request": {
+        "snapshot": {
+          "platform": "steam",
+          "captured_at": "2026-02-21T12:10:00Z",
+          "assets": [
+            {
+              "asset_id": "assetA",
+              "quantity": 1,
+              "metadata": {
+                "wear": "fn"
+              }
+            },
+            {
+              "asset_id": "assetB",
+              "quantity": 2,
+              "metadata": {}
+            }
+          ]
+        },
+        "recorded_at": "2026-02-21T12:10:30Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_snapshot_id": "inv_snapshot_000001",
+      "expect_assets_count": 2
+    },
+    {
+      "op": "inventory.assets.list",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "platform": "steam"
+      },
+      "expect_ok": true,
+      "expect_assets_count": 2
+    },
+    {
+      "op": "inventory.assets.list",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "unsupported": "1"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "inventory_asset_query_invalid"
+    },
+    {
+      "op": "disputes.create",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m98_dispute_1",
+      "request": {
+        "dispute": {
+          "dispute_type": "delivery",
+          "severity": "medium",
+          "subject_ref": "cycle_4f27eb196224",
+          "reason_code": "delivery_timeout",
+          "opened_at": "2026-02-21T12:20:00Z",
+          "evidence_items": [
+            {
+              "artifact_ref": "receipt://rcpt_123",
+              "kind": "receipt_ref"
+            }
+          ]
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_dispute_id": "dispute_000001",
+      "expect_dispute_status": "open"
+    },
+    {
+      "op": "disputes.get",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "dispute_id_ref": "last_created",
+      "expect_ok": true,
+      "expect_dispute_id": "dispute_000001",
+      "expect_dispute_status": "open"
+    },
+    {
+      "op": "disputes.get",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "dispute_id": "dispute_999999",
+      "expect_ok": false,
+      "expect_error_code": "NOT_FOUND",
+      "expect_reason_code": "dispute_not_found"
+    }
+  ],
+  "event_payload_checks": [
+    {
+      "type": "proposal.cancelled",
+      "payload": {
+        "proposal_id": "cycle_4f27eb196224",
+        "cycle_id": "cycle_4f27eb196224",
+        "reason_code": "user_cancelled",
+        "cancelled_at": "2026-02-21T12:30:00Z"
+      },
+      "expect_ok": true
+    },
+    {
+      "type": "cycle.failed",
+      "payload": {
+        "cycle_id": "cycle_4f27eb196224",
+        "from_state": "accepted",
+        "reason_code": "deposit_timeout",
+        "failed_at": "2026-02-21T12:31:00Z"
+      },
+      "expect_ok": true
+    },
+    {
+      "type": "user.reliability_changed",
+      "payload": {
+        "user_id": "u1",
+        "from_tier": "standard",
+        "to_tier": "probation",
+        "reason_code": "dispute_rate_high",
+        "changed_at": "2026-02-21T12:32:00Z"
+      },
+      "expect_ok": true
+    },
+    {
+      "type": "user.reliability_changed",
+      "payload": {
+        "user_id": "u1",
+        "from_tier": "standard",
+        "to_tier": "probation",
+        "changed_at": "2026-02-21T12:33:00Z"
+      },
+      "expect_ok": false
+    }
+  ]
+}

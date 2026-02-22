@@ -1,0 +1,45 @@
+{
+  "correlation_id": "corr_liquidityexecution_request_reject",
+  "provider_id": "lp_house_alpha",
+  "execution_request": {
+    "request_id": "lpexec_req_000002",
+    "provider_id": "lp_house_alpha",
+    "proposal_id": "proposal_lp_alpha_002",
+    "cycle_id": "cycle_lp_alpha_002",
+    "intent_ids": [
+      "intent_lp_alpha_002"
+    ],
+    "action_type": "settlement_cancel",
+    "risk_class": "medium",
+    "reason_codes": [
+      "inventory_shift",
+      "counterparty_unresponsive"
+    ],
+    "correlation_id": "corr_lpexec_req_000002",
+    "requested_at": "2026-02-22T12:25:00Z",
+    "requested_by": {
+      "type": "partner",
+      "id": "partner_alpha"
+    },
+    "mode_snapshot": {
+      "mode": "operator_assisted",
+      "restricted_adapter_context": true,
+      "override_policy": null
+    },
+    "metadata": {
+      "platform": "steam"
+    },
+    "status": "rejected",
+    "decision": "reject",
+    "operator_actor": {
+      "type": "partner",
+      "id": "partner_alpha"
+    },
+    "decision_reason_codes": [
+      "platform_policy_pending",
+      "risk_review_failed"
+    ],
+    "decision_correlation_id": "corr_lpexec_reject_000002",
+    "decided_at": "2026-02-22T12:30:00Z"
+  }
+}

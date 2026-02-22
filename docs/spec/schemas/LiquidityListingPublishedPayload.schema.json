@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquidityListingPublishedPayload.schema.json",
+  "title": "LiquidityListingPublishedPayload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "provider_id",
+    "intent_id",
+    "status",
+    "policy_ref",
+    "listed_at"
+  ],
+  "properties": {
+    "provider_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "intent_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "cancelled"
+      ]
+    },
+    "policy_ref": {
+      "$ref": "LiquidityPolicyRef.schema.json"
+    },
+    "listed_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

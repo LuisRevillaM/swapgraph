@@ -1,0 +1,9 @@
+{
+  "session": {
+    "session_id": "lsim_demo_alpha",
+    "label": "Alpha LP Strategy Dry Run",
+    "mode": "simulation",
+    "seed": "seed-alpha-001"
+  },
+  "started_at": "2026-02-22T09:00:00Z"
+}

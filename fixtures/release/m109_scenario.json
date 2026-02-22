@@ -1,0 +1,637 @@
+{
+  "actors": {
+    "partner_alpha": {
+      "type": "partner",
+      "id": "partner_alpha"
+    }
+  },
+  "seed_state": {},
+  "operations": [
+    {
+      "op": "partnerLiquidityProvider.get",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "provider_id": "plp_missing",
+      "expect_ok": false,
+      "expect_error_code": "NOT_FOUND",
+      "expect_reason_code": "partner_liquidity_provider_not_found"
+    },
+    {
+      "op": "partnerLiquidityProvider.onboard",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m109_onboard_invalid_1",
+      "skip_request_validation": true,
+      "request": {
+        "provider": {
+          "external_provider_id": "ext_lp_alpha"
+        },
+        "recorded_at": "2026-02-22T16:00:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "partner_liquidity_provider_invalid"
+    },
+    {
+      "op": "partnerLiquidityProvider.onboard",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m109_onboard_alpha_1",
+      "request": {
+        "provider": {
+          "external_provider_id": "ext_lp_alpha",
+          "owner_actor": {
+            "type": "partner",
+            "id": "partner_alpha"
+          },
+          "legal_entity_name": "Alpha Liquidity LLC",
+          "trust_contact_email": "risk@alpha-liquidity.example",
+          "disclosure_text": "External partner LP routed through deterministic governance gates.",
+          "segment_tier": "S1",
+          "status": "pending_review"
+        },
+        "recorded_at": "2026-02-22T16:00:10Z"
+      },
+      "save_provider_ref": "provider_alpha",
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_provider_id": "plp_000001",
+      "expect_status": "pending_review",
+      "expect_segment_tier": "S1"
+    },
+    {
+      "op": "partnerLiquidityProvider.onboard",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m109_onboard_alpha_1",
+      "request": {
+        "provider": {
+          "external_provider_id": "ext_lp_alpha",
+          "owner_actor": {
+            "type": "partner",
+            "id": "partner_alpha"
+          },
+          "legal_entity_name": "Alpha Liquidity LLC",
+          "trust_contact_email": "risk@alpha-liquidity.example",
+          "disclosure_text": "External partner LP routed through deterministic governance gates.",
+          "segment_tier": "S1",
+          "status": "pending_review"
+        },
+        "recorded_at": "2026-02-22T16:00:10Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": true,
+      "expect_provider_id": "plp_000001"
+    },
+    {
+      "op": "partnerLiquidityProvider.onboard",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m109_onboard_alpha_1",
+      "request": {
+        "provider": {
+          "external_provider_id": "ext_lp_alpha_changed",
+          "owner_actor": {
+            "type": "partner",
+            "id": "partner_alpha"
+          },
+          "legal_entity_name": "Alpha Liquidity LLC",
+          "trust_contact_email": "risk@alpha-liquidity.example",
+          "disclosure_text": "External partner LP routed through deterministic governance gates.",
+          "segment_tier": "S1",
+          "status": "pending_review"
+        },
+        "recorded_at": "2026-02-22T16:00:11Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    },
+    {
+      "op": "partnerLiquidityProvider.get",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "expect_ok": true,
+      "expect_provider_id": "plp_000001",
+      "expect_status": "pending_review",
+      "expect_segment_tier": "S1",
+      "expect_rollout_version": null
+    },
+    {
+      "op": "partnerLiquidityProvider.status.upsert",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "idempotency_key": "m109_status_active_blocked_1",
+      "request": {
+        "status": {
+          "status": "active",
+          "segment_tier": "S1",
+          "trust_safety_baseline_passed": false,
+          "reliability_baseline_passed": false,
+          "audit_conformance_passed": false,
+          "unresolved_critical_violations": 2
+        },
+        "recorded_at": "2026-02-22T16:10:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONFLICT",
+      "expect_reason_code": "partner_liquidity_provider_downgrade_required"
+    },
+    {
+      "op": "partnerLiquidityProvider.status.upsert",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "idempotency_key": "m109_status_restricted_1",
+      "request": {
+        "status": {
+          "status": "restricted",
+          "segment_tier": "S1",
+          "trust_safety_baseline_passed": false,
+          "reliability_baseline_passed": false,
+          "audit_conformance_passed": false,
+          "unresolved_critical_violations": 2,
+          "reason_codes": [
+            "incident_open",
+            "manual_lock"
+          ]
+        },
+        "recorded_at": "2026-02-22T16:11:00Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_status": "restricted",
+      "expect_segment_tier": "S1",
+      "expect_unresolved_critical_violations": 2,
+      "expect_reason_codes_count": 2
+    },
+    {
+      "op": "partnerLiquidityProvider.eligibility.evaluate",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "idempotency_key": "m109_eligibility_deny_1",
+      "request": {
+        "eligibility": {
+          "requested_segment_tier": "S2",
+          "trust_safety_baseline_passed": false,
+          "reliability_baseline_passed": false,
+          "audit_conformance_passed": false,
+          "unresolved_critical_violations": 2,
+          "consecutive_compliant_windows": 0,
+          "capability_family": "advanced",
+          "remediation_closed": false
+        },
+        "recorded_at": "2026-02-22T16:12:00Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_verdict": "deny",
+      "expect_reason_codes_count": 2,
+      "expect_reason_codes": [
+        "partner_liquidity_provider_eligibility_failed",
+        "partner_liquidity_provider_downgrade_required"
+      ],
+      "expect_recommended_status": "restricted"
+    },
+    {
+      "op": "partnerLiquidityProvider.rollout.upsert",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "idempotency_key": "m109_rollout_blocked_eligibility_1",
+      "request": {
+        "rollout": {
+          "rollout_status": "active",
+          "effective_segment_tier": "S2",
+          "capability_matrix": [
+            {
+              "capability": "listing_publish",
+              "min_segment_tier": "S1",
+              "enabled": true
+            }
+          ],
+          "reason_codes": [
+            "promotion_attempt"
+          ]
+        },
+        "recorded_at": "2026-02-22T16:13:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONFLICT",
+      "expect_reason_code": "partner_liquidity_provider_rollout_blocked"
+    },
+    {
+      "op": "partnerLiquidityProvider.status.upsert",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "idempotency_key": "m109_status_active_1",
+      "request": {
+        "status": {
+          "status": "active",
+          "segment_tier": "S1",
+          "trust_safety_baseline_passed": true,
+          "reliability_baseline_passed": true,
+          "audit_conformance_passed": true,
+          "unresolved_critical_violations": 0,
+          "reason_codes": [
+            "manual_review_complete"
+          ]
+        },
+        "recorded_at": "2026-02-22T16:14:00Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_status": "active",
+      "expect_unresolved_critical_violations": 0
+    },
+    {
+      "op": "partnerLiquidityProvider.eligibility.evaluate",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "idempotency_key": "m109_eligibility_allow_1",
+      "request": {
+        "eligibility": {
+          "requested_segment_tier": "S2",
+          "trust_safety_baseline_passed": true,
+          "reliability_baseline_passed": true,
+          "audit_conformance_passed": true,
+          "unresolved_critical_violations": 0,
+          "consecutive_compliant_windows": 2,
+          "capability_family": "advanced",
+          "remediation_closed": true
+        },
+        "recorded_at": "2026-02-22T16:20:00Z"
+      },
+      "save_evaluation_ref": "eligibility_allow_1",
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_verdict": "allow",
+      "expect_reason_codes_count": 0,
+      "expect_recommended_status": "active",
+      "expect_requested_segment_tier": "S2"
+    },
+    {
+      "op": "partnerLiquidityProvider.eligibility.evaluate",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "idempotency_key": "m109_eligibility_allow_1",
+      "request": {
+        "eligibility": {
+          "requested_segment_tier": "S2",
+          "trust_safety_baseline_passed": true,
+          "reliability_baseline_passed": true,
+          "audit_conformance_passed": true,
+          "unresolved_critical_violations": 0,
+          "consecutive_compliant_windows": 2,
+          "capability_family": "advanced",
+          "remediation_closed": true
+        },
+        "recorded_at": "2026-02-22T16:20:00Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": true,
+      "expect_verdict": "allow"
+    },
+    {
+      "op": "partnerLiquidityProvider.eligibility.evaluate",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "idempotency_key": "m109_eligibility_allow_1",
+      "request": {
+        "eligibility": {
+          "requested_segment_tier": "S2",
+          "trust_safety_baseline_passed": true,
+          "reliability_baseline_passed": true,
+          "audit_conformance_passed": true,
+          "unresolved_critical_violations": 0,
+          "consecutive_compliant_windows": 3,
+          "capability_family": "advanced",
+          "remediation_closed": true
+        },
+        "recorded_at": "2026-02-22T16:21:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    },
+    {
+      "op": "partnerLiquidityProvider.rollout.upsert",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "idempotency_key": "m109_rollout_blocked_segment_1",
+      "request": {
+        "rollout": {
+          "rollout_status": "active",
+          "effective_segment_tier": "S2",
+          "capability_matrix": [
+            {
+              "capability": "listing_publish",
+              "min_segment_tier": "S1",
+              "enabled": true
+            },
+            {
+              "capability": "settlement_execute",
+              "min_segment_tier": "S3",
+              "enabled": true
+            }
+          ],
+          "reason_codes": [
+            "promotion_approved"
+          ]
+        },
+        "recorded_at": "2026-02-22T16:25:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONFLICT",
+      "expect_reason_code": "partner_liquidity_provider_rollout_blocked"
+    },
+    {
+      "op": "partnerLiquidityProvider.rollout.upsert",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "idempotency_key": "m109_rollout_active_1",
+      "request": {
+        "rollout": {
+          "rollout_status": "active",
+          "effective_segment_tier": "S2",
+          "capability_matrix": [
+            {
+              "capability": "listing_publish",
+              "min_segment_tier": "S1",
+              "enabled": true
+            },
+            {
+              "capability": "proposal_auto_accept",
+              "min_segment_tier": "S2",
+              "enabled": true
+            },
+            {
+              "capability": "settlement_execute",
+              "min_segment_tier": "S3",
+              "enabled": false
+            }
+          ],
+          "reason_codes": [
+            "promotion_approved"
+          ]
+        },
+        "recorded_at": "2026-02-22T16:30:00Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_rollout_version": 1,
+      "expect_rollout_status": "active",
+      "expect_effective_segment_tier": "S2",
+      "expect_reason_codes_count": 1,
+      "expect_effective_enabled_count": 2
+    },
+    {
+      "op": "partnerLiquidityProvider.rollout.upsert",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "idempotency_key": "m109_rollout_active_1",
+      "request": {
+        "rollout": {
+          "rollout_status": "active",
+          "effective_segment_tier": "S2",
+          "capability_matrix": [
+            {
+              "capability": "listing_publish",
+              "min_segment_tier": "S1",
+              "enabled": true
+            },
+            {
+              "capability": "proposal_auto_accept",
+              "min_segment_tier": "S2",
+              "enabled": true
+            },
+            {
+              "capability": "settlement_execute",
+              "min_segment_tier": "S3",
+              "enabled": false
+            }
+          ],
+          "reason_codes": [
+            "promotion_approved"
+          ]
+        },
+        "recorded_at": "2026-02-22T16:30:00Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": true,
+      "expect_rollout_version": 1
+    },
+    {
+      "op": "partnerLiquidityProvider.rollout.upsert",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "idempotency_key": "m109_rollout_active_1",
+      "request": {
+        "rollout": {
+          "rollout_status": "paused",
+          "effective_segment_tier": "S2",
+          "capability_matrix": [
+            {
+              "capability": "listing_publish",
+              "min_segment_tier": "S1",
+              "enabled": true
+            }
+          ],
+          "reason_codes": [
+            "promotion_approved"
+          ]
+        },
+        "recorded_at": "2026-02-22T16:31:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    },
+    {
+      "op": "partnerLiquidityProvider.get",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "expect_ok": true,
+      "expect_provider_id": "plp_000001",
+      "expect_status": "active",
+      "expect_segment_tier": "S2",
+      "expect_rollout_version": 1
+    },
+    {
+      "op": "partnerLiquidityProvider.rollout.export",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "query": {
+        "limit": 2,
+        "now_iso": "2026-02-22T16:40:00Z",
+        "exported_at_iso": "2026-02-22T16:40:00Z"
+      },
+      "save_cursor_ref": "export_cursor_1",
+      "save_attestation_ref": "export_att_1",
+      "save_checkpoint_ref": "export_chk_1",
+      "expect_ok": true,
+      "expect_total_filtered": 6,
+      "expect_entries_count": 2,
+      "expect_first_event_type": "onboarded"
+    },
+    {
+      "op": "partnerLiquidityProvider.rollout.export",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "query": {
+        "limit": 2,
+        "cursor_after_ref": "export_cursor_1",
+        "attestation_after": "deadbeef",
+        "checkpoint_after_ref": "export_chk_1",
+        "now_iso": "2026-02-22T16:41:00Z",
+        "exported_at_iso": "2026-02-22T16:41:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "partner_liquidity_provider_invalid"
+    },
+    {
+      "op": "partnerLiquidityProvider.rollout.export",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "query": {
+        "limit": 2,
+        "cursor_after_ref": "export_cursor_1",
+        "attestation_after_ref": "export_att_1",
+        "checkpoint_after_ref": "export_chk_1",
+        "now_iso": "2026-02-22T16:42:00Z",
+        "exported_at_iso": "2026-02-22T16:42:00Z"
+      },
+      "save_cursor_ref": "export_cursor_2",
+      "save_attestation_ref": "export_att_2",
+      "save_checkpoint_ref": "export_chk_2",
+      "expect_ok": true,
+      "expect_total_filtered": 4,
+      "expect_entries_count": 2,
+      "expect_first_event_type": "eligibility_evaluated"
+    },
+    {
+      "op": "partnerLiquidityProvider.rollout.export",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "provider_id_ref": "provider_alpha",
+      "query": {
+        "limit": 2,
+        "cursor_after_ref": "export_cursor_2",
+        "attestation_after_ref": "export_att_2",
+        "checkpoint_after_ref": "export_chk_2",
+        "now_iso": "2026-02-22T16:43:00Z",
+        "exported_at_iso": "2026-02-22T16:43:00Z"
+      },
+      "expect_ok": true,
+      "expect_total_filtered": 2,
+      "expect_entries_count": 2,
+      "expect_first_event_type": "eligibility_evaluated",
+      "expect_next_cursor": null
+    }
+  ]
+}

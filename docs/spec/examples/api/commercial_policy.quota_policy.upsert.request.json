@@ -1,0 +1,9 @@
+{
+  "policy": {
+    "monthly_quota_units": 120,
+    "overage_enabled": true,
+    "overage_unit_price_usd": 0.35,
+    "hard_stop_on_quota_exceeded": true
+  },
+  "recorded_at": "2026-02-21T16:09:00Z"
+}

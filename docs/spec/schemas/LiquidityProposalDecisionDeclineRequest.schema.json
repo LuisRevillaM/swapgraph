@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquidityProposalDecisionDeclineRequest.schema.json",
+  "title": "LiquidityProposalDecisionDeclineRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "decision"
+  ],
+  "properties": {
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decision_reason_codes",
+        "policy_ref",
+        "confidence_score_bps",
+        "risk_tier_snapshot",
+        "correlation_id",
+        "recorded_at"
+      ],
+      "properties": {
+        "decision_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "decision_reason_codes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "policy_ref": {
+          "$ref": "LiquidityPolicyRef.schema.json"
+        },
+        "confidence_score_bps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "risk_tier_snapshot": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ]
+        },
+        "correlation_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

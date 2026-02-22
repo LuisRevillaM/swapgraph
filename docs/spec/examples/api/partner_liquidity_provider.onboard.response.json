@@ -1,0 +1,24 @@
+{
+  "correlation_id": "corr_partnerliquidityprovider_onboard",
+  "provider": {
+    "provider_id": "plp_000001",
+    "owner_actor": {
+      "type": "partner",
+      "id": "partner_alpha"
+    },
+    "external_provider_id": "ext_lp_alpha",
+    "legal_entity_name": "Alpha Liquidity LLC",
+    "trust_contact_email": "risk@alpha-liquidity.example",
+    "disclosure_text": "External partner LP routed through deterministic governance gates.",
+    "segment_tier": "S1",
+    "status": "pending_review",
+    "governance": {
+      "trust_safety_baseline_passed": false,
+      "reliability_baseline_passed": false,
+      "audit_conformance_passed": false,
+      "unresolved_critical_violations": 0
+    },
+    "created_at": "2026-02-22T16:00:00.000Z",
+    "updated_at": "2026-02-22T16:00:00.000Z"
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquidityExecutionRequestRecordedPayload.schema.json",
+  "title": "LiquidityExecutionRequestRecordedPayload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_id",
+    "provider_id",
+    "action_type",
+    "risk_class",
+    "status",
+    "reason_codes",
+    "correlation_id",
+    "requested_at"
+  ],
+  "properties": {
+    "request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action_type": {
+      "type": "string",
+      "enum": [
+        "settlement_execute",
+        "settlement_cancel",
+        "settlement_retry",
+        "inventory_release"
+      ]
+    },
+    "risk_class": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "const": "pending"
+    },
+    "reason_codes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "requested_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

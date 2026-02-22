@@ -18,6 +18,430 @@
       "schema": "SwapIntentCancelResponse.schema.json"
     },
     {
+      "file": "platform_connections.upsert.request.json",
+      "schema": "PlatformConnectionUpsertRequest.schema.json"
+    },
+    {
+      "file": "platform_connections.upsert.response.json",
+      "schema": "PlatformConnectionUpsertResponse.schema.json"
+    },
+    {
+      "file": "platform_connections.list.response.json",
+      "schema": "PlatformConnectionListResponse.schema.json"
+    },
+    {
+      "file": "inventory.snapshots.record.request.json",
+      "schema": "InventorySnapshotRecordRequest.schema.json"
+    },
+    {
+      "file": "inventory.snapshots.record.response.json",
+      "schema": "InventorySnapshotRecordResponse.schema.json"
+    },
+    {
+      "file": "inventory.assets.list.response.json",
+      "schema": "InventoryAssetListResponse.schema.json"
+    },
+    {
+      "file": "disputes.create.request.json",
+      "schema": "DisputeCreateRequest.schema.json"
+    },
+    {
+      "file": "disputes.create.response.json",
+      "schema": "DisputeCreateResponse.schema.json"
+    },
+    {
+      "file": "disputes.get.response.json",
+      "schema": "DisputeGetResponse.schema.json"
+    },
+    {
+      "file": "trust_safety.signal.record.request.json",
+      "schema": "TrustSafetySignalRecordRequest.schema.json"
+    },
+    {
+      "file": "trust_safety.signal.record.response.json",
+      "schema": "TrustSafetySignalRecordResponse.schema.json"
+    },
+    {
+      "file": "trust_safety.decision.record.request.json",
+      "schema": "TrustSafetyDecisionRecordRequest.schema.json"
+    },
+    {
+      "file": "trust_safety.decision.record.response.json",
+      "schema": "TrustSafetyDecisionRecordResponse.schema.json"
+    },
+    {
+      "file": "trust_safety.decision.get.response.json",
+      "schema": "TrustSafetyDecisionGetResponse.schema.json"
+    },
+    {
+      "file": "trust_safety.decision.export.response.json",
+      "schema": "TrustSafetyDecisionExportResponse.schema.json"
+    },
+    {
+      "file": "metrics.north_star.get.response.json",
+      "schema": "MetricsNorthStarGetResponse.schema.json"
+    },
+    {
+      "file": "metrics.marketplace_funnel.get.response.json",
+      "schema": "MetricsMarketplaceFunnelGetResponse.schema.json"
+    },
+    {
+      "file": "metrics.partner_health.get.response.json",
+      "schema": "MetricsPartnerHealthGetResponse.schema.json"
+    },
+    {
+      "file": "metrics.safety_health.get.response.json",
+      "schema": "MetricsSafetyHealthGetResponse.schema.json"
+    },
+    {
+      "file": "metrics.network_health.export.response.json",
+      "schema": "MetricsNetworkHealthExportResponse.schema.json"
+    },
+    {
+      "file": "notifications.preferences.get.response.json",
+      "schema": "NotificationPreferencesGetResponse.schema.json"
+    },
+    {
+      "file": "notifications.preferences.upsert.request.json",
+      "schema": "NotificationPreferencesUpsertRequest.schema.json"
+    },
+    {
+      "file": "notifications.preferences.upsert.response.json",
+      "schema": "NotificationPreferencesUpsertResponse.schema.json"
+    },
+    {
+      "file": "notifications.inbox.list.response.json",
+      "schema": "NotificationInboxListResponse.schema.json"
+    },
+    {
+      "file": "product_projection.inventory_awakening.get.response.json",
+      "schema": "InventoryAwakeningProjectionResponse.schema.json"
+    },
+    {
+      "file": "product_projection.cycle_inbox.list.response.json",
+      "schema": "CycleInboxProjectionListResponse.schema.json"
+    },
+    {
+      "file": "product_projection.settlement_timeline.get.response.json",
+      "schema": "SettlementTimelineDigestResponse.schema.json"
+    },
+    {
+      "file": "product_projection.receipt_share.get.response.json",
+      "schema": "ReceiptShareProjectionResponse.schema.json"
+    },
+    {
+      "file": "partner_ui.capabilities.get.response.json",
+      "schema": "PartnerUiCapabilitiesGetResponse.schema.json"
+    },
+    {
+      "file": "partner_ui.bundle.get.response.json",
+      "schema": "PartnerUiBundleGetResponse.schema.json"
+    },
+    {
+      "file": "commercial_policy.transaction_fee.get.response.json",
+      "schema": "CommercialTransactionFeePolicyGetResponse.schema.json"
+    },
+    {
+      "file": "commercial_policy.transaction_fee.upsert.request.json",
+      "schema": "CommercialTransactionFeePolicyUpsertRequest.schema.json"
+    },
+    {
+      "file": "commercial_policy.transaction_fee.upsert.response.json",
+      "schema": "CommercialTransactionFeePolicyUpsertResponse.schema.json"
+    },
+    {
+      "file": "commercial_policy.subscription_tier.get.response.json",
+      "schema": "CommercialSubscriptionTierPolicyGetResponse.schema.json"
+    },
+    {
+      "file": "commercial_policy.subscription_tier.upsert.request.json",
+      "schema": "CommercialSubscriptionTierPolicyUpsertRequest.schema.json"
+    },
+    {
+      "file": "commercial_policy.subscription_tier.upsert.response.json",
+      "schema": "CommercialSubscriptionTierPolicyUpsertResponse.schema.json"
+    },
+    {
+      "file": "commercial_policy.boost_policy.get.response.json",
+      "schema": "CommercialBoostPolicyGetResponse.schema.json"
+    },
+    {
+      "file": "commercial_policy.boost_policy.upsert.request.json",
+      "schema": "CommercialBoostPolicyUpsertRequest.schema.json"
+    },
+    {
+      "file": "commercial_policy.boost_policy.upsert.response.json",
+      "schema": "CommercialBoostPolicyUpsertResponse.schema.json"
+    },
+    {
+      "file": "commercial_policy.quota_policy.get.response.json",
+      "schema": "CommercialQuotaPolicyGetResponse.schema.json"
+    },
+    {
+      "file": "commercial_policy.quota_policy.upsert.request.json",
+      "schema": "CommercialQuotaPolicyUpsertRequest.schema.json"
+    },
+    {
+      "file": "commercial_policy.quota_policy.upsert.response.json",
+      "schema": "CommercialQuotaPolicyUpsertResponse.schema.json"
+    },
+    {
+      "file": "commercial_policy.evaluate.request.json",
+      "schema": "CommercialPolicyEvaluateRequest.schema.json"
+    },
+    {
+      "file": "commercial_policy.evaluate.response.json",
+      "schema": "CommercialPolicyEvaluateResponse.schema.json"
+    },
+    {
+      "file": "commercial_policy.export.response.json",
+      "schema": "CommercialPolicyExportResponse.schema.json"
+    },
+    {
+      "file": "partner_liquidity_provider.onboard.request.json",
+      "schema": "PartnerLiquidityProviderOnboardRequest.schema.json"
+    },
+    {
+      "file": "partner_liquidity_provider.onboard.response.json",
+      "schema": "PartnerLiquidityProviderOnboardResponse.schema.json"
+    },
+    {
+      "file": "partner_liquidity_provider.get.response.json",
+      "schema": "PartnerLiquidityProviderGetResponse.schema.json"
+    },
+    {
+      "file": "partner_liquidity_provider.status.upsert.request.json",
+      "schema": "PartnerLiquidityProviderStatusUpsertRequest.schema.json"
+    },
+    {
+      "file": "partner_liquidity_provider.status.upsert.response.json",
+      "schema": "PartnerLiquidityProviderStatusUpsertResponse.schema.json"
+    },
+    {
+      "file": "partner_liquidity_provider.eligibility.evaluate.request.json",
+      "schema": "PartnerLiquidityProviderEligibilityEvaluateRequest.schema.json"
+    },
+    {
+      "file": "partner_liquidity_provider.eligibility.evaluate.response.json",
+      "schema": "PartnerLiquidityProviderEligibilityEvaluateResponse.schema.json"
+    },
+    {
+      "file": "partner_liquidity_provider.rollout.upsert.request.json",
+      "schema": "PartnerLiquidityProviderRolloutUpsertRequest.schema.json"
+    },
+    {
+      "file": "partner_liquidity_provider.rollout.upsert.response.json",
+      "schema": "PartnerLiquidityProviderRolloutUpsertResponse.schema.json"
+    },
+    {
+      "file": "partner_liquidity_provider.rollout.export.response.json",
+      "schema": "PartnerLiquidityProviderRolloutExportResponse.schema.json"
+    },
+    {
+      "file": "liquidity_providers.register.request.json",
+      "schema": "LiquidityProviderRegisterRequest.schema.json"
+    },
+    {
+      "file": "liquidity_providers.register.response.json",
+      "schema": "LiquidityProviderRegisterResponse.schema.json"
+    },
+    {
+      "file": "liquidity_providers.get.response.json",
+      "schema": "LiquidityProviderGetResponse.schema.json"
+    },
+    {
+      "file": "liquidity_providers.list.response.json",
+      "schema": "LiquidityProviderListResponse.schema.json"
+    },
+    {
+      "file": "liquidity_providers.persona.upsert.request.json",
+      "schema": "LiquidityProviderPersonaUpsertRequest.schema.json"
+    },
+    {
+      "file": "liquidity_providers.persona.upsert.response.json",
+      "schema": "LiquidityProviderPersonaUpsertResponse.schema.json"
+    },
+    {
+      "file": "liquidity_policy.upsert.request.json",
+      "schema": "LiquidityPolicyUpsertRequest.schema.json"
+    },
+    {
+      "file": "liquidity_policy.upsert.response.json",
+      "schema": "LiquidityPolicyUpsertResponse.schema.json"
+    },
+    {
+      "file": "liquidity_policy.get.response.json",
+      "schema": "LiquidityPolicyGetResponse.schema.json"
+    },
+    {
+      "file": "liquidity_policy.evaluate.request.json",
+      "schema": "LiquidityPolicyEvaluateRequest.schema.json"
+    },
+    {
+      "file": "liquidity_policy.evaluate.response.json",
+      "schema": "LiquidityPolicyEvaluateResponse.schema.json"
+    },
+    {
+      "file": "liquidity_decision_audit.list.response.json",
+      "schema": "LiquidityDecisionAuditListResponse.schema.json"
+    },
+    {
+      "file": "liquidity_decision_audit.export.response.json",
+      "schema": "LiquidityDecisionAuditExportResponse.schema.json"
+    },
+    {
+      "file": "liquidity_inventory.snapshot.record.request.json",
+      "schema": "LiquidityInventorySnapshotRecordRequest.schema.json"
+    },
+    {
+      "file": "liquidity_inventory.snapshot.record.response.json",
+      "schema": "LiquidityInventorySnapshotRecordResponse.schema.json"
+    },
+    {
+      "file": "liquidity_inventory.assets.list.response.json",
+      "schema": "LiquidityInventoryAssetListResponse.schema.json"
+    },
+    {
+      "file": "liquidity_inventory.availability.get.response.json",
+      "schema": "LiquidityInventoryAvailabilityGetResponse.schema.json"
+    },
+    {
+      "file": "liquidity_inventory.reserve.batch.request.json",
+      "schema": "LiquidityInventoryReservationBatchRequest.schema.json"
+    },
+    {
+      "file": "liquidity_inventory.reserve.batch.response.json",
+      "schema": "LiquidityInventoryReservationBatchResponse.schema.json"
+    },
+    {
+      "file": "liquidity_inventory.release.batch.request.json",
+      "schema": "LiquidityInventoryReleaseBatchRequest.schema.json"
+    },
+    {
+      "file": "liquidity_inventory.release.batch.response.json",
+      "schema": "LiquidityInventoryReleaseBatchResponse.schema.json"
+    },
+    {
+      "file": "liquidity_inventory.reconciliation.export.response.json",
+      "schema": "LiquidityInventoryReconciliationExportResponse.schema.json"
+    },
+    {
+      "file": "liquidity_listings.upsert.request.json",
+      "schema": "LiquidityListingUpsertRequest.schema.json"
+    },
+    {
+      "file": "liquidity_listings.upsert.response.json",
+      "schema": "LiquidityListingUpsertResponse.schema.json"
+    },
+    {
+      "file": "liquidity_listings.cancel.request.json",
+      "schema": "LiquidityListingCancelRequest.schema.json"
+    },
+    {
+      "file": "liquidity_listings.cancel.response.json",
+      "schema": "LiquidityListingCancelResponse.schema.json"
+    },
+    {
+      "file": "liquidity_listings.list.response.json",
+      "schema": "LiquidityListingListResponse.schema.json"
+    },
+    {
+      "file": "liquidity_decisions.proposal.accept.request.json",
+      "schema": "LiquidityProposalDecisionAcceptRequest.schema.json"
+    },
+    {
+      "file": "liquidity_decisions.proposal.accept.response.json",
+      "schema": "LiquidityProposalDecisionAcceptResponse.schema.json"
+    },
+    {
+      "file": "liquidity_decisions.proposal.decline.request.json",
+      "schema": "LiquidityProposalDecisionDeclineRequest.schema.json"
+    },
+    {
+      "file": "liquidity_decisions.proposal.decline.response.json",
+      "schema": "LiquidityProposalDecisionDeclineResponse.schema.json"
+    },
+    {
+      "file": "liquidity_decisions.get.response.json",
+      "schema": "LiquidityDecisionGetResponse.schema.json"
+    },
+    {
+      "file": "liquidity_execution.mode.upsert.request.json",
+      "schema": "LiquidityExecutionModeUpsertRequest.schema.json"
+    },
+    {
+      "file": "liquidity_execution.mode.upsert.response.json",
+      "schema": "LiquidityExecutionModeUpsertResponse.schema.json"
+    },
+    {
+      "file": "liquidity_execution.mode.get.response.json",
+      "schema": "LiquidityExecutionModeGetResponse.schema.json"
+    },
+    {
+      "file": "liquidity_execution.request.record.request.json",
+      "schema": "LiquidityExecutionRequestRecordRequest.schema.json"
+    },
+    {
+      "file": "liquidity_execution.request.record.response.json",
+      "schema": "LiquidityExecutionRequestRecordResponse.schema.json"
+    },
+    {
+      "file": "liquidity_execution.request.approve.request.json",
+      "schema": "LiquidityExecutionRequestApproveRequest.schema.json"
+    },
+    {
+      "file": "liquidity_execution.request.approve.response.json",
+      "schema": "LiquidityExecutionRequestApproveResponse.schema.json"
+    },
+    {
+      "file": "liquidity_execution.request.reject.request.json",
+      "schema": "LiquidityExecutionRequestRejectRequest.schema.json"
+    },
+    {
+      "file": "liquidity_execution.request.reject.response.json",
+      "schema": "LiquidityExecutionRequestRejectResponse.schema.json"
+    },
+    {
+      "file": "liquidity_execution.export.response.json",
+      "schema": "LiquidityExecutionRequestExportResponse.schema.json"
+    },
+    {
+      "file": "liquidity_simulation.session.start.request.json",
+      "schema": "LiquiditySimulationSessionStartRequest.schema.json"
+    },
+    {
+      "file": "liquidity_simulation.session.start.response.json",
+      "schema": "LiquiditySimulationSessionStartResponse.schema.json"
+    },
+    {
+      "file": "liquidity_simulation.session.get.response.json",
+      "schema": "LiquiditySimulationSessionGetResponse.schema.json"
+    },
+    {
+      "file": "liquidity_simulation.session.stop.request.json",
+      "schema": "LiquiditySimulationSessionStopRequest.schema.json"
+    },
+    {
+      "file": "liquidity_simulation.session.stop.response.json",
+      "schema": "LiquiditySimulationSessionGetResponse.schema.json"
+    },
+    {
+      "file": "liquidity_simulation.intent.sync.request.json",
+      "schema": "LiquiditySimulationIntentSyncRequest.schema.json"
+    },
+    {
+      "file": "liquidity_simulation.intent.sync.response.json",
+      "schema": "LiquiditySimulationIntentSyncResponse.schema.json"
+    },
+    {
+      "file": "liquidity_simulation.cycle.export.response.json",
+      "schema": "LiquiditySimulationCycleExportResponse.schema.json"
+    },
+    {
+      "file": "liquidity_simulation.receipt.export.response.json",
+      "schema": "LiquiditySimulationReceiptExportResponse.schema.json"
+    },
+    {
       "file": "cycle_proposals.list.response.json",
       "schema": "CycleProposalListResponse.schema.json"
     },

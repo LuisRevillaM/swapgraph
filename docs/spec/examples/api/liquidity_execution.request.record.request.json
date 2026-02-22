@@ -1,0 +1,22 @@
+{
+  "execution_request": {
+    "request_id": "lpexec_req_000001",
+    "proposal_id": "proposal_lp_alpha_001",
+    "cycle_id": "cycle_lp_alpha_001",
+    "intent_ids": [
+      "intent_lp_alpha_001"
+    ],
+    "action_type": "settlement_execute",
+    "risk_class": "high",
+    "reason_codes": [
+      "high_value_path",
+      "steam_adapter_restricted"
+    ],
+    "correlation_id": "corr_lpexec_req_000001",
+    "requested_at": "2026-02-22T12:10:00Z",
+    "auto_execute": false,
+    "metadata": {
+      "platform": "steam"
+    }
+  }
+}

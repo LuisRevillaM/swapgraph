@@ -26,7 +26,7 @@ req_files=(
   "docs/source/LATEST.md"
   "package.json"
   "milestones/M0.yaml"
-  "verify/runner.ts"
+  "verify/runner.mjs"
   "verify/m0.sh"
   "ops/runner-state.json"
   "ops/RUNNER.md"

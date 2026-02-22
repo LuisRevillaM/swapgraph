@@ -1,7 +1,7 @@
 # M104 PRD Review Closure — Decision Checklist
 
 Date: 2026-02-21
-Status: Draft for approval (PRD-only mode)
+Status: Approved and implemented (fixtures-first, verifier-closed on 2026-02-22)
 
 Purpose: close simulation-boundary decisions so swarm behavior can be validated without mixing simulated and real custody flows.
 
@@ -48,3 +48,8 @@ Purpose: close simulation-boundary decisions so swarm behavior can be validated 
 
 ## PRD approval gate (M104)
 M104 is ready for implementation planning only when D1–D7 are explicitly approved or amended.
+
+## Implementation closure evidence
+- `npm run verify:m104` exits 0.
+- `node verify/runner.mjs milestones/M104.yaml` returns `overall=true`.
+- Canonical output hash locked in `fixtures/release/m104_expected.json` and artifacts published under `artifacts/milestones/M104/latest/*`.

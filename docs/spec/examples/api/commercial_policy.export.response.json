@@ -1,0 +1,68 @@
+{
+  "correlation_id": "corr_commercialpolicy_export",
+  "exported_at": "2026-02-21T16:15:00Z",
+  "query": {
+    "from_iso": "2026-02-21T16:00:00Z",
+    "to_iso": "2026-02-21T17:00:00Z",
+    "now_iso": "2026-02-21T16:15:00Z",
+    "limit": 2
+  },
+  "total_filtered": 4,
+  "entries": [
+    {
+      "audit_id": "cmpol_0001",
+      "partner_id": "partner_demo",
+      "policy_type": "transaction_fee",
+      "operation_id": "commercialPolicy.transaction_fee.upsert",
+      "version": 2,
+      "updated_at": "2026-02-21T16:00:00Z",
+      "actor": {
+        "type": "partner",
+        "id": "partner_demo"
+      },
+      "summary": {
+        "fee_model": "bps",
+        "fee_bps": 180,
+        "fee_flat_usd": null
+      }
+    },
+    {
+      "audit_id": "cmpol_0002",
+      "partner_id": "partner_demo",
+      "policy_type": "subscription_tier",
+      "operation_id": "commercialPolicy.subscription_tier.upsert",
+      "version": 3,
+      "updated_at": "2026-02-21T16:05:00Z",
+      "actor": {
+        "type": "partner",
+        "id": "partner_demo"
+      },
+      "summary": {
+        "tier": "pro",
+        "trust_milestone_required": "established_history"
+      }
+    }
+  ],
+  "next_cursor": "2026-02-21T16:05:00Z|cmpol_0002",
+  "attestation": {
+    "cursor_after": null,
+    "next_cursor": "2026-02-21T16:05:00Z|cmpol_0002",
+    "attestation_after": null,
+    "page_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "chain_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "checkpoint": {
+    "checkpoint_after": null,
+    "attestation_chain_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "next_cursor": "2026-02-21T16:05:00Z|cmpol_0002",
+    "entries_count": 2,
+    "total_filtered": 4,
+    "checkpoint_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  },
+  "export_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  "signature": {
+    "key_id": "dev-pi-k1",
+    "alg": "ed25519",
+    "sig": "MEQCIFIXTUREONLY"
+  }
+}

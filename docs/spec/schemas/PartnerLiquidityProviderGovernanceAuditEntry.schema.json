@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/PartnerLiquidityProviderGovernanceAuditEntry.schema.json",
+  "title": "PartnerLiquidityProviderGovernanceAuditEntry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "audit_id",
+    "provider_id",
+    "event_type",
+    "recorded_at",
+    "actor",
+    "reason_codes",
+    "details"
+  ],
+  "properties": {
+    "audit_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "onboarded",
+        "status_upserted",
+        "eligibility_evaluated",
+        "rollout_upserted"
+      ]
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "actor": {
+      "$ref": "ActorRef.schema.json"
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "details": {
+      "type": "object"
+    }
+  }
+}

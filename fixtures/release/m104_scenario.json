@@ -1,0 +1,530 @@
+{
+  "actors": {
+    "partner_alpha": {
+      "type": "partner",
+      "id": "partner_alpha"
+    },
+    "partner_beta": {
+      "type": "partner",
+      "id": "partner_beta"
+    }
+  },
+  "operations": [
+    {
+      "op": "keys.policy_integrity_signing.get",
+      "expect_ok": true
+    },
+    {
+      "op": "liquiditySimulation.session.start",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m104_session_start_1",
+      "request": {
+        "session": {
+          "session_id": "lsim_alpha_001",
+          "label": "Alpha Strategy Simulation",
+          "mode": "simulation",
+          "seed": "seed-alpha-001"
+        },
+        "started_at": "2026-02-22T09:00:00Z"
+      },
+      "save_session_ref": "session_alpha",
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_session_id": "lsim_alpha_001",
+      "expect_session_status": "active",
+      "expect_sync_calls": 0,
+      "expect_cycles_generated_total": 0,
+      "expect_receipts_generated_total": 0
+    },
+    {
+      "op": "liquiditySimulation.session.start",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m104_session_start_1",
+      "request": {
+        "session": {
+          "session_id": "lsim_alpha_001",
+          "label": "Alpha Strategy Simulation",
+          "mode": "simulation",
+          "seed": "seed-alpha-001"
+        },
+        "started_at": "2026-02-22T09:00:00Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": true,
+      "expect_session_status": "active"
+    },
+    {
+      "op": "liquiditySimulation.session.start",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m104_session_start_1",
+      "request": {
+        "session": {
+          "session_id": "lsim_alpha_001",
+          "label": "Alpha Strategy Simulation v2",
+          "mode": "simulation",
+          "seed": "seed-alpha-001"
+        },
+        "started_at": "2026-02-22T09:00:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    },
+    {
+      "op": "liquiditySimulation.session.get",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "session_id_ref": "session_alpha",
+      "expect_ok": true,
+      "expect_session_status": "active",
+      "expect_sync_calls": 0
+    },
+    {
+      "op": "liquiditySimulation.intent.sync",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "session_id_ref": "session_alpha",
+      "idempotency_key": "m104_sync_1",
+      "request": {
+        "sync": {
+          "synced_at": "2026-02-22T09:10:00Z",
+          "intents": [
+            {
+              "intent_id": "intent_sim_1",
+              "actor": {
+                "type": "user",
+                "id": "u1"
+              },
+              "value_usd": 220.5,
+              "status": "active",
+              "liquidity_provider_ref": {
+                "provider_id": "lp_house_alpha",
+                "provider_type": "house_bot",
+                "owner_actor": {
+                  "type": "partner",
+                  "id": "partner_alpha"
+                },
+                "is_automated": true,
+                "is_house_inventory": true,
+                "label_required": true,
+                "display_label": "Alpha Market Maker",
+                "disclosure_text": "Automated house-liquidity participant.",
+                "active": true,
+                "created_at": "2026-02-21T12:00:00Z",
+                "updated_at": "2026-02-21T12:00:00Z"
+              }
+            },
+            {
+              "intent_id": "intent_sim_2",
+              "actor": {
+                "type": "user",
+                "id": "u2"
+              },
+              "value_usd": 224.75,
+              "status": "active"
+            }
+          ]
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_synced_intents_count": 2,
+      "expect_active_intents_count": 2,
+      "expect_generated_cycle_id": "sim_cycle_lsim_alpha_001_0001",
+      "expect_generated_receipt_id": "sim_receipt_lsim_alpha_001_0001"
+    },
+    {
+      "op": "liquiditySimulation.intent.sync",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "session_id_ref": "session_alpha",
+      "idempotency_key": "m104_sync_1",
+      "request": {
+        "sync": {
+          "synced_at": "2026-02-22T09:10:00Z",
+          "intents": [
+            {
+              "intent_id": "intent_sim_1",
+              "actor": {
+                "type": "user",
+                "id": "u1"
+              },
+              "value_usd": 220.5,
+              "status": "active",
+              "liquidity_provider_ref": {
+                "provider_id": "lp_house_alpha",
+                "provider_type": "house_bot",
+                "owner_actor": {
+                  "type": "partner",
+                  "id": "partner_alpha"
+                },
+                "is_automated": true,
+                "is_house_inventory": true,
+                "label_required": true,
+                "display_label": "Alpha Market Maker",
+                "disclosure_text": "Automated house-liquidity participant.",
+                "active": true,
+                "created_at": "2026-02-21T12:00:00Z",
+                "updated_at": "2026-02-21T12:00:00Z"
+              }
+            },
+            {
+              "intent_id": "intent_sim_2",
+              "actor": {
+                "type": "user",
+                "id": "u2"
+              },
+              "value_usd": 224.75,
+              "status": "active"
+            }
+          ]
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": true
+    },
+    {
+      "op": "liquiditySimulation.intent.sync",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "session_id_ref": "session_alpha",
+      "idempotency_key": "m104_sync_1",
+      "request": {
+        "sync": {
+          "synced_at": "2026-02-22T09:10:00Z",
+          "intents": [
+            {
+              "intent_id": "intent_sim_1",
+              "actor": {
+                "type": "user",
+                "id": "u1"
+              },
+              "value_usd": 221.5,
+              "status": "active"
+            }
+          ]
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    },
+    {
+      "op": "liquiditySimulation.intent.sync",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "session_id_ref": "session_alpha",
+      "idempotency_key": "m104_sync_2",
+      "request": {
+        "sync": {
+          "synced_at": "2026-02-22T09:15:00Z",
+          "intents": [
+            {
+              "intent_id": "intent_sim_2",
+              "actor": {
+                "type": "user",
+                "id": "u2"
+              },
+              "value_usd": 224.75,
+              "status": "cancelled"
+            },
+            {
+              "intent_id": "intent_sim_3",
+              "actor": {
+                "type": "user",
+                "id": "u3"
+              },
+              "value_usd": 226.25,
+              "status": "active"
+            }
+          ]
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_synced_intents_count": 2,
+      "expect_active_intents_count": 2,
+      "expect_generated_cycle_id": "sim_cycle_lsim_alpha_001_0002",
+      "expect_generated_receipt_id": "sim_receipt_lsim_alpha_001_0002"
+    },
+    {
+      "op": "liquiditySimulation.cycle.export",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "session_id_ref": "session_alpha",
+      "query": {
+        "limit": 1
+      },
+      "save_export_ref": "cycle_export_page_1",
+      "expect_ok": true,
+      "expect_entries_count": 1,
+      "expect_total_filtered": 2,
+      "expect_next_cursor_present": true,
+      "expect_default_verify_ok": true,
+      "expect_public_key_verify_ok": true,
+      "expect_tamper_fail": true,
+      "expect_tamper_fail_verified": true
+    },
+    {
+      "op": "liquiditySimulation.cycle.export",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "session_id_ref": "session_alpha",
+      "query": {
+        "limit": 1
+      },
+      "cursor_ref": "cycle_export_page_1",
+      "expect_ok": true,
+      "expect_entries_count": 1,
+      "expect_total_filtered": 2,
+      "expect_next_cursor_present": false,
+      "expect_default_verify_ok": true,
+      "expect_public_key_verify_ok": true
+    },
+    {
+      "op": "liquiditySimulation.receipt.export",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "session_id_ref": "session_alpha",
+      "query": {
+        "limit": 1
+      },
+      "save_export_ref": "receipt_export_page_1",
+      "expect_ok": true,
+      "expect_entries_count": 1,
+      "expect_total_filtered": 2,
+      "expect_next_cursor_present": true,
+      "expect_default_verify_ok": true,
+      "expect_public_key_verify_ok": true,
+      "expect_tamper_fail": true,
+      "expect_tamper_fail_verified": true
+    },
+    {
+      "op": "liquiditySimulation.receipt.export",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "session_id_ref": "session_alpha",
+      "query": {
+        "limit": 1
+      },
+      "cursor_ref": "receipt_export_page_1",
+      "expect_ok": true,
+      "expect_entries_count": 1,
+      "expect_total_filtered": 2,
+      "expect_next_cursor_present": false,
+      "expect_default_verify_ok": true,
+      "expect_public_key_verify_ok": true
+    },
+    {
+      "op": "liquiditySimulation.session.stop",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "session_id_ref": "session_alpha",
+      "idempotency_key": "m104_stop_1",
+      "request": {
+        "stopped_at": "2026-02-22T10:00:00Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_session_status": "stopped",
+      "expect_sync_calls": 2,
+      "expect_cycles_generated_total": 2,
+      "expect_receipts_generated_total": 2
+    },
+    {
+      "op": "liquiditySimulation.session.stop",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "session_id_ref": "session_alpha",
+      "idempotency_key": "m104_stop_1",
+      "request": {
+        "stopped_at": "2026-02-22T10:00:00Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": true,
+      "expect_session_status": "stopped"
+    },
+    {
+      "op": "liquiditySimulation.intent.sync",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "session_id_ref": "session_alpha",
+      "idempotency_key": "m104_sync_after_stop",
+      "request": {
+        "sync": {
+          "synced_at": "2026-02-22T10:10:00Z",
+          "intents": [
+            {
+              "intent_id": "intent_sim_9",
+              "actor": {
+                "type": "user",
+                "id": "u9"
+              },
+              "value_usd": 10,
+              "status": "active"
+            }
+          ]
+        }
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "liquidity_simulation_session_inactive"
+    },
+    {
+      "op": "liquiditySimulation.session.get",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "session_id_ref": "session_alpha",
+      "expect_ok": true,
+      "expect_session_status": "stopped",
+      "expect_sync_calls": 2
+    },
+    {
+      "op": "liquiditySimulation.cycle.export",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "session_id_ref": "session_alpha",
+      "query": {
+        "unsupported": "1"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "liquidity_simulation_export_query_invalid"
+    },
+    {
+      "op": "liquiditySimulation.session.get",
+      "actor_ref": "partner_beta",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "session_id_ref": "session_alpha",
+      "expect_ok": false,
+      "expect_error_code": "NOT_FOUND",
+      "expect_reason_code": "liquidity_simulation_session_not_found"
+    },
+    {
+      "op": "liquiditySimulation.session.get",
+      "actor_ref": "partner_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "session_id": "lsim_missing",
+      "expect_ok": false,
+      "expect_error_code": "NOT_FOUND",
+      "expect_reason_code": "liquidity_simulation_session_not_found"
+    }
+  ],
+  "event_payload_checks": [
+    {
+      "type": "liquidity.simulation_session.started",
+      "payload": {
+        "session_id": "lsim_alpha_001",
+        "owner_actor": {
+          "type": "partner",
+          "id": "partner_alpha"
+        },
+        "label": "Alpha Strategy Simulation",
+        "started_at": "2026-02-22T09:00:00Z"
+      },
+      "expect_ok": true
+    },
+    {
+      "type": "liquidity.simulation_cycle.completed",
+      "payload": {
+        "session_id": "lsim_alpha_001",
+        "cycle_id": "sim_cycle_lsim_alpha_001_0001",
+        "receipt_id": "sim_receipt_lsim_alpha_001_0001",
+        "completed_at": "2026-02-22T09:10:00Z"
+      },
+      "expect_ok": true
+    },
+    {
+      "type": "liquidity.simulation_session.stopped",
+      "payload": {
+        "session_id": "lsim_alpha_001",
+        "stopped_at": "2026-02-22T10:00:00Z"
+      },
+      "expect_ok": true
+    },
+    {
+      "type": "liquidity.simulation_session.stopped",
+      "payload": {
+        "session_id": "lsim_alpha_001"
+      },
+      "expect_ok": false
+    }
+  ]
+}

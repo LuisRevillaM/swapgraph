@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/CommercialTransactionFeePolicyUpsertResponse.schema.json",
+  "title": "CommercialTransactionFeePolicyUpsertResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["correlation_id", "policy"],
+  "properties": {
+    "correlation_id": { "type": "string", "minLength": 1 },
+    "policy": {
+      "$ref": "CommercialTransactionFeePolicyGetResponse.schema.json#/properties/policy"
+    }
+  }
+}

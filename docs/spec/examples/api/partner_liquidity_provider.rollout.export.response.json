@@ -1,0 +1,67 @@
+{
+  "correlation_id": "corr_partnerliquidityprovider_rollout_export",
+  "provider_id": "plp_000001",
+  "export": {
+    "exported_at": "2026-02-22T16:40:00Z",
+    "query": {
+      "limit": 2,
+      "retention_days": 180
+    },
+    "total_filtered": 2,
+    "entries": [
+      {
+        "audit_id": "plpaudit_000001",
+        "provider_id": "plp_000001",
+        "event_type": "eligibility_evaluated",
+        "recorded_at": "2026-02-22T16:20:00.000Z",
+        "actor": {
+          "type": "partner",
+          "id": "partner_alpha"
+        },
+        "reason_codes": [],
+        "details": {
+          "evaluation_id": "plpelig_a7f89c227eec0c2d",
+          "verdict": "allow"
+        }
+      },
+      {
+        "audit_id": "plpaudit_000002",
+        "provider_id": "plp_000001",
+        "event_type": "rollout_upserted",
+        "recorded_at": "2026-02-22T16:30:00.000Z",
+        "actor": {
+          "type": "partner",
+          "id": "partner_alpha"
+        },
+        "reason_codes": [
+          "promotion_approved"
+        ],
+        "details": {
+          "rollout_version": 1,
+          "rollout_status": "active"
+        }
+      }
+    ],
+    "attestation": {
+      "cursor_after": null,
+      "next_cursor": null,
+      "attestation_after": null,
+      "page_hash": "f864fd08e66f6f34bb74f302257f16cf8f8a95d4cc4e7cf0d74d4b77ba30ffca",
+      "chain_hash": "84f5f6085e3ef52e632d30fb8ad1b98c30d4d25e75009a16bb9aa4c96bc5db23"
+    },
+    "checkpoint": {
+      "checkpoint_after": null,
+      "attestation_chain_hash": "84f5f6085e3ef52e632d30fb8ad1b98c30d4d25e75009a16bb9aa4c96bc5db23",
+      "next_cursor": null,
+      "entries_count": 2,
+      "total_filtered": 2,
+      "checkpoint_hash": "5bb1309133fff09b84ef6abeb7068ff5f89eec694fca4e43d03b442ae1770df6"
+    },
+    "export_hash": "ac7571d89c9ecac4ec5b0baaa4c7f93dcf1ff5e0dfd895b4f8f30b15eb9b13d2",
+    "signature": {
+      "key_id": "dev-pi-k1",
+      "alg": "ed25519",
+      "sig": "ZHVtbXk"
+    }
+  }
+}

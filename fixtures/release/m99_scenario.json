@@ -1,0 +1,364 @@
+{
+  "actors": {
+    "partner_demo": {
+      "type": "partner",
+      "id": "partner_demo"
+    },
+    "user_u1": {
+      "type": "user",
+      "id": "u1"
+    }
+  },
+  "operations": [
+    {
+      "op": "keys.policy_integrity_signing.get",
+      "expect_ok": true,
+      "expect_keys_count": 2,
+      "expect_active_key_id": "dev-pi-k1"
+    },
+    {
+      "op": "trustSafety.signal.record",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m99_signal_1",
+      "save_signal_ref": "sig_1",
+      "request": {
+        "signal": {
+          "signal_id": "ts_signal_000001",
+          "category": "fraud_velocity_spike",
+          "subject_actor_type": "user",
+          "subject_actor_id": "u1",
+          "severity": "high",
+          "confidence_score_bps": 9200,
+          "observed_at": "2026-02-21T13:00:00Z",
+          "metadata": {
+            "window_minutes": 10,
+            "threshold": 5
+          }
+        },
+        "recorded_at": "2026-02-21T13:00:05Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_signal_id": "ts_signal_000001"
+    },
+    {
+      "op": "trustSafety.signal.record",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m99_signal_1",
+      "request": {
+        "signal": {
+          "signal_id": "ts_signal_000001",
+          "category": "fraud_velocity_spike",
+          "subject_actor_type": "user",
+          "subject_actor_id": "u1",
+          "severity": "high",
+          "confidence_score_bps": 9200,
+          "observed_at": "2026-02-21T13:00:00Z",
+          "metadata": {
+            "window_minutes": 10,
+            "threshold": 5
+          }
+        },
+        "recorded_at": "2026-02-21T13:00:05Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": true,
+      "expect_signal_id": "ts_signal_000001"
+    },
+    {
+      "op": "trustSafety.signal.record",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m99_signal_1",
+      "request": {
+        "signal": {
+          "signal_id": "ts_signal_000001",
+          "category": "ato_device_drift",
+          "subject_actor_type": "user",
+          "subject_actor_id": "u1",
+          "severity": "high",
+          "confidence_score_bps": 9200,
+          "observed_at": "2026-02-21T13:00:00Z"
+        },
+        "recorded_at": "2026-02-21T13:00:05Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH"
+    },
+    {
+      "op": "trustSafety.signal.record",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m99_signal_invalid_subject",
+      "skip_request_validation": true,
+      "request": {
+        "signal": {
+          "category": "fraud_value_anomaly",
+          "severity": "high",
+          "confidence_score_bps": 8800,
+          "observed_at": "2026-02-21T13:00:20Z"
+        },
+        "recorded_at": "2026-02-21T13:00:21Z"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "trust_safety_signal_subject_missing"
+    },
+    {
+      "op": "trustSafety.signal.record",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m99_signal_2",
+      "save_signal_ref": "sig_2",
+      "request": {
+        "signal": {
+          "signal_id": "ts_signal_000002",
+          "category": "ato_device_drift",
+          "subject_actor_type": "user",
+          "subject_actor_id": "u1",
+          "severity": "high",
+          "confidence_score_bps": 9600,
+          "observed_at": "2026-02-21T13:01:00Z",
+          "metadata": {
+            "device_id": "dev_0099"
+          }
+        },
+        "recorded_at": "2026-02-21T13:01:05Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_signal_id": "ts_signal_000002"
+    },
+    {
+      "op": "trustSafety.decision.record",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m99_decision_1",
+      "save_decision_ref": "dec_1",
+      "contributing_signal_refs": [
+        "sig_1"
+      ],
+      "request": {
+        "decision": {
+          "decision_id": "ts_decision_000001",
+          "subject_actor_type": "user",
+          "subject_actor_id": "u1",
+          "decision": "manual_review",
+          "reason_codes": [
+            "fraud_velocity_spike"
+          ],
+          "contributing_signal_ids": [],
+          "severity": "high",
+          "confidence_score_bps": 9100,
+          "recorded_at": "2026-02-21T13:02:00Z",
+          "correlation_id": "risk_eval_0001",
+          "dispute_id": "dispute_000001",
+          "reliability_ref": "user_reliability:u1:v12"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_decision_id": "ts_decision_000001",
+      "expect_decision": "manual_review"
+    },
+    {
+      "op": "trustSafety.decision.record",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m99_decision_2",
+      "save_decision_ref": "dec_2",
+      "contributing_signal_refs": [
+        "sig_2"
+      ],
+      "request": {
+        "decision": {
+          "decision_id": "ts_decision_000002",
+          "subject_actor_type": "user",
+          "subject_actor_id": "u1",
+          "decision": "block",
+          "reason_codes": [
+            "ato_device_drift"
+          ],
+          "contributing_signal_ids": [],
+          "severity": "high",
+          "confidence_score_bps": 9700,
+          "recorded_at": "2026-02-21T13:03:00Z",
+          "correlation_id": "risk_eval_0002"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_decision_id": "ts_decision_000002",
+      "expect_decision": "block"
+    },
+    {
+      "op": "trustSafety.decision.record",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m99_decision_mismatch",
+      "contributing_signal_refs": [
+        "sig_1"
+      ],
+      "request": {
+        "decision": {
+          "decision_id": "ts_decision_999001",
+          "subject_actor_type": "partner",
+          "subject_actor_id": "partner_demo",
+          "decision": "block",
+          "reason_codes": [
+            "fraud_velocity_spike"
+          ],
+          "contributing_signal_ids": [],
+          "severity": "high",
+          "confidence_score_bps": 9700,
+          "recorded_at": "2026-02-21T13:03:30Z",
+          "correlation_id": "risk_eval_mismatch"
+        }
+      },
+      "expect_ok": false,
+      "expect_reason_code": "trust_safety_decision_subject_mismatch"
+    },
+    {
+      "op": "trustSafety.decision.get",
+      "actor_ref": "user_u1",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "decision_id_ref": "dec_1",
+      "expect_ok": true,
+      "expect_decision_id": "ts_decision_000001",
+      "expect_decision": "manual_review"
+    },
+    {
+      "op": "trustSafety.decision.get",
+      "actor_ref": "user_u1",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "decision_id": "ts_decision_999999",
+      "expect_ok": false,
+      "expect_error_code": "NOT_FOUND",
+      "expect_reason_code": "trust_safety_decision_not_found"
+    },
+    {
+      "op": "trustSafety.decision.export",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "save_export_ref": "export_page_1",
+      "query": {
+        "subject_actor_id": "u1",
+        "limit": 1,
+        "retention_days": 180,
+        "now_iso": "2026-02-21T14:00:00Z",
+        "exported_at_iso": "2026-02-21T14:00:00Z"
+      },
+      "expect_ok": true,
+      "expect_entries_count": 1,
+      "expect_total_filtered": 2,
+      "expect_next_cursor_present": true,
+      "expect_attestation_present": true,
+      "expect_checkpoint_present": true,
+      "expect_first_decision_id": "ts_decision_000001"
+    },
+    {
+      "op": "trustSafety.decision.export",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "subject_actor_id": "u1",
+        "limit": 1,
+        "retention_days": 180,
+        "now_iso": "2026-02-21T14:05:00Z",
+        "exported_at_iso": "2026-02-21T14:05:00Z"
+      },
+      "cursor_from_export_ref": "export_page_1",
+      "attestation_from_export_ref": "export_page_1",
+      "checkpoint_from_export_ref": "export_page_1",
+      "save_export_ref": "export_page_2",
+      "expect_ok": true,
+      "expect_entries_count": 1,
+      "expect_total_filtered": 1,
+      "expect_next_cursor_present": false,
+      "expect_attestation_present": true,
+      "expect_checkpoint_present": true,
+      "expect_first_decision_id": "ts_decision_000002"
+    },
+    {
+      "op": "trustSafety.decision.export",
+      "actor_ref": "partner_demo",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "subject_actor_id": "u1",
+        "limit": 1,
+        "cursor_after": "2026-02-21T13:00:00.000Z|ts_decision_unknown",
+        "attestation_after": "badhash",
+        "checkpoint_after": "badhash",
+        "now_iso": "2026-02-21T14:10:00Z",
+        "exported_at_iso": "2026-02-21T14:10:00Z"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "trust_safety_export_cursor_not_found"
+    },
+    {
+      "op": "trustSafety.decision.export.verify",
+      "export_ref": "export_page_1",
+      "expect_verify_ok": true,
+      "expect_verify_public_ok": true
+    },
+    {
+      "op": "trustSafety.decision.export.verify_tampered",
+      "export_ref": "export_page_1",
+      "expect_verify_ok": false,
+      "expect_verify_error": "hash_mismatch"
+    }
+  ]
+}

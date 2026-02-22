@@ -1,5 +1,5 @@
 # PLAN — SwapGraph
-AUTOPILOT_APPROVED: false
+AUTOPILOT_APPROVED: true
 PROJECT_KEY: swapgraph
 REPO_PATH: /workspace/projects/swapgraph
 
@@ -21,7 +21,7 @@ Every milestone must have:
 - a contract (`milestones/Mx.yaml`)
 - a verifier (`npm run verify:mx`) that produces artifacts under `artifacts/milestones/Mx/latest/*`
 
-No milestone is “done” unless `node verify/runner.ts milestones/Mx.yaml` passes.
+No milestone is “done” unless `node verify/runner.mjs milestones/Mx.yaml` passes.
 
 ## Milestones (aligned to plan v2.0)
 - [ ] M0 — Repo bootstrap + verification harness + plan imported

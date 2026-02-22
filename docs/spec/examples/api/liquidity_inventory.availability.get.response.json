@@ -1,0 +1,39 @@
+{
+  "correlation_id": "corr_liquidityinventory_availability_get",
+  "provider_id": "lp_house_alpha",
+  "assets": [
+    {
+      "holding_id": "steam:asset_ak47_redline",
+      "asset_id": "asset_ak47_redline",
+      "platform": "steam",
+      "total_quantity": 2,
+      "available_quantity": 1,
+      "reserved_quantity": 1,
+      "in_settlement_quantity": 0,
+      "active_reservation_id": "lpinv_res_alpha_001",
+      "status": "reserved",
+      "snapshot_id": "lpinv_snapshot_alpha_001",
+      "captured_at": "2026-02-22T11:00:00Z"
+    },
+    {
+      "holding_id": "steam:asset_awp_asiimov",
+      "asset_id": "asset_awp_asiimov",
+      "platform": "steam",
+      "total_quantity": 1,
+      "available_quantity": 1,
+      "reserved_quantity": 0,
+      "in_settlement_quantity": 0,
+      "active_reservation_id": null,
+      "status": "available",
+      "snapshot_id": "lpinv_snapshot_alpha_001",
+      "captured_at": "2026-02-22T11:00:00Z"
+    }
+  ],
+  "summary": {
+    "assets_count": 2,
+    "available_assets_count": 1,
+    "reserved_assets_count": 1,
+    "in_settlement_assets_count": 0,
+    "not_available_assets_count": 0
+  }
+}

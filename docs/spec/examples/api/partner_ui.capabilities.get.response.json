@@ -1,0 +1,49 @@
+{
+  "correlation_id": "corr_partnerui_capabilities_get",
+  "capabilities": {
+    "api_version": "v1",
+    "integration_modes": [
+      "api_only",
+      "embedded_ui"
+    ],
+    "surfaces": [
+      {
+        "surface": "cycle-proposal-cards",
+        "version": "1.0.0",
+        "status": "ga",
+        "required_operations": [
+          "productProjection.cycle_inbox.list",
+          "cycleProposals.get"
+        ]
+      },
+      {
+        "surface": "intent-composer",
+        "version": "1.0.0",
+        "status": "ga",
+        "required_operations": [
+          "swapIntents.create",
+          "swapIntents.update"
+        ]
+      },
+      {
+        "surface": "receipt-renderer",
+        "version": "1.0.0",
+        "status": "ga",
+        "required_operations": [
+          "productProjection.receipt_share.get",
+          "receipts.get"
+        ]
+      },
+      {
+        "surface": "settlement-checklist",
+        "version": "1.0.0",
+        "status": "ga",
+        "required_operations": [
+          "productProjection.settlement_timeline.get",
+          "settlement.instructions",
+          "settlement.status"
+        ]
+      }
+    ]
+  }
+}

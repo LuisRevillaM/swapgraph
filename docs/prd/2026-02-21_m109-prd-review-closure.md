@@ -1,9 +1,9 @@
 # M109 PRD Review Closure — Decision Checklist
 
 Date: 2026-02-21
-Status: Draft for approval (PRD-only mode)
+Status: Approved and implemented (fixtures-first, verifier-closed on 2026-02-22)
 
-Purpose: close partner LP onboarding/governance discovery decisions before implementation planning.
+Purpose: close partner LP onboarding/governance decisions with deterministic implementation coverage and verifier-backed evidence.
 
 ## Decision D1 — Segment taxonomy adoption
 - **Question:** which segmentation framework governs partner LP onboarding?
@@ -46,4 +46,9 @@ Purpose: close partner LP onboarding/governance discovery decisions before imple
 - **Approval needed:** yes.
 
 ## PRD approval gate (M109)
-M109 is ready for implementation planning only when D1–D7 are explicitly approved or amended.
+M109 was approved for implementation after D1–D7 and is now implementation-closed.
+
+## Implementation closure evidence
+- `npm run verify:m109` exits 0.
+- `node verify/runner.mjs milestones/M109.yaml` returns `overall=true`.
+- Canonical output hash locked in `fixtures/release/m109_expected.json` and artifacts published under `artifacts/milestones/M109/latest/*`.

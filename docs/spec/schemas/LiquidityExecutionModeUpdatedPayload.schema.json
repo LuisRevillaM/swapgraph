@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquidityExecutionModeUpdatedPayload.schema.json",
+  "title": "LiquidityExecutionModeUpdatedPayload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "provider_id",
+    "mode",
+    "restricted_adapter_context",
+    "override_policy",
+    "updated_at"
+  ],
+  "properties": {
+    "provider_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "simulation",
+        "operator_assisted",
+        "constrained_auto"
+      ]
+    },
+    "restricted_adapter_context": {
+      "type": "boolean"
+    },
+    "override_policy": {
+      "anyOf": [
+        {
+          "$ref": "LiquidityExecutionOverridePolicy.schema.json"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/DisputeCreateRequest.schema.json",
+  "title": "DisputeCreateRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "dispute"
+  ],
+  "properties": {
+    "dispute": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dispute_type",
+        "severity",
+        "subject_ref",
+        "reason_code"
+      ],
+      "properties": {
+        "dispute_type": {
+          "type": "string",
+          "enum": [
+            "delivery",
+            "billing",
+            "sla"
+          ]
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        "subject_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "opened_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "evidence_items": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}

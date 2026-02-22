@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/PlatformConnection.schema.json",
+  "title": "PlatformConnection",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "connection_id",
+    "actor",
+    "platform",
+    "account_ref",
+    "status",
+    "connected_at",
+    "updated_at",
+    "metadata"
+  ],
+  "properties": {
+    "connection_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "id"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "user",
+            "partner"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "platform": {
+      "type": "string",
+      "minLength": 1
+    },
+    "account_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "connected",
+        "disconnected",
+        "degraded"
+      ]
+    },
+    "connected_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "metadata": {
+      "type": "object"
+    }
+  }
+}

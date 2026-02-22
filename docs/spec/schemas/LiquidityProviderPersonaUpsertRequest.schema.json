@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquidityProviderPersonaUpsertRequest.schema.json",
+  "title": "LiquidityProviderPersonaUpsertRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "persona"
+  ],
+  "properties": {
+    "persona": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "display_name",
+        "strategy_summary",
+        "disclosure_text"
+      ],
+      "properties": {
+        "persona_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "display_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "strategy_summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "disclosure_text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "active": {
+          "type": "boolean"
+        }
+      }
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

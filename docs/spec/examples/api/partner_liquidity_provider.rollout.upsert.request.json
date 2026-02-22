@@ -1,0 +1,27 @@
+{
+  "rollout": {
+    "rollout_status": "active",
+    "effective_segment_tier": "S2",
+    "capability_matrix": [
+      {
+        "capability": "listing_publish",
+        "min_segment_tier": "S1",
+        "enabled": true
+      },
+      {
+        "capability": "proposal_auto_accept",
+        "min_segment_tier": "S2",
+        "enabled": true
+      },
+      {
+        "capability": "settlement_execute",
+        "min_segment_tier": "S3",
+        "enabled": false
+      }
+    ],
+    "reason_codes": [
+      "promotion_approved"
+    ]
+  },
+  "recorded_at": "2026-02-22T16:30:00Z"
+}

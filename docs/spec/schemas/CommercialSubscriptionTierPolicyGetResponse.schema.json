@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/CommercialSubscriptionTierPolicyGetResponse.schema.json",
+  "title": "CommercialSubscriptionTierPolicyGetResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["correlation_id", "policy"],
+  "properties": {
+    "correlation_id": { "type": "string", "minLength": 1 },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "partner_id",
+        "version",
+        "tier",
+        "monthly_subscription_usd",
+        "trust_milestone_required",
+        "max_cycle_notional_usd",
+        "max_open_intents",
+        "mobile_contract_notes",
+        "updated_at",
+        "updated_by"
+      ],
+      "properties": {
+        "partner_id": { "type": "string", "minLength": 1 },
+        "version": { "type": "integer", "minimum": 1 },
+        "tier": { "type": "string", "enum": ["free", "pro", "enterprise"] },
+        "monthly_subscription_usd": { "type": "number", "minimum": 0 },
+        "trust_milestone_required": { "type": "string", "enum": ["none", "verified_identity", "established_history"] },
+        "max_cycle_notional_usd": { "type": "number", "minimum": 0 },
+        "max_open_intents": { "type": "integer", "minimum": 1 },
+        "mobile_contract_notes": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1
+        },
+        "updated_at": { "type": "string", "format": "date-time" },
+        "updated_by": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "id"],
+          "properties": {
+            "type": { "type": "string", "enum": ["partner"] },
+            "id": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "correlation_id": "corr_liquidityexecution_mode_get",
+  "provider_id": "lp_house_alpha",
+  "execution_mode": {
+    "provider_id": "lp_house_alpha",
+    "mode": "operator_assisted",
+    "restricted_adapter_context": true,
+    "override_policy": null,
+    "integration_gate_enabled": true,
+    "updated_at": "2026-02-22T11:55:00Z",
+    "updated_by": {
+      "type": "partner",
+      "id": "partner_alpha"
+    }
+  }
+}

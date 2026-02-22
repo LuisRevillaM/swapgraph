@@ -1,0 +1,106 @@
+{
+  "correlation_id": "corr_liquiditydecision_audit_export",
+  "provider_id": "lp_house_alpha",
+  "export": {
+    "exported_at": "2026-02-22T15:00:00Z",
+    "query": {
+      "limit": 2,
+      "now_iso": "2026-02-22T15:00:00Z"
+    },
+    "total_filtered": 4,
+    "entries": [
+      {
+        "audit_id": "lpaudit_000001",
+        "evaluation_id": "lpeval_3497db7e2f26bd22",
+        "provider_id": "lp_house_alpha",
+        "operation_id": "liquidityDecisions.proposal.accept",
+        "verdict": "allow",
+        "reason_codes": [],
+        "enforced_precedence": "safety>trust>lp_autonomy_policy>commercial>preference",
+        "policy_ref": {
+          "policy_id": "lp_policy_alpha",
+          "policy_version": 4,
+          "policy_mode": "constrained_auto",
+          "constraints_hash": "sha256:0a3f37f94b37d905d8644f7428ea8ed6f1a34ff5c93f8a8a2f4406d476ca2e1f"
+        },
+        "policy_version": 4,
+        "evaluated_at": "2026-02-22T14:05:00Z",
+        "actor": {
+          "type": "partner",
+          "id": "partner_alpha"
+        },
+        "input_summary": {
+          "action_type": "accept",
+          "spread_bps": 180,
+          "quote_value_usd": 220,
+          "daily_value_usd": 3100,
+          "projected_daily_value_usd": 3320,
+          "counterparty_actor_id": "user_001",
+          "counterparty_exposure_usd": 900,
+          "projected_counterparty_exposure_usd": 1120,
+          "price_confidence_bps": 8400,
+          "asset_liquidity_tier": "medium",
+          "high_volatility": false
+        }
+      },
+      {
+        "audit_id": "lpaudit_000002",
+        "evaluation_id": "lpeval_4adbc0187bb635d4",
+        "provider_id": "lp_house_alpha",
+        "operation_id": "liquidityDecisions.proposal.accept",
+        "verdict": "deny",
+        "reason_codes": [
+          "liquidity_policy_spread_exceeded"
+        ],
+        "enforced_precedence": "safety>trust>lp_autonomy_policy>commercial>preference",
+        "policy_ref": {
+          "policy_id": "lp_policy_alpha",
+          "policy_version": 4,
+          "policy_mode": "constrained_auto",
+          "constraints_hash": "sha256:0a3f37f94b37d905d8644f7428ea8ed6f1a34ff5c93f8a8a2f4406d476ca2e1f"
+        },
+        "policy_version": 4,
+        "evaluated_at": "2026-02-22T14:06:00Z",
+        "actor": {
+          "type": "partner",
+          "id": "partner_alpha"
+        },
+        "input_summary": {
+          "action_type": "accept",
+          "spread_bps": 420,
+          "quote_value_usd": 220,
+          "daily_value_usd": 3320,
+          "projected_daily_value_usd": 3540,
+          "counterparty_actor_id": "user_001",
+          "counterparty_exposure_usd": 1120,
+          "projected_counterparty_exposure_usd": 1340,
+          "price_confidence_bps": 8400,
+          "asset_liquidity_tier": "medium",
+          "high_volatility": false
+        }
+      }
+    ],
+    "next_cursor": "2026-02-22T14:06:00.000Z|lpaudit_000002",
+    "attestation": {
+      "cursor_after": null,
+      "next_cursor": "2026-02-22T14:06:00.000Z|lpaudit_000002",
+      "attestation_after": null,
+      "page_hash": "f69db34f261eeb5ca6e95a280b202fefee3650d6354e0284f1f443fb607ebf6e",
+      "chain_hash": "f6e1ea41f30f7295c60e3e5e916c45f906c58ce8dc99c2ac67600da5ccb4388a"
+    },
+    "checkpoint": {
+      "checkpoint_after": null,
+      "attestation_chain_hash": "f6e1ea41f30f7295c60e3e5e916c45f906c58ce8dc99c2ac67600da5ccb4388a",
+      "next_cursor": "2026-02-22T14:06:00.000Z|lpaudit_000002",
+      "entries_count": 2,
+      "total_filtered": 4,
+      "checkpoint_hash": "0d048f8c8f643e4f43df8f56259b1c35668cfb48db6ee5c2b4bd8f9a39bc2cb2"
+    },
+    "export_hash": "f69db34f261eeb5ca6e95a280b202fefee3650d6354e0284f1f443fb607ebf6e",
+    "signature": {
+      "key_id": "dev-pi-k1",
+      "alg": "ed25519",
+      "sig": "REPLACE_WITH_RUNTIME_SIGNATURE"
+    }
+  }
+}

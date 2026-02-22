@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquidityDecisionAuditEntry.schema.json",
+  "title": "LiquidityDecisionAuditEntry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "audit_id",
+    "evaluation_id",
+    "provider_id",
+    "operation_id",
+    "verdict",
+    "reason_codes",
+    "enforced_precedence",
+    "policy_ref",
+    "policy_version",
+    "evaluated_at",
+    "actor",
+    "input_summary"
+  ],
+  "properties": {
+    "audit_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evaluation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "operation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "verdict": {
+      "type": "string",
+      "enum": [
+        "allow",
+        "deny"
+      ]
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "enforced_precedence": {
+      "type": "string",
+      "minLength": 1
+    },
+    "policy_ref": {
+      "$ref": "LiquidityPolicyRef.schema.json"
+    },
+    "policy_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "evaluated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "actor": {
+      "$ref": "ActorRef.schema.json"
+    },
+    "input_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "action_type",
+        "spread_bps",
+        "quote_value_usd",
+        "daily_value_usd",
+        "projected_daily_value_usd",
+        "counterparty_actor_id",
+        "counterparty_exposure_usd",
+        "projected_counterparty_exposure_usd",
+        "price_confidence_bps",
+        "asset_liquidity_tier",
+        "high_volatility"
+      ],
+      "properties": {
+        "action_type": {
+          "type": "string",
+          "enum": [
+            "quote",
+            "accept",
+            "execute"
+          ]
+        },
+        "spread_bps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "quote_value_usd": {
+          "type": "number",
+          "minimum": 0
+        },
+        "daily_value_usd": {
+          "type": "number",
+          "minimum": 0
+        },
+        "projected_daily_value_usd": {
+          "type": "number",
+          "minimum": 0
+        },
+        "counterparty_actor_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "counterparty_exposure_usd": {
+          "type": "number",
+          "minimum": 0
+        },
+        "projected_counterparty_exposure_usd": {
+          "type": "number",
+          "minimum": 0
+        },
+        "price_confidence_bps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "asset_liquidity_tier": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ]
+        },
+        "high_volatility": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/NotificationPreferencesUpsertRequest.schema.json",
+  "title": "NotificationPreferencesUpsertRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "preferences"
+  ],
+  "properties": {
+    "preferences": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "quiet_hours",
+        "urgency_threshold",
+        "category_opt_in",
+        "demand_signal_opt_in"
+      ],
+      "properties": {
+        "quiet_hours": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "enabled",
+            "start_hour_utc",
+            "end_hour_utc"
+          ],
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "start_hour_utc": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 23
+            },
+            "end_hour_utc": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 23
+            }
+          }
+        },
+        "urgency_threshold": {
+          "type": "string",
+          "enum": [
+            "low",
+            "normal",
+            "high",
+            "critical"
+          ]
+        },
+        "category_opt_in": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "proposal.created",
+            "proposal.expiring",
+            "settlement.deposit_required",
+            "settlement.deposit_deadline_approaching",
+            "cycle.executing",
+            "cycle.completed",
+            "cycle.failed",
+            "refund.completed",
+            "intent.demand_signal"
+          ],
+          "properties": {
+            "proposal.created": {
+              "type": "boolean"
+            },
+            "proposal.expiring": {
+              "type": "boolean"
+            },
+            "settlement.deposit_required": {
+              "type": "boolean"
+            },
+            "settlement.deposit_deadline_approaching": {
+              "type": "boolean"
+            },
+            "cycle.executing": {
+              "type": "boolean"
+            },
+            "cycle.completed": {
+              "type": "boolean"
+            },
+            "cycle.failed": {
+              "type": "boolean"
+            },
+            "refund.completed": {
+              "type": "boolean"
+            },
+            "intent.demand_signal": {
+              "type": "boolean"
+            }
+          }
+        },
+        "demand_signal_opt_in": {
+          "type": "boolean"
+        }
+      }
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

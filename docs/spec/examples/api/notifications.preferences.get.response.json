@@ -1,0 +1,28 @@
+{
+  "correlation_id": "corr_notifications_preferences_get",
+  "preference": {
+    "actor": {
+      "type": "user",
+      "id": "u1"
+    },
+    "quiet_hours": {
+      "enabled": true,
+      "start_hour_utc": 22,
+      "end_hour_utc": 7
+    },
+    "urgency_threshold": "normal",
+    "category_opt_in": {
+      "proposal.created": true,
+      "proposal.expiring": true,
+      "settlement.deposit_required": true,
+      "settlement.deposit_deadline_approaching": true,
+      "cycle.executing": true,
+      "cycle.completed": true,
+      "cycle.failed": true,
+      "refund.completed": true,
+      "intent.demand_signal": true
+    },
+    "demand_signal_opt_in": false,
+    "updated_at": "2026-02-21T14:00:00Z"
+  }
+}

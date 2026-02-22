@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquidityInventoryReleaseBatchRequest.schema.json",
+  "title": "LiquidityInventoryReleaseBatchRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "releases"
+  ],
+  "properties": {
+    "releases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reservation_id",
+          "target_status"
+        ],
+        "properties": {
+          "reservation_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "target_status": {
+            "type": "string",
+            "enum": [
+              "in_settlement",
+              "released",
+              "refunded",
+              "withdrawn"
+            ]
+          },
+          "cycle_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "holding_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "correlation_id": "corr_productprojection_inventory_awakening_get",
+  "projection": {
+    "swappability_summary": {
+      "intents_total": 2,
+      "active_intents": 2,
+      "cycle_opportunities": 2,
+      "average_confidence_bps": 8300
+    },
+    "recommended_first_intents": [
+      {
+        "recommendation_id": "rec_08dbd7a2cfecf8a8",
+        "cycle_id": "cycle_alpha",
+        "suggested_give_asset_id": "asset_a",
+        "suggested_get_asset_id": "asset_b",
+        "confidence_bps": 8600,
+        "rationale": "High confidence based on reciprocal asset overlap."
+      },
+      {
+        "recommendation_id": "rec_3efc6b4a41d2a2bc",
+        "cycle_id": "cycle_beta",
+        "suggested_give_asset_id": "asset_c",
+        "suggested_get_asset_id": "asset_d",
+        "confidence_bps": 8000,
+        "rationale": "Use this proposal to bootstrap first-cycle participation."
+      }
+    ]
+  }
+}

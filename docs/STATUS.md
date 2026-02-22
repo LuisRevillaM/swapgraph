@@ -1,9 +1,9 @@
 # Project Status — swapgraph
 
-Last updated: 2026-02-21
+Last updated: 2026-02-22
 
 ## Autopilot
-- Status: **spec hardening** (not approved)
+- Status: **implementation closure** (M109 verifier-complete)
 - Canonical plan: `docs/source/LATEST.md` (v2.0)
 
 ## Milestones (progress)
@@ -108,12 +108,26 @@ Last updated: 2026-02-21
 - M95: ✅ Dispute-to-compensation linkage workflow (fixtures-first) (idempotent dispute-compensation linkage record/update lifecycle, deterministic transition guardrails, resolved-dispute close enforcement, and signed paginated linkage export with continuation/tamper-fail verification) (fixtures-first)
 - M96: ✅ Reliability auto-remediation planning contract (fixtures-first) (idempotent remediation-plan suggestions derived from reliability signals with deterministic risk/action synthesis, `reliability_signals_missing` blocker signaling, and signed paginated remediation-plan export with continuation attestation/tamper-fail verification) (fixtures-first)
 - M97: ✅ Staging evidence refresh + operator conformance runbook pack (fixtures-first) (idempotent staging evidence-bundle manifest recording, checkpoint-gated continuation exports, signed bundle integrity verification, and refreshed M85/M86 evidence capture runbook flow) (fixtures-first)
+- M98: ✅ API + event surface completion contracts (fixtures-first) (platform connections contract surfaces, inventory snapshot/assets projections, canonical disputes facade operations mapped to partner dispute store, and event payload contract additions for `proposal.cancelled`, `cycle.failed`, and `user.reliability_changed`) (fixtures-first)
+- M99: ✅ Trust & safety risk-signal contracts (fixtures-first) (idempotent trust-safety signal and policy-decision recording, deterministic subject-lineage enforcement, and signed checkpointed decision export continuation with tamper-fail verification) (fixtures-first)
+- M100: ✅ Metrics and network-health contracts (fixtures-first) (deterministic UTC-window north-star/funnel/partner/safety surfaces with partner-tenant scoping, plus signed checkpointed network-health export continuity and tamper-fail verification) (fixtures-first)
+- M101: ✅ Product-surface readiness contracts (fixtures-first) (idempotent notification preference controls + anti-spam inbox projection, client-agnostic inventory/cycle/timeline/receipt projection surfaces, and partner UI capabilities/bundle contracts with deterministic reason-code floor coverage) (fixtures-first)
+- M102: ✅ Commercial packaging and policy contracts (fixtures-first) (idempotent transaction-fee/subscription-tier/boost/quota policy surfaces, deterministic precedence/non-bypass policy evaluation, and signed policy export continuation with tamper-fail verification) (fixtures-first)
+- M103: ✅ Liquidity provider primitives and attribution contracts (fixtures-first) (idempotent LP register/list/get/persona-upsert API surfaces, deterministic disclosure/actor/type reason-code floor, and attribution propagation on intent/proposal/receipt contracts) (fixtures-first)
+- M104: ✅ Liquidity simulation contracts (fixtures-first) (idempotent simulation session lifecycle + intent sync flow, simulation-only cycle/receipt signed exports with deterministic continuation and tamper-fail verification, and dedicated simulation reason-code floor) (fixtures-first)
+- M105: ✅ Liquidity inventory and reservation lifecycle contracts (fixtures-first) (provider-scoped inventory snapshot/list/availability surfaces, deterministic per-item reserve/release batch outcomes with lifecycle/context invariants, and signed reconciliation export continuity with tamper-fail verification) (fixtures-first)
+- M106: ✅ House LP listing and proposal participation contracts (fixtures-first) (provider-scoped listing upsert/cancel/list surfaces, mandatory decision explainability payload capture on proposal accept/decline contracts, and trust/safety precedence with deterministic decision lineage records) (fixtures-first)
+- M107: ✅ Operator-assisted settlement and Steam-safe execution controls (integration-gated verifier mode) (provider-scoped execution-mode upsert/get surfaces, explicit execution-request record/approve/reject contracts, and signed checkpointed execution export continuity with deterministic hard-stop reason codes) (fixtures-first)
+- M108: ✅ LP autonomy policy, anti-farming controls, and decision-audit continuity contracts (fixtures-first) (provider-scoped policy upsert/get/evaluate surfaces, deterministic precedence and anti-farming guardrail enforcement, and signed decision-audit export continuity with retention/redaction hooks) (fixtures-first)
+- M109: ✅ Partner LP onboarding and governance contracts (fixtures-first) (partner-LP onboarding/get/status/eligibility/rollout contracts, deterministic segment/capability gating with downgrade triggers, and signed checkpointed governance rollout export continuity) (fixtures-first)
 
 ## Next
 - PRD batch defined: `docs/prd/2026-02-21_master-next-batch_M98-M102.md`
 - Additive LP subsystem PRD batch defined: `docs/prd/2026-02-21_master-liquidity-provider-subsystem_M103-M110.md`
-- Current mode: PRD-only for M98+ (official implementation paused pending explicit approval)
-- Immediate target: batch approval checkpoint for M98–M102 closure artifacts (`docs/prd/2026-02-21_m98-prd-review-closure.md` … `docs/prd/2026-02-21_m102-prd-review-closure.md`) plus handoff/BRD/discovery pack (`docs/prd/2026-02-21_handoff-web-first_brd-vs-discovery.md`, `docs/brd/README.md`, `docs/brd/2026-02-21_BRD-01_business-outcomes-kpi-bands.md`, `docs/brd/2026-02-21_BRD-02_trust-safety-operating-policy.md`, `docs/brd/2026-02-21_BRD-03_commercial-packaging-strategy.md`, `docs/brd/2026-02-21_BRD-04_partner-segmentation-rollout-strategy.md`, `docs/prd/2026-02-21_web-first-discovery-brief-pack_D-W1-D-W5.md`, `docs/prd/2026-02-21_cross-agent-approval-board_M98-M102.md`) and LP subsystem closure/approval board (`docs/prd/2026-02-21_m103-prd-review-closure.md` … `docs/prd/2026-02-21_m110-prd-review-closure.md`, `docs/prd/2026-02-21_cross-agent-approval-board_M103-M110.md`, `docs/prd/2026-02-21_m103-m110-proposed-review-baseline.md`)
+- Current mode: M98–M109 implementation tranche complete with verifier closure.
+- Immediate target: proceed with LP subsystem follow-on planning (`M110+`) once remaining discovery ownership gate closes.
+- Runtime shell available for request/response validation: `npm run start:api` (`src/server/runtimeApiServer.mjs`).
+- CI baseline gate added: `.github/workflows/verify-baseline.yml` (includes `verify:m0`, baseline tranche, `verify:m98`, `verify:m99`, `verify:m100`, `verify:m101`, `verify:m102`, `verify:m103`, `verify:m104`, `verify:m105`, `verify:m106`, `verify:m107`, `verify:m108`, and `verify:m109`).
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.

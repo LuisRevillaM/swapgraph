@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquiditySimulationSessionStartedPayload.schema.json",
+  "title": "LiquiditySimulationSessionStartedPayload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "session_id",
+    "owner_actor",
+    "label",
+    "started_at"
+  ],
+  "properties": {
+    "session_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "owner_actor": {
+      "$ref": "ActorRef.schema.json"
+    },
+    "label": {
+      "type": "string",
+      "minLength": 1
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

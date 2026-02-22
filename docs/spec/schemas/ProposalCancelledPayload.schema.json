@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/ProposalCancelledPayload.schema.json",
+  "title": "ProposalCancelledPayload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "proposal_id",
+    "cycle_id",
+    "reason_code",
+    "cancelled_at"
+  ],
+  "properties": {
+    "proposal_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cycle_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reason_code": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cancelled_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

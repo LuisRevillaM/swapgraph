@@ -1,0 +1,20 @@
+{
+  "correlation_id": "corr_metrics_safety_health_get",
+  "partner_id": "partner_demo",
+  "window": {
+    "from_iso": "2026-02-20T00:00:00Z",
+    "to_iso": "2026-02-21T00:00:00Z",
+    "bucket": "day"
+  },
+  "safety_health": {
+    "fraud_flags_count": 2,
+    "confirmed_abuse_count": 1,
+    "unwind_rate_bps": 2500,
+    "felt_safe_proxy_bps": 7000,
+    "felt_safe_proxy_numerator": 7,
+    "felt_safe_proxy_denominator": 10,
+    "fraud_flags_per_1000_intents": 250,
+    "fraud_flags_per_1000_intents_numerator": 2,
+    "fraud_flags_per_1000_intents_denominator": 8
+  }
+}
