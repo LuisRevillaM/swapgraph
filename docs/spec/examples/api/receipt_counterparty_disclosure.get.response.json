@@ -1,0 +1,73 @@
+{
+  "correlation_id": "corr_receiptcounterpartydisclosure_get",
+  "receipt_id": "receipt_lp_001",
+  "cycle_id": "cycle_lp_001",
+  "disclosures": [
+    {
+      "disclosure_id": "cpd_0f9e8d7c6b5a4a3b",
+      "source": "receipt",
+      "source_id": "receipt_lp_001",
+      "intent_id": "intent_partner_001",
+      "counterparty_actor": {
+        "type": "user",
+        "id": "user_003"
+      },
+      "provider_ref": {
+        "provider_id": "lp_partner_beta",
+        "provider_type": "partner_lp",
+        "owner_actor": {
+          "type": "partner",
+          "id": "partner_beta"
+        },
+        "is_automated": false,
+        "is_house_inventory": false,
+        "label_required": true,
+        "display_label": "Beta Partner LP",
+        "disclosure_text": "Partner-operated liquidity provider.",
+        "active": true,
+        "created_at": "2026-02-22T17:05:00Z",
+        "updated_at": "2026-02-22T18:05:00Z"
+      },
+      "automation_disclosure": {
+        "is_automated": false,
+        "is_house_inventory": false,
+        "label_required": true,
+        "disclosure_text": "Partner-operated liquidity provider."
+      },
+      "persona_ref": null,
+      "strategy_summary_ref": null,
+      "decision_rationale": {
+        "reference_id": "lpdec_000002",
+        "summary": "accept decision [partner_lp_fill]",
+        "link": "liquidity-decisions://lpdec_000002"
+      },
+      "preference_evaluation": {
+        "allowed": true,
+        "blocked_reason_codes": []
+      }
+    }
+  ],
+  "total_counterparties": 1,
+  "filtered_counterparties": 0,
+  "preference_snapshot": {
+    "actor": {
+      "type": "user",
+      "id": "user_001"
+    },
+    "allow_bots": false,
+    "allow_house_liquidity": false,
+    "allow_partner_lp": true,
+    "category_filters": [
+      {
+        "category": "house_inventory",
+        "allow": false
+      },
+      {
+        "category": "partner_lp",
+        "allow": true
+      }
+    ],
+    "no_eligible_counterparty_behavior": "no_match",
+    "updated_at": "2026-02-22T18:15:00Z"
+  }
+}

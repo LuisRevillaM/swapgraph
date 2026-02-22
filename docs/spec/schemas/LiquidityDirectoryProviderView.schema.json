@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquidityDirectoryProviderView.schema.json",
+  "title": "LiquidityDirectoryProviderView",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "provider_id",
+    "provider_type",
+    "owner_actor_type",
+    "is_automated",
+    "is_house_inventory",
+    "label_required",
+    "display_label",
+    "disclosure_text",
+    "active",
+    "categories",
+    "persona_ref",
+    "updated_at"
+  ],
+  "properties": {
+    "provider_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider_type": {
+      "type": "string",
+      "enum": [
+        "user",
+        "house_bot",
+        "partner_lp"
+      ]
+    },
+    "owner_actor_type": {
+      "type": "string",
+      "enum": [
+        "user",
+        "partner",
+        "agent"
+      ]
+    },
+    "is_automated": {
+      "type": "boolean"
+    },
+    "is_house_inventory": {
+      "type": "boolean"
+    },
+    "label_required": {
+      "type": "boolean"
+    },
+    "display_label": {
+      "type": "string",
+      "minLength": 1
+    },
+    "disclosure_text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "active": {
+      "type": "boolean"
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "persona_ref": {
+      "anyOf": [
+        {
+          "$ref": "BotPersonaRef.schema.json"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

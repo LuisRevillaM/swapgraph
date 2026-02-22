@@ -1,0 +1,49 @@
+{
+  "correlation_id": "corr_liquiditydirectory_list",
+  "providers": [
+    {
+      "provider_id": "lp_house_alpha",
+      "provider_type": "house_bot",
+      "owner_actor_type": "partner",
+      "is_automated": true,
+      "is_house_inventory": true,
+      "label_required": true,
+      "display_label": "Alpha Market Maker",
+      "disclosure_text": "Automated house-liquidity participant.",
+      "active": true,
+      "categories": [
+        "automated",
+        "house_bot",
+        "house_inventory"
+      ],
+      "persona_ref": {
+        "provider_id": "lp_house_alpha",
+        "persona_id": "persona_alpha_mm",
+        "display_name": "Alpha MM",
+        "strategy_summary": "Passive spread capture for balanced cycle completion.",
+        "disclosure_text": "Automated house-liquidity participant.",
+        "active": true,
+        "updated_at": "2026-02-22T18:00:00Z"
+      },
+      "updated_at": "2026-02-22T18:00:00Z"
+    },
+    {
+      "provider_id": "lp_partner_beta",
+      "provider_type": "partner_lp",
+      "owner_actor_type": "partner",
+      "is_automated": false,
+      "is_house_inventory": false,
+      "label_required": true,
+      "display_label": "Beta Partner LP",
+      "disclosure_text": "Partner-operated liquidity provider.",
+      "active": true,
+      "categories": [
+        "manual",
+        "partner_lp"
+      ],
+      "persona_ref": null,
+      "updated_at": "2026-02-22T18:05:00Z"
+    }
+  ],
+  "total_filtered": 2
+}

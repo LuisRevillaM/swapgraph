@@ -62,6 +62,7 @@ export class JsonStateStore {
       trust_safety_export_checkpoints: {},
       metrics_network_health_export_checkpoints: {},
       notification_preferences: {},
+      counterparty_preferences: {},
       commercial_policies: {},
       commercial_policy_audit: [],
       commercial_policy_export_checkpoints: {},
@@ -171,6 +172,7 @@ export class JsonStateStore {
         trust_safety_export_checkpoints: {},
         metrics_network_health_export_checkpoints: {},
         notification_preferences: {},
+        counterparty_preferences: {},
         commercial_policies: {},
         commercial_policy_audit: [],
         commercial_policy_export_checkpoints: {},
@@ -281,6 +283,7 @@ export class JsonStateStore {
     this.state.trust_safety_export_checkpoints ||= {};
     this.state.metrics_network_health_export_checkpoints ||= {};
     this.state.notification_preferences ||= {};
+    this.state.counterparty_preferences ||= {};
     this.state.commercial_policies ||= {};
     this.state.commercial_policy_audit ||= [];
     this.state.commercial_policy_export_checkpoints ||= {};

@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/CounterpartyPreferencesView.schema.json",
+  "title": "CounterpartyPreferencesView",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "actor",
+    "allow_bots",
+    "allow_house_liquidity",
+    "allow_partner_lp",
+    "category_filters",
+    "no_eligible_counterparty_behavior",
+    "updated_at"
+  ],
+  "properties": {
+    "actor": {
+      "$ref": "ActorRef.schema.json"
+    },
+    "allow_bots": {
+      "type": "boolean"
+    },
+    "allow_house_liquidity": {
+      "type": "boolean"
+    },
+    "allow_partner_lp": {
+      "type": "boolean"
+    },
+    "category_filters": {
+      "type": "array",
+      "items": {
+        "$ref": "CounterpartyPreferenceCategoryRule.schema.json"
+      }
+    },
+    "no_eligible_counterparty_behavior": {
+      "type": "string",
+      "enum": [
+        "no_match"
+      ]
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

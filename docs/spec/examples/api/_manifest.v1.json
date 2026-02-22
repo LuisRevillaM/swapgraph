@@ -1024,6 +1024,38 @@
     {
       "file": "staging.evidence_bundle.export.response.json",
       "schema": "StagingEvidenceBundleExportResponse.schema.json"
+    },
+    {
+      "file": "liquidity_directory.list.response.json",
+      "schema": "LiquidityDirectoryListResponse.schema.json"
+    },
+    {
+      "file": "liquidity_directory.get.response.json",
+      "schema": "LiquidityDirectoryGetResponse.schema.json"
+    },
+    {
+      "file": "liquidity_directory.persona.list.response.json",
+      "schema": "LiquidityDirectoryPersonaListResponse.schema.json"
+    },
+    {
+      "file": "counterparty_preferences.get.response.json",
+      "schema": "CounterpartyPreferencesGetResponse.schema.json"
+    },
+    {
+      "file": "counterparty_preferences.upsert.request.json",
+      "schema": "CounterpartyPreferencesUpsertRequest.schema.json"
+    },
+    {
+      "file": "counterparty_preferences.upsert.response.json",
+      "schema": "CounterpartyPreferencesUpsertResponse.schema.json"
+    },
+    {
+      "file": "proposal_counterparty_disclosure.get.response.json",
+      "schema": "ProposalCounterpartyDisclosureGetResponse.schema.json"
+    },
+    {
+      "file": "receipt_counterparty_disclosure.get.response.json",
+      "schema": "ReceiptCounterpartyDisclosureGetResponse.schema.json"
     }
   ]
 }

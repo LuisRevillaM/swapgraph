@@ -1,0 +1,103 @@
+{
+  "correlation_id": "corr_proposalcounterpartydisclosure_get",
+  "proposal_id": "cycle_lp_001",
+  "cycle_id": "cycle_lp_001",
+  "disclosures": [
+    {
+      "disclosure_id": "cpd_1a2b3c4d5e6f7a8b",
+      "source": "proposal",
+      "source_id": "cycle_lp_001",
+      "intent_id": "intent_house_001",
+      "counterparty_actor": {
+        "type": "user",
+        "id": "user_002"
+      },
+      "provider_ref": {
+        "provider_id": "lp_house_alpha",
+        "provider_type": "house_bot",
+        "owner_actor": {
+          "type": "partner",
+          "id": "partner_alpha"
+        },
+        "is_automated": true,
+        "is_house_inventory": true,
+        "label_required": true,
+        "display_label": "Alpha Market Maker",
+        "disclosure_text": "Automated house-liquidity participant.",
+        "active": true,
+        "policy_ref": {
+          "policy_id": "lp_policy_alpha",
+          "policy_version": 4,
+          "policy_mode": "constrained_auto",
+          "constraints_hash": "sha256:lp-policy-alpha-v4"
+        },
+        "persona_ref": {
+          "provider_id": "lp_house_alpha",
+          "persona_id": "persona_alpha_mm",
+          "display_name": "Alpha MM",
+          "strategy_summary": "Passive spread capture for balanced cycle completion.",
+          "disclosure_text": "Automated house-liquidity participant.",
+          "active": true,
+          "updated_at": "2026-02-22T18:00:00Z"
+        },
+        "created_at": "2026-02-22T17:00:00Z",
+        "updated_at": "2026-02-22T18:00:00Z"
+      },
+      "automation_disclosure": {
+        "is_automated": true,
+        "is_house_inventory": true,
+        "label_required": true,
+        "disclosure_text": "Automated house-liquidity participant."
+      },
+      "persona_ref": {
+        "provider_id": "lp_house_alpha",
+        "persona_id": "persona_alpha_mm",
+        "display_name": "Alpha MM",
+        "strategy_summary": "Passive spread capture for balanced cycle completion.",
+        "disclosure_text": "Automated house-liquidity participant.",
+        "active": true,
+        "updated_at": "2026-02-22T18:00:00Z"
+      },
+      "strategy_summary_ref": {
+        "provider_id": "lp_house_alpha",
+        "persona_id": "persona_alpha_mm",
+        "display_name": "Alpha MM",
+        "strategy_summary": "Passive spread capture for balanced cycle completion."
+      },
+      "decision_rationale": {
+        "reference_id": "lpdec_000001",
+        "summary": "accept decision [house_liquidity_supply]",
+        "link": "liquidity-decisions://lpdec_000001"
+      },
+      "preference_evaluation": {
+        "allowed": false,
+        "blocked_reason_codes": [
+          "counterparty_preferences_conflict"
+        ]
+      }
+    }
+  ],
+  "total_counterparties": 1,
+  "filtered_counterparties": 1,
+  "preference_snapshot": {
+    "actor": {
+      "type": "user",
+      "id": "user_001"
+    },
+    "allow_bots": false,
+    "allow_house_liquidity": false,
+    "allow_partner_lp": true,
+    "category_filters": [
+      {
+        "category": "house_inventory",
+        "allow": false
+      },
+      {
+        "category": "partner_lp",
+        "allow": true
+      }
+    ],
+    "no_eligible_counterparty_behavior": "no_match",
+    "updated_at": "2026-02-22T18:15:00Z"
+  }
+}

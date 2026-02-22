@@ -1,0 +1,18 @@
+{
+  "preferences": {
+    "allow_bots": false,
+    "allow_house_liquidity": false,
+    "allow_partner_lp": true,
+    "category_filters": [
+      {
+        "category": "partner_lp",
+        "allow": true
+      },
+      {
+        "category": "house_inventory",
+        "allow": false
+      }
+    ]
+  },
+  "recorded_at": "2026-02-22T18:15:00Z"
+}

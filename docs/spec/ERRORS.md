@@ -276,6 +276,11 @@ Notes:
   - `partner_liquidity_provider_eligibility_failed`
   - `partner_liquidity_provider_rollout_blocked`
   - `partner_liquidity_provider_downgrade_required`
+  - `counterparty_preferences_invalid`
+  - `counterparty_preferences_invalid_timestamp`
+  - `counterparty_preferences_conflict`
+  - `liquidity_directory_query_invalid`
+  - `counterparty_disclosure_not_found`
 - Rollout diagnostics automation execution-attestation verification may return deterministic mismatch errors such as:
   - `automation_execution_expected_effect_hash_mismatch`
   - `automation_execution_request_hash_chain_mismatch`

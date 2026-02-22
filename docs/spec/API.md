@@ -84,6 +84,28 @@ Auth headers (see `docs/spec/AUTH.md` for details):
   - `GET /product-projections/receipt-share/{receipt_id}`
   - projection query validation failures use deterministic reason code `product_projection_query_invalid`
 
+- `LiquidityDirectory`
+  - `GET /liquidity-providers/directory` (public-safe LP directory list with deterministic filter semantics)
+  - `GET /liquidity-providers/directory/{provider_id}` (public-safe LP directory profile)
+  - `GET /liquidity-providers/directory/{provider_id}/personas` (public-safe LP persona disclosures)
+  - directory surfaces intentionally expose disclosure-safe profile data only (no partner-internal governance internals)
+
+- `CounterpartyPreferences`
+  - `GET /counterparty-preferences` (get actor counterparty controls)
+  - `POST /counterparty-preferences` (idempotent upsert of bot/house/partner controls + category-level filters)
+  - control invariants:
+    - explicit `allow_bots`, `allow_house_liquidity`, `allow_partner_lp` switches
+    - category filter conflicts fail deterministically (no silent override)
+    - no-eligible behavior is explicit (`no_match`)
+
+- `CounterpartyDisclosureProjection`
+  - `GET /product-projections/proposals/{proposal_id}/counterparty-disclosure`
+  - `GET /product-projections/receipts/{receipt_id}/counterparty-disclosure`
+  - disclosure invariants:
+    - LP counterparties are explicitly labeled in proposal and receipt projections
+    - automation and house-liquidity flags are explicit in disclosure payloads
+    - persona/strategy summary refs and decision-rationale refs are projected when present
+
 - `PartnerUi`
   - `GET /partner-ui/capabilities` (supported embedded surfaces/version matrix for partner actors)
   - `GET /partner-ui/bundles/{surface}` (surface payload bundle for partner embedding mode)

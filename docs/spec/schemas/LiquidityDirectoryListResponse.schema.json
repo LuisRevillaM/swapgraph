@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/LiquidityDirectoryListResponse.schema.json",
+  "title": "LiquidityDirectoryListResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "providers",
+    "total_filtered"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "providers": {
+      "type": "array",
+      "items": {
+        "$ref": "LiquidityDirectoryProviderView.schema.json"
+      }
+    },
+    "total_filtered": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

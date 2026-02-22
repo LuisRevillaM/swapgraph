@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/ReceiptCounterpartyDisclosureGetResponse.schema.json",
+  "title": "ReceiptCounterpartyDisclosureGetResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "receipt_id",
+    "cycle_id",
+    "disclosures",
+    "total_counterparties",
+    "filtered_counterparties",
+    "preference_snapshot"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "receipt_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cycle_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "disclosures": {
+      "type": "array",
+      "items": {
+        "$ref": "CounterpartyDisclosureEntry.schema.json"
+      }
+    },
+    "total_counterparties": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "filtered_counterparties": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "preference_snapshot": {
+      "$ref": "CounterpartyPreferencesView.schema.json"
+    }
+  }
+}

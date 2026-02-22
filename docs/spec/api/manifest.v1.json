@@ -2828,6 +2828,126 @@
           "settlement:read"
         ]
       }
+    },
+    {
+      "method": "GET",
+      "path": "/liquidity-providers/directory",
+      "operation_id": "liquidityDirectory.list",
+      "idempotency_required": false,
+      "response_schema": "LiquidityDirectoryListResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/liquidity-providers/directory/{provider_id}",
+      "operation_id": "liquidityDirectory.get",
+      "idempotency_required": false,
+      "response_schema": "LiquidityDirectoryGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/liquidity-providers/directory/{provider_id}/personas",
+      "operation_id": "liquidityDirectory.persona.list",
+      "idempotency_required": false,
+      "response_schema": "LiquidityDirectoryPersonaListResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/counterparty-preferences",
+      "operation_id": "counterpartyPreferences.get",
+      "idempotency_required": false,
+      "response_schema": "CounterpartyPreferencesGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/counterparty-preferences",
+      "operation_id": "counterpartyPreferences.upsert",
+      "idempotency_required": true,
+      "request_schema": "CounterpartyPreferencesUpsertRequest.schema.json",
+      "response_schema": "CounterpartyPreferencesUpsertResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/product-projections/proposals/{proposal_id}/counterparty-disclosure",
+      "operation_id": "proposalCounterpartyDisclosure.get",
+      "idempotency_required": false,
+      "response_schema": "ProposalCounterpartyDisclosureGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/product-projections/receipts/{receipt_id}/counterparty-disclosure",
+      "operation_id": "receiptCounterpartyDisclosure.get",
+      "idempotency_required": false,
+      "response_schema": "ReceiptCounterpartyDisclosureGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner",
+          "user"
+        ],
+        "required_scopes": [
+          "receipts:read"
+        ]
+      }
     }
   ],
   "webhooks": {

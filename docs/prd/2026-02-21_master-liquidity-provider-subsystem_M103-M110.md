@@ -10,7 +10,7 @@ Goal: define an additive PRD tranche that makes a liquidity provider subsystem (
 - M107 is implementation-closed (fixtures-first, integration-gated verifier mode).
 - M108 is implementation-closed (fixtures-first).
 - M109 is implementation-closed (fixtures-first).
-- M110 remains **PRD-only** until explicit implementation approval.
+- M110 is implementation-closed (fixtures-first).
 - This tranche is **additive** to v2 coverage (M0–M102), not a replacement.
 
 ## Why this tranche exists
@@ -73,10 +73,10 @@ The system already has a strong clearing core (intents, proposals, commit, settl
 - Bind BRD-03/BRD-04 policy and segmentation to LP governance contracts.
 - Define rollout, downgrade, and offboarding policy surfaces.
 
-### M110 — Swarm transparency and user controls (**discovery-first PRD**)
-- Define bot/persona directory and disclosure projections.
-- Define user controls (`allow_bots`, `allow_house_liquidity`, category-level bot filters).
-- Define proposal/receipt transparency UX payload contracts.
+### M110 — Swarm transparency and user controls (**implemented, fixtures-first**)
+- Implemented bot/persona directory and disclosure projections.
+- Implemented user controls (`allow_bots`, `allow_house_liquidity`, category-level filters).
+- Implemented proposal/receipt transparency disclosure payload contracts.
 
 ## Cross-tranche dependencies
 - M99: trust/safety decision contracts for LP policy gating.
@@ -84,10 +84,10 @@ The system already has a strong clearing core (intents, proposals, commit, settl
 - M101: web-first projections for LP transparency and controls.
 - M102: commercial and policy precedence for partner LP monetization.
 
-## Entry gate for implementation planning (M110+)
-Implementation planning for M110+ begins only when:
+## Entry gate for implementation planning (M111+)
+Implementation planning for M111+ begins only when:
 1. M98–M102 approval board is complete,
-2. M103–M109 implementation closures are complete and M110 PRD is approved (or amended/approved),
+2. M103–M110 implementation closures are complete,
 3. explicit user approval to implement is given.
 
 ## Approval board

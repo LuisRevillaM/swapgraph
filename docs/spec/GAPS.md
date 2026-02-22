@@ -195,7 +195,7 @@ Each item here must become at least one of:
 - Resolved (integration-gated, partial): M107 (liquidity execution governance contracts: provider-scoped execution-mode upsert/get surfaces, explicit operator approval/rejection records for execution requests, and signed checkpointed execution export continuity with deterministic hard-stop reason codes).
 - Resolved (fixtures-first, partial): M108 (liquidity autonomy policy contracts: provider-scoped policy upsert/get/evaluate surfaces, deterministic precedence and anti-farming guardrail enforcement, and signed checkpointed decision-audit export continuity with retention/redaction hooks).
 - Resolved (fixtures-first, partial): M109 (partner liquidity-provider onboarding/governance contracts: partner-LP onboarding/get/status/eligibility/rollout surfaces with deterministic segment capability gating, downgrade triggers, and signed checkpointed governance export continuity).
-- Additive (planned, post-v2 extension): LP subsystem follow-on PRD tranche M110 (`docs/prd/2026-02-21_master-liquidity-provider-subsystem_M103-M110.md`) to formalize user-facing transparency and controls.
+- Resolved (fixtures-first, partial): M110 (swarm transparency and user-control contracts: public-safe liquidity directory/persona disclosure surfaces, idempotent counterparty preference controls with deterministic conflict/no-match signaling, and proposal/receipt counterparty disclosure projections with explicit LP labeling).
 
 ---
 

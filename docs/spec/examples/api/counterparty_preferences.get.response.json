@@ -1,0 +1,20 @@
+{
+  "correlation_id": "corr_counterpartypreferences_get",
+  "preferences": {
+    "actor": {
+      "type": "user",
+      "id": "user_001"
+    },
+    "allow_bots": true,
+    "allow_house_liquidity": true,
+    "allow_partner_lp": true,
+    "category_filters": [
+      {
+        "category": "house_inventory",
+        "allow": false
+      }
+    ],
+    "no_eligible_counterparty_behavior": "no_match",
+    "updated_at": "2026-02-22T18:10:00Z"
+  }
+}

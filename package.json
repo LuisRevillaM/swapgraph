@@ -118,7 +118,8 @@
     "verify:m106": "bash verify/m106.sh",
     "verify:m107": "bash verify/m107.sh",
     "verify:m108": "bash verify/m108.sh",
-    "verify:m109": "bash verify/m109.sh"
+    "verify:m109": "bash verify/m109.sh",
+    "verify:m110": "bash verify/m110.sh"
   },
   "devDependencies": {
     "ajv": "8.18.0",

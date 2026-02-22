@@ -1,0 +1,15 @@
+{
+  "correlation_id": "corr_liquiditydirectory_persona_list",
+  "provider_id": "lp_house_alpha",
+  "personas": [
+    {
+      "provider_id": "lp_house_alpha",
+      "persona_id": "persona_alpha_mm",
+      "display_name": "Alpha MM",
+      "strategy_summary": "Passive spread capture for balanced cycle completion.",
+      "disclosure_text": "Automated house-liquidity participant.",
+      "active": true,
+      "updated_at": "2026-02-22T18:00:00Z"
+    }
+  ]
+}

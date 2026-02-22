@@ -1,0 +1,760 @@
+{
+  "actors": {
+    "partner_alpha": {
+      "type": "partner",
+      "id": "partner_alpha"
+    },
+    "user_001": {
+      "type": "user",
+      "id": "user_001"
+    },
+    "user_004": {
+      "type": "user",
+      "id": "user_004"
+    }
+  },
+  "seed_state": {
+    "liquidity_providers": {
+      "lp_house_alpha": {
+        "provider_id": "lp_house_alpha",
+        "provider_type": "house_bot",
+        "owner_actor": {
+          "type": "partner",
+          "id": "partner_alpha"
+        },
+        "is_automated": true,
+        "is_house_inventory": true,
+        "label_required": true,
+        "display_label": "Alpha Market Maker",
+        "disclosure_text": "Automated house-liquidity participant.",
+        "active": true,
+        "policy_ref": {
+          "policy_id": "lp_policy_alpha",
+          "policy_version": 4,
+          "policy_mode": "constrained_auto",
+          "constraints_hash": "sha256:lp-policy-alpha-v4"
+        },
+        "created_at": "2026-02-22T17:00:00Z",
+        "updated_at": "2026-02-22T18:00:00Z"
+      },
+      "lp_partner_beta": {
+        "provider_id": "lp_partner_beta",
+        "provider_type": "partner_lp",
+        "owner_actor": {
+          "type": "partner",
+          "id": "partner_alpha"
+        },
+        "is_automated": false,
+        "is_house_inventory": false,
+        "label_required": true,
+        "display_label": "Beta Partner LP",
+        "disclosure_text": "Partner-operated liquidity provider.",
+        "active": true,
+        "created_at": "2026-02-22T17:05:00Z",
+        "updated_at": "2026-02-22T18:05:00Z"
+      }
+    },
+    "liquidity_provider_personas": {
+      "lp_house_alpha": {
+        "provider_id": "lp_house_alpha",
+        "persona_id": "persona_alpha_mm",
+        "display_name": "Alpha MM",
+        "strategy_summary": "Passive spread capture for balanced cycle completion.",
+        "disclosure_text": "Automated house-liquidity participant.",
+        "active": true,
+        "updated_at": "2026-02-22T18:00:00Z"
+      }
+    },
+    "proposals": {
+      "cycle_lp_001": {
+        "id": "cycle_lp_001",
+        "expires_at": "2026-02-23T18:00:00Z",
+        "participants": [
+          {
+            "intent_id": "intent_user_001",
+            "actor": {
+              "type": "user",
+              "id": "user_001"
+            },
+            "give": [
+              {
+                "platform": "steam",
+                "asset_id": "asset_a"
+              }
+            ],
+            "get": [
+              {
+                "platform": "steam",
+                "asset_id": "asset_b"
+              }
+            ]
+          },
+          {
+            "intent_id": "intent_house_001",
+            "actor": {
+              "type": "user",
+              "id": "user_002"
+            },
+            "give": [
+              {
+                "platform": "steam",
+                "asset_id": "asset_b"
+              }
+            ],
+            "get": [
+              {
+                "platform": "steam",
+                "asset_id": "asset_c"
+              }
+            ],
+            "liquidity_provider_ref": {
+              "provider_id": "lp_house_alpha",
+              "provider_type": "house_bot",
+              "owner_actor": {
+                "type": "partner",
+                "id": "partner_alpha"
+              },
+              "is_automated": true,
+              "is_house_inventory": true,
+              "label_required": true,
+              "display_label": "Alpha Market Maker",
+              "disclosure_text": "Automated house-liquidity participant.",
+              "active": true,
+              "policy_ref": {
+                "policy_id": "lp_policy_alpha",
+                "policy_version": 4,
+                "policy_mode": "constrained_auto",
+                "constraints_hash": "sha256:lp-policy-alpha-v4"
+              },
+              "persona_ref": {
+                "provider_id": "lp_house_alpha",
+                "persona_id": "persona_alpha_mm",
+                "display_name": "Alpha MM",
+                "strategy_summary": "Passive spread capture for balanced cycle completion.",
+                "disclosure_text": "Automated house-liquidity participant.",
+                "active": true,
+                "updated_at": "2026-02-22T18:00:00Z"
+              },
+              "created_at": "2026-02-22T17:00:00Z",
+              "updated_at": "2026-02-22T18:00:00Z"
+            },
+            "persona_ref": {
+              "provider_id": "lp_house_alpha",
+              "persona_id": "persona_alpha_mm",
+              "display_name": "Alpha MM",
+              "strategy_summary": "Passive spread capture for balanced cycle completion.",
+              "disclosure_text": "Automated house-liquidity participant.",
+              "active": true,
+              "updated_at": "2026-02-22T18:00:00Z"
+            }
+          },
+          {
+            "intent_id": "intent_partner_001",
+            "actor": {
+              "type": "user",
+              "id": "user_003"
+            },
+            "give": [
+              {
+                "platform": "steam",
+                "asset_id": "asset_c"
+              }
+            ],
+            "get": [
+              {
+                "platform": "steam",
+                "asset_id": "asset_a"
+              }
+            ],
+            "liquidity_provider_ref": {
+              "provider_id": "lp_partner_beta",
+              "provider_type": "partner_lp",
+              "owner_actor": {
+                "type": "partner",
+                "id": "partner_alpha"
+              },
+              "is_automated": false,
+              "is_house_inventory": false,
+              "label_required": true,
+              "display_label": "Beta Partner LP",
+              "disclosure_text": "Partner-operated liquidity provider.",
+              "active": true,
+              "created_at": "2026-02-22T17:05:00Z",
+              "updated_at": "2026-02-22T18:05:00Z"
+            }
+          }
+        ],
+        "confidence_score": 0.83,
+        "value_spread": 0.04,
+        "fee_breakdown": [
+          {
+            "actor": {
+              "type": "user",
+              "id": "user_001"
+            },
+            "fee_usd": 8.4
+          }
+        ],
+        "explainability": [
+          "Cycle closes with LP-assisted liquidity."
+        ]
+      }
+    },
+    "tenancy": {
+      "proposals": {
+        "cycle_lp_001": {
+          "partner_id": "partner_alpha"
+        }
+      },
+      "cycles": {
+        "cycle_lp_001": {
+          "partner_id": "partner_alpha"
+        }
+      }
+    },
+    "receipts": {
+      "cycle_lp_001": {
+        "id": "receipt_lp_001",
+        "cycle_id": "cycle_lp_001",
+        "final_state": "completed",
+        "intent_ids": [
+          "intent_user_001",
+          "intent_house_001",
+          "intent_partner_001"
+        ],
+        "asset_ids": [
+          "asset_a",
+          "asset_b",
+          "asset_c"
+        ],
+        "liquidity_provider_summary": [
+          {
+            "provider": {
+              "provider_id": "lp_house_alpha",
+              "provider_type": "house_bot",
+              "owner_actor": {
+                "type": "partner",
+                "id": "partner_alpha"
+              },
+              "is_automated": true,
+              "is_house_inventory": true,
+              "label_required": true,
+              "display_label": "Alpha Market Maker",
+              "disclosure_text": "Automated house-liquidity participant.",
+              "active": true,
+              "policy_ref": {
+                "policy_id": "lp_policy_alpha",
+                "policy_version": 4,
+                "policy_mode": "constrained_auto",
+                "constraints_hash": "sha256:lp-policy-alpha-v4"
+              },
+              "persona_ref": {
+                "provider_id": "lp_house_alpha",
+                "persona_id": "persona_alpha_mm",
+                "display_name": "Alpha MM",
+                "strategy_summary": "Passive spread capture for balanced cycle completion.",
+                "disclosure_text": "Automated house-liquidity participant.",
+                "active": true,
+                "updated_at": "2026-02-22T18:00:00Z"
+              },
+              "created_at": "2026-02-22T17:00:00Z",
+              "updated_at": "2026-02-22T18:00:00Z"
+            },
+            "participant_count": 1,
+            "counterparty_intent_ids": [
+              "intent_house_001"
+            ]
+          },
+          {
+            "provider": {
+              "provider_id": "lp_partner_beta",
+              "provider_type": "partner_lp",
+              "owner_actor": {
+                "type": "partner",
+                "id": "partner_alpha"
+              },
+              "is_automated": false,
+              "is_house_inventory": false,
+              "label_required": true,
+              "display_label": "Beta Partner LP",
+              "disclosure_text": "Partner-operated liquidity provider.",
+              "active": true,
+              "created_at": "2026-02-22T17:05:00Z",
+              "updated_at": "2026-02-22T18:05:00Z"
+            },
+            "participant_count": 1,
+            "counterparty_intent_ids": [
+              "intent_partner_001"
+            ]
+          }
+        ],
+        "created_at": "2026-02-22T18:30:00Z",
+        "signature": {
+          "key_id": "dev-k1",
+          "alg": "ed25519",
+          "sig": "vPvL1N6Shmw6Qe7A6zqBf1fYwL7B6m6xNQYpkmQ7mGSe8d1S09C+gM5w8hIwXbBRgB5Vf6tK8QqJ2cS7n0YDAw=="
+        }
+      }
+    },
+    "intents": {
+      "intent_user_001": {
+        "id": "intent_user_001",
+        "actor": {
+          "type": "user",
+          "id": "user_001"
+        },
+        "give": [
+          {
+            "platform": "steam",
+            "asset_id": "asset_a"
+          }
+        ],
+        "want": [
+          {
+            "platform": "steam",
+            "assets": [
+              "asset_b"
+            ]
+          }
+        ],
+        "constraints": {
+          "max_value_delta_pct": 0.1
+        },
+        "status": "active",
+        "created_at": "2026-02-22T17:30:00Z"
+      },
+      "intent_house_001": {
+        "id": "intent_house_001",
+        "actor": {
+          "type": "user",
+          "id": "user_002"
+        },
+        "give": [
+          {
+            "platform": "steam",
+            "asset_id": "asset_b"
+          }
+        ],
+        "want": [
+          {
+            "platform": "steam",
+            "assets": [
+              "asset_c"
+            ]
+          }
+        ],
+        "constraints": {
+          "max_value_delta_pct": 0.1
+        },
+        "status": "active",
+        "created_at": "2026-02-22T17:31:00Z",
+        "liquidity_provider_ref": {
+          "provider_id": "lp_house_alpha",
+          "provider_type": "house_bot",
+          "owner_actor": {
+            "type": "partner",
+            "id": "partner_alpha"
+          },
+          "is_automated": true,
+          "is_house_inventory": true,
+          "label_required": true,
+          "display_label": "Alpha Market Maker",
+          "disclosure_text": "Automated house-liquidity participant.",
+          "active": true,
+          "policy_ref": {
+            "policy_id": "lp_policy_alpha",
+            "policy_version": 4,
+            "policy_mode": "constrained_auto",
+            "constraints_hash": "sha256:lp-policy-alpha-v4"
+          },
+          "persona_ref": {
+            "provider_id": "lp_house_alpha",
+            "persona_id": "persona_alpha_mm",
+            "display_name": "Alpha MM",
+            "strategy_summary": "Passive spread capture for balanced cycle completion.",
+            "disclosure_text": "Automated house-liquidity participant.",
+            "active": true,
+            "updated_at": "2026-02-22T18:00:00Z"
+          },
+          "created_at": "2026-02-22T17:00:00Z",
+          "updated_at": "2026-02-22T18:00:00Z"
+        }
+      },
+      "intent_partner_001": {
+        "id": "intent_partner_001",
+        "actor": {
+          "type": "user",
+          "id": "user_003"
+        },
+        "give": [
+          {
+            "platform": "steam",
+            "asset_id": "asset_c"
+          }
+        ],
+        "want": [
+          {
+            "platform": "steam",
+            "assets": [
+              "asset_a"
+            ]
+          }
+        ],
+        "constraints": {
+          "max_value_delta_pct": 0.1
+        },
+        "status": "active",
+        "created_at": "2026-02-22T17:32:00Z",
+        "liquidity_provider_ref": {
+          "provider_id": "lp_partner_beta",
+          "provider_type": "partner_lp",
+          "owner_actor": {
+            "type": "partner",
+            "id": "partner_alpha"
+          },
+          "is_automated": false,
+          "is_house_inventory": false,
+          "label_required": true,
+          "display_label": "Beta Partner LP",
+          "disclosure_text": "Partner-operated liquidity provider.",
+          "active": true,
+          "created_at": "2026-02-22T17:05:00Z",
+          "updated_at": "2026-02-22T18:05:00Z"
+        }
+      }
+    },
+    "liquidity_decisions": {
+      "lpdec_000001": {
+        "decision_id": "lpdec_000001",
+        "provider_id": "lp_house_alpha",
+        "proposal_id": "cycle_lp_001",
+        "intent_ids": [
+          "intent_house_001"
+        ],
+        "commit_id": null,
+        "decision": "accept",
+        "decision_reason_codes": [
+          "house_liquidity_supply"
+        ],
+        "policy_ref": {
+          "policy_id": "lp_policy_alpha",
+          "policy_version": 4,
+          "policy_mode": "constrained_auto",
+          "constraints_hash": "sha256:lp-policy-alpha-v4"
+        },
+        "confidence_score_bps": 8200,
+        "risk_tier_snapshot": "low",
+        "correlation_id": "corr_lpdec_house",
+        "recorded_at": "2026-02-22T18:10:00Z",
+        "recorded_by": {
+          "type": "partner",
+          "id": "partner_alpha"
+        },
+        "trust_safety_decision_id": "tsd_001"
+      },
+      "lpdec_000002": {
+        "decision_id": "lpdec_000002",
+        "provider_id": "lp_partner_beta",
+        "proposal_id": "cycle_lp_001",
+        "intent_ids": [
+          "intent_partner_001"
+        ],
+        "commit_id": null,
+        "decision": "accept",
+        "decision_reason_codes": [
+          "partner_lp_fill"
+        ],
+        "policy_ref": {
+          "policy_id": "lp_policy_alpha",
+          "policy_version": 4,
+          "policy_mode": "constrained_auto",
+          "constraints_hash": "sha256:lp-policy-alpha-v4"
+        },
+        "confidence_score_bps": 8100,
+        "risk_tier_snapshot": "low",
+        "correlation_id": "corr_lpdec_partner",
+        "recorded_at": "2026-02-22T18:11:00Z",
+        "recorded_by": {
+          "type": "partner",
+          "id": "partner_alpha"
+        },
+        "trust_safety_decision_id": "tsd_001"
+      }
+    }
+  },
+  "operations": [
+    {
+      "op": "liquidityDirectory.list",
+      "actor_ref": "user_001",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "limit": "20"
+      },
+      "expect_ok": true,
+      "expect_providers_count": 2,
+      "expect_total_filtered": 2,
+      "expect_first_provider_id": "lp_house_alpha"
+    },
+    {
+      "op": "liquidityDirectory.get",
+      "actor_ref": "user_001",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "provider_id": "lp_house_alpha",
+      "expect_ok": true,
+      "expect_provider_id": "lp_house_alpha",
+      "expect_provider_type": "house_bot"
+    },
+    {
+      "op": "liquidityDirectory.persona.list",
+      "actor_ref": "user_001",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "provider_id": "lp_house_alpha",
+      "expect_ok": true,
+      "expect_personas_count": 1,
+      "expect_first_persona_id": "persona_alpha_mm"
+    },
+    {
+      "op": "liquidityDirectory.list",
+      "actor_ref": "user_001",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "query": {
+        "unknown": "x"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "liquidity_directory_query_invalid"
+    },
+    {
+      "op": "counterpartyPreferences.get",
+      "actor_ref": "user_001",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "expect_ok": true,
+      "expect_allow_bots": true,
+      "expect_allow_house_liquidity": true,
+      "expect_allow_partner_lp": true,
+      "expect_category_filters_count": 0
+    },
+    {
+      "op": "counterpartyPreferences.upsert",
+      "actor_ref": "user_001",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m110_pref_invalid_1",
+      "skip_request_validation": true,
+      "request": {
+        "recorded_at": "2026-02-22T18:15:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "counterparty_preferences_invalid"
+    },
+    {
+      "op": "counterpartyPreferences.upsert",
+      "actor_ref": "user_001",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m110_pref_invalid_ts_1",
+      "skip_request_validation": true,
+      "request": {
+        "preferences": {
+          "allow_bots": true,
+          "allow_house_liquidity": true,
+          "allow_partner_lp": true,
+          "category_filters": []
+        },
+        "recorded_at": "bad-ts"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "counterparty_preferences_invalid_timestamp"
+    },
+    {
+      "op": "counterpartyPreferences.upsert",
+      "actor_ref": "user_001",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m110_pref_conflict_1",
+      "request": {
+        "preferences": {
+          "allow_bots": true,
+          "allow_house_liquidity": true,
+          "allow_partner_lp": false,
+          "category_filters": [
+            {
+              "category": "partner_lp",
+              "allow": true
+            }
+          ]
+        },
+        "recorded_at": "2026-02-22T18:16:00Z"
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONFLICT",
+      "expect_reason_code": "counterparty_preferences_conflict"
+    },
+    {
+      "op": "counterpartyPreferences.upsert",
+      "actor_ref": "user_001",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m110_pref_upsert_1",
+      "request": {
+        "preferences": {
+          "allow_bots": false,
+          "allow_house_liquidity": false,
+          "allow_partner_lp": true,
+          "category_filters": [
+            {
+              "category": "house_inventory",
+              "allow": false
+            },
+            {
+              "category": "partner_lp",
+              "allow": true
+            }
+          ]
+        },
+        "recorded_at": "2026-02-22T18:17:00Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_allow_bots": false,
+      "expect_allow_house_liquidity": false,
+      "expect_allow_partner_lp": true,
+      "expect_category_filters_count": 2
+    },
+    {
+      "op": "counterpartyPreferences.upsert",
+      "actor_ref": "user_001",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m110_pref_upsert_1",
+      "request": {
+        "preferences": {
+          "allow_bots": false,
+          "allow_house_liquidity": false,
+          "allow_partner_lp": true,
+          "category_filters": [
+            {
+              "category": "house_inventory",
+              "allow": false
+            },
+            {
+              "category": "partner_lp",
+              "allow": true
+            }
+          ]
+        },
+        "recorded_at": "2026-02-22T18:17:00Z"
+      },
+      "expect_ok": true,
+      "expect_replayed": true,
+      "expect_allow_bots": false,
+      "expect_allow_house_liquidity": false,
+      "expect_allow_partner_lp": true
+    },
+    {
+      "op": "proposalCounterpartyDisclosure.get",
+      "actor_ref": "user_001",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "proposal_id": "cycle_lp_001",
+      "expect_ok": true,
+      "expect_disclosures_count": 2,
+      "expect_total_counterparties": 2,
+      "expect_filtered_counterparties": 1,
+      "expect_first_provider_id": "lp_house_alpha"
+    },
+    {
+      "op": "receiptCounterpartyDisclosure.get",
+      "actor_ref": "user_001",
+      "auth": {
+        "scopes": [
+          "receipts:read"
+        ]
+      },
+      "receipt_id": "receipt_lp_001",
+      "expect_ok": true,
+      "expect_disclosures_count": 2,
+      "expect_total_counterparties": 2,
+      "expect_filtered_counterparties": 1,
+      "expect_first_provider_id": "lp_house_alpha"
+    },
+    {
+      "op": "proposalCounterpartyDisclosure.get",
+      "actor_ref": "user_001",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "proposal_id": "cycle_missing",
+      "expect_ok": false,
+      "expect_error_code": "NOT_FOUND",
+      "expect_reason_code": "counterparty_disclosure_not_found"
+    },
+    {
+      "op": "receiptCounterpartyDisclosure.get",
+      "actor_ref": "user_001",
+      "auth": {
+        "scopes": [
+          "receipts:read"
+        ]
+      },
+      "receipt_id": "receipt_missing",
+      "expect_ok": false,
+      "expect_error_code": "NOT_FOUND",
+      "expect_reason_code": "counterparty_disclosure_not_found"
+    },
+    {
+      "op": "proposalCounterpartyDisclosure.get",
+      "actor_ref": "user_004",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "proposal_id": "cycle_lp_001",
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN"
+    }
+  ]
+}

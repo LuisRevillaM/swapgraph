@@ -17,6 +17,7 @@ import { LiquidityInventoryService } from '../service/liquidityInventoryService.
 import { LiquidityListingDecisionService } from '../service/liquidityListingDecisionService.mjs';
 import { LiquidityProviderService } from '../service/liquidityProviderService.mjs';
 import { LiquiditySimulationService } from '../service/liquiditySimulationService.mjs';
+import { LiquidityTransparencyService } from '../service/liquidityTransparencyService.mjs';
 import { MetricsNetworkHealthService } from '../service/metricsNetworkHealthService.mjs';
 import { PartnerLiquidityProviderGovernanceService } from '../service/partnerLiquidityProviderGovernanceService.mjs';
 import { PlatformInventoryDisputeFacadeService } from '../service/platformInventoryDisputeFacadeService.mjs';
@@ -228,6 +229,7 @@ function summarizeState(store) {
     trust_safety_decisions: Object.keys(store.state.trust_safety_decisions ?? {}).length,
     metrics_network_health_export_checkpoints: Object.keys(store.state.metrics_network_health_export_checkpoints ?? {}).length,
     notification_preferences: Object.keys(store.state.notification_preferences ?? {}).length,
+    counterparty_preferences: Object.keys(store.state.counterparty_preferences ?? {}).length,
     commercial_policies: Object.keys(store.state.commercial_policies ?? {}).length,
     commercial_policy_audit_entries: Array.isArray(store.state.commercial_policy_audit) ? store.state.commercial_policy_audit.length : 0
   };
@@ -281,6 +283,7 @@ export function createRuntimeApiServer({
   const metricsNetworkHealth = new MetricsNetworkHealthService({ store });
   const productSurface = new ProductSurfaceReadinessService({ store });
   const commercialPolicy = new CommercialPolicyService({ store });
+  const liquidityTransparency = new LiquidityTransparencyService({ store });
   const liquidityProviders = new LiquidityProviderService({ store });
   const liquidityInventory = new LiquidityInventoryService({ store });
   const liquidityListingsDecisions = new LiquidityListingDecisionService({ store });
@@ -500,6 +503,48 @@ export function createRuntimeApiServer({
         return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
       }
 
+      if (method === 'GET' && pathname === '/counterparty-preferences') {
+        const result = liquidityTransparency.getCounterpartyPreferences({ actor, auth });
+        return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
+      }
+
+      if (method === 'POST' && pathname === '/counterparty-preferences') {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = liquidityTransparency.upsertCounterpartyPreferences({ actor, auth, idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      if (method === 'GET' && pathname === '/liquidity-providers/directory') {
+        const query = toQueryObject(url.searchParams);
+        const result = liquidityTransparency.listDirectory({ actor, auth, query });
+        return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
+      }
+
+      const liquidityDirectoryGet = routeMatch(pathname, /^\/liquidity-providers\/directory\/([^/]+)$/);
+      if (method === 'GET' && liquidityDirectoryGet) {
+        const result = liquidityTransparency.getDirectoryProvider({
+          actor,
+          auth,
+          providerId: liquidityDirectoryGet[0]
+        });
+        return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
+      }
+
+      const liquidityDirectoryPersonaList = routeMatch(pathname, /^\/liquidity-providers\/directory\/([^/]+)\/personas$/);
+      if (method === 'GET' && liquidityDirectoryPersonaList) {
+        const result = liquidityTransparency.listDirectoryPersonas({
+          actor,
+          auth,
+          providerId: liquidityDirectoryPersonaList[0]
+        });
+        return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
+      }
+
       if (method === 'GET' && pathname === '/product-projections/inventory-awakening') {
         const query = toQueryObject(url.searchParams);
         const result = productSurface.getInventoryAwakeningProjection({ actor, auth, query });
@@ -523,6 +568,26 @@ export function createRuntimeApiServer({
       if (method === 'GET' && receiptShareProjection) {
         const query = toQueryObject(url.searchParams);
         const result = productSurface.getReceiptShareProjection({ actor, auth, receiptId: receiptShareProjection[0], query });
+        return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
+      }
+
+      const proposalCounterpartyDisclosureProjection = routeMatch(pathname, /^\/product-projections\/proposals\/([^/]+)\/counterparty-disclosure$/);
+      if (method === 'GET' && proposalCounterpartyDisclosureProjection) {
+        const result = liquidityTransparency.getProposalCounterpartyDisclosure({
+          actor,
+          auth,
+          proposalId: proposalCounterpartyDisclosureProjection[0]
+        });
+        return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
+      }
+
+      const receiptCounterpartyDisclosureProjection = routeMatch(pathname, /^\/product-projections\/receipts\/([^/]+)\/counterparty-disclosure$/);
+      if (method === 'GET' && receiptCounterpartyDisclosureProjection) {
+        const result = liquidityTransparency.getReceiptCounterpartyDisclosure({
+          actor,
+          auth,
+          receiptId: receiptCounterpartyDisclosureProjection[0]
+        });
         return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
       }
 

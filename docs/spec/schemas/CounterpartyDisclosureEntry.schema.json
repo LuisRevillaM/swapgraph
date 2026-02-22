@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/CounterpartyDisclosureEntry.schema.json",
+  "title": "CounterpartyDisclosureEntry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "disclosure_id",
+    "source",
+    "source_id",
+    "intent_id",
+    "counterparty_actor",
+    "provider_ref",
+    "automation_disclosure",
+    "persona_ref",
+    "strategy_summary_ref",
+    "decision_rationale",
+    "preference_evaluation"
+  ],
+  "properties": {
+    "disclosure_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "proposal",
+        "receipt"
+      ]
+    },
+    "source_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "intent_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "counterparty_actor": {
+      "$ref": "ActorRef.schema.json"
+    },
+    "provider_ref": {
+      "$ref": "LiquidityProviderRef.schema.json"
+    },
+    "automation_disclosure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "is_automated",
+        "is_house_inventory",
+        "label_required",
+        "disclosure_text"
+      ],
+      "properties": {
+        "is_automated": {
+          "type": "boolean"
+        },
+        "is_house_inventory": {
+          "type": "boolean"
+        },
+        "label_required": {
+          "type": "boolean"
+        },
+        "disclosure_text": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "persona_ref": {
+      "anyOf": [
+        {
+          "$ref": "BotPersonaRef.schema.json"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "strategy_summary_ref": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "provider_id",
+            "persona_id",
+            "display_name",
+            "strategy_summary"
+          ],
+          "properties": {
+            "provider_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "persona_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "display_name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "strategy_summary": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "decision_rationale": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reference_id",
+        "summary",
+        "link"
+      ],
+      "properties": {
+        "reference_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "link": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        }
+      }
+    },
+    "preference_evaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allowed",
+        "blocked_reason_codes"
+      ],
+      "properties": {
+        "allowed": {
+          "type": "boolean"
+        },
+        "blocked_reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}
