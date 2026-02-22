@@ -126,6 +126,7 @@ Last updated: 2026-02-22
 ## Next
 - PRD batch defined: `docs/prd/2026-02-21_master-next-batch_M98-M102.md`
 - Additive LP subsystem PRD batch defined: `docs/prd/2026-02-21_master-liquidity-provider-subsystem_M103-M110.md`
+- Storage hardening PRD drafted: `docs/prd/M112.md`
 - Current mode: M98–M111 implementation tranche complete with verifier closure.
 - Immediate target: M112 storage hardening (SQLite migration-ready path) and deployment hardening.
 - Runtime shell available for request/response validation: `npm run start:api` (`src/server/runtimeApiServer.mjs`).
