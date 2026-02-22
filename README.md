@@ -55,6 +55,24 @@ npm run migrate:state -- --from-backend json --to-backend sqlite --force
 npm run migrate:state -- --from-backend sqlite --to-backend json --to-state-file ./artifacts/runtime-backup.json --force
 ```
 
+Render smoke hardening automation (integration-gated, M113):
+```bash
+INTEGRATION_ENABLED=1 \
+RENDER_API_KEY=... \
+RENDER_SERVICE_ID=... \
+npm run verify:m113
+```
+
+Create-or-reuse mode (when `RENDER_SERVICE_ID` is omitted):
+```bash
+INTEGRATION_ENABLED=1 \
+RENDER_API_KEY=... \
+RENDER_OWNER_ID=... \
+RENDER_SERVICE_NAME=swapgraph-runtime-api \
+RENDER_REPO_URL=https://github.com/<org>/<repo> \
+npm run verify:m113
+```
+
 Seed deterministic demo fixtures (M5 intents + proposals):
 ```bash
 curl -s -X POST http://127.0.0.1:3005/dev/seed/m5 \

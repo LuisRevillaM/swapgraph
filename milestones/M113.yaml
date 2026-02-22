@@ -1,0 +1,22 @@
+name: M113
+commands:
+  - cmd: "INTEGRATION_ENABLED=1 npm run verify:m113"
+artifacts:
+  - artifact: "docs/prd/M113.md"
+  - artifact: "docs/STATUS.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/ERRORS.md"
+  - artifact: "docs/spec/GAPS.md"
+
+  - artifact: "scripts/run-m113-render-smoke-hardening-scenario.mjs"
+  - artifact: "fixtures/integration/m113_scenario.json"
+  - artifact: "fixtures/integration/m113_expected.json"
+  - artifact: "milestones/M113.yaml"
+  - artifact: "verify/m113.sh"
+
+  - artifact: "artifacts/milestones/M113/latest/commands.log"
+  - artifact: "artifacts/milestones/M113/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M113/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M113/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M113/latest/render_smoke_hardening_output.json"
+  - artifact: "artifacts/milestones/M113/latest/assertions.json"

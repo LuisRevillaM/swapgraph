@@ -1,0 +1,12 @@
+{
+  "expected": {
+    "health": {
+      "store_backend": "sqlite",
+      "persistence_mode": "sqlite_wal"
+    },
+    "smoke": {
+      "min_intents_after_create": 2,
+      "min_intents_after_restart": 2
+    }
+  }
+}

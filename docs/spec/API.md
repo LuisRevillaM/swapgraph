@@ -475,6 +475,15 @@ Runtime persistence controls (M112):
   - `node scripts/migrate-state-store.mjs --from-backend sqlite --to-backend json --to-state-file artifacts/runtime-backup.json --force`
   - `node scripts/migrate-json-state-to-sqlite.mjs --force`
 
+Render deployment smoke hardening automation (M113, integration-gated):
+- `node scripts/run-m113-render-smoke-hardening-scenario.mjs` automates:
+  - Render service reuse/create,
+  - persistent disk attachment,
+  - env upsert (`STATE_BACKEND=sqlite`, `STATE_FILE=...`),
+  - deploy/restart orchestration,
+  - live smoke checks (`/healthz`, `swap-intents`, `marketplace/matching/runs`).
+- Requires `INTEGRATION_ENABLED=1` and `RENDER_API_KEY`.
+
 ## Webhooks (v1)
 Partners can receive:
 - `proposal.created`
