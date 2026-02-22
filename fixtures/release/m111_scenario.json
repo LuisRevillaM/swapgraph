@@ -1,0 +1,248 @@
+{
+  "actors": {
+    "partner_marketplace": {
+      "type": "partner",
+      "id": "partner_marketplace"
+    },
+    "user_alpha": {
+      "type": "user",
+      "id": "user_alpha"
+    }
+  },
+  "seed_from_matching_fixture": true,
+  "seed_state": {
+    "proposals": {
+      "cycle_old_market_001": {
+        "id": "cycle_old_market_001",
+        "expires_at": "2026-02-22T18:00:00.000Z",
+        "participants": [
+          {
+            "intent_id": "legacy_intent_a",
+            "actor": {
+              "type": "user",
+              "id": "legacy_u1"
+            },
+            "give": [
+              {
+                "platform": "steam",
+                "asset_id": "legacy_asset_a"
+              }
+            ],
+            "get": [
+              {
+                "platform": "steam",
+                "asset_id": "legacy_asset_b"
+              }
+            ]
+          },
+          {
+            "intent_id": "legacy_intent_b",
+            "actor": {
+              "type": "user",
+              "id": "legacy_u2"
+            },
+            "give": [
+              {
+                "platform": "steam",
+                "asset_id": "legacy_asset_b"
+              }
+            ],
+            "get": [
+              {
+                "platform": "steam",
+                "asset_id": "legacy_asset_a"
+              }
+            ]
+          }
+        ],
+        "confidence_score": 0.5,
+        "value_spread": 0.2,
+        "fee_breakdown": [
+          {
+            "actor": {
+              "type": "user",
+              "id": "legacy_u1"
+            },
+            "fee_usd": 1
+          },
+          {
+            "actor": {
+              "type": "user",
+              "id": "legacy_u2"
+            },
+            "fee_usd": 1
+          }
+        ],
+        "explainability": [
+          "Legacy marketplace proposal"
+        ]
+      }
+    },
+    "tenancy": {
+      "proposals": {
+        "cycle_old_market_001": {
+          "partner_id": "marketplace"
+        }
+      },
+      "cycles": {}
+    },
+    "marketplace_matching_proposal_runs": {
+      "cycle_old_market_001": "mrun_legacy"
+    },
+    "marketplace_matching_runs": {},
+    "marketplace_matching_run_counter": 0,
+    "marketplace_asset_values": {}
+  },
+  "operations": [
+    {
+      "op": "marketplaceMatching.run",
+      "actor_ref": "partner_marketplace",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m111_invalid_request_1",
+      "skip_request_validation": true,
+      "request": {
+        "max_proposals": 0
+      },
+      "expect_ok": false,
+      "expect_error_code": "CONSTRAINT_VIOLATION",
+      "expect_reason_code": "marketplace_matching_invalid_request"
+    },
+    {
+      "op": "marketplaceMatching.run",
+      "actor_ref": "partner_marketplace",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m111_run_1",
+      "request": {
+        "replace_existing": true,
+        "max_proposals": 2,
+        "recorded_at": "2026-02-22T20:00:00.000Z",
+        "asset_values_usd": {
+          "assetA": 100,
+          "assetB": 101,
+          "assetC": 99,
+          "assetD": 50,
+          "assetE": 51,
+          "assetF": 130
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_run_id": "mrun_000001",
+      "expect_selected_proposals_count": 2,
+      "expect_stored_proposals_count": 2,
+      "expect_replaced_proposals_count": 0,
+      "expect_expired_proposals_count": 1,
+      "expect_first_proposal_id": "cycle_961f2288e6f7",
+      "expect_candidate_cycles": 3
+    },
+    {
+      "op": "marketplaceMatching.run",
+      "actor_ref": "partner_marketplace",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m111_run_1",
+      "request": {
+        "replace_existing": true,
+        "max_proposals": 2,
+        "recorded_at": "2026-02-22T20:00:00.000Z",
+        "asset_values_usd": {
+          "assetA": 100,
+          "assetB": 101,
+          "assetC": 99,
+          "assetD": 50,
+          "assetE": 51,
+          "assetF": 130
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": true,
+      "expect_run_id": "mrun_000001",
+      "expect_selected_proposals_count": 2
+    },
+    {
+      "op": "marketplaceMatchingRun.get",
+      "actor_ref": "partner_marketplace",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "run_id": "mrun_000001",
+      "expect_ok": true,
+      "expect_run_id": "mrun_000001",
+      "expect_selected_proposals_count": 2,
+      "expect_first_proposal_id": "cycle_961f2288e6f7"
+    },
+    {
+      "op": "marketplaceMatching.run",
+      "actor_ref": "partner_marketplace",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m111_run_2",
+      "request": {
+        "replace_existing": true,
+        "max_proposals": 1,
+        "recorded_at": "2026-02-22T20:05:00.000Z",
+        "asset_values_usd": {
+          "assetA": 100,
+          "assetB": 101,
+          "assetC": 99,
+          "assetD": 50,
+          "assetE": 51,
+          "assetF": 130
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_run_id": "mrun_000002",
+      "expect_selected_proposals_count": 1,
+      "expect_stored_proposals_count": 1,
+      "expect_replaced_proposals_count": 2,
+      "expect_expired_proposals_count": 0,
+      "expect_first_proposal_id": "cycle_961f2288e6f7",
+      "expect_candidate_cycles": 3
+    },
+    {
+      "op": "marketplaceMatchingRun.get",
+      "actor_ref": "partner_marketplace",
+      "auth": {
+        "scopes": [
+          "settlement:read"
+        ]
+      },
+      "run_id": "mrun_missing",
+      "expect_ok": false,
+      "expect_error_code": "NOT_FOUND",
+      "expect_reason_code": "marketplace_matching_run_not_found"
+    },
+    {
+      "op": "marketplaceMatching.run",
+      "actor_ref": "user_alpha",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "m111_forbidden_user_1",
+      "request": {
+        "max_proposals": 1
+      },
+      "expect_ok": false,
+      "expect_error_code": "FORBIDDEN"
+    }
+  ]
+}

@@ -63,6 +63,10 @@ export class JsonStateStore {
       metrics_network_health_export_checkpoints: {},
       notification_preferences: {},
       counterparty_preferences: {},
+      marketplace_asset_values: {},
+      marketplace_matching_runs: {},
+      marketplace_matching_run_counter: 0,
+      marketplace_matching_proposal_runs: {},
       commercial_policies: {},
       commercial_policy_audit: [],
       commercial_policy_export_checkpoints: {},
@@ -173,6 +177,10 @@ export class JsonStateStore {
         metrics_network_health_export_checkpoints: {},
         notification_preferences: {},
         counterparty_preferences: {},
+        marketplace_asset_values: {},
+        marketplace_matching_runs: {},
+        marketplace_matching_run_counter: 0,
+        marketplace_matching_proposal_runs: {},
         commercial_policies: {},
         commercial_policy_audit: [],
         commercial_policy_export_checkpoints: {},
@@ -284,6 +292,10 @@ export class JsonStateStore {
     this.state.metrics_network_health_export_checkpoints ||= {};
     this.state.notification_preferences ||= {};
     this.state.counterparty_preferences ||= {};
+    this.state.marketplace_asset_values ||= {};
+    this.state.marketplace_matching_runs ||= {};
+    this.state.marketplace_matching_run_counter ||= 0;
+    this.state.marketplace_matching_proposal_runs ||= {};
     this.state.commercial_policies ||= {};
     this.state.commercial_policy_audit ||= [];
     this.state.commercial_policy_export_checkpoints ||= {};

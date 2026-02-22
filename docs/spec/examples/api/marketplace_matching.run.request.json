@@ -1,0 +1,13 @@
+{
+  "replace_existing": true,
+  "max_proposals": 2,
+  "recorded_at": "2026-02-22T20:00:00.000Z",
+  "asset_values_usd": {
+    "assetA": 100,
+    "assetB": 101,
+    "assetC": 99,
+    "assetD": 50,
+    "assetE": 51,
+    "assetF": 130
+  }
+}

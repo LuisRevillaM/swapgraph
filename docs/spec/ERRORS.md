@@ -281,6 +281,9 @@ Notes:
   - `counterparty_preferences_conflict`
   - `liquidity_directory_query_invalid`
   - `counterparty_disclosure_not_found`
+  - `marketplace_matching_invalid_request`
+  - `marketplace_matching_asset_values_missing`
+  - `marketplace_matching_run_not_found`
 - Rollout diagnostics automation execution-attestation verification may return deterministic mismatch errors such as:
   - `automation_execution_expected_effect_hash_mismatch`
   - `automation_execution_request_hash_chain_mismatch`

@@ -19,6 +19,7 @@ import { LiquidityProviderService } from '../service/liquidityProviderService.mj
 import { LiquiditySimulationService } from '../service/liquiditySimulationService.mjs';
 import { LiquidityTransparencyService } from '../service/liquidityTransparencyService.mjs';
 import { MetricsNetworkHealthService } from '../service/metricsNetworkHealthService.mjs';
+import { MarketplaceMatchingService } from '../service/marketplaceMatchingService.mjs';
 import { PartnerLiquidityProviderGovernanceService } from '../service/partnerLiquidityProviderGovernanceService.mjs';
 import { PlatformInventoryDisputeFacadeService } from '../service/platformInventoryDisputeFacadeService.mjs';
 import { ProductSurfaceReadinessService } from '../service/productSurfaceReadinessService.mjs';
@@ -230,6 +231,9 @@ function summarizeState(store) {
     metrics_network_health_export_checkpoints: Object.keys(store.state.metrics_network_health_export_checkpoints ?? {}).length,
     notification_preferences: Object.keys(store.state.notification_preferences ?? {}).length,
     counterparty_preferences: Object.keys(store.state.counterparty_preferences ?? {}).length,
+    marketplace_asset_values: Object.keys(store.state.marketplace_asset_values ?? {}).length,
+    marketplace_matching_runs: Object.keys(store.state.marketplace_matching_runs ?? {}).length,
+    marketplace_matching_proposals: Object.keys(store.state.marketplace_matching_proposal_runs ?? {}).length,
     commercial_policies: Object.keys(store.state.commercial_policies ?? {}).length,
     commercial_policy_audit_entries: Array.isArray(store.state.commercial_policy_audit) ? store.state.commercial_policy_audit.length : 0
   };
@@ -282,6 +286,7 @@ export function createRuntimeApiServer({
   const trustSafety = new TrustSafetyService({ store });
   const metricsNetworkHealth = new MetricsNetworkHealthService({ store });
   const productSurface = new ProductSurfaceReadinessService({ store });
+  const marketplaceMatching = new MarketplaceMatchingService({ store });
   const commercialPolicy = new CommercialPolicyService({ store });
   const liquidityTransparency = new LiquidityTransparencyService({ store });
   const liquidityProviders = new LiquidityProviderService({ store });
@@ -517,6 +522,27 @@ export function createRuntimeApiServer({
         const out = liquidityTransparency.upsertCounterpartyPreferences({ actor, auth, idempotencyKey: idem.value, request: body });
         shouldPersist = true;
         return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      if (method === 'POST' && pathname === '/marketplace/matching/runs') {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = marketplaceMatching.runMatching({ actor, auth, idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      const marketplaceMatchingRunGet = routeMatch(pathname, /^\/marketplace\/matching\/runs\/([^/]+)$/);
+      if (method === 'GET' && marketplaceMatchingRunGet) {
+        const result = marketplaceMatching.getMatchingRun({
+          actor,
+          auth,
+          runId: marketplaceMatchingRunGet[0]
+        });
+        return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
       }
 
       if (method === 'GET' && pathname === '/liquidity-providers/directory') {

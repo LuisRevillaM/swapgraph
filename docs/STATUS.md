@@ -3,7 +3,7 @@
 Last updated: 2026-02-22
 
 ## Autopilot
-- Status: **implementation closure** (M110 verifier-complete)
+- Status: **implementation closure** (M111 verifier-complete)
 - Canonical plan: `docs/source/LATEST.md` (v2.0)
 
 ## Milestones (progress)
@@ -121,14 +121,15 @@ Last updated: 2026-02-22
 - M108: ✅ LP autonomy policy, anti-farming controls, and decision-audit continuity contracts (fixtures-first) (provider-scoped policy upsert/get/evaluate surfaces, deterministic precedence and anti-farming guardrail enforcement, and signed decision-audit export continuity with retention/redaction hooks) (fixtures-first)
 - M109: ✅ Partner LP onboarding and governance contracts (fixtures-first) (partner-LP onboarding/get/status/eligibility/rollout contracts, deterministic segment/capability gating with downgrade triggers, and signed checkpointed governance rollout export continuity) (fixtures-first)
 - M110: ✅ Swarm transparency and user-control contracts (fixtures-first) (public-safe liquidity directory/persona disclosure surfaces, idempotent counterparty preference controls with deterministic conflict/no-match signaling, and proposal/receipt counterparty disclosure projections with explicit LP labeling) (fixtures-first)
+- M111: ✅ Marketplace execution loop contracts (fixtures-first) (idempotent matching-run and run-read API surfaces, deterministic proposal replace+expiry lifecycle accounting, and runtime integration for user-intent-to-proposal generation) (fixtures-first)
 
 ## Next
 - PRD batch defined: `docs/prd/2026-02-21_master-next-batch_M98-M102.md`
 - Additive LP subsystem PRD batch defined: `docs/prd/2026-02-21_master-liquidity-provider-subsystem_M103-M110.md`
-- Current mode: M98–M110 implementation tranche complete with verifier closure.
-- Immediate target: proceed with post-LP-subsystem follow-on planning (`M111+`) and service hardening for deployment.
+- Current mode: M98–M111 implementation tranche complete with verifier closure.
+- Immediate target: M112 storage hardening (SQLite migration-ready path) and deployment hardening.
 - Runtime shell available for request/response validation: `npm run start:api` (`src/server/runtimeApiServer.mjs`).
-- CI baseline gate added: `.github/workflows/verify-baseline.yml` (includes `verify:m0`, baseline tranche, `verify:m98`, `verify:m99`, `verify:m100`, `verify:m101`, `verify:m102`, `verify:m103`, `verify:m104`, `verify:m105`, `verify:m106`, `verify:m107`, `verify:m108`, `verify:m109`, and `verify:m110`).
+- CI baseline gate added: `.github/workflows/verify-baseline.yml` (includes `verify:m0`, baseline tranche, `verify:m98`, `verify:m99`, `verify:m100`, `verify:m101`, `verify:m102`, `verify:m103`, `verify:m104`, `verify:m105`, `verify:m106`, `verify:m107`, `verify:m108`, `verify:m109`, `verify:m110`, and `verify:m111`).
 
 ## Notes
 - We are intentionally building *fixtures-first* so verifiers are deterministic and do not require credentials.

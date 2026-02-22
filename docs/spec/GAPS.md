@@ -196,6 +196,7 @@ Each item here must become at least one of:
 - Resolved (fixtures-first, partial): M108 (liquidity autonomy policy contracts: provider-scoped policy upsert/get/evaluate surfaces, deterministic precedence and anti-farming guardrail enforcement, and signed checkpointed decision-audit export continuity with retention/redaction hooks).
 - Resolved (fixtures-first, partial): M109 (partner liquidity-provider onboarding/governance contracts: partner-LP onboarding/get/status/eligibility/rollout surfaces with deterministic segment capability gating, downgrade triggers, and signed checkpointed governance export continuity).
 - Resolved (fixtures-first, partial): M110 (swarm transparency and user-control contracts: public-safe liquidity directory/persona disclosure surfaces, idempotent counterparty preference controls with deterministic conflict/no-match signaling, and proposal/receipt counterparty disclosure projections with explicit LP labeling).
+- Resolved (fixtures-first, partial): M111 (marketplace execution loop contracts: idempotent matching run/run-read surfaces, deterministic proposal replace+expiry lifecycle accounting, and runtime integration for stored user-intent-to-proposal generation).
 
 ---
 

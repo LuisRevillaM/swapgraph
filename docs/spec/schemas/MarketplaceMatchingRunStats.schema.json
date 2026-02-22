@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketplaceMatchingRunStats.schema.json",
+  "title": "MarketplaceMatchingRunStats",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "intents_active",
+    "edges",
+    "candidate_cycles",
+    "candidate_proposals",
+    "selected_proposals"
+  ],
+  "properties": {
+    "intents_active": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "edges": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "candidate_cycles": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "candidate_proposals": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "selected_proposals": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

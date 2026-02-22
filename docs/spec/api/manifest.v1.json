@@ -2948,6 +2948,39 @@
           "receipts:read"
         ]
       }
+    },
+    {
+      "method": "POST",
+      "path": "/marketplace/matching/runs",
+      "operation_id": "marketplaceMatching.run",
+      "idempotency_required": true,
+      "request_schema": "MarketplaceMatchingRunRequest.schema.json",
+      "response_schema": "MarketplaceMatchingRunResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/marketplace/matching/runs/{run_id}",
+      "operation_id": "marketplaceMatchingRun.get",
+      "idempotency_required": false,
+      "response_schema": "MarketplaceMatchingRunGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "partner"
+        ],
+        "required_scopes": [
+          "settlement:read"
+        ]
+      }
     }
   ],
   "webhooks": {

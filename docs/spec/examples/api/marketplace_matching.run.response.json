@@ -1,0 +1,29 @@
+{
+  "correlation_id": "corr_marketplacematching_run",
+  "run": {
+    "run_id": "mrun_000001",
+    "requested_by": {
+      "type": "partner",
+      "id": "partner_marketplace"
+    },
+    "recorded_at": "2026-02-22T20:00:00.000Z",
+    "replace_existing": true,
+    "max_proposals": 2,
+    "active_intents_count": 6,
+    "selected_proposals_count": 2,
+    "stored_proposals_count": 2,
+    "replaced_proposals_count": 0,
+    "expired_proposals_count": 1,
+    "proposal_ids": [
+      "cycle_961f2288e6f7",
+      "cycle_4f27eb196224"
+    ],
+    "stats": {
+      "intents_active": 6,
+      "edges": 7,
+      "candidate_cycles": 3,
+      "candidate_proposals": 3,
+      "selected_proposals": 2
+    }
+  }
+}

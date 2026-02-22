@@ -1,4 +1,4 @@
-# SwapGraph v2.0 Conformance Matrix (M110)
+# SwapGraph v2.0 Conformance Matrix (M111)
 
 M92_RELEASE_READY: true
 M97_EVIDENCE_REFRESH_READY: true
@@ -15,6 +15,7 @@ M107_LIQUIDITY_EXECUTION_GOVERNANCE_CONTRACTS_READY: true
 M108_LIQUIDITY_AUTONOMY_POLICY_CONTRACTS_READY: true
 M109_PARTNER_LIQUIDITY_PROVIDER_GOVERNANCE_CONTRACTS_READY: true
 M110_SWARM_TRANSPARENCY_USER_CONTROL_CONTRACTS_READY: true
+M111_MARKETPLACE_EXECUTION_LOOP_CONTRACTS_READY: true
 
 This matrix maps v2.0 plan gates and milestone tranches to deterministic, verifier-backed artifacts in this repo.
 
@@ -57,10 +58,11 @@ This matrix maps v2.0 plan gates and milestone tranches to deterministic, verifi
 - M108: liquidity autonomy policy contracts (policy upsert/get/evaluate surfaces with deterministic precedence enforcement, anti-farming guardrail floor, and signed checkpointed decision-audit export continuity with retention/redaction hooks).
 - M109: partner liquidity-provider onboarding/governance contracts (partner-LP onboarding + status + eligibility + rollout surfaces with deterministic segment capability gating, downgrade triggers, and signed checkpointed rollout-governance export continuity).
 - M110: swarm transparency and user-control contracts (liquidity directory + persona disclosure surfaces, actor-governed counterparty preference controls, and proposal/receipt counterparty disclosure projections with deterministic no-match signaling).
+- M111: marketplace execution loop contracts (idempotent matching run/get surfaces, deterministic proposal replace/expiry lifecycle accounting, and runtime integration for stored user-intent proposal generation).
 
 ## Release-Readiness Assertions
 
-- ✅ All milestone descriptors exist for M71–M110 (`docs/prd/Mxx.md`, `milestones/Mxx.yaml`, `verify/mxx.sh`).
-- ✅ Deterministic verification artifacts exist for M71–M110 under `artifacts/milestones/Mxx/latest/*`.
+- ✅ All milestone descriptors exist for M71–M111 (`docs/prd/Mxx.md`, `milestones/Mxx.yaml`, `verify/mxx.sh`).
+- ✅ Deterministic verification artifacts exist for M71–M111 under `artifacts/milestones/Mxx/latest/*`.
 - ✅ Spec gaps are closed to zero unresolved blocker state for this tranche.
 - ✅ `BLOCKERS.md` indicates no active blockers.

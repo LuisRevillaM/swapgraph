@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketplaceMatchingRunView.schema.json",
+  "title": "MarketplaceMatchingRunView",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "run_id",
+    "requested_by",
+    "recorded_at",
+    "replace_existing",
+    "max_proposals",
+    "active_intents_count",
+    "selected_proposals_count",
+    "stored_proposals_count",
+    "replaced_proposals_count",
+    "expired_proposals_count",
+    "proposal_ids",
+    "stats"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "requested_by": {
+      "$ref": "ActorRef.schema.json"
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "replace_existing": {
+      "type": "boolean"
+    },
+    "max_proposals": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 200
+    },
+    "active_intents_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "selected_proposals_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "stored_proposals_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "replaced_proposals_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "expired_proposals_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "proposal_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "stats": {
+      "$ref": "MarketplaceMatchingRunStats.schema.json"
+    }
+  }
+}

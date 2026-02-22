@@ -67,3 +67,6 @@ jobs:
 
       - name: Verify M110 contracts
         run: npm run verify:m110
+
+      - name: Verify M111 contracts
+        run: npm run verify:m111

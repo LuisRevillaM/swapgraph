@@ -84,6 +84,15 @@ Auth headers (see `docs/spec/AUTH.md` for details):
   - `GET /product-projections/receipt-share/{receipt_id}`
   - projection query validation failures use deterministic reason code `product_projection_query_invalid`
 
+- `MarketplaceMatching`
+  - `POST /marketplace/matching/runs` (idempotent marketplace matching execution run)
+  - `GET /marketplace/matching/runs/{run_id}` (read deterministic marketplace matching run record)
+  - matching loop invariants:
+    - matching execution uses active user intents and deterministic cycle-scoring semantics
+    - run records include deterministic selected/stored/replaced/expired proposal counts
+    - generated proposals are persisted into canonical proposal read surfaces
+    - invalid run requests, missing asset valuations, and unknown run ids fail with stable reason codes
+
 - `LiquidityDirectory`
   - `GET /liquidity-providers/directory` (public-safe LP directory list with deterministic filter semantics)
   - `GET /liquidity-providers/directory/{provider_id}` (public-safe LP directory profile)
