@@ -67,6 +67,8 @@ export class JsonStateStore {
       marketplace_matching_runs: {},
       marketplace_matching_run_counter: 0,
       marketplace_matching_proposal_runs: {},
+      edge_intents: {},
+      edge_intent_counter: 0,
       commercial_policies: {},
       commercial_policy_audit: [],
       commercial_policy_export_checkpoints: {},
@@ -181,6 +183,8 @@ export class JsonStateStore {
         marketplace_matching_runs: {},
         marketplace_matching_run_counter: 0,
         marketplace_matching_proposal_runs: {},
+        edge_intents: {},
+        edge_intent_counter: 0,
         commercial_policies: {},
         commercial_policy_audit: [],
         commercial_policy_export_checkpoints: {},
@@ -296,6 +300,8 @@ export class JsonStateStore {
     this.state.marketplace_matching_runs ||= {};
     this.state.marketplace_matching_run_counter ||= 0;
     this.state.marketplace_matching_proposal_runs ||= {};
+    this.state.edge_intents ||= {};
+    this.state.edge_intent_counter ||= 0;
     this.state.commercial_policies ||= {};
     this.state.commercial_policy_audit ||= [];
     this.state.commercial_policy_export_checkpoints ||= {};

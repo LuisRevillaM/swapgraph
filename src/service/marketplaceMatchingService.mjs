@@ -80,6 +80,22 @@ function deriveAssetValuesFromIntents(intents) {
   return out;
 }
 
+function activeEdgeIntentsForMatching({ store, nowIso }) {
+  const nowMs = parseIsoMs(nowIso) ?? Date.now();
+  return Object.values(store.state.edge_intents ?? {})
+    .filter(row => {
+      if (!row || typeof row !== 'object') return false;
+      const sourceIntentId = normalizeOptionalString(row.source_intent_id);
+      const targetIntentId = normalizeOptionalString(row.target_intent_id);
+      if (!sourceIntentId || !targetIntentId || sourceIntentId === targetIntentId) return false;
+      if (!store.state.intents?.[sourceIntentId] || !store.state.intents?.[targetIntentId]) return false;
+      if ((row.status ?? 'active') !== 'active') return false;
+      const expiresMs = parseIsoMs(row.expires_at);
+      if (expiresMs !== null && expiresMs <= nowMs) return false;
+      return true;
+    });
+}
+
 function proposalInUse({ store, proposalId }) {
   const commitId = commitIdForProposalId(proposalId);
   if (store.state?.commits?.[commitId]) return true;
@@ -103,6 +119,8 @@ function ensureState(store) {
   store.state.marketplace_matching_runs ||= {};
   store.state.marketplace_matching_run_counter ||= 0;
   store.state.marketplace_matching_proposal_runs ||= {};
+  store.state.edge_intents ||= {};
+  store.state.edge_intent_counter ||= 0;
 }
 
 function nextRunId(store) {
@@ -247,7 +265,8 @@ export class MarketplaceMatchingService {
         const expiredProposalsCount = this._expireMarketplaceProposals({ nowIso: requestedAt });
         const replacedProposalsCount = replaceExisting ? this._replaceMarketplaceProposals() : 0;
 
-        const matching = runMatching({ intents: activeIntents, assetValuesUsd });
+        const edgeIntents = activeEdgeIntentsForMatching({ store: this.store, nowIso: requestedAt });
+        const matching = runMatching({ intents: activeIntents, assetValuesUsd, edgeIntents, nowIso: requestedAt });
         const selected = (matching?.proposals ?? []).slice(0, maxProposals);
         const runId = nextRunId(this.store);
 

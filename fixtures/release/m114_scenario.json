@@ -1,0 +1,380 @@
+{
+  "actors": {
+    "user_a": {
+      "type": "user",
+      "id": "user_a"
+    },
+    "user_b": {
+      "type": "user",
+      "id": "user_b"
+    },
+    "user_c": {
+      "type": "user",
+      "id": "user_c"
+    },
+    "partner_marketplace": {
+      "type": "partner",
+      "id": "partner_marketplace"
+    }
+  },
+  "seed_state": {
+    "intents": {
+      "intent_a": {
+        "id": "intent_a",
+        "actor": {
+          "type": "user",
+          "id": "user_a"
+        },
+        "offer": [
+          {
+            "platform": "steam",
+            "app_id": 730,
+            "context_id": 2,
+            "asset_id": "asset_a",
+            "class_id": "class_a",
+            "instance_id": "0",
+            "metadata": {
+              "category": "cat_a",
+              "value_usd": 100
+            }
+          }
+        ],
+        "want_spec": {
+          "type": "set",
+          "any_of": [
+            {
+              "type": "category",
+              "platform": "steam",
+              "app_id": 730,
+              "category": "cat_x"
+            }
+          ]
+        },
+        "value_band": {
+          "min_usd": 1,
+          "max_usd": 300
+        },
+        "trust_constraints": {
+          "max_cycle_length": 3
+        },
+        "time_constraints": {
+          "expires_at": "2027-02-22T00:00:00.000Z",
+          "urgency": "normal"
+        },
+        "settlement_preferences": {
+          "require_escrow": true
+        },
+        "status": "active"
+      },
+      "intent_b": {
+        "id": "intent_b",
+        "actor": {
+          "type": "user",
+          "id": "user_b"
+        },
+        "offer": [
+          {
+            "platform": "steam",
+            "app_id": 730,
+            "context_id": 2,
+            "asset_id": "asset_b",
+            "class_id": "class_b",
+            "instance_id": "0",
+            "metadata": {
+              "category": "cat_b",
+              "value_usd": 101
+            }
+          }
+        ],
+        "want_spec": {
+          "type": "set",
+          "any_of": [
+            {
+              "type": "category",
+              "platform": "steam",
+              "app_id": 730,
+              "category": "cat_y"
+            }
+          ]
+        },
+        "value_band": {
+          "min_usd": 1,
+          "max_usd": 300
+        },
+        "trust_constraints": {
+          "max_cycle_length": 3
+        },
+        "time_constraints": {
+          "expires_at": "2027-02-22T00:00:00.000Z",
+          "urgency": "normal"
+        },
+        "settlement_preferences": {
+          "require_escrow": true
+        },
+        "status": "active"
+      },
+      "intent_c": {
+        "id": "intent_c",
+        "actor": {
+          "type": "user",
+          "id": "user_c"
+        },
+        "offer": [
+          {
+            "platform": "steam",
+            "app_id": 730,
+            "context_id": 2,
+            "asset_id": "asset_c",
+            "class_id": "class_c",
+            "instance_id": "0",
+            "metadata": {
+              "category": "cat_c",
+              "value_usd": 99
+            }
+          }
+        ],
+        "want_spec": {
+          "type": "set",
+          "any_of": [
+            {
+              "type": "category",
+              "platform": "steam",
+              "app_id": 730,
+              "category": "cat_z"
+            }
+          ]
+        },
+        "value_band": {
+          "min_usd": 1,
+          "max_usd": 300
+        },
+        "trust_constraints": {
+          "max_cycle_length": 3
+        },
+        "time_constraints": {
+          "expires_at": "2027-02-22T00:00:00.000Z",
+          "urgency": "normal"
+        },
+        "settlement_preferences": {
+          "require_escrow": true
+        },
+        "status": "active"
+      }
+    }
+  },
+  "operations": [
+    {
+      "op": "edgeIntents.upsert",
+      "actor_ref": "user_a",
+      "auth": {
+        "scopes": [
+          "swap_intents:write"
+        ]
+      },
+      "idempotency_key": "edge-ab-v1",
+      "request": {
+        "recorded_at": "2026-02-22T00:00:00.000Z",
+        "edge_intent": {
+          "id": "edge_ab",
+          "source_intent_id": "intent_a",
+          "target_intent_id": "intent_b",
+          "intent_type": "allow",
+          "strength": 1,
+          "status": "active"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_edge_intent_id": "edge_ab",
+      "expect_edge_intent_type": "allow"
+    },
+    {
+      "op": "edgeIntents.upsert",
+      "actor_ref": "user_b",
+      "auth": {
+        "scopes": [
+          "swap_intents:write"
+        ]
+      },
+      "idempotency_key": "edge-bc-v1",
+      "request": {
+        "recorded_at": "2026-02-22T00:00:01.000Z",
+        "edge_intent": {
+          "id": "edge_bc",
+          "source_intent_id": "intent_b",
+          "target_intent_id": "intent_c",
+          "intent_type": "prefer",
+          "strength": 0.9,
+          "status": "active"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_edge_intent_id": "edge_bc",
+      "expect_edge_intent_type": "prefer"
+    },
+    {
+      "op": "edgeIntents.upsert",
+      "actor_ref": "user_c",
+      "auth": {
+        "scopes": [
+          "swap_intents:write"
+        ]
+      },
+      "idempotency_key": "edge-ca-v1",
+      "request": {
+        "recorded_at": "2026-02-22T00:00:02.000Z",
+        "edge_intent": {
+          "id": "edge_ca",
+          "source_intent_id": "intent_c",
+          "target_intent_id": "intent_a",
+          "intent_type": "allow",
+          "strength": 1,
+          "status": "active"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_edge_intent_id": "edge_ca",
+      "expect_edge_intent_type": "allow"
+    },
+    {
+      "op": "edgeIntents.upsert",
+      "actor_ref": "user_a",
+      "auth": {
+        "scopes": [
+          "swap_intents:write"
+        ]
+      },
+      "idempotency_key": "edge-ab-v1",
+      "request": {
+        "recorded_at": "2026-02-22T00:00:00.000Z",
+        "edge_intent": {
+          "id": "edge_ab",
+          "source_intent_id": "intent_a",
+          "target_intent_id": "intent_b",
+          "intent_type": "allow",
+          "strength": 1,
+          "status": "active"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": true,
+      "expect_edge_intent_id": "edge_ab",
+      "expect_edge_intent_type": "allow"
+    },
+    {
+      "op": "marketplaceMatching.run",
+      "actor_ref": "partner_marketplace",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "matching-run-1",
+      "request": {
+        "replace_existing": true,
+        "max_proposals": 20,
+        "recorded_at": "2026-02-22T00:00:10.000Z",
+        "asset_values_usd": {
+          "asset_a": 100,
+          "asset_b": 101,
+          "asset_c": 99
+        }
+      },
+      "expect_ok": true,
+      "expect_selected_proposals_count": 1,
+      "expect_candidate_cycles": 1,
+      "expect_replaced_proposals_count": 0
+    },
+    {
+      "op": "edgeIntents.list",
+      "actor_ref": "partner_marketplace",
+      "auth": {
+        "scopes": [
+          "swap_intents:read"
+        ]
+      },
+      "query": {
+        "active_only": "true",
+        "limit": "10"
+      },
+      "expect_ok": true,
+      "expect_total": 3,
+      "expect_first_edge_intent_id": "edge_ca"
+    },
+    {
+      "op": "edgeIntents.get",
+      "actor_ref": "partner_marketplace",
+      "auth": {
+        "scopes": [
+          "swap_intents:read"
+        ]
+      },
+      "edge_intent_id": "edge_ca",
+      "expect_ok": true,
+      "expect_edge_intent_type": "allow"
+    },
+    {
+      "op": "edgeIntents.upsert",
+      "actor_ref": "user_c",
+      "auth": {
+        "scopes": [
+          "swap_intents:write"
+        ]
+      },
+      "idempotency_key": "edge-ca-v2",
+      "request": {
+        "recorded_at": "2026-02-22T00:00:20.000Z",
+        "edge_intent": {
+          "id": "edge_ca",
+          "source_intent_id": "intent_c",
+          "target_intent_id": "intent_a",
+          "intent_type": "block",
+          "strength": 1,
+          "status": "active"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_edge_intent_id": "edge_ca",
+      "expect_edge_intent_type": "block"
+    },
+    {
+      "op": "marketplaceMatching.run",
+      "actor_ref": "partner_marketplace",
+      "auth": {
+        "scopes": [
+          "settlement:write"
+        ]
+      },
+      "idempotency_key": "matching-run-2",
+      "request": {
+        "replace_existing": true,
+        "max_proposals": 20,
+        "recorded_at": "2026-02-22T00:00:30.000Z",
+        "asset_values_usd": {
+          "asset_a": 100,
+          "asset_b": 101,
+          "asset_c": 99
+        }
+      },
+      "expect_ok": true,
+      "expect_selected_proposals_count": 0,
+      "expect_candidate_cycles": 0,
+      "expect_replaced_proposals_count": 1
+    },
+    {
+      "op": "edgeIntents.get",
+      "actor_ref": "partner_marketplace",
+      "auth": {
+        "scopes": [
+          "swap_intents:read"
+        ]
+      },
+      "edge_intent_id": "edge_ca",
+      "expect_ok": true,
+      "expect_edge_intent_type": "block"
+    }
+  ]
+}

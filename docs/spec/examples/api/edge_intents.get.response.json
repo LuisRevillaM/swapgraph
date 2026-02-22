@@ -1,0 +1,19 @@
+{
+  "correlation_id": "corr_edgeintents_get",
+  "edge_intent": {
+    "id": "edge_000001",
+    "source_intent_id": "intent_user_a",
+    "target_intent_id": "intent_user_b",
+    "intent_type": "prefer",
+    "strength": 0.8,
+    "status": "active",
+    "expires_at": null,
+    "note": "I explicitly want this listing.",
+    "created_by": {
+      "type": "user",
+      "id": "user_a"
+    },
+    "created_at": "2026-02-22T21:00:00.000Z",
+    "updated_at": "2026-02-22T21:00:00.000Z"
+  }
+}

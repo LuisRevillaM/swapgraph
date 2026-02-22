@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/EdgeIntentGetResponse.schema.json",
+  "title": "EdgeIntentGetResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "edge_intent"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "edge_intent": {
+      "$ref": "EdgeIntentView.schema.json"
+    }
+  }
+}

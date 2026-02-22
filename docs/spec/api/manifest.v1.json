@@ -2951,6 +2951,58 @@
     },
     {
       "method": "POST",
+      "path": "/edge-intents",
+      "operation_id": "edgeIntents.upsert",
+      "idempotency_required": true,
+      "request_schema": "EdgeIntentUpsertRequest.schema.json",
+      "response_schema": "EdgeIntentUpsertResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner"
+        ],
+        "required_scopes": [
+          "swap_intents:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/edge-intents",
+      "operation_id": "edgeIntents.list",
+      "idempotency_required": false,
+      "response_schema": "EdgeIntentListResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner"
+        ],
+        "required_scopes": [
+          "swap_intents:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/edge-intents/{edge_intent_id}",
+      "operation_id": "edgeIntents.get",
+      "idempotency_required": false,
+      "response_schema": "EdgeIntentGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner"
+        ],
+        "required_scopes": [
+          "swap_intents:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/marketplace/matching/runs",
       "operation_id": "marketplaceMatching.run",
       "idempotency_required": true,

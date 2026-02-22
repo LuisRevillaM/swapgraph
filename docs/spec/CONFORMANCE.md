@@ -1,4 +1,4 @@
-# SwapGraph v2.0 Conformance Matrix (M112)
+# SwapGraph v2.0 Conformance Matrix (M114)
 
 M92_RELEASE_READY: true
 M97_EVIDENCE_REFRESH_READY: true
@@ -17,6 +17,8 @@ M109_PARTNER_LIQUIDITY_PROVIDER_GOVERNANCE_CONTRACTS_READY: true
 M110_SWARM_TRANSPARENCY_USER_CONTROL_CONTRACTS_READY: true
 M111_MARKETPLACE_EXECUTION_LOOP_CONTRACTS_READY: true
 M112_STORAGE_HARDENING_SQLITE_MIGRATION_READY: true
+M113_RENDER_DEPLOYMENT_SMOKE_HARDENING_READY: true
+M114_EXPLICIT_EDGE_INTENTS_HYBRID_MATCHING_READY: true
 
 This matrix maps v2.0 plan gates and milestone tranches to deterministic, verifier-backed artifacts in this repo.
 
@@ -61,10 +63,12 @@ This matrix maps v2.0 plan gates and milestone tranches to deterministic, verifi
 - M110: swarm transparency and user-control contracts (liquidity directory + persona disclosure surfaces, actor-governed counterparty preference controls, and proposal/receipt counterparty disclosure projections with deterministic no-match signaling).
 - M111: marketplace execution loop contracts (idempotent matching run/get surfaces, deterministic proposal replace/expiry lifecycle accounting, and runtime integration for stored user-intent proposal generation).
 - M112: storage hardening and SQLite migration path (runtime backend selector + SQLite store activation, deterministic JSON<->SQLite migration tooling, and restart durability + backup/restore parity verification).
+- M113: Render deployment smoke hardening automation (integration-gated Render service/disk/env/deploy/restart orchestration + live health/smoke and restart durability verification).
+- M114: explicit edge-intent + hybrid graph matching contracts (idempotent edge-intent upsert/list/get surfaces with deterministic reason codes and matcher support for derived+expressed edge construction with block suppression).
 
 ## Release-Readiness Assertions
 
-- ✅ All milestone descriptors exist for M71–M112 (`docs/prd/Mxx.md`, `milestones/Mxx.yaml`, `verify/mxx.sh`).
-- ✅ Deterministic verification artifacts exist for M71–M112 under `artifacts/milestones/Mxx/latest/*`.
+- ✅ All milestone descriptors exist for M71–M114 (`docs/prd/Mxx.md`, `milestones/Mxx.yaml`, `verify/mxx.sh`).
+- ✅ Deterministic verification artifacts exist for M71–M114 under `artifacts/milestones/Mxx/latest/*`.
 - ✅ Spec gaps are closed to zero unresolved blocker state for this tranche.
 - ✅ `BLOCKERS.md` indicates no active blockers.

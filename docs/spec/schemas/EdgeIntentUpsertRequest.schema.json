@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/EdgeIntentUpsertRequest.schema.json",
+  "title": "EdgeIntentUpsertRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "edge_intent"
+  ],
+  "properties": {
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "edge_intent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_intent_id",
+        "target_intent_id",
+        "intent_type"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_intent_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target_intent_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "intent_type": {
+          "type": "string",
+          "enum": [
+            "allow",
+            "prefer",
+            "block"
+          ]
+        },
+        "strength": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "inactive"
+          ]
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 400
+        }
+      }
+    }
+  }
+}

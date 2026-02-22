@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/EdgeIntentView.schema.json",
+  "title": "EdgeIntentView",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "source_intent_id",
+    "target_intent_id",
+    "intent_type",
+    "strength",
+    "status",
+    "expires_at",
+    "note",
+    "created_by",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_intent_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_intent_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "intent_type": {
+      "type": "string",
+      "enum": [
+        "allow",
+        "prefer",
+        "block"
+      ]
+    },
+    "strength": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive"
+      ]
+    },
+    "expires_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "note": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 400
+    },
+    "created_by": {
+      "$ref": "ActorRef.schema.json"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

@@ -1058,6 +1058,22 @@
       "schema": "ReceiptCounterpartyDisclosureGetResponse.schema.json"
     },
     {
+      "file": "edge_intents.upsert.request.json",
+      "schema": "EdgeIntentUpsertRequest.schema.json"
+    },
+    {
+      "file": "edge_intents.upsert.response.json",
+      "schema": "EdgeIntentUpsertResponse.schema.json"
+    },
+    {
+      "file": "edge_intents.list.response.json",
+      "schema": "EdgeIntentListResponse.schema.json"
+    },
+    {
+      "file": "edge_intents.get.response.json",
+      "schema": "EdgeIntentGetResponse.schema.json"
+    },
+    {
       "file": "marketplace_matching.run.request.json",
       "schema": "MarketplaceMatchingRunRequest.schema.json"
     },

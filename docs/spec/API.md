@@ -115,6 +115,16 @@ Auth headers (see `docs/spec/AUTH.md` for details):
     - automation and house-liquidity flags are explicit in disclosure payloads
     - persona/strategy summary refs and decision-rationale refs are projected when present
 
+- `EdgeIntent`
+  - `POST /edge-intents` (idempotent edge-intent upsert)
+  - `GET /edge-intents` (list edge-intents with deterministic filtering)
+  - `GET /edge-intents/{edge_intent_id}` (read edge-intent)
+  - edge-intent invariants:
+    - user actors can only create edges from source intents they own
+    - source and target intents must exist
+    - `block` disables a directed edge, `allow` enables a directed edge, and `prefer` enables + ranks a directed edge
+    - matching can form cycles from derived compatibility edges and/or explicit edge-intent edges
+
 - `PartnerUi`
   - `GET /partner-ui/capabilities` (supported embedded surfaces/version matrix for partner actors)
   - `GET /partner-ui/bundles/{surface}` (surface payload bundle for partner embedding mode)

@@ -1,0 +1,11 @@
+{
+  "recorded_at": "2026-02-22T21:00:00.000Z",
+  "edge_intent": {
+    "source_intent_id": "intent_user_a",
+    "target_intent_id": "intent_user_b",
+    "intent_type": "prefer",
+    "strength": 0.8,
+    "status": "active",
+    "note": "I explicitly want this listing."
+  }
+}

@@ -2,8 +2,8 @@ import { buildCompatibilityGraph } from './graph.mjs';
 import { findCyclesLen2, findCyclesLen3 } from './cycles.mjs';
 import { selectDisjointProposals } from './proposals.mjs';
 
-export function runMatching({ intents, assetValuesUsd }) {
-  const { byId, edges } = buildCompatibilityGraph({ intents, assetValuesUsd });
+export function runMatching({ intents, assetValuesUsd, edgeIntents = [], nowIso = null }) {
+  const { byId, edges, edgeMeta } = buildCompatibilityGraph({ intents, assetValuesUsd, edgeIntents, nowIso });
   const c2 = findCyclesLen2({ edges });
   const c3 = findCyclesLen3({ edges });
   const all = [...c2, ...c3];
@@ -11,7 +11,8 @@ export function runMatching({ intents, assetValuesUsd }) {
   const { selected, trace, candidates_count } = selectDisjointProposals({
     candidateCycles: all,
     byId,
-    assetValuesUsd
+    assetValuesUsd,
+    edgeMeta
   });
 
   return {

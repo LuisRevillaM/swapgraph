@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/EdgeIntentListResponse.schema.json",
+  "title": "EdgeIntentListResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "edge_intents",
+    "total"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "edge_intents": {
+      "type": "array",
+      "items": {
+        "$ref": "EdgeIntentView.schema.json"
+      }
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

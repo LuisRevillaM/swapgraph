@@ -281,6 +281,14 @@ Notes:
   - `counterparty_preferences_conflict`
   - `liquidity_directory_query_invalid`
   - `counterparty_disclosure_not_found`
+  - `edge_intent_invalid`
+  - `edge_intent_invalid_timestamp`
+  - `edge_intent_invalid_expiry`
+  - `edge_intent_query_invalid`
+  - `edge_intent_source_not_found`
+  - `edge_intent_target_not_found`
+  - `edge_intent_source_not_owned`
+  - `edge_intent_not_found`
   - `marketplace_matching_invalid_request`
   - `marketplace_matching_asset_values_missing`
   - `marketplace_matching_run_not_found`

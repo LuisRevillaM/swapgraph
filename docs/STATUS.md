@@ -124,13 +124,14 @@ Last updated: 2026-02-22
 - M111: ✅ Marketplace execution loop contracts (fixtures-first) (idempotent matching-run and run-read API surfaces, deterministic proposal replace+expiry lifecycle accounting, and runtime integration for user-intent-to-proposal generation) (fixtures-first)
 - M112: ✅ Storage hardening and SQLite migration path (fixtures-first) (runtime backend selector + SQLite state-store activation, deterministic JSON<->SQLite migration tooling, and restart durability/backup-restore verifier coverage) (fixtures-first)
 - M113: ✅ Render deployment smoke hardening automation (integration-gated, live-proof complete) (scripted service/disk/env/deploy/restart orchestration plus live health/smoke validation under credential gate; verifier-closed on 2026-02-22)
+- M114: ✅ Explicit edge-intents + hybrid graph matching contracts (fixtures-first) (idempotent edge-intent upsert/list/get API surfaces with deterministic ownership/existence/query reason codes, plus matching integration for derived+expressed edge compatibility and block-edge suppression) (fixtures-first)
 
 ## Next
 - PRD batch defined: `docs/prd/2026-02-21_master-next-batch_M98-M102.md`
 - Additive LP subsystem PRD batch defined: `docs/prd/2026-02-21_master-liquidity-provider-subsystem_M103-M110.md`
 - Storage hardening PRD implemented: `docs/prd/M112.md`
-- Current mode: M98–M113 implementation tranche complete (including integration-gated Render smoke hardening proof).
-- Immediate target: define and activate the next milestone tranche beyond M113.
+- Current mode: M98–M114 implementation tranche complete (including integration-gated Render smoke hardening proof and hybrid edge-intent matching contracts).
+- Immediate target: define and activate the next milestone tranche beyond M114.
 - Runtime shell available for request/response validation: `npm run start:api` (`src/server/runtimeApiServer.mjs`).
 - CI baseline gate added: `.github/workflows/verify-baseline.yml` (includes `verify:m0`, baseline tranche, `verify:m98`, `verify:m99`, `verify:m100`, `verify:m101`, `verify:m102`, `verify:m103`, `verify:m104`, `verify:m105`, `verify:m106`, `verify:m107`, `verify:m108`, `verify:m109`, `verify:m110`, `verify:m111`, and `verify:m112`).
 

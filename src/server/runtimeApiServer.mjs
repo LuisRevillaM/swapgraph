@@ -20,6 +20,7 @@ import { LiquiditySimulationService } from '../service/liquiditySimulationServic
 import { LiquidityTransparencyService } from '../service/liquidityTransparencyService.mjs';
 import { MetricsNetworkHealthService } from '../service/metricsNetworkHealthService.mjs';
 import { MarketplaceMatchingService } from '../service/marketplaceMatchingService.mjs';
+import { EdgeIntentService } from '../service/edgeIntentService.mjs';
 import { PartnerLiquidityProviderGovernanceService } from '../service/partnerLiquidityProviderGovernanceService.mjs';
 import { PlatformInventoryDisputeFacadeService } from '../service/platformInventoryDisputeFacadeService.mjs';
 import { ProductSurfaceReadinessService } from '../service/productSurfaceReadinessService.mjs';
@@ -234,6 +235,7 @@ function summarizeState(store) {
     marketplace_asset_values: Object.keys(store.state.marketplace_asset_values ?? {}).length,
     marketplace_matching_runs: Object.keys(store.state.marketplace_matching_runs ?? {}).length,
     marketplace_matching_proposals: Object.keys(store.state.marketplace_matching_proposal_runs ?? {}).length,
+    edge_intents: Object.keys(store.state.edge_intents ?? {}).length,
     commercial_policies: Object.keys(store.state.commercial_policies ?? {}).length,
     commercial_policy_audit_entries: Array.isArray(store.state.commercial_policy_audit) ? store.state.commercial_policy_audit.length : 0
   };
@@ -290,6 +292,7 @@ export function createRuntimeApiServer({
   const metricsNetworkHealth = new MetricsNetworkHealthService({ store });
   const productSurface = new ProductSurfaceReadinessService({ store });
   const marketplaceMatching = new MarketplaceMatchingService({ store });
+  const edgeIntents = new EdgeIntentService({ store });
   const commercialPolicy = new CommercialPolicyService({ store });
   const liquidityTransparency = new LiquidityTransparencyService({ store });
   const liquidityProviders = new LiquidityProviderService({ store });
@@ -527,6 +530,29 @@ export function createRuntimeApiServer({
         const out = liquidityTransparency.upsertCounterpartyPreferences({ actor, auth, idempotencyKey: idem.value, request: body });
         shouldPersist = true;
         return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      if (method === 'POST' && pathname === '/edge-intents') {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = edgeIntents.upsertEdgeIntent({ actor, auth, idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      if (method === 'GET' && pathname === '/edge-intents') {
+        const query = toQueryObject(url.searchParams);
+        const result = edgeIntents.listEdgeIntents({ actor, auth, query });
+        return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
+      }
+
+      const edgeIntentGet = routeMatch(pathname, /^\/edge-intents\/([^/]+)$/);
+      if (method === 'GET' && edgeIntentGet) {
+        const result = edgeIntents.getEdgeIntent({ actor, auth, edgeIntentId: edgeIntentGet[0] });
+        return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
       }
 
       if (method === 'POST' && pathname === '/marketplace/matching/runs') {

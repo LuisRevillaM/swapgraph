@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { valueOfAssets, round } from './values.mjs';
+import { valueOfAssets, round, clamp01 } from './values.mjs';
 import { computeValueSpread, scoreCycle } from './scoring.mjs';
 
 function cycleKey(ids) {
@@ -12,13 +12,17 @@ function cycleId(ids) {
   return `cycle_${h}`;
 }
 
+function edgeKey(sourceIntentId, targetIntentId) {
+  return `${sourceIntentId}>${targetIntentId}`;
+}
+
 function minIso(a, b) {
   if (!a) return b;
   if (!b) return a;
   return a < b ? a : b;
 }
 
-export function buildProposal({ cycleIntentIds, byId, assetValuesUsd }) {
+export function buildProposal({ cycleIntentIds, byId, assetValuesUsd, edgeMeta = null }) {
   const L = cycleIntentIds.length;
   const intents = cycleIntentIds.map(id => byId.get(id));
 
@@ -38,6 +42,7 @@ export function buildProposal({ cycleIntentIds, byId, assetValuesUsd }) {
 
   const participants = [];
   const getValues = [];
+  let explicitPreferenceStrength = 0;
 
   for (let i = 0; i < L; i++) {
     const a = intents[i];
@@ -47,6 +52,7 @@ export function buildProposal({ cycleIntentIds, byId, assetValuesUsd }) {
 
     const gv = valueOfAssets({ assets: get, assetValuesUsd });
     getValues.push(gv);
+    explicitPreferenceStrength += Number(edgeMeta?.get(edgeKey(a.id, b.id))?.explicit_prefer_strength ?? 0);
 
     participants.push({
       intent_id: a.id,
@@ -57,7 +63,9 @@ export function buildProposal({ cycleIntentIds, byId, assetValuesUsd }) {
   }
 
   const valueSpread = round(computeValueSpread({ getValues }), 4);
-  const confidence = scoreCycle({ length: L, valueSpread });
+  const baseConfidence = scoreCycle({ length: L, valueSpread });
+  const preferenceBonus = round(Math.min(0.1, explicitPreferenceStrength * 0.02), 4);
+  const confidence = round(clamp01(baseConfidence + preferenceBonus), 4);
 
   // Fee: 1% of what you receive.
   const fee_breakdown = participants.map((p, idx) => ({
@@ -69,6 +77,7 @@ export function buildProposal({ cycleIntentIds, byId, assetValuesUsd }) {
     'All wants satisfied within explicit constraints',
     `cycle_length=${L}`,
     `value_spread=${valueSpread}`,
+    `explicit_preference_strength=${round(explicitPreferenceStrength, 4)}`,
     `confidence_score=${confidence}`
   ];
 
@@ -86,10 +95,10 @@ export function buildProposal({ cycleIntentIds, byId, assetValuesUsd }) {
   };
 }
 
-export function selectDisjointProposals({ candidateCycles, byId, assetValuesUsd }) {
+export function selectDisjointProposals({ candidateCycles, byId, assetValuesUsd, edgeMeta = null }) {
   const candidates = [];
   for (const cyc of candidateCycles) {
-    const built = buildProposal({ cycleIntentIds: cyc, byId, assetValuesUsd });
+    const built = buildProposal({ cycleIntentIds: cyc, byId, assetValuesUsd, edgeMeta });
     if (!built.ok) continue;
     const L = cyc.length;
     candidates.push({
