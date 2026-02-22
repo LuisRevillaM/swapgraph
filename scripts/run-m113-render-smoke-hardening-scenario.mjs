@@ -32,7 +32,9 @@ function sleep(ms) {
 }
 
 function buildUrl(base, pathname, query = {}) {
-  const url = new URL(pathname, base);
+  const baseUrl = new URL(base.endsWith('/') ? base : `${base}/`);
+  const relativePath = String(pathname ?? '').replace(/^\/+/, '');
+  const url = new URL(relativePath, baseUrl);
   for (const [key, value] of Object.entries(query ?? {})) {
     if (value === undefined || value === null || value === '') continue;
     if (Array.isArray(value)) {
@@ -68,35 +70,99 @@ function idempotencyKey(prefix, index) {
   return `${prefix}-${Date.now()}-${index}`;
 }
 
+function transientNetworkCode(error) {
+  return trimOrNull(
+    error?.code ??
+    error?.cause?.code ??
+    null
+  );
+}
+
+function isTransientNetworkError(error) {
+  if (String(error?.name ?? '') === 'AbortError') return true;
+  const code = String(transientNetworkCode(error) ?? '').toUpperCase();
+  if (!code) return false;
+  return [
+    'ECONNRESET',
+    'ETIMEDOUT',
+    'ECONNREFUSED',
+    'EAI_AGAIN',
+    'UND_ERR_CONNECT_TIMEOUT',
+    'UND_ERR_SOCKET',
+    'UND_ERR_HEADERS_TIMEOUT'
+  ].includes(code);
+}
+
+function isRetriableStatus(status) {
+  return [408, 409, 425, 429, 500, 502, 503, 504].includes(Number(status));
+}
+
+async function retryDelay(attempt) {
+  const base = Number.parseInt(trimOrNull(process.env.RENDER_HTTP_RETRY_DELAY_MS) ?? '1000', 10);
+  const baseMs = Number.isFinite(base) && base >= 100 ? base : 1000;
+  const jitter = Math.floor(Math.random() * 250);
+  const backoff = Math.min(8000, baseMs * (2 ** attempt));
+  await sleep(backoff + jitter);
+}
+
 async function httpJson({ url, method = 'GET', headers = {}, body, okStatuses = [200] }) {
-  const response = await fetch(url, {
-    method,
-    headers: {
-      accept: 'application/json',
-      ...headers
-    },
-    body: body === undefined ? undefined : JSON.stringify(body)
-  });
+  const configuredAttempts = Number.parseInt(trimOrNull(process.env.RENDER_HTTP_RETRIES) ?? '4', 10);
+  const attempts = Number.isFinite(configuredAttempts) && configuredAttempts >= 1 ? configuredAttempts : 4;
+  const configuredTimeoutMs = Number.parseInt(trimOrNull(process.env.RENDER_HTTP_TIMEOUT_MS) ?? '20000', 10);
+  const requestTimeoutMs = Number.isFinite(configuredTimeoutMs) && configuredTimeoutMs >= 1000 ? configuredTimeoutMs : 20000;
 
-  const text = await response.text();
-  let parsed = null;
-  try {
-    parsed = text ? JSON.parse(text) : null;
-  } catch {
-    parsed = { raw: text };
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), requestTimeoutMs);
+      let response = null;
+      try {
+        response = await fetch(url, {
+          method,
+          headers: {
+            accept: 'application/json',
+            ...headers
+          },
+          body: body === undefined ? undefined : JSON.stringify(body),
+          signal: controller.signal
+        });
+      } finally {
+        clearTimeout(timeout);
+      }
+
+      const text = await response.text();
+      let parsed = null;
+      try {
+        parsed = text ? JSON.parse(text) : null;
+      } catch {
+        parsed = { raw: text };
+      }
+
+      if (!okStatuses.includes(response.status)) {
+        const error = new Error(`http request failed: ${method} ${url} -> ${response.status}`);
+        error.status = response.status;
+        error.body = parsed;
+        if (attempt + 1 < attempts && isRetriableStatus(response.status)) {
+          await retryDelay(attempt);
+          continue;
+        }
+        throw error;
+      }
+
+      return {
+        status: response.status,
+        body: parsed
+      };
+    } catch (error) {
+      if (attempt + 1 < attempts && isTransientNetworkError(error)) {
+        await retryDelay(attempt);
+        continue;
+      }
+      throw error;
+    }
   }
 
-  if (!okStatuses.includes(response.status)) {
-    const error = new Error(`http request failed: ${method} ${url} -> ${response.status}`);
-    error.status = response.status;
-    error.body = parsed;
-    throw error;
-  }
-
-  return {
-    status: response.status,
-    body: parsed
-  };
+  throw new Error(`http request exhausted retries: ${method} ${url}`);
 }
 
 function renderHeaders(apiKey) {
@@ -106,19 +172,67 @@ function renderHeaders(apiKey) {
   };
 }
 
+function normalizeService(payload) {
+  if (!payload || typeof payload !== 'object') return null;
+  const direct = payload?.id ? payload : null;
+  const service = payload?.service && typeof payload.service === 'object' ? payload.service : null;
+  const dataService = payload?.data?.service && typeof payload.data.service === 'object' ? payload.data.service : null;
+  const resultService = payload?.result?.service && typeof payload.result.service === 'object' ? payload.result.service : null;
+  const data = payload?.data?.id ? payload.data : null;
+  const result = payload?.result?.id ? payload.result : null;
+  return service ?? dataService ?? resultService ?? direct ?? data ?? result;
+}
+
+function normalizeServicesListPayload(payload) {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.services)) return payload.services;
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.result)) return payload.result;
+  return [];
+}
+
+function normalizeDeploy(payload) {
+  if (!payload || typeof payload !== 'object') return null;
+  const direct = payload?.id ? payload : null;
+  const deploy = payload?.deploy && typeof payload.deploy === 'object' ? payload.deploy : null;
+  const dataDeploy = payload?.data?.deploy && typeof payload.data.deploy === 'object' ? payload.data.deploy : null;
+  const resultDeploy = payload?.result?.deploy && typeof payload.result.deploy === 'object' ? payload.result.deploy : null;
+  const data = payload?.data?.id ? payload.data : null;
+  const result = payload?.result?.id ? payload.result : null;
+  return deploy ?? dataDeploy ?? resultDeploy ?? direct ?? data ?? result;
+}
+
+function normalizeDeployListPayload(payload) {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.deploys)) return payload.deploys;
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.result)) return payload.result;
+  return [];
+}
+
 function toServiceRows(payload) {
-  if (!Array.isArray(payload)) return [];
-  return payload
+  const list = normalizeServicesListPayload(payload);
+  return list
     .map(item => ({
-      service: item?.service ?? null,
+      service: normalizeService(item),
       cursor: item?.cursor ?? null
     }))
     .filter(item => !!item.service?.id);
 }
 
 function toOwnerRows(payload) {
-  if (Array.isArray(payload)) {
-    return payload
+  const list = Array.isArray(payload)
+    ? payload
+    : Array.isArray(payload?.owners)
+      ? payload.owners
+      : Array.isArray(payload?.data)
+        ? payload.data
+        : Array.isArray(payload?.result)
+          ? payload.result
+          : [];
+
+  if (list.length > 0) {
+    return list
       .map(item => {
         const owner = item?.owner && typeof item.owner === 'object' ? item.owner : item;
         const cursor = item?.cursor ?? null;
@@ -131,11 +245,6 @@ function toOwnerRows(payload) {
   }
   if (payload?.id) {
     return [{ owner: payload, cursor: payload?.cursor ?? null }];
-  }
-  if (Array.isArray(payload?.owners)) {
-    return payload.owners
-      .map(owner => (owner?.id ? { owner, cursor: null } : null))
-      .filter(Boolean);
   }
   return [];
 }
@@ -156,7 +265,27 @@ function ownerIdentity(owner) {
 }
 
 function currentDeployStatus(payload) {
-  return trimOrNull(payload?.status ?? null);
+  return trimOrNull(normalizeDeploy(payload)?.status ?? null);
+}
+
+function renderErrorMessage(error) {
+  return trimOrNull(
+    error?.body?.message ??
+    error?.body?.raw ??
+    error?.message ??
+    null
+  ) ?? 'unknown render error';
+}
+
+function isPendingDeployStatus(status) {
+  return [
+    'created',
+    'queued',
+    'build_in_progress',
+    'update_in_progress',
+    'pre_deploy_in_progress',
+    'cancelling'
+  ].includes(String(status ?? '').toLowerCase());
 }
 
 function smokeHeaders({ actorType, actorId, scopes, idempotency }) {
@@ -241,7 +370,11 @@ async function getServiceById(serviceId) {
     pathname: `/services/${encodeURIComponent(serviceId)}`,
     okStatuses: [200]
   });
-  return res.body;
+  const service = normalizeService(res.body);
+  if (!service?.id) {
+    throw new Error(`unable to resolve service payload by id: ${serviceId}`);
+  }
+  return service;
 }
 
 async function listServices(query = {}) {
@@ -414,10 +547,17 @@ async function createService() {
     body: payload,
     okStatuses: [201]
   });
-  return response.body;
+  const service = normalizeService(response.body);
+  if (!service?.id) {
+    throw new Error('create service returned payload without service id');
+  }
+  return service;
 }
 
 async function ensureDisk(service) {
+  const serviceId = trimOrNull(service?.id);
+  if (!serviceId) throw new Error('service.id is required before disk attachment');
+
   const serviceDisk = service?.serviceDetails?.disk ?? null;
   if (serviceDisk?.id) {
     operations.push({
@@ -429,19 +569,36 @@ async function ensureDisk(service) {
     return serviceDisk;
   }
 
-  const response = await renderRequest({
+  const createDisk = async () => renderRequest({
     method: 'POST',
     pathname: '/disks',
     body: {
       name: renderDiskName,
       sizeGB: renderDiskSizeGb,
       mountPath: renderDiskMountPath,
-      serviceId: service.id
+      serviceId
     },
     okStatuses: [201]
   });
 
-  const disk = response.body;
+  let response = null;
+  try {
+    response = await createDisk();
+  } catch (error) {
+    const message = renderErrorMessage(error);
+    const pendingDeployGuard = error?.status === 400 && /pending deploy/i.test(message);
+    if (!pendingDeployGuard) throw error;
+
+    operations.push({
+      op: 'render.disk.pending_deploy_guard',
+      service_id: serviceId,
+      message
+    });
+    await waitForNoPendingDeploys(serviceId);
+    response = await createDisk();
+  }
+
+  const disk = response?.body ?? null;
   operations.push({
     op: 'render.disk.created',
     disk_id: disk?.id ?? null,
@@ -455,7 +612,8 @@ async function ensureEnvVars(serviceId) {
   const requiredEnv = {
     ...(scenario?.required_env ?? {}),
     STATE_BACKEND: 'sqlite',
-    STATE_FILE: stateFilePath
+    STATE_FILE: stateFilePath,
+    HOST: trimOrNull(process.env.HOST) ?? '0.0.0.0'
   };
 
   const upserts = [];
@@ -502,8 +660,41 @@ async function latestDeployId(serviceId) {
     query: { limit: 1 },
     okStatuses: [200]
   });
-  const row = Array.isArray(response.body) && response.body.length > 0 ? response.body[0] : null;
-  return trimOrNull(row?.deploy?.id ?? null);
+  const rows = normalizeDeployListPayload(response.body);
+  const deploy = rows.length > 0 ? normalizeDeploy(rows[0]) : null;
+  return trimOrNull(deploy?.id ?? null);
+}
+
+async function waitForNoPendingDeploys(serviceId) {
+  const startedAtMs = Date.now();
+  while (Date.now() - startedAtMs < deployTimeoutSeconds * 1000) {
+    const deployId = await latestDeployId(serviceId);
+    if (!deployId) {
+      operations.push({
+        op: 'render.deploy.quiescent',
+        service_id: serviceId,
+        reason: 'no_deploys_found'
+      });
+      return;
+    }
+
+    const response = await renderRequest({
+      method: 'GET',
+      pathname: `/services/${encodeURIComponent(serviceId)}/deploys/${encodeURIComponent(deployId)}`,
+      okStatuses: [200]
+    });
+    const status = currentDeployStatus(response.body);
+    operations.push({
+      op: 'render.deploy.status.before_disk_retry',
+      service_id: serviceId,
+      deploy_id: deployId,
+      status
+    });
+    if (!isPendingDeployStatus(status)) return;
+
+    await sleep(deployPollSeconds * 1000);
+  }
+  throw new Error(`timed out waiting for pending deploy to settle before disk attach (timeout=${deployTimeoutSeconds}s)`);
 }
 
 async function pollDeployUntilLive(serviceId, deployIdSeed) {
@@ -524,8 +715,9 @@ async function pollDeployUntilLive(serviceId, deployIdSeed) {
       pathname: `/services/${encodeURIComponent(serviceId)}/deploys/${encodeURIComponent(deployId)}`,
       okStatuses: [200]
     });
-
+    const deploy = normalizeDeploy(response.body);
     const status = currentDeployStatus(response.body);
+    if (deploy?.id) deployId = deploy.id;
     deployStatusTrail.push({
       at: new Date().toISOString(),
       deploy_id: deployId,
@@ -541,7 +733,7 @@ async function pollDeployUntilLive(serviceId, deployIdSeed) {
       return { deployId, status };
     }
 
-    if (['build_failed', 'update_failed', 'canceled', 'deactivated', 'pre_deploy_failed'].includes(String(status))) {
+    if (['build_failed', 'update_failed', 'canceled', 'deactivated', 'pre_deploy_failed', 'failed'].includes(String(status))) {
       throw new Error(`render deploy failed with status=${status} deploy_id=${deployId}`);
     }
 

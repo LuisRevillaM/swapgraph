@@ -75,5 +75,6 @@ cp "$OUT_DIR/api_contract_validation.json" "$LATEST_DIR/api_contract_validation.
 cp "$OUT_DIR/api_auth_validation.json" "$LATEST_DIR/api_auth_validation.json"
 cp "$OUT_DIR/render_smoke_hardening_output.json" "$LATEST_DIR/render_smoke_hardening_output.json"
 cp "$OUT_DIR/assertions.json" "$LATEST_DIR/assertions.json"
+rm -f "$LATEST_DIR/integration_gate_failure.json"
 
 echo "verify ${M} pass"

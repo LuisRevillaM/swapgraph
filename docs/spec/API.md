@@ -479,7 +479,7 @@ Render deployment smoke hardening automation (M113, integration-gated):
 - `node scripts/run-m113-render-smoke-hardening-scenario.mjs` automates:
   - Render service reuse/create,
   - persistent disk attachment,
-  - env upsert (`STATE_BACKEND=sqlite`, `STATE_FILE=...`),
+  - env upsert (`STATE_BACKEND=sqlite`, `STATE_FILE=...`, `HOST=0.0.0.0`),
   - deploy/restart orchestration,
   - live smoke checks (`/healthz`, `swap-intents`, `marketplace/matching/runs`).
 - Requires `INTEGRATION_ENABLED=1` and `RENDER_API_KEY`.
