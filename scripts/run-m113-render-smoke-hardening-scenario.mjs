@@ -116,6 +116,45 @@ function toServiceRows(payload) {
     .filter(item => !!item.service?.id);
 }
 
+function toOwnerRows(payload) {
+  if (Array.isArray(payload)) {
+    return payload
+      .map(item => {
+        const owner = item?.owner && typeof item.owner === 'object' ? item.owner : item;
+        const cursor = item?.cursor ?? null;
+        return owner?.id ? { owner, cursor } : null;
+      })
+      .filter(Boolean);
+  }
+  if (payload?.owner?.id) {
+    return [{ owner: payload.owner, cursor: payload?.cursor ?? null }];
+  }
+  if (payload?.id) {
+    return [{ owner: payload, cursor: payload?.cursor ?? null }];
+  }
+  if (Array.isArray(payload?.owners)) {
+    return payload.owners
+      .map(owner => (owner?.id ? { owner, cursor: null } : null))
+      .filter(Boolean);
+  }
+  return [];
+}
+
+function ownerIdFromService(service) {
+  return trimOrNull(service?.ownerId ?? service?.owner?.id ?? null);
+}
+
+function ownerIdentity(owner) {
+  return [
+    trimOrNull(owner?.name),
+    trimOrNull(owner?.slug),
+    trimOrNull(owner?.email),
+    trimOrNull(owner?.id)
+  ]
+    .filter(Boolean)
+    .join(' / ');
+}
+
 function currentDeployStatus(payload) {
   return trimOrNull(payload?.status ?? null);
 }
@@ -136,7 +175,8 @@ const expected = readJson(path.join(root, EXPECTED_FILE));
 
 const renderApiKey = requireEnv('RENDER_API_KEY');
 const renderApiBase = trimOrNull(process.env.RENDER_API_BASE) ?? 'https://api.render.com/v1';
-const renderOwnerId = trimOrNull(process.env.RENDER_OWNER_ID);
+const renderOwnerIdHint = trimOrNull(process.env.RENDER_OWNER_ID);
+const renderOwnerNameHint = trimOrNull(process.env.RENDER_OWNER_NAME);
 const renderServiceIdHint = trimOrNull(process.env.RENDER_SERVICE_ID);
 const renderServiceName = trimOrNull(process.env.RENDER_SERVICE_NAME) ?? trimOrNull(scenario?.service?.name) ?? 'swapgraph-runtime-api';
 const renderServiceType = trimOrNull(process.env.RENDER_SERVICE_TYPE) ?? trimOrNull(scenario?.service?.type) ?? 'web_service';
@@ -182,6 +222,7 @@ const minIntentsAfterRestart = Number(expected?.expected?.smoke?.min_intents_aft
 const operations = [];
 const deployStatusTrail = [];
 const renderAuthHeaders = renderHeaders(renderApiKey);
+let resolvedRenderOwnerId = renderOwnerIdHint;
 
 async function renderRequest({ method, pathname, query, body, okStatuses }) {
   const url = buildUrl(renderApiBase, pathname, query);
@@ -203,7 +244,7 @@ async function getServiceById(serviceId) {
   return res.body;
 }
 
-async function listServicesByName() {
+async function listServices(query = {}) {
   const services = [];
   let cursor = null;
   do {
@@ -211,9 +252,7 @@ async function listServicesByName() {
       method: 'GET',
       pathname: '/services',
       query: cleanObject({
-        name: renderServiceName,
-        type: renderServiceType,
-        ownerId: renderOwnerId ? [renderOwnerId] : undefined,
+        ...query,
         limit: 100,
         cursor
       }),
@@ -226,14 +265,133 @@ async function listServicesByName() {
   return services;
 }
 
+async function listServicesByName() {
+  return listServices({
+    name: renderServiceName,
+    type: renderServiceType,
+    ownerId: resolvedRenderOwnerId ? [resolvedRenderOwnerId] : undefined
+  });
+}
+
+async function listOwners() {
+  const owners = [];
+  let cursor = null;
+  do {
+    const response = await renderRequest({
+      method: 'GET',
+      pathname: '/owners',
+      query: cleanObject({
+        limit: 100,
+        cursor
+      }),
+      okStatuses: [200]
+    });
+    const rows = toOwnerRows(response.body);
+    owners.push(...rows.map(row => row.owner));
+    cursor = rows.length > 0 ? rows[rows.length - 1].cursor : null;
+  } while (cursor);
+  return owners;
+}
+
+function uniqueOwnerIds(values) {
+  return [...new Set(values.map(v => trimOrNull(v)).filter(Boolean))];
+}
+
+function ownerMatchesHint(owner, hint) {
+  const normalizedHint = hint.trim().toLowerCase();
+  const candidates = [
+    owner?.name,
+    owner?.slug,
+    owner?.email,
+    owner?.id
+  ]
+    .map(v => trimOrNull(v))
+    .filter(Boolean)
+    .map(v => v.toLowerCase());
+  return candidates.includes(normalizedHint);
+}
+
+async function resolveOwnerIdForCreate() {
+  if (resolvedRenderOwnerId) {
+    operations.push({
+      op: 'render.owner.resolved',
+      source: 'env',
+      owner_id: resolvedRenderOwnerId
+    });
+    return resolvedRenderOwnerId;
+  }
+
+  let owners = [];
+  try {
+    owners = await listOwners();
+    operations.push({
+      op: 'render.owner.discovery.owners',
+      owners_count: owners.length
+    });
+  } catch (error) {
+    operations.push({
+      op: 'render.owner.discovery.owners_unavailable',
+      error: String(error?.message ?? error)
+    });
+  }
+
+  if (owners.length > 0) {
+    let candidates = owners;
+    if (renderOwnerNameHint) {
+      candidates = owners.filter(owner => ownerMatchesHint(owner, renderOwnerNameHint));
+      if (candidates.length === 0) {
+        throw new Error(`RENDER_OWNER_NAME did not match any Render owners: ${renderOwnerNameHint}`);
+      }
+    }
+
+    const ids = uniqueOwnerIds(candidates.map(owner => owner?.id));
+    if (ids.length === 1) {
+      resolvedRenderOwnerId = ids[0];
+      operations.push({
+        op: 'render.owner.resolved',
+        source: renderOwnerNameHint ? 'owners_api_by_name' : 'owners_api_single',
+        owner_id: resolvedRenderOwnerId,
+        owner: ownerIdentity(candidates[0])
+      });
+      return resolvedRenderOwnerId;
+    }
+
+    const names = candidates.map(owner => ownerIdentity(owner)).filter(Boolean).sort();
+    throw new Error(
+      `RENDER_OWNER_ID is required: multiple owners detected (${names.join(' | ')})`
+    );
+  }
+
+  const services = await listServices();
+  const ids = uniqueOwnerIds(services.map(service => ownerIdFromService(service)));
+  if (ids.length === 1) {
+    resolvedRenderOwnerId = ids[0];
+    operations.push({
+      op: 'render.owner.resolved',
+      source: 'services_fallback_single',
+      owner_id: resolvedRenderOwnerId,
+      services_scanned: services.length
+    });
+    return resolvedRenderOwnerId;
+  }
+
+  if (ids.length > 1) {
+    throw new Error(
+      `RENDER_OWNER_ID is required: multiple owner IDs found from services (${ids.join(', ')})`
+    );
+  }
+
+  throw new Error('RENDER_OWNER_ID is required to create service (owner auto-discovery failed)');
+}
+
 async function createService() {
-  if (!renderOwnerId) throw new Error('RENDER_OWNER_ID is required to create service');
+  const ownerId = await resolveOwnerIdForCreate();
   if (!renderRepo) throw new Error('RENDER_REPO_URL is required to create service');
 
   const payload = cleanObject({
     type: renderServiceType,
     name: renderServiceName,
-    ownerId: renderOwnerId,
+    ownerId,
     repo: renderRepo,
     branch: renderBranch,
     rootDir: renderRootDir,

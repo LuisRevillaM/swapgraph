@@ -483,6 +483,10 @@ Render deployment smoke hardening automation (M113, integration-gated):
   - deploy/restart orchestration,
   - live smoke checks (`/healthz`, `swap-intents`, `marketplace/matching/runs`).
 - Requires `INTEGRATION_ENABLED=1` and `RENDER_API_KEY`.
+- Create-mode owner resolution:
+  - auto-discovers owner via Render API when `RENDER_OWNER_ID` is not set,
+  - supports `RENDER_OWNER_NAME` hint,
+  - requires explicit `RENDER_OWNER_ID` when multiple owners are available and cannot be disambiguated.
 
 ## Webhooks (v1)
 Partners can receive:

@@ -67,11 +67,14 @@ Create-or-reuse mode (when `RENDER_SERVICE_ID` is omitted):
 ```bash
 INTEGRATION_ENABLED=1 \
 RENDER_API_KEY=... \
-RENDER_OWNER_ID=... \
 RENDER_SERVICE_NAME=swapgraph-runtime-api \
 RENDER_REPO_URL=https://github.com/<org>/<repo> \
 npm run verify:m113
 ```
+
+Optional owner hints for create mode:
+- `RENDER_OWNER_ID=<workspace_or_user_owner_id>` when API key has multiple owners.
+- `RENDER_OWNER_NAME=<workspace_name_or_slug>` to disambiguate owner discovery.
 
 Seed deterministic demo fixtures (M5 intents + proposals):
 ```bash
