@@ -238,6 +238,22 @@ function ensureCanaryState(store) {
 function summarizeCanarySamples({ samples, canaryConfig }) {
   const safeSamples = Array.isArray(samples) ? samples : [];
   const total = safeSamples.length;
+  if (total === 0) {
+    return {
+      samples_count: 0,
+      error_count: 0,
+      timeout_count: 0,
+      limited_count: 0,
+      non_negative_delta_count: 0,
+      rates_bps: {
+        error_rate_bps: 0,
+        timeout_rate_bps: 0,
+        limited_rate_bps: 0,
+        non_negative_delta_rate_bps: 10000
+      },
+      reason_code: null
+    };
+  }
   const errorCount = safeSamples.filter(sample => sample?.error === true).length;
   const timeoutCount = safeSamples.filter(sample => sample?.timeout === true).length;
   const limitedCount = safeSamples.filter(sample => sample?.limited === true).length;
@@ -291,7 +307,7 @@ function updateCanaryRollbackState({ store, canaryConfig, runId, recordedAt, sam
   });
 
   let triggered = false;
-  if (!state.rollback_active && summary.reason_code) {
+  if (!state.rollback_active && summary.samples_count > 0 && summary.reason_code) {
     state.rollback_active = true;
     state.rollback_reason_code = summary.reason_code;
     state.rollback_activated_at = recordedAt;
