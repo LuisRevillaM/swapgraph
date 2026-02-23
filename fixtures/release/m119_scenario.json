@@ -206,6 +206,26 @@
   },
   "steps": [
     {
+      "label": "rollout_excluded_zero_sample",
+      "env": {
+        "MATCHING_V2_CANARY_PERCENT_BPS": "0",
+        "MATCHING_V2_CANARY_ROLLBACK_MIN_NON_NEGATIVE_DELTA_RATE_BPS": "10000"
+      },
+      "recorded_at": "2026-02-24T23:59:00.000Z",
+      "expect": {
+        "primary_engine": "v1",
+        "canary_selected": false,
+        "skipped_reason": "rollout_excluded",
+        "routed_to_v2": false,
+        "fallback_to_v1": false,
+        "rollback_triggered": false,
+        "rollback_active_after": false,
+        "sample_summary_samples_count": 0,
+        "sample_summary_reason_code": null,
+        "run_candidate_cycles_source": "v1"
+      }
+    },
+    {
       "label": "canary_success",
       "recorded_at": "2026-02-25T00:00:00.000Z",
       "expect": {

@@ -131,6 +131,20 @@ function assertStepExpectations({ step, run, decision }) {
   if (expect.rollback_reason_code_after !== undefined) {
     assert.equal(decision?.rollback?.reason_code_after ?? null, expect.rollback_reason_code_after, `rollback_reason_code_after mismatch for step=${step.label}`);
   }
+  if (expect.sample_summary_samples_count !== undefined) {
+    assert.equal(
+      Number(decision?.sample_summary?.samples_count ?? -1),
+      Number(expect.sample_summary_samples_count),
+      `sample_summary_samples_count mismatch for step=${step.label}`
+    );
+  }
+  if (expect.sample_summary_reason_code !== undefined) {
+    assert.equal(
+      decision?.sample_summary?.reason_code ?? null,
+      expect.sample_summary_reason_code,
+      `sample_summary_reason_code mismatch for step=${step.label}`
+    );
+  }
   if (expect.run_candidate_cycles_source === 'v1') {
     assert.equal(
       Number(run?.stats?.candidate_cycles ?? -1),
@@ -219,6 +233,10 @@ for (const step of scenario.steps ?? []) {
         v1: Number(decision?.metrics?.v1_candidate_cycles ?? 0),
         v2: decision?.metrics?.v2_candidate_cycles === null ? null : Number(decision?.metrics?.v2_candidate_cycles),
         primary: Number(decision?.metrics?.primary_candidate_cycles ?? 0)
+      },
+      sample_summary: {
+        samples_count: Number(decision?.sample_summary?.samples_count ?? 0),
+        reason_code: decision?.sample_summary?.reason_code ?? null
       }
     })
   );
