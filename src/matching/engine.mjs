@@ -10,10 +10,11 @@ export function runMatching({
   minCycleLength = 2,
   maxCycleLength = 3,
   maxEnumeratedCycles = null,
-  timeoutMs = null
+  timeoutMs = null,
+  includeCycleDiagnostics = false
 }) {
   const { byId, edges, edgeMeta } = buildCompatibilityGraph({ intents, assetValuesUsd, edgeIntents, nowIso });
-  const cycleDiagnostics = {};
+  const cycleDiagnostics = includeCycleDiagnostics ? {} : null;
   const all = findBoundedSimpleCycles({
     edges,
     minCycleLength,
@@ -30,17 +31,18 @@ export function runMatching({
     edgeMeta
   });
 
-  return {
-    proposals: selected,
-    trace,
-    stats: {
-      intents_active: byId.size,
-      edges: [...edges.values()].reduce((a, v) => a + v.length, 0),
-      candidate_cycles: all.length,
-      candidate_proposals: candidates_count,
-      selected_proposals: selected.length,
-      cycle_enumeration_limited: Boolean(cycleDiagnostics.max_cycles_reached),
-      cycle_enumeration_timed_out: Boolean(cycleDiagnostics.timeout_reached)
-    }
+  const stats = {
+    intents_active: byId.size,
+    edges: [...edges.values()].reduce((a, v) => a + v.length, 0),
+    candidate_cycles: all.length,
+    candidate_proposals: candidates_count,
+    selected_proposals: selected.length
   };
+
+  if (includeCycleDiagnostics) {
+    stats.cycle_enumeration_limited = Boolean(cycleDiagnostics?.max_cycles_reached);
+    stats.cycle_enumeration_timed_out = Boolean(cycleDiagnostics?.timeout_reached);
+  }
+
+  return { proposals: selected, trace, stats };
 }

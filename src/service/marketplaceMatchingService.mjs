@@ -62,6 +62,7 @@ function readMatchingV2ShadowConfigFromEnv() {
     shadow_enabled: parseBooleanFlag(process.env.MATCHING_V2_SHADOW, false),
     min_cycle_length: minCycleLength,
     max_cycle_length: maxCycleLength,
+    include_cycle_diagnostics: true,
     max_cycles_explored: parseBoundedInt(process.env.MATCHING_V2_MAX_CYCLES_EXPLORED, {
       fallback: 20000,
       min: 1,
@@ -71,6 +72,11 @@ function readMatchingV2ShadowConfigFromEnv() {
       fallback: 100,
       min: 1,
       max: 5000
+    }),
+    max_shadow_diffs: parseBoundedInt(process.env.MATCHING_V2_MAX_SHADOW_DIFFS, {
+      fallback: 1000,
+      min: 1,
+      max: 100000
     })
   };
 }
@@ -117,7 +123,8 @@ function runMatcherWithConfig({ intents, assetValuesUsd, edgeIntents, nowIso, co
     minCycleLength: config.min_cycle_length,
     maxCycleLength: config.max_cycle_length,
     maxEnumeratedCycles: config.max_cycles_explored,
-    timeoutMs: config.timeout_ms
+    timeoutMs: config.timeout_ms,
+    includeCycleDiagnostics: config.include_cycle_diagnostics === true
   });
   const runtimeMs = Number((process.hrtime.bigint() - startedAtNs) / 1000000n);
 
@@ -125,6 +132,18 @@ function runMatcherWithConfig({ intents, assetValuesUsd, edgeIntents, nowIso, co
     matching,
     runtime_ms: runtimeMs
   };
+}
+
+function pruneShadowDiffHistory({ store, maxShadowDiffs }) {
+  if (!store?.state?.marketplace_matching_shadow_diffs || !Number.isFinite(maxShadowDiffs) || maxShadowDiffs < 1) {
+    return;
+  }
+  const runIds = Object.keys(store.state.marketplace_matching_shadow_diffs).sort();
+  const overflow = runIds.length - maxShadowDiffs;
+  if (overflow <= 0) return;
+  for (let idx = 0; idx < overflow; idx += 1) {
+    delete store.state.marketplace_matching_shadow_diffs[runIds[idx]];
+  }
 }
 
 function buildShadowDiffRecord({
@@ -433,6 +452,7 @@ export class MarketplaceMatchingService {
         const v1Config = {
           min_cycle_length: 2,
           max_cycle_length: 3,
+          include_cycle_diagnostics: false,
           max_cycles_explored: null,
           timeout_ms: null
         };
@@ -466,6 +486,10 @@ export class MarketplaceMatchingService {
             v1Result,
             v2Config,
             v2Result
+          });
+          pruneShadowDiffHistory({
+            store: this.store,
+            maxShadowDiffs: v2Config.max_shadow_diffs
           });
         }
 
