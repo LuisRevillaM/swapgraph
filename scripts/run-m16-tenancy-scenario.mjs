@@ -324,7 +324,9 @@ const operations = [];
   });
 
   let scopeAfterSelfHeal = null;
+  let replaySelfHealObserved = false;
   {
+    const preReplayState = loadStoreState(storeFile);
     const runtime = await startRuntime({ storeFile });
     try {
       const opId = 'settlement.start';
@@ -354,7 +356,14 @@ const operations = [];
     } finally {
       await runtime.close();
     }
-    scopeAfterSelfHeal = loadStoreState(storeFile).tenancy?.cycles?.[cycleId] ?? null;
+    const postReplayState = loadStoreState(storeFile);
+    const preTimeline = preReplayState.timelines?.[cycleId] ?? null;
+    const postTimeline = postReplayState.timelines?.[cycleId] ?? null;
+    const preEventsCount = Array.isArray(preReplayState.events) ? preReplayState.events.length : 0;
+    const postEventsCount = Array.isArray(postReplayState.events) ? postReplayState.events.length : 0;
+
+    replaySelfHealObserved = Boolean(preTimeline) && JSON.stringify(preTimeline) === JSON.stringify(postTimeline) && preEventsCount === postEventsCount;
+    scopeAfterSelfHeal = postReplayState.tenancy?.cycles?.[cycleId] ?? null;
   }
 
   if (scopeAfterSelfHeal?.partner_id !== actors.partner_a.id) {
@@ -366,7 +375,7 @@ const operations = [];
     cycle_id: cycleId,
     actor: actors.partner_a,
     ok: true,
-    replayed: true,
+    replayed: replaySelfHealObserved,
     scope_after_partner_id: scopeAfterSelfHeal?.partner_id ?? null
   });
 
