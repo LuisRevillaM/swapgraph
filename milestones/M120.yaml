@@ -1,0 +1,14 @@
+name: M120
+commands:
+  - cmd: "npm run verify:m120"
+artifacts:
+  - artifact: "docs/prd/M120.md"
+  - artifact: "src/service/marketplaceMatchingService.mjs"
+  - artifact: "scripts/run-m120-matching-v2-primary-scenario.mjs"
+  - artifact: "fixtures/release/m120_scenario.json"
+  - artifact: "fixtures/release/m120_expected.json"
+  - artifact: "milestones/M120.yaml"
+  - artifact: "verify/m120.sh"
+  - artifact: "artifacts/milestones/M120/latest/commands.log"
+  - artifact: "artifacts/milestones/M120/latest/matching_v2_primary_output.json"
+  - artifact: "artifacts/milestones/M120/latest/assertions.json"

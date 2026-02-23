@@ -127,6 +127,18 @@ function readMatchingV2CanaryConfigFromEnv() {
   };
 }
 
+function readMatchingV2PrimaryConfigFromEnv() {
+  return {
+    enabled: parseBooleanFlag(process.env.MATCHING_V2_PRIMARY_ENABLED, false),
+    force_primary_error: parseBooleanFlag(process.env.MATCHING_V2_PRIMARY_FORCE_ERROR, false),
+    force_safety_timeout: parseBooleanFlag(process.env.MATCHING_V2_PRIMARY_FORCE_SAFETY_TIMEOUT, false),
+    force_safety_limited: parseBooleanFlag(process.env.MATCHING_V2_PRIMARY_FORCE_SAFETY_LIMITED, false),
+    fallback_on_timeout: parseBooleanFlag(process.env.MATCHING_V2_FALLBACK_ON_TIMEOUT, true),
+    fallback_on_limited: parseBooleanFlag(process.env.MATCHING_V2_FALLBACK_ON_LIMITED, true),
+    rollback_reset: parseBooleanFlag(process.env.MATCHING_V2_ROLLBACK_RESET, false)
+  };
+}
+
 function toBps(numerator, denominator) {
   if (!Number.isFinite(denominator) || denominator <= 0) return 0;
   return Math.round((Number(numerator ?? 0) * 10000) / denominator);
@@ -233,6 +245,30 @@ function ensureCanaryState(store) {
   state.rollback_run_id = normalizeOptionalString(state.rollback_run_id);
   state.recent_samples = Array.isArray(state.recent_samples) ? state.recent_samples : [];
   return state;
+}
+
+function clearCanaryRollbackState(store) {
+  const state = ensureCanaryState(store);
+  state.rollback_active = false;
+  state.rollback_reason_code = null;
+  state.rollback_activated_at = null;
+  state.rollback_run_id = null;
+  state.recent_samples = [];
+  return state;
+}
+
+function applyForcedSafetyTriggers({ safety, primaryConfig }) {
+  return {
+    timeout_reached: Boolean(safety?.timeout_reached) || primaryConfig.force_safety_timeout === true,
+    max_cycles_reached: Boolean(safety?.max_cycles_reached) || primaryConfig.force_safety_limited === true
+  };
+}
+
+function applySafetyToDiffRecord({ diffRecord, safety }) {
+  if (!diffRecord?.v2_safety_triggers) return diffRecord;
+  diffRecord.v2_safety_triggers.timeout_reached = Boolean(safety?.timeout_reached);
+  diffRecord.v2_safety_triggers.max_cycles_reached = Boolean(safety?.max_cycles_reached);
+  return diffRecord;
 }
 
 function summarizeCanarySamples({ samples, canaryConfig }) {
@@ -672,6 +708,7 @@ export class MarketplaceMatchingService {
         };
         const v2Config = readMatchingV2ShadowConfigFromEnv();
         const canaryConfig = readMatchingV2CanaryConfigFromEnv();
+        const primaryConfig = readMatchingV2PrimaryConfigFromEnv();
 
         const v1Result = runMatcherWithConfig({
           intents: activeIntents,
@@ -683,6 +720,11 @@ export class MarketplaceMatchingService {
         const runId = nextRunId(this.store);
         let v2Result = null;
         let canaryError = null;
+        let v2FallbackReasonCode = null;
+        let v2SafetyTriggers = {
+          timeout_reached: false,
+          max_cycles_reached: false
+        };
         let primaryResult = v1Result;
         let primaryEngine = 'v1';
 
@@ -690,6 +732,7 @@ export class MarketplaceMatchingService {
         let inCanaryBucket = false;
         let canarySkippedReason = 'canary_disabled';
         let canarySelected = false;
+        let rollbackResetApplied = false;
         let canaryRollbackBefore = { active: false, reason_code: null };
         let canaryRollbackAfter = { active: false, reason_code: null };
         let canaryRollbackTriggered = false;
@@ -697,9 +740,16 @@ export class MarketplaceMatchingService {
           samples: [],
           canaryConfig
         });
+        const decisionTrackingEnabled = primaryConfig.enabled || canaryConfig.enabled;
 
-        if (canaryConfig.enabled) {
-          const canaryState = ensureCanaryState(this.store);
+        if (decisionTrackingEnabled) {
+          let canaryState = ensureCanaryState(this.store);
+          if (primaryConfig.enabled && primaryConfig.rollback_reset) {
+            clearCanaryRollbackState(this.store);
+            rollbackResetApplied = true;
+            canaryState = ensureCanaryState(this.store);
+          }
+
           canaryRollbackBefore = {
             active: canaryState.rollback_active === true,
             reason_code: canaryState.rollback_reason_code ?? null
@@ -710,27 +760,40 @@ export class MarketplaceMatchingService {
             canaryConfig
           });
 
-          canaryBucketValue = canaryBucketBps({
-            canaryConfig,
-            actor,
-            idempotencyKey,
-            requestedAt
-          });
-          inCanaryBucket = canaryConfig.force_bucket_v2 || canaryBucketValue < canaryConfig.rollout_bps;
-
-          if (canaryRollbackBefore.active) {
-            canarySkippedReason = 'rollback_active';
-          } else if (!inCanaryBucket) {
-            canarySkippedReason = 'rollout_excluded';
+          if (primaryConfig.enabled) {
+            inCanaryBucket = true;
+            if (canaryRollbackBefore.active) {
+              canarySkippedReason = 'rollback_active';
+            } else {
+              canarySkippedReason = null;
+              canarySelected = true;
+            }
           } else {
-            canarySkippedReason = null;
-            canarySelected = true;
+            canaryBucketValue = canaryBucketBps({
+              canaryConfig,
+              actor,
+              idempotencyKey,
+              requestedAt
+            });
+            inCanaryBucket = canaryConfig.force_bucket_v2 || canaryBucketValue < canaryConfig.rollout_bps;
+
+            if (canaryRollbackBefore.active) {
+              canarySkippedReason = 'rollback_active';
+            } else if (!inCanaryBucket) {
+              canarySkippedReason = 'rollout_excluded';
+            } else {
+              canarySkippedReason = null;
+              canarySelected = true;
+            }
           }
         }
 
         if (canarySelected) {
           try {
-            if (canaryConfig.force_canary_error) {
+            if (primaryConfig.enabled && primaryConfig.force_primary_error) {
+              throw new Error('forced matching v2 primary error');
+            }
+            if (!primaryConfig.enabled && canaryConfig.force_canary_error) {
               throw new Error('forced matching v2 canary error');
             }
 
@@ -741,10 +804,33 @@ export class MarketplaceMatchingService {
               nowIso: requestedAt,
               config: v2Config
             });
-            primaryResult = v2Result;
-            primaryEngine = 'v2';
+
+            v2SafetyTriggers = applyForcedSafetyTriggers({
+              safety: {
+                timeout_reached: Boolean(v2Result?.matching?.stats?.cycle_enumeration_timed_out),
+                max_cycles_reached: Boolean(v2Result?.matching?.stats?.cycle_enumeration_limited)
+              },
+              primaryConfig
+            });
+
+            if (primaryConfig.enabled) {
+              const timeoutFallback = v2SafetyTriggers.timeout_reached && primaryConfig.fallback_on_timeout;
+              const limitedFallback = v2SafetyTriggers.max_cycles_reached && primaryConfig.fallback_on_limited;
+              if (timeoutFallback || limitedFallback) {
+                primaryResult = v1Result;
+                primaryEngine = 'v1';
+                v2FallbackReasonCode = timeoutFallback ? 'v2_timeout_safety' : 'v2_limited_safety';
+              } else {
+                primaryResult = v2Result;
+                primaryEngine = 'v2';
+              }
+            } else {
+              primaryResult = v2Result;
+              primaryEngine = 'v2';
+            }
           } catch (error) {
             canaryError = error;
+            v2FallbackReasonCode = primaryConfig.enabled ? 'v2_error' : 'canary_error';
           }
         }
 
@@ -765,6 +851,14 @@ export class MarketplaceMatchingService {
               });
             }
 
+            v2SafetyTriggers = applyForcedSafetyTriggers({
+              safety: {
+                timeout_reached: Boolean(v2Result?.matching?.stats?.cycle_enumeration_timed_out),
+                max_cycles_reached: Boolean(v2Result?.matching?.stats?.cycle_enumeration_limited)
+              },
+              primaryConfig
+            });
+
             shadowRecord = buildShadowDiffRecord({
               runId,
               recordedAt: requestedAt,
@@ -773,6 +867,10 @@ export class MarketplaceMatchingService {
               v1Result,
               v2Config,
               v2Result
+            });
+            shadowRecord = applySafetyToDiffRecord({
+              diffRecord: shadowRecord,
+              safety: v2SafetyTriggers
             });
             canaryDiffRecord = shadowRecord;
             this.store.state.marketplace_matching_shadow_diffs[runId] = shadowRecord;
@@ -800,20 +898,24 @@ export class MarketplaceMatchingService {
             v2Config,
             v2Result
           });
+          canaryDiffRecord = applySafetyToDiffRecord({
+            diffRecord: canaryDiffRecord,
+            safety: v2SafetyTriggers
+          });
         }
 
         const matching = primaryResult.matching;
         const selected = (matching?.proposals ?? []).slice(0, maxProposals);
 
-        if (canaryConfig.enabled) {
+        if (decisionTrackingEnabled) {
           const canarySample = !canarySelected
             ? null
             : {
               run_id: runId,
               recorded_at: requestedAt,
               error: Boolean(canaryError),
-              timeout: canaryError ? false : Boolean(canaryDiffRecord?.v2_safety_triggers?.timeout_reached),
-              limited: canaryError ? false : Boolean(canaryDiffRecord?.v2_safety_triggers?.max_cycles_reached),
+              timeout: canaryError ? false : Boolean(v2SafetyTriggers.timeout_reached),
+              limited: canaryError ? false : Boolean(v2SafetyTriggers.max_cycles_reached),
               non_negative_delta: canaryError
                 ? false
                 : Number(canaryDiffRecord?.metrics?.delta_score_sum_scaled ?? 0) >= 0
@@ -834,11 +936,15 @@ export class MarketplaceMatchingService {
           this.store.state.marketplace_matching_canary_decisions[runId] = {
             run_id: runId,
             recorded_at: requestedAt,
+            mode: primaryConfig.enabled ? 'v2_primary' : 'v2_canary',
             primary_engine: primaryEngine,
             routed_to_v2: primaryEngine === 'v2',
             fallback_to_v1: canarySelected && primaryEngine !== 'v2',
+            fallback_reason_code: canarySelected && primaryEngine !== 'v2' ? v2FallbackReasonCode : null,
             canary_selected: canarySelected,
-            canary_enabled: true,
+            canary_enabled: canaryConfig.enabled,
+            primary_enabled: primaryConfig.enabled,
+            rollback_reset_applied: rollbackResetApplied,
             skipped_reason: canarySkippedReason,
             rollout_bps: canaryConfig.rollout_bps,
             bucket_bps: canaryBucketValue,
@@ -855,9 +961,9 @@ export class MarketplaceMatchingService {
               attempted: canarySelected,
               error: canaryError
                 ? {
-                  code: 'matching_v2_canary_failed',
+                  code: primaryConfig.enabled ? 'matching_v2_primary_failed' : 'matching_v2_canary_failed',
                   name: String(canaryError?.name ?? 'Error'),
-                  message: String(canaryError?.message ?? 'v2 canary execution failed')
+                  message: String(canaryError?.message ?? (primaryConfig.enabled ? 'v2 primary execution failed' : 'v2 canary execution failed'))
                 }
                 : null
             },

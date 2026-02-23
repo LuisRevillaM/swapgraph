@@ -3,7 +3,7 @@
 Last updated: 2026-02-23
 
 ## Autopilot
-- Status: **implementation closure** (M119 verifier-complete)
+- Status: **implementation closure** (M120 verifier-complete)
 - Canonical plan: `docs/source/LATEST.md` (v2.0)
 
 ## Milestones (progress)
@@ -130,10 +130,11 @@ Last updated: 2026-02-23
 - M117: ✅ Matching v2 shadow mode (bounded, deterministic, non-breaking) (fixtures-first) (v1 primary + v2 shadow metrics/diffs, bounded controls, failure isolation, and retention hardening)
 - M118: ✅ Matching v2 shadow burn-in observability gate (fixtures-first) (explicit KPI thresholds + deterministic pass/fail gate for shadow readiness and fallback behavior)
 - M119: ✅ Matching v2 canary cutover contract (fixtures-first) (deterministic canary routing, v2-primary small-slice fallback, automatic rollback activation, and per-run canary decision diagnostics)
+- M120: ✅ Matching v2 full-primary cutover contract (fixtures-first) (v2-primary runtime path with retained error/safety fallback to v1, rollback latch suppression, and explicit rollback reset/unlatch proof coverage)
 
 ## Next
-- Current mode: matching performance tranche M115–M119 is verifier-complete with v2 canary safeguards active and full cutover still gated.
-- Immediate target: M120 full cutover + retained fallback contract.
+- Current mode: matching performance tranche M115–M120 is verifier-complete with v2 full-primary contract and rollback/fallback controls proven fixtures-first.
+- Immediate target: Render smoke + intent/cycle drills against deployed service using M120 behavior.
 - Follow-on target: M121 TypeScript shadow scaffold + parity gates for non-breaking migration.
 - TypeScript track (parallel, non-breaking): define M121 TS scaffold + parity gates, then module-by-module migration starting with matching core.
 - Runtime shell available for request/response validation: `npm run start:api` (`src/server/runtimeApiServer.mjs`).
