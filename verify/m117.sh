@@ -11,6 +11,8 @@ mkdir -p "$OUT_DIR" "$LATEST_DIR"
   echo "# verify ${M} (matching v2 shadow metrics and determinism)"
   echo "utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo "$ OUT_DIR=$OUT_DIR node scripts/run-m117-matching-v2-shadow-scenario.mjs"
+  echo "$ npm run verify:m111"
+  echo "$ npm run verify:m114"
 } > "$OUT_DIR/commands.log"
 
 req=(
@@ -31,6 +33,8 @@ for f in "${req[@]}"; do
 done
 
 OUT_DIR="$OUT_DIR" node scripts/run-m117-matching-v2-shadow-scenario.mjs >> "$OUT_DIR/commands.log" 2>&1
+npm run verify:m111 >> "$OUT_DIR/commands.log" 2>&1
+npm run verify:m114 >> "$OUT_DIR/commands.log" 2>&1
 
 cp "$OUT_DIR/commands.log" "$LATEST_DIR/commands.log"
 cp "$OUT_DIR/matching_v2_shadow_output.json" "$LATEST_DIR/matching_v2_shadow_output.json"

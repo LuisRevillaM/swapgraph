@@ -134,16 +134,49 @@ function runMatcherWithConfig({ intents, assetValuesUsd, edgeIntents, nowIso, co
   };
 }
 
+function runSequenceFromRunId(runId) {
+  const match = /^mrun_(\d+)$/.exec(String(runId ?? ''));
+  if (!match) return Number.POSITIVE_INFINITY;
+  const parsed = Number.parseInt(match[1], 10);
+  return Number.isFinite(parsed) ? parsed : Number.POSITIVE_INFINITY;
+}
+
 function pruneShadowDiffHistory({ store, maxShadowDiffs }) {
   if (!store?.state?.marketplace_matching_shadow_diffs || !Number.isFinite(maxShadowDiffs) || maxShadowDiffs < 1) {
     return;
   }
-  const runIds = Object.keys(store.state.marketplace_matching_shadow_diffs).sort();
+  const runIds = Object.keys(store.state.marketplace_matching_shadow_diffs)
+    .sort((a, b) => {
+      const seqA = runSequenceFromRunId(a);
+      const seqB = runSequenceFromRunId(b);
+      if (seqA !== seqB) return seqA - seqB;
+      return String(a).localeCompare(String(b));
+    });
   const overflow = runIds.length - maxShadowDiffs;
   if (overflow <= 0) return;
   for (let idx = 0; idx < overflow; idx += 1) {
     delete store.state.marketplace_matching_shadow_diffs[runIds[idx]];
   }
+}
+
+function buildShadowErrorRecord({ runId, recordedAt, v2Config, error }) {
+  return {
+    run_id: runId,
+    recorded_at: recordedAt,
+    shadow_error: {
+      code: 'matching_v2_shadow_failed',
+      name: String(error?.name ?? 'Error'),
+      message: String(error?.message ?? 'shadow execution failed')
+    },
+    v2_cycle_bounds: {
+      min_cycle_length: v2Config.min_cycle_length,
+      max_cycle_length: v2Config.max_cycle_length
+    },
+    v2_safety_limits: {
+      max_cycles_explored: v2Config.max_cycles_explored,
+      timeout_ms: v2Config.timeout_ms
+    }
+  };
 }
 
 function buildShadowDiffRecord({
@@ -470,23 +503,33 @@ export class MarketplaceMatchingService {
         const runId = nextRunId(this.store);
 
         if (v2Config.shadow_enabled) {
-          const v2Result = runMatcherWithConfig({
-            intents: activeIntents,
-            assetValuesUsd,
-            edgeIntents,
-            nowIso: requestedAt,
-            config: v2Config
-          });
+          try {
+            const v2Result = runMatcherWithConfig({
+              intents: activeIntents,
+              assetValuesUsd,
+              edgeIntents,
+              nowIso: requestedAt,
+              config: v2Config
+            });
 
-          this.store.state.marketplace_matching_shadow_diffs[runId] = buildShadowDiffRecord({
-            runId,
-            recordedAt: requestedAt,
-            maxProposals,
-            v1Config,
-            v1Result,
-            v2Config,
-            v2Result
-          });
+            this.store.state.marketplace_matching_shadow_diffs[runId] = buildShadowDiffRecord({
+              runId,
+              recordedAt: requestedAt,
+              maxProposals,
+              v1Config,
+              v1Result,
+              v2Config,
+              v2Result
+            });
+          } catch (error) {
+            this.store.state.marketplace_matching_shadow_diffs[runId] = buildShadowErrorRecord({
+              runId,
+              recordedAt: requestedAt,
+              v2Config,
+              error
+            });
+          }
+
           pruneShadowDiffHistory({
             store: this.store,
             maxShadowDiffs: v2Config.max_shadow_diffs
