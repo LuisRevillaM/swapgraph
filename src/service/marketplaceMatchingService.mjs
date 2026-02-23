@@ -2,6 +2,7 @@ import { authorizeApiOperation } from '../core/authz.mjs';
 import { idempotencyScopeKey, payloadHash } from '../core/idempotency.mjs';
 import { commitIdForProposalId } from '../commit/commitIds.mjs';
 import { runMatching } from '../matching/engine.mjs';
+import { createHash } from 'node:crypto';
 
 function correlationId(op) {
   return `corr_${String(op).replace(/[^a-zA-Z0-9]+/g, '_').toLowerCase()}`;
@@ -82,6 +83,66 @@ function readMatchingV2ShadowConfigFromEnv() {
   };
 }
 
+function readMatchingV2CanaryConfigFromEnv() {
+  return {
+    enabled: parseBooleanFlag(process.env.MATCHING_V2_CANARY_ENABLED, false),
+    rollout_bps: parseBoundedInt(process.env.MATCHING_V2_CANARY_PERCENT_BPS, {
+      fallback: 0,
+      min: 0,
+      max: 10000
+    }),
+    salt: normalizeOptionalString(process.env.MATCHING_V2_CANARY_SALT) ?? 'swapgraph_v2_canary',
+    force_bucket_v2: parseBooleanFlag(process.env.MATCHING_V2_CANARY_FORCE_BUCKET_V2, false),
+    force_canary_error: parseBooleanFlag(process.env.MATCHING_V2_CANARY_FORCE_ERROR, false),
+    max_canary_decisions: parseBoundedInt(process.env.MATCHING_V2_MAX_CANARY_DECISIONS, {
+      fallback: 1000,
+      min: 1,
+      max: 100000
+    }),
+    rollback_window_runs: parseBoundedInt(process.env.MATCHING_V2_CANARY_ROLLBACK_WINDOW_RUNS, {
+      fallback: 20,
+      min: 1,
+      max: 1000
+    }),
+    rollback_max_error_rate_bps: parseBoundedInt(process.env.MATCHING_V2_CANARY_ROLLBACK_MAX_ERROR_RATE_BPS, {
+      fallback: 0,
+      min: 0,
+      max: 10000
+    }),
+    rollback_max_timeout_rate_bps: parseBoundedInt(process.env.MATCHING_V2_CANARY_ROLLBACK_MAX_TIMEOUT_RATE_BPS, {
+      fallback: 0,
+      min: 0,
+      max: 10000
+    }),
+    rollback_max_limited_rate_bps: parseBoundedInt(process.env.MATCHING_V2_CANARY_ROLLBACK_MAX_LIMITED_RATE_BPS, {
+      fallback: 0,
+      min: 0,
+      max: 10000
+    }),
+    rollback_min_non_negative_delta_rate_bps: parseBoundedInt(process.env.MATCHING_V2_CANARY_ROLLBACK_MIN_NON_NEGATIVE_DELTA_RATE_BPS, {
+      fallback: 10000,
+      min: 0,
+      max: 10000
+    })
+  };
+}
+
+function toBps(numerator, denominator) {
+  if (!Number.isFinite(denominator) || denominator <= 0) return 0;
+  return Math.round((Number(numerator ?? 0) * 10000) / denominator);
+}
+
+function canaryBucketBps({ canaryConfig, actor, idempotencyKey, requestedAt }) {
+  const actorType = normalizeOptionalString(actor?.type) ?? 'unknown';
+  const actorId = normalizeOptionalString(actor?.id) ?? 'unknown';
+  const safeIdempotencyKey = normalizeOptionalString(idempotencyKey) ?? 'none';
+  const key = `${canaryConfig.salt}|${actorType}|${actorId}|${safeIdempotencyKey}|${requestedAt}`;
+  const digest = createHash('sha256').update(key, 'utf8').digest('hex').slice(0, 8);
+  const n = Number.parseInt(digest, 16);
+  if (!Number.isFinite(n)) return 0;
+  return n % 10000;
+}
+
 function rotateToSmallest(ids) {
   const min = [...ids].sort()[0];
   const idx = ids.indexOf(min);
@@ -142,21 +203,124 @@ function runSequenceFromRunId(runId) {
   return Number.isFinite(parsed) ? parsed : Number.POSITIVE_INFINITY;
 }
 
+function sortRunIdsBySequence(runIds) {
+  return [...runIds].sort((a, b) => {
+    const seqA = runSequenceFromRunId(a);
+    const seqB = runSequenceFromRunId(b);
+    if (seqA !== seqB) return seqA - seqB;
+    return String(a).localeCompare(String(b));
+  });
+}
+
 function pruneShadowDiffHistory({ store, maxShadowDiffs }) {
   if (!store?.state?.marketplace_matching_shadow_diffs || !Number.isFinite(maxShadowDiffs) || maxShadowDiffs < 1) {
     return;
   }
-  const runIds = Object.keys(store.state.marketplace_matching_shadow_diffs)
-    .sort((a, b) => {
-      const seqA = runSequenceFromRunId(a);
-      const seqB = runSequenceFromRunId(b);
-      if (seqA !== seqB) return seqA - seqB;
-      return String(a).localeCompare(String(b));
-    });
+  const runIds = sortRunIdsBySequence(Object.keys(store.state.marketplace_matching_shadow_diffs));
   const overflow = runIds.length - maxShadowDiffs;
   if (overflow <= 0) return;
   for (let idx = 0; idx < overflow; idx += 1) {
     delete store.state.marketplace_matching_shadow_diffs[runIds[idx]];
+  }
+}
+
+function ensureCanaryState(store) {
+  store.state.marketplace_matching_canary_state ||= {};
+  const state = store.state.marketplace_matching_canary_state;
+  state.rollback_active = state.rollback_active === true;
+  state.rollback_reason_code = normalizeOptionalString(state.rollback_reason_code);
+  state.rollback_activated_at = normalizeOptionalString(state.rollback_activated_at);
+  state.rollback_run_id = normalizeOptionalString(state.rollback_run_id);
+  state.recent_samples = Array.isArray(state.recent_samples) ? state.recent_samples : [];
+  return state;
+}
+
+function summarizeCanarySamples({ samples, canaryConfig }) {
+  const safeSamples = Array.isArray(samples) ? samples : [];
+  const total = safeSamples.length;
+  const errorCount = safeSamples.filter(sample => sample?.error === true).length;
+  const timeoutCount = safeSamples.filter(sample => sample?.timeout === true).length;
+  const limitedCount = safeSamples.filter(sample => sample?.limited === true).length;
+  const nonNegativeDeltaCount = safeSamples.filter(sample => sample?.non_negative_delta === true).length;
+
+  const ratesBps = {
+    error_rate_bps: toBps(errorCount, total),
+    timeout_rate_bps: toBps(timeoutCount, total),
+    limited_rate_bps: toBps(limitedCount, total),
+    non_negative_delta_rate_bps: toBps(nonNegativeDeltaCount, total)
+  };
+
+  let reasonCode = null;
+  if (ratesBps.error_rate_bps > canaryConfig.rollback_max_error_rate_bps) {
+    reasonCode = 'canary_error_rate_exceeded';
+  } else if (ratesBps.timeout_rate_bps > canaryConfig.rollback_max_timeout_rate_bps) {
+    reasonCode = 'canary_timeout_rate_exceeded';
+  } else if (ratesBps.limited_rate_bps > canaryConfig.rollback_max_limited_rate_bps) {
+    reasonCode = 'canary_limited_rate_exceeded';
+  } else if (ratesBps.non_negative_delta_rate_bps < canaryConfig.rollback_min_non_negative_delta_rate_bps) {
+    reasonCode = 'canary_negative_delta_rate_exceeded';
+  }
+
+  return {
+    samples_count: total,
+    error_count: errorCount,
+    timeout_count: timeoutCount,
+    limited_count: limitedCount,
+    non_negative_delta_count: nonNegativeDeltaCount,
+    rates_bps: ratesBps,
+    reason_code: reasonCode
+  };
+}
+
+function updateCanaryRollbackState({ store, canaryConfig, runId, recordedAt, sample }) {
+  const state = ensureCanaryState(store);
+  const before = {
+    active: state.rollback_active === true,
+    reason_code: state.rollback_reason_code ?? null
+  };
+
+  if (sample && before.active !== true) {
+    state.recent_samples.push(sample);
+    const overflow = state.recent_samples.length - canaryConfig.rollback_window_runs;
+    if (overflow > 0) state.recent_samples.splice(0, overflow);
+  }
+
+  const summary = summarizeCanarySamples({
+    samples: state.recent_samples,
+    canaryConfig
+  });
+
+  let triggered = false;
+  if (!state.rollback_active && summary.reason_code) {
+    state.rollback_active = true;
+    state.rollback_reason_code = summary.reason_code;
+    state.rollback_activated_at = recordedAt;
+    state.rollback_run_id = runId;
+    triggered = true;
+  }
+
+  const after = {
+    active: state.rollback_active === true,
+    reason_code: state.rollback_reason_code ?? null
+  };
+
+  return {
+    before,
+    after,
+    summary,
+    triggered
+  };
+}
+
+function pruneCanaryDecisionHistory({ store, maxCanaryDecisions }) {
+  if (!store?.state?.marketplace_matching_canary_decisions || !Number.isFinite(maxCanaryDecisions) || maxCanaryDecisions < 1) {
+    return;
+  }
+  const runIds = sortRunIdsBySequence(Object.keys(store.state.marketplace_matching_canary_decisions));
+  const overflow = runIds.length - maxCanaryDecisions;
+  if (overflow <= 0) return;
+  for (let idx = 0; idx < overflow; idx += 1) {
+    delete store.state.marketplace_matching_canary_decisions[runIds[idx]];
   }
 }
 
@@ -491,6 +655,7 @@ export class MarketplaceMatchingService {
           timeout_ms: null
         };
         const v2Config = readMatchingV2ShadowConfigFromEnv();
+        const canaryConfig = readMatchingV2CanaryConfigFromEnv();
 
         const v1Result = runMatcherWithConfig({
           intents: activeIntents,
@@ -499,24 +664,92 @@ export class MarketplaceMatchingService {
           nowIso: requestedAt,
           config: v1Config
         });
-        const matching = v1Result.matching;
-        const selected = (matching?.proposals ?? []).slice(0, maxProposals);
         const runId = nextRunId(this.store);
+        let v2Result = null;
+        let canaryError = null;
+        let primaryResult = v1Result;
+        let primaryEngine = 'v1';
 
-        if (v2Config.shadow_enabled) {
+        let canaryBucketValue = null;
+        let inCanaryBucket = false;
+        let canarySkippedReason = 'canary_disabled';
+        let canarySelected = false;
+        let canaryRollbackBefore = { active: false, reason_code: null };
+        let canaryRollbackAfter = { active: false, reason_code: null };
+        let canaryRollbackTriggered = false;
+        let canarySampleSummary = summarizeCanarySamples({
+          samples: [],
+          canaryConfig
+        });
+
+        if (canaryConfig.enabled) {
+          const canaryState = ensureCanaryState(this.store);
+          canaryRollbackBefore = {
+            active: canaryState.rollback_active === true,
+            reason_code: canaryState.rollback_reason_code ?? null
+          };
+          canaryRollbackAfter = clone(canaryRollbackBefore);
+          canarySampleSummary = summarizeCanarySamples({
+            samples: canaryState.recent_samples,
+            canaryConfig
+          });
+
+          canaryBucketValue = canaryBucketBps({
+            canaryConfig,
+            actor,
+            idempotencyKey,
+            requestedAt
+          });
+          inCanaryBucket = canaryConfig.force_bucket_v2 || canaryBucketValue < canaryConfig.rollout_bps;
+
+          if (canaryRollbackBefore.active) {
+            canarySkippedReason = 'rollback_active';
+          } else if (!inCanaryBucket) {
+            canarySkippedReason = 'rollout_excluded';
+          } else {
+            canarySkippedReason = null;
+            canarySelected = true;
+          }
+        }
+
+        if (canarySelected) {
           try {
-            if (v2Config.force_shadow_error) {
-              throw new Error('forced matching v2 shadow error');
+            if (canaryConfig.force_canary_error) {
+              throw new Error('forced matching v2 canary error');
             }
-            const v2Result = runMatcherWithConfig({
+
+            v2Result = runMatcherWithConfig({
               intents: activeIntents,
               assetValuesUsd,
               edgeIntents,
               nowIso: requestedAt,
               config: v2Config
             });
+            primaryResult = v2Result;
+            primaryEngine = 'v2';
+          } catch (error) {
+            canaryError = error;
+          }
+        }
 
-            this.store.state.marketplace_matching_shadow_diffs[runId] = buildShadowDiffRecord({
+        let canaryDiffRecord = null;
+        let shadowRecord = null;
+        if (v2Config.shadow_enabled) {
+          try {
+            if (!v2Result) {
+              if (v2Config.force_shadow_error) {
+                throw new Error('forced matching v2 shadow error');
+              }
+              v2Result = runMatcherWithConfig({
+                intents: activeIntents,
+                assetValuesUsd,
+                edgeIntents,
+                nowIso: requestedAt,
+                config: v2Config
+              });
+            }
+
+            shadowRecord = buildShadowDiffRecord({
               runId,
               recordedAt: requestedAt,
               maxProposals,
@@ -525,18 +758,107 @@ export class MarketplaceMatchingService {
               v2Config,
               v2Result
             });
+            canaryDiffRecord = shadowRecord;
+            this.store.state.marketplace_matching_shadow_diffs[runId] = shadowRecord;
           } catch (error) {
-            this.store.state.marketplace_matching_shadow_diffs[runId] = buildShadowErrorRecord({
+            shadowRecord = buildShadowErrorRecord({
               runId,
               recordedAt: requestedAt,
               v2Config,
               error
             });
+            this.store.state.marketplace_matching_shadow_diffs[runId] = shadowRecord;
           }
 
           pruneShadowDiffHistory({
             store: this.store,
             maxShadowDiffs: v2Config.max_shadow_diffs
+          });
+        } else if (v2Result) {
+          canaryDiffRecord = buildShadowDiffRecord({
+            runId,
+            recordedAt: requestedAt,
+            maxProposals,
+            v1Config,
+            v1Result,
+            v2Config,
+            v2Result
+          });
+        }
+
+        const matching = primaryResult.matching;
+        const selected = (matching?.proposals ?? []).slice(0, maxProposals);
+
+        if (canaryConfig.enabled) {
+          const canarySample = !canarySelected
+            ? null
+            : {
+              run_id: runId,
+              recorded_at: requestedAt,
+              error: Boolean(canaryError),
+              timeout: canaryError ? false : Boolean(canaryDiffRecord?.v2_safety_triggers?.timeout_reached),
+              limited: canaryError ? false : Boolean(canaryDiffRecord?.v2_safety_triggers?.max_cycles_reached),
+              non_negative_delta: canaryError
+                ? false
+                : Number(canaryDiffRecord?.metrics?.delta_score_sum_scaled ?? 0) >= 0
+            };
+          const rollbackUpdate = updateCanaryRollbackState({
+            store: this.store,
+            canaryConfig,
+            runId,
+            recordedAt: requestedAt,
+            sample: canarySample
+          });
+          canaryRollbackBefore = rollbackUpdate.before;
+          canaryRollbackAfter = rollbackUpdate.after;
+          canaryRollbackTriggered = rollbackUpdate.triggered;
+          canarySampleSummary = rollbackUpdate.summary;
+
+          this.store.state.marketplace_matching_canary_decisions ||= {};
+          this.store.state.marketplace_matching_canary_decisions[runId] = {
+            run_id: runId,
+            recorded_at: requestedAt,
+            primary_engine: primaryEngine,
+            routed_to_v2: primaryEngine === 'v2',
+            fallback_to_v1: canarySelected && primaryEngine !== 'v2',
+            canary_selected: canarySelected,
+            canary_enabled: true,
+            skipped_reason: canarySkippedReason,
+            rollout_bps: canaryConfig.rollout_bps,
+            bucket_bps: canaryBucketValue,
+            in_rollout_bucket: inCanaryBucket,
+            rollback: {
+              active_before: canaryRollbackBefore.active,
+              reason_code_before: canaryRollbackBefore.reason_code,
+              active_after: canaryRollbackAfter.active,
+              reason_code_after: canaryRollbackAfter.reason_code,
+              triggered: canaryRollbackTriggered,
+              trigger_reason_code: canaryRollbackTriggered ? canaryRollbackAfter.reason_code : null
+            },
+            v2: {
+              attempted: canarySelected,
+              error: canaryError
+                ? {
+                  code: 'matching_v2_canary_failed',
+                  name: String(canaryError?.name ?? 'Error'),
+                  message: String(canaryError?.message ?? 'v2 canary execution failed')
+                }
+                : null
+            },
+            metrics: {
+              v1_candidate_cycles: Number(canaryDiffRecord?.metrics?.v1_candidate_cycles ?? v1Result?.matching?.stats?.candidate_cycles ?? 0),
+              v2_candidate_cycles: canaryDiffRecord ? Number(canaryDiffRecord?.metrics?.v2_candidate_cycles ?? 0) : null,
+              primary_candidate_cycles: Number(matching?.stats?.candidate_cycles ?? 0),
+              delta_score_sum_scaled: canaryDiffRecord ? Number(canaryDiffRecord?.metrics?.delta_score_sum_scaled ?? 0) : null,
+              timeout_reached: canaryDiffRecord ? Boolean(canaryDiffRecord?.v2_safety_triggers?.timeout_reached) : null,
+              limited_reached: canaryDiffRecord ? Boolean(canaryDiffRecord?.v2_safety_triggers?.max_cycles_reached) : null
+            },
+            sample_summary: canarySampleSummary
+          };
+
+          pruneCanaryDecisionHistory({
+            store: this.store,
+            maxCanaryDecisions: canaryConfig.max_canary_decisions
           });
         }
 

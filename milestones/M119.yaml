@@ -1,0 +1,14 @@
+name: M119
+commands:
+  - cmd: "npm run verify:m119"
+artifacts:
+  - artifact: "docs/prd/M119.md"
+  - artifact: "src/service/marketplaceMatchingService.mjs"
+  - artifact: "scripts/run-m119-matching-v2-canary-scenario.mjs"
+  - artifact: "fixtures/release/m119_scenario.json"
+  - artifact: "fixtures/release/m119_expected.json"
+  - artifact: "milestones/M119.yaml"
+  - artifact: "verify/m119.sh"
+  - artifact: "artifacts/milestones/M119/latest/commands.log"
+  - artifact: "artifacts/milestones/M119/latest/matching_v2_canary_output.json"
+  - artifact: "artifacts/milestones/M119/latest/assertions.json"

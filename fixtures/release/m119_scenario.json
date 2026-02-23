@@ -1,0 +1,256 @@
+{
+  "actor": {
+    "type": "partner",
+    "id": "partner_marketplace"
+  },
+  "auth": {
+    "scopes": [
+      "settlement:write"
+    ]
+  },
+  "env": {
+    "MATCHING_V2_CANARY_ENABLED": "1",
+    "MATCHING_V2_CANARY_PERCENT_BPS": "10000",
+    "MATCHING_V2_CANARY_SALT": "m119",
+    "MATCHING_V2_CANARY_ROLLBACK_WINDOW_RUNS": "20",
+    "MATCHING_V2_CANARY_ROLLBACK_MAX_ERROR_RATE_BPS": "0",
+    "MATCHING_V2_CANARY_ROLLBACK_MAX_TIMEOUT_RATE_BPS": "0",
+    "MATCHING_V2_CANARY_ROLLBACK_MAX_LIMITED_RATE_BPS": "0",
+    "MATCHING_V2_CANARY_ROLLBACK_MIN_NON_NEGATIVE_DELTA_RATE_BPS": "0",
+    "MATCHING_V2_MAX_CANARY_DECISIONS": "1000",
+    "MATCHING_V2_MIN_CYCLE_LENGTH": "2",
+    "MATCHING_V2_LMAX": "5",
+    "MATCHING_V2_MAX_CYCLES_EXPLORED": "5000",
+    "MATCHING_V2_TIMEOUT_MS": "1000",
+    "MATCHING_V2_SHADOW": "0"
+  },
+  "request_template": {
+    "replace_existing": true,
+    "max_proposals": 5,
+    "asset_values_usd": {
+      "asset_a": 100,
+      "asset_b": 101,
+      "asset_c": 99,
+      "asset_d": 100
+    }
+  },
+  "seed_state": {
+    "intents": {
+      "intent_a": {
+        "id": "intent_a",
+        "actor": {
+          "type": "user",
+          "id": "u_a"
+        },
+        "offer": [
+          {
+            "platform": "steam",
+            "asset_id": "asset_a"
+          }
+        ],
+        "want_spec": {
+          "type": "set",
+          "any_of": [
+            {
+              "type": "specific_asset",
+              "platform": "steam",
+              "asset_key": "steam:asset_b"
+            }
+          ]
+        },
+        "value_band": {
+          "min_usd": 1,
+          "max_usd": 500
+        },
+        "trust_constraints": {
+          "max_cycle_length": 4,
+          "min_counterparty_reliability": 0
+        },
+        "time_constraints": {
+          "expires_at": "2027-03-01T00:00:00Z",
+          "urgency": "normal"
+        },
+        "settlement_preferences": {
+          "require_escrow": true
+        },
+        "status": "active"
+      },
+      "intent_b": {
+        "id": "intent_b",
+        "actor": {
+          "type": "user",
+          "id": "u_b"
+        },
+        "offer": [
+          {
+            "platform": "steam",
+            "asset_id": "asset_b"
+          }
+        ],
+        "want_spec": {
+          "type": "set",
+          "any_of": [
+            {
+              "type": "specific_asset",
+              "platform": "steam",
+              "asset_key": "steam:asset_c"
+            }
+          ]
+        },
+        "value_band": {
+          "min_usd": 1,
+          "max_usd": 500
+        },
+        "trust_constraints": {
+          "max_cycle_length": 4,
+          "min_counterparty_reliability": 0
+        },
+        "time_constraints": {
+          "expires_at": "2027-03-01T00:00:00Z",
+          "urgency": "normal"
+        },
+        "settlement_preferences": {
+          "require_escrow": true
+        },
+        "status": "active"
+      },
+      "intent_c": {
+        "id": "intent_c",
+        "actor": {
+          "type": "user",
+          "id": "u_c"
+        },
+        "offer": [
+          {
+            "platform": "steam",
+            "asset_id": "asset_c"
+          }
+        ],
+        "want_spec": {
+          "type": "set",
+          "any_of": [
+            {
+              "type": "specific_asset",
+              "platform": "steam",
+              "asset_key": "steam:asset_d"
+            }
+          ]
+        },
+        "value_band": {
+          "min_usd": 1,
+          "max_usd": 500
+        },
+        "trust_constraints": {
+          "max_cycle_length": 4,
+          "min_counterparty_reliability": 0
+        },
+        "time_constraints": {
+          "expires_at": "2027-03-01T00:00:00Z",
+          "urgency": "normal"
+        },
+        "settlement_preferences": {
+          "require_escrow": true
+        },
+        "status": "active"
+      },
+      "intent_d": {
+        "id": "intent_d",
+        "actor": {
+          "type": "user",
+          "id": "u_d"
+        },
+        "offer": [
+          {
+            "platform": "steam",
+            "asset_id": "asset_d"
+          }
+        ],
+        "want_spec": {
+          "type": "set",
+          "any_of": [
+            {
+              "type": "specific_asset",
+              "platform": "steam",
+              "asset_key": "steam:asset_a"
+            }
+          ]
+        },
+        "value_band": {
+          "min_usd": 1,
+          "max_usd": 500
+        },
+        "trust_constraints": {
+          "max_cycle_length": 4,
+          "min_counterparty_reliability": 0
+        },
+        "time_constraints": {
+          "expires_at": "2027-03-01T00:00:00Z",
+          "urgency": "normal"
+        },
+        "settlement_preferences": {
+          "require_escrow": true
+        },
+        "status": "active"
+      }
+    },
+    "proposals": {},
+    "tenancy": {
+      "proposals": {},
+      "cycles": {}
+    },
+    "marketplace_matching_proposal_runs": {},
+    "marketplace_matching_runs": {},
+    "marketplace_matching_run_counter": 0,
+    "marketplace_matching_shadow_diffs": {},
+    "marketplace_asset_values": {}
+  },
+  "steps": [
+    {
+      "label": "canary_success",
+      "recorded_at": "2026-02-25T00:00:00.000Z",
+      "expect": {
+        "primary_engine": "v2",
+        "canary_selected": true,
+        "routed_to_v2": true,
+        "fallback_to_v1": false,
+        "rollback_active_after": false,
+        "run_candidate_cycles_source": "v2"
+      }
+    },
+    {
+      "label": "canary_forced_error",
+      "env": {
+        "MATCHING_V2_CANARY_FORCE_ERROR": "1",
+        "MATCHING_V2_CANARY_ROLLBACK_WINDOW_RUNS": "1"
+      },
+      "recorded_at": "2026-02-25T00:01:00.000Z",
+      "expect": {
+        "primary_engine": "v1",
+        "canary_selected": true,
+        "routed_to_v2": false,
+        "fallback_to_v1": true,
+        "v2_error": true,
+        "rollback_triggered": true,
+        "rollback_reason_code_after": "canary_error_rate_exceeded",
+        "run_candidate_cycles_source": "v1"
+      }
+    },
+    {
+      "label": "rollback_suppresses_canary",
+      "env": {
+        "MATCHING_V2_CANARY_FORCE_ERROR": "0",
+        "MATCHING_V2_CANARY_ROLLBACK_WINDOW_RUNS": "1"
+      },
+      "recorded_at": "2026-02-25T00:02:00.000Z",
+      "expect": {
+        "primary_engine": "v1",
+        "canary_selected": false,
+        "skipped_reason": "rollback_active",
+        "routed_to_v2": false,
+        "fallback_to_v1": false,
+        "rollback_active_after": true,
+        "run_candidate_cycles_source": "v1"
+      }
+    }
+  ]
+}

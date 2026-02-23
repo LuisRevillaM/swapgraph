@@ -3,7 +3,7 @@
 Last updated: 2026-02-23
 
 ## Autopilot
-- Status: **implementation closure** (M118 verifier-complete)
+- Status: **implementation closure** (M119 verifier-complete)
 - Canonical plan: `docs/source/LATEST.md` (v2.0)
 
 ## Milestones (progress)
@@ -129,11 +129,12 @@ Last updated: 2026-02-23
 - M116: ✅ Deterministic disjoint-cycle optimizer (exact with bounded fallback) (fixtures-first) (replaces greedy-only selection with deterministic score-maximizing independent-set optimization)
 - M117: ✅ Matching v2 shadow mode (bounded, deterministic, non-breaking) (fixtures-first) (v1 primary + v2 shadow metrics/diffs, bounded controls, failure isolation, and retention hardening)
 - M118: ✅ Matching v2 shadow burn-in observability gate (fixtures-first) (explicit KPI thresholds + deterministic pass/fail gate for shadow readiness and fallback behavior)
+- M119: ✅ Matching v2 canary cutover contract (fixtures-first) (deterministic canary routing, v2-primary small-slice fallback, automatic rollback activation, and per-run canary decision diagnostics)
 
 ## Next
-- Current mode: matching performance tranche M115–M118 is verifier-complete with v2 still shadow-only.
-- Immediate target: M119 canary cutover contract (small-slice v2 primary + automatic rollback conditions).
-- Follow-on target: M120 full cutover + retained fallback contract.
+- Current mode: matching performance tranche M115–M119 is verifier-complete with v2 canary safeguards active and full cutover still gated.
+- Immediate target: M120 full cutover + retained fallback contract.
+- Follow-on target: M121 TypeScript shadow scaffold + parity gates for non-breaking migration.
 - TypeScript track (parallel, non-breaking): define M121 TS scaffold + parity gates, then module-by-module migration starting with matching core.
 - Runtime shell available for request/response validation: `npm run start:api` (`src/server/runtimeApiServer.mjs`).
 - CI baseline gate added: `.github/workflows/verify-baseline.yml` (includes `verify:m0`, baseline tranche, `verify:m98`, `verify:m99`, `verify:m100`, `verify:m101`, `verify:m102`, `verify:m103`, `verify:m104`, `verify:m105`, `verify:m106`, `verify:m107`, `verify:m108`, `verify:m109`, `verify:m110`, `verify:m111`, and `verify:m112`).
