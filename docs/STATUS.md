@@ -1,9 +1,9 @@
 # Project Status — swapgraph
 
-Last updated: 2026-02-22
+Last updated: 2026-02-23
 
 ## Autopilot
-- Status: **implementation closure** (M112 verifier-complete)
+- Status: **implementation closure** (M118 verifier-complete)
 - Canonical plan: `docs/source/LATEST.md` (v2.0)
 
 ## Milestones (progress)
@@ -125,13 +125,16 @@ Last updated: 2026-02-22
 - M112: ✅ Storage hardening and SQLite migration path (fixtures-first) (runtime backend selector + SQLite state-store activation, deterministic JSON<->SQLite migration tooling, and restart durability/backup-restore verifier coverage) (fixtures-first)
 - M113: ✅ Render deployment smoke hardening automation (integration-gated, live-proof complete) (scripted service/disk/env/deploy/restart orchestration plus live health/smoke validation under credential gate; verifier-closed on 2026-02-22)
 - M114: ✅ Explicit edge-intents + hybrid graph matching contracts (fixtures-first) (idempotent edge-intent upsert/list/get API surfaces with deterministic ownership/existence/query reason codes, plus matching integration for derived+expressed edge compatibility and block-edge suppression) (fixtures-first)
+- M115: ✅ Bounded exhaustive cycle enumeration (SCC + canonical DFS, deterministic) (fixtures-first) (extensible `min/max` cycle bounds with deterministic candidate-cycle coverage and proof artifacts)
+- M116: ✅ Deterministic disjoint-cycle optimizer (exact with bounded fallback) (fixtures-first) (replaces greedy-only selection with deterministic score-maximizing independent-set optimization)
+- M117: ✅ Matching v2 shadow mode (bounded, deterministic, non-breaking) (fixtures-first) (v1 primary + v2 shadow metrics/diffs, bounded controls, failure isolation, and retention hardening)
+- M118: ✅ Matching v2 shadow burn-in observability gate (fixtures-first) (explicit KPI thresholds + deterministic pass/fail gate for shadow readiness and fallback behavior)
 
 ## Next
-- PRD batch defined: `docs/prd/2026-02-21_master-next-batch_M98-M102.md`
-- Additive LP subsystem PRD batch defined: `docs/prd/2026-02-21_master-liquidity-provider-subsystem_M103-M110.md`
-- Storage hardening PRD implemented: `docs/prd/M112.md`
-- Current mode: M98–M114 implementation tranche complete (including integration-gated Render smoke hardening proof and hybrid edge-intent matching contracts).
-- Immediate target: define and activate the next milestone tranche beyond M114.
+- Current mode: matching performance tranche M115–M118 is verifier-complete with v2 still shadow-only.
+- Immediate target: M119 canary cutover contract (small-slice v2 primary + automatic rollback conditions).
+- Follow-on target: M120 full cutover + retained fallback contract.
+- TypeScript track (parallel, non-breaking): define M121 TS scaffold + parity gates, then module-by-module migration starting with matching core.
 - Runtime shell available for request/response validation: `npm run start:api` (`src/server/runtimeApiServer.mjs`).
 - CI baseline gate added: `.github/workflows/verify-baseline.yml` (includes `verify:m0`, baseline tranche, `verify:m98`, `verify:m99`, `verify:m100`, `verify:m101`, `verify:m102`, `verify:m103`, `verify:m104`, `verify:m105`, `verify:m106`, `verify:m107`, `verify:m108`, `verify:m109`, `verify:m110`, `verify:m111`, and `verify:m112`).
 
