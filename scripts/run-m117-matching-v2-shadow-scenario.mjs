@@ -50,11 +50,19 @@ function sortRunIdsNumerically(runIds) {
   });
 }
 
-function withEnv(overrides, fn) {
+function withIsolatedMatcherEnv(overrides, fn) {
+  const caseEnv = overrides ?? {};
+  const matcherKeys = new Set([
+    ...Object.keys(process.env).filter(key => key.startsWith('MATCHING_V2_')),
+    ...Object.keys(caseEnv).filter(key => key.startsWith('MATCHING_V2_'))
+  ]);
+  const otherKeys = Object.keys(caseEnv).filter(key => !key.startsWith('MATCHING_V2_'));
+  const managedKeys = new Set([...matcherKeys, ...otherKeys]);
   const previous = new Map();
-  for (const [key, value] of Object.entries(overrides ?? {})) {
+  for (const key of managedKeys) {
     previous.set(key, process.env[key]);
-    process.env[key] = String(value);
+    if (Object.prototype.hasOwnProperty.call(caseEnv, key)) process.env[key] = String(caseEnv[key]);
+    else delete process.env[key];
   }
   try {
     return fn();
@@ -286,7 +294,7 @@ function runRetentionRolloverCase({ label, scenario }) {
 const scenario = readJson(path.join(root, SCENARIO_FILE));
 const expected = readJson(path.join(root, EXPECTED_FILE));
 
-const { first, second } = withEnv(scenario.shadow_env ?? {}, () => ({
+const { first, second } = withIsolatedMatcherEnv(scenario.shadow_env ?? {}, () => ({
   first: runCase({ label: 'a', scenario }),
   second: runCase({ label: 'b', scenario })
 }));
@@ -303,8 +311,8 @@ assert.ok(
   'expected shadow v2 to discover additional bounded cycles in this fixture'
 );
 
-const errorCase = withEnv(scenario.shadow_error_env ?? {}, () => runShadowErrorCase({ label: 'error', scenario }));
-const retentionCase = withEnv(scenario.retention_env ?? {}, () => runRetentionRolloverCase({ label: 'rollover', scenario }));
+const errorCase = withIsolatedMatcherEnv(scenario.shadow_error_env ?? {}, () => runShadowErrorCase({ label: 'error', scenario }));
+const retentionCase = withIsolatedMatcherEnv(scenario.retention_env ?? {}, () => runRetentionRolloverCase({ label: 'rollover', scenario }));
 
 const out = canonicalize({
   deterministic_shadow_metrics: true,

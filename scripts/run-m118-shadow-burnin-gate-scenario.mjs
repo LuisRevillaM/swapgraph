@@ -47,11 +47,19 @@ function percentile95(values) {
   return nums[idx];
 }
 
-function withEnv(overrides, fn) {
+function withIsolatedMatcherEnv(overrides, fn) {
+  const caseEnv = overrides ?? {};
+  const matcherKeys = new Set([
+    ...Object.keys(process.env).filter(key => key.startsWith('MATCHING_V2_')),
+    ...Object.keys(caseEnv).filter(key => key.startsWith('MATCHING_V2_'))
+  ]);
+  const otherKeys = Object.keys(caseEnv).filter(key => !key.startsWith('MATCHING_V2_'));
+  const managedKeys = new Set([...matcherKeys, ...otherKeys]);
   const previous = new Map();
-  for (const [key, value] of Object.entries(overrides ?? {})) {
+  for (const key of managedKeys) {
     previous.set(key, process.env[key]);
-    process.env[key] = String(value);
+    if (Object.prototype.hasOwnProperty.call(caseEnv, key)) process.env[key] = String(caseEnv[key]);
+    else delete process.env[key];
   }
   try {
     return fn();
@@ -214,7 +222,7 @@ const expected = readJson(path.join(root, EXPECTED_FILE));
 
 const caseResults = [];
 for (const caseSpec of scenario.cases ?? []) {
-  const rec = withEnv(caseSpec.env ?? {}, () => evaluateCase({ scenario, caseSpec }));
+  const rec = withIsolatedMatcherEnv(caseSpec.env ?? {}, () => evaluateCase({ scenario, caseSpec }));
   caseResults.push(rec);
 }
 
