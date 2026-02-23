@@ -65,6 +65,7 @@
         "All wants satisfied within explicit constraints",
         "cycle_length=2",
         "value_spread=0.0196",
+        "explicit_preference_strength=0",
         "confidence_score=0.8804"
       ]
     },
@@ -159,6 +160,7 @@
         "All wants satisfied within explicit constraints",
         "cycle_length=3",
         "value_spread=0.0198",
+        "explicit_preference_strength=0",
         "confidence_score=0.8302"
       ]
     }

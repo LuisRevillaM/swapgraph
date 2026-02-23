@@ -1,0 +1,89 @@
+{
+  "milestone": "M121",
+  "parity_dependency_verifiers": [
+    "npm run verify:m5",
+    "npm run verify:m111",
+    "npm run verify:m114"
+  ],
+  "wrapper_modules": [
+    {
+      "shadow_module": "src-ts/matching/assetKeys.mts",
+      "source_module": "src/matching/assetKeys.mjs",
+      "expected_export_from": "../../src/matching/assetKeys.mjs"
+    },
+    {
+      "shadow_module": "src-ts/matching/cycles.mts",
+      "source_module": "src/matching/cycles.mjs",
+      "expected_export_from": "../../src/matching/cycles.mjs"
+    },
+    {
+      "shadow_module": "src-ts/matching/engine.mts",
+      "source_module": "src/matching/engine.mjs",
+      "expected_export_from": "../../src/matching/engine.mjs"
+    },
+    {
+      "shadow_module": "src-ts/matching/graph.mts",
+      "source_module": "src/matching/graph.mjs",
+      "expected_export_from": "../../src/matching/graph.mjs"
+    },
+    {
+      "shadow_module": "src-ts/matching/proposals.mts",
+      "source_module": "src/matching/proposals.mjs",
+      "expected_export_from": "../../src/matching/proposals.mjs"
+    },
+    {
+      "shadow_module": "src-ts/matching/scoring.mts",
+      "source_module": "src/matching/scoring.mjs",
+      "expected_export_from": "../../src/matching/scoring.mjs"
+    },
+    {
+      "shadow_module": "src-ts/matching/values.mts",
+      "source_module": "src/matching/values.mjs",
+      "expected_export_from": "../../src/matching/values.mjs"
+    },
+    {
+      "shadow_module": "src-ts/matching/wantSpec.mts",
+      "source_module": "src/matching/wantSpec.mjs",
+      "expected_export_from": "../../src/matching/wantSpec.mjs"
+    },
+    {
+      "shadow_module": "src-ts/service/marketplaceMatchingService.mts",
+      "source_module": "src/service/marketplaceMatchingService.mjs",
+      "expected_export_from": "../../src/service/marketplaceMatchingService.mjs"
+    },
+    {
+      "shadow_module": "src-ts/store/jsonStateStore.mts",
+      "source_module": "src/store/jsonStateStore.mjs",
+      "expected_export_from": "../../src/store/jsonStateStore.mjs"
+    },
+    {
+      "shadow_module": "src-ts/util/canonicalJson.mts",
+      "source_module": "src/util/canonicalJson.mjs",
+      "expected_export_from": "../../src/util/canonicalJson.mjs"
+    }
+  ],
+  "index_contracts": [
+    {
+      "index_module": "src-ts/matching/index.mts",
+      "expected_exports": [
+        "./assetKeys.mts",
+        "./cycles.mts",
+        "./engine.mts",
+        "./graph.mts",
+        "./proposals.mts",
+        "./scoring.mts",
+        "./values.mts",
+        "./wantSpec.mts"
+      ]
+    },
+    {
+      "index_module": "src-ts/index.mts",
+      "expected_exports": [
+        "./matching/index.mts",
+        "./service/marketplaceMatchingService.mts",
+        "./store/jsonStateStore.mts",
+        "./util/canonicalJson.mts"
+      ]
+    }
+  ]
+}

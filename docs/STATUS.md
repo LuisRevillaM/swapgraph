@@ -3,7 +3,7 @@
 Last updated: 2026-02-23
 
 ## Autopilot
-- Status: **implementation closure** (M120 verifier-complete)
+- Status: **implementation closure** (M121 verifier-complete; live Render smoke pending credentials)
 - Canonical plan: `docs/source/LATEST.md` (v2.0)
 
 ## Milestones (progress)
@@ -131,12 +131,13 @@ Last updated: 2026-02-23
 - M118: ✅ Matching v2 shadow burn-in observability gate (fixtures-first) (explicit KPI thresholds + deterministic pass/fail gate for shadow readiness and fallback behavior)
 - M119: ✅ Matching v2 canary cutover contract (fixtures-first) (deterministic canary routing, v2-primary small-slice fallback, automatic rollback activation, and per-run canary decision diagnostics)
 - M120: ✅ Matching v2 full-primary cutover contract (fixtures-first) (v2-primary runtime path with retained error/safety fallback to v1, rollback latch suppression, and explicit rollback reset/unlatch proof coverage)
+- M121: ✅ TypeScript shadow scaffold + parity gates (fixtures-first, non-behavioral) (`src-ts` wrappers + deterministic scaffold contract + composed parity checks via `verify:m5`, `verify:m111`, `verify:m114`)
 
 ## Next
-- Current mode: matching performance tranche M115–M120 is verifier-complete with v2 full-primary contract and rollback/fallback controls proven fixtures-first.
-- Immediate target: Render smoke + intent/cycle drills against deployed service using M120 behavior.
-- Follow-on target: M121 TypeScript shadow scaffold + parity gates for non-breaking migration.
-- TypeScript track (parallel, non-breaking): define M121 TS scaffold + parity gates, then module-by-module migration starting with matching core.
+- Current mode: matching performance tranche M115–M121 is verifier-complete with v2 full-primary runtime, rollback/fallback controls, and TS shadow scaffold parity gates proven fixtures-first.
+- Immediate target: Render smoke + intent/cycle drills against deployed service using M120 behavior (requires `RENDER_API_KEY` in environment).
+- Follow-on contract decision: M120.1 optional global rollback shadow suppression toggle (`MATCHING_V2_ROLLBACK_SUPPRESS_SHADOW`, default `0`) with canary-mode proof.
+- TypeScript track (parallel, non-breaking): replace `src-ts` wrappers module-by-module with real TS implementations behind parity gates, starting with matching core.
 - Runtime shell available for request/response validation: `npm run start:api` (`src/server/runtimeApiServer.mjs`).
 - CI baseline gate added: `.github/workflows/verify-baseline.yml` (includes `verify:m0`, baseline tranche, `verify:m98`, `verify:m99`, `verify:m100`, `verify:m101`, `verify:m102`, `verify:m103`, `verify:m104`, `verify:m105`, `verify:m106`, `verify:m107`, `verify:m108`, `verify:m109`, `verify:m110`, `verify:m111`, and `verify:m112`).
 
