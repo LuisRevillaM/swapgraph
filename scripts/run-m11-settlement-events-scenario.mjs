@@ -4,8 +4,7 @@ import assert from 'node:assert/strict';
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 
-import { CommitService } from '../src/commit/commitService.mjs';
-import { SettlementService } from '../src/settlement/settlementService.mjs';
+import { createRuntimeApiServer } from '../src/server/runtimeApiServer.mjs';
 import { JsonStateStore } from '../src/store/jsonStateStore.mjs';
 import { canonicalize } from '../src/util/canonicalJson.mjs';
 
@@ -15,10 +14,77 @@ if (!outDir) {
   console.error('Missing OUT_DIR env');
   process.exit(2);
 }
+if (process.env.AUTHZ_ENFORCE !== '1') {
+  console.error('AUTHZ_ENFORCE must be 1 for M11 runtime settlement scenario');
+  process.exit(2);
+}
 mkdirSync(outDir, { recursive: true });
 
 function readJson(p) {
   return JSON.parse(readFileSync(p, 'utf8'));
+}
+
+function clone(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function actorFromOperation(op) {
+  if (op?.actor && op.actor.type && op.actor.id) return op.actor;
+  throw new Error(`operation actor is required for op=${op?.op}`);
+}
+
+function methodForOperation(opId) {
+  if (opId === 'settlement.instructions' || opId === 'settlement.status' || opId === 'receipts.get') return 'GET';
+  return 'POST';
+}
+
+function pathForOperation({ opId, cycleId }) {
+  if (opId === 'cycleProposals.accept') return `/cycle-proposals/${encodeURIComponent(cycleId)}/accept`;
+  if (opId === 'settlement.start') return `/settlement/${encodeURIComponent(cycleId)}/start`;
+  if (opId === 'settlement.deposit_confirmed') return `/settlement/${encodeURIComponent(cycleId)}/deposit-confirmed`;
+  if (opId === 'settlement.begin_execution') return `/settlement/${encodeURIComponent(cycleId)}/begin-execution`;
+  if (opId === 'settlement.complete') return `/settlement/${encodeURIComponent(cycleId)}/complete`;
+  if (opId === 'settlement.expire_deposit_window') return `/settlement/${encodeURIComponent(cycleId)}/expire-deposit-window`;
+  if (opId === 'settlement.instructions') return `/settlement/${encodeURIComponent(cycleId)}/instructions`;
+  if (opId === 'settlement.status') return `/settlement/${encodeURIComponent(cycleId)}/status`;
+  if (opId === 'receipts.get') return `/receipts/${encodeURIComponent(cycleId)}`;
+  throw new Error(`unsupported op: ${opId}`);
+}
+
+function validateResponseSchema({ opId, responseBody, ok, endpointsByOp, validateBySchemaFile }) {
+  if (ok) {
+    const endpoint = endpointsByOp.get(opId);
+    if (!endpoint) throw new Error(`missing endpoint in API manifest for op=${opId}`);
+    if (!endpoint.response_schema) return;
+    const v = validateBySchemaFile(endpoint.response_schema, responseBody);
+    if (!v.ok) throw new Error(`response invalid for op=${opId}: ${JSON.stringify(v.errors)}`);
+    return;
+  }
+  const verr = validateBySchemaFile('ErrorResponse.schema.json', responseBody);
+  if (!verr.ok) throw new Error(`error response invalid for op=${opId}: ${JSON.stringify(verr.errors)}`);
+}
+
+function loadStoreState(filePath) {
+  const s = new JsonStateStore({ filePath });
+  s.load();
+  return s.state;
+}
+
+function inferReplay({ op, cycleId, actor, preState }) {
+  if (op.op === 'cycleProposals.accept') {
+    const key = `${actor.type}:${actor.id}|${op.op}|${op.idempotency_key}`;
+    return Object.prototype.hasOwnProperty.call(preState.idempotency ?? {}, key);
+  }
+  if (op.op === 'settlement.start') {
+    return !!preState.timelines?.[cycleId];
+  }
+  if (op.op === 'settlement.deposit_confirmed') {
+    const timeline = preState.timelines?.[cycleId];
+    const leg = (timeline?.legs ?? []).find(row => row?.from_actor?.type === actor.type && row?.from_actor?.id === actor.id);
+    if (!leg) return false;
+    return leg.status === 'deposited' && leg.deposit_ref === op.deposit_ref;
+  }
+  return false;
 }
 
 // --- Load schemas ---
@@ -35,6 +101,18 @@ function validateBySchemaFile(schemaFile, payload) {
   const validate = ajv.getSchema(schema.$id) ?? ajv.compile(schema);
   const ok = validate(payload);
   return { ok, errors: validate.errors ?? [] };
+}
+
+// API manifest
+const apiManifest = readJson(path.join(root, 'docs/spec/api/manifest.v1.json'));
+const endpointsByOp = new Map((apiManifest.endpoints ?? []).map(endpoint => [endpoint.operation_id, endpoint]));
+
+function scopesForOperation(op) {
+  if (Array.isArray(op?.scopes)) return op.scopes;
+  const endpoint = endpointsByOp.get(op?.op);
+  if (!endpoint) throw new Error(`missing endpoint in API manifest for op=${op?.op}`);
+  const required = endpoint?.auth?.required_scopes;
+  return Array.isArray(required) ? required : [];
 }
 
 // --- Events manifest ---
@@ -58,95 +136,153 @@ function validateEvent(evt) {
   };
 }
 
-// --- Seed intents from fixture ---
+// --- Seed intents and proposals ---
 const matchingInput = readJson(path.join(root, 'fixtures/matching/m5_input.json'));
+const matchingOut = readJson(path.join(root, 'fixtures/matching/m5_expected.json'));
+const proposals = matchingOut.proposals;
+const p3 = proposals.find(p => p.participants.length === 3);
+const p2 = proposals.find(p => p.participants.length === 2);
+if (!p3 || !p2) throw new Error('expected both a 3-cycle and 2-cycle proposal in fixtures');
+const proposalByRef = { p3, p2 };
+
+const scenario = readJson(path.join(root, 'fixtures/settlement/m11_scenario.json'));
+const actorSystem = scenario?.actor_system;
+if (!actorSystem?.id || actorSystem.type !== 'partner') {
+  throw new Error('scenario.actor_system must be a partner actor');
+}
 
 const storeFile = path.join(outDir, 'store.json');
-const store = new JsonStateStore({ filePath: storeFile });
-store.load();
+const seedStore = new JsonStateStore({ filePath: storeFile });
+seedStore.load();
 
 for (const it of matchingInput.intents) {
   const intent = { ...it, status: it.status ?? 'active' };
   const v = validateBySchemaFile('SwapIntent.schema.json', intent);
   if (!v.ok) throw new Error(`seed intent invalid: ${JSON.stringify(v.errors)}`);
-  store.state.intents[intent.id] = intent;
+  seedStore.state.intents[intent.id] = intent;
 }
 
-// Proposals from matching fixture output
-const matchingOut = readJson(path.join(root, 'fixtures/matching/m5_expected.json'));
-const proposals = matchingOut.proposals;
+seedStore.state.tenancy ||= {};
+seedStore.state.tenancy.proposals ||= {};
+for (const proposal of [p3, p2]) {
+  const vp = validateBySchemaFile('CycleProposal.schema.json', proposal);
+  if (!vp.ok) throw new Error(`seed proposal invalid: ${JSON.stringify(vp.errors)}`);
+  seedStore.state.proposals[proposal.id] = clone(proposal);
+  seedStore.state.tenancy.proposals[proposal.id] = { partner_id: actorSystem.id };
+}
+seedStore.save();
 
-const p3 = proposals.find(p => p.participants.length === 3);
-const p2 = proposals.find(p => p.participants.length === 2);
-if (!p3 || !p2) throw new Error('expected both a 3-cycle and 2-cycle proposal in fixtures');
+const runtime = createRuntimeApiServer({
+  host: '127.0.0.1',
+  port: 0,
+  stateBackend: 'json',
+  storePath: storeFile
+});
+await runtime.listen();
 
-const proposalByRef = { p3, p2 };
-
-const scenario = readJson(path.join(root, 'fixtures/settlement/m11_scenario.json'));
-
-const commitSvc = new CommitService({ store });
-const settlementSvc = new SettlementService({ store });
-
+const baseUrl = `http://${runtime.host}:${runtime.port}`;
 const opsResults = [];
 
-for (const op of scenario.operations) {
-  if (op.op === 'cycleProposals.accept') {
+try {
+  for (const op of scenario.operations) {
     const proposal = proposalByRef[op.proposal_ref];
-    const req = { proposal_id: proposal.id };
-    const r = commitSvc.accept({ actor: op.actor, idempotencyKey: op.idempotency_key, proposal, requestBody: req, occurredAt: op.occurred_at });
-    const res = r.result;
-    opsResults.push({ op: op.op, proposal_id: proposal.id, ok: res.ok, replayed: r.replayed, error_code: res.ok ? null : res.body.error.code, commit_phase: res.ok ? res.body.commit.phase : null });
-    continue;
+    if (!proposal) throw new Error(`unknown proposal_ref: ${op.proposal_ref}`);
+    const cycleId = proposal.id;
+    const actor = actorFromOperation(op);
+    const preState = loadStoreState(storeFile);
+    const replayed = inferReplay({ op, cycleId, actor, preState });
+
+    let body;
+    if (op.op === 'cycleProposals.accept') {
+      body = { proposal_id: cycleId, occurred_at: op.occurred_at };
+    } else if (op.op === 'settlement.start') {
+      body = {
+        deposit_deadline_at: scenario.cycles?.[op.proposal_ref]?.deposit_deadline_at,
+        occurred_at: op.occurred_at
+      };
+    } else if (op.op === 'settlement.deposit_confirmed') {
+      body = { deposit_ref: op.deposit_ref, occurred_at: op.occurred_at };
+    } else if (op.op === 'settlement.begin_execution') {
+      body = { occurred_at: op.occurred_at };
+    } else if (op.op === 'settlement.complete') {
+      body = { occurred_at: op.occurred_at };
+    } else if (op.op === 'settlement.expire_deposit_window') {
+      body = { now_iso: op.now_iso };
+    }
+
+    const method = methodForOperation(op.op);
+    const url = `${baseUrl}${pathForOperation({ opId: op.op, cycleId })}`;
+    const scopes = scopesForOperation(op);
+    const headers = {
+      accept: 'application/json',
+      'x-actor-type': actor.type,
+      'x-actor-id': actor.id
+    };
+    if (scopes.length > 0) headers['x-auth-scopes'] = scopes.join(' ');
+    if (op.idempotency_key) headers['idempotency-key'] = op.idempotency_key;
+    if (body !== undefined) headers['content-type'] = 'application/json';
+
+    const response = await fetch(url, {
+      method,
+      headers,
+      body: body === undefined ? undefined : JSON.stringify(body)
+    });
+    const raw = await response.text();
+    const responseBody = raw ? JSON.parse(raw) : {};
+    const ok = response.status >= 200 && response.status < 300;
+
+    validateResponseSchema({
+      opId: op.op,
+      responseBody,
+      ok,
+      endpointsByOp,
+      validateBySchemaFile
+    });
+
+    if (!ok) throw new Error(`operation failed: op=${op.op} status=${response.status} body=${JSON.stringify(responseBody)}`);
+
+    if (op.op === 'cycleProposals.accept') {
+      opsResults.push({
+        op: op.op,
+        proposal_id: cycleId,
+        ok: true,
+        replayed,
+        error_code: null,
+        commit_phase: responseBody.commit?.phase ?? null
+      });
+      continue;
+    }
+    if (op.op === 'settlement.start' || op.op === 'settlement.deposit_confirmed') {
+      opsResults.push({
+        op: op.op,
+        cycle_id: cycleId,
+        ok: true,
+        replayed,
+        timeline_state: responseBody.timeline?.state ?? null
+      });
+      continue;
+    }
+    if (op.op === 'settlement.begin_execution') {
+      opsResults.push({ op: op.op, cycle_id: cycleId, ok: true, timeline_state: responseBody.timeline?.state ?? null });
+      continue;
+    }
+    if (op.op === 'settlement.complete' || op.op === 'settlement.expire_deposit_window') {
+      opsResults.push({
+        op: op.op,
+        cycle_id: cycleId,
+        ok: true,
+        timeline_state: responseBody.timeline?.state ?? null,
+        receipt_id: responseBody.receipt?.id ?? null,
+        final_state: responseBody.receipt?.final_state ?? null
+      });
+      continue;
+    }
+
+    throw new Error(`unsupported op: ${op.op}`);
   }
-
-  if (op.op === 'settlement.start') {
-    const proposal = proposalByRef[op.proposal_ref];
-    const depositDeadlineAt = scenario.cycles?.[op.proposal_ref]?.deposit_deadline_at;
-    const r = settlementSvc.start({ actor: op.actor, proposal, occurredAt: op.occurred_at, depositDeadlineAt });
-    if (!r.ok) throw new Error(`settlement.start failed: ${JSON.stringify(r)}`);
-    opsResults.push({ op: op.op, cycle_id: proposal.id, ok: true, replayed: r.replayed, timeline_state: r.timeline.state });
-    continue;
-  }
-
-  if (op.op === 'settlement.deposit_confirmed') {
-    const proposal = proposalByRef[op.proposal_ref];
-    const r = settlementSvc.confirmDeposit({ actor: op.actor, cycleId: proposal.id, depositRef: op.deposit_ref, occurredAt: op.occurred_at });
-    if (!r.ok) throw new Error(`confirmDeposit failed: ${JSON.stringify(r)}`);
-    opsResults.push({ op: op.op, cycle_id: proposal.id, ok: true, replayed: r.replayed ?? false, timeline_state: r.timeline.state });
-    continue;
-  }
-
-  if (op.op === 'settlement.begin_execution') {
-    const proposal = proposalByRef[op.proposal_ref];
-    const r = settlementSvc.beginExecution({ actor: op.actor, cycleId: proposal.id, occurredAt: op.occurred_at });
-    if (!r.ok) throw new Error(`beginExecution failed: ${JSON.stringify(r)}`);
-    opsResults.push({ op: op.op, cycle_id: proposal.id, ok: true, timeline_state: r.timeline.state });
-    continue;
-  }
-
-  if (op.op === 'settlement.complete') {
-    const proposal = proposalByRef[op.proposal_ref];
-    const r = settlementSvc.complete({ actor: op.actor, cycleId: proposal.id, occurredAt: op.occurred_at });
-    if (!r.ok) throw new Error(`complete failed: ${JSON.stringify(r)}`);
-    opsResults.push({ op: op.op, cycle_id: proposal.id, ok: true, timeline_state: r.timeline.state, receipt_id: r.receipt.id, final_state: r.receipt.final_state });
-    continue;
-  }
-
-  if (op.op === 'settlement.expire_deposit_window') {
-    const proposal = proposalByRef[op.proposal_ref];
-    const r = settlementSvc.expireDepositWindow({ actor: op.actor, cycleId: proposal.id, nowIso: op.now_iso });
-    if (!r.ok) throw new Error(`expireDepositWindow failed: ${JSON.stringify(r)}`);
-
-    const timeline = store.state.timelines[proposal.id];
-    const receipt = store.state.receipts[proposal.id];
-    opsResults.push({ op: op.op, cycle_id: proposal.id, ok: true, timeline_state: timeline.state, receipt_id: receipt.id, final_state: receipt.final_state });
-    continue;
-  }
-
-  throw new Error(`unsupported op: ${op.op}`);
+} finally {
+  await runtime.close();
 }
-
-store.save();
 
 const storeReload = new JsonStateStore({ filePath: storeFile });
 storeReload.load();
