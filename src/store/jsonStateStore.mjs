@@ -67,6 +67,7 @@ export class JsonStateStore {
       marketplace_matching_runs: {},
       marketplace_matching_run_counter: 0,
       marketplace_matching_proposal_runs: {},
+      marketplace_matching_shadow_diffs: {},
       edge_intents: {},
       edge_intent_counter: 0,
       commercial_policies: {},
@@ -183,6 +184,7 @@ export class JsonStateStore {
         marketplace_matching_runs: {},
         marketplace_matching_run_counter: 0,
         marketplace_matching_proposal_runs: {},
+        marketplace_matching_shadow_diffs: {},
         edge_intents: {},
         edge_intent_counter: 0,
         commercial_policies: {},
@@ -300,6 +302,7 @@ export class JsonStateStore {
     this.state.marketplace_matching_runs ||= {};
     this.state.marketplace_matching_run_counter ||= 0;
     this.state.marketplace_matching_proposal_runs ||= {};
+    this.state.marketplace_matching_shadow_diffs ||= {};
     this.state.edge_intents ||= {};
     this.state.edge_intent_counter ||= 0;
     this.state.commercial_policies ||= {};

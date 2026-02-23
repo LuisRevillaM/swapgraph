@@ -27,6 +27,169 @@ function parsePositiveInt(value, fallback, max = 200) {
   return Math.min(n, max);
 }
 
+function parseBooleanFlag(value, fallback = false) {
+  if (value === undefined || value === null || value === '') return fallback;
+  const normalized = String(value).trim().toLowerCase();
+  if (['1', 'true', 'yes', 'on'].includes(normalized)) return true;
+  if (['0', 'false', 'no', 'off'].includes(normalized)) return false;
+  return fallback;
+}
+
+function parseBoundedInt(value, { fallback, min, max }) {
+  const parsed = Number.parseInt(String(value ?? ''), 10);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(max, Math.max(min, parsed));
+}
+
+function scoreScaledToDecimal(scoreScaled) {
+  return Number((Number(scoreScaled ?? 0) / 10000).toFixed(4));
+}
+
+function readMatchingV2ShadowConfigFromEnv() {
+  const lmaxRaw = process.env.MATCHING_V2_LMAX;
+  const maxCycleLength = parseBoundedInt(lmaxRaw ?? process.env.MATCHING_V2_MAX_CYCLE_LENGTH, {
+    fallback: 5,
+    min: 2,
+    max: 8
+  });
+  const minCycleLength = parseBoundedInt(process.env.MATCHING_V2_MIN_CYCLE_LENGTH, {
+    fallback: 2,
+    min: 2,
+    max: maxCycleLength
+  });
+
+  return {
+    shadow_enabled: parseBooleanFlag(process.env.MATCHING_V2_SHADOW, false),
+    min_cycle_length: minCycleLength,
+    max_cycle_length: maxCycleLength,
+    max_cycles_explored: parseBoundedInt(process.env.MATCHING_V2_MAX_CYCLES_EXPLORED, {
+      fallback: 20000,
+      min: 1,
+      max: 200000
+    }),
+    timeout_ms: parseBoundedInt(process.env.MATCHING_V2_TIMEOUT_MS, {
+      fallback: 100,
+      min: 1,
+      max: 5000
+    })
+  };
+}
+
+function rotateToSmallest(ids) {
+  const min = [...ids].sort()[0];
+  const idx = ids.indexOf(min);
+  return [...ids.slice(idx), ...ids.slice(0, idx)];
+}
+
+function cycleKeyFromProposal(proposal) {
+  const ids = (proposal?.participants ?? []).map(participant => String(participant?.intent_id ?? '')).filter(Boolean);
+  if (ids.length === 0) return null;
+  return rotateToSmallest(ids).join('>');
+}
+
+function scoreScaledFromProposal(proposal) {
+  return Math.round(Number(proposal?.confidence_score ?? 0) * 10000);
+}
+
+function summarizeSelectedProposals(proposals) {
+  const cycleKeys = [];
+  let totalScoreScaled = 0;
+  for (const proposal of proposals ?? []) {
+    const cycleKey = cycleKeyFromProposal(proposal);
+    if (cycleKey) cycleKeys.push(cycleKey);
+    totalScoreScaled += scoreScaledFromProposal(proposal);
+  }
+  cycleKeys.sort();
+  return {
+    selected_count: (proposals ?? []).length,
+    selected_cycle_keys: cycleKeys,
+    selected_total_score_scaled: totalScoreScaled
+  };
+}
+
+function runMatcherWithConfig({ intents, assetValuesUsd, edgeIntents, nowIso, config }) {
+  const startedAtNs = process.hrtime.bigint();
+  const matching = runMatching({
+    intents,
+    assetValuesUsd,
+    edgeIntents,
+    nowIso,
+    minCycleLength: config.min_cycle_length,
+    maxCycleLength: config.max_cycle_length,
+    maxEnumeratedCycles: config.max_cycles_explored,
+    timeoutMs: config.timeout_ms
+  });
+  const runtimeMs = Number((process.hrtime.bigint() - startedAtNs) / 1000000n);
+
+  return {
+    matching,
+    runtime_ms: runtimeMs
+  };
+}
+
+function buildShadowDiffRecord({
+  runId,
+  recordedAt,
+  maxProposals,
+  v1Config,
+  v1Result,
+  v2Config,
+  v2Result
+}) {
+  const v1Selected = (v1Result?.matching?.proposals ?? []).slice(0, maxProposals);
+  const v2Selected = (v2Result?.matching?.proposals ?? []).slice(0, maxProposals);
+  const v1Summary = summarizeSelectedProposals(v1Selected);
+  const v2Summary = summarizeSelectedProposals(v2Selected);
+
+  const v1Set = new Set(v1Summary.selected_cycle_keys);
+  const v2Set = new Set(v2Summary.selected_cycle_keys);
+  const overlap = [...v1Set].filter(cycleKey => v2Set.has(cycleKey)).sort();
+  const onlyV1 = [...v1Set].filter(cycleKey => !v2Set.has(cycleKey)).sort();
+  const onlyV2 = [...v2Set].filter(cycleKey => !v1Set.has(cycleKey)).sort();
+  const deltaScoreScaled = v2Summary.selected_total_score_scaled - v1Summary.selected_total_score_scaled;
+
+  return {
+    run_id: runId,
+    recorded_at: recordedAt,
+    max_proposals: maxProposals,
+    v1_cycle_bounds: {
+      min_cycle_length: v1Config.min_cycle_length,
+      max_cycle_length: v1Config.max_cycle_length
+    },
+    v2_cycle_bounds: {
+      min_cycle_length: v2Config.min_cycle_length,
+      max_cycle_length: v2Config.max_cycle_length
+    },
+    v2_safety_limits: {
+      max_cycles_explored: v2Config.max_cycles_explored,
+      timeout_ms: v2Config.timeout_ms
+    },
+    metrics: {
+      v1_candidate_cycles: Number(v1Result?.matching?.stats?.candidate_cycles ?? 0),
+      v2_candidate_cycles: Number(v2Result?.matching?.stats?.candidate_cycles ?? 0),
+      v1_selected_proposals: Number(v1Summary.selected_count ?? 0),
+      v2_selected_proposals: Number(v2Summary.selected_count ?? 0),
+      v1_vs_v2_overlap: overlap.length,
+      delta_score_sum_scaled: deltaScoreScaled,
+      delta_score_sum: scoreScaledToDecimal(deltaScoreScaled),
+      v1_runtime_ms: Number(v1Result?.runtime_ms ?? 0),
+      v2_runtime_ms: Number(v2Result?.runtime_ms ?? 0)
+    },
+    v2_safety_triggers: {
+      max_cycles_reached: Boolean(v2Result?.matching?.stats?.cycle_enumeration_limited),
+      timeout_reached: Boolean(v2Result?.matching?.stats?.cycle_enumeration_timed_out)
+    },
+    selected_cycle_keys: {
+      overlap_count: overlap.length,
+      only_v1_count: onlyV1.length,
+      only_v2_count: onlyV2.length,
+      overlap,
+      only_v1: onlyV1,
+      only_v2: onlyV2
+    }
+  };
+}
+
 function errorResponse(correlationIdValue, code, message, details = {}) {
   return {
     correlation_id: correlationIdValue,
@@ -119,6 +282,7 @@ function ensureState(store) {
   store.state.marketplace_matching_runs ||= {};
   store.state.marketplace_matching_run_counter ||= 0;
   store.state.marketplace_matching_proposal_runs ||= {};
+  store.state.marketplace_matching_shadow_diffs ||= {};
   store.state.edge_intents ||= {};
   store.state.edge_intent_counter ||= 0;
 }
@@ -266,9 +430,44 @@ export class MarketplaceMatchingService {
         const replacedProposalsCount = replaceExisting ? this._replaceMarketplaceProposals() : 0;
 
         const edgeIntents = activeEdgeIntentsForMatching({ store: this.store, nowIso: requestedAt });
-        const matching = runMatching({ intents: activeIntents, assetValuesUsd, edgeIntents, nowIso: requestedAt });
+        const v1Config = {
+          min_cycle_length: 2,
+          max_cycle_length: 3,
+          max_cycles_explored: null,
+          timeout_ms: null
+        };
+        const v2Config = readMatchingV2ShadowConfigFromEnv();
+
+        const v1Result = runMatcherWithConfig({
+          intents: activeIntents,
+          assetValuesUsd,
+          edgeIntents,
+          nowIso: requestedAt,
+          config: v1Config
+        });
+        const matching = v1Result.matching;
         const selected = (matching?.proposals ?? []).slice(0, maxProposals);
         const runId = nextRunId(this.store);
+
+        if (v2Config.shadow_enabled) {
+          const v2Result = runMatcherWithConfig({
+            intents: activeIntents,
+            assetValuesUsd,
+            edgeIntents,
+            nowIso: requestedAt,
+            config: v2Config
+          });
+
+          this.store.state.marketplace_matching_shadow_diffs[runId] = buildShadowDiffRecord({
+            runId,
+            recordedAt: requestedAt,
+            maxProposals,
+            v1Config,
+            v1Result,
+            v2Config,
+            v2Result
+          });
+        }
 
         for (const proposal of selected) {
           this.store.state.proposals[proposal.id] = clone(proposal);

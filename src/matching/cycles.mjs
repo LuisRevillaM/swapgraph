@@ -21,6 +21,19 @@ function normalizeBounds({ minCycleLength = 2, maxCycleLength = 3 }) {
   return { minLen, maxLen };
 }
 
+function normalizeCycleLimit(maxEnumeratedCycles) {
+  const n = parseBound(maxEnumeratedCycles, Number.POSITIVE_INFINITY);
+  if (!Number.isFinite(n)) return Number.POSITIVE_INFINITY;
+  return Math.max(1, n);
+}
+
+function normalizeTimeout(timeoutMs) {
+  if (timeoutMs === undefined || timeoutMs === null || timeoutMs === '') return null;
+  const n = parseBound(timeoutMs, null);
+  if (!Number.isFinite(n) || n < 1) return null;
+  return n;
+}
+
 function normalizeGraph(edges) {
   const nodes = [...(edges?.keys?.() ?? [])].map(String).sort();
   const known = new Set(nodes);
@@ -92,19 +105,49 @@ function componentHasDirectedCycle({ component, adjacency }) {
  * Bounded exhaustive simple-cycle enumeration using SCC decomposition and a
  * canonical start-node DFS, deterministic over sorted node ids.
  */
-export function findBoundedSimpleCycles({ edges, minCycleLength = 2, maxCycleLength = 3 }) {
+export function findBoundedSimpleCycles({
+  edges,
+  minCycleLength = 2,
+  maxCycleLength = 3,
+  maxEnumeratedCycles = null,
+  timeoutMs = null,
+  diagnostics = null
+}) {
   const { minLen, maxLen } = normalizeBounds({ minCycleLength, maxCycleLength });
+  const maxCycles = normalizeCycleLimit(maxEnumeratedCycles);
+  const timeoutBudgetMs = normalizeTimeout(timeoutMs);
+  const deadlineMs = timeoutBudgetMs === null ? null : Date.now() + timeoutBudgetMs;
   const { nodes, adjacency } = normalizeGraph(edges);
   const order = new Map(nodes.map((node, idx) => [node, idx]));
   const seen = new Set();
   const cycles = [];
+  let maxCyclesReached = false;
+  let timeoutReached = false;
+
+  function shouldStop() {
+    if (cycles.length >= maxCycles) {
+      maxCyclesReached = true;
+      return true;
+    }
+    if (deadlineMs !== null && Date.now() >= deadlineMs) {
+      timeoutReached = true;
+      return true;
+    }
+    return false;
+  }
 
   function addCycle(path) {
+    if (shouldStop()) return false;
     const canonical = rotateToSmallest(path);
     const key = canonical.join('>');
-    if (seen.has(key)) return;
+    if (seen.has(key)) return true;
     seen.add(key);
     cycles.push(canonical);
+    if (cycles.length >= maxCycles) {
+      maxCyclesReached = true;
+      return false;
+    }
+    return !shouldStop();
   }
 
   const allNodes = new Set(nodes);
@@ -117,22 +160,27 @@ export function findBoundedSimpleCycles({ edges, minCycleLength = 2, maxCycleLen
     });
 
   for (const component of sccs) {
+    if (shouldStop()) break;
     const sccNodes = [...component].sort((a, b) => order.get(a) - order.get(b));
     const scc = new Set(sccNodes);
 
     for (const start of sccNodes) {
+      if (shouldStop()) break;
       const startOrder = order.get(start);
       const stack = [start];
       const onPath = new Set([start]);
 
       function dfs(v) {
+        if (shouldStop()) return;
         for (const w of adjacency.get(v) ?? []) {
+          if (shouldStop()) return;
           if (!scc.has(w)) continue;
           if (order.get(w) < startOrder) continue;
 
           if (w === start) {
             if (stack.length >= minLen && stack.length <= maxLen) {
-              addCycle([...stack]);
+              const shouldContinue = addCycle([...stack]);
+              if (!shouldContinue) return;
             }
             continue;
           }
@@ -145,6 +193,7 @@ export function findBoundedSimpleCycles({ edges, minCycleLength = 2, maxCycleLen
           dfs(w);
           onPath.delete(w);
           stack.pop();
+          if (shouldStop()) return;
         }
       }
 
@@ -156,6 +205,13 @@ export function findBoundedSimpleCycles({ edges, minCycleLength = 2, maxCycleLen
     if (a.length !== b.length) return a.length - b.length;
     return a.join('>').localeCompare(b.join('>'));
   });
+
+  if (diagnostics && typeof diagnostics === 'object') {
+    diagnostics.max_cycles_reached = Boolean(maxCyclesReached);
+    diagnostics.timeout_reached = Boolean(timeoutReached);
+    diagnostics.max_enumerated_cycles = Number.isFinite(maxCycles) ? maxCycles : null;
+    diagnostics.timeout_ms = timeoutBudgetMs;
+  }
 
   return cycles;
 }

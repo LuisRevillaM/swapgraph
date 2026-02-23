@@ -1,0 +1,16 @@
+name: M117
+commands:
+  - cmd: "npm run verify:m117"
+artifacts:
+  - artifact: "docs/prd/M117.md"
+  - artifact: "src/service/marketplaceMatchingService.mjs"
+  - artifact: "src/matching/engine.mjs"
+  - artifact: "src/matching/cycles.mjs"
+  - artifact: "scripts/run-m117-matching-v2-shadow-scenario.mjs"
+  - artifact: "fixtures/release/m117_scenario.json"
+  - artifact: "fixtures/release/m117_expected.json"
+  - artifact: "milestones/M117.yaml"
+  - artifact: "verify/m117.sh"
+  - artifact: "artifacts/milestones/M117/latest/commands.log"
+  - artifact: "artifacts/milestones/M117/latest/matching_v2_shadow_output.json"
+  - artifact: "artifacts/milestones/M117/latest/assertions.json"
