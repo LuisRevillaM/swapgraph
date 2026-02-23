@@ -238,6 +238,12 @@
         "routed_to_v2": true,
         "fallback_to_v1": false,
         "rollback_active_after": false,
+        "sample_summary_samples_count": 1,
+        "sample_summary_reason_code": null,
+        "sample_summary_error_rate_bps": 0,
+        "sample_summary_timeout_rate_bps": 0,
+        "sample_summary_limited_rate_bps": 0,
+        "sample_summary_non_negative_delta_rate_bps": 10000,
         "run_candidate_cycles_source": "v2"
       }
     },
@@ -256,6 +262,12 @@
         "v2_error": true,
         "rollback_triggered": true,
         "rollback_reason_code_after": "canary_error_rate_exceeded",
+        "sample_summary_samples_count": 1,
+        "sample_summary_reason_code": "canary_error_rate_exceeded",
+        "sample_summary_error_rate_bps": 10000,
+        "sample_summary_timeout_rate_bps": 0,
+        "sample_summary_limited_rate_bps": 0,
+        "sample_summary_non_negative_delta_rate_bps": 0,
         "run_candidate_cycles_source": "v1"
       }
     },
@@ -273,6 +285,12 @@
         "routed_to_v2": false,
         "fallback_to_v1": false,
         "rollback_active_after": true,
+        "sample_summary_samples_count": 1,
+        "sample_summary_reason_code": "canary_error_rate_exceeded",
+        "sample_summary_error_rate_bps": 10000,
+        "sample_summary_timeout_rate_bps": 0,
+        "sample_summary_limited_rate_bps": 0,
+        "sample_summary_non_negative_delta_rate_bps": 0,
         "run_candidate_cycles_source": "v1"
       }
     }
