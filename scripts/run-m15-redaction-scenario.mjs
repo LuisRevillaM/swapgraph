@@ -42,6 +42,12 @@ function validateAgainstSchemaFile(schemaFile, payload) {
   return { ok, errors: validate.errors ?? [] };
 }
 
+function authForOperation(op) {
+  const endpoint = endpointsByOp.get(op);
+  const requiredScopes = Array.isArray(endpoint?.auth?.required_scopes) ? endpoint.auth.required_scopes : [];
+  return { scopes: requiredScopes };
+}
+
 // ---- Seed store intents from matching fixture input ----
 const matchingInput = readJson(path.join(root, 'fixtures/matching/m5_input.json'));
 
@@ -76,13 +82,45 @@ const commitSvc = new CommitService({ store });
 const settlementSvc = new SettlementService({ store });
 const readSvc = new SettlementReadService({ store });
 
+function seedVaultHoldingsForCycle({ cycleRef, proposal, cycleConfig }) {
+  const vaultBindings = cycleConfig?.vault_bindings;
+  if (!Array.isArray(vaultBindings) || vaultBindings.length === 0) return;
+
+  const participantByIntentId = new Map((proposal.participants ?? []).map(participant => [participant.intent_id, participant]));
+  store.state.vault_holdings ||= {};
+
+  for (const binding of vaultBindings) {
+    const participant = participantByIntentId.get(binding.intent_id);
+    if (!participant) throw new Error(`vault binding intent missing from cycle ${cycleRef}: ${binding.intent_id}`);
+    const asset = Array.isArray(participant.give) ? participant.give[0] : null;
+    if (!asset) throw new Error(`vault binding intent has no give asset for cycle ${cycleRef}: ${binding.intent_id}`);
+    store.state.vault_holdings[binding.holding_id] = {
+      holding_id: binding.holding_id,
+      owner_actor: participant.actor,
+      vault_id: `vault_${participant.actor.id}`,
+      asset: JSON.parse(JSON.stringify(asset)),
+      status: 'reserved',
+      reservation_id: binding.reservation_id,
+      settlement_cycle_id: null,
+      updated_at: '2026-02-16T00:00:00Z'
+    };
+  }
+}
+
+for (const [cycleRef, cycleConfig] of Object.entries(scenario.cycles ?? {})) {
+  const proposal = proposalByRef[cycleRef];
+  if (!proposal) continue;
+  seedVaultHoldingsForCycle({ cycleRef, proposal, cycleConfig });
+}
+
 const operations = [];
 
 for (const op of scenario.operations) {
   if (op.op === 'cycleProposals.accept') {
     const proposal = proposalByRef[op.proposal_ref];
     const req = { proposal_id: proposal.id };
-    const r = commitSvc.accept({ actor: op.actor, idempotencyKey: op.idempotency_key, proposal, requestBody: req, occurredAt: op.occurred_at });
+    const auth = authForOperation(op.op);
+    const r = commitSvc.accept({ actor: op.actor, auth, idempotencyKey: op.idempotency_key, proposal, requestBody: req, occurredAt: op.occurred_at });
     const res = r.result;
     operations.push({
       op: op.op,
@@ -97,8 +135,10 @@ for (const op of scenario.operations) {
 
   if (op.op === 'settlement.start') {
     const proposal = proposalByRef[op.proposal_ref];
-    const depositDeadlineAt = scenario.cycles?.[op.proposal_ref]?.deposit_deadline_at;
-    const r = settlementSvc.start({ actor: op.actor, proposal, occurredAt: op.occurred_at, depositDeadlineAt });
+    const cycleConfig = scenario.cycles?.[op.proposal_ref] ?? {};
+    const depositDeadlineAt = cycleConfig.deposit_deadline_at;
+    const vaultBindings = Array.isArray(cycleConfig.vault_bindings) ? cycleConfig.vault_bindings : undefined;
+    const r = settlementSvc.start({ actor: op.actor, proposal, occurredAt: op.occurred_at, depositDeadlineAt, vaultBindings });
     if (!r.ok) throw new Error(`settlement.start failed: ${JSON.stringify(r)}`);
     operations.push({ op: op.op, cycle_id: proposal.id, ok: true, replayed: r.replayed, timeline_state: r.timeline.state });
     continue;
@@ -112,15 +152,40 @@ for (const op of scenario.operations) {
     continue;
   }
 
-  if (op.op === 'settlement.status' || op.op === 'settlement.instructions') {
+  if (op.op === 'settlement.begin_execution') {
+    const proposal = proposalByRef[op.proposal_ref];
+    const r = settlementSvc.beginExecution({ actor: op.actor, cycleId: proposal.id, occurredAt: op.occurred_at });
+    if (!r.ok) throw new Error(`beginExecution failed: ${JSON.stringify(r)}`);
+    operations.push({ op: op.op, cycle_id: proposal.id, ok: true, timeline_state: r.timeline.state });
+    continue;
+  }
+
+  if (op.op === 'settlement.complete') {
+    const proposal = proposalByRef[op.proposal_ref];
+    const r = settlementSvc.complete({ actor: op.actor, cycleId: proposal.id, occurredAt: op.occurred_at });
+    if (!r.ok) throw new Error(`complete failed: ${JSON.stringify(r)}`);
+    operations.push({
+      op: op.op,
+      cycle_id: proposal.id,
+      ok: true,
+      timeline_state: r.timeline.state,
+      receipt_id: r.receipt.id,
+      receipt_final_state: r.receipt.final_state
+    });
+    continue;
+  }
+
+  if (op.op === 'settlement.status' || op.op === 'settlement.instructions' || op.op === 'receipts.get') {
     const proposal = proposalByRef[op.proposal_ref];
     const cycleId = proposal.id;
     const actor = actorRefs[op.actor_ref];
     if (!actor) throw new Error(`unknown actor_ref: ${op.actor_ref}`);
+    const auth = authForOperation(op.op);
 
-    const r = op.op === 'settlement.status'
-      ? readSvc.status({ actor, cycleId })
-      : readSvc.instructions({ actor, cycleId });
+    let r;
+    if (op.op === 'settlement.status') r = readSvc.status({ actor, auth, cycleId });
+    if (op.op === 'settlement.instructions') r = readSvc.instructions({ actor, auth, cycleId });
+    if (op.op === 'receipts.get') r = readSvc.receipt({ actor, auth, cycleId });
 
     const endpoint = endpointsByOp.get(op.op);
     if (!endpoint) throw new Error(`missing endpoint in API manifest for op=${op.op}`);

@@ -25,6 +25,7 @@
       "cycle_id": "cycle_4f27eb196224",
       "ok": true,
       "op": "settlement.start",
+      "replayed": false,
       "timeline_state": "escrow.pending"
     },
     {
@@ -66,6 +67,82 @@
       "error_code": "FORBIDDEN",
       "ok": false,
       "op": "settlement.instructions"
+    },
+    {
+      "cycle_id": "cycle_4f27eb196224",
+      "ok": true,
+      "op": "settlement.deposit_confirmed",
+      "replayed": false,
+      "timeline_state": "escrow.pending"
+    },
+    {
+      "cycle_id": "cycle_4f27eb196224",
+      "ok": true,
+      "op": "settlement.deposit_confirmed",
+      "replayed": false,
+      "timeline_state": "escrow.pending"
+    },
+    {
+      "cycle_id": "cycle_4f27eb196224",
+      "ok": true,
+      "op": "settlement.deposit_confirmed",
+      "replayed": false,
+      "timeline_state": "escrow.ready"
+    },
+    {
+      "cycle_id": "cycle_4f27eb196224",
+      "ok": true,
+      "op": "settlement.begin_execution",
+      "timeline_state": "executing"
+    },
+    {
+      "cycle_id": "cycle_4f27eb196224",
+      "ok": true,
+      "op": "settlement.complete",
+      "receipt_final_state": "completed",
+      "receipt_id": "receipt_02cce1dcc083",
+      "timeline_state": "completed"
+    },
+    {
+      "actor": {
+        "id": "partner_a",
+        "type": "partner"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "receipts.get"
+    },
+    {
+      "actor": {
+        "id": "partner_b",
+        "type": "partner"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": "FORBIDDEN",
+      "ok": false,
+      "op": "receipts.get"
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "receipts.get"
+    },
+    {
+      "actor": {
+        "id": "partner_b",
+        "type": "partner"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "ok": true,
+      "op": "settlement.start.replay_scope_guard",
+      "replayed": true,
+      "scope_after_partner_id": null
     }
   ],
   "tenancy": {

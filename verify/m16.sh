@@ -10,7 +10,7 @@ mkdir -p "$OUT_DIR" "$LATEST_DIR"
 {
   echo "# verify ${M} (partner scoping / tenancy)"
   echo "utc=$(date -u +%Y-%m-%dT%H%M%S)"
-  echo "$ OUT_DIR=$OUT_DIR node scripts/run-m16-tenancy-scenario.mjs"
+  echo "$ AUTHZ_ENFORCE=1 OUT_DIR=$OUT_DIR node scripts/run-m16-tenancy-scenario.mjs"
 } > "$OUT_DIR/commands.log"
 
 req=(
@@ -27,7 +27,7 @@ for f in "${req[@]}"; do
   echo "found_file=$f" >> "$OUT_DIR/commands.log"
 done
 
-OUT_DIR="$OUT_DIR" node scripts/run-m16-tenancy-scenario.mjs >> "$OUT_DIR/commands.log" 2>&1
+AUTHZ_ENFORCE=1 OUT_DIR="$OUT_DIR" node scripts/run-m16-tenancy-scenario.mjs >> "$OUT_DIR/commands.log" 2>&1
 
 cp "$OUT_DIR/commands.log" "$LATEST_DIR/commands.log"
 cp "$OUT_DIR/tenancy_output.json" "$LATEST_DIR/tenancy_output.json"

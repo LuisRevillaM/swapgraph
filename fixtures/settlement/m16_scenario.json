@@ -18,6 +18,17 @@
     { "op": "settlement.status", "proposal_ref": "p3", "actor_ref": "partner_b" },
     { "op": "settlement.status", "proposal_ref": "p3", "actor_ref": "user_participant" },
 
-    { "op": "settlement.instructions", "proposal_ref": "p3", "actor_ref": "partner_b" }
+    { "op": "settlement.instructions", "proposal_ref": "p3", "actor_ref": "partner_b" },
+
+    { "op": "settlement.deposit_confirmed", "proposal_ref": "p3", "actor": {"type":"user","id":"u1"}, "deposit_ref": "dep_u1_p3_m16", "occurred_at": "2026-02-16T00:01:10Z" },
+    { "op": "settlement.deposit_confirmed", "proposal_ref": "p3", "actor": {"type":"user","id":"u2"}, "deposit_ref": "dep_u2_p3_m16", "occurred_at": "2026-02-16T00:01:11Z" },
+    { "op": "settlement.deposit_confirmed", "proposal_ref": "p3", "actor": {"type":"user","id":"u3"}, "deposit_ref": "dep_u3_p3_m16", "occurred_at": "2026-02-16T00:01:12Z" },
+
+    { "op": "settlement.begin_execution", "proposal_ref": "p3", "actor_ref": "partner_a", "occurred_at": "2026-02-16T00:01:20Z" },
+    { "op": "settlement.complete", "proposal_ref": "p3", "actor_ref": "partner_a", "occurred_at": "2026-02-16T00:01:30Z" },
+
+    { "op": "receipts.get", "proposal_ref": "p3", "actor_ref": "partner_a" },
+    { "op": "receipts.get", "proposal_ref": "p3", "actor_ref": "partner_b" },
+    { "op": "receipts.get", "proposal_ref": "p3", "actor_ref": "user_participant" }
   ]
 }

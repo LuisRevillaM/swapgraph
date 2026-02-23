@@ -433,13 +433,13 @@ export class SettlementService {
         }
       };
     }
-    this.store.state.tenancy.cycles[proposal.id] = { partner_id: actor.id };
 
     const existing = this.store.state.timelines[proposal.id];
     if (existing) {
       // idempotent: allow re-start if already started.
       return { ok: true, timeline: existing, replayed: true };
     }
+    this.store.state.tenancy.cycles[proposal.id] = { partner_id: actor.id };
 
     const timeline = {
       cycle_id: proposal.id,

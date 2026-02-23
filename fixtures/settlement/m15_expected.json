@@ -47,24 +47,20 @@
             "deposit_deadline_at": "2026-02-17T00:00:00Z",
             "intent_id": "intent_a",
             "kind": "deposit"
+          }
+        ],
+        "state_transitions": [
+          {
+            "from_state": "proposed",
+            "occurred_at": "2026-02-16T00:00:12Z",
+            "reason_code": null,
+            "to_state": "accepted"
           },
           {
-            "actor": {
-              "id": "u2",
-              "type": "user"
-            },
-            "deposit_deadline_at": "2026-02-17T00:00:00Z",
-            "intent_id": "intent_b",
-            "kind": "deposit"
-          },
-          {
-            "actor": {
-              "id": "u3",
-              "type": "user"
-            },
-            "deposit_deadline_at": "2026-02-17T00:00:00Z",
-            "intent_id": "intent_c",
-            "kind": "deposit"
+            "from_state": "accepted",
+            "occurred_at": "2026-02-16T00:01:00Z",
+            "reason_code": null,
+            "to_state": "escrow.pending"
           }
         ],
         "timeline": {
@@ -98,17 +94,22 @@
                 }
               ],
               "deposit_deadline_at": "2026-02-17T00:00:00Z",
+              "deposit_mode": "vault",
+              "deposit_ref": "vault:hold_intent_b:rsv_intent_b",
+              "deposited_at": "2026-02-16T00:01:00Z",
               "from_actor": {
                 "id": "u2",
                 "type": "user"
               },
               "intent_id": "intent_b",
               "leg_id": "leg_cycle_4f27eb196224_1",
-              "status": "pending",
+              "status": "deposited",
               "to_actor": {
                 "id": "u1",
                 "type": "user"
-              }
+              },
+              "vault_holding_id": "hold_intent_b",
+              "vault_reservation_id": "rsv_intent_b"
             },
             {
               "assets": [
@@ -118,21 +119,56 @@
                 }
               ],
               "deposit_deadline_at": "2026-02-17T00:00:00Z",
+              "deposit_mode": "vault",
+              "deposit_ref": "vault:hold_intent_c:rsv_intent_c",
+              "deposited_at": "2026-02-16T00:01:00Z",
               "from_actor": {
                 "id": "u3",
                 "type": "user"
               },
               "intent_id": "intent_c",
               "leg_id": "leg_cycle_4f27eb196224_2",
-              "status": "pending",
+              "status": "deposited",
               "to_actor": {
                 "id": "u2",
                 "type": "user"
-              }
+              },
+              "vault_holding_id": "hold_intent_c",
+              "vault_reservation_id": "rsv_intent_c"
             }
           ],
           "state": "escrow.pending",
           "updated_at": "2026-02-16T00:01:00Z"
+        },
+        "vault_reconciliation": {
+          "entries": [
+            {
+              "holding_id": "hold_intent_b",
+              "holding_status": "reserved",
+              "intent_id": "intent_b",
+              "leg_status": "deposited",
+              "reservation_id": "rsv_intent_b",
+              "settlement_cycle_id": "cycle_4f27eb196224",
+              "withdrawn_at": null
+            },
+            {
+              "holding_id": "hold_intent_c",
+              "holding_status": "reserved",
+              "intent_id": "intent_c",
+              "leg_status": "deposited",
+              "reservation_id": "rsv_intent_c",
+              "settlement_cycle_id": "cycle_4f27eb196224",
+              "withdrawn_at": null
+            }
+          ],
+          "summary": {
+            "available": 0,
+            "mode": "partial",
+            "not_found": 0,
+            "reserved": 2,
+            "total": 2,
+            "withdrawn": 0
+          }
         }
       },
       "cycle_id": "cycle_4f27eb196224",
@@ -195,7 +231,7 @@
               },
               "intent_id": "intent_b",
               "leg_id": "leg_cycle_4f27eb196224_1",
-              "status": "pending",
+              "status": "deposited",
               "to_actor": {
                 "id": "u1",
                 "type": "user"
@@ -215,7 +251,7 @@
               },
               "intent_id": "intent_c",
               "leg_id": "leg_cycle_4f27eb196224_2",
-              "status": "pending",
+              "status": "deposited",
               "to_actor": {
                 "id": "redacted",
                 "type": "user"
@@ -232,11 +268,225 @@
       "op": "settlement.instructions"
     },
     {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "body": {
+        "correlation_id": "corr_cycle_4f27eb196224",
+        "state_transitions": [
+          {
+            "from_state": "proposed",
+            "occurred_at": "2026-02-16T00:00:12Z",
+            "reason_code": null,
+            "to_state": "accepted"
+          },
+          {
+            "from_state": "accepted",
+            "occurred_at": "2026-02-16T00:01:00Z",
+            "reason_code": null,
+            "to_state": "escrow.pending"
+          }
+        ],
+        "timeline": {
+          "cycle_id": "cycle_4f27eb196224",
+          "legs": [
+            {
+              "assets": [
+                {
+                  "asset_id": "assetA",
+                  "platform": "steam"
+                }
+              ],
+              "deposit_deadline_at": "2026-02-17T00:00:00Z",
+              "from_actor": {
+                "id": "u1",
+                "type": "user"
+              },
+              "intent_id": "intent_a",
+              "leg_id": "leg_cycle_4f27eb196224_0",
+              "status": "pending",
+              "to_actor": {
+                "id": "u3",
+                "type": "user"
+              }
+            },
+            {
+              "assets": [
+                {
+                  "asset_id": "assetB",
+                  "platform": "steam"
+                }
+              ],
+              "deposit_deadline_at": "2026-02-17T00:00:00Z",
+              "deposit_mode": "vault",
+              "deposit_ref": "vault:hold_intent_b:rsv_intent_b",
+              "deposited_at": "2026-02-16T00:01:00Z",
+              "from_actor": {
+                "id": "u2",
+                "type": "user"
+              },
+              "intent_id": "intent_b",
+              "leg_id": "leg_cycle_4f27eb196224_1",
+              "status": "deposited",
+              "to_actor": {
+                "id": "u1",
+                "type": "user"
+              },
+              "vault_holding_id": "hold_intent_b",
+              "vault_reservation_id": "rsv_intent_b"
+            },
+            {
+              "assets": [
+                {
+                  "asset_id": "assetC",
+                  "platform": "steam"
+                }
+              ],
+              "deposit_deadline_at": "2026-02-17T00:00:00Z",
+              "deposit_mode": "vault",
+              "deposit_ref": "vault:hold_intent_c:rsv_intent_c",
+              "deposited_at": "2026-02-16T00:01:00Z",
+              "from_actor": {
+                "id": "u3",
+                "type": "user"
+              },
+              "intent_id": "intent_c",
+              "leg_id": "leg_cycle_4f27eb196224_2",
+              "status": "deposited",
+              "to_actor": {
+                "id": "u2",
+                "type": "user"
+              },
+              "vault_holding_id": "hold_intent_c",
+              "vault_reservation_id": "rsv_intent_c"
+            }
+          ],
+          "state": "escrow.pending",
+          "updated_at": "2026-02-16T00:01:00Z"
+        },
+        "vault_reconciliation": {
+          "entries": [
+            {
+              "holding_id": "hold_intent_b",
+              "holding_status": "reserved",
+              "intent_id": "intent_b",
+              "leg_status": "deposited",
+              "reservation_id": "rsv_intent_b",
+              "settlement_cycle_id": "cycle_4f27eb196224",
+              "withdrawn_at": null
+            },
+            {
+              "holding_id": "hold_intent_c",
+              "holding_status": "reserved",
+              "intent_id": "intent_c",
+              "leg_status": "deposited",
+              "reservation_id": "rsv_intent_c",
+              "settlement_cycle_id": "cycle_4f27eb196224",
+              "withdrawn_at": null
+            }
+          ],
+          "summary": {
+            "available": 0,
+            "mode": "partial",
+            "not_found": 0,
+            "reserved": 2,
+            "total": 2,
+            "withdrawn": 0
+          }
+        }
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "settlement.status"
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "body": {
+        "correlation_id": "corr_cycle_4f27eb196224",
+        "timeline": {
+          "cycle_id": "cycle_4f27eb196224",
+          "legs": [
+            {
+              "assets": [
+                {
+                  "asset_id": "assetA",
+                  "platform": "steam"
+                }
+              ],
+              "deposit_deadline_at": "2026-02-17T00:00:00Z",
+              "from_actor": {
+                "id": "u1",
+                "type": "user"
+              },
+              "intent_id": "intent_a",
+              "leg_id": "leg_cycle_4f27eb196224_0",
+              "status": "pending",
+              "to_actor": {
+                "id": "redacted",
+                "type": "user"
+              }
+            },
+            {
+              "assets": [
+                {
+                  "asset_id": "assetB",
+                  "platform": "steam"
+                }
+              ],
+              "deposit_deadline_at": "2026-02-17T00:00:00Z",
+              "from_actor": {
+                "id": "redacted",
+                "type": "user"
+              },
+              "intent_id": "intent_b",
+              "leg_id": "leg_cycle_4f27eb196224_1",
+              "status": "deposited",
+              "to_actor": {
+                "id": "u1",
+                "type": "user"
+              }
+            },
+            {
+              "assets": [
+                {
+                  "asset_id": "assetC",
+                  "platform": "steam"
+                }
+              ],
+              "deposit_deadline_at": "2026-02-17T00:00:00Z",
+              "from_actor": {
+                "id": "redacted",
+                "type": "user"
+              },
+              "intent_id": "intent_c",
+              "leg_id": "leg_cycle_4f27eb196224_2",
+              "status": "deposited",
+              "to_actor": {
+                "id": "redacted",
+                "type": "user"
+              }
+            }
+          ],
+          "state": "escrow.pending",
+          "updated_at": "2026-02-16T00:01:00Z"
+        }
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "settlement.status"
+    },
+    {
       "cycle_id": "cycle_4f27eb196224",
       "ok": true,
       "op": "settlement.deposit_confirmed",
       "replayed": false,
-      "timeline_state": "escrow.pending"
+      "timeline_state": "escrow.ready"
     },
     {
       "actor": {
@@ -245,6 +495,26 @@
       },
       "body": {
         "correlation_id": "corr_cycle_4f27eb196224",
+        "state_transitions": [
+          {
+            "from_state": "proposed",
+            "occurred_at": "2026-02-16T00:00:12Z",
+            "reason_code": null,
+            "to_state": "accepted"
+          },
+          {
+            "from_state": "accepted",
+            "occurred_at": "2026-02-16T00:01:00Z",
+            "reason_code": null,
+            "to_state": "escrow.pending"
+          },
+          {
+            "from_state": "escrow.pending",
+            "occurred_at": "2026-02-16T00:01:10Z",
+            "reason_code": null,
+            "to_state": "escrow.ready"
+          }
+        ],
         "timeline": {
           "cycle_id": "cycle_4f27eb196224",
           "legs": [
@@ -278,17 +548,22 @@
                 }
               ],
               "deposit_deadline_at": "2026-02-17T00:00:00Z",
+              "deposit_mode": "vault",
+              "deposit_ref": "vault:hold_intent_b:rsv_intent_b",
+              "deposited_at": "2026-02-16T00:01:00Z",
               "from_actor": {
                 "id": "u2",
                 "type": "user"
               },
               "intent_id": "intent_b",
               "leg_id": "leg_cycle_4f27eb196224_1",
-              "status": "pending",
+              "status": "deposited",
               "to_actor": {
                 "id": "u1",
                 "type": "user"
-              }
+              },
+              "vault_holding_id": "hold_intent_b",
+              "vault_reservation_id": "rsv_intent_b"
             },
             {
               "assets": [
@@ -298,21 +573,56 @@
                 }
               ],
               "deposit_deadline_at": "2026-02-17T00:00:00Z",
+              "deposit_mode": "vault",
+              "deposit_ref": "vault:hold_intent_c:rsv_intent_c",
+              "deposited_at": "2026-02-16T00:01:00Z",
               "from_actor": {
                 "id": "u3",
                 "type": "user"
               },
               "intent_id": "intent_c",
               "leg_id": "leg_cycle_4f27eb196224_2",
-              "status": "pending",
+              "status": "deposited",
               "to_actor": {
                 "id": "u2",
                 "type": "user"
-              }
+              },
+              "vault_holding_id": "hold_intent_c",
+              "vault_reservation_id": "rsv_intent_c"
             }
           ],
-          "state": "escrow.pending",
+          "state": "escrow.ready",
           "updated_at": "2026-02-16T00:01:10Z"
+        },
+        "vault_reconciliation": {
+          "entries": [
+            {
+              "holding_id": "hold_intent_b",
+              "holding_status": "reserved",
+              "intent_id": "intent_b",
+              "leg_status": "deposited",
+              "reservation_id": "rsv_intent_b",
+              "settlement_cycle_id": "cycle_4f27eb196224",
+              "withdrawn_at": null
+            },
+            {
+              "holding_id": "hold_intent_c",
+              "holding_status": "reserved",
+              "intent_id": "intent_c",
+              "leg_status": "deposited",
+              "reservation_id": "rsv_intent_c",
+              "settlement_cycle_id": "cycle_4f27eb196224",
+              "withdrawn_at": null
+            }
+          ],
+          "summary": {
+            "available": 0,
+            "mode": "partial",
+            "not_found": 0,
+            "reserved": 2,
+            "total": 2,
+            "withdrawn": 0
+          }
         }
       },
       "cycle_id": "cycle_4f27eb196224",
@@ -366,7 +676,7 @@
               },
               "intent_id": "intent_b",
               "leg_id": "leg_cycle_4f27eb196224_1",
-              "status": "pending",
+              "status": "deposited",
               "to_actor": {
                 "id": "u1",
                 "type": "user"
@@ -386,14 +696,14 @@
               },
               "intent_id": "intent_c",
               "leg_id": "leg_cycle_4f27eb196224_2",
-              "status": "pending",
+              "status": "deposited",
               "to_actor": {
                 "id": "redacted",
                 "type": "user"
               }
             }
           ],
-          "state": "escrow.pending",
+          "state": "escrow.ready",
           "updated_at": "2026-02-16T00:01:10Z"
         }
       },
@@ -409,24 +719,25 @@
       },
       "body": {
         "correlation_id": "corr_cycle_4f27eb196224",
-        "instructions": [
+        "instructions": [],
+        "state_transitions": [
           {
-            "actor": {
-              "id": "u2",
-              "type": "user"
-            },
-            "deposit_deadline_at": "2026-02-17T00:00:00Z",
-            "intent_id": "intent_b",
-            "kind": "deposit"
+            "from_state": "proposed",
+            "occurred_at": "2026-02-16T00:00:12Z",
+            "reason_code": null,
+            "to_state": "accepted"
           },
           {
-            "actor": {
-              "id": "u3",
-              "type": "user"
-            },
-            "deposit_deadline_at": "2026-02-17T00:00:00Z",
-            "intent_id": "intent_c",
-            "kind": "deposit"
+            "from_state": "accepted",
+            "occurred_at": "2026-02-16T00:01:00Z",
+            "reason_code": null,
+            "to_state": "escrow.pending"
+          },
+          {
+            "from_state": "escrow.pending",
+            "occurred_at": "2026-02-16T00:01:10Z",
+            "reason_code": null,
+            "to_state": "escrow.ready"
           }
         ],
         "timeline": {
@@ -462,17 +773,22 @@
                 }
               ],
               "deposit_deadline_at": "2026-02-17T00:00:00Z",
+              "deposit_mode": "vault",
+              "deposit_ref": "vault:hold_intent_b:rsv_intent_b",
+              "deposited_at": "2026-02-16T00:01:00Z",
               "from_actor": {
                 "id": "u2",
                 "type": "user"
               },
               "intent_id": "intent_b",
               "leg_id": "leg_cycle_4f27eb196224_1",
-              "status": "pending",
+              "status": "deposited",
               "to_actor": {
                 "id": "u1",
                 "type": "user"
-              }
+              },
+              "vault_holding_id": "hold_intent_b",
+              "vault_reservation_id": "rsv_intent_b"
             },
             {
               "assets": [
@@ -482,21 +798,56 @@
                 }
               ],
               "deposit_deadline_at": "2026-02-17T00:00:00Z",
+              "deposit_mode": "vault",
+              "deposit_ref": "vault:hold_intent_c:rsv_intent_c",
+              "deposited_at": "2026-02-16T00:01:00Z",
               "from_actor": {
                 "id": "u3",
                 "type": "user"
               },
               "intent_id": "intent_c",
               "leg_id": "leg_cycle_4f27eb196224_2",
-              "status": "pending",
+              "status": "deposited",
               "to_actor": {
                 "id": "u2",
                 "type": "user"
-              }
+              },
+              "vault_holding_id": "hold_intent_c",
+              "vault_reservation_id": "rsv_intent_c"
             }
           ],
-          "state": "escrow.pending",
+          "state": "escrow.ready",
           "updated_at": "2026-02-16T00:01:10Z"
+        },
+        "vault_reconciliation": {
+          "entries": [
+            {
+              "holding_id": "hold_intent_b",
+              "holding_status": "reserved",
+              "intent_id": "intent_b",
+              "leg_status": "deposited",
+              "reservation_id": "rsv_intent_b",
+              "settlement_cycle_id": "cycle_4f27eb196224",
+              "withdrawn_at": null
+            },
+            {
+              "holding_id": "hold_intent_c",
+              "holding_status": "reserved",
+              "intent_id": "intent_c",
+              "leg_status": "deposited",
+              "reservation_id": "rsv_intent_c",
+              "settlement_cycle_id": "cycle_4f27eb196224",
+              "withdrawn_at": null
+            }
+          ],
+          "summary": {
+            "available": 0,
+            "mode": "partial",
+            "not_found": 0,
+            "reserved": 2,
+            "total": 2,
+            "withdrawn": 0
+          }
         }
       },
       "cycle_id": "cycle_4f27eb196224",
@@ -551,7 +902,7 @@
               },
               "intent_id": "intent_b",
               "leg_id": "leg_cycle_4f27eb196224_1",
-              "status": "pending",
+              "status": "deposited",
               "to_actor": {
                 "id": "u1",
                 "type": "user"
@@ -571,14 +922,14 @@
               },
               "intent_id": "intent_c",
               "leg_id": "leg_cycle_4f27eb196224_2",
-              "status": "pending",
+              "status": "deposited",
               "to_actor": {
                 "id": "redacted",
                 "type": "user"
               }
             }
           ],
-          "state": "escrow.pending",
+          "state": "escrow.ready",
           "updated_at": "2026-02-16T00:01:10Z"
         }
       },
@@ -586,6 +937,88 @@
       "error_code": null,
       "ok": true,
       "op": "settlement.instructions"
+    },
+    {
+      "cycle_id": "cycle_4f27eb196224",
+      "ok": true,
+      "op": "settlement.begin_execution",
+      "timeline_state": "executing"
+    },
+    {
+      "cycle_id": "cycle_4f27eb196224",
+      "ok": true,
+      "op": "settlement.complete",
+      "receipt_final_state": "completed",
+      "receipt_id": "receipt_02cce1dcc083",
+      "timeline_state": "completed"
+    },
+    {
+      "actor": {
+        "id": "swapgraph",
+        "type": "partner"
+      },
+      "body": {
+        "correlation_id": "corr_cycle_4f27eb196224",
+        "receipt": {
+          "asset_ids": [
+            "assetA",
+            "assetB",
+            "assetC"
+          ],
+          "created_at": "2026-02-16T00:01:30Z",
+          "cycle_id": "cycle_4f27eb196224",
+          "final_state": "completed",
+          "id": "receipt_02cce1dcc083",
+          "intent_ids": [
+            "intent_a",
+            "intent_b",
+            "intent_c"
+          ],
+          "signature": {
+            "alg": "ed25519",
+            "key_id": "dev-k1",
+            "sig": "imdSAdvjpwtagFk6XY+6QanD3E6qwm49pvlD+V76Ub3NOQzEfK1BeXR9NUCa/tvmG11ApQFfG2+SKOFtQZF7CA=="
+          }
+        }
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "receipts.get"
+    },
+    {
+      "actor": {
+        "id": "u1",
+        "type": "user"
+      },
+      "body": {
+        "correlation_id": "corr_cycle_4f27eb196224",
+        "receipt": {
+          "asset_ids": [
+            "assetA",
+            "assetB",
+            "assetC"
+          ],
+          "created_at": "2026-02-16T00:01:30Z",
+          "cycle_id": "cycle_4f27eb196224",
+          "final_state": "completed",
+          "id": "receipt_02cce1dcc083",
+          "intent_ids": [
+            "intent_a",
+            "intent_b",
+            "intent_c"
+          ],
+          "signature": {
+            "alg": "ed25519",
+            "key_id": "dev-k1",
+            "sig": "imdSAdvjpwtagFk6XY+6QanD3E6qwm49pvlD+V76Ub3NOQzEfK1BeXR9NUCa/tvmG11ApQFfG2+SKOFtQZF7CA=="
+          }
+        }
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": null,
+      "ok": true,
+      "op": "receipts.get"
     }
   ]
 }

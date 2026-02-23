@@ -133,6 +133,9 @@ function redactLeg({ leg, viewer }) {
   if (!owned) {
     delete out.deposit_ref;
     delete out.deposited_at;
+    delete out.deposit_mode;
+    delete out.vault_holding_id;
+    delete out.vault_reservation_id;
     delete out.release_ref;
     delete out.released_at;
     delete out.refund_ref;
