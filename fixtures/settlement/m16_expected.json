@@ -135,13 +135,24 @@
     },
     {
       "actor": {
-        "id": "partner_b",
+        "id": "partner_a",
         "type": "partner"
       },
       "cycle_id": "cycle_4f27eb196224",
       "ok": true,
-      "op": "settlement.start.replay_scope_guard",
+      "op": "settlement.start.replay_scope_self_heal",
       "replayed": true,
+      "scope_after_partner_id": "partner_a"
+    },
+    {
+      "actor": {
+        "id": "partner_b",
+        "type": "partner"
+      },
+      "cycle_id": "cycle_4f27eb196224",
+      "error_code": "FORBIDDEN",
+      "ok": false,
+      "op": "settlement.start.replay_scope_guard",
       "scope_after_partner_id": null
     }
   ],
@@ -151,6 +162,10 @@
         "partner_id": "partner_a"
       }
     },
-    "proposals": {}
+    "proposals": {
+      "cycle_4f27eb196224": {
+        "partner_id": "partner_a"
+      }
+    }
   }
 }

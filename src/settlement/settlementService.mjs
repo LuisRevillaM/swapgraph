@@ -423,6 +423,7 @@ export class SettlementService {
     this.store.state.tenancy ||= {};
     this.store.state.tenancy.cycles ||= {};
     const existingScope = this.store.state.tenancy.cycles[proposal.id];
+    const proposalScope = this.store.state.tenancy?.proposals?.[proposal.id]?.partner_id ?? null;
     if (existingScope?.partner_id && existingScope.partner_id !== actor.id) {
       return {
         ok: false,
@@ -436,6 +437,20 @@ export class SettlementService {
 
     const existing = this.store.state.timelines[proposal.id];
     if (existing) {
+      // Replay path: if cycle scope is missing, heal from proposal scope when unambiguous.
+      if (!existingScope?.partner_id && proposalScope) {
+        if (proposalScope !== actor.id) {
+          return {
+            ok: false,
+            error: {
+              code: 'FORBIDDEN',
+              message: 'cycle is owned by a different partner',
+              details: { cycle_id: proposal.id, partner_id: actor.id, cycle_partner_id: proposalScope }
+            }
+          };
+        }
+        this.store.state.tenancy.cycles[proposal.id] = { partner_id: proposalScope };
+      }
       // idempotent: allow re-start if already started.
       return { ok: true, timeline: existing, replayed: true };
     }

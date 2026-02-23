@@ -1,0 +1,143 @@
+{
+  "actors": {
+    "partner_a": { "type": "partner", "id": "partner_a" },
+    "partner_b": { "type": "partner", "id": "partner_b" },
+    "user_u1": { "type": "user", "id": "u1" },
+    "user_u2": { "type": "user", "id": "u2" },
+    "user_u3": { "type": "user", "id": "u3" }
+  },
+  "cycle": {
+    "proposal_ref": "p3",
+    "proposal_partner_actor_ref": "partner_a"
+  },
+  "operations": [
+    {
+      "op": "cycleProposals.accept",
+      "actor_ref": "user_u1",
+      "scopes": ["commits:write"],
+      "idempotency_key": "m16_rt_accept_u1",
+      "body": { "proposal_id": "$CYCLE_ID", "occurred_at": "2026-02-16T00:00:10Z" },
+      "expect_status": 200,
+      "expect_commit_phase": "accept"
+    },
+    {
+      "op": "cycleProposals.accept",
+      "actor_ref": "user_u2",
+      "scopes": ["commits:write"],
+      "idempotency_key": "m16_rt_accept_u2",
+      "body": { "proposal_id": "$CYCLE_ID", "occurred_at": "2026-02-16T00:00:11Z" },
+      "expect_status": 200,
+      "expect_commit_phase": "accept"
+    },
+    {
+      "op": "cycleProposals.accept",
+      "actor_ref": "user_u3",
+      "scopes": ["commits:write"],
+      "idempotency_key": "m16_rt_accept_u3",
+      "body": { "proposal_id": "$CYCLE_ID", "occurred_at": "2026-02-16T00:00:12Z" },
+      "expect_status": 200,
+      "expect_commit_phase": "ready"
+    },
+    {
+      "op": "settlement.start",
+      "actor_ref": "partner_a",
+      "scopes": [],
+      "body": { "deposit_deadline_at": "2026-02-17T00:00:00Z", "occurred_at": "2026-02-16T00:01:00Z" },
+      "expect_status": 403,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    },
+    {
+      "op": "settlement.start",
+      "actor_ref": "partner_a",
+      "scopes": ["settlement:write"],
+      "body": { "deposit_deadline_at": "2026-02-17T00:00:00Z", "occurred_at": "2026-02-16T00:01:00Z" },
+      "expect_status": 200,
+      "expect_timeline_state": "escrow.pending"
+    },
+    {
+      "op": "settlement.deposit_confirmed",
+      "actor_ref": "user_u1",
+      "scopes": ["settlement:write"],
+      "body": { "deposit_ref": "dep_u1_p3_m16_rt", "occurred_at": "2026-02-16T00:01:10Z" },
+      "expect_status": 200,
+      "expect_timeline_state": "escrow.pending"
+    },
+    {
+      "op": "settlement.deposit_confirmed",
+      "actor_ref": "user_u2",
+      "scopes": ["settlement:write"],
+      "body": { "deposit_ref": "dep_u2_p3_m16_rt", "occurred_at": "2026-02-16T00:01:11Z" },
+      "expect_status": 200,
+      "expect_timeline_state": "escrow.pending"
+    },
+    {
+      "op": "settlement.deposit_confirmed",
+      "actor_ref": "user_u3",
+      "scopes": ["settlement:write"],
+      "body": { "deposit_ref": "dep_u3_p3_m16_rt", "occurred_at": "2026-02-16T00:01:12Z" },
+      "expect_status": 200,
+      "expect_timeline_state": "escrow.ready"
+    },
+    {
+      "op": "settlement.begin_execution",
+      "actor_ref": "partner_a",
+      "scopes": [],
+      "body": { "occurred_at": "2026-02-16T00:01:20Z" },
+      "expect_status": 403,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    },
+    {
+      "op": "settlement.begin_execution",
+      "actor_ref": "partner_a",
+      "scopes": ["settlement:write"],
+      "body": { "occurred_at": "2026-02-16T00:01:20Z" },
+      "expect_status": 200,
+      "expect_timeline_state": "executing"
+    },
+    {
+      "op": "settlement.complete",
+      "actor_ref": "partner_a",
+      "scopes": [],
+      "body": { "occurred_at": "2026-02-16T00:01:30Z" },
+      "expect_status": 403,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    },
+    {
+      "op": "settlement.complete",
+      "actor_ref": "partner_a",
+      "scopes": ["settlement:write"],
+      "body": { "occurred_at": "2026-02-16T00:01:30Z" },
+      "expect_status": 200,
+      "expect_timeline_state": "completed",
+      "expect_receipt_present": true
+    },
+    {
+      "op": "receipts.get",
+      "actor_ref": "partner_a",
+      "scopes": [],
+      "expect_status": 403,
+      "expect_error_code": "INSUFFICIENT_SCOPE"
+    },
+    {
+      "op": "receipts.get",
+      "actor_ref": "partner_a",
+      "scopes": ["receipts:read"],
+      "expect_status": 200,
+      "expect_receipt_present": true
+    },
+    {
+      "op": "receipts.get",
+      "actor_ref": "partner_b",
+      "scopes": ["receipts:read"],
+      "expect_status": 403,
+      "expect_error_code": "FORBIDDEN"
+    },
+    {
+      "op": "receipts.get",
+      "actor_ref": "user_u1",
+      "scopes": ["receipts:read"],
+      "expect_status": 200,
+      "expect_receipt_present": true
+    }
+  ]
+}

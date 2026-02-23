@@ -75,6 +75,10 @@ const expected = readJson(path.join(root, 'fixtures/settlement/m16_expected.json
 
 const actors = scenario.actors;
 
+store.state.tenancy ||= {};
+store.state.tenancy.proposals ||= {};
+store.state.tenancy.proposals[p3.id] = { partner_id: actors.partner_a?.id ?? 'partner_a' };
+
 const commitSvc = new CommitService({ store });
 const settlementSvc = new SettlementService({ store });
 const readSvc = new SettlementReadService({ store });
@@ -177,6 +181,31 @@ for (const op of scenario.operations) {
 
   if (store.state.tenancy?.cycles) delete store.state.tenancy.cycles[cycleId];
 
+  const replaySelfHeal = settlementSvc.start({
+    actor: actors.partner_a,
+    proposal,
+    occurredAt: '2026-02-16T00:09:58Z',
+    depositDeadlineAt: scenario.cycles?.p3?.deposit_deadline_at
+  });
+
+  if (!replaySelfHeal.ok) throw new Error(`replay self-heal start failed: ${JSON.stringify(replaySelfHeal)}`);
+
+  const scopeAfterSelfHeal = store.state.tenancy?.cycles?.[cycleId] ?? null;
+  if (scopeAfterSelfHeal?.partner_id !== actors.partner_a?.id) {
+    throw new Error(`replay self-heal did not restore cycle tenancy: ${JSON.stringify(scopeAfterSelfHeal)}`);
+  }
+
+  operations.push({
+    op: 'settlement.start.replay_scope_self_heal',
+    cycle_id: cycleId,
+    actor: actors.partner_a,
+    ok: replaySelfHeal.ok,
+    replayed: replaySelfHeal.replayed ?? false,
+    scope_after_partner_id: scopeAfterSelfHeal?.partner_id ?? null
+  });
+
+  if (store.state.tenancy?.cycles) delete store.state.tenancy.cycles[cycleId];
+
   const replay = settlementSvc.start({
     actor: actors.partner_b,
     proposal,
@@ -184,10 +213,11 @@ for (const op of scenario.operations) {
     depositDeadlineAt: scenario.cycles?.p3?.deposit_deadline_at
   });
 
-  if (!replay.ok) throw new Error(`replay guard start failed: ${JSON.stringify(replay)}`);
+  if (replay.ok) throw new Error(`replay guard unexpectedly succeeded: ${JSON.stringify(replay)}`);
+  if (replay.error?.code !== 'FORBIDDEN') throw new Error(`replay guard expected FORBIDDEN: ${JSON.stringify(replay)}`);
 
   const scopeAfterReplay = store.state.tenancy?.cycles?.[cycleId] ?? null;
-  if (scopeAfterReplay?.partner_id === actors.partner_b?.id) {
+  if (scopeAfterReplay?.partner_id) {
     throw new Error(`replay start rebound cycle tenancy: ${JSON.stringify(scopeAfterReplay)}`);
   }
 
@@ -204,7 +234,7 @@ for (const op of scenario.operations) {
     cycle_id: cycleId,
     actor: actors.partner_b,
     ok: replay.ok,
-    replayed: replay.replayed ?? false,
+    error_code: replay.error?.code ?? null,
     scope_after_partner_id: scopeAfterReplay?.partner_id ?? null
   });
 }
