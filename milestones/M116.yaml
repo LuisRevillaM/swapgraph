@@ -1,0 +1,14 @@
+name: M116
+commands:
+  - cmd: "npm run verify:m116"
+artifacts:
+  - artifact: "docs/prd/M116.md"
+  - artifact: "src/matching/proposals.mjs"
+  - artifact: "scripts/run-m116-disjoint-optimizer-scenario.mjs"
+  - artifact: "fixtures/release/m116_scenario.json"
+  - artifact: "fixtures/release/m116_expected.json"
+  - artifact: "milestones/M116.yaml"
+  - artifact: "verify/m116.sh"
+  - artifact: "artifacts/milestones/M116/latest/commands.log"
+  - artifact: "artifacts/milestones/M116/latest/disjoint_optimizer_output.json"
+  - artifact: "artifacts/milestones/M116/latest/assertions.json"

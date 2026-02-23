@@ -1,12 +1,17 @@
 import { buildCompatibilityGraph } from './graph.mjs';
-import { findCyclesLen2, findCyclesLen3 } from './cycles.mjs';
+import { findBoundedSimpleCycles } from './cycles.mjs';
 import { selectDisjointProposals } from './proposals.mjs';
 
-export function runMatching({ intents, assetValuesUsd, edgeIntents = [], nowIso = null }) {
+export function runMatching({
+  intents,
+  assetValuesUsd,
+  edgeIntents = [],
+  nowIso = null,
+  minCycleLength = 2,
+  maxCycleLength = 3
+}) {
   const { byId, edges, edgeMeta } = buildCompatibilityGraph({ intents, assetValuesUsd, edgeIntents, nowIso });
-  const c2 = findCyclesLen2({ edges });
-  const c3 = findCyclesLen3({ edges });
-  const all = [...c2, ...c3];
+  const all = findBoundedSimpleCycles({ edges, minCycleLength, maxCycleLength });
 
   const { selected, trace, candidates_count } = selectDisjointProposals({
     candidateCycles: all,

@@ -1,0 +1,108 @@
+{
+  "asset_values_usd": {
+    "asset_a": 100,
+    "asset_b": 100,
+    "asset_c": 99,
+    "asset_d": 99,
+    "asset_e": 50,
+    "asset_f": 50,
+    "asset_g": 50,
+    "asset_h": 50
+  },
+  "intents": [
+    {
+      "id": "intent_a",
+      "actor": { "type": "user", "id": "u_a" },
+      "offer": [{ "platform": "steam", "asset_id": "asset_a" }],
+      "trust_constraints": { "max_cycle_length": 3 },
+      "time_constraints": { "expires_at": "2027-03-01T00:00:00Z", "urgency": "normal" }
+    },
+    {
+      "id": "intent_b",
+      "actor": { "type": "user", "id": "u_b" },
+      "offer": [{ "platform": "steam", "asset_id": "asset_b" }],
+      "trust_constraints": { "max_cycle_length": 3 },
+      "time_constraints": { "expires_at": "2027-03-01T00:00:00Z", "urgency": "normal" }
+    },
+    {
+      "id": "intent_c",
+      "actor": { "type": "user", "id": "u_c" },
+      "offer": [{ "platform": "steam", "asset_id": "asset_c" }],
+      "trust_constraints": { "max_cycle_length": 3 },
+      "time_constraints": { "expires_at": "2027-03-01T00:00:00Z", "urgency": "normal" }
+    },
+    {
+      "id": "intent_d",
+      "actor": { "type": "user", "id": "u_d" },
+      "offer": [{ "platform": "steam", "asset_id": "asset_d" }],
+      "trust_constraints": { "max_cycle_length": 3 },
+      "time_constraints": { "expires_at": "2027-03-01T00:00:00Z", "urgency": "normal" }
+    },
+    {
+      "id": "intent_e",
+      "actor": { "type": "user", "id": "u_e" },
+      "offer": [{ "platform": "steam", "asset_id": "asset_e" }],
+      "trust_constraints": { "max_cycle_length": 3 },
+      "time_constraints": { "expires_at": "2027-03-01T00:00:00Z", "urgency": "normal" }
+    },
+    {
+      "id": "intent_f",
+      "actor": { "type": "user", "id": "u_f" },
+      "offer": [{ "platform": "steam", "asset_id": "asset_f" }],
+      "trust_constraints": { "max_cycle_length": 3 },
+      "time_constraints": { "expires_at": "2027-03-01T00:00:00Z", "urgency": "normal" }
+    },
+    {
+      "id": "intent_g",
+      "actor": { "type": "user", "id": "u_g" },
+      "offer": [{ "platform": "steam", "asset_id": "asset_g" }],
+      "trust_constraints": { "max_cycle_length": 3 },
+      "time_constraints": { "expires_at": "2027-03-01T00:00:00Z", "urgency": "normal" }
+    },
+    {
+      "id": "intent_h",
+      "actor": { "type": "user", "id": "u_h" },
+      "offer": [{ "platform": "steam", "asset_id": "asset_h" }],
+      "trust_constraints": { "max_cycle_length": 3 },
+      "time_constraints": { "expires_at": "2027-03-01T00:00:00Z", "urgency": "normal" }
+    }
+  ],
+  "operations": [
+    {
+      "name": "greedy_suboptimal_counterexample",
+      "candidate_cycles": [
+        ["intent_a", "intent_b"],
+        ["intent_a", "intent_c"],
+        ["intent_b", "intent_d"]
+      ],
+      "expect_candidate_proposals": 3,
+      "expect_greedy_selected_count": 1,
+      "expect_greedy_total_score_scaled": 9000,
+      "expect_greedy_selected_cycle_keys": [
+        "intent_a>intent_b"
+      ],
+      "expect_optimal_selected_count": 2,
+      "expect_optimal_total_score_scaled": 17800,
+      "expect_optimal_selected_cycle_keys": [
+        "intent_a>intent_c",
+        "intent_b>intent_d"
+      ],
+      "expect_improvement_scaled": 8800
+    },
+    {
+      "name": "tie_break_determinism_case",
+      "candidate_cycles": [
+        ["intent_e", "intent_f"],
+        ["intent_e", "intent_g"],
+        ["intent_f", "intent_h"],
+        ["intent_g", "intent_h"]
+      ],
+      "expect_candidate_proposals": 4,
+      "expect_greedy_selected_count": 2,
+      "expect_greedy_total_score_scaled": 18000,
+      "expect_optimal_selected_count": 2,
+      "expect_optimal_total_score_scaled": 18000,
+      "expect_improvement_scaled": 0
+    }
+  ]
+}

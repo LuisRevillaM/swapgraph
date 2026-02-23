@@ -1,0 +1,15 @@
+name: M115
+commands:
+  - cmd: "npm run verify:m115"
+artifacts:
+  - artifact: "docs/prd/M115.md"
+  - artifact: "src/matching/cycles.mjs"
+  - artifact: "src/matching/engine.mjs"
+  - artifact: "scripts/run-m115-bounded-cycle-scenario.mjs"
+  - artifact: "fixtures/release/m115_scenario.json"
+  - artifact: "fixtures/release/m115_expected.json"
+  - artifact: "milestones/M115.yaml"
+  - artifact: "verify/m115.sh"
+  - artifact: "artifacts/milestones/M115/latest/commands.log"
+  - artifact: "artifacts/milestones/M115/latest/bounded_cycle_matching_output.json"
+  - artifact: "artifacts/milestones/M115/latest/assertions.json"
