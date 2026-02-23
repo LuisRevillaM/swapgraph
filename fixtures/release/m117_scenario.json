@@ -13,7 +13,53 @@
     "MATCHING_V2_MIN_CYCLE_LENGTH": "2",
     "MATCHING_V2_LMAX": "5",
     "MATCHING_V2_MAX_CYCLES_EXPLORED": "5000",
-    "MATCHING_V2_TIMEOUT_MS": "1000"
+    "MATCHING_V2_TIMEOUT_MS": "1000",
+    "MATCHING_V2_MAX_SHADOW_DIFFS": "1000"
+  },
+  "shadow_error_env": {
+    "MATCHING_V2_SHADOW": "1",
+    "MATCHING_V2_SHADOW_FORCE_ERROR": "1",
+    "MATCHING_V2_MIN_CYCLE_LENGTH": "2",
+    "MATCHING_V2_LMAX": "5",
+    "MATCHING_V2_MAX_CYCLES_EXPLORED": "5000",
+    "MATCHING_V2_TIMEOUT_MS": "1000",
+    "MATCHING_V2_MAX_SHADOW_DIFFS": "1000"
+  },
+  "retention_env": {
+    "MATCHING_V2_SHADOW": "1",
+    "MATCHING_V2_MIN_CYCLE_LENGTH": "2",
+    "MATCHING_V2_LMAX": "5",
+    "MATCHING_V2_MAX_CYCLES_EXPLORED": "5000",
+    "MATCHING_V2_TIMEOUT_MS": "1000",
+    "MATCHING_V2_MAX_SHADOW_DIFFS": "2"
+  },
+  "retention_seed_state": {
+    "marketplace_matching_run_counter": 1000000,
+    "marketplace_matching_shadow_diffs": {
+      "mrun_999998": {
+        "run_id": "mrun_999998",
+        "recorded_at": "2026-02-22T00:00:00.000Z"
+      },
+      "mrun_999999": {
+        "run_id": "mrun_999999",
+        "recorded_at": "2026-02-22T00:01:00.000Z"
+      },
+      "mrun_1000000": {
+        "run_id": "mrun_1000000",
+        "recorded_at": "2026-02-22T00:02:00.000Z"
+      }
+    }
+  },
+  "retention_expect": {
+    "max_shadow_diffs": 2,
+    "kept_run_ids": [
+      "mrun_1000000",
+      "mrun_1000001"
+    ],
+    "pruned_run_ids": [
+      "mrun_999998",
+      "mrun_999999"
+    ]
   },
   "seed_state": {
     "intents": {

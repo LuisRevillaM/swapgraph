@@ -60,6 +60,7 @@ function readMatchingV2ShadowConfigFromEnv() {
 
   return {
     shadow_enabled: parseBooleanFlag(process.env.MATCHING_V2_SHADOW, false),
+    force_shadow_error: parseBooleanFlag(process.env.MATCHING_V2_SHADOW_FORCE_ERROR, false),
     min_cycle_length: minCycleLength,
     max_cycle_length: maxCycleLength,
     include_cycle_diagnostics: true,
@@ -504,6 +505,9 @@ export class MarketplaceMatchingService {
 
         if (v2Config.shadow_enabled) {
           try {
+            if (v2Config.force_shadow_error) {
+              throw new Error('forced matching v2 shadow error');
+            }
             const v2Result = runMatcherWithConfig({
               intents: activeIntents,
               assetValuesUsd,

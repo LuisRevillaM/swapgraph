@@ -10,6 +10,7 @@ artifacts:
   - artifact: "fixtures/release/m117_scenario.json"
   - artifact: "fixtures/release/m117_expected.json"
   - artifact: "milestones/M117.yaml"
+  - artifact: "verify/m117-local.sh"
   - artifact: "verify/m117.sh"
   - artifact: "artifacts/milestones/M117/latest/commands.log"
   - artifact: "artifacts/milestones/M117/latest/matching_v2_shadow_output.json"

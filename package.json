@@ -128,6 +128,7 @@
     "verify:m114": "bash verify/m114.sh",
     "verify:m115": "bash verify/m115.sh",
     "verify:m116": "bash verify/m116.sh",
+    "verify:m117:local": "bash verify/m117-local.sh",
     "verify:m117": "bash verify/m117.sh"
   },
   "devDependencies": {

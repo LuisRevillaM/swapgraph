@@ -34,6 +34,22 @@ function stableHash(value) {
   return createHash('sha256').update(canonicalStringify(value), 'utf8').digest('hex');
 }
 
+function runSequenceFromRunId(runId) {
+  const match = /^mrun_(\d+)$/.exec(String(runId ?? ''));
+  if (!match) return Number.POSITIVE_INFINITY;
+  const parsed = Number.parseInt(match[1], 10);
+  return Number.isFinite(parsed) ? parsed : Number.POSITIVE_INFINITY;
+}
+
+function sortRunIdsNumerically(runIds) {
+  return [...runIds].sort((a, b) => {
+    const seqA = runSequenceFromRunId(a);
+    const seqB = runSequenceFromRunId(b);
+    if (seqA !== seqB) return seqA - seqB;
+    return String(a).localeCompare(String(b));
+  });
+}
+
 function withEnv(overrides, fn) {
   const previous = new Map();
   for (const [key, value] of Object.entries(overrides ?? {})) {
@@ -115,13 +131,31 @@ function normalizeShadowRecord(shadow) {
   });
 }
 
-function runCase({ label, scenario }) {
+function normalizeShadowErrorRecord(shadow) {
+  return canonicalize({
+    run_id: String(shadow?.run_id ?? ''),
+    recorded_at: String(shadow?.recorded_at ?? ''),
+    shadow_error: {
+      code: String(shadow?.shadow_error?.code ?? ''),
+      name: String(shadow?.shadow_error?.name ?? ''),
+      message: String(shadow?.shadow_error?.message ?? '')
+    },
+    v2_cycle_bounds: shadow?.v2_cycle_bounds ?? null,
+    v2_safety_limits: shadow?.v2_safety_limits ?? null
+  });
+}
+
+function createSeededStore({ label, seedState }) {
   const store = new JsonStateStore({ filePath: path.join(outDir, `store_${label}.json`) });
   store.load();
-  for (const [key, value] of Object.entries(scenario.seed_state ?? {})) {
+  for (const [key, value] of Object.entries(seedState ?? {})) {
     store.state[key] = clone(value);
   }
+  return store;
+}
 
+function runCase({ label, scenario, seedState = null }) {
+  const store = createSeededStore({ label, seedState: seedState ?? scenario.seed_state });
   const service = new MarketplaceMatchingService({ store });
   const request = clone(scenario.request ?? {});
   validateRunRequest(request);
@@ -173,6 +207,82 @@ function runCase({ label, scenario }) {
   };
 }
 
+function runShadowErrorCase({ label, scenario }) {
+  const store = createSeededStore({ label, seedState: scenario.seed_state });
+  const service = new MarketplaceMatchingService({ store });
+  const request = clone(scenario.request ?? {});
+  validateRunRequest(request);
+
+  const out = service.runMatching({
+    actor: clone(scenario.actor),
+    auth: clone(scenario.auth),
+    idempotencyKey: `m117_${label}`,
+    request
+  });
+  validateRunResponse(out.result);
+  assert.equal(out.result.ok, true, 'v1 result should still succeed when shadow fails');
+
+  const run = out.result.body?.run;
+  assert.ok(run, 'run response must include run');
+  const shadow = store.state.marketplace_matching_shadow_diffs?.[run.run_id] ?? null;
+  assert.ok(shadow, 'shadow fallback record should exist when shadow run fails');
+  assert.ok(shadow?.shadow_error, 'shadow fallback record should include shadow_error');
+  assert.equal(shadow.shadow_error.code, 'matching_v2_shadow_failed', 'shadow error code mismatch');
+  assert.equal(typeof shadow.shadow_error.name, 'string', 'shadow error name must be string');
+  assert.equal(typeof shadow.shadow_error.message, 'string', 'shadow error message must be string');
+
+  return {
+    run_summary: {
+      run_id: run.run_id,
+      selected_proposals_count: Number(run.selected_proposals_count ?? 0),
+      candidate_cycles: Number(run.stats?.candidate_cycles ?? 0)
+    },
+    shadow_error: normalizeShadowErrorRecord(shadow)
+  };
+}
+
+function runRetentionRolloverCase({ label, scenario }) {
+  const retentionSeed = canonicalize({
+    ...(scenario.seed_state ?? {}),
+    ...(scenario.retention_seed_state ?? {})
+  });
+  const store = createSeededStore({ label, seedState: retentionSeed });
+  const service = new MarketplaceMatchingService({ store });
+  const request = clone(scenario.request ?? {});
+  validateRunRequest(request);
+
+  const beforeRunIds = sortRunIdsNumerically(Object.keys(store.state.marketplace_matching_shadow_diffs ?? {}));
+  const out = service.runMatching({
+    actor: clone(scenario.actor),
+    auth: clone(scenario.auth),
+    idempotencyKey: `m117_${label}`,
+    request
+  });
+  validateRunResponse(out.result);
+  assert.equal(out.result.ok, true, 'rollover retention run should succeed');
+
+  const run = out.result.body?.run;
+  assert.ok(run, 'retention run response must include run');
+  const afterRunIds = sortRunIdsNumerically(Object.keys(store.state.marketplace_matching_shadow_diffs ?? {}));
+
+  const expect = scenario.retention_expect ?? {};
+  const expectedKept = sortRunIdsNumerically(expect.kept_run_ids ?? []);
+  const expectedPruned = sortRunIdsNumerically(expect.pruned_run_ids ?? []);
+  const actualPruned = beforeRunIds.filter(id => !afterRunIds.includes(id));
+
+  assert.equal(afterRunIds.length, Number(expect.max_shadow_diffs ?? afterRunIds.length), 'retention count mismatch');
+  assert.deepEqual(afterRunIds, expectedKept, 'retention kept set mismatch');
+  assert.deepEqual(sortRunIdsNumerically(actualPruned), expectedPruned, 'retention pruned set mismatch');
+  assert.ok(afterRunIds.includes(run.run_id), 'latest run id must be retained');
+
+  return {
+    run_id: run.run_id,
+    before_run_ids: beforeRunIds,
+    after_run_ids: afterRunIds,
+    pruned_run_ids: sortRunIdsNumerically(actualPruned)
+  };
+}
+
 const scenario = readJson(path.join(root, SCENARIO_FILE));
 const expected = readJson(path.join(root, EXPECTED_FILE));
 
@@ -193,11 +303,16 @@ assert.ok(
   'expected shadow v2 to discover additional bounded cycles in this fixture'
 );
 
+const errorCase = withEnv(scenario.shadow_error_env ?? {}, () => runShadowErrorCase({ label: 'error', scenario }));
+const retentionCase = withEnv(scenario.retention_env ?? {}, () => runRetentionRolloverCase({ label: 'rollover', scenario }));
+
 const out = canonicalize({
   deterministic_shadow_metrics: true,
   shadow_structural_hash: stableHash(first.structural_shadow),
   run_summary: first.run_summary,
-  shadow: first.structural_shadow
+  shadow: first.structural_shadow,
+  shadow_error_fallback: errorCase,
+  retention_rollover: retentionCase
 });
 writeFileSync(path.join(outDir, OUTPUT_FILE), JSON.stringify(out, null, 2));
 
