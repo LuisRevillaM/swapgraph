@@ -836,52 +836,57 @@ export class MarketplaceMatchingService {
 
         let canaryDiffRecord = null;
         let shadowRecord = null;
+        const skipShadowDueToPrimaryRollbackLatch = primaryConfig.enabled
+          && canarySkippedReason === 'rollback_active'
+          && !v2Result;
         if (v2Config.shadow_enabled) {
-          try {
-            if (!v2Result) {
-              if (v2Config.force_shadow_error) {
-                throw new Error('forced matching v2 shadow error');
+          if (!skipShadowDueToPrimaryRollbackLatch) {
+            try {
+              if (!v2Result) {
+                if (v2Config.force_shadow_error) {
+                  throw new Error('forced matching v2 shadow error');
+                }
+                v2Result = runMatcherWithConfig({
+                  intents: activeIntents,
+                  assetValuesUsd,
+                  edgeIntents,
+                  nowIso: requestedAt,
+                  config: v2Config
+                });
               }
-              v2Result = runMatcherWithConfig({
-                intents: activeIntents,
-                assetValuesUsd,
-                edgeIntents,
-                nowIso: requestedAt,
-                config: v2Config
+
+              v2SafetyTriggers = applyForcedSafetyTriggers({
+                safety: {
+                  timeout_reached: Boolean(v2Result?.matching?.stats?.cycle_enumeration_timed_out),
+                  max_cycles_reached: Boolean(v2Result?.matching?.stats?.cycle_enumeration_limited)
+                },
+                primaryConfig
               });
+
+              shadowRecord = buildShadowDiffRecord({
+                runId,
+                recordedAt: requestedAt,
+                maxProposals,
+                v1Config,
+                v1Result,
+                v2Config,
+                v2Result
+              });
+              shadowRecord = applySafetyToDiffRecord({
+                diffRecord: shadowRecord,
+                safety: v2SafetyTriggers
+              });
+              canaryDiffRecord = shadowRecord;
+              this.store.state.marketplace_matching_shadow_diffs[runId] = shadowRecord;
+            } catch (error) {
+              shadowRecord = buildShadowErrorRecord({
+                runId,
+                recordedAt: requestedAt,
+                v2Config,
+                error
+              });
+              this.store.state.marketplace_matching_shadow_diffs[runId] = shadowRecord;
             }
-
-            v2SafetyTriggers = applyForcedSafetyTriggers({
-              safety: {
-                timeout_reached: Boolean(v2Result?.matching?.stats?.cycle_enumeration_timed_out),
-                max_cycles_reached: Boolean(v2Result?.matching?.stats?.cycle_enumeration_limited)
-              },
-              primaryConfig
-            });
-
-            shadowRecord = buildShadowDiffRecord({
-              runId,
-              recordedAt: requestedAt,
-              maxProposals,
-              v1Config,
-              v1Result,
-              v2Config,
-              v2Result
-            });
-            shadowRecord = applySafetyToDiffRecord({
-              diffRecord: shadowRecord,
-              safety: v2SafetyTriggers
-            });
-            canaryDiffRecord = shadowRecord;
-            this.store.state.marketplace_matching_shadow_diffs[runId] = shadowRecord;
-          } catch (error) {
-            shadowRecord = buildShadowErrorRecord({
-              runId,
-              recordedAt: requestedAt,
-              v2Config,
-              error
-            });
-            this.store.state.marketplace_matching_shadow_diffs[runId] = shadowRecord;
           }
 
           pruneShadowDiffHistory({

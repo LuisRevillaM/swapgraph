@@ -305,6 +305,34 @@
         "sample_summary_timeout_rate_bps": 0,
         "sample_summary_limited_rate_bps": 0,
         "sample_summary_non_negative_delta_rate_bps": 0,
+        "shadow_record_present": false,
+        "run_candidate_cycles_source": "v1"
+      }
+    },
+    {
+      "label": "rollback_latched_shadow_suppressed",
+      "env": {
+        "MATCHING_V2_CANARY_ROLLBACK_WINDOW_RUNS": "1",
+        "MATCHING_V2_SHADOW": "1",
+        "MATCHING_V2_SHADOW_FORCE_ERROR": "1"
+      },
+      "recorded_at": "2026-02-26T00:03:30.000Z",
+      "expect": {
+        "mode": "v2_primary",
+        "primary_engine": "v1",
+        "canary_selected": false,
+        "skipped_reason": "rollback_active",
+        "routed_to_v2": false,
+        "fallback_to_v1": false,
+        "rollback_triggered": false,
+        "rollback_active_after": true,
+        "sample_summary_samples_count": 1,
+        "sample_summary_reason_code": "canary_error_rate_exceeded",
+        "sample_summary_error_rate_bps": 10000,
+        "sample_summary_timeout_rate_bps": 0,
+        "sample_summary_limited_rate_bps": 0,
+        "sample_summary_non_negative_delta_rate_bps": 0,
+        "shadow_record_present": false,
         "run_candidate_cycles_source": "v1"
       }
     },
@@ -331,6 +359,7 @@
         "sample_summary_timeout_rate_bps": 0,
         "sample_summary_limited_rate_bps": 0,
         "sample_summary_non_negative_delta_rate_bps": 10000,
+        "shadow_record_present": false,
         "run_candidate_cycles_source": "v2"
       }
     }

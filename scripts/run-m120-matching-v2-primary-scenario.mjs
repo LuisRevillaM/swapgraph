@@ -102,7 +102,7 @@ function createSeededStore({ seedState }) {
   return store;
 }
 
-function assertStepExpectations({ step, run, decision }) {
+function assertStepExpectations({ step, run, decision, shadowRecord }) {
   const expect = step?.expect ?? {};
   if (expect.mode !== undefined) {
     assert.equal(decision?.mode ?? null, expect.mode, `mode mismatch for step=${step.label}`);
@@ -199,6 +199,20 @@ function assertStepExpectations({ step, run, decision }) {
       `run candidate_cycles should match v2 metrics for step=${step.label}`
     );
   }
+  if (expect.shadow_record_present !== undefined) {
+    assert.equal(
+      Boolean(shadowRecord && typeof shadowRecord === 'object'),
+      Boolean(expect.shadow_record_present),
+      `shadow_record_present mismatch for step=${step.label}`
+    );
+  }
+  if (expect.shadow_error_code !== undefined) {
+    assert.equal(
+      shadowRecord?.shadow_error?.code ?? null,
+      expect.shadow_error_code,
+      `shadow_error_code mismatch for step=${step.label}`
+    );
+  }
 }
 
 const scenario = readJson(path.join(root, SCENARIO_FILE));
@@ -236,13 +250,14 @@ for (const step of scenario.steps ?? []) {
   assert.ok(run, `run response missing for step=${step?.label}`);
   const decision = store.state.marketplace_matching_canary_decisions?.[run.run_id] ?? null;
   assert.ok(decision, `decision record missing for step=${step?.label}`);
+  const shadowRecord = store.state.marketplace_matching_shadow_diffs?.[run.run_id] ?? null;
   assert.equal(
     Number(run?.stats?.candidate_cycles ?? -1),
     Number(decision?.metrics?.primary_candidate_cycles ?? -2),
     `run candidate_cycles should match primary metrics for step=${step?.label}`
   );
 
-  assertStepExpectations({ step, run, decision });
+  assertStepExpectations({ step, run, decision, shadowRecord });
 
   stepSummaries.push(
     canonicalize({
@@ -286,6 +301,10 @@ for (const step of scenario.steps ?? []) {
           limited_rate_bps: Number(decision?.sample_summary?.rates_bps?.limited_rate_bps ?? 0),
           non_negative_delta_rate_bps: Number(decision?.sample_summary?.rates_bps?.non_negative_delta_rate_bps ?? 0)
         }
+      },
+      shadow: {
+        present: Boolean(shadowRecord && typeof shadowRecord === 'object'),
+        error_code: shadowRecord?.shadow_error?.code ?? null
       }
     })
   );
