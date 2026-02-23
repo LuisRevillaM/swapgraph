@@ -145,6 +145,34 @@ function assertStepExpectations({ step, run, decision }) {
       `sample_summary_reason_code mismatch for step=${step.label}`
     );
   }
+  if (expect.sample_summary_error_rate_bps !== undefined) {
+    assert.equal(
+      Number(decision?.sample_summary?.rates_bps?.error_rate_bps ?? -1),
+      Number(expect.sample_summary_error_rate_bps),
+      `sample_summary_error_rate_bps mismatch for step=${step.label}`
+    );
+  }
+  if (expect.sample_summary_timeout_rate_bps !== undefined) {
+    assert.equal(
+      Number(decision?.sample_summary?.rates_bps?.timeout_rate_bps ?? -1),
+      Number(expect.sample_summary_timeout_rate_bps),
+      `sample_summary_timeout_rate_bps mismatch for step=${step.label}`
+    );
+  }
+  if (expect.sample_summary_limited_rate_bps !== undefined) {
+    assert.equal(
+      Number(decision?.sample_summary?.rates_bps?.limited_rate_bps ?? -1),
+      Number(expect.sample_summary_limited_rate_bps),
+      `sample_summary_limited_rate_bps mismatch for step=${step.label}`
+    );
+  }
+  if (expect.sample_summary_non_negative_delta_rate_bps !== undefined) {
+    assert.equal(
+      Number(decision?.sample_summary?.rates_bps?.non_negative_delta_rate_bps ?? -1),
+      Number(expect.sample_summary_non_negative_delta_rate_bps),
+      `sample_summary_non_negative_delta_rate_bps mismatch for step=${step.label}`
+    );
+  }
   if (expect.run_candidate_cycles_source === 'v1') {
     assert.equal(
       Number(run?.stats?.candidate_cycles ?? -1),
@@ -236,7 +264,13 @@ for (const step of scenario.steps ?? []) {
       },
       sample_summary: {
         samples_count: Number(decision?.sample_summary?.samples_count ?? 0),
-        reason_code: decision?.sample_summary?.reason_code ?? null
+        reason_code: decision?.sample_summary?.reason_code ?? null,
+        rates_bps: {
+          error_rate_bps: Number(decision?.sample_summary?.rates_bps?.error_rate_bps ?? 0),
+          timeout_rate_bps: Number(decision?.sample_summary?.rates_bps?.timeout_rate_bps ?? 0),
+          limited_rate_bps: Number(decision?.sample_summary?.rates_bps?.limited_rate_bps ?? 0),
+          non_negative_delta_rate_bps: Number(decision?.sample_summary?.rates_bps?.non_negative_delta_rate_bps ?? 0)
+        }
       }
     })
   );

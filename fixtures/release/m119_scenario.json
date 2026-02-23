@@ -222,6 +222,10 @@
         "rollback_active_after": false,
         "sample_summary_samples_count": 0,
         "sample_summary_reason_code": null,
+        "sample_summary_error_rate_bps": 0,
+        "sample_summary_timeout_rate_bps": 0,
+        "sample_summary_limited_rate_bps": 0,
+        "sample_summary_non_negative_delta_rate_bps": 10000,
         "run_candidate_cycles_source": "v1"
       }
     },
