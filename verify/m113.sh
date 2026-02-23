@@ -35,6 +35,18 @@ for f in "${req[@]}"; do
   echo "found_file=$f" >> "$OUT_DIR/commands.log"
 done
 
+# Optional local credential bootstrap for non-interactive shells.
+RENDER_ENV_FILE="${RENDER_ENV_FILE:-$HOME/.swapgraph-render.env}"
+if [[ -f "$RENDER_ENV_FILE" ]]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "$RENDER_ENV_FILE"
+  set +a
+  echo "sourced_render_env_file=$RENDER_ENV_FILE" >> "$OUT_DIR/commands.log"
+else
+  echo "sourced_render_env_file=none" >> "$OUT_DIR/commands.log"
+fi
+
 if [[ "${INTEGRATION_ENABLED:-0}" != "1" ]]; then
   cat > "$OUT_DIR/integration_gate_failure.json" <<EOF
 {
