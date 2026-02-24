@@ -94,3 +94,22 @@ Auth in local runtime shell:
 - `x-actor-type` + `x-actor-id` for user/partner/agent identity.
 - Optional `x-auth-scopes` (comma or space-separated) when running strict auth mode (for example, `cycle_proposals:read` for `GET /cycle-proposals`).
 - Delegation tokens are supported via `Authorization: Bearer sgdt1...`.
+
+## Marketplace Client Harness
+A lightweight browser client is available for live API interaction and manual loop testing.
+
+```bash
+npm run start:client
+```
+
+Then open:
+- `http://127.0.0.1:4173`
+
+Optional runtime target override:
+```bash
+RUNTIME_SERVICE_URL=https://swapgraph-runtime-api.onrender.com npm run start:client
+```
+
+Notes:
+- The client uses a local proxy (`/api/*`) to avoid CORS issues.
+- It supports health checks, paired intent creation, intent listing, matching run execution, proposal listing, and proposal inspection.

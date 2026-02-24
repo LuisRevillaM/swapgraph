@@ -10,7 +10,7 @@ mkdir -p "$OUT_DIR" "$VERIFY_DIR" "$LATEST_VERIFY_DIR"
 {
   echo "# verify render live intent-cycle drill"
   echo "utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-  echo "$ INTEGRATION_ENABLED=1 DRILL_OUT_DIR=$OUT_DIR DRILL_RUNS=${DRILL_RUNS:-2} node scripts/run-render-intent-cycle-drill.mjs"
+  echo "$ INTEGRATION_ENABLED=1 DRILL_OUT_DIR=$OUT_DIR DRILL_RUNS=${DRILL_RUNS:-2} DRILL_PASS_RETRIES=${DRILL_PASS_RETRIES:-1} DRILL_HEALTH_STABILIZE=${DRILL_HEALTH_STABILIZE:-1} node scripts/run-render-intent-cycle-drill.mjs"
 } > "$VERIFY_DIR/commands.log"
 
 req=(
@@ -53,9 +53,13 @@ fi
 RUNTIME_SERVICE_URL="${RUNTIME_SERVICE_URL:-${RENDER_SERVICE_URL:-https://swapgraph-runtime-api.onrender.com}}"
 DRILL_RUNS="${DRILL_RUNS:-2}"
 DRILL_OUT_DIR="${DRILL_OUT_DIR:-$OUT_DIR}"
+DRILL_PASS_RETRIES="${DRILL_PASS_RETRIES:-1}"
+DRILL_HEALTH_STABILIZE="${DRILL_HEALTH_STABILIZE:-1}"
 
 RUNTIME_SERVICE_URL="$RUNTIME_SERVICE_URL" \
   DRILL_RUNS="$DRILL_RUNS" \
+  DRILL_PASS_RETRIES="$DRILL_PASS_RETRIES" \
+  DRILL_HEALTH_STABILIZE="$DRILL_HEALTH_STABILIZE" \
   DRILL_OUT_DIR="$DRILL_OUT_DIR" \
   node scripts/run-render-intent-cycle-drill.mjs >> "$VERIFY_DIR/commands.log" 2>&1
 

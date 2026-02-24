@@ -14,6 +14,20 @@ function parsePositiveInt(value, fallback) {
   return parsed;
 }
 
+function parseNonNegativeInt(value, fallback) {
+  const parsed = Number.parseInt(String(value ?? ''), 10);
+  if (!Number.isFinite(parsed) || parsed < 0) return fallback;
+  return parsed;
+}
+
+function parseBooleanFlag(value, fallback = false) {
+  if (value === undefined || value === null || value === '') return fallback;
+  const normalized = String(value).trim().toLowerCase();
+  if (['1', 'true', 'yes', 'on'].includes(normalized)) return true;
+  if (['0', 'false', 'no', 'off'].includes(normalized)) return false;
+  return fallback;
+}
+
 function tokenUtc(date = new Date()) {
   const y = date.getUTCFullYear();
   const m = String(date.getUTCMonth() + 1).padStart(2, '0');
@@ -67,10 +81,20 @@ async function httpJson({
   method = 'GET',
   headers = {},
   body,
-  okStatuses = [200]
+  okStatuses = [200],
+  retriesOverride,
+  timeoutMsOverride
 }) {
-  const retries = parsePositiveInt(process.env.DRILL_HTTP_RETRIES, 4);
-  const timeoutMs = parsePositiveInt(process.env.DRILL_HTTP_TIMEOUT_MS, 15000);
+  const retries = parsePositiveInt(
+    retriesOverride,
+    parsePositiveInt(process.env.DRILL_HTTP_RETRIES, 6)
+  );
+  const timeoutMs = parsePositiveInt(
+    timeoutMsOverride,
+    parsePositiveInt(process.env.DRILL_HTTP_TIMEOUT_MS, 15000)
+  );
+  const backoffBaseMs = parsePositiveInt(process.env.DRILL_HTTP_BACKOFF_BASE_MS, 500);
+  const backoffMaxMs = parsePositiveInt(process.env.DRILL_HTTP_BACKOFF_MAX_MS, 10000);
 
   for (let attempt = 0; attempt < retries; attempt += 1) {
     try {
@@ -100,7 +124,8 @@ async function httpJson({
         err.status = response.status;
         err.body = parsed;
         if (attempt + 1 < retries && retryableStatus(response.status)) {
-          await sleep(Math.min(5000, 400 * (attempt + 1)));
+          const delayMs = Math.min(backoffMaxMs, backoffBaseMs * (2 ** attempt)) + Math.floor(Math.random() * 250);
+          await sleep(delayMs);
           continue;
         }
         throw err;
@@ -112,7 +137,8 @@ async function httpJson({
       };
     } catch (error) {
       if (attempt + 1 < retries && retryableNetworkError(error)) {
-        await sleep(Math.min(5000, 400 * (attempt + 1)));
+        const delayMs = Math.min(backoffMaxMs, backoffBaseMs * (2 ** attempt)) + Math.floor(Math.random() * 250);
+        await sleep(delayMs);
         continue;
       }
       throw error;
@@ -197,6 +223,73 @@ function errorSummary(error) {
 
 function nonceToken(index) {
   return `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}${index}`;
+}
+
+function isRetryablePassRecord(pass) {
+  const status = Number(pass?.error?.status);
+  if (retryableStatus(status)) return true;
+
+  const message = String(pass?.error?.message ?? '').toLowerCase();
+  if (message.includes('fetch failed')) return true;
+  if (message.includes('timed out')) return true;
+  if (message.includes('econn')) return true;
+  if (message.includes('socket')) return true;
+
+  return false;
+}
+
+async function stabilizeHealth({
+  serviceUrl,
+  requiredStreak = 2,
+  timeoutMs = 90000,
+  pollMs = 2000
+}) {
+  const startedAtMs = Date.now();
+  let consecutiveOk = 0;
+  let attempts = 0;
+  let lastError = null;
+  let lastHealth = null;
+
+  while (Date.now() - startedAtMs < timeoutMs) {
+    attempts += 1;
+    try {
+      const response = await httpJson({
+        serviceUrl,
+        route: '/healthz',
+        method: 'GET',
+        okStatuses: [200],
+        retriesOverride: 2,
+        timeoutMsOverride: 12000
+      });
+      lastHealth = response.body ?? null;
+      if (response.body?.ok === true) {
+        consecutiveOk += 1;
+        if (consecutiveOk >= requiredStreak) {
+          return {
+            ok: true,
+            attempts,
+            consecutive_ok: consecutiveOk,
+            last_health: response.body
+          };
+        }
+      } else {
+        consecutiveOk = 0;
+      }
+    } catch (error) {
+      consecutiveOk = 0;
+      lastError = errorSummary(error);
+    }
+    await sleep(pollMs);
+  }
+
+  const timeoutError = new Error(`health stabilization timed out after ${timeoutMs}ms`);
+  timeoutError.details = {
+    attempts,
+    required_streak: requiredStreak,
+    last_error: lastError,
+    last_health: lastHealth
+  };
+  throw timeoutError;
 }
 
 async function runPass({ serviceUrl, passIndex, maxProposals }) {
@@ -513,12 +606,96 @@ const serviceUrl = (
 ).replace(/\/+$/g, '');
 const runsRequested = parsePositiveInt(process.env.DRILL_RUNS, DEFAULT_RUNS);
 const maxProposals = parsePositiveInt(process.env.DRILL_MAX_PROPOSALS, 200);
+const passRetries = parseNonNegativeInt(process.env.DRILL_PASS_RETRIES, 1);
+const passRetryBackoffMs = parsePositiveInt(process.env.DRILL_PASS_RETRY_BACKOFF_MS, 2000);
+const healthStabilizationEnabled = parseBooleanFlag(process.env.DRILL_HEALTH_STABILIZE, true);
+const healthStabilizationTimeoutMs = parsePositiveInt(process.env.DRILL_HEALTH_STABILIZE_TIMEOUT_MS, 90000);
+const healthStabilizationPollMs = parsePositiveInt(process.env.DRILL_HEALTH_STABILIZE_POLL_MS, 2000);
+const healthStabilizationStreak = parsePositiveInt(process.env.DRILL_HEALTH_STABILIZE_STREAK, 2);
 
 const startedAt = new Date().toISOString();
 const passRecords = [];
+let preflight = {
+  enabled: healthStabilizationEnabled,
+  ok: false,
+  attempts: 0,
+  required_streak: healthStabilizationStreak,
+  timeout_ms: healthStabilizationTimeoutMs,
+  poll_ms: healthStabilizationPollMs,
+  error: null,
+  last_health: null
+};
+
+if (healthStabilizationEnabled) {
+  try {
+    const stabilized = await stabilizeHealth({
+      serviceUrl,
+      requiredStreak: healthStabilizationStreak,
+      timeoutMs: healthStabilizationTimeoutMs,
+      pollMs: healthStabilizationPollMs
+    });
+    preflight = {
+      ...preflight,
+      ok: true,
+      attempts: stabilized.attempts,
+      last_health: stabilized.last_health
+    };
+  } catch (error) {
+    preflight = {
+      ...preflight,
+      ok: false,
+      error: errorSummary(error),
+      attempts: Number(error?.details?.attempts ?? 0),
+      last_health: error?.details?.last_health ?? null
+    };
+  }
+} else {
+  preflight.ok = true;
+}
 
 for (let idx = 1; idx <= runsRequested; idx += 1) {
-  const pass = await runPass({ serviceUrl, passIndex: idx, maxProposals });
+  const attempts = [];
+  let finalPass = null;
+
+  for (let attempt = 0; attempt <= passRetries; attempt += 1) {
+    if (attempt > 0 && healthStabilizationEnabled) {
+      try {
+        await stabilizeHealth({
+          serviceUrl,
+          requiredStreak: 1,
+          timeoutMs: Math.min(30000, healthStabilizationTimeoutMs),
+          pollMs: healthStabilizationPollMs
+        });
+      } catch {
+        // Retry path should still attempt the pass even if stabilization does not succeed quickly.
+      }
+    }
+
+    const pass = await runPass({ serviceUrl, passIndex: idx, maxProposals });
+    pass.retry = {
+      attempt: attempt + 1,
+      max_attempts: passRetries + 1
+    };
+    attempts.push({
+      attempt: attempt + 1,
+      ok: pass.ok,
+      run_id: pass.run?.run_id ?? null,
+      error_message: pass.error?.message ?? null,
+      status: pass.error?.status ?? null
+    });
+
+    const retryable = !pass.ok && isRetryablePassRecord(pass);
+    const hasAttemptsRemaining = attempt < passRetries;
+    if (!retryable || !hasAttemptsRemaining || pass.ok) {
+      finalPass = pass;
+      break;
+    }
+
+    const retryDelayMs = Math.min(12000, passRetryBackoffMs * (2 ** attempt));
+    await sleep(retryDelayMs);
+  }
+
+  const pass = finalPass ?? await runPass({ serviceUrl, passIndex: idx, maxProposals });
   const file = `render-intent-cycle-drill-${tokenUtc()}-p${String(idx).padStart(2, '0')}.json`;
   writeJson(path.join(outDir, file), pass);
 
@@ -532,6 +709,8 @@ for (let idx = 1; idx <= runsRequested; idx += 1) {
     matched_proposal_id: pass.matched_proposal_id ?? null,
     cleanup_ok: pass.cleanup?.ok === true,
     error_message: pass.error?.message ?? null,
+    attempts_count: attempts.length,
+    attempts,
     pass: clone(pass)
   });
 }
@@ -549,6 +728,8 @@ const summary = {
   finished_at: new Date().toISOString(),
   ok: failureCount === 0,
   service_url: serviceUrl,
+  preflight,
+  pass_retries: passRetries,
   runs_requested: runsRequested,
   runs_completed: passRecords.length,
   success_count: successCount,
@@ -562,7 +743,9 @@ const summary = {
     candidate_cycles: row.candidate_cycles,
     matched_proposal_id: row.matched_proposal_id,
     cleanup_ok: row.cleanup_ok,
-    error_message: row.error_message
+    error_message: row.error_message,
+    attempts_count: row.attempts_count,
+    attempts: row.attempts
   }))
 };
 

@@ -7,6 +7,7 @@
     "build": "node scripts/sync-matching-ts-shadow-runtime.mjs --check",
     "start:api": "node scripts/run-api-server.mjs",
     "start:api:strict": "AUTHZ_ENFORCE=1 node scripts/run-api-server.mjs",
+    "start:client": "node scripts/run-marketplace-client.mjs",
     "migrate:state": "node scripts/migrate-state-store.mjs",
     "migrate:json-to-sqlite": "node scripts/migrate-json-state-to-sqlite.mjs",
     "verify:baseline": "bash scripts/verify-release-baseline.sh",
