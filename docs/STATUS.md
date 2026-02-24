@@ -3,7 +3,7 @@
 Last updated: 2026-02-24
 
 ## Autopilot
-- Status: **implementation closure** (M123 verifier-complete; live Render drill verifier productized)
+- Status: **implementation closure** (M124 verifier-complete; live Render drill verifier productized)
 - Canonical plan: `docs/source/LATEST.md` (v2.0)
 
 ## Milestones (progress)
@@ -134,10 +134,11 @@ Last updated: 2026-02-24
 - M121: ✅ TypeScript shadow scaffold + parity gates (fixtures-first, non-behavioral) (`src-ts` wrappers + deterministic scaffold contract + composed parity checks via `verify:m5`, `verify:m111`, `verify:m114`)
 - M122: ✅ TypeScript matching module migration phase 1 (fixtures-first, non-breaking) (wrapper removal + concrete `.mts` implementations for `assetKeys`/`wantSpec` with deterministic normalized parity-hash gate and composed `verify:m5`, `verify:m111`, and `verify:m114` dependencies)
 - M123: ✅ TypeScript matching module migration phase 2 (fixtures-first, non-breaking) (wrapper removal + concrete `.mts` implementations for `values`/`scoring`/`proposals` with deterministic normalized parity-hash gate and composed `verify:m122` dependency)
+- M124: ✅ TypeScript matching module migration phase 3 (fixtures-first, non-breaking) (wrapper removal + concrete `.mts` implementations for `cycles`/`graph`/`engine` with deterministic normalized parity-hash gate and composed `verify:m123` dependency)
 
 ## Next
-- Current mode: matching performance tranche M115–M123 is verifier-complete with v2 full-primary runtime, rollback/fallback controls, and concrete TS migrations for matching-core proposal synthesis modules proven fixtures-first.
-- Immediate target: M124 TS migration phase 3 for matching-core modules (`cycles`/`graph`/`engine`) with the same parity-gated, non-breaking contract.
+- Current mode: matching performance tranche M115–M124 is verifier-complete with v2 full-primary runtime, rollback/fallback controls, and concrete TS migrations for matching-core modules proven fixtures-first.
+- Immediate target: M125 runtime TypeScript execution shadow (non-breaking) that runs TS matcher path in-process for parity telemetry while JS remains authoritative.
 - Follow-on contract decision: M120.1 optional global rollback shadow suppression toggle (`MATCHING_V2_ROLLBACK_SUPPRESS_SHADOW`, default `0`) with canary-mode proof.
 - TypeScript track (parallel, non-breaking): continue replacing `src-ts` wrappers module-by-module with concrete TS implementations behind parity gates.
 - Runtime shell available for request/response validation: `npm run start:api` (`src/server/runtimeApiServer.mjs`).

@@ -136,6 +136,7 @@
     "verify:m121": "bash verify/m121.sh",
     "verify:m122": "bash verify/m122.sh",
     "verify:m123": "bash verify/m123.sh",
+    "verify:m124": "bash verify/m124.sh",
     "verify:render:drill": "bash verify/render-drill.sh"
   },
   "devDependencies": {

@@ -1,0 +1,56 @@
+{
+  "milestone": "M124",
+  "parity_dependency_verifiers": [
+    "npm run verify:m123"
+  ],
+  "migrated_modules": [
+    {
+      "shadow_module": "src-ts/matching/cycles.mts",
+      "source_module": "src/matching/cycles.mjs",
+      "expected_export_functions": [
+        "findBoundedSimpleCycles",
+        "findCyclesLen2",
+        "findCyclesLen3"
+      ],
+      "expected_imports": []
+    },
+    {
+      "shadow_module": "src-ts/matching/graph.mts",
+      "source_module": "src/matching/graph.mjs",
+      "expected_export_functions": [
+        "buildCompatibilityGraph"
+      ],
+      "expected_imports": [
+        "./wantSpec.mts",
+        "./values.mts"
+      ]
+    },
+    {
+      "shadow_module": "src-ts/matching/engine.mts",
+      "source_module": "src/matching/engine.mjs",
+      "expected_export_functions": [
+        "runMatching"
+      ],
+      "expected_imports": [
+        "./cycles.mts",
+        "./graph.mts",
+        "./proposals.mts"
+      ]
+    }
+  ],
+  "index_contracts": [
+    {
+      "index_module": "src-ts/matching/index.mts",
+      "expected_exports": [
+        "./assetKeys.mts",
+        "./cycles.mts",
+        "./engine.mts",
+        "./graph.mts",
+        "./proposals.mts",
+        "./scoring.mts",
+        "./values.mts",
+        "./wantSpec.mts"
+      ]
+    }
+  ]
+}

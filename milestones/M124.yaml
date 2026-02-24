@@ -1,0 +1,16 @@
+name: M124
+commands:
+  - cmd: "npm run verify:m124"
+artifacts:
+  - artifact: "docs/prd/M124.md"
+  - artifact: "src-ts/matching/cycles.mts"
+  - artifact: "src-ts/matching/graph.mts"
+  - artifact: "src-ts/matching/engine.mts"
+  - artifact: "scripts/run-m124-typescript-matching-module-parity-phase3-scenario.mjs"
+  - artifact: "fixtures/release/m124_scenario.json"
+  - artifact: "fixtures/release/m124_expected.json"
+  - artifact: "verify/m124.sh"
+  - artifact: "milestones/M124.yaml"
+  - artifact: "artifacts/milestones/M124/latest/commands.log"
+  - artifact: "artifacts/milestones/M124/latest/typescript_matching_module_parity_phase3_output.json"
+  - artifact: "artifacts/milestones/M124/latest/assertions.json"

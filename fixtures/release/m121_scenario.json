@@ -15,17 +15,20 @@
     {
       "shadow_module": "src-ts/matching/cycles.mts",
       "source_module": "src/matching/cycles.mjs",
-      "expected_export_from": "../../src/matching/cycles.mjs"
+      "expected_export_from": "../../src/matching/cycles.mjs",
+      "allow_concrete": true
     },
     {
       "shadow_module": "src-ts/matching/engine.mts",
       "source_module": "src/matching/engine.mjs",
-      "expected_export_from": "../../src/matching/engine.mjs"
+      "expected_export_from": "../../src/matching/engine.mjs",
+      "allow_concrete": true
     },
     {
       "shadow_module": "src-ts/matching/graph.mts",
       "source_module": "src/matching/graph.mjs",
-      "expected_export_from": "../../src/matching/graph.mjs"
+      "expected_export_from": "../../src/matching/graph.mjs",
+      "allow_concrete": true
     },
     {
       "shadow_module": "src-ts/matching/proposals.mts",
