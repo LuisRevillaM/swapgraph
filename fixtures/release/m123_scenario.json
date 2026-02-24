@@ -1,0 +1,57 @@
+{
+  "milestone": "M123",
+  "parity_dependency_verifiers": [
+    "npm run verify:m122"
+  ],
+  "migrated_modules": [
+    {
+      "shadow_module": "src-ts/matching/values.mts",
+      "source_module": "src/matching/values.mjs",
+      "expected_export_functions": [
+        "clamp01",
+        "round",
+        "valueOfAssets"
+      ],
+      "expected_imports": []
+    },
+    {
+      "shadow_module": "src-ts/matching/scoring.mts",
+      "source_module": "src/matching/scoring.mjs",
+      "expected_export_functions": [
+        "computeValueSpread",
+        "scoreCycle"
+      ],
+      "expected_imports": [
+        "./values.mts"
+      ]
+    },
+    {
+      "shadow_module": "src-ts/matching/proposals.mts",
+      "source_module": "src/matching/proposals.mjs",
+      "expected_export_functions": [
+        "buildProposal",
+        "selectDisjointProposals"
+      ],
+      "expected_imports": [
+        "node:crypto",
+        "./scoring.mts",
+        "./values.mts"
+      ]
+    }
+  ],
+  "index_contracts": [
+    {
+      "index_module": "src-ts/matching/index.mts",
+      "expected_exports": [
+        "./assetKeys.mts",
+        "./cycles.mts",
+        "./engine.mts",
+        "./graph.mts",
+        "./proposals.mts",
+        "./scoring.mts",
+        "./values.mts",
+        "./wantSpec.mts"
+      ]
+    }
+  ]
+}

@@ -30,17 +30,20 @@
     {
       "shadow_module": "src-ts/matching/proposals.mts",
       "source_module": "src/matching/proposals.mjs",
-      "expected_export_from": "../../src/matching/proposals.mjs"
+      "expected_export_from": "../../src/matching/proposals.mjs",
+      "allow_concrete": true
     },
     {
       "shadow_module": "src-ts/matching/scoring.mts",
       "source_module": "src/matching/scoring.mjs",
-      "expected_export_from": "../../src/matching/scoring.mjs"
+      "expected_export_from": "../../src/matching/scoring.mjs",
+      "allow_concrete": true
     },
     {
       "shadow_module": "src-ts/matching/values.mts",
       "source_module": "src/matching/values.mjs",
-      "expected_export_from": "../../src/matching/values.mjs"
+      "expected_export_from": "../../src/matching/values.mjs",
+      "allow_concrete": true
     },
     {
       "shadow_module": "src-ts/matching/wantSpec.mts",

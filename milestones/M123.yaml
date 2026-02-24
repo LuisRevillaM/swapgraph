@@ -1,0 +1,16 @@
+name: M123
+commands:
+  - cmd: "npm run verify:m123"
+artifacts:
+  - artifact: "docs/prd/M123.md"
+  - artifact: "src-ts/matching/values.mts"
+  - artifact: "src-ts/matching/scoring.mts"
+  - artifact: "src-ts/matching/proposals.mts"
+  - artifact: "scripts/run-m123-typescript-matching-module-parity-phase2-scenario.mjs"
+  - artifact: "fixtures/release/m123_scenario.json"
+  - artifact: "fixtures/release/m123_expected.json"
+  - artifact: "verify/m123.sh"
+  - artifact: "milestones/M123.yaml"
+  - artifact: "artifacts/milestones/M123/latest/commands.log"
+  - artifact: "artifacts/milestones/M123/latest/typescript_matching_module_parity_phase2_output.json"
+  - artifact: "artifacts/milestones/M123/latest/assertions.json"
