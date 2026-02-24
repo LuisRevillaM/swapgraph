@@ -1,7 +1,8 @@
 import { authorizeApiOperation } from '../core/authz.mjs';
 import { idempotencyScopeKey, payloadHash } from '../core/idempotency.mjs';
 import { commitIdForProposalId } from '../commit/commitIds.mjs';
-import { runMatching } from '../matching/engine.mjs';
+import { runMatching as runMatchingJs } from '../matching/engine.mjs';
+import { runMatching as runMatchingTsShadow } from '../matching-ts-shadow/engine.mjs';
 import { createHash } from 'node:crypto';
 
 function correlationId(op) {
@@ -76,6 +77,18 @@ function readMatchingV2ShadowConfigFromEnv() {
       max: 5000
     }),
     max_shadow_diffs: parseBoundedInt(process.env.MATCHING_V2_MAX_SHADOW_DIFFS, {
+      fallback: 1000,
+      min: 1,
+      max: 100000
+    })
+  };
+}
+
+function readMatchingTsShadowConfigFromEnv() {
+  return {
+    enabled: parseBooleanFlag(process.env.MATCHING_TS_SHADOW, false),
+    force_shadow_error: parseBooleanFlag(process.env.MATCHING_TS_SHADOW_FORCE_ERROR, false),
+    max_shadow_diffs: parseBoundedInt(process.env.MATCHING_TS_SHADOW_MAX_DIFFS, {
       fallback: 1000,
       min: 1,
       max: 100000
@@ -189,7 +202,28 @@ function summarizeSelectedProposals(proposals) {
 
 function runMatcherWithConfig({ intents, assetValuesUsd, edgeIntents, nowIso, config }) {
   const startedAtNs = process.hrtime.bigint();
-  const matching = runMatching({
+  const matching = runMatchingJs({
+    intents,
+    assetValuesUsd,
+    edgeIntents,
+    nowIso,
+    minCycleLength: config.min_cycle_length,
+    maxCycleLength: config.max_cycle_length,
+    maxEnumeratedCycles: config.max_cycles_explored,
+    timeoutMs: config.timeout_ms,
+    includeCycleDiagnostics: config.include_cycle_diagnostics === true
+  });
+  const runtimeMs = Number((process.hrtime.bigint() - startedAtNs) / 1000000n);
+
+  return {
+    matching,
+    runtime_ms: runtimeMs
+  };
+}
+
+function runMatcherTsShadowWithConfig({ intents, assetValuesUsd, edgeIntents, nowIso, config }) {
+  const startedAtNs = process.hrtime.bigint();
+  const matching = runMatchingTsShadow({
     intents,
     assetValuesUsd,
     edgeIntents,
@@ -233,6 +267,18 @@ function pruneShadowDiffHistory({ store, maxShadowDiffs }) {
   if (overflow <= 0) return;
   for (let idx = 0; idx < overflow; idx += 1) {
     delete store.state.marketplace_matching_shadow_diffs[runIds[idx]];
+  }
+}
+
+function pruneTsShadowDiffHistory({ store, maxShadowDiffs }) {
+  if (!store?.state?.marketplace_matching_ts_shadow_diffs || !Number.isFinite(maxShadowDiffs) || maxShadowDiffs < 1) {
+    return;
+  }
+  const runIds = sortRunIdsBySequence(Object.keys(store.state.marketplace_matching_ts_shadow_diffs));
+  const overflow = runIds.length - maxShadowDiffs;
+  if (overflow <= 0) return;
+  for (let idx = 0; idx < overflow; idx += 1) {
+    delete store.state.marketplace_matching_ts_shadow_diffs[runIds[idx]];
   }
 }
 
@@ -459,6 +505,91 @@ function buildShadowDiffRecord({
   };
 }
 
+function buildTsShadowErrorRecord({ runId, recordedAt, primaryEngine, matcherConfig, error }) {
+  return {
+    run_id: runId,
+    recorded_at: recordedAt,
+    primary_engine: primaryEngine,
+    ts_shadow_error: {
+      code: 'matching_ts_shadow_failed',
+      name: String(error?.name ?? 'Error'),
+      message: String(error?.message ?? 'typescript shadow execution failed')
+    },
+    matcher_cycle_bounds: {
+      min_cycle_length: matcherConfig.min_cycle_length,
+      max_cycle_length: matcherConfig.max_cycle_length
+    },
+    matcher_safety_limits: {
+      max_cycles_explored: matcherConfig.max_cycles_explored,
+      timeout_ms: matcherConfig.timeout_ms
+    }
+  };
+}
+
+function buildTsShadowDiffRecord({
+  runId,
+  recordedAt,
+  maxProposals,
+  primaryEngine,
+  matcherConfig,
+  jsResult,
+  tsResult
+}) {
+  const jsSelected = (jsResult?.matching?.proposals ?? []).slice(0, maxProposals);
+  const tsSelected = (tsResult?.matching?.proposals ?? []).slice(0, maxProposals);
+  const jsSummary = summarizeSelectedProposals(jsSelected);
+  const tsSummary = summarizeSelectedProposals(tsSelected);
+
+  const jsSet = new Set(jsSummary.selected_cycle_keys);
+  const tsSet = new Set(tsSummary.selected_cycle_keys);
+  const overlap = [...jsSet].filter(cycleKey => tsSet.has(cycleKey)).sort();
+  const onlyJs = [...jsSet].filter(cycleKey => !tsSet.has(cycleKey)).sort();
+  const onlyTs = [...tsSet].filter(cycleKey => !jsSet.has(cycleKey)).sort();
+  const deltaScoreScaled = tsSummary.selected_total_score_scaled - jsSummary.selected_total_score_scaled;
+
+  return {
+    run_id: runId,
+    recorded_at: recordedAt,
+    primary_engine: primaryEngine,
+    max_proposals: maxProposals,
+    matcher_cycle_bounds: {
+      min_cycle_length: matcherConfig.min_cycle_length,
+      max_cycle_length: matcherConfig.max_cycle_length
+    },
+    matcher_safety_limits: {
+      max_cycles_explored: matcherConfig.max_cycles_explored,
+      timeout_ms: matcherConfig.timeout_ms
+    },
+    metrics: {
+      js_candidate_cycles: Number(jsResult?.matching?.stats?.candidate_cycles ?? 0),
+      ts_candidate_cycles: Number(tsResult?.matching?.stats?.candidate_cycles ?? 0),
+      js_selected_proposals: Number(jsSummary.selected_count ?? 0),
+      ts_selected_proposals: Number(tsSummary.selected_count ?? 0),
+      js_vs_ts_overlap: overlap.length,
+      delta_score_sum_scaled: deltaScoreScaled,
+      delta_score_sum: scoreScaledToDecimal(deltaScoreScaled),
+      js_runtime_ms: Number(jsResult?.runtime_ms ?? 0),
+      ts_runtime_ms: Number(tsResult?.runtime_ms ?? 0)
+    },
+    js_safety_triggers: {
+      max_cycles_reached: Boolean(jsResult?.matching?.stats?.cycle_enumeration_limited),
+      timeout_reached: Boolean(jsResult?.matching?.stats?.cycle_enumeration_timed_out)
+    },
+    ts_safety_triggers: {
+      max_cycles_reached: Boolean(tsResult?.matching?.stats?.cycle_enumeration_limited),
+      timeout_reached: Boolean(tsResult?.matching?.stats?.cycle_enumeration_timed_out)
+    },
+    selected_cycle_keys: {
+      overlap_count: overlap.length,
+      only_js_count: onlyJs.length,
+      only_ts_count: onlyTs.length,
+      overlap,
+      only_js: onlyJs,
+      only_ts: onlyTs
+    }
+  };
+}
+
 function errorResponse(correlationIdValue, code, message, details = {}) {
   return {
     correlation_id: correlationIdValue,
@@ -552,6 +683,7 @@ function ensureState(store) {
   store.state.marketplace_matching_run_counter ||= 0;
   store.state.marketplace_matching_proposal_runs ||= {};
   store.state.marketplace_matching_shadow_diffs ||= {};
+  store.state.marketplace_matching_ts_shadow_diffs ||= {};
   store.state.edge_intents ||= {};
   store.state.edge_intent_counter ||= 0;
 }
@@ -707,6 +839,7 @@ export class MarketplaceMatchingService {
           timeout_ms: null
         };
         const v2Config = readMatchingV2ShadowConfigFromEnv();
+        const tsShadowConfig = readMatchingTsShadowConfigFromEnv();
         const canaryConfig = readMatchingV2CanaryConfigFromEnv();
         const primaryConfig = readMatchingV2PrimaryConfigFromEnv();
 
@@ -911,6 +1044,48 @@ export class MarketplaceMatchingService {
 
         const matching = primaryResult.matching;
         const selected = (matching?.proposals ?? []).slice(0, maxProposals);
+        const primaryMatcherConfig = primaryEngine === 'v2' ? v2Config : v1Config;
+
+        if (tsShadowConfig.enabled) {
+          try {
+            if (tsShadowConfig.force_shadow_error) {
+              throw new Error('forced matching ts shadow error');
+            }
+
+            const tsResult = runMatcherTsShadowWithConfig({
+              intents: activeIntents,
+              assetValuesUsd,
+              edgeIntents,
+              nowIso: requestedAt,
+              config: primaryMatcherConfig
+            });
+
+            const tsShadowRecord = buildTsShadowDiffRecord({
+              runId,
+              recordedAt: requestedAt,
+              maxProposals,
+              primaryEngine,
+              matcherConfig: primaryMatcherConfig,
+              jsResult: primaryResult,
+              tsResult
+            });
+            this.store.state.marketplace_matching_ts_shadow_diffs[runId] = tsShadowRecord;
+          } catch (error) {
+            const tsShadowErrorRecord = buildTsShadowErrorRecord({
+              runId,
+              recordedAt: requestedAt,
+              primaryEngine,
+              matcherConfig: primaryMatcherConfig,
+              error
+            });
+            this.store.state.marketplace_matching_ts_shadow_diffs[runId] = tsShadowErrorRecord;
+          }
+
+          pruneTsShadowDiffHistory({
+            store: this.store,
+            maxShadowDiffs: tsShadowConfig.max_shadow_diffs
+          });
+        }
 
         if (decisionTrackingEnabled) {
           const canarySample = !canarySelected

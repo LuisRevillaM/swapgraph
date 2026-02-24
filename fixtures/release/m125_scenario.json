@@ -1,0 +1,246 @@
+{
+  "milestone": "M125",
+  "actor": {
+    "type": "partner",
+    "id": "partner_marketplace"
+  },
+  "auth": {
+    "scopes": [
+      "settlement:write"
+    ]
+  },
+  "ts_shadow_env": {
+    "MATCHING_TS_SHADOW": "1",
+    "MATCHING_TS_SHADOW_FORCE_ERROR": "0",
+    "MATCHING_TS_SHADOW_MAX_DIFFS": "1000",
+    "MATCHING_V2_PRIMARY_ENABLED": "0",
+    "MATCHING_V2_CANARY_ENABLED": "0",
+    "MATCHING_V2_SHADOW": "0"
+  },
+  "ts_shadow_error_env": {
+    "MATCHING_TS_SHADOW": "1",
+    "MATCHING_TS_SHADOW_FORCE_ERROR": "1",
+    "MATCHING_TS_SHADOW_MAX_DIFFS": "1000",
+    "MATCHING_V2_PRIMARY_ENABLED": "0",
+    "MATCHING_V2_CANARY_ENABLED": "0",
+    "MATCHING_V2_SHADOW": "0"
+  },
+  "retention_env": {
+    "MATCHING_TS_SHADOW": "1",
+    "MATCHING_TS_SHADOW_FORCE_ERROR": "0",
+    "MATCHING_TS_SHADOW_MAX_DIFFS": "2",
+    "MATCHING_V2_PRIMARY_ENABLED": "0",
+    "MATCHING_V2_CANARY_ENABLED": "0",
+    "MATCHING_V2_SHADOW": "0"
+  },
+  "retention_seed_state": {
+    "marketplace_matching_run_counter": 1000000,
+    "marketplace_matching_ts_shadow_diffs": {
+      "mrun_999998": {
+        "run_id": "mrun_999998",
+        "recorded_at": "2026-02-24T00:00:00.000Z"
+      },
+      "mrun_999999": {
+        "run_id": "mrun_999999",
+        "recorded_at": "2026-02-24T00:01:00.000Z"
+      },
+      "mrun_1000000": {
+        "run_id": "mrun_1000000",
+        "recorded_at": "2026-02-24T00:02:00.000Z"
+      }
+    }
+  },
+  "retention_expect": {
+    "max_shadow_diffs": 2,
+    "kept_run_ids": [
+      "mrun_1000000",
+      "mrun_1000001"
+    ],
+    "pruned_run_ids": [
+      "mrun_999998",
+      "mrun_999999"
+    ]
+  },
+  "seed_state": {
+    "intents": {
+      "intent_a": {
+        "id": "intent_a",
+        "actor": {
+          "type": "user",
+          "id": "u_a"
+        },
+        "offer": [
+          {
+            "platform": "steam",
+            "asset_id": "asset_a"
+          }
+        ],
+        "want_spec": {
+          "type": "set",
+          "any_of": [
+            {
+              "type": "specific_asset",
+              "platform": "steam",
+              "asset_key": "steam:asset_b"
+            }
+          ]
+        },
+        "value_band": {
+          "min_usd": 1,
+          "max_usd": 500
+        },
+        "trust_constraints": {
+          "max_cycle_length": 4,
+          "min_counterparty_reliability": 0
+        },
+        "time_constraints": {
+          "expires_at": "2027-03-01T00:00:00Z",
+          "urgency": "normal"
+        },
+        "settlement_preferences": {
+          "require_escrow": true
+        },
+        "status": "active"
+      },
+      "intent_b": {
+        "id": "intent_b",
+        "actor": {
+          "type": "user",
+          "id": "u_b"
+        },
+        "offer": [
+          {
+            "platform": "steam",
+            "asset_id": "asset_b"
+          }
+        ],
+        "want_spec": {
+          "type": "set",
+          "any_of": [
+            {
+              "type": "specific_asset",
+              "platform": "steam",
+              "asset_key": "steam:asset_c"
+            }
+          ]
+        },
+        "value_band": {
+          "min_usd": 1,
+          "max_usd": 500
+        },
+        "trust_constraints": {
+          "max_cycle_length": 4,
+          "min_counterparty_reliability": 0
+        },
+        "time_constraints": {
+          "expires_at": "2027-03-01T00:00:00Z",
+          "urgency": "normal"
+        },
+        "settlement_preferences": {
+          "require_escrow": true
+        },
+        "status": "active"
+      },
+      "intent_c": {
+        "id": "intent_c",
+        "actor": {
+          "type": "user",
+          "id": "u_c"
+        },
+        "offer": [
+          {
+            "platform": "steam",
+            "asset_id": "asset_c"
+          }
+        ],
+        "want_spec": {
+          "type": "set",
+          "any_of": [
+            {
+              "type": "specific_asset",
+              "platform": "steam",
+              "asset_key": "steam:asset_d"
+            }
+          ]
+        },
+        "value_band": {
+          "min_usd": 1,
+          "max_usd": 500
+        },
+        "trust_constraints": {
+          "max_cycle_length": 4,
+          "min_counterparty_reliability": 0
+        },
+        "time_constraints": {
+          "expires_at": "2027-03-01T00:00:00Z",
+          "urgency": "normal"
+        },
+        "settlement_preferences": {
+          "require_escrow": true
+        },
+        "status": "active"
+      },
+      "intent_d": {
+        "id": "intent_d",
+        "actor": {
+          "type": "user",
+          "id": "u_d"
+        },
+        "offer": [
+          {
+            "platform": "steam",
+            "asset_id": "asset_d"
+          }
+        ],
+        "want_spec": {
+          "type": "set",
+          "any_of": [
+            {
+              "type": "specific_asset",
+              "platform": "steam",
+              "asset_key": "steam:asset_a"
+            }
+          ]
+        },
+        "value_band": {
+          "min_usd": 1,
+          "max_usd": 500
+        },
+        "trust_constraints": {
+          "max_cycle_length": 4,
+          "min_counterparty_reliability": 0
+        },
+        "time_constraints": {
+          "expires_at": "2027-03-01T00:00:00Z",
+          "urgency": "normal"
+        },
+        "settlement_preferences": {
+          "require_escrow": true
+        },
+        "status": "active"
+      }
+    },
+    "proposals": {},
+    "tenancy": {
+      "proposals": {},
+      "cycles": {}
+    },
+    "marketplace_matching_proposal_runs": {},
+    "marketplace_matching_runs": {},
+    "marketplace_matching_run_counter": 0,
+    "marketplace_matching_shadow_diffs": {},
+    "marketplace_matching_ts_shadow_diffs": {},
+    "marketplace_asset_values": {}
+  },
+  "request": {
+    "replace_existing": true,
+    "max_proposals": 5,
+    "recorded_at": "2026-02-24T12:00:00.000Z",
+    "asset_values_usd": {
+      "asset_a": 100,
+      "asset_b": 101,
+      "asset_c": 99,
+      "asset_d": 100
+    }
+  }
+}

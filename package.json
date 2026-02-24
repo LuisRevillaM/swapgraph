@@ -137,6 +137,8 @@
     "verify:m122": "bash verify/m122.sh",
     "verify:m123": "bash verify/m123.sh",
     "verify:m124": "bash verify/m124.sh",
+    "verify:m125": "bash verify/m125.sh",
+    "sync:matching-ts-shadow": "node scripts/sync-matching-ts-shadow-runtime.mjs",
     "verify:render:drill": "bash verify/render-drill.sh"
   },
   "devDependencies": {
