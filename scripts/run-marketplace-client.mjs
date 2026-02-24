@@ -18,6 +18,7 @@ const MIME_TYPES = new Map([
   ['.html', 'text/html; charset=utf-8'],
   ['.css', 'text/css; charset=utf-8'],
   ['.js', 'application/javascript; charset=utf-8'],
+  ['.mjs', 'application/javascript; charset=utf-8'],
   ['.json', 'application/json; charset=utf-8'],
   ['.svg', 'image/svg+xml'],
   ['.png', 'image/png'],
@@ -51,6 +52,7 @@ function filterForwardHeaders(headers) {
     'x-actor-type',
     'x-actor-id',
     'x-auth-scopes',
+    'x-csrf-token',
     'x-now-iso'
   ]);
   const out = {};
@@ -72,7 +74,7 @@ async function readBodyBuffer(req) {
 
 function setCorsHeaders(res) {
   res.setHeader('access-control-allow-origin', '*');
-  res.setHeader('access-control-allow-headers', 'authorization, content-type, idempotency-key, x-actor-type, x-actor-id, x-auth-scopes, x-now-iso');
+  res.setHeader('access-control-allow-headers', 'authorization, content-type, idempotency-key, x-actor-type, x-actor-id, x-auth-scopes, x-csrf-token, x-now-iso');
   res.setHeader('access-control-allow-methods', 'GET,POST,PUT,DELETE,OPTIONS');
 }
 

@@ -2,97 +2,19 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>SwapGraph Marketplace Client</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./generated/tokens.css" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <div class="page-shell">
-      <header class="hero">
-        <p class="eyebrow">SwapGraph Runtime API Harness</p>
-        <h1>Marketplace Client</h1>
-        <p class="subtitle">Exercise the live intent → matching → proposals loop without milestone scripts.</p>
-      </header>
-
-      <main class="grid">
-        <section class="panel">
-          <h2>Connection</h2>
-          <div class="row">
-            <button id="btn-health" class="btn btn-primary">Check Health</button>
-            <button id="btn-reset" class="btn">Reset IDs</button>
-          </div>
-          <dl class="kv">
-            <div><dt>Proxy Upstream</dt><dd id="runtime-url">Unknown (run health check)</dd></div>
-            <div><dt>Store Backend</dt><dd id="health-backend">n/a</dd></div>
-            <div><dt>Persistence Mode</dt><dd id="health-mode">n/a</dd></div>
-            <div><dt>Intent Count</dt><dd id="health-intents">n/a</dd></div>
-          </dl>
-        </section>
-
-        <section class="panel">
-          <h2>Actors</h2>
-          <div class="field-grid">
-            <label>User A ID<input id="user-a-id" type="text" /></label>
-            <label>User B ID<input id="user-b-id" type="text" /></label>
-            <label>Partner ID<input id="partner-id" type="text" /></label>
-            <label>Max Proposals<input id="max-proposals" type="number" min="1" step="1" value="20" /></label>
-          </div>
-        </section>
-
-        <section class="panel">
-          <h2>Seed Pair</h2>
-          <p>Create two intents that should pair directly (A wants B, B wants A).</p>
-          <div class="field-grid">
-            <label>Asset A<input id="asset-a" type="text" /></label>
-            <label>Asset B<input id="asset-b" type="text" /></label>
-            <label>Value A (USD)<input id="value-a" type="number" min="1" step="1" value="100" /></label>
-            <label>Value B (USD)<input id="value-b" type="number" min="1" step="1" value="101" /></label>
-          </div>
-          <div class="row">
-            <button id="btn-seed-pair" class="btn btn-primary">Create Intent Pair</button>
-            <button id="btn-list-intents" class="btn">List Intents</button>
-          </div>
-          <p id="seed-ids" class="mono small"></p>
-        </section>
-
-        <section class="panel">
-          <h2>Matching</h2>
-          <div class="row">
-            <button id="btn-run-matching" class="btn btn-primary">Run Matching</button>
-            <button id="btn-load-proposals" class="btn">Load Proposals</button>
-          </div>
-          <dl class="kv">
-            <div><dt>Run ID</dt><dd id="run-id">n/a</dd></div>
-            <div><dt>Selected</dt><dd id="run-selected">n/a</dd></div>
-            <div><dt>Candidate Cycles</dt><dd id="run-cycles">n/a</dd></div>
-            <div><dt>Candidate Proposals</dt><dd id="run-proposals">n/a</dd></div>
-          </dl>
-        </section>
-
-        <section class="panel panel-wide">
-          <h2>Proposals</h2>
-          <div class="row">
-            <select id="proposal-select"></select>
-            <button id="btn-inspect-proposal" class="btn">Inspect Proposal</button>
-          </div>
-          <div id="proposal-table" class="table-wrap"></div>
-        </section>
-
-        <section class="panel panel-wide">
-          <h2>Response Viewer</h2>
-          <pre id="response-viewer"></pre>
-        </section>
-
-        <section class="panel panel-wide">
-          <h2>Event Log</h2>
-          <div id="event-log" class="log"></div>
-        </section>
-      </main>
-    </div>
-
+    <div id="app-root"></div>
     <script type="module" src="./app.js"></script>
   </body>
 </html>
