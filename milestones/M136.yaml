@@ -1,0 +1,16 @@
+name: M136
+commands:
+  - cmd: "npm run verify:m136"
+artifacts:
+  - artifact: "docs/prd/M136.md"
+  - artifact: "src/service/marketplaceMatchingCanaryDecisionHelpers.mjs"
+  - artifact: "src-ts/service/marketplaceMatchingCanaryDecisionHelpers.mts"
+  - artifact: "src/service/marketplaceMatchingService.mjs"
+  - artifact: "scripts/run-m136-typescript-service-canary-decision-helper-parity-scenario.mjs"
+  - artifact: "fixtures/release/m136_scenario.json"
+  - artifact: "fixtures/release/m136_expected.json"
+  - artifact: "verify/m136.sh"
+  - artifact: "milestones/M136.yaml"
+  - artifact: "artifacts/milestones/M136/latest/commands.log"
+  - artifact: "artifacts/milestones/M136/latest/typescript_service_canary_decision_helper_parity_output.json"
+  - artifact: "artifacts/milestones/M136/latest/assertions.json"
