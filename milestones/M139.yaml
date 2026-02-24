@@ -1,0 +1,16 @@
+name: M139
+commands:
+  - cmd: "npm run verify:m139"
+artifacts:
+  - artifact: "docs/prd/M139.md"
+  - artifact: "src/service/marketplaceMatchingCanaryRoutingHelpers.mjs"
+  - artifact: "src-ts/service/marketplaceMatchingCanaryRoutingHelpers.mts"
+  - artifact: "src/service/marketplaceMatchingService.mjs"
+  - artifact: "scripts/run-m139-typescript-service-canary-routing-helper-parity-scenario.mjs"
+  - artifact: "fixtures/release/m139_scenario.json"
+  - artifact: "fixtures/release/m139_expected.json"
+  - artifact: "verify/m139.sh"
+  - artifact: "milestones/M139.yaml"
+  - artifact: "artifacts/milestones/M139/latest/commands.log"
+  - artifact: "artifacts/milestones/M139/latest/typescript_service_canary_routing_helper_parity_output.json"
+  - artifact: "artifacts/milestones/M139/latest/assertions.json"

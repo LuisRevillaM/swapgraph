@@ -1,0 +1,16 @@
+name: M137
+commands:
+  - cmd: "npm run verify:m137"
+artifacts:
+  - artifact: "docs/prd/M137.md"
+  - artifact: "src/service/marketplaceMatchingExecutionHelpers.mjs"
+  - artifact: "src-ts/service/marketplaceMatchingExecutionHelpers.mts"
+  - artifact: "src/service/marketplaceMatchingService.mjs"
+  - artifact: "scripts/run-m137-typescript-service-execution-helper-parity-scenario.mjs"
+  - artifact: "fixtures/release/m137_scenario.json"
+  - artifact: "fixtures/release/m137_expected.json"
+  - artifact: "verify/m137.sh"
+  - artifact: "milestones/M137.yaml"
+  - artifact: "artifacts/milestones/M137/latest/commands.log"
+  - artifact: "artifacts/milestones/M137/latest/typescript_service_execution_helper_parity_output.json"
+  - artifact: "artifacts/milestones/M137/latest/assertions.json"

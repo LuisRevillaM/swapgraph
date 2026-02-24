@@ -3,7 +3,7 @@
 Last updated: 2026-02-24
 
 ## Autopilot
-- Status: **implementation closure** (M136 verifier-complete; canary-decision helpers extracted and parity-gated)
+- Status: **implementation closure** (M139 verifier-complete; canary-routing + execution helpers extracted and parity-gated)
 - Canonical plan: `docs/source/LATEST.md` (v2.0)
 
 ## Milestones (progress)
@@ -147,10 +147,13 @@ Last updated: 2026-02-24
 - M134: ✅ Response/error/idempotency helper extraction parity gate (fixtures-first, non-breaking) (response/error primitives and idempotency replay utility extracted from service into dedicated JS helper module with concrete TS parity module and deterministic extraction-contract verification)
 - M135: ✅ Run-record helper extraction parity gate (fixtures-first, non-breaking) (proposal persistence and run-record assembly helpers extracted from service into dedicated JS helper module with concrete TS parity module and deterministic extraction-contract verification)
 - M136: ✅ Canary decision helper extraction parity gate (fixtures-first, non-breaking) (canary sample and decision-record assembly helpers extracted from service into dedicated JS helper module with concrete TS parity module and deterministic extraction-contract verification)
+- M137: ✅ v2 execution helper extraction parity gate (fixtures-first, non-breaking) (canary-selection + v2 shadow execution helpers extracted from service into dedicated JS helper module with concrete TS parity module and deterministic extraction-contract verification)
+- M138: ✅ TS-shadow execution helper extraction parity gate (fixtures-first, non-breaking) (TS-shadow execution/persistence helper extracted from service into dedicated JS helper module with concrete TS parity module and deterministic extraction-contract verification)
+- M139: ✅ Canary routing helper extraction parity gate (fixtures-first, non-breaking) (canary routing/bootstrap helper extracted from service into dedicated JS helper module with concrete TS parity module and deterministic extraction-contract verification)
 
 ## Next
-- Current mode: matching performance + TS migration tranche M115–M136 is verifier-complete with v2 full-primary runtime, rollback/fallback controls, concrete TS matching-core modules, runtime TS shadow telemetry, service-level helper decomposition parity, TS service wrapper-removal compatibility gating, matcher-runner seam extraction, canary/rollback helper extraction, request/asset normalization helper extraction, proposal lifecycle helper extraction, state/bootstrap + edge-intent helper extraction, response/error/idempotency helper extraction, run-record helper extraction, and canary decision helper extraction.
-- Immediate target: M137 TypeScript service migration phase 15 (remaining service helper decomposition parity gate, non-breaking).
+- Current mode: matching performance + TS migration tranche M115–M139 is verifier-complete with v2 full-primary runtime, rollback/fallback controls, concrete TS matching-core modules, runtime TS shadow telemetry, service-level helper decomposition parity, TS service wrapper-removal compatibility gating, matcher-runner seam extraction, canary/rollback helper extraction, request/asset normalization helper extraction, proposal lifecycle helper extraction, state/bootstrap + edge-intent helper extraction, response/error/idempotency helper extraction, run-record helper extraction, canary decision helper extraction, v2 execution helper extraction, TS-shadow execution helper extraction, and canary routing/bootstrap helper extraction.
+- Immediate target: M140 TypeScript service migration phase 18 (remaining service orchestration extraction and concrete TS service cutover contract, non-breaking).
 - Follow-on contract decision: M120.1 optional global rollback shadow suppression toggle (`MATCHING_V2_ROLLBACK_SUPPRESS_SHADOW`, default `0`) with canary-mode proof.
 - TypeScript track (parallel, non-breaking): continue replacing `src-ts` wrappers module-by-module with concrete TS implementations behind parity gates.
 - Runtime shell available for request/response validation: `npm run start:api` (`src/server/runtimeApiServer.mjs`).

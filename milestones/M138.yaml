@@ -1,0 +1,16 @@
+name: M138
+commands:
+  - cmd: "npm run verify:m138"
+artifacts:
+  - artifact: "docs/prd/M138.md"
+  - artifact: "src/service/marketplaceMatchingTsShadowExecutionHelpers.mjs"
+  - artifact: "src-ts/service/marketplaceMatchingTsShadowExecutionHelpers.mts"
+  - artifact: "src/service/marketplaceMatchingService.mjs"
+  - artifact: "scripts/run-m138-typescript-service-ts-shadow-helper-parity-scenario.mjs"
+  - artifact: "fixtures/release/m138_scenario.json"
+  - artifact: "fixtures/release/m138_expected.json"
+  - artifact: "verify/m138.sh"
+  - artifact: "milestones/M138.yaml"
+  - artifact: "artifacts/milestones/M138/latest/commands.log"
+  - artifact: "artifacts/milestones/M138/latest/typescript_service_ts_shadow_helper_parity_output.json"
+  - artifact: "artifacts/milestones/M138/latest/assertions.json"

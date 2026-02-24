@@ -53,6 +53,12 @@ import {
   buildMarketplaceCanaryDecisionRecord
 } from './marketplaceMatchingCanaryDecisionHelpers.mjs';
 import {
+  executeMarketplaceShadowDiff,
+  executeMarketplaceV2CanarySelection
+} from './marketplaceMatchingExecutionHelpers.mjs';
+import { buildMarketplaceCanaryRoutingContext } from './marketplaceMatchingCanaryRoutingHelpers.mjs';
+import { executeMarketplaceTsShadow } from './marketplaceMatchingTsShadowExecutionHelpers.mjs';
+import {
   correlationId,
   clone,
   errorResponse,
@@ -160,231 +166,91 @@ export class MarketplaceMatchingService {
         let primaryResult = v1Result;
         let primaryEngine = 'v1';
 
-        let canaryBucketValue = null;
-        let inCanaryBucket = false;
-        let canarySkippedReason = 'canary_disabled';
-        let canarySelected = false;
-        let rollbackResetApplied = false;
-        let canaryRollbackBefore = { active: false, reason_code: null };
-        let canaryRollbackAfter = { active: false, reason_code: null };
-        let canaryRollbackTriggered = false;
-        let canarySampleSummary = summarizeCanarySamples({
-          samples: [],
-          canaryConfig
+        let {
+          canaryBucketValue,
+          inCanaryBucket,
+          canarySkippedReason,
+          canarySelected,
+          rollbackResetApplied,
+          canaryRollbackBefore,
+          canaryRollbackAfter,
+          canaryRollbackTriggered,
+          canarySampleSummary,
+          decisionTrackingEnabled
+        } = buildMarketplaceCanaryRoutingContext({
+          store: this.store,
+          primaryConfig,
+          canaryConfig,
+          actor,
+          idempotencyKey,
+          requestedAt,
+          cloneValue: clone
         });
-        const decisionTrackingEnabled = primaryConfig.enabled || canaryConfig.enabled;
 
-        if (decisionTrackingEnabled) {
-          let canaryState = ensureCanaryState(this.store);
-          if (primaryConfig.enabled && primaryConfig.rollback_reset) {
-            clearCanaryRollbackState(this.store);
-            rollbackResetApplied = true;
-            canaryState = ensureCanaryState(this.store);
-          }
-
-          canaryRollbackBefore = {
-            active: canaryState.rollback_active === true,
-            reason_code: canaryState.rollback_reason_code ?? null
-          };
-          canaryRollbackAfter = clone(canaryRollbackBefore);
-          canarySampleSummary = summarizeCanarySamples({
-            samples: canaryState.recent_samples,
-            canaryConfig
-          });
-
-          if (primaryConfig.enabled) {
-            inCanaryBucket = true;
-            if (canaryRollbackBefore.active) {
-              canarySkippedReason = 'rollback_active';
-            } else {
-              canarySkippedReason = null;
-              canarySelected = true;
-            }
-          } else {
-            canaryBucketValue = canaryBucketBps({
-              canaryConfig,
-              actor,
-              idempotencyKey,
-              requestedAt
-            });
-            inCanaryBucket = canaryConfig.force_bucket_v2 || canaryBucketValue < canaryConfig.rollout_bps;
-
-            if (canaryRollbackBefore.active) {
-              canarySkippedReason = 'rollback_active';
-            } else if (!inCanaryBucket) {
-              canarySkippedReason = 'rollout_excluded';
-            } else {
-              canarySkippedReason = null;
-              canarySelected = true;
-            }
-          }
-        }
-
-        if (canarySelected) {
-          try {
-            if (primaryConfig.enabled && primaryConfig.force_primary_error) {
-              throw new Error('forced matching v2 primary error');
-            }
-            if (!primaryConfig.enabled && canaryConfig.force_canary_error) {
-              throw new Error('forced matching v2 canary error');
-            }
-
-            v2Result = runMatcherWithConfig({
-              intents: activeIntents,
-              assetValuesUsd,
-              edgeIntents,
-              nowIso: requestedAt,
-              config: v2Config
-            });
-
-            v2SafetyTriggers = applyForcedSafetyTriggers({
-              safety: {
-                timeout_reached: Boolean(v2Result?.matching?.stats?.cycle_enumeration_timed_out),
-                max_cycles_reached: Boolean(v2Result?.matching?.stats?.cycle_enumeration_limited)
-              },
-              primaryConfig
-            });
-
-            if (primaryConfig.enabled) {
-              const timeoutFallback = v2SafetyTriggers.timeout_reached && primaryConfig.fallback_on_timeout;
-              const limitedFallback = v2SafetyTriggers.max_cycles_reached && primaryConfig.fallback_on_limited;
-              if (timeoutFallback || limitedFallback) {
-                primaryResult = v1Result;
-                primaryEngine = 'v1';
-                v2FallbackReasonCode = timeoutFallback ? 'v2_timeout_safety' : 'v2_limited_safety';
-              } else {
-                primaryResult = v2Result;
-                primaryEngine = 'v2';
-              }
-            } else {
-              primaryResult = v2Result;
-              primaryEngine = 'v2';
-            }
-          } catch (error) {
-            canaryError = error;
-            v2FallbackReasonCode = primaryConfig.enabled ? 'v2_error' : 'canary_error';
-          }
-        }
+        ({
+          v2Result,
+          canaryError,
+          v2FallbackReasonCode,
+          v2SafetyTriggers,
+          primaryResult,
+          primaryEngine
+        } = executeMarketplaceV2CanarySelection({
+          canarySelected,
+          primaryConfig,
+          canaryConfig,
+          activeIntents,
+          assetValuesUsd,
+          edgeIntents,
+          requestedAt,
+          v2Config,
+          v1Result,
+          v2Result,
+          v2SafetyTriggers,
+          primaryResult,
+          primaryEngine,
+          v2FallbackReasonCode,
+          canaryError
+        }));
 
         let canaryDiffRecord = null;
-        let shadowRecord = null;
-        const skipShadowDueToPrimaryRollbackLatch = primaryConfig.enabled
-          && canarySkippedReason === 'rollback_active'
-          && !v2Result;
-        if (v2Config.shadow_enabled) {
-          if (!skipShadowDueToPrimaryRollbackLatch) {
-            try {
-              if (!v2Result) {
-                if (v2Config.force_shadow_error) {
-                  throw new Error('forced matching v2 shadow error');
-                }
-                v2Result = runMatcherWithConfig({
-                  intents: activeIntents,
-                  assetValuesUsd,
-                  edgeIntents,
-                  nowIso: requestedAt,
-                  config: v2Config
-                });
-              }
-
-              v2SafetyTriggers = applyForcedSafetyTriggers({
-                safety: {
-                  timeout_reached: Boolean(v2Result?.matching?.stats?.cycle_enumeration_timed_out),
-                  max_cycles_reached: Boolean(v2Result?.matching?.stats?.cycle_enumeration_limited)
-                },
-                primaryConfig
-              });
-
-              shadowRecord = buildShadowDiffRecord({
-                runId,
-                recordedAt: requestedAt,
-                maxProposals,
-                v1Config,
-                v1Result,
-                v2Config,
-                v2Result
-              });
-              shadowRecord = applySafetyToDiffRecord({
-                diffRecord: shadowRecord,
-                safety: v2SafetyTriggers
-              });
-              canaryDiffRecord = shadowRecord;
-              this.store.state.marketplace_matching_shadow_diffs[runId] = shadowRecord;
-            } catch (error) {
-              shadowRecord = buildShadowErrorRecord({
-                runId,
-                recordedAt: requestedAt,
-                v2Config,
-                error
-              });
-              this.store.state.marketplace_matching_shadow_diffs[runId] = shadowRecord;
-            }
-          }
-
-          pruneShadowDiffHistory({
-            store: this.store,
-            maxShadowDiffs: v2Config.max_shadow_diffs
-          });
-        } else if (v2Result) {
-          canaryDiffRecord = buildShadowDiffRecord({
-            runId,
-            recordedAt: requestedAt,
-            maxProposals,
-            v1Config,
-            v1Result,
-            v2Config,
-            v2Result
-          });
-          canaryDiffRecord = applySafetyToDiffRecord({
-            diffRecord: canaryDiffRecord,
-            safety: v2SafetyTriggers
-          });
-        }
+        ({
+          v2Result,
+          v2SafetyTriggers,
+          canaryDiffRecord
+        } = executeMarketplaceShadowDiff({
+          store: this.store,
+          runId,
+          requestedAt,
+          maxProposals,
+          v1Config,
+          v1Result,
+          activeIntents,
+          assetValuesUsd,
+          edgeIntents,
+          v2Config,
+          v2Result,
+          v2SafetyTriggers,
+          primaryConfig,
+          canarySkippedReason
+        }));
 
         const matching = primaryResult.matching;
         const selected = (matching?.proposals ?? []).slice(0, maxProposals);
         const primaryMatcherConfig = primaryEngine === 'v2' ? v2Config : v1Config;
 
-        if (tsShadowConfig.enabled) {
-          try {
-            if (tsShadowConfig.force_shadow_error) {
-              throw new Error('forced matching ts shadow error');
-            }
-
-            const tsResult = runMatcherTsShadowWithConfig({
-              intents: activeIntents,
-              assetValuesUsd,
-              edgeIntents,
-              nowIso: requestedAt,
-              config: primaryMatcherConfig
-            });
-
-            const tsShadowRecord = buildTsShadowDiffRecord({
-              runId,
-              recordedAt: requestedAt,
-              maxProposals,
-              primaryEngine,
-              matcherConfig: primaryMatcherConfig,
-              jsResult: primaryResult,
-              tsResult
-            });
-            this.store.state.marketplace_matching_ts_shadow_diffs[runId] = tsShadowRecord;
-          } catch (error) {
-            const tsShadowErrorRecord = buildTsShadowErrorRecord({
-              runId,
-              recordedAt: requestedAt,
-              primaryEngine,
-              matcherConfig: primaryMatcherConfig,
-              error
-            });
-            this.store.state.marketplace_matching_ts_shadow_diffs[runId] = tsShadowErrorRecord;
-          }
-
-          pruneTsShadowDiffHistory({
-            store: this.store,
-            maxShadowDiffs: tsShadowConfig.max_shadow_diffs
-          });
-        }
+        executeMarketplaceTsShadow({
+          store: this.store,
+          runId,
+          requestedAt,
+          maxProposals,
+          primaryEngine,
+          primaryMatcherConfig,
+          activeIntents,
+          assetValuesUsd,
+          edgeIntents,
+          primaryResult,
+          tsShadowConfig
+        });
 
         if (decisionTrackingEnabled) {
           const canarySample = buildCanarySample({

@@ -1,0 +1,30 @@
+{
+  "milestone": "M139",
+  "parity_dependency_verifiers": [
+    "npm run verify:m138",
+    "npm run verify:m119"
+  ],
+  "migrated_modules": [
+    {
+      "shadow_module": "src-ts/service/marketplaceMatchingCanaryRoutingHelpers.mts",
+      "source_module": "src/service/marketplaceMatchingCanaryRoutingHelpers.mjs",
+      "expected_export_functions": [
+        "buildMarketplaceCanaryRoutingContext"
+      ],
+      "expected_imports": [
+        "./marketplaceMatchingCanaryHelpers.mts",
+        "./marketplaceMatchingHelpers.mts"
+      ]
+    }
+  ],
+  "extraction_contracts": [
+    {
+      "service_module": "src/service/marketplaceMatchingService.mjs",
+      "helper_module": "src/service/marketplaceMatchingCanaryRoutingHelpers.mjs",
+      "helper_module_import": "./marketplaceMatchingCanaryRoutingHelpers.mjs",
+      "expected_externalized_functions": [
+        "buildMarketplaceCanaryRoutingContext"
+      ]
+    }
+  ]
+}
