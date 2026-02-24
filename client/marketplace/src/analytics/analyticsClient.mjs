@@ -1,4 +1,4 @@
-import { validateAnalyticsEvent } from './events.mjs';
+import { validateAnalyticsEvent } from './schema.mjs';
 
 export class AnalyticsClient {
   constructor({ sink = null, now = () => new Date().toISOString() } = {}) {
