@@ -1,0 +1,36 @@
+{
+  "milestone": "M130",
+  "parity_dependency_verifiers": [
+    "npm run verify:m129",
+    "npm run verify:m119"
+  ],
+  "migrated_modules": [
+    {
+      "shadow_module": "src-ts/service/marketplaceMatchingCanaryHelpers.mts",
+      "source_module": "src/service/marketplaceMatchingCanaryHelpers.mjs",
+      "expected_export_functions": [
+        "canaryBucketBps",
+        "clearCanaryRollbackState",
+        "ensureCanaryState",
+        "updateCanaryRollbackState"
+      ],
+      "expected_imports": [
+        "./marketplaceMatchingHelpers.mts",
+        "node:crypto"
+      ]
+    }
+  ],
+  "extraction_contracts": [
+    {
+      "service_module": "src/service/marketplaceMatchingService.mjs",
+      "helper_module": "src/service/marketplaceMatchingCanaryHelpers.mjs",
+      "helper_module_import": "./marketplaceMatchingCanaryHelpers.mjs",
+      "expected_externalized_functions": [
+        "canaryBucketBps",
+        "clearCanaryRollbackState",
+        "ensureCanaryState",
+        "updateCanaryRollbackState"
+      ]
+    }
+  ]
+}

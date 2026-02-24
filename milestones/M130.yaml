@@ -1,0 +1,16 @@
+name: M130
+commands:
+  - cmd: "npm run verify:m130"
+artifacts:
+  - artifact: "docs/prd/M130.md"
+  - artifact: "src/service/marketplaceMatchingCanaryHelpers.mjs"
+  - artifact: "src-ts/service/marketplaceMatchingCanaryHelpers.mts"
+  - artifact: "src/service/marketplaceMatchingService.mjs"
+  - artifact: "scripts/run-m130-typescript-service-canary-helper-parity-scenario.mjs"
+  - artifact: "fixtures/release/m130_scenario.json"
+  - artifact: "fixtures/release/m130_expected.json"
+  - artifact: "verify/m130.sh"
+  - artifact: "milestones/M130.yaml"
+  - artifact: "artifacts/milestones/M130/latest/commands.log"
+  - artifact: "artifacts/milestones/M130/latest/typescript_service_canary_helper_parity_output.json"
+  - artifact: "artifacts/milestones/M130/latest/assertions.json"
