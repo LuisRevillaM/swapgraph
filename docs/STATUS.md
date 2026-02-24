@@ -132,7 +132,7 @@ Last updated: 2026-02-24
 - M119: ✅ Matching v2 canary cutover contract (fixtures-first) (deterministic canary routing, v2-primary small-slice fallback, automatic rollback activation, and per-run canary decision diagnostics)
 - M120: ✅ Matching v2 full-primary cutover contract (fixtures-first) (v2-primary runtime path with retained error/safety fallback to v1, rollback latch suppression, and explicit rollback reset/unlatch proof coverage)
 - M121: ✅ TypeScript shadow scaffold + parity gates (fixtures-first, non-behavioral) (`src-ts` wrappers + deterministic scaffold contract + composed parity checks via `verify:m5`, `verify:m111`, `verify:m114`)
-- M122: ✅ TypeScript matching module migration phase 1 (fixtures-first, non-breaking) (wrapper removal + concrete `.mts` implementations for `assetKeys`/`wantSpec` with deterministic normalized parity-hash gate and composed `verify:m121` dependency)
+- M122: ✅ TypeScript matching module migration phase 1 (fixtures-first, non-breaking) (wrapper removal + concrete `.mts` implementations for `assetKeys`/`wantSpec` with deterministic normalized parity-hash gate and composed `verify:m5`, `verify:m111`, and `verify:m114` dependencies)
 
 ## Next
 - Current mode: matching performance tranche M115–M122 is verifier-complete with v2 full-primary runtime, rollback/fallback controls, and first concrete TS matching-module migration proven fixtures-first.
