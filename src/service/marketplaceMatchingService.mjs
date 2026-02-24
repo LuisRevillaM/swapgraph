@@ -30,6 +30,13 @@ import {
   clearCanaryRollbackState,
   updateCanaryRollbackState
 } from './marketplaceMatchingCanaryHelpers.mjs';
+import {
+  normalizeOptionalString,
+  parseIsoMs,
+  parsePositiveInt,
+  normalizeAssetValuesMap,
+  deriveAssetValuesFromIntents
+} from './marketplaceMatchingRequestHelpers.mjs';
 
 function correlationId(op) {
   return `corr_${String(op).replace(/[^a-zA-Z0-9]+/g, '_').toLowerCase()}`;
@@ -37,22 +44,6 @@ function correlationId(op) {
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
-}
-
-function normalizeOptionalString(value) {
-  return typeof value === 'string' && value.trim() ? value.trim() : null;
-}
-
-function parseIsoMs(iso) {
-  const ms = Date.parse(String(iso ?? ''));
-  return Number.isFinite(ms) ? ms : null;
-}
-
-function parsePositiveInt(value, fallback, max = 200) {
-  if (value === undefined || value === null || value === '') return fallback;
-  const n = Number.parseInt(String(value), 10);
-  if (!Number.isFinite(n) || n < 1) return null;
-  return Math.min(n, max);
 }
 
 function errorResponse(correlationIdValue, code, message, details = {}) {
@@ -64,48 +55,6 @@ function errorResponse(correlationIdValue, code, message, details = {}) {
       details
     }
   };
-}
-
-function normalizeAssetValuesMap(value) {
-  if (value === undefined || value === null) return {};
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
-
-  const out = {};
-  for (const [assetId, amount] of Object.entries(value)) {
-    const key = normalizeOptionalString(assetId);
-    const numeric = Number(amount);
-    if (!key || !Number.isFinite(numeric) || numeric < 0) return null;
-    out[key] = numeric;
-  }
-  return out;
-}
-
-function valueFromAsset(asset) {
-  const candidates = [
-    asset?.estimated_value_usd,
-    asset?.value_usd,
-    asset?.metadata?.estimated_value_usd,
-    asset?.metadata?.value_usd
-  ];
-
-  for (const candidate of candidates) {
-    const n = Number(candidate);
-    if (Number.isFinite(n) && n >= 0) return n;
-  }
-
-  return null;
-}
-
-function deriveAssetValuesFromIntents(intents) {
-  const out = {};
-  for (const intent of intents ?? []) {
-    for (const asset of intent?.offer ?? []) {
-      const assetId = normalizeOptionalString(asset?.asset_id);
-      const value = valueFromAsset(asset);
-      if (assetId && value !== null) out[assetId] = value;
-    }
-  }
-  return out;
 }
 
 function activeEdgeIntentsForMatching({ store, nowIso }) {

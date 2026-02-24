@@ -1,0 +1,35 @@
+{
+  "milestone": "M131",
+  "parity_dependency_verifiers": [
+    "npm run verify:m130",
+    "npm run verify:m111"
+  ],
+  "migrated_modules": [
+    {
+      "shadow_module": "src-ts/service/marketplaceMatchingRequestHelpers.mts",
+      "source_module": "src/service/marketplaceMatchingRequestHelpers.mjs",
+      "expected_export_functions": [
+        "deriveAssetValuesFromIntents",
+        "normalizeAssetValuesMap",
+        "normalizeOptionalString",
+        "parseIsoMs",
+        "parsePositiveInt"
+      ],
+      "expected_imports": []
+    }
+  ],
+  "extraction_contracts": [
+    {
+      "service_module": "src/service/marketplaceMatchingService.mjs",
+      "helper_module": "src/service/marketplaceMatchingRequestHelpers.mjs",
+      "helper_module_import": "./marketplaceMatchingRequestHelpers.mjs",
+      "expected_externalized_functions": [
+        "deriveAssetValuesFromIntents",
+        "normalizeAssetValuesMap",
+        "normalizeOptionalString",
+        "parseIsoMs",
+        "parsePositiveInt"
+      ]
+    }
+  ]
+}
