@@ -1,4 +1,4 @@
-const CACHE_NAME = 'swapgraph-marketplace-shell-v1';
+const CACHE_NAME = 'swapgraph-marketplace-shell-v2';
 const PRECACHE_URLS = [
   '/',
   '/index.html',
@@ -50,4 +50,3 @@ self.addEventListener('fetch', event => {
     })
   );
 });
-
