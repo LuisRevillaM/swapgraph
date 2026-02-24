@@ -1,5 +1,4 @@
 import { authorizeApiOperation } from '../core/authz.mjs';
-import { idempotencyScopeKey, payloadHash } from '../core/idempotency.mjs';
 import {
   readMatchingV2ShadowConfigFromEnv,
   readMatchingTsShadowConfigFromEnv,
@@ -45,25 +44,12 @@ import {
   ensureState,
   nextRunId
 } from './marketplaceMatchingStateHelpers.mjs';
-
-function correlationId(op) {
-  return `corr_${String(op).replace(/[^a-zA-Z0-9]+/g, '_').toLowerCase()}`;
-}
-
-function clone(value) {
-  return JSON.parse(JSON.stringify(value));
-}
-
-function errorResponse(correlationIdValue, code, message, details = {}) {
-  return {
-    correlation_id: correlationIdValue,
-    error: {
-      code,
-      message,
-      details
-    }
-  };
-}
+import {
+  correlationId,
+  clone,
+  errorResponse,
+  withIdempotency
+} from './marketplaceMatchingResponseHelpers.mjs';
 
 export class MarketplaceMatchingService {
   /**
@@ -75,40 +61,6 @@ export class MarketplaceMatchingService {
     ensureState(this.store);
   }
 
-  _withIdempotency({ actor, operationId, idempotencyKey, requestBody, correlationId: corr, handler }) {
-    const scopeKey = idempotencyScopeKey({ actor, operationId, idempotencyKey });
-    const requestHash = payloadHash(requestBody);
-    const existing = this.store.state.idempotency[scopeKey];
-
-    if (existing) {
-      if (existing.payload_hash === requestHash) {
-        return {
-          replayed: true,
-          result: clone(existing.result)
-        };
-      }
-
-      return {
-        replayed: false,
-        result: {
-          ok: false,
-          body: errorResponse(corr, 'IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH', 'idempotency key reused with a different payload', {
-            operation_id: operationId,
-            idempotency_key: idempotencyKey
-          })
-        }
-      };
-    }
-
-    const result = handler();
-    this.store.state.idempotency[scopeKey] = {
-      payload_hash: requestHash,
-      result: clone(result)
-    };
-
-    return { replayed: false, result };
-  }
-
   runMatching({ actor, auth, idempotencyKey, request }) {
     const op = 'marketplaceMatching.run';
     const corr = correlationId(op);
@@ -116,12 +68,13 @@ export class MarketplaceMatchingService {
     const authz = authorizeApiOperation({ operationId: op, actor, auth, store: this.store });
     if (!authz.ok) return { replayed: false, result: { ok: false, body: errorResponse(corr, authz.error.code, authz.error.message, authz.error.details) } };
 
-    return this._withIdempotency({
+    return withIdempotency({
+      store: this.store,
       actor,
       operationId: op,
       idempotencyKey,
       requestBody: request,
-      correlationId: corr,
+      correlationIdValue: corr,
       handler: () => {
         const replaceExisting = request?.replace_existing !== false;
         const maxProposals = parsePositiveInt(request?.max_proposals, 50);

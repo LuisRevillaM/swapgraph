@@ -1,0 +1,16 @@
+name: M134
+commands:
+  - cmd: "npm run verify:m134"
+artifacts:
+  - artifact: "docs/prd/M134.md"
+  - artifact: "src/service/marketplaceMatchingResponseHelpers.mjs"
+  - artifact: "src-ts/service/marketplaceMatchingResponseHelpers.mts"
+  - artifact: "src/service/marketplaceMatchingService.mjs"
+  - artifact: "scripts/run-m134-typescript-service-response-helper-parity-scenario.mjs"
+  - artifact: "fixtures/release/m134_scenario.json"
+  - artifact: "fixtures/release/m134_expected.json"
+  - artifact: "verify/m134.sh"
+  - artifact: "milestones/M134.yaml"
+  - artifact: "artifacts/milestones/M134/latest/commands.log"
+  - artifact: "artifacts/milestones/M134/latest/typescript_service_response_helper_parity_output.json"
+  - artifact: "artifacts/milestones/M134/latest/assertions.json"
