@@ -3,7 +3,7 @@
 Last updated: 2026-02-24
 
 ## Autopilot
-- Status: **implementation closure** (M127 verifier-complete; service diff-helper decomposition parity-gated)
+- Status: **implementation closure** (M128 verifier-complete; TS service wrapper-removal compatibility gate in place)
 - Canonical plan: `docs/source/LATEST.md` (v2.0)
 
 ## Milestones (progress)
@@ -138,10 +138,11 @@ Last updated: 2026-02-24
 - M125: ✅ Runtime TypeScript matcher shadow telemetry (fixtures-first, non-breaking) (JS matcher remains authoritative while TS-sourced runtime shadow path records parity/error diagnostics with retention controls)
 - M126: ✅ TypeScript service helper extraction parity gate (fixtures-first, non-breaking) (marketplace matching env/canary/retention helper functions extracted to dedicated JS helper module with concrete TS parity module and deterministic extraction-contract verification)
 - M127: ✅ Marketplace matching diff-helper decomposition parity gate (fixtures-first, non-breaking) (shadow/safety/diff-record helper functions extracted from service into dedicated JS helper module with concrete TS parity module and deterministic extraction-contract verification)
+- M128: ✅ TypeScript service wrapper-removal compatibility gate (fixtures-first, non-breaking) (`src-ts/service/marketplaceMatchingService.mts` converted from export-star wrapper to concrete class shim with M121 compatibility contract updates and deterministic verification)
 
 ## Next
-- Current mode: matching performance + TS migration tranche M115–M127 is verifier-complete with v2 full-primary runtime, rollback/fallback controls, concrete TS matching-core modules, runtime TS shadow telemetry, and service-level helper decomposition parity.
-- Immediate target: M128 TypeScript service migration phase 6 (service wrapper removal strategy for `src-ts/service/marketplaceMatchingService.mts` with compatibility gate updates, non-breaking).
+- Current mode: matching performance + TS migration tranche M115–M128 is verifier-complete with v2 full-primary runtime, rollback/fallback controls, concrete TS matching-core modules, runtime TS shadow telemetry, service-level helper decomposition parity, and TS service wrapper-removal compatibility gating.
+- Immediate target: M129 TypeScript service migration phase 7 (introduce concrete TS service construction hooks for matcher invocation seams, parity-gated and non-breaking).
 - Follow-on contract decision: M120.1 optional global rollback shadow suppression toggle (`MATCHING_V2_ROLLBACK_SUPPRESS_SHADOW`, default `0`) with canary-mode proof.
 - TypeScript track (parallel, non-breaking): continue replacing `src-ts` wrappers module-by-module with concrete TS implementations behind parity gates.
 - Runtime shell available for request/response validation: `npm run start:api` (`src/server/runtimeApiServer.mjs`).

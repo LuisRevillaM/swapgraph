@@ -41,6 +41,14 @@ function parseExportFunctions(source) {
   return [...source.matchAll(/export\s+function\s+([A-Za-z0-9_]+)\s*\(/g)].map(match => String(match[1])).sort();
 }
 
+function parseExportClasses(source) {
+  return [...source.matchAll(/export\s+class\s+([A-Za-z0-9_]+)\s*/g)].map(match => String(match[1])).sort();
+}
+
+function parseExportSymbols(source) {
+  return [...new Set([...parseExportFunctions(source), ...parseExportClasses(source)])].sort();
+}
+
 function assertNoDuplicateWrappers(wrapperModules) {
   const seen = new Set();
   for (const wrapper of wrapperModules) {
@@ -56,6 +64,7 @@ async function buildWrapperSummary(wrapper) {
   const sourceRel = String(wrapper?.source_module ?? '');
   const expectedExportFrom = String(wrapper?.expected_export_from ?? '');
   const allowConcrete = wrapper?.allow_concrete === true;
+  const expectedExportSymbols = [...(wrapper?.expected_export_symbols ?? [])].map(String).sort();
   const shadowFile = path.join(root, shadowRel);
   const sourceFile = path.join(root, sourceRel);
 
@@ -66,6 +75,7 @@ async function buildWrapperSummary(wrapper) {
   const shadowSource = readFileSync(shadowFile, 'utf8');
   const sourceSource = readFileSync(sourceFile, 'utf8');
   const sourceExportFunctions = parseExportFunctions(sourceSource);
+  const sourceExportSymbols = parseExportSymbols(sourceSource);
 
   let exportMode = 'wrapper';
   let exportKeys = [];
@@ -90,13 +100,28 @@ async function buildWrapperSummary(wrapper) {
   } else if (exportTargets.length === 0 && allowConcrete) {
     exportMode = 'concrete';
     const shadowExportFunctions = parseExportFunctions(shadowSource);
-    assert.ok(shadowExportFunctions.length > 0, `concrete module has no export functions: ${shadowRel}`);
-    assert.deepEqual(
-      shadowExportFunctions,
-      sourceExportFunctions,
-      `concrete export function parity mismatch: ${shadowRel}`
-    );
-    exportKeys = shadowExportFunctions;
+    const shadowExportSymbols = parseExportSymbols(shadowSource);
+    if (expectedExportSymbols.length > 0) {
+      assert.deepEqual(
+        shadowExportSymbols,
+        expectedExportSymbols,
+        `concrete export symbol contract mismatch: ${shadowRel}`
+      );
+      assert.deepEqual(
+        sourceExportSymbols,
+        expectedExportSymbols,
+        `source export symbol contract mismatch: ${sourceRel}`
+      );
+      exportKeys = shadowExportSymbols;
+    } else {
+      assert.ok(shadowExportFunctions.length > 0, `concrete module has no export functions: ${shadowRel}`);
+      assert.deepEqual(
+        shadowExportFunctions,
+        sourceExportFunctions,
+        `concrete export function parity mismatch: ${shadowRel}`
+      );
+      exportKeys = shadowExportFunctions;
+    }
   } else {
     assert.equal(exportTargets.length, 1, `shadow module must have one export target: ${shadowRel}`);
   }
@@ -108,6 +133,7 @@ async function buildWrapperSummary(wrapper) {
     export_from: exportFrom,
     resolved_export_target: resolvedExportTargetRel,
     allow_concrete: allowConcrete,
+    expected_export_symbols: expectedExportSymbols,
     export_keys: exportKeys,
     export_count: exportKeys.length
   });

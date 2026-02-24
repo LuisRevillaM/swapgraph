@@ -1,0 +1,21 @@
+{
+  "milestone": "M128",
+  "parity_dependency_verifiers": [
+    "npm run verify:m127",
+    "npm run verify:m121"
+  ],
+  "module_contract": {
+    "shadow_module": "src-ts/service/marketplaceMatchingService.mts",
+    "source_module": "src/service/marketplaceMatchingService.mjs",
+    "expected_import_target": "../../src/service/marketplaceMatchingService.mjs",
+    "expected_export_classes": [
+      "MarketplaceMatchingService"
+    ],
+    "m121_contract": {
+      "allow_concrete": true,
+      "expected_export_symbols": [
+        "MarketplaceMatchingService"
+      ]
+    }
+  }
+}

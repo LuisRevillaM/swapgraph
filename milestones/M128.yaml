@@ -1,0 +1,17 @@
+name: M128
+commands:
+  - cmd: "npm run verify:m128"
+artifacts:
+  - artifact: "docs/prd/M128.md"
+  - artifact: "src-ts/service/marketplaceMatchingService.mts"
+  - artifact: "scripts/run-m121-typescript-shadow-scenario.mjs"
+  - artifact: "fixtures/release/m121_scenario.json"
+  - artifact: "fixtures/release/m121_expected.json"
+  - artifact: "scripts/run-m128-typescript-service-wrapper-removal-scenario.mjs"
+  - artifact: "fixtures/release/m128_scenario.json"
+  - artifact: "fixtures/release/m128_expected.json"
+  - artifact: "verify/m128.sh"
+  - artifact: "milestones/M128.yaml"
+  - artifact: "artifacts/milestones/M128/latest/commands.log"
+  - artifact: "artifacts/milestones/M128/latest/typescript_service_wrapper_removal_output.json"
+  - artifact: "artifacts/milestones/M128/latest/assertions.json"

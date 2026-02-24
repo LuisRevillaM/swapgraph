@@ -57,7 +57,11 @@
     {
       "shadow_module": "src-ts/service/marketplaceMatchingService.mts",
       "source_module": "src/service/marketplaceMatchingService.mjs",
-      "expected_export_from": "../../src/service/marketplaceMatchingService.mjs"
+      "expected_export_from": "../../src/service/marketplaceMatchingService.mjs",
+      "allow_concrete": true,
+      "expected_export_symbols": [
+        "MarketplaceMatchingService"
+      ]
     },
     {
       "shadow_module": "src-ts/store/jsonStateStore.mts",
