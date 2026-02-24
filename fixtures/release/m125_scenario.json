@@ -220,6 +220,45 @@
         "status": "active"
       }
     },
+    "edge_intents": {
+      "edge_000001": {
+        "id": "edge_000001",
+        "source_intent_id": "intent_a",
+        "target_intent_id": "intent_b",
+        "intent_type": "allow",
+        "status": "active",
+        "recorded_by": {
+          "type": "partner",
+          "id": "partner_marketplace"
+        },
+        "recorded_at": "2026-02-24T11:59:00.000Z"
+      },
+      "edge_000002": {
+        "id": "edge_000002",
+        "source_intent_id": "intent_b",
+        "target_intent_id": "intent_c",
+        "intent_type": "allow",
+        "status": "active",
+        "recorded_by": {
+          "type": "partner",
+          "id": "partner_marketplace"
+        },
+        "recorded_at": "2026-02-24T11:59:00.000Z"
+      },
+      "edge_000003": {
+        "id": "edge_000003",
+        "source_intent_id": "intent_c",
+        "target_intent_id": "intent_a",
+        "intent_type": "allow",
+        "status": "active",
+        "recorded_by": {
+          "type": "partner",
+          "id": "partner_marketplace"
+        },
+        "recorded_at": "2026-02-24T11:59:00.000Z"
+      }
+    },
+    "edge_intent_counter": 3,
     "proposals": {},
     "tenancy": {
       "proposals": {},
