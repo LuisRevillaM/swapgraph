@@ -1,0 +1,43 @@
+{
+  "milestone": "M126",
+  "parity_dependency_verifiers": [
+    "npm run verify:m125",
+    "npm run verify:m121"
+  ],
+  "migrated_modules": [
+    {
+      "shadow_module": "src-ts/service/marketplaceMatchingHelpers.mts",
+      "source_module": "src/service/marketplaceMatchingHelpers.mjs",
+      "expected_export_functions": [
+        "pruneCanaryDecisionHistory",
+        "pruneShadowDiffHistory",
+        "pruneTsShadowDiffHistory",
+        "readMatchingTsShadowConfigFromEnv",
+        "readMatchingV2CanaryConfigFromEnv",
+        "readMatchingV2PrimaryConfigFromEnv",
+        "readMatchingV2ShadowConfigFromEnv",
+        "scoreScaledToDecimal",
+        "summarizeCanarySamples"
+      ],
+      "expected_imports": []
+    }
+  ],
+  "extraction_contracts": [
+    {
+      "service_module": "src/service/marketplaceMatchingService.mjs",
+      "helper_module": "src/service/marketplaceMatchingHelpers.mjs",
+      "helper_module_import": "./marketplaceMatchingHelpers.mjs",
+      "expected_externalized_functions": [
+        "pruneCanaryDecisionHistory",
+        "pruneShadowDiffHistory",
+        "pruneTsShadowDiffHistory",
+        "readMatchingTsShadowConfigFromEnv",
+        "readMatchingV2CanaryConfigFromEnv",
+        "readMatchingV2PrimaryConfigFromEnv",
+        "readMatchingV2ShadowConfigFromEnv",
+        "scoreScaledToDecimal",
+        "summarizeCanarySamples"
+      ]
+    }
+  ]
+}

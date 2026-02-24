@@ -1,0 +1,16 @@
+name: M126
+commands:
+  - cmd: "npm run verify:m126"
+artifacts:
+  - artifact: "docs/prd/M126.md"
+  - artifact: "src/service/marketplaceMatchingHelpers.mjs"
+  - artifact: "src-ts/service/marketplaceMatchingHelpers.mts"
+  - artifact: "src/service/marketplaceMatchingService.mjs"
+  - artifact: "scripts/run-m126-typescript-service-helper-parity-scenario.mjs"
+  - artifact: "fixtures/release/m126_scenario.json"
+  - artifact: "fixtures/release/m126_expected.json"
+  - artifact: "verify/m126.sh"
+  - artifact: "milestones/M126.yaml"
+  - artifact: "artifacts/milestones/M126/latest/commands.log"
+  - artifact: "artifacts/milestones/M126/latest/typescript_service_helper_parity_output.json"
+  - artifact: "artifacts/milestones/M126/latest/assertions.json"
