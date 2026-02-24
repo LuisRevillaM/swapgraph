@@ -1,0 +1,15 @@
+name: M122
+commands:
+  - cmd: "npm run verify:m122"
+artifacts:
+  - artifact: "docs/prd/M122.md"
+  - artifact: "src-ts/matching/assetKeys.mts"
+  - artifact: "src-ts/matching/wantSpec.mts"
+  - artifact: "scripts/run-m122-typescript-matching-module-parity-scenario.mjs"
+  - artifact: "fixtures/release/m122_scenario.json"
+  - artifact: "fixtures/release/m122_expected.json"
+  - artifact: "verify/m122.sh"
+  - artifact: "milestones/M122.yaml"
+  - artifact: "artifacts/milestones/M122/latest/commands.log"
+  - artifact: "artifacts/milestones/M122/latest/typescript_matching_module_parity_output.json"
+  - artifact: "artifacts/milestones/M122/latest/assertions.json"

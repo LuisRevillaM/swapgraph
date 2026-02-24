@@ -9,7 +9,8 @@
     {
       "shadow_module": "src-ts/matching/assetKeys.mts",
       "source_module": "src/matching/assetKeys.mjs",
-      "expected_export_from": "../../src/matching/assetKeys.mjs"
+      "expected_export_from": "../../src/matching/assetKeys.mjs",
+      "allow_concrete": true
     },
     {
       "shadow_module": "src-ts/matching/cycles.mts",
@@ -44,7 +45,8 @@
     {
       "shadow_module": "src-ts/matching/wantSpec.mts",
       "source_module": "src/matching/wantSpec.mjs",
-      "expected_export_from": "../../src/matching/wantSpec.mjs"
+      "expected_export_from": "../../src/matching/wantSpec.mjs",
+      "allow_concrete": true
     },
     {
       "shadow_module": "src-ts/service/marketplaceMatchingService.mts",

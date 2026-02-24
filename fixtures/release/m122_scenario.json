@@ -1,0 +1,43 @@
+{
+  "milestone": "M122",
+  "parity_dependency_verifiers": [
+    "npm run verify:m5",
+    "npm run verify:m111",
+    "npm run verify:m114"
+  ],
+  "migrated_modules": [
+    {
+      "shadow_module": "src-ts/matching/assetKeys.mts",
+      "source_module": "src/matching/assetKeys.mjs",
+      "expected_export_functions": [
+        "assetKeyFor"
+      ],
+      "expected_imports": []
+    },
+    {
+      "shadow_module": "src-ts/matching/wantSpec.mts",
+      "source_module": "src/matching/wantSpec.mjs",
+      "expected_export_functions": [
+        "offerSatisfiesWantSpec"
+      ],
+      "expected_imports": [
+        "./assetKeys.mts"
+      ]
+    }
+  ],
+  "index_contracts": [
+    {
+      "index_module": "src-ts/matching/index.mts",
+      "expected_exports": [
+        "./assetKeys.mts",
+        "./cycles.mts",
+        "./engine.mts",
+        "./graph.mts",
+        "./proposals.mts",
+        "./scoring.mts",
+        "./values.mts",
+        "./wantSpec.mts"
+      ]
+    }
+  ]
+}

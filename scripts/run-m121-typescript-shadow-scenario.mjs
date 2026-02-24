@@ -37,6 +37,10 @@ function parseExportTargets(filePath) {
   return targets;
 }
 
+function parseExportFunctions(source) {
+  return [...source.matchAll(/export\s+function\s+([A-Za-z0-9_]+)\s*\(/g)].map(match => String(match[1])).sort();
+}
+
 function assertNoDuplicateWrappers(wrapperModules) {
   const seen = new Set();
   for (const wrapper of wrapperModules) {
@@ -51,6 +55,7 @@ async function buildWrapperSummary(wrapper) {
   const shadowRel = String(wrapper?.shadow_module ?? '');
   const sourceRel = String(wrapper?.source_module ?? '');
   const expectedExportFrom = String(wrapper?.expected_export_from ?? '');
+  const allowConcrete = wrapper?.allow_concrete === true;
   const shadowFile = path.join(root, shadowRel);
   const sourceFile = path.join(root, sourceRel);
 
@@ -58,24 +63,51 @@ async function buildWrapperSummary(wrapper) {
   assert.ok(existsSync(sourceFile), `missing source module: ${sourceRel}`);
 
   const exportTargets = parseExportTargets(shadowFile);
-  assert.equal(exportTargets.length, 1, `shadow module must have one export target: ${shadowRel}`);
-  assert.equal(exportTargets[0], expectedExportFrom, `export target mismatch: ${shadowRel}`);
+  const shadowSource = readFileSync(shadowFile, 'utf8');
+  const sourceSource = readFileSync(sourceFile, 'utf8');
+  const sourceExportFunctions = parseExportFunctions(sourceSource);
 
-  const resolvedExportTarget = path.resolve(path.dirname(shadowFile), exportTargets[0]);
-  assert.equal(
-    toPosixRelative(resolvedExportTarget),
-    toPosixRelative(sourceFile),
-    `resolved export target mismatch: ${shadowRel}`
-  );
+  let exportMode = 'wrapper';
+  let exportKeys = [];
+  let exportFrom = null;
+  let resolvedExportTargetRel = null;
 
-  const sourceModule = await import(`${pathToFileURL(sourceFile).href}?m121=${encodeURIComponent(shadowRel)}`);
-  const exportKeys = Object.keys(sourceModule).sort();
-  assert.ok(exportKeys.length > 0, `source module has no exports: ${sourceRel}`);
+  if (exportTargets.length === 1) {
+    exportFrom = exportTargets[0];
+    assert.equal(exportTargets[0], expectedExportFrom, `export target mismatch: ${shadowRel}`);
+
+    const resolvedExportTarget = path.resolve(path.dirname(shadowFile), exportTargets[0]);
+    resolvedExportTargetRel = toPosixRelative(resolvedExportTarget);
+    assert.equal(
+      resolvedExportTargetRel,
+      toPosixRelative(sourceFile),
+      `resolved export target mismatch: ${shadowRel}`
+    );
+
+    const sourceModule = await import(`${pathToFileURL(sourceFile).href}?m121=${encodeURIComponent(shadowRel)}`);
+    exportKeys = Object.keys(sourceModule).sort();
+    assert.ok(exportKeys.length > 0, `source module has no exports: ${sourceRel}`);
+  } else if (exportTargets.length === 0 && allowConcrete) {
+    exportMode = 'concrete';
+    const shadowExportFunctions = parseExportFunctions(shadowSource);
+    assert.ok(shadowExportFunctions.length > 0, `concrete module has no export functions: ${shadowRel}`);
+    assert.deepEqual(
+      shadowExportFunctions,
+      sourceExportFunctions,
+      `concrete export function parity mismatch: ${shadowRel}`
+    );
+    exportKeys = shadowExportFunctions;
+  } else {
+    assert.equal(exportTargets.length, 1, `shadow module must have one export target: ${shadowRel}`);
+  }
 
   return canonicalize({
     shadow_module: shadowRel,
     source_module: sourceRel,
-    export_from: exportTargets[0],
+    export_mode: exportMode,
+    export_from: exportFrom,
+    resolved_export_target: resolvedExportTargetRel,
+    allow_concrete: allowConcrete,
     export_keys: exportKeys,
     export_count: exportKeys.length
   });
