@@ -1,0 +1,16 @@
+name: M133
+commands:
+  - cmd: "npm run verify:m133"
+artifacts:
+  - artifact: "docs/prd/M133.md"
+  - artifact: "src/service/marketplaceMatchingStateHelpers.mjs"
+  - artifact: "src-ts/service/marketplaceMatchingStateHelpers.mts"
+  - artifact: "src/service/marketplaceMatchingService.mjs"
+  - artifact: "scripts/run-m133-typescript-service-state-helper-parity-scenario.mjs"
+  - artifact: "fixtures/release/m133_scenario.json"
+  - artifact: "fixtures/release/m133_expected.json"
+  - artifact: "verify/m133.sh"
+  - artifact: "milestones/M133.yaml"
+  - artifact: "artifacts/milestones/M133/latest/commands.log"
+  - artifact: "artifacts/milestones/M133/latest/typescript_service_state_helper_parity_output.json"
+  - artifact: "artifacts/milestones/M133/latest/assertions.json"

@@ -1,0 +1,33 @@
+{
+  "milestone": "M133",
+  "parity_dependency_verifiers": [
+    "npm run verify:m132",
+    "npm run verify:m111"
+  ],
+  "migrated_modules": [
+    {
+      "shadow_module": "src-ts/service/marketplaceMatchingStateHelpers.mts",
+      "source_module": "src/service/marketplaceMatchingStateHelpers.mjs",
+      "expected_export_functions": [
+        "activeEdgeIntentsForMatching",
+        "ensureState",
+        "nextRunId"
+      ],
+      "expected_imports": [
+        "./marketplaceMatchingRequestHelpers.mts"
+      ]
+    }
+  ],
+  "extraction_contracts": [
+    {
+      "service_module": "src/service/marketplaceMatchingService.mjs",
+      "helper_module": "src/service/marketplaceMatchingStateHelpers.mjs",
+      "helper_module_import": "./marketplaceMatchingStateHelpers.mjs",
+      "expected_externalized_functions": [
+        "activeEdgeIntentsForMatching",
+        "ensureState",
+        "nextRunId"
+      ]
+    }
+  ]
+}
