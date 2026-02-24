@@ -35,7 +35,6 @@
         "readMatchingV2CanaryConfigFromEnv",
         "readMatchingV2PrimaryConfigFromEnv",
         "readMatchingV2ShadowConfigFromEnv",
-        "scoreScaledToDecimal",
         "summarizeCanarySamples"
       ]
     }

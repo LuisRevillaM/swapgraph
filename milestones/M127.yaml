@@ -1,0 +1,16 @@
+name: M127
+commands:
+  - cmd: "npm run verify:m127"
+artifacts:
+  - artifact: "docs/prd/M127.md"
+  - artifact: "src/service/marketplaceMatchingDiffHelpers.mjs"
+  - artifact: "src-ts/service/marketplaceMatchingDiffHelpers.mts"
+  - artifact: "src/service/marketplaceMatchingService.mjs"
+  - artifact: "scripts/run-m127-typescript-service-diff-helper-parity-scenario.mjs"
+  - artifact: "fixtures/release/m127_scenario.json"
+  - artifact: "fixtures/release/m127_expected.json"
+  - artifact: "verify/m127.sh"
+  - artifact: "milestones/M127.yaml"
+  - artifact: "artifacts/milestones/M127/latest/commands.log"
+  - artifact: "artifacts/milestones/M127/latest/typescript_service_diff_helper_parity_output.json"
+  - artifact: "artifacts/milestones/M127/latest/assertions.json"

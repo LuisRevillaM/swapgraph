@@ -1,0 +1,41 @@
+{
+  "milestone": "M127",
+  "parity_dependency_verifiers": [
+    "npm run verify:m126",
+    "npm run verify:m125"
+  ],
+  "migrated_modules": [
+    {
+      "shadow_module": "src-ts/service/marketplaceMatchingDiffHelpers.mts",
+      "source_module": "src/service/marketplaceMatchingDiffHelpers.mjs",
+      "expected_export_functions": [
+        "applyForcedSafetyTriggers",
+        "applySafetyToDiffRecord",
+        "buildShadowDiffRecord",
+        "buildShadowErrorRecord",
+        "buildTsShadowDiffRecord",
+        "buildTsShadowErrorRecord",
+        "summarizeSelectedProposals"
+      ],
+      "expected_imports": [
+        "./marketplaceMatchingHelpers.mts"
+      ]
+    }
+  ],
+  "extraction_contracts": [
+    {
+      "service_module": "src/service/marketplaceMatchingService.mjs",
+      "helper_module": "src/service/marketplaceMatchingDiffHelpers.mjs",
+      "helper_module_import": "./marketplaceMatchingDiffHelpers.mjs",
+      "expected_externalized_functions": [
+        "applyForcedSafetyTriggers",
+        "applySafetyToDiffRecord",
+        "buildShadowDiffRecord",
+        "buildShadowErrorRecord",
+        "buildTsShadowDiffRecord",
+        "buildTsShadowErrorRecord",
+        "summarizeSelectedProposals"
+      ]
+    }
+  ]
+}
