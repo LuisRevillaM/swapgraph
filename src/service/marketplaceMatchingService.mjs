@@ -45,6 +45,10 @@ import {
   nextRunId
 } from './marketplaceMatchingStateHelpers.mjs';
 import {
+  buildMarketplaceRunRecord,
+  persistSelectedMarketplaceProposals
+} from './marketplaceMatchingRunRecordHelpers.mjs';
+import {
   correlationId,
   clone,
   errorResponse,
@@ -455,35 +459,25 @@ export class MarketplaceMatchingService {
           });
         }
 
-        for (const proposal of selected) {
-          this.store.state.proposals[proposal.id] = clone(proposal);
-          this.store.state.tenancy.proposals[proposal.id] ||= { partner_id: 'marketplace' };
-          this.store.state.marketplace_matching_proposal_runs[proposal.id] = runId;
-        }
+        persistSelectedMarketplaceProposals({
+          store: this.store,
+          selected,
+          runId,
+          cloneValue: clone
+        });
 
-        const run = {
-          run_id: runId,
-          requested_by: {
-            type: actor.type,
-            id: actor.id
-          },
-          recorded_at: requestedAt,
-          replace_existing: replaceExisting,
-          max_proposals: maxProposals,
-          active_intents_count: activeIntents.length,
-          selected_proposals_count: selected.length,
-          stored_proposals_count: selected.length,
-          replaced_proposals_count: replacedProposalsCount,
-          expired_proposals_count: expiredProposalsCount,
-          proposal_ids: selected.map(proposal => proposal.id),
-          stats: {
-            intents_active: Number(matching?.stats?.intents_active ?? 0),
-            edges: Number(matching?.stats?.edges ?? 0),
-            candidate_cycles: Number(matching?.stats?.candidate_cycles ?? 0),
-            candidate_proposals: Number(matching?.stats?.candidate_proposals ?? 0),
-            selected_proposals: Number(matching?.stats?.selected_proposals ?? 0)
-          }
-        };
+        const run = buildMarketplaceRunRecord({
+          actor,
+          runId,
+          requestedAt,
+          replaceExisting,
+          maxProposals,
+          activeIntentsCount: activeIntents.length,
+          selected,
+          replacedProposalsCount,
+          expiredProposalsCount,
+          matching
+        });
 
         this.store.state.marketplace_matching_runs[runId] = clone(run);
 
