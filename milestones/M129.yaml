@@ -1,0 +1,16 @@
+name: M129
+commands:
+  - cmd: "npm run verify:m129"
+artifacts:
+  - artifact: "docs/prd/M129.md"
+  - artifact: "src/service/marketplaceMatcherRunners.mjs"
+  - artifact: "src-ts/service/marketplaceMatcherRunners.mts"
+  - artifact: "src/service/marketplaceMatchingService.mjs"
+  - artifact: "scripts/run-m129-typescript-service-runner-parity-scenario.mjs"
+  - artifact: "fixtures/release/m129_scenario.json"
+  - artifact: "fixtures/release/m129_expected.json"
+  - artifact: "verify/m129.sh"
+  - artifact: "milestones/M129.yaml"
+  - artifact: "artifacts/milestones/M129/latest/commands.log"
+  - artifact: "artifacts/milestones/M129/latest/typescript_service_runner_parity_output.json"
+  - artifact: "artifacts/milestones/M129/latest/assertions.json"

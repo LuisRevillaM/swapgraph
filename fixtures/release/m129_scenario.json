@@ -1,0 +1,32 @@
+{
+  "milestone": "M129",
+  "parity_dependency_verifiers": [
+    "npm run verify:m128",
+    "npm run verify:m125"
+  ],
+  "migrated_modules": [
+    {
+      "shadow_module": "src-ts/service/marketplaceMatcherRunners.mts",
+      "source_module": "src/service/marketplaceMatcherRunners.mjs",
+      "expected_export_functions": [
+        "runMatcherTsShadowWithConfig",
+        "runMatcherWithConfig"
+      ],
+      "expected_imports": [
+        "../matching/engine.mts",
+        "../../src/matching-ts-shadow/engine.mjs"
+      ]
+    }
+  ],
+  "extraction_contracts": [
+    {
+      "service_module": "src/service/marketplaceMatchingService.mjs",
+      "helper_module": "src/service/marketplaceMatcherRunners.mjs",
+      "helper_module_import": "./marketplaceMatcherRunners.mjs",
+      "expected_externalized_functions": [
+        "runMatcherTsShadowWithConfig",
+        "runMatcherWithConfig"
+      ]
+    }
+  ]
+}

@@ -1,8 +1,6 @@
 import { authorizeApiOperation } from '../core/authz.mjs';
 import { idempotencyScopeKey, payloadHash } from '../core/idempotency.mjs';
 import { commitIdForProposalId } from '../commit/commitIds.mjs';
-import { runMatching as runMatchingJs } from '../matching/engine.mjs';
-import { runMatching as runMatchingTsShadow } from '../matching-ts-shadow/engine.mjs';
 import {
   readMatchingV2ShadowConfigFromEnv,
   readMatchingTsShadowConfigFromEnv,
@@ -22,6 +20,10 @@ import {
   buildTsShadowErrorRecord,
   buildTsShadowDiffRecord
 } from './marketplaceMatchingDiffHelpers.mjs';
+import {
+  runMatcherWithConfig,
+  runMatcherTsShadowWithConfig
+} from './marketplaceMatcherRunners.mjs';
 import { createHash } from 'node:crypto';
 
 function correlationId(op) {
@@ -57,48 +59,6 @@ function canaryBucketBps({ canaryConfig, actor, idempotencyKey, requestedAt }) {
   const n = Number.parseInt(digest, 16);
   if (!Number.isFinite(n)) return 0;
   return n % 10000;
-}
-
-function runMatcherWithConfig({ intents, assetValuesUsd, edgeIntents, nowIso, config }) {
-  const startedAtNs = process.hrtime.bigint();
-  const matching = runMatchingJs({
-    intents,
-    assetValuesUsd,
-    edgeIntents,
-    nowIso,
-    minCycleLength: config.min_cycle_length,
-    maxCycleLength: config.max_cycle_length,
-    maxEnumeratedCycles: config.max_cycles_explored,
-    timeoutMs: config.timeout_ms,
-    includeCycleDiagnostics: config.include_cycle_diagnostics === true
-  });
-  const runtimeMs = Number((process.hrtime.bigint() - startedAtNs) / 1000000n);
-
-  return {
-    matching,
-    runtime_ms: runtimeMs
-  };
-}
-
-function runMatcherTsShadowWithConfig({ intents, assetValuesUsd, edgeIntents, nowIso, config }) {
-  const startedAtNs = process.hrtime.bigint();
-  const matching = runMatchingTsShadow({
-    intents,
-    assetValuesUsd,
-    edgeIntents,
-    nowIso,
-    minCycleLength: config.min_cycle_length,
-    maxCycleLength: config.max_cycle_length,
-    maxEnumeratedCycles: config.max_cycles_explored,
-    timeoutMs: config.timeout_ms,
-    includeCycleDiagnostics: config.include_cycle_diagnostics === true
-  });
-  const runtimeMs = Number((process.hrtime.bigint() - startedAtNs) / 1000000n);
-
-  return {
-    matching,
-    runtime_ms: runtimeMs
-  };
 }
 
 function ensureCanaryState(store) {
