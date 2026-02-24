@@ -1,6 +1,5 @@
 import { authorizeApiOperation } from '../core/authz.mjs';
 import { idempotencyScopeKey, payloadHash } from '../core/idempotency.mjs';
-import { commitIdForProposalId } from '../commit/commitIds.mjs';
 import {
   readMatchingV2ShadowConfigFromEnv,
   readMatchingTsShadowConfigFromEnv,
@@ -37,6 +36,10 @@ import {
   normalizeAssetValuesMap,
   deriveAssetValuesFromIntents
 } from './marketplaceMatchingRequestHelpers.mjs';
+import {
+  expireMarketplaceProposals,
+  replaceMarketplaceProposals
+} from './marketplaceMatchingProposalLifecycleHelpers.mjs';
 
 function correlationId(op) {
   return `corr_${String(op).replace(/[^a-zA-Z0-9]+/g, '_').toLowerCase()}`;
@@ -71,15 +74,6 @@ function activeEdgeIntentsForMatching({ store, nowIso }) {
       if (expiresMs !== null && expiresMs <= nowMs) return false;
       return true;
     });
-}
-
-function proposalInUse({ store, proposalId }) {
-  const commitId = commitIdForProposalId(proposalId);
-  if (store.state?.commits?.[commitId]) return true;
-  if (store.state?.timelines?.[proposalId]) return true;
-  if (Object.values(store.state?.receipts ?? {}).some(receipt => receipt?.cycle_id === proposalId)) return true;
-  if (Object.values(store.state?.reservations ?? {}).some(reservation => reservation?.cycle_id === proposalId)) return true;
-  return false;
 }
 
 function ensureState(store) {
@@ -152,44 +146,6 @@ export class MarketplaceMatchingService {
     return { replayed: false, result };
   }
 
-  _expireMarketplaceProposals({ nowIso }) {
-    const nowMs = parseIsoMs(nowIso) ?? Date.now();
-    let expired = 0;
-
-    for (const proposalId of Object.keys(this.store.state.marketplace_matching_proposal_runs ?? {})) {
-      const proposal = this.store.state.proposals?.[proposalId] ?? null;
-      if (!proposal) {
-        delete this.store.state.marketplace_matching_proposal_runs[proposalId];
-        continue;
-      }
-
-      const expiresMs = parseIsoMs(proposal?.expires_at);
-      if (expiresMs === null || expiresMs > nowMs) continue;
-      if (proposalInUse({ store: this.store, proposalId })) continue;
-
-      delete this.store.state.proposals[proposalId];
-      delete this.store.state.tenancy?.proposals?.[proposalId];
-      delete this.store.state.marketplace_matching_proposal_runs[proposalId];
-      expired += 1;
-    }
-
-    return expired;
-  }
-
-  _replaceMarketplaceProposals() {
-    let replaced = 0;
-
-    for (const proposalId of Object.keys(this.store.state.marketplace_matching_proposal_runs ?? {})) {
-      if (proposalInUse({ store: this.store, proposalId })) continue;
-      delete this.store.state.proposals[proposalId];
-      delete this.store.state.tenancy?.proposals?.[proposalId];
-      delete this.store.state.marketplace_matching_proposal_runs[proposalId];
-      replaced += 1;
-    }
-
-    return replaced;
-  }
-
   runMatching({ actor, auth, idempotencyKey, request }) {
     const op = 'marketplaceMatching.run';
     const corr = correlationId(op);
@@ -241,8 +197,13 @@ export class MarketplaceMatchingService {
 
         this.store.state.marketplace_asset_values = assetValuesUsd;
 
-        const expiredProposalsCount = this._expireMarketplaceProposals({ nowIso: requestedAt });
-        const replacedProposalsCount = replaceExisting ? this._replaceMarketplaceProposals() : 0;
+        const expiredProposalsCount = expireMarketplaceProposals({
+          store: this.store,
+          nowIso: requestedAt
+        });
+        const replacedProposalsCount = replaceExisting
+          ? replaceMarketplaceProposals({ store: this.store })
+          : 0;
 
         const edgeIntents = activeEdgeIntentsForMatching({ store: this.store, nowIso: requestedAt });
         const v1Config = {

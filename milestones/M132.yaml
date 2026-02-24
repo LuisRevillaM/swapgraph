@@ -1,0 +1,16 @@
+name: M132
+commands:
+  - cmd: "npm run verify:m132"
+artifacts:
+  - artifact: "docs/prd/M132.md"
+  - artifact: "src/service/marketplaceMatchingProposalLifecycleHelpers.mjs"
+  - artifact: "src-ts/service/marketplaceMatchingProposalLifecycleHelpers.mts"
+  - artifact: "src/service/marketplaceMatchingService.mjs"
+  - artifact: "scripts/run-m132-typescript-service-proposal-lifecycle-helper-parity-scenario.mjs"
+  - artifact: "fixtures/release/m132_scenario.json"
+  - artifact: "fixtures/release/m132_expected.json"
+  - artifact: "verify/m132.sh"
+  - artifact: "milestones/M132.yaml"
+  - artifact: "artifacts/milestones/M132/latest/commands.log"
+  - artifact: "artifacts/milestones/M132/latest/typescript_service_proposal_lifecycle_helper_parity_output.json"
+  - artifact: "artifacts/milestones/M132/latest/assertions.json"

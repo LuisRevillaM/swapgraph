@@ -1,0 +1,33 @@
+{
+  "milestone": "M132",
+  "parity_dependency_verifiers": [
+    "npm run verify:m131",
+    "npm run verify:m111"
+  ],
+  "migrated_modules": [
+    {
+      "shadow_module": "src-ts/service/marketplaceMatchingProposalLifecycleHelpers.mts",
+      "source_module": "src/service/marketplaceMatchingProposalLifecycleHelpers.mjs",
+      "expected_export_functions": [
+        "expireMarketplaceProposals",
+        "proposalInUse",
+        "replaceMarketplaceProposals"
+      ],
+      "expected_imports": [
+        "../../src/commit/commitIds.mjs",
+        "./marketplaceMatchingRequestHelpers.mts"
+      ]
+    }
+  ],
+  "extraction_contracts": [
+    {
+      "service_module": "src/service/marketplaceMatchingService.mjs",
+      "helper_module": "src/service/marketplaceMatchingProposalLifecycleHelpers.mjs",
+      "helper_module_import": "./marketplaceMatchingProposalLifecycleHelpers.mjs",
+      "expected_externalized_functions": [
+        "expireMarketplaceProposals",
+        "replaceMarketplaceProposals"
+      ]
+    }
+  ]
+}
