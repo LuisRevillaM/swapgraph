@@ -167,7 +167,7 @@ test('buildProposalDetailModel uses track-a aliases for fixture actors and theme
   });
 
   assert.equal(detail.cycleNodes[0].actorLabel, 'You');
-  assert.equal(detail.cycleNodes[1].actorLabel, 'Agent Ops');
+  assert.equal(detail.cycleNodes[1].actorLabel, 'Jesus');
   assert.equal(detail.hero.giveName, 'Prompt Forge License');
   assert.equal(detail.hero.getName, 'Agent Autopilot Pass');
 });

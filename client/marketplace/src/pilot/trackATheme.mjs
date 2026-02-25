@@ -1,10 +1,10 @@
 const TRACK_A_ACTOR_ALIASES = Object.freeze({
-  u1: 'Prompt Captain',
-  u2: 'Agent Ops',
-  u3: 'Bug Hunter',
-  u4: 'Latency Slayer',
-  u5: 'Deploy Commander',
-  u6: 'Revenue Ranger'
+  u1: 'Javier',
+  u2: 'Jesus',
+  u3: 'Edgar',
+  u4: 'Gabo',
+  u5: 'Luis',
+  u6: 'Guest'
 });
 
 const TRACK_A_ASSET_LABELS = Object.freeze({

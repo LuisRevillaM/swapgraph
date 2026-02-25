@@ -22,6 +22,96 @@ body {
   min-height: 100dvh;
 }
 
+.pilot-login {
+  min-height: 100dvh;
+  display: grid;
+  align-items: center;
+  padding: 20px 14px;
+}
+
+.pilot-login-card {
+  width: min(820px, 100%);
+  margin: 0 auto;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--card-radius) + 4px);
+  background: rgba(248, 247, 244, 0.94);
+  box-shadow: var(--shadow-sm);
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.pilot-login-card h1,
+.pilot-login-card p {
+  margin: 0;
+}
+
+.pilot-login-form {
+  display: grid;
+  gap: 8px;
+}
+
+.pilot-login-label {
+  color: var(--ink-3);
+}
+
+.pilot-login-select,
+.pilot-login-input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--border-active);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  padding: 0 12px;
+  font-size: var(--t-base);
+  font-family: inherit;
+}
+
+.pilot-login-error {
+  margin: 0;
+  min-height: 20px;
+  color: var(--danger);
+}
+
+.pilot-login-button {
+  border: 1px solid var(--signal);
+  border-radius: 10px;
+  min-height: 44px;
+  background: var(--signal);
+  color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.pilot-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.pilot-preview-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  padding: 8px;
+  display: grid;
+  gap: 6px;
+}
+
+.pilot-preview-card h3,
+.pilot-preview-card p {
+  margin: 0;
+}
+
+.pilot-preview-card img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid rgba(18, 42, 30, 0.15);
+}
+
 .app-shell {
   min-height: 100dvh;
 }
@@ -310,6 +400,42 @@ body {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
+}
+
+.pilot-locker {
+  gap: 10px;
+}
+
+.pilot-locker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.pilot-locker-item {
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--well);
+  padding: 8px;
+  display: grid;
+  gap: 6px;
+}
+
+.pilot-locker-item img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.pilot-locker-item figcaption {
+  display: grid;
+  gap: 2px;
+}
+
+.pilot-locker-item figcaption p {
+  margin: 0;
 }
 
 .item-card {

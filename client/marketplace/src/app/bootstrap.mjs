@@ -31,7 +31,7 @@ import {
 } from '../features/security/storagePolicy.mjs';
 import { mapIntentDto } from '../domain/mappers.mjs';
 import { createHashRouter, buildRouteHash } from '../routing/router.mjs';
-import { loadOrCreateActorId } from '../session/actorIdentity.mjs';
+import { SESSION_ACTOR_STORAGE_KEY, loadOrCreateActorId } from '../session/actorIdentity.mjs';
 import { createMarketplaceStore } from '../state/store.mjs';
 import { createMarketplaceShell } from '../ui/shell.mjs';
 
@@ -1203,7 +1203,15 @@ export function bootstrapMarketplaceClient({ root, windowRef = window }) {
     onReload: () => {
       hydrateRoute(store.getState().route, { force: true });
     },
-    onUiEvent: handleUiEvent
+    onUiEvent: handleUiEvent,
+    onSwitchAccount: () => {
+      try {
+        storage?.removeItem?.(SESSION_ACTOR_STORAGE_KEY);
+      } catch {
+        // ignore storage clear failures
+      }
+      windowRef.location.reload();
+    }
   });
 
   const unsubscribe = store.subscribe(snapshot => {

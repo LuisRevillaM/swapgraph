@@ -11,6 +11,7 @@ import { buildItemCards, demandBannerModel, humanizeAssetId } from '../features/
 import { quietHoursLabel } from '../features/notifications/preferences.mjs';
 import { panelA11yId, tabA11yId } from '../features/accessibility/tabs.mjs';
 import { clampListForRender } from '../features/performance/listBudget.mjs';
+import { pilotAccountByActorId } from '../pilot/pilotAccounts.mjs';
 import { actorDisplayLabel } from '../pilot/trackATheme.mjs';
 import { escapeHtml, formatIsoShort, formatUsd, toneFromState } from '../utils/format.mjs';
 
@@ -114,6 +115,33 @@ function renderItemsCards(state) {
   `;
 }
 
+function renderPilotLocker(state) {
+  const viewerActorId = String(state?.session?.actorId ?? '').trim();
+  const account = pilotAccountByActorId(viewerActorId);
+  if (!account) return '';
+
+  return `
+    <article class="card pilot-locker">
+      <div class="proposal-section-head">
+        <h3 class="u-text-md u-weight-600">${escapeHtml(account.name)}'s starter locker</h3>
+        <span class="u-text-sm u-ink-3">${escapeHtml(String(account.inventory.length))} items</span>
+      </div>
+      <p class="u-text-base u-ink-2">${escapeHtml(account.tagline)}</p>
+      <div class="pilot-locker-grid" aria-label="${escapeHtml(account.name)} starter inventory">
+        ${account.inventory.map(item => `
+          <figure class="pilot-locker-item">
+            <img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.name)}" loading="lazy" />
+            <figcaption>
+              <p class="u-text-sm u-weight-600">${escapeHtml(item.name)}</p>
+              <p class="u-text-xs u-ink-3">${escapeHtml(item.blurb)}</p>
+            </figcaption>
+          </figure>
+        `).join('')}
+      </div>
+    </article>
+  `;
+}
+
 function renderItems(state) {
   const projection = state?.caches?.inventoryAwakening?.value ?? null;
   const summary = projection?.swappabilitySummary ?? null;
@@ -132,6 +160,7 @@ function renderItems(state) {
       <h2 class="u-display">Inventory Awakening</h2>
       ${summaryLine}
       ${renderDemandBanner(projection)}
+      ${renderPilotLocker(state)}
       <article class="card">
         <div class="proposal-section-head">
           <h3 class="u-text-md u-weight-600">Notification controls</h3>

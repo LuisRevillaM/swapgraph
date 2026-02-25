@@ -49,7 +49,7 @@ function renderErrorFallback(error) {
   `;
 }
 
-export function createMarketplaceShell({ root, onNavigate, onReload, onUiEvent = null }) {
+export function createMarketplaceShell({ root, onNavigate, onReload, onUiEvent = null, onSwitchAccount = null }) {
   if (!root) throw new Error('root element is required');
   if (typeof onNavigate !== 'function') throw new Error('onNavigate is required');
 
@@ -66,6 +66,7 @@ export function createMarketplaceShell({ root, onNavigate, onReload, onUiEvent =
         </div>
         <div class="top-actions">
           <span class="live-pill u-text-sm" id="live-pill" title="System matching is active">Always matching</span>
+          <button type="button" class="refresh-btn u-text-sm" id="btn-switch-account">Switch user</button>
           <button type="button" class="refresh-btn u-text-sm" id="btn-open-notifications">Alerts</button>
           <button type="button" class="refresh-btn u-text-sm" id="btn-refresh-route">Refresh</button>
         </div>
@@ -80,6 +81,7 @@ export function createMarketplaceShell({ root, onNavigate, onReload, onUiEvent =
   const main = root.querySelector('#main-content');
   const tabbar = root.querySelector('#tabbar');
   const refreshButton = root.querySelector('#btn-refresh-route');
+  const switchAccountButton = root.querySelector('#btn-switch-account');
   const openNotificationsButton = root.querySelector('#btn-open-notifications');
   const livePill = root.querySelector('#live-pill');
 
@@ -106,6 +108,10 @@ export function createMarketplaceShell({ root, onNavigate, onReload, onUiEvent =
 
   if (refreshButton && typeof onReload === 'function') {
     refreshButton.addEventListener('click', () => onReload());
+  }
+
+  if (switchAccountButton && typeof onSwitchAccount === 'function') {
+    switchAccountButton.addEventListener('click', () => onSwitchAccount());
   }
 
   if (openNotificationsButton && typeof onUiEvent === 'function') {
