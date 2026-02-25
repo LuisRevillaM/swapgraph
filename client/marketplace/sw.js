@@ -1,9 +1,11 @@
-const CACHE_NAME = 'swapgraph-marketplace-shell-v2';
+const CACHE_NAME = 'swapgraph-marketplace-shell-v3';
 const PRECACHE_URLS = [
   '/',
   '/index.html',
   '/app.js',
+  '/app.js?v=20260225a',
   '/styles.css',
+  '/styles.css?v=20260225a',
   '/generated/tokens.css',
   '/generated/theme.mjs',
   '/src/app/bootstrap.mjs'
