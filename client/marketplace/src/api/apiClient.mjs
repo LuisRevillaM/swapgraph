@@ -133,14 +133,14 @@ export class MarketplaceApiClient {
       }
 
       try {
-        const response = await this.fetchImpl(targetUrl, {
+        const response = await Reflect.apply(this.fetchImpl, globalThis, [targetUrl, {
           method: normalizedMethod,
           headers,
           body: body === undefined ? undefined : JSON.stringify(body),
           credentials: 'same-origin',
           cache: 'no-store',
           redirect: 'error'
-        });
+        }]);
 
         const rawText = await response.text();
         const parsedBody = jsonOrNull(rawText);
