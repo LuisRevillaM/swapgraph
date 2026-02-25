@@ -11,7 +11,7 @@ import { buildItemCards, demandBannerModel, humanizeAssetId } from '../features/
 import { quietHoursLabel } from '../features/notifications/preferences.mjs';
 import { panelA11yId, tabA11yId } from '../features/accessibility/tabs.mjs';
 import { clampListForRender } from '../features/performance/listBudget.mjs';
-import { pilotAccountByActorId } from '../pilot/pilotAccounts.mjs';
+import { PILOT_ACCOUNTS, pilotAccountByActorId } from '../pilot/pilotAccounts.mjs';
 import { actorDisplayLabel } from '../pilot/trackATheme.mjs';
 import { escapeHtml, formatIsoShort, formatUsd, toneFromState } from '../utils/format.mjs';
 
@@ -142,6 +142,33 @@ function renderPilotLocker(state) {
   `;
 }
 
+function renderPilotSquadFeed(state) {
+  const viewerActorId = String(state?.session?.actorId ?? '').trim();
+  const others = PILOT_ACCOUNTS.filter(account => account.actorId !== viewerActorId);
+  if (others.length === 0) return '';
+
+  return `
+    <article class="card squad-feed">
+      <div class="proposal-section-head">
+        <h3 class="u-text-md u-weight-600">Everyone else's items</h3>
+        <span class="u-text-sm u-ink-3">${escapeHtml(String(others.length))} accounts</span>
+      </div>
+      <div class="squad-feed-grid" aria-label="Squad feed">
+        ${others.flatMap(account => account.inventory.map(item => `
+          <figure class="squad-feed-item">
+            <img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.name)}" loading="lazy" />
+            <figcaption>
+              <p class="u-text-sm u-weight-600">${escapeHtml(item.name)}</p>
+              <p class="u-text-xs u-ink-3">${escapeHtml(item.blurb)}</p>
+              <span class="squad-owner-pill u-text-xs">From ${escapeHtml(account.name)}</span>
+            </figcaption>
+          </figure>
+        `)).join('')}
+      </div>
+    </article>
+  `;
+}
+
 function renderItems(state) {
   const projection = state?.caches?.inventoryAwakening?.value ?? null;
   const summary = projection?.swappabilitySummary ?? null;
@@ -161,6 +188,7 @@ function renderItems(state) {
       ${summaryLine}
       ${renderDemandBanner(projection)}
       ${renderPilotLocker(state)}
+      ${renderPilotSquadFeed(state)}
       <article class="card">
         <div class="proposal-section-head">
           <h3 class="u-text-md u-weight-600">Notification controls</h3>

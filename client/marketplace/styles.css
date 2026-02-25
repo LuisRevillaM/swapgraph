@@ -438,6 +438,54 @@ body {
   margin: 0;
 }
 
+.squad-feed {
+  gap: 10px;
+}
+
+.squad-feed-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.squad-feed-item {
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  padding: 8px;
+  display: grid;
+  gap: 6px;
+}
+
+.squad-feed-item img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.squad-feed-item figcaption {
+  display: grid;
+  gap: 2px;
+}
+
+.squad-feed-item figcaption p {
+  margin: 0;
+}
+
+.squad-owner-pill {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--well);
+  color: var(--ink-3);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  padding: 2px 8px;
+}
+
 .item-card {
   border: 1px solid var(--border);
   border-radius: var(--card-radius);
