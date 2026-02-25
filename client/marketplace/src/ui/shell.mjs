@@ -66,7 +66,7 @@ export function createMarketplaceShell({ root, onNavigate, onReload, onUiEvent =
         </div>
         <div class="top-actions">
           <span class="live-pill u-text-sm" id="live-pill" title="System matching is active">Always matching</span>
-          <button type="button" class="refresh-btn u-text-sm" id="btn-switch-account">Switch user</button>
+          <button type="button" class="refresh-btn u-text-sm" id="btn-switch-account">Switch</button>
           <button type="button" class="refresh-btn u-text-sm" id="btn-open-notifications">Alerts</button>
           <button type="button" class="refresh-btn u-text-sm" id="btn-refresh-route">Refresh</button>
         </div>
