@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+node "$SCRIPT_DIR/run-swift-filter-check.mjs" \
+  --check-id SC-UX-06 \
+  --item "Deep-link routing preserves destination after route handoff::AppShellUISmokeTests/testDeepLinkRoutesToExpectedTabs" \
+  --item "Deep-link parser maps push payload route metadata::PushNotificationParserTests/testParserMapsDeepLinkPayload"

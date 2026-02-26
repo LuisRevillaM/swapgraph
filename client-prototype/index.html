@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>SwapGraph</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/*  ────────────────────────────────────────────
+    SWAPGRAPH · STEAM-FIRST SWAP CLEARING
+
+    Aesthetic direction: Auction-house clarity.
+    Light, warm, breathing. A serif display face
+    signals trust and seriousness. The items ARE
+    the color. The UI is the white wall of the
+    gallery they hang on.
+
+    Typography:
+      Fraunces — variable optical-size serif for
+        display. Warm, alive, slightly wonky at
+        large sizes. Feels human, not corporate.
+      DM Sans — humanist sans for interface/body.
+        Round, clear, excellent small-size legibility.
+      JetBrains Mono — engineered for data readability.
+        Float values, prices, constraints, timestamps.
+    ──────────────────────────────────────────── */
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  /* Canvas: warm paper, not clinical white */
+  --canvas: #F8F7F4;
+  --surface: #FFFFFF;
+  --well: #F0EFEB;
+  --raised: #FFFFFF;
+
+  /* Ink: true readability hierarchy */
+  --ink: #1A1A1A;
+  --ink-2: #4A4A4A;
+  --ink-3: #6B6B6B;
+  --ink-4: #999999;
+  --ink-5: #D0CEC8;
+
+  /* Signal: deep forest green — trust, not hype */
+  --signal: #1A7A4C;
+  --signal-light: #E3F2EA;
+  --signal-text: #15653E;
+
+  /* Caution: warm amber */
+  --caution: #B07B1A;
+  --caution-light: #FBF3E0;
+
+  /* Danger: quiet red */
+  --danger: #B8433A;
+  --danger-light: #FBE9E7;
+
+  /* Border: warm, not gray */
+  --border: #E8E5DF;
+  --border-active: #D0CCC4;
+
+  /* Shadow */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.03);
+  --shadow-lg: 0 8px 28px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.03);
+
+  /* Type families */
+  --serif: 'Fraunces', Georgia, serif;
+  --sans: 'DM Sans', -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+
+  /* ═══ READABILITY SYSTEM ═══
+     Hard floor: nothing carrying information goes below --t-sm.
+     Only purely decorative/supplementary text (float values
+     on dark image overlays) may use --t-xs.
+
+     Sizes at 15px base:
+       --t-xs:    0.68rem = 10.2px  (decorative only)
+       --t-sm:    0.75rem = 11.3px  (labels, badges, timestamps)
+       --t-base:  0.85rem = 12.8px  (body, descriptions, meta)
+       --t-md:    0.95rem = 14.3px  (item names, card titles)
+       --t-lg:    1.1rem  = 16.5px  (section headers)
+       --t-xl:    1.5rem  = 22.5px  (page titles)
+
+     Mono data (prices, floats, constraints) uses --t-data
+     which matches --t-sm but carries enough weight/tracking
+     to remain legible.
+  */
+  --t-xs: 0.68rem;
+  --t-sm: 0.75rem;
+  --t-base: 0.85rem;
+  --t-md: 0.95rem;
+  --t-lg: 1.1rem;
+  --t-xl: 1.5rem;
+  --t-data: 0.75rem;
+
+  /* Layout */
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --bar-h: 54px;
+  --tab-h: 52px;
+  --r: 14px;
+  --r-sm: 10px;
+}
+
+html { font-size: 15px; -webkit-font-smoothing: antialiased; }
+
+body {
+  font-family: var(--sans);
+  background: var(--canvas);
+  color: var(--ink);
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+/* ─── TOP BAR ─── */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: calc(var(--bar-h) + var(--safe-t));
+  padding-top: var(--safe-t);
+  background: rgba(248,247,244,0.88);
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding-inline: 18px;
+  z-index: 100;
+}
+
+.topbar-left { display: flex; align-items: center; gap: 9px; }
+
+.logo-mark {
+  width: 20px; height: 20px;
+  border: 2px solid var(--signal);
+  border-radius: 4px;
+  transform: rotate(45deg);
+  position: relative;
+}
+.logo-mark::after {
+  content: '';
+  position: absolute; inset: 3px;
+  border: 1.5px solid var(--signal);
+  border-radius: 2px;
+}
+
+.topbar-brand {
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-variation-settings: 'opsz' 32;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+
+.live-pill {
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 10px 4px 8px;
+  border-radius: 100px;
+  background: var(--signal-light);
+  font-family: var(--mono);
+  font-size: var(--t-sm); font-weight: 500;
+  color: var(--signal-text);
+  letter-spacing: 0.02em;
+}
+.live-pill::before {
+  content: '';
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--signal);
+  animation: pulse 2.5s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+.avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--well);
+  border: 1px solid var(--border);
+  display: grid; place-items: center;
+  font-size: 0.6rem; font-weight: 600; color: var(--ink-3);
+}
+
+/* ─── TAB BAR ─── */
+.tabbar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: calc(var(--tab-h) + var(--safe-b));
+  padding-bottom: var(--safe-b);
+  background: rgba(248,247,244,0.92);
+  backdrop-filter: blur(20px) saturate(1.3);
+  -webkit-backdrop-filter: blur(20px) saturate(1.3);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-around;
+  z-index: 100;
+}
+
+.tab {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  padding: 5px 12px; position: relative;
+  transition: transform 0.12s;
+}
+.tab:active { transform: scale(0.88); }
+.tab-icon { font-size: 1rem; color: var(--ink-4); transition: color 0.2s; }
+.tab-name {
+  font-size: 0.65rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--ink-4); transition: color 0.2s;
+}
+.tab.on .tab-icon { color: var(--signal); }
+.tab.on .tab-name { color: var(--signal-text); }
+
+.tab-pip {
+  position: absolute; top: 1px; right: 4px;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--signal);
+}
+
+/* ─── MAIN ─── */
+.main {
+  padding-top: calc(var(--bar-h) + var(--safe-t) + 4px);
+  padding-bottom: calc(var(--tab-h) + var(--safe-b) + 20px);
+  min-height: 100dvh;
+}
+
+.scr { display: none; padding: 14px 16px 0; }
+.scr.on { display: block; animation: enter 0.3s cubic-bezier(0.22,1,0.36,1); }
+@keyframes enter { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ─── UTILITY ─── */
+.mono {
+  font-family: var(--mono);
+  font-size: var(--t-data); font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.cap {
+  font-family: var(--mono);
+  font-size: var(--t-sm); font-weight: 500;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.display {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-variation-settings: 'opsz' 48;
+  letter-spacing: -0.02em;
+}
+
+.fade { opacity: 0; transform: translateY(8px); animation: fi 0.4s cubic-bezier(0.22,1,0.36,1) forwards; }
+.d1 { animation-delay: 0.03s; } .d2 { animation-delay: 0.07s; }
+.d3 { animation-delay: 0.11s; } .d4 { animation-delay: 0.15s; }
+.d5 { animation-delay: 0.19s; } .d6 { animation-delay: 0.23s; }
+@keyframes fi { to { opacity: 1; transform: translateY(0); } }
+
+/* ════════════════════════════════════════
+   SCREEN: HOME — INVENTORY AWAKENING
+   ════════════════════════════════════════ */
+
+.home-top { margin-bottom: 18px; }
+
+.home-title {
+  font-family: var(--serif);
+  font-size: 1.55rem;
+  font-weight: 600;
+  font-variation-settings: 'opsz' 72;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  margin-bottom: 4px;
+}
+
+.home-sub {
+  font-size: 0.8rem;
+  color: var(--ink-3);
+  line-height: 1.4;
+}
+
+/* Demand signal */
+.demand-bar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px;
+  background: var(--signal-light);
+  border: 1px solid rgba(26,122,76,0.12);
+  border-radius: var(--r-sm);
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.demand-bar:active { background: rgba(26,122,76,0.1); }
+
+.demand-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--signal); flex-shrink: 0;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.demand-text {
+  font-size: 0.8rem; font-weight: 500; color: var(--ink-2);
+}
+.demand-text strong { color: var(--signal-text); font-weight: 600; }
+.demand-caret { margin-left: auto; color: var(--ink-4); font-size: 0.7rem; }
+
+/* Item grid */
+.grid-label { margin-bottom: 10px; }
+
+.igrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.icard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.2s;
+  box-shadow: var(--shadow-sm);
+}
+.icard:active { transform: scale(0.97); box-shadow: var(--shadow-md); }
+
+.icard-vis {
+  width: 100%; aspect-ratio: 1;
+  position: relative; overflow: hidden;
+}
+
+/* Skin backgrounds — intentionally muted, items pop against them */
+.sk-karambit { background: linear-gradient(155deg, #2d2040 0%, #1a1028 50%, #100a18 100%); }
+.sk-vulcan   { background: linear-gradient(155deg, #1a2840 0%, #0f1a2d 50%, #0a0f18 100%); }
+.sk-howl     { background: linear-gradient(155deg, #3a1a18 0%, #281010 50%, #180a0a 100%); }
+.sk-dlore    { background: linear-gradient(155deg, #2a3318 0%, #1a2210 50%, #10150a 100%); }
+.sk-bfly     { background: linear-gradient(155deg, #3a2a18 0%, #281c10 50%, #18100a 100%); }
+.sk-neon     { background: linear-gradient(155deg, #281840 0%, #1a0f2d 50%, #100a18 100%); }
+
+.icard-emoji {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  font-size: 2.4rem;
+  filter: drop-shadow(0 4px 16px rgba(0,0,0,0.35));
+}
+
+.icard-float {
+  position: absolute; bottom: 7px; left: 7px;
+  font-family: var(--mono);
+  font-size: var(--t-xs); font-weight: 500;
+  color: rgba(255,255,255,0.45);
+  letter-spacing: 0.02em;
+}
+
+/* Demand pip on card */
+.icard-demand {
+  position: absolute; top: 8px; right: 8px;
+  padding: 3px 8px 3px 6px;
+  border-radius: 6px;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(6px);
+  font-family: var(--mono);
+  font-size: var(--t-sm); font-weight: 500;
+  color: rgba(255,255,255,0.9);
+  display: flex; align-items: center; gap: 5px;
+}
+.icard-demand::before {
+  content: ''; width: 5px; height: 5px;
+  border-radius: 50%; background: #4ade80;
+}
+
+.icard-body { padding: 10px 11px 11px; }
+
+.icard-name {
+  font-size: var(--t-md); font-weight: 600;
+  margin-bottom: 4px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.icard-meta {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--mono);
+  font-size: var(--t-data); color: var(--ink-3);
+}
+
+.wear-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: var(--t-sm); font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.w-fn { background: #E3F2EA; color: #15653E; }
+.w-mw { background: #E3EEF8; color: #1A5A8A; }
+.w-ft { background: #FBF3E0; color: #8A6A1A; }
+
+/* ════════════════════════════════════════
+   SCREEN: INTENTS
+   ════════════════════════════════════════ */
+
+.icard-intent {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 15px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.icard-intent:active { transform: scale(0.985); }
+
+.intent-gg {
+  display: flex; align-items: stretch; gap: 0;
+  margin-bottom: 10px;
+}
+
+.intent-side { flex: 1; }
+.intent-dir {
+  font-family: var(--mono);
+  font-size: var(--t-sm); font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  margin-bottom: 3px;
+}
+.intent-dir.give { color: var(--ink-3); }
+.intent-dir.want { color: var(--signal-text); }
+
+.intent-name { font-size: var(--t-md); font-weight: 600; line-height: 1.3; }
+.intent-desc { font-size: var(--t-base); color: var(--ink-3); margin-top: 2px; }
+
+.intent-sep {
+  width: 1px; background: var(--border);
+  margin: 0 12px; position: relative;
+}
+.intent-sep::after {
+  content: '→'; position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  font-size: 0.6rem; color: var(--ink-4);
+  background: var(--surface); padding: 3px 1px;
+}
+
+.intent-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
+
+.itag {
+  padding: 4px 9px; border-radius: 6px;
+  font-family: var(--mono); font-size: var(--t-sm); font-weight: 500;
+  background: var(--well); color: var(--ink-3);
+  border: 1px solid var(--border);
+}
+
+.intent-live {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: var(--t-sm); color: var(--ink-3);
+}
+.intent-live::before {
+  content: ''; width: 5px; height: 5px; border-radius: 50%;
+  background: var(--signal); animation: pulse 2s ease-in-out infinite;
+}
+
+.new-intent-btn {
+  width: 100%; padding: 13px;
+  border: 1.5px dashed var(--border-active);
+  border-radius: var(--r);
+  background: transparent;
+  font-family: var(--sans); font-size: 0.8rem; font-weight: 500;
+  color: var(--ink-3); cursor: pointer;
+  transition: all 0.2s; margin-top: 4px;
+}
+.new-intent-btn:active { background: var(--well); color: var(--ink-2); }
+
+/* ════════════════════════════════════════
+   SCREEN: INBOX — PROPOSALS
+   Vertical stacked layout for readability.
+   Each item gets full width. No cramped
+   side-by-side squeeze.
+   ════════════════════════════════════════ */
+
+.pcard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.2s;
+}
+.pcard:active { transform: scale(0.985); box-shadow: var(--shadow-md); }
+
+.pcard-body { padding: 16px 16px 14px; }
+
+/* Give row */
+.pcard-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.pcard-row + .pcard-row { margin-top: 12px; }
+
+.pcard-dir {
+  font-family: var(--mono);
+  font-size: var(--t-sm); font-weight: 600;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  flex-shrink: 0;
+  width: 62px;
+}
+.pcard-dir.give { color: var(--ink-4); }
+.pcard-dir.get { color: var(--signal-text); }
+
+.pcard-item-group { flex: 1; min-width: 0; }
+
+.pcard-item {
+  font-size: var(--t-md);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.pcard-meta {
+  font-family: var(--mono);
+  font-size: var(--t-data);
+  color: var(--ink-3);
+  margin-top: 2px;
+}
+
+/* Separator between give/get */
+.pcard-sep {
+  height: 1px;
+  background: var(--border);
+  margin: 12px 0 12px 70px;
+}
+
+.pcard-foot {
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pbadge {
+  padding: 3px 9px; border-radius: 6px;
+  font-family: var(--mono); font-size: var(--t-sm); font-weight: 500;
+}
+.pbadge-conf-h { background: var(--signal-light); color: var(--signal-text); }
+.pbadge-conf-m { background: var(--caution-light); color: var(--caution); }
+.pbadge-neutral { background: var(--well); color: var(--ink-3); }
+.pbadge-value { background: var(--signal-light); color: var(--signal-text); }
+
+.pcard-time {
+  margin-left: auto;
+  font-family: var(--mono); font-size: var(--t-sm); color: var(--ink-4);
+}
+
+/* ════════════════════════════════════════
+   SCREEN: PROPOSAL DETAIL
+   ════════════════════════════════════════ */
+
+.back-link {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 0.75rem; color: var(--ink-3); cursor: pointer;
+  padding: 6px 0; margin-bottom: 12px;
+}
+.back-link:active { opacity: 0.5; }
+
+/* Exchange hero */
+.xchange {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.xchange-row {
+  padding: 16px;
+  display: flex; align-items: center; gap: 12px;
+}
+.xchange-row + .xchange-row { border-top: 1px solid var(--border); }
+
+.xchange-thumb {
+  width: 52px; height: 52px;
+  border-radius: var(--r-sm);
+  display: grid; place-items: center;
+  font-size: 1.5rem; flex-shrink: 0;
+}
+
+.xchange-info { flex: 1; }
+.xchange-dir {
+  font-family: var(--mono);
+  font-size: var(--t-sm); font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.xchange-dir.give { color: var(--ink-3); }
+.xchange-dir.get { color: var(--signal-text); }
+
+.xchange-name {
+  font-family: var(--serif);
+  font-size: var(--t-lg); font-weight: 600;
+  font-variation-settings: 'opsz' 32;
+  letter-spacing: -0.01em;
+}
+.xchange-meta { font-family: var(--mono); font-size: var(--t-data); color: var(--ink-3); margin-top: 2px; }
+
+/* Cycle path */
+.cycle-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 14px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow-sm);
+}
+
+.cycle-card .cap { margin-bottom: 12px; }
+
+.cycle-row {
+  display: flex; align-items: center; gap: 0;
+  overflow-x: auto; padding-bottom: 4px;
+}
+
+.c-node {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  flex-shrink: 0;
+}
+
+.c-circle {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: 0.85rem;
+  border: 1.5px solid var(--border-active);
+  background: var(--well);
+}
+.c-circle.me {
+  border-color: var(--signal);
+  background: var(--signal-light);
+}
+
+.c-name {
+  font-family: var(--mono); font-size: var(--t-sm); font-weight: 500;
+  color: var(--ink-3); letter-spacing: 0.02em;
+}
+.c-name.me { color: var(--signal-text); font-weight: 600; }
+
+.c-edge {
+  flex-shrink: 0; display: flex; flex-direction: column;
+  align-items: center; gap: 2px; padding: 0 4px;
+}
+.c-edge-line {
+  width: 28px; height: 1px; background: var(--ink-5);
+  position: relative;
+}
+.c-edge-line::after {
+  content: ''; position: absolute; right: -1px; top: -2.5px;
+  border: 2.5px solid transparent; border-left-color: var(--ink-5);
+}
+.c-edge-label {
+  font-family: var(--mono); font-size: var(--t-xs);
+  color: var(--ink-4); white-space: nowrap;
+}
+
+/* Explanation */
+.explain {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 13px 14px;
+  margin-bottom: 8px;
+  box-shadow: var(--shadow-sm);
+}
+
+.explain-head {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 4px;
+}
+
+.explain-dot {
+  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+}
+.edot-val { background: var(--signal); }
+.edot-conf { background: var(--caution); }
+.edot-fit { background: #5B8DEF; }
+
+.explain-title { font-size: var(--t-base); font-weight: 600; }
+.explain-body { font-size: var(--t-base); color: var(--ink-2); line-height: 1.55; padding-left: 14px; }
+.explain-hl { font-family: var(--mono); font-weight: 600; color: var(--signal-text); }
+
+/* Actions */
+.actions {
+  display: flex; gap: 8px;
+  margin-top: 18px; padding-bottom: 8px;
+}
+
+.btn {
+  flex: 1; padding: 13px; border: none;
+  border-radius: var(--r-sm);
+  font-family: var(--sans); font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; transition: all 0.15s;
+}
+.btn:active { transform: scale(0.96); }
+
+.btn-primary {
+  background: var(--signal);
+  color: #fff;
+}
+
+.btn-secondary {
+  background: var(--well);
+  border: 1px solid var(--border);
+  color: var(--ink-2);
+}
+
+/* ════════════════════════════════════════
+   SCREEN: ACTIVE SWAP
+   ════════════════════════════════════════ */
+
+.active-top {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 14px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.active-status {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 8px;
+}
+
+.status-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--caution); flex-shrink: 0;
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+.active-headline { font-size: var(--t-base); font-weight: 600; }
+.active-sub { font-family: var(--mono); font-size: var(--t-data); color: var(--ink-3); margin-top: 3px; }
+
+.progress {
+  height: 3px; background: var(--well);
+  border-radius: 2px; overflow: hidden;
+}
+.progress-fill {
+  height: 100%; background: var(--signal);
+  border-radius: 2px; transition: width 0.5s;
+}
+
+/* Timeline */
+.tl { padding-left: 20px; position: relative; }
+.tl-line {
+  position: absolute; left: 4px; top: 0; bottom: 0;
+  width: 1.5px; background: var(--ink-5);
+}
+.tl-fill { width: 100%; background: var(--signal); transition: height 0.5s; }
+
+.tl-ev { position: relative; padding-bottom: 18px; }
+.tl-ev:last-child { padding-bottom: 0; }
+
+.tl-dot {
+  position: absolute; left: -19px; top: 3px;
+  width: 9px; height: 9px; border-radius: 50%;
+  border: 1.5px solid var(--ink-5);
+  background: var(--canvas); z-index: 2;
+}
+.tl-ev.done .tl-dot { background: var(--signal); border-color: var(--signal); }
+.tl-ev.now .tl-dot { border-color: var(--caution); box-shadow: 0 0 0 3px var(--caution-light); }
+
+.tl-title { font-size: var(--t-base); font-weight: 600; margin-bottom: 2px; }
+.tl-desc { font-size: var(--t-base); color: var(--ink-2); line-height: 1.45; }
+.tl-time { font-family: var(--mono); font-size: var(--t-sm); color: var(--ink-4); margin-top: 4px; }
+
+/* ════════════════════════════════════════
+   SCREEN: RECEIPTS
+   ════════════════════════════════════════ */
+
+.rcard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 13px 14px;
+  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 11px;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.rcard:active { transform: scale(0.985); }
+
+.rcard-status {
+  width: 30px; height: 30px; border-radius: 8px;
+  display: grid; place-items: center;
+  font-size: 0.7rem; flex-shrink: 0;
+}
+.rcard-ok { background: var(--signal-light); color: var(--signal-text); }
+.rcard-fail { background: var(--danger-light); color: var(--danger); }
+
+.rcard-info { flex: 1; min-width: 0; }
+.rcard-title { font-size: var(--t-base); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rcard-meta { font-family: var(--mono); font-size: var(--t-sm); color: var(--ink-3); margin-top: 3px; }
+
+.rcard-delta {
+  font-family: var(--mono); font-size: var(--t-base); font-weight: 600;
+  text-align: right; flex-shrink: 0;
+}
+.d-up { color: var(--signal-text); }
+.d-down { color: var(--danger); }
+.d-flat { color: var(--ink-4); }
+
+/* ─── RESPONSIVE ─── */
+@media (min-width: 768px) {
+  .main { max-width: 420px; margin: 0 auto; }
+  .topbar, .tabbar { max-width: 420px; left: 50%; transform: translateX(-50%); }
+}
+
+/* ─── MODAL ─── */
+.modal-bg {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.25);
+  z-index: 200;
+  align-items: flex-end; justify-content: center;
+}
+.modal-bg.on { display: flex; }
+
+.modal-sheet {
+  width: 100%; max-width: 420px;
+  background: var(--surface);
+  border-radius: var(--r) var(--r) 0 0;
+  padding: 18px 16px calc(18px + var(--safe-b));
+  box-shadow: var(--shadow-lg);
+  animation: sheet-up 0.3s cubic-bezier(0.22,1,0.36,1);
+}
+@keyframes sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+.modal-handle {
+  width: 32px; height: 4px;
+  background: var(--ink-5); border-radius: 2px;
+  margin: 0 auto 14px;
+}
+
+.modal-title {
+  font-family: var(--serif);
+  font-size: 1.1rem; font-weight: 600;
+  font-variation-settings: 'opsz' 36;
+  margin-bottom: 16px;
+}
+
+.fg { margin-bottom: 12px; }
+.fg-label {
+  font-family: var(--mono); font-size: var(--t-sm); font-weight: 500;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--ink-3); margin-bottom: 7px;
+}
+
+.fg-input {
+  width: 100%; padding: 10px 12px;
+  background: var(--well);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  font-family: var(--sans); font-size: 0.82rem;
+  color: var(--ink); outline: none;
+  transition: border-color 0.2s;
+}
+.fg-input::placeholder { color: var(--ink-4); }
+.fg-input:focus { border-color: var(--signal); }
+
+.fg-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+.fg-tag {
+  padding: 5px 10px; border-radius: 7px;
+  font-size: 0.7rem; font-weight: 500;
+  background: var(--well); border: 1px solid var(--border);
+  color: var(--ink-3); cursor: pointer; transition: all 0.2s;
+}
+.fg-tag.on {
+  background: var(--signal-light);
+  border-color: rgba(26,122,76,0.18);
+  color: var(--signal-text);
+}
+.fg-tag:active { transform: scale(0.93); }
+
+.modal-go {
+  width: 100%; padding: 13px;
+  background: var(--signal); color: #fff;
+  border: none; border-radius: var(--r-sm);
+  font-family: var(--sans); font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; margin-top: 6px;
+  transition: transform 0.15s;
+}
+.modal-go:active { transform: scale(0.97); }
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+  <div class="topbar-left">
+    <div class="logo-mark"></div>
+    <span class="topbar-brand">SwapGraph</span>
+  </div>
+  <div class="topbar-right">
+    <div class="live-pill">Matching</div>
+    <div class="avatar">LR</div>
+  </div>
+</header>
+
+<main class="main">
+
+<!-- ═══ HOME ═══ -->
+<section class="scr on" id="s-home">
+  <div class="home-top fade d1">
+    <div class="home-title">Your inventory</div>
+    <div class="home-sub">Connected via Steam · 6 tradable items</div>
+  </div>
+
+  <div class="demand-bar fade d2" onclick="nav('s-inbox')">
+    <div class="demand-dot"></div>
+    <div class="demand-text"><strong>3 proposals</strong> matched your intents</div>
+    <div class="demand-caret">→</div>
+  </div>
+
+  <div class="cap grid-label fade d2">Highest demand</div>
+  <div class="igrid">
+    <div class="icard fade d2" onclick="nav('s-detail')">
+      <div class="icard-vis sk-karambit">
+        <div class="icard-emoji">🔪</div>
+        <div class="icard-float">0.0312</div>
+        <div class="icard-demand">17 wants</div>
+      </div>
+      <div class="icard-body">
+        <div class="icard-name">Karambit | Doppler</div>
+        <div class="icard-meta"><span class="wear-badge w-fn">FN</span> $380</div>
+      </div>
+    </div>
+    <div class="icard fade d3">
+      <div class="icard-vis sk-howl">
+        <div class="icard-emoji">🐺</div>
+        <div class="icard-float">0.1847</div>
+        <div class="icard-demand">31 wants</div>
+      </div>
+      <div class="icard-body">
+        <div class="icard-name">M4A4 | Howl</div>
+        <div class="icard-meta"><span class="wear-badge w-ft">FT</span> $1,840</div>
+      </div>
+    </div>
+    <div class="icard fade d3">
+      <div class="icard-vis sk-vulcan">
+        <div class="icard-emoji">🔫</div>
+        <div class="icard-float">0.0891</div>
+        <div class="icard-demand">9 wants</div>
+      </div>
+      <div class="icard-body">
+        <div class="icard-name">AK-47 | Vulcan</div>
+        <div class="icard-meta"><span class="wear-badge w-mw">MW</span> $210</div>
+      </div>
+    </div>
+    <div class="icard fade d4">
+      <div class="icard-vis sk-dlore">
+        <div class="icard-emoji">🐉</div>
+        <div class="icard-float">0.2104</div>
+      </div>
+      <div class="icard-body">
+        <div class="icard-name">AWP | Dragon Lore</div>
+        <div class="icard-meta"><span class="wear-badge w-ft">FT</span> $4,200</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cap grid-label fade d5">Also tradable</div>
+  <div class="igrid">
+    <div class="icard fade d5">
+      <div class="icard-vis sk-bfly">
+        <div class="icard-emoji">🦋</div>
+        <div class="icard-float">0.0089</div>
+        <div class="icard-demand">5 wants</div>
+      </div>
+      <div class="icard-body">
+        <div class="icard-name">Butterfly | Fade</div>
+        <div class="icard-meta"><span class="wear-badge w-fn">FN</span> $620</div>
+      </div>
+    </div>
+    <div class="icard fade d6">
+      <div class="icard-vis sk-neon">
+        <div class="icard-emoji">💀</div>
+        <div class="icard-float">0.0234</div>
+      </div>
+      <div class="icard-body">
+        <div class="icard-name">AK-47 | Neon Rider</div>
+        <div class="icard-meta"><span class="wear-badge w-fn">FN</span> $85</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ INTENTS ═══ -->
+<section class="scr" id="s-intents">
+  <div class="home-title fade d1" style="margin-bottom:3px;">Intents</div>
+  <div class="home-sub fade d1" style="margin-bottom:16px;">Matching continuously against these.</div>
+
+  <div class="icard-intent fade d2">
+    <div class="intent-gg">
+      <div class="intent-side">
+        <div class="intent-dir give">Offering</div>
+        <div class="intent-name">AK-47 | Vulcan</div>
+        <div class="intent-desc">Minimal Wear</div>
+      </div>
+      <div class="intent-sep"></div>
+      <div class="intent-side">
+        <div class="intent-dir want">Want</div>
+        <div class="intent-name">Any CS2 knife</div>
+        <div class="intent-desc">FT – MW condition</div>
+      </div>
+    </div>
+    <div class="intent-tags">
+      <span class="itag">± $50</span>
+      <span class="itag">≤ 3 hops</span>
+    </div>
+    <div class="intent-live">Watching · 4 near-matches</div>
+  </div>
+
+  <div class="icard-intent fade d3">
+    <div class="intent-gg">
+      <div class="intent-side">
+        <div class="intent-dir give">Offering</div>
+        <div class="intent-name">Butterfly | Fade</div>
+        <div class="intent-desc">Factory New</div>
+      </div>
+      <div class="intent-sep"></div>
+      <div class="intent-side">
+        <div class="intent-dir want">Want</div>
+        <div class="intent-name">Karambit | Marble Fade</div>
+        <div class="intent-desc">FN only</div>
+      </div>
+    </div>
+    <div class="intent-tags">
+      <span class="itag">± $80</span>
+    </div>
+    <div class="intent-live">Watching · 1 near-match</div>
+  </div>
+
+  <div class="icard-intent fade d4">
+    <div class="intent-gg">
+      <div class="intent-side">
+        <div class="intent-dir give">Offering</div>
+        <div class="intent-name">M4A4 | Howl</div>
+        <div class="intent-desc">Field-Tested</div>
+      </div>
+      <div class="intent-sep"></div>
+      <div class="intent-side">
+        <div class="intent-dir want">Want</div>
+        <div class="intent-name">AWP | Gungnir + adds</div>
+        <div class="intent-desc">MW – FN</div>
+      </div>
+    </div>
+    <div class="intent-tags">
+      <span class="itag">± $200</span>
+      <span class="itag">≤ 4 hops</span>
+      <span class="itag">reliability ≥ 4.0</span>
+    </div>
+    <div class="intent-live">Watching · no matches yet</div>
+  </div>
+
+  <button class="new-intent-btn fade d5" onclick="openModal()">+ Post new intent</button>
+</section>
+
+<!-- ═══ INBOX ═══ -->
+<section class="scr" id="s-inbox">
+  <div class="home-title fade d1" style="margin-bottom:3px;">Proposals</div>
+  <div class="home-sub fade d1" style="margin-bottom:16px;">Matched against your standing intents.</div>
+
+  <div class="pcard fade d2" onclick="nav('s-detail')">
+    <div class="pcard-body">
+      <div class="pcard-row">
+        <div class="pcard-dir give">Give</div>
+        <div class="pcard-item-group">
+          <div class="pcard-item">AK-47 | Vulcan</div>
+          <div class="pcard-meta">Minimal Wear · $210</div>
+        </div>
+      </div>
+      <div class="pcard-sep"></div>
+      <div class="pcard-row">
+        <div class="pcard-dir get">Get</div>
+        <div class="pcard-item-group">
+          <div class="pcard-item">Falchion | Slaughter</div>
+          <div class="pcard-meta">Minimal Wear · $245</div>
+        </div>
+      </div>
+    </div>
+    <div class="pcard-foot">
+      <span class="pbadge pbadge-conf-h">97% conf</span>
+      <span class="pbadge pbadge-value">+$35</span>
+      <span class="pbadge pbadge-neutral">3-way cycle</span>
+      <span class="pcard-time">12m ago</span>
+    </div>
+  </div>
+
+  <div class="pcard fade d3" onclick="nav('s-detail')">
+    <div class="pcard-body">
+      <div class="pcard-row">
+        <div class="pcard-dir give">Give</div>
+        <div class="pcard-item-group">
+          <div class="pcard-item">Butterfly | Fade</div>
+          <div class="pcard-meta">Factory New · $620</div>
+        </div>
+      </div>
+      <div class="pcard-sep"></div>
+      <div class="pcard-row">
+        <div class="pcard-dir get">Get</div>
+        <div class="pcard-item-group">
+          <div class="pcard-item">Karambit | Tiger Tooth</div>
+          <div class="pcard-meta">Factory New · $590</div>
+        </div>
+      </div>
+    </div>
+    <div class="pcard-foot">
+      <span class="pbadge pbadge-conf-m">84% conf</span>
+      <span class="pbadge pbadge-neutral">–$30</span>
+      <span class="pbadge pbadge-neutral">direct swap</span>
+      <span class="pcard-time">1h ago</span>
+    </div>
+  </div>
+
+  <div class="pcard fade d4" onclick="nav('s-detail')">
+    <div class="pcard-body">
+      <div class="pcard-row">
+        <div class="pcard-dir give">Give</div>
+        <div class="pcard-item-group">
+          <div class="pcard-item">M4A4 | Howl</div>
+          <div class="pcard-meta">Field-Tested · $1,840</div>
+        </div>
+      </div>
+      <div class="pcard-sep"></div>
+      <div class="pcard-row">
+        <div class="pcard-dir get">Get</div>
+        <div class="pcard-item-group">
+          <div class="pcard-item">AWP | Gungnir</div>
+          <div class="pcard-meta">Minimal Wear · $1,920</div>
+        </div>
+      </div>
+    </div>
+    <div class="pcard-foot">
+      <span class="pbadge pbadge-conf-m">72% conf</span>
+      <span class="pbadge pbadge-value">+$80</span>
+      <span class="pbadge pbadge-neutral">4-way cycle</span>
+      <span class="pcard-time">3h ago</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ DETAIL ═══ -->
+<section class="scr" id="s-detail">
+  <div class="back-link fade" onclick="nav('s-inbox')">← Proposals</div>
+
+  <div class="xchange fade d1">
+    <div class="xchange-row">
+      <div class="xchange-thumb sk-vulcan" style="border-radius:var(--r-sm);">
+        <div style="font-size:1.3rem;">🔫</div>
+      </div>
+      <div class="xchange-info">
+        <div class="xchange-dir give">You give</div>
+        <div class="xchange-name">AK-47 | Vulcan</div>
+        <div class="xchange-meta">Minimal Wear · Float 0.089 · $210</div>
+      </div>
+    </div>
+    <div class="xchange-row">
+      <div class="xchange-thumb" style="border-radius:var(--r-sm);background:linear-gradient(135deg,#2a1518,#180a0c);">
+        <div style="font-size:1.3rem;">🔪</div>
+      </div>
+      <div class="xchange-info">
+        <div class="xchange-dir get">You get</div>
+        <div class="xchange-name">Falchion | Slaughter</div>
+        <div class="xchange-meta">Minimal Wear · Float 0.102 · $245</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cycle-card fade d2">
+    <div class="cap">Swap cycle · 3 parties</div>
+    <div class="cycle-row">
+      <div class="c-node">
+        <div class="c-circle me">🧑</div>
+        <div class="c-name me">You</div>
+      </div>
+      <div class="c-edge">
+        <div class="c-edge-label">Vulcan</div>
+        <div class="c-edge-line"></div>
+      </div>
+      <div class="c-node">
+        <div class="c-circle">👤</div>
+        <div class="c-name">@steel</div>
+      </div>
+      <div class="c-edge">
+        <div class="c-edge-label">Deagle Blaze</div>
+        <div class="c-edge-line"></div>
+      </div>
+      <div class="c-node">
+        <div class="c-circle">👤</div>
+        <div class="c-name">@navi_fan</div>
+      </div>
+      <div class="c-edge">
+        <div class="c-edge-label">Falchion</div>
+        <div class="c-edge-line"></div>
+      </div>
+      <div class="c-node">
+        <div class="c-circle me">🧑</div>
+        <div class="c-name me">You</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cap fade d3" style="margin-bottom:8px;">Why this proposal</div>
+
+  <div class="explain fade d3">
+    <div class="explain-head">
+      <div class="explain-dot edot-val"></div>
+      <div class="explain-title">Value delta</div>
+    </div>
+    <div class="explain-body">
+      You gain <span class="explain-hl">+$35</span> in estimated value.
+      AK-47 Vulcan ($210) trades up to Falchion Slaughter ($245).
+    </div>
+  </div>
+
+  <div class="explain fade d4">
+    <div class="explain-head">
+      <div class="explain-dot edot-conf"></div>
+      <div class="explain-title">Confidence: 97%</div>
+    </div>
+    <div class="explain-body">
+      All 3 participants' constraints satisfied. @steel and @navi_fan have
+      96%+ completion rates across 40+ swaps.
+    </div>
+  </div>
+
+  <div class="explain fade d5">
+    <div class="explain-head">
+      <div class="explain-dot edot-fit"></div>
+      <div class="explain-title">Constraint fit</div>
+    </div>
+    <div class="explain-body">
+      Matches your "any CS2 knife, FT–MW, ±$50" intent.
+      Falchion Slaughter MW falls within all bounds.
+    </div>
+  </div>
+
+  <div class="actions fade d6">
+    <button class="btn btn-secondary" onclick="nav('s-inbox')">Decline</button>
+    <button class="btn btn-primary" onclick="nav('s-active')">Accept swap</button>
+  </div>
+</section>
+
+<!-- ═══ ACTIVE SWAP ═══ -->
+<section class="scr" id="s-active">
+  <div class="home-title fade d1" style="margin-bottom:3px;">Active swap</div>
+  <div class="home-sub fade d1" style="margin-bottom:14px;">Vulcan → Falchion Slaughter · 3-way</div>
+
+  <div class="active-top fade d2">
+    <div class="active-status">
+      <div class="status-dot"></div>
+      <div class="active-headline">Awaiting @steel's deposit</div>
+    </div>
+    <div class="active-sub">Deposit deadline: 22h remaining</div>
+    <div class="progress" style="margin-top:10px;">
+      <div class="progress-fill" style="width:50%;"></div>
+    </div>
+  </div>
+
+  <div class="tl fade d3">
+    <div class="tl-line"><div class="tl-fill" style="height:55%;"></div></div>
+
+    <div class="tl-ev done">
+      <div class="tl-dot"></div>
+      <div class="tl-title">Proposal accepted</div>
+      <div class="tl-desc">You accepted the 3-way cycle for Falchion Slaughter.</div>
+      <div class="tl-time">Today, 2:14 PM</div>
+    </div>
+    <div class="tl-ev done">
+      <div class="tl-dot"></div>
+      <div class="tl-title">All parties committed</div>
+      <div class="tl-desc">@steel and @navi_fan confirmed. Cycle locked.</div>
+      <div class="tl-time">Today, 2:18 PM</div>
+    </div>
+    <div class="tl-ev done">
+      <div class="tl-dot"></div>
+      <div class="tl-title">Your trade offer sent</div>
+      <div class="tl-desc">Steam trade offer for AK-47 Vulcan sent to escrow.</div>
+      <div class="tl-time">Today, 2:31 PM</div>
+    </div>
+    <div class="tl-ev now">
+      <div class="tl-dot"></div>
+      <div class="tl-title">Awaiting remaining deposits</div>
+      <div class="tl-desc">@steel needs to deposit Deagle Blaze. 22h remaining.</div>
+      <div class="tl-time">Waiting…</div>
+    </div>
+    <div class="tl-ev">
+      <div class="tl-dot"></div>
+      <div class="tl-title">Execution</div>
+      <div class="tl-desc">All items released simultaneously.</div>
+    </div>
+    <div class="tl-ev">
+      <div class="tl-dot"></div>
+      <div class="tl-title">Receipt issued</div>
+      <div class="tl-desc">Signed, verifiable settlement receipt.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ RECEIPTS ═══ -->
+<section class="scr" id="s-receipts">
+  <div class="home-title fade d1" style="margin-bottom:3px;">Receipts</div>
+  <div class="home-sub fade d1" style="margin-bottom:16px;">Verified settlement records</div>
+
+  <div class="rcard fade d2">
+    <div class="rcard-status rcard-ok">✓</div>
+    <div class="rcard-info">
+      <div class="rcard-title">USP-S Kill Confirmed → Deagle Blaze</div>
+      <div class="rcard-meta">Settled · Jan 28 · direct · verified</div>
+    </div>
+    <div class="rcard-delta d-up">+$12</div>
+  </div>
+
+  <div class="rcard fade d3">
+    <div class="rcard-status rcard-ok">✓</div>
+    <div class="rcard-info">
+      <div class="rcard-title">Bayonet Rust → Flip Doppler P4</div>
+      <div class="rcard-meta">Settled · Jan 15 · 3-way · verified</div>
+    </div>
+    <div class="rcard-delta d-up">+$45</div>
+  </div>
+
+  <div class="rcard fade d4">
+    <div class="rcard-status rcard-fail">✕</div>
+    <div class="rcard-info">
+      <div class="rcard-title">Glock Fade → M9 Lore (unwound)</div>
+      <div class="rcard-meta">Unwound · Jan 8 · counterparty timeout · refunded</div>
+    </div>
+    <div class="rcard-delta d-flat">$0</div>
+  </div>
+
+  <div class="rcard fade d5">
+    <div class="rcard-status rcard-ok">✓</div>
+    <div class="rcard-info">
+      <div class="rcard-title">AWP Asiimov → SSG Blood in Water</div>
+      <div class="rcard-meta">Settled · Dec 30 · 4-way · verified</div>
+    </div>
+    <div class="rcard-delta d-up">+$8</div>
+  </div>
+
+  <div class="rcard fade d6">
+    <div class="rcard-status rcard-ok">✓</div>
+    <div class="rcard-info">
+      <div class="rcard-title">P250 Muertos → Five-SeveN Hyper Beast</div>
+      <div class="rcard-meta">Settled · Dec 18 · direct · verified</div>
+    </div>
+    <div class="rcard-delta d-up">+$3</div>
+  </div>
+</section>
+
+</main>
+
+<nav class="tabbar">
+  <div class="tab on" onclick="nav('s-home')" data-s="s-home">
+    <div class="tab-icon">◇</div>
+    <div class="tab-name">Items</div>
+  </div>
+  <div class="tab" onclick="nav('s-intents')" data-s="s-intents">
+    <div class="tab-icon">◎</div>
+    <div class="tab-name">Intents</div>
+  </div>
+  <div class="tab" onclick="nav('s-inbox')" data-s="s-inbox">
+    <div class="tab-icon">⬡</div>
+    <div class="tab-name">Inbox</div>
+    <div class="tab-pip"></div>
+  </div>
+  <div class="tab" onclick="nav('s-active')" data-s="s-active">
+    <div class="tab-icon">▸</div>
+    <div class="tab-name">Active</div>
+  </div>
+  <div class="tab" onclick="nav('s-receipts')" data-s="s-receipts">
+    <div class="tab-icon">☰</div>
+    <div class="tab-name">Receipts</div>
+  </div>
+</nav>
+
+<!-- ═══ MODAL ═══ -->
+<div class="modal-bg" id="modal" onclick="closeModal(event)">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title">New intent</div>
+    <div class="fg">
+      <div class="fg-label">Offering</div>
+      <div class="fg-input" style="display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;">
+        <span style="font-size:0.95rem;">🔫</span>
+        <span style="font-size:0.8rem;font-weight:500;">AK-47 | Vulcan MW</span>
+        <span style="margin-left:auto;color:var(--ink-4);font-size:0.68rem;">Change</span>
+      </div>
+    </div>
+    <div class="fg">
+      <div class="fg-label">Want</div>
+      <input class="fg-input" type="text" placeholder="e.g. Any CS2 knife, Karambit Fade…">
+    </div>
+    <div class="fg">
+      <div class="fg-label">Acceptable wear</div>
+      <div class="fg-tags">
+        <div class="fg-tag" onclick="this.classList.toggle('on')">FN</div>
+        <div class="fg-tag on" onclick="this.classList.toggle('on')">MW</div>
+        <div class="fg-tag on" onclick="this.classList.toggle('on')">FT</div>
+        <div class="fg-tag" onclick="this.classList.toggle('on')">WW</div>
+        <div class="fg-tag" onclick="this.classList.toggle('on')">BS</div>
+      </div>
+    </div>
+    <div class="fg">
+      <div class="fg-label">Value tolerance</div>
+      <div class="fg-tags">
+        <div class="fg-tag" onclick="selOne(this)">± $20</div>
+        <div class="fg-tag on" onclick="selOne(this)">± $50</div>
+        <div class="fg-tag" onclick="selOne(this)">± $100</div>
+        <div class="fg-tag" onclick="selOne(this)">± $200</div>
+      </div>
+    </div>
+    <div class="fg">
+      <div class="fg-label">Max cycle length</div>
+      <div class="fg-tags">
+        <div class="fg-tag on" onclick="this.classList.toggle('on')">Direct</div>
+        <div class="fg-tag on" onclick="this.classList.toggle('on')">3-way</div>
+        <div class="fg-tag" onclick="this.classList.toggle('on')">4-way</div>
+      </div>
+    </div>
+    <button class="modal-go" onclick="closeModal()">Post intent</button>
+  </div>
+</div>
+
+<script>
+function nav(id) {
+  document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  const tab = document.querySelector(`.tab[data-s="${id}"]`);
+  if (tab) tab.classList.add('on');
+  document.getElementById(id).querySelectorAll('.fade').forEach(el => {
+    el.style.animation = 'none'; el.offsetHeight; el.style.animation = '';
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function openModal() { document.getElementById('modal').classList.add('on'); }
+function closeModal(e) {
+  if (!e || e.target === e.currentTarget) document.getElementById('modal').classList.remove('on');
+}
+function selOne(el) {
+  el.parentElement.querySelectorAll('.fg-tag').forEach(t => t.classList.remove('on'));
+  el.classList.add('on');
+}
+</script>
+
+</body>
+</html>

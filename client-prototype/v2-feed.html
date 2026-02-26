@@ -1,0 +1,2744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>SwapGraph v2 — Opportunity Feed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/*  ════════════════════════════════════════════
+    SWAPGRAPH v2 · OPPORTUNITY FEED PROTOTYPE
+
+    Architecture shift: 5 system-literal tabs →
+    3 user-job-driven surfaces.
+
+    Feed   = "What should I do right now?"
+    Locker = "What do I have & what am I hunting?"
+    History = "What happened?"
+
+    Design direction: Sotheby's auction clarity
+    meets Linear's density-done-right. Warm,
+    confident, gallery-like. Every card answers
+    a user question, not a system state.
+    ════════════════════════════════════════════ */
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --canvas: #F8F7F4;
+  --surface: #FFFFFF;
+  --well: #F0EFEB;
+
+  --ink: #1A1A1A;
+  --ink-2: #4A4A4A;
+  --ink-3: #6B6B6B;
+  --ink-4: #999999;
+  --ink-5: #D0CEC8;
+
+  --signal: #1A7A4C;
+  --signal-light: #E3F2EA;
+  --signal-text: #15653E;
+  --signal-faint: #f0f9f4;
+
+  --caution: #B07B1A;
+  --caution-light: #FBF3E0;
+  --caution-text: #8a5f0e;
+
+  --danger: #B8433A;
+  --danger-light: #FBE9E7;
+  --danger-text: #922f28;
+
+  --border: #E8E5DF;
+  --border-active: #D0CCC4;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.03);
+  --shadow-lg: 0 8px 28px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.03);
+
+  --serif: 'Fraunces', Georgia, serif;
+  --sans: 'DM Sans', -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+
+  --t-xs: 0.68rem;
+  --t-sm: 0.75rem;
+  --t-base: 0.85rem;
+  --t-md: 0.95rem;
+  --t-lg: 1.1rem;
+  --t-xl: 1.5rem;
+  --t-xxl: 2rem;
+  --t-data: 0.75rem;
+
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --bar-h: 52px;
+  --tab-h: 56px;
+  --r: 14px;
+  --r-sm: 10px;
+  --r-xs: 7px;
+}
+
+html { font-size: 15px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+body {
+  font-family: var(--sans);
+  background: var(--canvas);
+  color: var(--ink);
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+/* ─── GLOBAL UTILITIES ─── */
+.u-serif { font-family: var(--serif); }
+.u-mono { font-family: var(--mono); }
+.u-ink-2 { color: var(--ink-2); }
+.u-ink-3 { color: var(--ink-3); }
+
+/* ─── TOP BAR ─── */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: calc(var(--bar-h) + var(--safe-t));
+  padding-top: var(--safe-t);
+  background: rgba(248,247,244,0.88);
+  backdrop-filter: blur(24px) saturate(1.3);
+  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding-inline: 18px;
+  z-index: 100;
+}
+
+.topbar-left { display: flex; align-items: center; gap: 10px; }
+
+.logo-mark {
+  width: 18px; height: 18px;
+  border: 2px solid var(--signal);
+  border-radius: 3px;
+  transform: rotate(45deg);
+  position: relative;
+  flex-shrink: 0;
+}
+.logo-mark::after {
+  content: '';
+  position: absolute; inset: 2.5px;
+  border: 1.5px solid var(--signal);
+  border-radius: 1.5px;
+}
+
+.topbar-brand {
+  font-family: var(--serif);
+  font-size: var(--t-md);
+  font-weight: 600;
+  font-variation-settings: 'opsz' 32;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+
+.live-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 9px 3px 7px;
+  border-radius: 100px;
+  background: var(--signal-light);
+  font-family: var(--mono);
+  font-size: var(--t-sm); font-weight: 500;
+  color: var(--signal-text);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.live-pill::before {
+  content: '';
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--signal);
+  animation: pulse 2.5s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+.avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--well);
+  border: 1.5px solid var(--border);
+  display: grid; place-items: center;
+  font-size: 0.58rem; font-weight: 600; color: var(--ink-3);
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
+}
+
+/* ─── 3-SURFACE TAB BAR ─── */
+.tabbar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: calc(var(--tab-h) + var(--safe-b));
+  padding-bottom: var(--safe-b);
+  background: rgba(248,247,244,0.92);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-around;
+  z-index: 100;
+}
+
+.tab {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  padding: 6px 20px; position: relative;
+  transition: transform 0.12s;
+  background: none; border: none; outline: none;
+}
+.tab:active { transform: scale(0.9); }
+
+.tab-icon {
+  font-size: 1.05rem;
+  color: var(--ink-4);
+  transition: color 0.25s;
+  line-height: 1;
+}
+.tab-label {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  transition: color 0.25s;
+}
+.tab.is-active .tab-icon { color: var(--signal); }
+.tab.is-active .tab-label { color: var(--signal-text); }
+
+.tab-badge {
+  position: absolute;
+  top: 2px; right: 12px;
+  min-width: 16px; height: 16px;
+  padding: 0 4px;
+  border-radius: 100px;
+  background: var(--signal);
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 0.55rem;
+  font-weight: 600;
+  display: grid; place-items: center;
+  line-height: 1;
+}
+
+/* ─── MAIN CONTENT ─── */
+.main {
+  padding-top: calc(var(--bar-h) + var(--safe-t) + 8px);
+  padding-bottom: calc(var(--tab-h) + var(--safe-b) + 16px);
+  padding-inline: 14px;
+  max-width: 430px;
+  margin: 0 auto;
+}
+
+/* ─── SURFACE PANELS ─── */
+.surface { display: none; }
+.surface.is-active { display: block; animation: surfaceIn 0.3s ease-out; }
+@keyframes surfaceIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── FEED SURFACE ─── */
+.feed-header {
+  margin-bottom: 20px;
+}
+.feed-greeting {
+  font-family: var(--serif);
+  font-size: var(--t-xxl);
+  font-weight: 500;
+  font-variation-settings: 'opsz' 72;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+.feed-summary {
+  font-size: var(--t-base);
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+.feed-summary strong {
+  font-family: var(--mono);
+  font-weight: 600;
+  color: var(--signal-text);
+}
+
+/* ─── FEED CARDS ─── */
+.feed-stream { display: flex; flex-direction: column; gap: 12px; }
+
+.feed-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s, transform 0.15s;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.feed-card:active { transform: scale(0.985); box-shadow: var(--shadow-md); }
+
+/* Card type accents */
+.feed-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 3px; height: 100%;
+}
+.feed-card[data-type="proposal"]::before { background: var(--signal); }
+.feed-card[data-type="active"]::before { background: var(--caution); }
+.feed-card[data-type="suggestion"]::before { background: linear-gradient(180deg, var(--signal) 0%, transparent 100%); }
+.feed-card[data-type="receipt"]::before { background: var(--ink-5); }
+
+.card-type-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: var(--mono);
+  font-size: var(--t-sm);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.card-type-badge.proposal { color: var(--signal-text); }
+.card-type-badge.active { color: var(--caution-text); }
+.card-type-badge.suggestion { color: var(--ink-3); }
+.card-type-badge.receipt { color: var(--ink-3); }
+
+.card-type-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  flex-shrink: 0;
+}
+.proposal .card-type-dot { background: var(--signal); }
+.active .card-type-dot { background: var(--caution); animation: pulse 2s ease-in-out infinite; }
+.suggestion .card-type-dot { background: var(--ink-4); }
+.receipt .card-type-dot { background: var(--ink-5); }
+
+/* Proposal card interior */
+.swap-visual {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: 12px;
+}
+
+.swap-side {
+  flex: 1;
+  padding: 12px;
+  border-radius: var(--r-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.swap-side.give { background: var(--well); }
+.swap-side.get { background: var(--signal-faint); }
+
+.swap-direction {
+  font-family: var(--mono);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.swap-side.get .swap-direction { color: var(--signal-text); }
+
+.swap-item-thumb {
+  width: 100%;
+  aspect-ratio: 4/3;
+  border-radius: var(--r-xs);
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+.swap-item-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.swap-item-name {
+  font-family: var(--serif);
+  font-size: var(--t-md);
+  font-weight: 600;
+  font-variation-settings: 'opsz' 24;
+  line-height: 1.25;
+  letter-spacing: -0.005em;
+}
+
+.swap-item-meta {
+  font-family: var(--mono);
+  font-size: var(--t-data);
+  font-weight: 500;
+  color: var(--ink-3);
+  letter-spacing: 0.02em;
+}
+
+.swap-arrow-col {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  flex-shrink: 0;
+}
+.swap-arrow {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  display: grid;
+  place-items: center;
+  font-size: 0.65rem;
+  color: var(--ink-3);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Card footer stats */
+.card-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 8px;
+  border-radius: 100px;
+  font-family: var(--mono);
+  font-size: var(--t-sm);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.stat-pill.signal { background: var(--signal-light); color: var(--signal-text); }
+.stat-pill.caution { background: var(--caution-light); color: var(--caution-text); }
+.stat-pill.danger { background: var(--danger-light); color: var(--danger-text); }
+.stat-pill.neutral { background: var(--well); color: var(--ink-2); }
+
+/* Card CTA row (detail sheet only, NOT in feed cards) */
+.card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+/* Tap-to-review prompt (feed cards) */
+.card-review-prompt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.card-review-label {
+  font-family: var(--mono);
+  font-size: var(--t-sm);
+  font-weight: 500;
+  color: var(--signal-text);
+  letter-spacing: 0.02em;
+}
+.card-review-arrow {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--signal-light);
+  display: grid;
+  place-items: center;
+  font-size: 0.6rem;
+  color: var(--signal);
+}
+
+/* ─── OPPORTUNITY DETAIL SHEET ─── */
+.detail-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: none;
+}
+.detail-overlay.is-open { display: block; }
+
+.detail-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(26, 26, 26, 0.3);
+  backdrop-filter: blur(4px);
+  animation: scrimIn 0.25s ease-out;
+}
+
+.detail-sheet {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  max-height: 92dvh;
+  background: var(--surface);
+  border-radius: var(--r) var(--r) 0 0;
+  box-shadow: var(--shadow-lg);
+  overflow-y: auto;
+  animation: sheetUp 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  padding-bottom: calc(var(--safe-b) + 16px);
+}
+
+.detail-handle {
+  display: flex;
+  justify-content: center;
+  padding: 10px 0 4px;
+}
+.detail-handle-bar {
+  width: 36px; height: 4px;
+  border-radius: 2px;
+  background: var(--ink-5);
+}
+
+.detail-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 18px 12px;
+}
+.detail-title {
+  font-family: var(--serif);
+  font-size: var(--t-lg);
+  font-weight: 600;
+  font-variation-settings: 'opsz' 28;
+}
+.detail-close {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--well);
+  border: none;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-size: 0.85rem;
+  color: var(--ink-3);
+}
+
+.detail-body { padding: 0 18px; }
+
+.detail-hero {
+  display: flex;
+  gap: 0;
+  margin-bottom: 16px;
+}
+.detail-hero .swap-side { flex: 1; }
+.detail-hero .swap-arrow-col { width: 28px; }
+
+.detail-explain {
+  margin-bottom: 16px;
+}
+.detail-explain-title {
+  font-family: var(--mono);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 8px;
+}
+.explain-card {
+  padding: 10px 12px;
+  background: var(--well);
+  border-radius: var(--r-xs);
+  margin-bottom: 6px;
+}
+.explain-card h4 {
+  font-size: var(--t-sm);
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.explain-card p {
+  font-size: var(--t-base);
+  color: var(--ink-2);
+  line-height: 1.45;
+}
+
+.detail-cycle-graph {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px;
+  background: var(--well);
+  border-radius: var(--r-sm);
+  margin-bottom: 16px;
+  overflow-x: auto;
+}
+.cycle-node {
+  padding: 6px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xs);
+  text-align: center;
+  min-width: 70px;
+}
+.cycle-node.is-you {
+  border-color: var(--signal);
+  background: var(--signal-faint);
+}
+.cycle-node-label {
+  font-size: var(--t-sm);
+  font-weight: 600;
+}
+.cycle-node-give {
+  font-size: var(--t-xs);
+  color: var(--ink-3);
+  margin-top: 2px;
+}
+.cycle-arrow {
+  font-family: var(--mono);
+  font-size: var(--t-sm);
+  color: var(--ink-4);
+  flex-shrink: 0;
+}
+
+.detail-actions {
+  padding: 16px 18px 0;
+  display: flex;
+  gap: 8px;
+}
+
+.btn-primary {
+  flex: 1;
+  height: 42px;
+  border: none;
+  border-radius: var(--r-sm);
+  background: var(--signal);
+  color: #fff;
+  font-family: var(--sans);
+  font-size: var(--t-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.12s;
+}
+.btn-primary:active { transform: scale(0.97); background: #15653E; }
+
+.btn-ghost {
+  flex: 0.5;
+  height: 42px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--ink-2);
+  font-family: var(--sans);
+  font-size: var(--t-base);
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.12s;
+}
+.btn-ghost:active { transform: scale(0.97); border-color: var(--border-active); }
+
+.btn-ghost.danger {
+  color: var(--danger);
+  border-color: var(--danger-light);
+}
+
+/* ─── ACTIVE SWAP CARD ─── */
+.active-progress-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--well);
+  margin: 10px 0 8px;
+  overflow: hidden;
+}
+.active-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--caution);
+  transition: width 0.6s ease-out;
+}
+
+.active-headline {
+  font-size: var(--t-md);
+  font-weight: 600;
+  line-height: 1.35;
+  margin-bottom: 2px;
+}
+
+.active-detail {
+  font-size: var(--t-base);
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+
+.active-deadline {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--mono);
+  font-size: var(--t-data);
+  font-weight: 500;
+  color: var(--caution-text);
+  margin-top: 6px;
+}
+
+/* ─── SUGGESTION CARD ─── */
+.suggestion-body {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.suggestion-item-preview {
+  width: 56px; height: 56px;
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.suggestion-item-preview img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+
+.suggestion-text h3 {
+  font-size: var(--t-md);
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 3px;
+}
+.suggestion-text p {
+  font-size: var(--t-base);
+  color: var(--ink-2);
+  line-height: 1.45;
+}
+
+.suggestion-cta {
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--mono);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--signal);
+  letter-spacing: 0.02em;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+.suggestion-cta::after { content: '→'; }
+
+/* ─── RECEIPT CARD (in feed) ─── */
+.receipt-inline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.receipt-icon {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  font-size: 0.85rem;
+}
+.receipt-icon.completed { background: var(--signal-light); color: var(--signal); }
+.receipt-icon.failed { background: var(--danger-light); color: var(--danger); }
+
+.receipt-text h3 {
+  font-size: var(--t-md);
+  font-weight: 600;
+  line-height: 1.3;
+}
+.receipt-text p {
+  font-size: var(--t-base);
+  color: var(--ink-2);
+}
+.receipt-text .receipt-delta {
+  font-family: var(--mono);
+  font-size: var(--t-data);
+  font-weight: 600;
+  color: var(--signal);
+}
+.receipt-text .receipt-delta.negative { color: var(--danger); }
+
+/* ─── LOCKER SURFACE ─── */
+.locker-header {
+  margin-bottom: 16px;
+}
+.locker-title {
+  font-family: var(--serif);
+  font-size: var(--t-xl);
+  font-weight: 500;
+  font-variation-settings: 'opsz' 48;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+.locker-subtitle {
+  font-size: var(--t-base);
+  color: var(--ink-2);
+}
+
+.locker-summary {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.locker-stat {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  text-align: center;
+}
+.locker-stat-value {
+  font-family: var(--mono);
+  font-size: var(--t-lg);
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.locker-stat-label {
+  font-family: var(--mono);
+  font-size: var(--t-sm);
+  font-weight: 500;
+  color: var(--ink-3);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+/* Inventory grid */
+.inv-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.inv-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.15s;
+  position: relative;
+}
+.inv-card:active {
+  transform: scale(0.97);
+  box-shadow: var(--shadow-md);
+}
+
+.inv-card-image {
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  position: relative;
+}
+.inv-card-image img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+
+.inv-demand-pip {
+  position: absolute;
+  top: 8px; left: 8px;
+  padding: 2px 7px;
+  border-radius: 100px;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  font-family: var(--mono);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+.inv-demand-pip.hot { background: var(--signal); }
+
+.inv-intent-indicator {
+  position: absolute;
+  top: 8px; right: 8px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--signal);
+  border: 1.5px solid var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+.inv-intent-indicator.watching {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.inv-card-body {
+  padding: 10px 12px 12px;
+}
+.inv-card-name {
+  font-family: var(--serif);
+  font-size: var(--t-md);
+  font-weight: 600;
+  font-variation-settings: 'opsz' 20;
+  line-height: 1.25;
+  margin-bottom: 4px;
+  letter-spacing: -0.005em;
+}
+.inv-card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.inv-card-price {
+  font-family: var(--mono);
+  font-size: var(--t-data);
+  font-weight: 600;
+  color: var(--ink);
+}
+.inv-card-wear {
+  font-family: var(--mono);
+  font-size: var(--t-data);
+  font-weight: 500;
+  color: var(--ink-3);
+}
+
+.inv-card-intent {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-size: var(--t-sm);
+  color: var(--ink-3);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.inv-card-intent .intent-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--signal);
+  flex-shrink: 0;
+}
+
+/* ─── HISTORY SURFACE ─── */
+.history-header {
+  margin-bottom: 18px;
+}
+.history-title {
+  font-family: var(--serif);
+  font-size: var(--t-xl);
+  font-weight: 500;
+  font-variation-settings: 'opsz' 48;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+
+.history-filters {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.history-filter {
+  padding: 5px 12px;
+  border-radius: 100px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  font-family: var(--mono);
+  font-size: var(--t-sm);
+  font-weight: 500;
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.02em;
+}
+.history-filter.is-active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--canvas);
+}
+
+.history-stream { display: flex; flex-direction: column; gap: 10px; }
+
+/* History timeline cards */
+.history-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 14px 16px;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+
+.history-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.history-card-label {
+  font-family: var(--mono);
+  font-size: var(--t-sm);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.history-card-label.settled { color: var(--signal-text); }
+.history-card-label.in-flight { color: var(--caution-text); }
+.history-card-label.unwound { color: var(--danger-text); }
+
+.history-card-date {
+  font-family: var(--mono);
+  font-size: var(--t-sm);
+  font-weight: 500;
+  color: var(--ink-3);
+}
+
+.history-swap-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.history-swap-row .item-label {
+  font-size: var(--t-base);
+  font-weight: 600;
+}
+.history-swap-row .swap-direction-arrow {
+  font-family: var(--mono);
+  font-size: var(--t-sm);
+  color: var(--ink-4);
+}
+
+.history-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.history-delta {
+  font-family: var(--mono);
+  font-size: var(--t-data);
+  font-weight: 600;
+}
+.history-delta.positive { color: var(--signal); }
+.history-delta.negative { color: var(--danger); }
+
+.history-verification {
+  font-family: var(--mono);
+  font-size: var(--t-sm);
+  font-weight: 500;
+  color: var(--ink-3);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.history-verification::before {
+  content: '';
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--signal);
+}
+
+/* Active timeline in history */
+.history-timeline {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.timeline-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 5px 0;
+  position: relative;
+}
+.timeline-step + .timeline-step::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: -4px;
+  width: 1px;
+  height: 13px;
+  background: var(--border);
+}
+.timeline-dot {
+  width: 11px; height: 11px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.timeline-dot.done {
+  background: var(--signal);
+  border-color: var(--signal);
+}
+.timeline-dot.current {
+  border-color: var(--caution);
+  background: var(--caution-light);
+  animation: pulse 2s ease-in-out infinite;
+}
+.timeline-step-text {
+  font-size: var(--t-sm);
+  color: var(--ink-2);
+  line-height: 1.4;
+}
+.timeline-step-text strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* ─── COMPOSER BOTTOM SHEET ─── */
+.composer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: none;
+}
+.composer-overlay.is-open { display: block; }
+
+.composer-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(26, 26, 26, 0.3);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: scrimIn 0.25s ease-out;
+}
+@keyframes scrimIn { from { opacity: 0; } to { opacity: 1; } }
+
+.composer-sheet {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  max-height: 85dvh;
+  background: var(--surface);
+  border-radius: var(--r) var(--r) 0 0;
+  box-shadow: var(--shadow-lg);
+  overflow-y: auto;
+  animation: sheetUp 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  padding-bottom: calc(var(--safe-b) + 16px);
+}
+@keyframes sheetUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.composer-handle {
+  display: flex;
+  justify-content: center;
+  padding: 10px 0 4px;
+}
+.composer-handle-bar {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--ink-5);
+}
+
+.composer-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 18px 16px;
+}
+.composer-title {
+  font-family: var(--serif);
+  font-size: var(--t-lg);
+  font-weight: 600;
+  font-variation-settings: 'opsz' 28;
+}
+.composer-close {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--well);
+  border: none;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-size: 0.85rem;
+  color: var(--ink-3);
+  transition: background 0.15s;
+}
+.composer-close:active { background: var(--border); }
+
+/* Composer: item selected */
+.composer-selected-item {
+  margin: 0 18px 18px;
+  padding: 12px;
+  background: var(--well);
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.composer-selected-thumb {
+  width: 52px; height: 52px;
+  border-radius: var(--r-xs);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.composer-selected-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.composer-selected-info h4 {
+  font-family: var(--serif);
+  font-size: var(--t-md);
+  font-weight: 600;
+  font-variation-settings: 'opsz' 20;
+  margin-bottom: 2px;
+}
+.composer-selected-info p {
+  font-family: var(--mono);
+  font-size: var(--t-data);
+  color: var(--ink-3);
+}
+
+/* Composer: want target */
+.composer-section {
+  padding: 0 18px;
+  margin-bottom: 18px;
+}
+.composer-label {
+  font-family: var(--mono);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 8px;
+}
+.composer-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  font-family: var(--sans);
+  font-size: var(--t-base);
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.composer-input:focus { border-color: var(--signal); }
+.composer-input::placeholder { color: var(--ink-4); }
+
+/* Autocomplete suggestions */
+.autocomplete-list {
+  margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.autocomplete-chip {
+  padding: 5px 10px;
+  border-radius: 100px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.autocomplete-chip:active { background: var(--well); border-color: var(--border-active); }
+
+/* Progressive constraints */
+.constraints-toggle {
+  padding: 0 18px;
+  margin-bottom: 14px;
+}
+.constraints-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: var(--t-sm);
+  font-weight: 500;
+  color: var(--ink-3);
+  letter-spacing: 0.02em;
+  padding: 0;
+}
+.constraints-toggle-btn .chevron {
+  font-size: 0.65rem;
+  transition: transform 0.2s;
+}
+.constraints-toggle-btn.is-open .chevron { transform: rotate(90deg); }
+
+.constraints-panel {
+  padding: 0 18px;
+  display: none;
+  margin-bottom: 18px;
+}
+.constraints-panel.is-open { display: block; animation: constraintsIn 0.25s ease-out; }
+@keyframes constraintsIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+.constraint-row {
+  margin-bottom: 14px;
+}
+.constraint-label {
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--ink-2);
+  margin-bottom: 6px;
+}
+.constraint-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.constraint-chip {
+  padding: 6px 12px;
+  border-radius: 100px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  font-family: var(--mono);
+  font-size: var(--t-sm);
+  font-weight: 500;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.02em;
+}
+.constraint-chip.is-selected {
+  background: var(--signal-light);
+  border-color: var(--signal);
+  color: var(--signal-text);
+}
+.constraint-chip:active { background: var(--well); }
+
+.composer-submit {
+  margin: 8px 18px 0;
+  width: calc(100% - 36px);
+  height: 48px;
+  border: none;
+  border-radius: var(--r-sm);
+  background: var(--signal);
+  color: #fff;
+  font-family: var(--sans);
+  font-size: var(--t-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.12s;
+}
+.composer-submit:active { transform: scale(0.98); background: #15653E; }
+
+/* ─── PROPOSAL ACCEPTED TRANSITION ─── */
+.accepted-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: none;
+  background: rgba(248, 247, 244, 0.96);
+  backdrop-filter: blur(12px);
+}
+.accepted-overlay.is-visible {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: acceptedIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes acceptedIn { from { opacity: 0; } to { opacity: 1; } }
+
+.accepted-check {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: var(--signal-light);
+  display: grid;
+  place-items: center;
+  margin-bottom: 16px;
+  animation: checkPop 0.5s 0.15s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes checkPop {
+  from { transform: scale(0.5); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.accepted-check svg { width: 24px; height: 24px; color: var(--signal); }
+
+.accepted-title {
+  font-family: var(--serif);
+  font-size: var(--t-xl);
+  font-weight: 600;
+  font-variation-settings: 'opsz' 48;
+  text-align: center;
+  margin-bottom: 6px;
+  animation: acceptedText 0.4s 0.25s ease-out both;
+}
+.accepted-detail {
+  font-size: var(--t-base);
+  color: var(--ink-2);
+  text-align: center;
+  max-width: 260px;
+  line-height: 1.5;
+  animation: acceptedText 0.4s 0.35s ease-out both;
+}
+@keyframes acceptedText { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+.accepted-progress {
+  margin-top: 24px;
+  animation: acceptedText 0.4s 0.5s ease-out both;
+}
+.accepted-progress p {
+  font-family: var(--mono);
+  font-size: var(--t-sm);
+  color: var(--caution-text);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.topbar-icon {
+  border: 1px solid var(--border-active);
+  background: var(--surface);
+  color: var(--ink-2);
+  border-radius: 999px;
+  min-height: 30px;
+  min-width: 30px;
+  padding: 0 10px;
+  font-family: var(--mono);
+  font-size: var(--t-sm);
+  cursor: pointer;
+}
+
+.feed-state-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 12px 0 8px;
+}
+
+.feed-state-btn {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink-3);
+  border-radius: 999px;
+  min-height: 30px;
+  padding: 0 10px;
+  font-family: var(--mono);
+  font-size: var(--t-sm);
+  cursor: pointer;
+}
+
+.feed-state-btn.is-active {
+  border-color: var(--signal);
+  background: var(--signal-light);
+  color: var(--signal-text);
+}
+
+.feed-stale-banner {
+  margin-bottom: 10px;
+  border: 1px solid var(--caution);
+  background: var(--caution-light);
+  color: var(--ink-2);
+  border-radius: var(--r-sm);
+  padding: 8px 10px;
+  font-size: var(--t-sm);
+}
+
+.fallback-card {
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  padding: 14px;
+  margin-top: 10px;
+}
+
+.fallback-card h3 {
+  font-size: var(--t-md);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.fallback-card p {
+  font-size: var(--t-base);
+  color: var(--ink-2);
+  line-height: 1.45;
+}
+
+.fallback-card .retry-btn {
+  margin-top: 10px;
+  border: 1px solid var(--signal);
+  background: var(--signal);
+  color: #fff;
+  border-radius: 9px;
+  min-height: 36px;
+  padding: 0 12px;
+  font-family: var(--sans);
+  cursor: pointer;
+}
+
+.history-card {
+  cursor: pointer;
+}
+
+.history-detail {
+  display: none;
+  margin-top: 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+
+.history-card.is-open .history-detail {
+  display: block;
+}
+
+.history-inline-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.history-inline-grid div {
+  border: 1px solid var(--border);
+  border-radius: var(--r-xs);
+  background: var(--well);
+  padding: 7px 8px;
+}
+
+.history-inline-grid p {
+  font-size: var(--t-sm);
+  color: var(--ink-3);
+  margin-bottom: 2px;
+}
+
+.history-inline-grid strong {
+  font-size: var(--t-base);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  display: none;
+}
+
+.settings-overlay.is-open {
+  display: block;
+}
+
+.settings-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.settings-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--surface);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  border: 1px solid var(--border);
+  border-bottom: 0;
+  max-height: min(80dvh, 560px);
+  overflow-y: auto;
+  padding: 12px 14px calc(var(--safe-b) + 12px);
+}
+
+.settings-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.settings-head h2 {
+  font-family: var(--serif);
+  font-size: var(--t-xl);
+  font-weight: 500;
+}
+
+.settings-section {
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--well);
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.settings-section h3 {
+  font-family: var(--mono);
+  font-size: var(--t-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-3);
+  margin-bottom: 8px;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.settings-row:last-child {
+  margin-bottom: 0;
+}
+
+.settings-row label {
+  font-size: var(--t-base);
+  color: var(--ink);
+}
+
+.settings-row input[type="number"] {
+  width: 68px;
+  min-height: 34px;
+  border: 1px solid var(--border-active);
+  border-radius: 8px;
+  padding: 0 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--mono);
+}
+
+.settings-done {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid var(--signal);
+  border-radius: 10px;
+  background: var(--signal);
+  color: #fff;
+  font-size: var(--t-base);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%) translateY(18px);
+  bottom: calc(var(--tab-h) + var(--safe-b) + 12px);
+  background: rgba(26, 26, 26, 0.9);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: var(--t-sm);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 180;
+}
+
+.toast.is-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ TOP BAR ═══ -->
+<header class="topbar">
+  <div class="topbar-left">
+    <div class="logo-mark" aria-hidden="true"></div>
+    <span class="topbar-brand">SwapGraph</span>
+  </div>
+  <div class="topbar-right">
+    <span class="live-pill">Matching</span>
+    <button class="topbar-icon" type="button" onclick="simulatePush()" aria-label="Simulate push">Push</button>
+    <button class="topbar-icon" type="button" onclick="openSettings()" aria-label="Open settings">⚙</button>
+    <div class="avatar">JR</div>
+  </div>
+</header>
+
+<!-- ═══ MAIN CONTENT ═══ -->
+<main class="main">
+
+  <!-- ─── FEED SURFACE ─── -->
+  <div class="surface is-active" id="surface-feed">
+    <div class="feed-header">
+      <h1 class="feed-greeting">Good evening, Javier</h1>
+      <p class="feed-summary">
+        <strong id="count-proposals">3</strong> proposals waiting &middot;
+        <strong id="count-active">1</strong> swap in flight &middot;
+        <strong id="count-watching">2</strong> intents watching
+      </p>
+    </div>
+
+    <div class="feed-state-controls" aria-label="Fallback state demos">
+      <button class="feed-state-btn is-active" data-fallback-mode="populated" onclick="setFeedFallback(this, 'populated')">Populated</button>
+      <button class="feed-state-btn" data-fallback-mode="loading" onclick="setFeedFallback(this, 'loading')">Loading</button>
+      <button class="feed-state-btn" data-fallback-mode="empty" onclick="setFeedFallback(this, 'empty')">Empty</button>
+      <button class="feed-state-btn" data-fallback-mode="retryable" onclick="setFeedFallback(this, 'retryable')">Retryable</button>
+      <button class="feed-state-btn" data-fallback-mode="blocked" onclick="setFeedFallback(this, 'blocked')">Blocked</button>
+      <button class="feed-state-btn" data-fallback-mode="failure" onclick="setFeedFallback(this, 'failure')">Failure</button>
+      <button class="feed-state-btn" data-fallback-mode="offlineCached" onclick="setFeedFallback(this, 'offlineCached')">Offline cached</button>
+      <button class="feed-state-btn" data-fallback-mode="offlineEmpty" onclick="setFeedFallback(this, 'offlineEmpty')">Offline empty</button>
+      <button class="feed-state-btn" data-fallback-mode="stale" onclick="setFeedFallback(this, 'stale')">Stale</button>
+    </div>
+    <div class="feed-stale-banner" id="feed-stale-banner" hidden>Refreshing... showing recent cached cards.</div>
+    <div class="fallback-card" id="feed-fallback-card" hidden></div>
+
+    <div class="feed-stream">
+
+      <!-- PROPOSAL CARD (urgent) -->
+      <article class="feed-card" data-type="proposal" data-id="proposal-1" onclick="openOpportunityDetail(this)">
+        <div class="card-type-badge proposal">
+          <span class="card-type-dot"></span>
+          Proposal &middot; Urgent
+        </div>
+
+        <div class="swap-visual">
+          <div class="swap-side give">
+            <span class="swap-direction">Give</span>
+            <div class="swap-item-thumb">
+              <img src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%231a7a4c'/%3E%3Cstop offset='100%25' stop-color='%23355c7d'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='300' fill='url(%23g)'/%3E%3Ctext x='200' y='160' text-anchor='middle' font-size='64'%3E%F0%9F%94%AB%3C/text%3E%3C/svg%3E" alt="AK-47 Vulcan">
+            </div>
+            <span class="swap-item-name">AK-47 | Vulcan</span>
+            <span class="swap-item-meta">MW &middot; 0.089 &middot; $127.40</span>
+          </div>
+          <div class="swap-arrow-col">
+            <span class="swap-arrow">⇄</span>
+          </div>
+          <div class="swap-side get">
+            <span class="swap-direction">Get</span>
+            <div class="swap-item-thumb">
+              <img src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23b07b1a'/%3E%3Cstop offset='100%25' stop-color='%237f4f00'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='300' fill='url(%23g)'/%3E%3Ctext x='200' y='160' text-anchor='middle' font-size='64'%3E%F0%9F%97%A1%EF%B8%8F%3C/text%3E%3C/svg%3E" alt="Butterfly Knife Fade">
+            </div>
+            <span class="swap-item-name">Butterfly | Fade</span>
+            <span class="swap-item-meta">FN &middot; 0.015 &middot; $142.80</span>
+          </div>
+        </div>
+
+        <div class="card-stats">
+          <span class="stat-pill signal">92% confidence</span>
+          <span class="stat-pill signal">+$15.40 delta</span>
+          <span class="stat-pill neutral">3-way</span>
+          <span class="stat-pill caution">Expires 4h</span>
+        </div>
+
+        <div class="card-review-prompt">
+          <span class="card-review-label">Tap to review</span>
+          <span class="card-review-arrow">→</span>
+        </div>
+      </article>
+
+      <!-- ACTIVE SWAP CARD -->
+      <article class="feed-card" data-type="active" data-id="active-1">
+        <div class="card-type-badge active">
+          <span class="card-type-dot"></span>
+          In flight
+        </div>
+        <h3 class="active-headline">Awaiting @steel's deposit</h3>
+        <p class="active-detail">Your M4A4 Howl was deposited. Waiting for 1 of 2 remaining participants.</p>
+        <div class="active-progress-bar">
+          <div class="active-progress-fill" style="width: 60%"></div>
+        </div>
+        <div class="active-deadline">
+          <span>⏱</span> 18h 32m remaining
+        </div>
+      </article>
+
+      <!-- INTENT SUGGESTION CARD -->
+      <article class="feed-card" data-type="suggestion" data-id="suggestion-1">
+        <div class="card-type-badge suggestion">
+          <span class="card-type-dot"></span>
+          Suggestion
+        </div>
+        <div class="suggestion-body">
+          <div class="suggestion-item-preview">
+            <img src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23b07b1a'/%3E%3Cstop offset='100%25' stop-color='%237f4f00'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='120' height='120' rx='12' fill='url(%23g)'/%3E%3Ctext x='60' y='68' text-anchor='middle' font-size='36'%3E%F0%9F%92%B8%3C/text%3E%3C/svg%3E" alt="Meme Yield Badge">
+          </div>
+          <div class="suggestion-text">
+            <h3>17 people want your Meme Yield Badge</h3>
+            <p>High demand in the badge category. Post an intent to start matching.</p>
+          </div>
+        </div>
+        <button class="suggestion-cta" onclick="openComposer()">Trade this item</button>
+      </article>
+
+      <!-- PROPOSAL CARD (ranked) -->
+      <article class="feed-card" data-type="proposal" data-id="proposal-2" onclick="openOpportunityDetail(this)">
+        <div class="card-type-badge proposal">
+          <span class="card-type-dot"></span>
+          Proposal
+        </div>
+
+        <div class="swap-visual">
+          <div class="swap-side give">
+            <span class="swap-direction">Give</span>
+            <div class="swap-item-thumb">
+              <img src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23355c7d'/%3E%3Cstop offset='100%25' stop-color='%231e3b57'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='300' fill='url(%23g)'/%3E%3Ctext x='200' y='160' text-anchor='middle' font-size='64'%3E%F0%9F%A7%AA%3C/text%3E%3C/svg%3E" alt="CI Lightsaber">
+            </div>
+            <span class="swap-item-name">CI Lightsaber</span>
+            <span class="swap-item-meta">FT &middot; $88.50</span>
+          </div>
+          <div class="swap-arrow-col">
+            <span class="swap-arrow">⇄</span>
+          </div>
+          <div class="swap-side get">
+            <span class="swap-direction">Get</span>
+            <div class="swap-item-thumb">
+              <img src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%237b5ea7'/%3E%3Cstop offset='100%25' stop-color='%234b3b6b'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='300' fill='url(%23g)'/%3E%3Ctext x='200' y='160' text-anchor='middle' font-size='64'%3E%F0%9F%94%AE%3C/text%3E%3C/svg%3E" alt="AWP Asiimov">
+            </div>
+            <span class="swap-item-name">AWP | Asiimov</span>
+            <span class="swap-item-meta">FT &middot; 0.28 &middot; $94.20</span>
+          </div>
+        </div>
+
+        <div class="card-stats">
+          <span class="stat-pill signal">78% confidence</span>
+          <span class="stat-pill signal">+$5.70 delta</span>
+          <span class="stat-pill neutral">Direct</span>
+        </div>
+
+        <div class="card-review-prompt">
+          <span class="card-review-label">Tap to review</span>
+          <span class="card-review-arrow">→</span>
+        </div>
+      </article>
+
+      <!-- RECEIPT CARD (inline) -->
+      <article class="feed-card" data-type="receipt" data-id="receipt-1">
+        <div class="card-type-badge receipt">
+          <span class="card-type-dot"></span>
+          Settled &middot; 2h ago
+        </div>
+        <div class="receipt-inline">
+          <div class="receipt-icon completed">✓</div>
+          <div class="receipt-text">
+            <h3>USP-S Kill Confirmed → Glock Fade</h3>
+            <p>3-way cycle completed. All deposits released.</p>
+            <span class="receipt-delta">+$8.20 net</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- PROPOSAL CARD 3 -->
+      <article class="feed-card" data-type="proposal" data-id="proposal-3" onclick="openOpportunityDetail(this)">
+        <div class="card-type-badge proposal">
+          <span class="card-type-dot"></span>
+          Proposal
+        </div>
+
+        <div class="swap-visual">
+          <div class="swap-side give">
+            <span class="swap-direction">Give</span>
+            <div class="swap-item-thumb">
+              <img src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%231a7a4c'/%3E%3Cstop offset='100%25' stop-color='%23124f33'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='300' fill='url(%23g)'/%3E%3Ctext x='200' y='160' text-anchor='middle' font-size='64'%3E%F0%9F%8F%8E%EF%B8%8F%3C/text%3E%3C/svg%3E" alt="Prompt Lambo Pass">
+            </div>
+            <span class="swap-item-name">Prompt Lambo Pass</span>
+            <span class="swap-item-meta">$64.00</span>
+          </div>
+          <div class="swap-arrow-col">
+            <span class="swap-arrow">⇄</span>
+          </div>
+          <div class="swap-side get">
+            <span class="swap-direction">Get</span>
+            <div class="swap-item-thumb">
+              <img src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23f29f05'/%3E%3Cstop offset='100%25' stop-color='%23b36a00'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='300' fill='url(%23g)'/%3E%3Ctext x='200' y='160' text-anchor='middle' font-size='64'%3E%E2%9A%A1%3C/text%3E%3C/svg%3E" alt="Latency Charm">
+            </div>
+            <span class="swap-item-name">Latency Charm</span>
+            <span class="swap-item-meta">$68.40</span>
+          </div>
+        </div>
+
+        <div class="card-stats">
+          <span class="stat-pill signal">71% confidence</span>
+          <span class="stat-pill signal">+$4.40 delta</span>
+          <span class="stat-pill neutral">4-way</span>
+        </div>
+
+        <div class="card-review-prompt">
+          <span class="card-review-label">Tap to review</span>
+          <span class="card-review-arrow">→</span>
+        </div>
+      </article>
+
+    </div>
+  </div>
+
+  <!-- ─── LOCKER SURFACE ─── -->
+  <div class="surface" id="surface-locker">
+    <div class="locker-header">
+      <h1 class="locker-title">Your Locker</h1>
+      <p class="locker-subtitle">Tap any item to start a trade.</p>
+    </div>
+
+    <div class="locker-summary">
+      <div class="locker-stat">
+        <div class="locker-stat-value">6</div>
+        <div class="locker-stat-label">Items</div>
+      </div>
+      <div class="locker-stat">
+        <div class="locker-stat-value">2</div>
+        <div class="locker-stat-label">Watching</div>
+      </div>
+      <div class="locker-stat">
+        <div class="locker-stat-value" style="color: var(--signal)">$538</div>
+        <div class="locker-stat-label">Value</div>
+      </div>
+    </div>
+
+    <div class="inv-grid">
+
+      <article class="inv-card" onclick="openComposer()">
+        <div class="inv-card-image">
+          <img src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%231a7a4c'/%3E%3Cstop offset='100%25' stop-color='%23355c7d'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='400' fill='url(%23g)'/%3E%3Ctext x='200' y='220' text-anchor='middle' font-size='80'%3E%F0%9F%94%AB%3C/text%3E%3C/svg%3E" alt="AK-47 Vulcan">
+          <span class="inv-demand-pip hot">17 wants</span>
+          <span class="inv-intent-indicator watching"></span>
+        </div>
+        <div class="inv-card-body">
+          <div class="inv-card-name">AK-47 | Vulcan</div>
+          <div class="inv-card-meta">
+            <span class="inv-card-price">$127.40</span>
+            <span class="inv-card-wear">MW</span>
+          </div>
+          <div class="inv-card-intent">
+            <span class="intent-dot"></span>
+            Watching &middot; 3 near-matches
+          </div>
+        </div>
+      </article>
+
+      <article class="inv-card" onclick="openComposer()">
+        <div class="inv-card-image">
+          <img src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23355c7d'/%3E%3Cstop offset='100%25' stop-color='%231e3b57'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='400' fill='url(%23g)'/%3E%3Ctext x='200' y='220' text-anchor='middle' font-size='80'%3E%F0%9F%A7%AA%3C/text%3E%3C/svg%3E" alt="CI Lightsaber">
+          <span class="inv-demand-pip hot">9 wants</span>
+        </div>
+        <div class="inv-card-body">
+          <div class="inv-card-name">CI Lightsaber</div>
+          <div class="inv-card-meta">
+            <span class="inv-card-price">$88.50</span>
+            <span class="inv-card-wear">FT</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="inv-card" onclick="openComposer()">
+        <div class="inv-card-image">
+          <img src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23b07b1a'/%3E%3Cstop offset='100%25' stop-color='%237f4f00'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='400' fill='url(%23g)'/%3E%3Ctext x='200' y='220' text-anchor='middle' font-size='80'%3E%F0%9F%92%B8%3C/text%3E%3C/svg%3E" alt="Meme Yield Badge">
+          <span class="inv-demand-pip hot">17 wants</span>
+          <span class="inv-intent-indicator watching"></span>
+        </div>
+        <div class="inv-card-body">
+          <div class="inv-card-name">Meme Yield Badge</div>
+          <div class="inv-card-meta">
+            <span class="inv-card-price">$42.00</span>
+            <span class="inv-card-wear">FN</span>
+          </div>
+          <div class="inv-card-intent">
+            <span class="intent-dot"></span>
+            Watching &middot; 1 near-match
+          </div>
+        </div>
+      </article>
+
+      <article class="inv-card" onclick="openComposer()">
+        <div class="inv-card-image">
+          <img src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23214e8a'/%3E%3Cstop offset='100%25' stop-color='%23132f52'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='400' fill='url(%23g)'/%3E%3Ctext x='200' y='220' text-anchor='middle' font-size='80'%3E%F0%9F%94%AE%3C/text%3E%3C/svg%3E" alt="AWP Asiimov">
+          <span class="inv-demand-pip">4 wants</span>
+        </div>
+        <div class="inv-card-body">
+          <div class="inv-card-name">AWP | Asiimov</div>
+          <div class="inv-card-meta">
+            <span class="inv-card-price">$94.20</span>
+            <span class="inv-card-wear">FT</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="inv-card" onclick="openComposer()">
+        <div class="inv-card-image">
+          <img src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%233f7d20'/%3E%3Cstop offset='100%25' stop-color='%23234b12'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='400' fill='url(%23g)'/%3E%3Ctext x='200' y='220' text-anchor='middle' font-size='80'%3E%F0%9F%93%9C%3C/text%3E%3C/svg%3E" alt="Refactor Scroll">
+          <span class="inv-demand-pip">2 wants</span>
+        </div>
+        <div class="inv-card-body">
+          <div class="inv-card-name">Refactor Scroll</div>
+          <div class="inv-card-meta">
+            <span class="inv-card-price">$56.30</span>
+            <span class="inv-card-wear">MW</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="inv-card" onclick="openComposer()">
+        <div class="inv-card-image">
+          <img src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%234f6d7a'/%3E%3Cstop offset='100%25' stop-color='%232d434d'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='400' fill='url(%23g)'/%3E%3Ctext x='200' y='220' text-anchor='middle' font-size='80'%3E%F0%9F%9B%A1%EF%B8%8F%3C/text%3E%3C/svg%3E" alt="Chaos Shield">
+          <span class="inv-demand-pip">1 want</span>
+        </div>
+        <div class="inv-card-body">
+          <div class="inv-card-name">Chaos Shield</div>
+          <div class="inv-card-meta">
+            <span class="inv-card-price">$130.00</span>
+            <span class="inv-card-wear">BS</span>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+
+  <!-- ─── HISTORY SURFACE ─── -->
+  <div class="surface" id="surface-history">
+    <div class="history-header">
+      <h1 class="history-title">History</h1>
+    </div>
+
+    <div class="history-filters">
+      <button class="history-filter is-active" onclick="filterHistory(this, 'all')">All</button>
+      <button class="history-filter" onclick="filterHistory(this, 'active')">In flight</button>
+      <button class="history-filter" onclick="filterHistory(this, 'settled')">Settled</button>
+      <button class="history-filter" onclick="filterHistory(this, 'unwound')">Unwound</button>
+    </div>
+
+    <div class="history-stream">
+
+      <!-- Active swap in history -->
+      <article class="history-card is-open" data-kind="active" data-cycle-id="cycle_accepted_demo" onclick="toggleHistoryDetail(this)">
+        <div class="history-card-head">
+          <span class="history-card-label in-flight">In flight</span>
+          <span class="history-card-date">Today, 14:32</span>
+        </div>
+        <div class="history-swap-row">
+          <span class="item-label">M4A4 Howl</span>
+          <span class="swap-direction-arrow">→</span>
+          <span class="item-label">Karambit Tiger Tooth</span>
+        </div>
+        <div class="history-detail history-timeline">
+          <div class="timeline-step">
+            <span class="timeline-dot done"></span>
+            <span class="timeline-step-text"><strong>You accepted</strong> &middot; 14:32</span>
+          </div>
+          <div class="timeline-step">
+            <span class="timeline-dot done"></span>
+            <span class="timeline-step-text"><strong>All committed</strong> &middot; 14:35</span>
+          </div>
+          <div class="timeline-step">
+            <span class="timeline-dot done"></span>
+            <span class="timeline-step-text"><strong>Your deposit sent</strong> &middot; 14:41</span>
+          </div>
+          <div class="timeline-step">
+            <span class="timeline-dot current"></span>
+            <span class="timeline-step-text"><strong>Awaiting @steel's deposit</strong> &middot; 18h 32m left</span>
+          </div>
+          <div class="timeline-step">
+            <span class="timeline-dot"></span>
+            <span class="timeline-step-text">Execution</span>
+          </div>
+          <div class="timeline-step">
+            <span class="timeline-dot"></span>
+            <span class="timeline-step-text">Receipt issued</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Settled receipt -->
+      <article class="history-card" data-kind="settled" data-cycle-id="cycle_settled_1" data-receipt-id="receipt_settled_1" onclick="toggleHistoryDetail(this)">
+        <div class="history-card-head">
+          <span class="history-card-label settled">Settled</span>
+          <span class="history-card-date">Today, 11:07</span>
+        </div>
+        <div class="history-swap-row">
+          <span class="item-label">USP-S Kill Confirmed</span>
+          <span class="swap-direction-arrow">→</span>
+          <span class="item-label">Glock Fade</span>
+        </div>
+        <div class="history-card-footer">
+          <span class="history-delta positive">+$8.20 net</span>
+          <span class="history-verification">Verified</span>
+        </div>
+        <div class="history-detail">
+          <div class="history-inline-grid">
+            <div><p>Type</p><strong>settlement_completed</strong></div>
+            <div><p>Verification</p><strong>ed25519 signature</strong></div>
+            <div><p>Cycle</p><strong>cycle_settled_1</strong></div>
+            <div><p>Receipt</p><strong>receipt_settled_1</strong></div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Unwound receipt -->
+      <article class="history-card" data-kind="unwound" data-cycle-id="cycle_unwound_1" data-receipt-id="receipt_unwound_1" onclick="toggleHistoryDetail(this)">
+        <div class="history-card-head">
+          <span class="history-card-label unwound">Unwound</span>
+          <span class="history-card-date">Yesterday, 22:15</span>
+        </div>
+        <div class="history-swap-row">
+          <span class="item-label">Desert Eagle Blaze</span>
+          <span class="swap-direction-arrow">→</span>
+          <span class="item-label">AWP Dragon Lore</span>
+        </div>
+        <div class="history-card-footer">
+          <span class="history-delta">$0.00 refunded</span>
+          <span class="history-verification">Verified</span>
+        </div>
+        <div class="history-detail">
+          <div class="history-inline-grid">
+            <div><p>Type</p><strong>deposit_timeout</strong></div>
+            <div><p>Verification</p><strong>ed25519 signature</strong></div>
+            <div><p>Cycle</p><strong>cycle_unwound_1</strong></div>
+            <div><p>Outcome</p><strong>Refunded</strong></div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Another settled -->
+      <article class="history-card" data-kind="settled" data-cycle-id="cycle_settled_2" data-receipt-id="receipt_settled_2" onclick="toggleHistoryDetail(this)">
+        <div class="history-card-head">
+          <span class="history-card-label settled">Settled</span>
+          <span class="history-card-date">Feb 22, 09:40</span>
+        </div>
+        <div class="history-swap-row">
+          <span class="item-label">P250 Nuclear Threat</span>
+          <span class="swap-direction-arrow">→</span>
+          <span class="item-label">Five-SeveN Hyper Beast</span>
+        </div>
+        <div class="history-card-footer">
+          <span class="history-delta positive">+$3.10 net</span>
+          <span class="history-verification">Verified</span>
+        </div>
+        <div class="history-detail">
+          <div class="history-inline-grid">
+            <div><p>Type</p><strong>settlement_completed</strong></div>
+            <div><p>Receipt</p><strong>receipt_settled_2</strong></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="history-card" data-kind="settled" data-cycle-id="cycle_settled_3" data-receipt-id="receipt_settled_3" onclick="toggleHistoryDetail(this)">
+        <div class="history-card-head">
+          <span class="history-card-label settled">Settled</span>
+          <span class="history-card-date">Feb 20, 16:22</span>
+        </div>
+        <div class="history-swap-row">
+          <span class="item-label">StatTrak M4A1-S Hyper Beast</span>
+          <span class="swap-direction-arrow">→</span>
+          <span class="item-label">AK-47 Neon Rider</span>
+        </div>
+        <div class="history-card-footer">
+          <span class="history-delta negative">-$2.40 net</span>
+          <span class="history-verification">Verified</span>
+        </div>
+        <div class="history-detail">
+          <div class="history-inline-grid">
+            <div><p>Type</p><strong>settlement_completed</strong></div>
+            <div><p>Receipt</p><strong>receipt_settled_3</strong></div>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+
+</main>
+
+<!-- ═══ OPPORTUNITY DETAIL SHEET ═══ -->
+<div class="detail-overlay" id="opportunity-detail">
+  <div class="detail-scrim" onclick="closeDetail()"></div>
+  <div class="detail-sheet">
+    <div class="detail-handle"><div class="detail-handle-bar"></div></div>
+    <div class="detail-head">
+      <h2 class="detail-title">Review proposal</h2>
+      <button class="detail-close" onclick="closeDetail()" aria-label="Close">×</button>
+    </div>
+
+    <div class="detail-body">
+      <!-- Hero give/get -->
+      <div class="detail-hero">
+        <div class="swap-side give">
+          <span class="swap-direction">Give</span>
+          <div class="swap-item-thumb">
+            <img id="detail-give-img" src="" alt="">
+          </div>
+          <span class="swap-item-name" id="detail-give-name"></span>
+          <span class="swap-item-meta" id="detail-give-meta"></span>
+        </div>
+        <div class="swap-arrow-col">
+          <span class="swap-arrow">⇄</span>
+        </div>
+        <div class="swap-side get">
+          <span class="swap-direction">Get</span>
+          <div class="swap-item-thumb">
+            <img id="detail-get-img" src="" alt="">
+          </div>
+          <span class="swap-item-name" id="detail-get-name"></span>
+          <span class="swap-item-meta" id="detail-get-meta"></span>
+        </div>
+      </div>
+
+      <!-- Cycle graph -->
+      <div class="detail-cycle-graph" id="detail-cycle-graph">
+        <div class="cycle-node is-you">
+          <div class="cycle-node-label">You</div>
+          <div class="cycle-node-give" id="detail-you-give"></div>
+        </div>
+        <span class="cycle-arrow">→</span>
+        <div class="cycle-node">
+          <div class="cycle-node-label" id="detail-p2-label">@steel</div>
+          <div class="cycle-node-give" id="detail-p2-give"></div>
+        </div>
+        <span class="cycle-arrow">→</span>
+        <div class="cycle-node">
+          <div class="cycle-node-label" id="detail-p3-label">@nova</div>
+          <div class="cycle-node-give" id="detail-p3-give"></div>
+        </div>
+        <span class="cycle-arrow">→</span>
+        <div class="cycle-node is-you">
+          <div class="cycle-node-label">You</div>
+        </div>
+      </div>
+
+      <!-- Explainability cards -->
+      <div class="detail-explain">
+        <div class="detail-explain-title">Why this proposal</div>
+        <div class="explain-card">
+          <h4>Value delta</h4>
+          <p id="detail-explain-delta">You gain +$15.40 in estimated value.</p>
+        </div>
+        <div class="explain-card">
+          <h4 id="detail-explain-conf-title">Confidence · 92%</h4>
+          <p>High confidence based on cycle compatibility and reliability signals.</p>
+        </div>
+        <div class="explain-card">
+          <h4>Constraint fit</h4>
+          <p>Matched constraints fit your standing intent preferences. Wear, value, and cycle length are within tolerance.</p>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="card-stats" id="detail-stats">
+        <span class="stat-pill signal" id="detail-stat-conf">92% confidence</span>
+        <span class="stat-pill signal" id="detail-stat-delta">+$15.40 delta</span>
+        <span class="stat-pill neutral" id="detail-stat-cycle">3-way</span>
+        <span class="stat-pill caution" id="detail-stat-expiry">Expires 4h</span>
+      </div>
+    </div>
+
+    <!-- Decision buttons (ONLY here, not in feed cards) -->
+    <div class="detail-actions">
+      <button class="btn-ghost danger" style="flex:0.5" onclick="declineOpportunity()">Decline</button>
+      <button class="btn-primary" style="flex:1" onclick="acceptOpportunity()">Accept swap</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ COMPOSER BOTTOM SHEET ═══ -->
+<div class="composer-overlay" id="composer">
+  <div class="composer-scrim" onclick="closeComposer()"></div>
+  <div class="composer-sheet">
+    <div class="composer-handle"><div class="composer-handle-bar"></div></div>
+    <div class="composer-head">
+      <h2 class="composer-title">I'd trade this for...</h2>
+      <button class="composer-close" onclick="closeComposer()" aria-label="Close">×</button>
+    </div>
+
+    <div class="composer-selected-item">
+      <div class="composer-selected-thumb">
+        <img src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%231a7a4c'/%3E%3Cstop offset='100%25' stop-color='%23355c7d'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='120' height='120' rx='12' fill='url(%23g)'/%3E%3Ctext x='60' y='68' text-anchor='middle' font-size='36'%3E%F0%9F%94%AB%3C/text%3E%3C/svg%3E" alt="AK-47 Vulcan">
+      </div>
+      <div class="composer-selected-info">
+        <h4>AK-47 | Vulcan</h4>
+        <p>MW &middot; 0.089 &middot; $127.40</p>
+      </div>
+    </div>
+
+    <div class="composer-section">
+      <div class="composer-label">What do you want?</div>
+      <input class="composer-input" type="text" placeholder="Search items or categories..." />
+      <div class="autocomplete-list">
+        <button class="autocomplete-chip" type="button">Any CS2 knife</button>
+        <button class="autocomplete-chip" type="button">Butterfly knives</button>
+        <button class="autocomplete-chip" type="button">Karambit</button>
+        <button class="autocomplete-chip" type="button">AK-47 skins</button>
+        <button class="autocomplete-chip" type="button">AWP skins</button>
+      </div>
+    </div>
+
+    <div class="constraints-toggle">
+      <button class="constraints-toggle-btn" type="button" onclick="toggleConstraints(this)">
+        <span class="chevron">▸</span>
+        Constraints &middot; optional
+      </button>
+    </div>
+
+    <div class="constraints-panel" id="constraints-panel">
+      <div class="constraint-row">
+        <div class="constraint-label">Acceptable wear</div>
+        <div class="constraint-chips">
+          <button class="constraint-chip" type="button" onclick="toggleChip(this)">FN</button>
+          <button class="constraint-chip is-selected" type="button" onclick="toggleChip(this)">MW</button>
+          <button class="constraint-chip is-selected" type="button" onclick="toggleChip(this)">FT</button>
+          <button class="constraint-chip" type="button" onclick="toggleChip(this)">WW</button>
+          <button class="constraint-chip" type="button" onclick="toggleChip(this)">BS</button>
+        </div>
+      </div>
+      <div class="constraint-row">
+        <div class="constraint-label">Value tolerance</div>
+        <div class="constraint-chips">
+          <button class="constraint-chip" type="button" onclick="toggleChipGroup(this)">± $20</button>
+          <button class="constraint-chip is-selected" type="button" onclick="toggleChipGroup(this)">± $50</button>
+          <button class="constraint-chip" type="button" onclick="toggleChipGroup(this)">± $100</button>
+          <button class="constraint-chip" type="button" onclick="toggleChipGroup(this)">± $200</button>
+        </div>
+      </div>
+      <div class="constraint-row">
+        <div class="constraint-label">Max cycle length</div>
+        <div class="constraint-chips">
+          <button class="constraint-chip" type="button" onclick="toggleChipGroup(this)">Direct</button>
+          <button class="constraint-chip is-selected" type="button" onclick="toggleChipGroup(this)">3-way</button>
+          <button class="constraint-chip" type="button" onclick="toggleChipGroup(this)">4-way</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="composer-submit" type="button" onclick="closeComposer()">Start watching</button>
+  </div>
+</div>
+
+<!-- ═══ ACCEPTED TRANSITION OVERLAY ═══ -->
+<div class="accepted-overlay" id="accepted-overlay">
+  <div class="accepted-check">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+  </div>
+  <h2 class="accepted-title">Swap accepted</h2>
+  <p class="accepted-detail">Settlement is in flight. You'll be notified when action is needed.</p>
+  <div class="accepted-progress">
+    <p>Moving to active timeline...</p>
+  </div>
+</div>
+
+<!-- ═══ SETTINGS OVERLAY ═══ -->
+<div class="settings-overlay" id="settings-overlay">
+  <div class="settings-scrim" onclick="closeSettings()"></div>
+  <section class="settings-sheet" role="dialog" aria-modal="true" aria-label="Notification settings">
+    <div class="settings-head">
+      <h2>Alert settings</h2>
+      <button class="detail-close" type="button" onclick="closeSettings()" aria-label="Close settings">×</button>
+    </div>
+    <div class="settings-section">
+      <h3>Channels</h3>
+      <div class="settings-row"><label for="ch-proposal">Proposal alerts</label><input id="ch-proposal" type="checkbox" checked></div>
+      <div class="settings-row"><label for="ch-active">Active swap alerts</label><input id="ch-active" type="checkbox" checked></div>
+      <div class="settings-row"><label for="ch-receipt">Receipt alerts</label><input id="ch-receipt" type="checkbox" checked></div>
+    </div>
+    <div class="settings-section">
+      <h3>Quiet hours</h3>
+      <div class="settings-row"><label for="qh-enabled">Enabled</label><input id="qh-enabled" type="checkbox"></div>
+      <div class="settings-row"><label for="qh-start">Start hour</label><input id="qh-start" type="number" min="0" max="23" value="22"></div>
+      <div class="settings-row"><label for="qh-end">End hour</label><input id="qh-end" type="number" min="0" max="23" value="7"></div>
+    </div>
+    <button class="settings-done" type="button" onclick="closeSettings()">Save settings</button>
+  </section>
+</div>
+
+<div class="toast" id="app-toast"></div>
+
+<!-- ═══ TAB BAR (3 surfaces) ═══ -->
+<nav class="tabbar" role="tablist" aria-label="SwapGraph navigation">
+  <button class="tab is-active" role="tab" aria-selected="true" onclick="switchSurface('feed', this)">
+    <span class="tab-icon">◉</span>
+    <span class="tab-label">Feed</span>
+    <span class="tab-badge" id="feed-tab-badge">3</span>
+  </button>
+  <button class="tab" role="tab" aria-selected="false" onclick="switchSurface('locker', this)">
+    <span class="tab-icon">◇</span>
+    <span class="tab-label">Locker</span>
+  </button>
+  <button class="tab" role="tab" aria-selected="false" onclick="switchSurface('history', this)">
+    <span class="tab-icon">☰</span>
+    <span class="tab-label">History</span>
+  </button>
+</nav>
+
+<script>
+const prototypeState = {
+  selectedOpportunityCard: null,
+  selectedOpportunityId: null,
+  counts: {
+    proposals: 3,
+    active: 1,
+    watching: 2
+  },
+  pushCursor: 0
+};
+
+function showToast(message) {
+  const toast = document.getElementById('app-toast');
+  if (!toast) return;
+  toast.textContent = message;
+  toast.classList.add('is-visible');
+  setTimeout(() => toast.classList.remove('is-visible'), 1600);
+}
+
+function updateSummaryCounts() {
+  const proposals = Math.max(0, prototypeState.counts.proposals);
+  const active = Math.max(0, prototypeState.counts.active);
+  const watching = Math.max(0, prototypeState.counts.watching);
+  document.getElementById('count-proposals').textContent = String(proposals);
+  document.getElementById('count-active').textContent = String(active);
+  document.getElementById('count-watching').textContent = String(watching);
+
+  const badge = document.getElementById('feed-tab-badge');
+  if (badge) {
+    badge.textContent = String(proposals);
+    badge.style.display = proposals > 0 ? '' : 'none';
+  }
+}
+
+function baseHashForSurface(surface) {
+  if (surface === 'locker') return '#/locker';
+  if (surface === 'history') return '#/history';
+  return '#/feed';
+}
+
+function activeSurfaceId() {
+  if (document.getElementById('surface-locker').classList.contains('is-active')) return 'locker';
+  if (document.getElementById('surface-history').classList.contains('is-active')) return 'history';
+  return 'feed';
+}
+
+function activeTabButtonForSurface(surface) {
+  if (surface === 'locker') return document.querySelectorAll('.tab')[1];
+  if (surface === 'history') return document.querySelectorAll('.tab')[2];
+  return document.querySelectorAll('.tab')[0];
+}
+
+function switchSurface(id, tabEl, options = {}) {
+  document.querySelectorAll('.surface').forEach(s => s.classList.remove('is-active'));
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.remove('is-active');
+    t.setAttribute('aria-selected', 'false');
+  });
+
+  const target = document.getElementById('surface-' + id);
+  if (target) target.classList.add('is-active');
+  if (tabEl) {
+    tabEl.classList.add('is-active');
+    tabEl.setAttribute('aria-selected', 'true');
+  }
+
+  if (options.scroll !== false) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  if (options.updateHash !== false) {
+    const nextHash = baseHashForSurface(id);
+    if (window.location.hash !== nextHash) {
+      window.location.hash = nextHash;
+    }
+  }
+}
+
+function openOpportunityDetail(cardEl) {
+  const giveName = cardEl.querySelector('.swap-side.give .swap-item-name')?.textContent ?? '';
+  const giveMeta = cardEl.querySelector('.swap-side.give .swap-item-meta')?.textContent ?? '';
+  const giveImg = cardEl.querySelector('.swap-side.give .swap-item-thumb img')?.src ?? '';
+  const getName = cardEl.querySelector('.swap-side.get .swap-item-name')?.textContent ?? '';
+  const getMeta = cardEl.querySelector('.swap-side.get .swap-item-meta')?.textContent ?? '';
+  const getImg = cardEl.querySelector('.swap-side.get .swap-item-thumb img')?.src ?? '';
+
+  document.getElementById('detail-give-name').textContent = giveName;
+  document.getElementById('detail-give-meta').textContent = giveMeta;
+  document.getElementById('detail-give-img').src = giveImg;
+  document.getElementById('detail-get-name').textContent = getName;
+  document.getElementById('detail-get-meta').textContent = getMeta;
+  document.getElementById('detail-get-img').src = getImg;
+
+  const stats = cardEl.querySelectorAll('.stat-pill');
+  const confText = stats[0]?.textContent ?? '';
+  const deltaText = stats[1]?.textContent ?? '';
+  const cycleText = stats[2]?.textContent ?? '';
+  const expiryText = stats[3]?.textContent ?? '';
+
+  document.getElementById('detail-stat-conf').textContent = confText;
+  document.getElementById('detail-stat-delta').textContent = deltaText;
+  document.getElementById('detail-stat-cycle').textContent = cycleText;
+  if (expiryText) {
+    document.getElementById('detail-stat-expiry').textContent = expiryText;
+    document.getElementById('detail-stat-expiry').style.display = '';
+  } else {
+    document.getElementById('detail-stat-expiry').style.display = 'none';
+  }
+
+  document.getElementById('detail-explain-delta').textContent = 'You gain ' + deltaText + ' in estimated value.';
+  document.getElementById('detail-explain-conf-title').textContent = 'Confidence · ' + confText.replace(' confidence', '');
+  document.getElementById('detail-you-give').textContent = giveName;
+  document.getElementById('detail-p2-give').textContent = getName;
+
+  prototypeState.selectedOpportunityCard = cardEl;
+  prototypeState.selectedOpportunityId = cardEl.dataset.id ?? null;
+  document.getElementById('opportunity-detail').classList.add('is-open');
+}
+
+function closeDetail() {
+  document.getElementById('opportunity-detail').classList.remove('is-open');
+}
+
+function removeOpportunityCard(cardEl) {
+  if (!cardEl) return;
+  cardEl.style.transition = 'opacity 0.16s ease, transform 0.16s ease';
+  cardEl.style.opacity = '0';
+  cardEl.style.transform = 'translateY(-8px)';
+  setTimeout(() => cardEl.remove(), 180);
+}
+
+function acceptOpportunity() {
+  const cardEl = prototypeState.selectedOpportunityCard;
+  closeDetail();
+  if (cardEl) {
+    removeOpportunityCard(cardEl);
+    prototypeState.counts.proposals -= 1;
+    updateSummaryCounts();
+  }
+  showAccepted();
+}
+
+function declineOpportunity() {
+  const cardEl = prototypeState.selectedOpportunityCard;
+  closeDetail();
+  if (cardEl) {
+    removeOpportunityCard(cardEl);
+    prototypeState.counts.proposals -= 1;
+    updateSummaryCounts();
+  }
+  showToast('Declined safely. Feed refreshed.');
+}
+
+function openComposer() {
+  document.getElementById('composer').classList.add('is-open');
+}
+
+function closeComposer() {
+  document.getElementById('composer').classList.remove('is-open');
+}
+
+function openSettings() {
+  document.getElementById('settings-overlay').classList.add('is-open');
+  if (window.location.hash !== '#/settings/notifications') {
+    window.location.hash = '#/settings/notifications';
+  }
+}
+
+function closeSettings() {
+  document.getElementById('settings-overlay').classList.remove('is-open');
+  if (window.location.hash.startsWith('#/settings/')) {
+    const surface = activeSurfaceId();
+    window.location.hash = baseHashForSurface(surface);
+  }
+}
+
+function toggleConstraints(btn) {
+  btn.classList.toggle('is-open');
+  document.getElementById('constraints-panel').classList.toggle('is-open');
+}
+
+function toggleChip(chip) {
+  chip.classList.toggle('is-selected');
+}
+
+function toggleChipGroup(chip) {
+  chip.parentElement.querySelectorAll('.constraint-chip').forEach(c => c.classList.remove('is-selected'));
+  chip.classList.add('is-selected');
+}
+
+function showAccepted() {
+  const overlay = document.getElementById('accepted-overlay');
+  overlay.classList.add('is-visible');
+  setTimeout(() => {
+    overlay.classList.remove('is-visible');
+    const historyTab = activeTabButtonForSurface('history');
+    switchSurface('history', historyTab, { updateHash: false });
+    setHistoryFilter('active');
+    const activeCard = document.querySelector('.history-card[data-kind="active"]');
+    if (activeCard) activeCard.classList.add('is-open');
+    window.location.hash = '#/history/cycle/cycle_accepted_demo';
+  }, 2400);
+}
+
+function toggleHistoryDetail(card) {
+  card.classList.toggle('is-open');
+}
+
+function filterHistory(btn, kind) {
+  document.querySelectorAll('.history-filter').forEach(f => f.classList.remove('is-active'));
+  if (btn) btn.classList.add('is-active');
+  document.querySelectorAll('.history-card').forEach(card => {
+    if (kind === 'all') {
+      card.style.display = '';
+      return;
+    }
+    card.style.display = card.dataset.kind === kind ? '' : 'none';
+  });
+}
+
+function setHistoryFilter(kind) {
+  const btn = Array.from(document.querySelectorAll('.history-filter')).find(x => {
+    const label = x.textContent.trim().toLowerCase();
+    if (kind === 'active') return label === 'in flight';
+    if (kind === 'settled') return label === 'settled';
+    if (kind === 'unwound') return label === 'unwound';
+    return label === 'all';
+  }) ?? document.querySelector('.history-filter');
+  filterHistory(btn, kind);
+}
+
+function renderFallbackCard(mode) {
+  if (mode === 'loading') {
+    return '<h3>Loading feed</h3><p>Fetching opportunities, active swaps, and receipts.</p>';
+  }
+  if (mode === 'empty') {
+    return '<h3>All caught up</h3><p>The matcher is watching. New opportunities appear here.</p>';
+  }
+  if (mode === 'retryable') {
+    return '<h3>Temporary issue</h3><p>Could not refresh feed data.</p><button class="retry-btn" type="button" onclick="setFeedFallback(document.querySelector(\'[data-fallback-mode=&quot;populated&quot;]\'), \'populated\')">Retry</button>';
+  }
+  if (mode === 'blocked') {
+    return '<h3>Session blocked</h3><p>Your current session does not have permission for this feed.</p>';
+  }
+  if (mode === 'failure') {
+    return '<h3>Unexpected response</h3><p>The feed response could not be parsed. Contact support if this persists.</p>';
+  }
+  if (mode === 'offlineCached') {
+    return '<h3>Offline mode</h3><p>Showing cached Feed data from 18:42. Values may be stale.</p>';
+  }
+  if (mode === 'offlineEmpty') {
+    return '<h3>Offline mode</h3><p>No cached feed data is available yet.</p>';
+  }
+  return '';
+}
+
+function setFeedFallback(btn, mode) {
+  document.querySelectorAll('.feed-state-btn').forEach(b => b.classList.remove('is-active'));
+  if (btn) btn.classList.add('is-active');
+
+  const stream = document.querySelector('#surface-feed .feed-stream');
+  const stale = document.getElementById('feed-stale-banner');
+  const fallback = document.getElementById('feed-fallback-card');
+
+  if (mode === 'populated') {
+    stale.hidden = true;
+    fallback.hidden = true;
+    stream.style.display = '';
+    return;
+  }
+
+  if (mode === 'stale') {
+    stale.hidden = false;
+    fallback.hidden = true;
+    stream.style.display = '';
+    return;
+  }
+
+  stale.hidden = true;
+  stream.style.display = 'none';
+  fallback.innerHTML = renderFallbackCard(mode);
+  fallback.hidden = false;
+}
+
+function routeToFeedOpportunity(proposalId) {
+  const feedTab = activeTabButtonForSurface('feed');
+  switchSurface('feed', feedTab, { updateHash: false, scroll: false });
+  const card = document.querySelector('.feed-card[data-type="proposal"][data-id="' + proposalId + '"]');
+  if (card) {
+    openOpportunityDetail(card);
+  } else {
+    showToast('Proposal not available.');
+  }
+}
+
+function routeToHistoryCycle(cycleId) {
+  const historyTab = activeTabButtonForSurface('history');
+  switchSurface('history', historyTab, { updateHash: false, scroll: false });
+  setHistoryFilter('active');
+  const card = document.querySelector('.history-card[data-cycle-id="' + cycleId + '"]')
+    ?? document.querySelector('.history-card[data-kind="active"]');
+  if (card) card.classList.add('is-open');
+}
+
+function routeToHistoryReceipt(receiptId) {
+  const historyTab = activeTabButtonForSurface('history');
+  switchSurface('history', historyTab, { updateHash: false, scroll: false });
+  const card = document.querySelector('.history-card[data-receipt-id="' + receiptId + '"]');
+  if (card) {
+    const kind = card.dataset.kind === 'unwound' ? 'unwound' : 'settled';
+    setHistoryFilter(kind);
+    card.classList.add('is-open');
+    card.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  } else {
+    showToast('Receipt not available.');
+  }
+}
+
+function applyRoute(hash) {
+  const normalized = String(hash || '').trim() || '#/feed';
+  const path = normalized.startsWith('#') ? normalized.slice(1) : normalized;
+
+  if (path === '/feed' || path === '/feed/') {
+    switchSurface('feed', activeTabButtonForSurface('feed'), { updateHash: false, scroll: false });
+    closeDetail();
+    closeSettings();
+    return;
+  }
+
+  if (path === '/locker' || path === '/locker/') {
+    switchSurface('locker', activeTabButtonForSurface('locker'), { updateHash: false, scroll: false });
+    closeDetail();
+    closeSettings();
+    return;
+  }
+
+  if (path === '/history' || path === '/history/') {
+    switchSurface('history', activeTabButtonForSurface('history'), { updateHash: false, scroll: false });
+    setHistoryFilter('all');
+    closeDetail();
+    closeSettings();
+    return;
+  }
+
+  const oppMatch = path.match(/^\/feed\/opportunity\/([^/]+)\/?$/);
+  if (oppMatch) {
+    routeToFeedOpportunity(decodeURIComponent(oppMatch[1]));
+    closeSettings();
+    return;
+  }
+
+  const cycleMatch = path.match(/^\/history\/cycle\/([^/]+)\/?$/);
+  if (cycleMatch) {
+    routeToHistoryCycle(decodeURIComponent(cycleMatch[1]));
+    closeSettings();
+    return;
+  }
+
+  const receiptMatch = path.match(/^\/history\/receipt\/([^/]+)\/?$/);
+  if (receiptMatch) {
+    routeToHistoryReceipt(decodeURIComponent(receiptMatch[1]));
+    closeSettings();
+    return;
+  }
+
+  if (path === '/settings/notifications' || path === '/settings/notifications/') {
+    document.getElementById('settings-overlay').classList.add('is-open');
+    return;
+  }
+
+  window.location.hash = '#/feed';
+}
+
+function simulatePush() {
+  const sequence = ['proposal', 'active', 'receipt'];
+  const kind = sequence[prototypeState.pushCursor % sequence.length];
+  prototypeState.pushCursor += 1;
+
+  if (kind === 'proposal') {
+    showToast('Push: new proposal');
+    window.location.hash = '#/feed/opportunity/proposal-2';
+    return;
+  }
+  if (kind === 'active') {
+    showToast('Push: action needed in active cycle');
+    window.location.hash = '#/history/cycle/cycle_accepted_demo';
+    return;
+  }
+  showToast('Push: new receipt');
+  window.location.hash = '#/history/receipt/receipt_settled_1';
+}
+
+window.addEventListener('hashchange', () => applyRoute(window.location.hash));
+updateSummaryCounts();
+applyRoute(window.location.hash || '#/feed');
+</script>
+</body>
+</html>

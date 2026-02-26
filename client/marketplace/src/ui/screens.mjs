@@ -133,7 +133,7 @@ function renderPilotLocker(state) {
             <img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.name)}" loading="lazy" />
             <figcaption>
               <p class="u-text-sm u-weight-600">${escapeHtml(item.name)}</p>
-              <p class="u-text-xs u-ink-3">${escapeHtml(item.blurb)}</p>
+              <p class="u-text-sm u-ink-3">${escapeHtml(item.blurb)}</p>
             </figcaption>
           </figure>
         `).join('')}
@@ -159,8 +159,8 @@ function renderPilotSquadFeed(state) {
             <img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.name)}" loading="lazy" />
             <figcaption>
               <p class="u-text-sm u-weight-600">${escapeHtml(item.name)}</p>
-              <p class="u-text-xs u-ink-3">${escapeHtml(item.blurb)}</p>
-              <span class="squad-owner-pill u-text-xs">From ${escapeHtml(account.name)}</span>
+              <p class="u-text-sm u-ink-3">${escapeHtml(item.blurb)}</p>
+              <span class="squad-owner-pill u-text-sm">From ${escapeHtml(account.name)}</span>
             </figcaption>
           </figure>
         `)).join('')}

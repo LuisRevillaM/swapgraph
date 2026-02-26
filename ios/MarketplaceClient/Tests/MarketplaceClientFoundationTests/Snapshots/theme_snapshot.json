@@ -1,0 +1,37 @@
+{
+  "colors": {
+    "canvas": "#F8F7F4",
+    "surface": "#FFFFFF",
+    "well": "#F0EFEB",
+    "ink": "#1A1A1A",
+    "ink-2": "#4A4A4A",
+    "ink-3": "#6B6B6B",
+    "ink-4": "#999999",
+    "ink-5": "#D0CEC8",
+    "signal": "#1A7A4C",
+    "signal-light": "#E3F2EA",
+    "signal-text": "#15653E",
+    "caution": "#B07B1A",
+    "caution-light": "#FBF3E0",
+    "danger": "#B8433A",
+    "danger-light": "#FBE9E7",
+    "border": "#E8E5DF",
+    "border-active": "#D0CCC4"
+  },
+  "spacing": {
+    "cardPadding": 16,
+    "cardRadius": 14,
+    "cardRadiusSmall": 10,
+    "gridGap": 10,
+    "sectionGap": 22
+  },
+  "typography": {
+    "pageTitle": 22.5,
+    "sectionHeading": 16.5,
+    "itemTitle": 14.3,
+    "body": 12.8,
+    "label": 11.3,
+    "data": 11.3,
+    "decorativeOverlay": 10.2
+  }
+}

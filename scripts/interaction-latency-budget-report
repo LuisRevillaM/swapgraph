@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+node "$SCRIPT_DIR/run-swift-filter-check.mjs" \
+  --check-id SC-PF-03 \
+  --item "Proposal decision interaction remains within latency budget::PerformanceFeatureTests/testInteractionLatencyBudgetForProposalDecision" \
+  --item "Inbox refresh stays within long-list budget::PerformanceFeatureTests/testLongListRefreshBudgetForInbox"

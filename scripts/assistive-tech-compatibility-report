@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+node "$SCRIPT_DIR/run-swift-filter-check.mjs" \
+  --check-id SC-AX-03 \
+  --item "Controls expose accessibility labels, hints, and identifiers::AccessibilityFeatureTests/testCriticalInteractiveControlsExposeAccessibilitySemantics" \
+  --item "Focus order priorities remain deterministic::AccessibilityFeatureTests/testProposalAndActiveViewsDeclareFocusOrderPriorities" \
+  --item "Small controls are promoted to minimum touch target::AccessibilityFeatureTests/testSmallControlsPromotedToMinimumTouchTarget"
