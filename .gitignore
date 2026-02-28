@@ -21,3 +21,7 @@ data/runtime-api-state.sqlite-wal
 
 # OS
 .DS_Store
+
+# Local iOS build/cache artifacts
+.clang-module-cache/
+ios/MarketplaceClient/.build/
