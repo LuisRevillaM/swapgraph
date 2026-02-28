@@ -27,11 +27,11 @@ public struct IntentsView: View {
                     }
                     FallbackStateView(
                         state: .empty(
-                            title: "No standing intents",
-                            message: "Post an intent to start matching"
+                            title: "No trades yet",
+                            message: "Post your first trade to start matching"
                         )
                     )
-                    Button("Post intent") {
+                    Button("Post your first trade") {
                         viewModel.openComposer()
                     }
                     .buttonStyle(.borderedProminent)
@@ -44,6 +44,7 @@ public struct IntentsView: View {
                         if let staleDataState = viewModel.staleDataState {
                             StaleDataBannerView(state: staleDataState)
                         }
+                        MatchingStatusBannerView()
                         actionHeader
 
                         ForEach(viewModel.rows) { row in
@@ -84,8 +85,8 @@ public struct IntentsView: View {
                         .font(.marketplace(.label))
                         .padding(.horizontal, 10)
                         .padding(.vertical, 7)
-                        .background(Color(red: 0.89, green: 0.95, blue: 0.92))
-                        .foregroundStyle(Color(red: 0.08, green: 0.40, blue: 0.24))
+                        .background(Color.marketplacePrimaryLight)
+                        .foregroundStyle(Color.marketplacePrimary)
                         .clipShape(Capsule())
                 }
                 .buttonStyle(.plain)
@@ -105,7 +106,7 @@ public struct IntentsView: View {
                 .font(.marketplace(.label))
                 .padding(.horizontal, 10)
                 .padding(.vertical, 7)
-                .background(Color(red: 0.94, green: 0.94, blue: 0.92))
+                .background(Color.marketplaceNeutral)
                 .foregroundStyle(.primary)
                 .clipShape(Capsule())
         }
@@ -168,7 +169,7 @@ private struct IntentRowCard: View {
                         .font(.marketplace(.label))
                         .buttonStyle(.bordered)
                         .controlSize(.small)
-                        .tint(Color(red: 0.72, green: 0.26, blue: 0.23))
+                        .tint(Color.marketplaceCancelTint)
                         .marketplaceTouchTarget()
                         .accessibilityLabel("Cancel intent \(row.id)")
                 }
@@ -179,7 +180,7 @@ private struct IntentRowCard: View {
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .overlay(
             RoundedRectangle(cornerRadius: 14)
-                .stroke(Color(red: 0.91, green: 0.90, blue: 0.87), lineWidth: 1)
+                .stroke(Color.marketplaceBorder, lineWidth: 1)
         )
         .accessibilityElement(children: .combine)
     }
@@ -192,16 +193,16 @@ private struct IntentRowCard: View {
         switch row.watchState {
         case .watchingNoMatches:
             text = "Watching · no matches"
-            fill = Color(red: 0.95, green: 0.95, blue: 0.93)
-            ink = Color(red: 0.29, green: 0.29, blue: 0.29)
+            fill = Color.marketplaceSurfaceWatching
+            ink = Color.marketplaceNeutralInk
         case .matched(let nearMatchCount):
             text = "Watching · \(nearMatchCount) near"
-            fill = Color(red: 0.89, green: 0.95, blue: 0.92)
-            ink = Color(red: 0.08, green: 0.40, blue: 0.24)
+            fill = Color.marketplacePrimaryLight
+            ink = Color.marketplacePrimary
         case .cancelled:
             text = "Cancelled"
-            fill = Color(red: 0.98, green: 0.92, blue: 0.91)
-            ink = Color(red: 0.63, green: 0.28, blue: 0.25)
+            fill = Color.marketplaceDangerLight
+            ink = Color.marketplaceDanger
         }
 
         return Text(text)
@@ -232,7 +233,7 @@ private struct IntentRowCard: View {
             .font(.marketplace(.label))
             .padding(.horizontal, 6)
             .padding(.vertical, 4)
-            .background(Color(red: 0.94, green: 0.94, blue: 0.92))
+            .background(Color.marketplaceNeutral)
             .clipShape(Capsule())
     }
 
@@ -246,7 +247,7 @@ private struct IntentRowCard: View {
         }
         .padding(.horizontal, 6)
         .padding(.vertical, 4)
-        .background(Color(red: 0.94, green: 0.94, blue: 0.92))
+        .background(Color.marketplaceNeutral)
         .clipShape(Capsule())
     }
 }
@@ -260,70 +261,77 @@ private struct IntentComposerSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     labeledField(
-                        title: "Offering asset ID",
+                        title: "Giving away",
                         prompt: "asset_123",
                         text: $viewModel.composerDraft.offeringAssetID
                     )
+                    .disabled(viewModel.isOfferingAssetLocked && viewModel.editingIntentID == nil)
 
                     labeledField(
-                        title: "Want",
+                        title: "Looking for",
                         prompt: "knife, gloves, or category",
                         text: $viewModel.composerDraft.wantQuery
                     )
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Acceptable wear")
-                            .font(.marketplace(.label))
-                            .foregroundStyle(.secondary)
-                        wearTags
-                    }
+                    DisclosureGroup("Advanced options") {
+                        VStack(alignment: .leading, spacing: 16) {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Acceptable wear")
+                                    .font(.marketplace(.label))
+                                    .foregroundStyle(.secondary)
+                                wearTags
+                            }
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Value tolerance")
-                            .font(.marketplace(.label))
-                            .foregroundStyle(.secondary)
-                        Picker("Value tolerance", selection: $viewModel.composerDraft.valueTolerance) {
-                            ForEach(ValueToleranceOption.allCases, id: \.self) { option in
-                                Text(option.label).tag(option)
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Value tolerance")
+                                    .font(.marketplace(.label))
+                                    .foregroundStyle(.secondary)
+                                Picker("Value tolerance", selection: $viewModel.composerDraft.valueTolerance) {
+                                    ForEach(ValueToleranceOption.allCases, id: \.self) { option in
+                                        Text(option.label).tag(option)
+                                    }
+                                }
+                                .pickerStyle(.segmented)
+                            }
+
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Max cycle length")
+                                    .font(.marketplace(.label))
+                                    .foregroundStyle(.secondary)
+                                Picker("Cycle length", selection: $viewModel.composerDraft.cycleLength) {
+                                    ForEach(CycleLengthOption.allCases, id: \.self) { option in
+                                        Text(option.label).tag(option)
+                                    }
+                                }
+                                .pickerStyle(.segmented)
+                            }
+
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Urgency")
+                                    .font(.marketplace(.label))
+                                    .foregroundStyle(.secondary)
+
+                                Picker("Urgency", selection: $viewModel.composerDraft.urgency) {
+                                    Text("Normal").tag("normal")
+                                    Text("High").tag("high")
+                                }
+                                .pickerStyle(.segmented)
                             }
                         }
-                        .pickerStyle(.segmented)
                     }
-
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Max cycle length")
-                            .font(.marketplace(.label))
-                            .foregroundStyle(.secondary)
-                        Picker("Cycle length", selection: $viewModel.composerDraft.cycleLength) {
-                            ForEach(CycleLengthOption.allCases, id: \.self) { option in
-                                Text(option.label).tag(option)
-                            }
-                        }
-                        .pickerStyle(.segmented)
-                    }
-
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Urgency")
-                            .font(.marketplace(.label))
-                            .foregroundStyle(.secondary)
-
-                        Picker("Urgency", selection: $viewModel.composerDraft.urgency) {
-                            Text("Normal").tag("normal")
-                            Text("High").tag("high")
-                        }
-                        .pickerStyle(.segmented)
-                    }
+                    .font(.marketplace(.label))
+                    .foregroundStyle(.secondary)
 
                     if !viewModel.composerIssues.isEmpty {
                         VStack(alignment: .leading, spacing: 6) {
                             ForEach(viewModel.composerIssues) { issue in
                                 Text("• \(issue.message)")
                                     .font(.marketplace(.body).weight(.medium))
-                                    .foregroundStyle(Color(red: 0.63, green: 0.28, blue: 0.25))
+                                    .foregroundStyle(Color.marketplaceDanger)
                             }
                         }
                         .padding(10)
-                        .background(Color(red: 0.98, green: 0.92, blue: 0.91))
+                        .background(Color.marketplaceDangerLight)
                         .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
 
@@ -343,7 +351,7 @@ private struct IntentComposerSheet: View {
                         }
                         .padding(.vertical, 12)
                         .foregroundStyle(.white)
-                        .background(Color(red: 0.08, green: 0.40, blue: 0.24))
+                        .background(Color.marketplacePrimary)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                     .buttonStyle(.plain)
@@ -352,7 +360,7 @@ private struct IntentComposerSheet: View {
                 }
                 .padding(16)
             }
-            .background(Color(red: 0.97, green: 0.97, blue: 0.96))
+            .background(Color.marketplaceSurface)
             .navigationTitle(viewModel.editingIntentID == nil ? "Post intent" : "Edit intent")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -384,8 +392,8 @@ private struct IntentComposerSheet: View {
                         .foregroundStyle(selected ? .white : .primary)
                         .background(
                             selected
-                            ? Color(red: 0.08, green: 0.40, blue: 0.24)
-                            : Color(red: 0.94, green: 0.94, blue: 0.92)
+                            ? Color.marketplacePrimary
+                            : Color.marketplaceNeutral
                         )
                         .clipShape(Capsule())
                 }

@@ -3,10 +3,14 @@ import SwiftUI
 public struct ItemsView: View {
     @ObservedObject private var viewModel: ItemsViewModel
     private let openInbox: () -> Void
+    private let onTradeItem: ((String) -> Void)?
+    private let hasActiveIntents: Bool
 
-    public init(viewModel: ItemsViewModel, openInbox: @escaping () -> Void) {
+    public init(viewModel: ItemsViewModel, openInbox: @escaping () -> Void, onTradeItem: ((String) -> Void)? = nil, hasActiveIntents: Bool = false) {
         self.viewModel = viewModel
         self.openInbox = openInbox
+        self.onTradeItem = onTradeItem
+        self.hasActiveIntents = hasActiveIntents
     }
 
     public var body: some View {
@@ -37,6 +41,10 @@ public struct ItemsView: View {
                                 StaleDataBannerView(state: staleDataState)
                             }
 
+                            if hasActiveIntents {
+                                MatchingStatusBannerView()
+                            }
+
                             if snapshot.demandBannerCount > 0 {
                                 Button {
                                     Task { await viewModel.trackDemandBannerTap() }
@@ -48,10 +56,10 @@ public struct ItemsView: View {
                                         Spacer()
                                         Image(systemName: "arrow.right")
                                     }
-                                    .foregroundStyle(Color(red: 0.08, green: 0.40, blue: 0.24))
+                                    .foregroundStyle(Color.marketplacePrimary)
                                     .padding(12)
                                     .frame(maxWidth: .infinity)
-                                    .background(Color(red: 0.89, green: 0.95, blue: 0.92))
+                                    .background(Color.marketplacePrimaryLight)
                                     .clipShape(RoundedRectangle(cornerRadius: 12))
                                 }
                                 .buttonStyle(.plain)
@@ -69,7 +77,7 @@ public struct ItemsView: View {
 
                                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
                                         ForEach(section.items) { item in
-                                            ItemCardView(item: item)
+                                            ItemCardView(item: item, onTrade: onTradeItem)
                                         }
                                     }
                                 }
@@ -92,9 +100,11 @@ public struct ItemsView: View {
 
 public struct ItemCardView: View {
     let item: MarketplaceItemCardModel
+    var onTrade: ((String) -> Void)?
 
-    public init(item: MarketplaceItemCardModel) {
+    public init(item: MarketplaceItemCardModel, onTrade: ((String) -> Void)? = nil) {
         self.item = item
+        self.onTrade = onTrade
     }
 
     public var body: some View {
@@ -104,8 +114,8 @@ public struct ItemCardView: View {
                     .fill(
                         LinearGradient(
                             colors: [
-                                Color(red: 0.18, green: 0.18, blue: 0.21),
-                                Color(red: 0.10, green: 0.10, blue: 0.13)
+                                Color.marketplaceCardGradientStart,
+                                Color.marketplaceCardGradientEnd
                             ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
@@ -143,6 +153,24 @@ public struct ItemCardView: View {
                         .foregroundStyle(.secondary)
                 }
             }
+
+            if let onTrade {
+                Button {
+                    onTrade(item.assetID)
+                } label: {
+                    Text("Trade this")
+                        .font(.marketplace(.label))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .foregroundStyle(.white)
+                        .background(Color.marketplacePrimary)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                }
+                .buttonStyle(.plain)
+                .marketplaceTouchTarget()
+                .accessibilityIdentifier("items.tradeThis.\(item.assetID)")
+                .accessibilityLabel("Trade \(item.displayName)")
+            }
         }
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -150,7 +178,7 @@ public struct ItemCardView: View {
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .overlay(
             RoundedRectangle(cornerRadius: 14)
-                .stroke(Color(red: 0.91, green: 0.90, blue: 0.87), lineWidth: 1)
+                .stroke(Color.marketplaceBorder, lineWidth: 1)
         )
         .shadow(color: .black.opacity(0.03), radius: 3, x: 0, y: 1)
         .accessibilityElement(children: .combine)
@@ -166,7 +194,7 @@ public struct ItemCardView: View {
         }
         .padding(.horizontal, 6)
         .padding(.vertical, 4)
-        .background(Color(red: 0.94, green: 0.94, blue: 0.92))
+        .background(Color.marketplaceNeutral)
         .clipShape(Capsule())
     }
 

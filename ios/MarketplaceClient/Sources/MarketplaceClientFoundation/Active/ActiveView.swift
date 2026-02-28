@@ -45,7 +45,7 @@ public struct ActiveView: View {
                     }
                     .padding(16)
                 }
-                .background(Color(red: 0.97, green: 0.97, blue: 0.96))
+                .background(Color.marketplaceSurface)
             } else {
                 FallbackStateView(state: .loading(message: "Preparing active timeline"))
             }
@@ -59,7 +59,7 @@ public struct ActiveView: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 8) {
                 Circle()
-                    .fill(Color(red: 0.08, green: 0.40, blue: 0.24))
+                    .fill(Color.marketplacePrimary)
                     .frame(width: 8, height: 8)
                 Text(header.stateLabel.uppercased())
                     .font(.marketplace(.label))
@@ -79,7 +79,7 @@ public struct ActiveView: View {
                 .foregroundStyle(.secondary)
 
             ProgressView(value: header.progressFraction)
-                .tint(Color(red: 0.08, green: 0.40, blue: 0.24))
+                .tint(Color.marketplacePrimary)
 
             Text("Progress \(header.completedSteps)/\(header.totalSteps)")
                 .font(.marketplace(.data))
@@ -90,7 +90,7 @@ public struct ActiveView: View {
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .overlay(
             RoundedRectangle(cornerRadius: 14)
-                .stroke(Color(red: 0.91, green: 0.90, blue: 0.87), lineWidth: 1)
+                .stroke(Color.marketplaceBorder, lineWidth: 1)
         )
     }
 
@@ -104,7 +104,7 @@ public struct ActiveView: View {
                 .foregroundStyle(.primary)
         }
         .padding(12)
-        .background(Color(red: 0.99, green: 0.96, blue: 0.90))
+        .background(Color.marketplaceWarningLight)
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
@@ -129,14 +129,14 @@ public struct ActiveView: View {
                     Text(action.subtitle)
                         .font(.marketplace(.body))
                 }
-                .foregroundStyle(action.isEnabled ? Color.white : Color(red: 0.45, green: 0.45, blue: 0.43))
+                .foregroundStyle(action.isEnabled ? Color.white : Color.marketplaceNeutralDark)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.vertical, 10)
                 .padding(.horizontal, 12)
                 .background(
                     action.isEnabled
-                        ? Color(red: 0.08, green: 0.40, blue: 0.24)
-                        : Color(red: 0.94, green: 0.94, blue: 0.92)
+                        ? Color.marketplacePrimary
+                        : Color.marketplaceNeutral
                 )
                 .clipShape(RoundedRectangle(cornerRadius: 12))
             }
@@ -150,7 +150,7 @@ public struct ActiveView: View {
             if let reason = action.disabledReason, !action.isEnabled {
                 Text(reason)
                     .font(.marketplace(.body))
-                    .foregroundStyle(Color(red: 0.63, green: 0.28, blue: 0.25))
+                    .foregroundStyle(Color.marketplaceDanger)
             }
         }
         .padding(14)
@@ -158,7 +158,7 @@ public struct ActiveView: View {
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .overlay(
             RoundedRectangle(cornerRadius: 14)
-                .stroke(Color(red: 0.91, green: 0.90, blue: 0.87), lineWidth: 1)
+                .stroke(Color.marketplaceBorder, lineWidth: 1)
         )
         .accessibilityElement(children: .contain)
     }
@@ -193,7 +193,7 @@ public struct ActiveView: View {
                     }
                 }
                 .padding(10)
-                .background(Color(red: 0.97, green: 0.97, blue: 0.95))
+                .background(Color.marketplaceSurfaceAlt)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
             }
         }
@@ -202,18 +202,18 @@ public struct ActiveView: View {
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .overlay(
             RoundedRectangle(cornerRadius: 14)
-                .stroke(Color(red: 0.91, green: 0.90, blue: 0.87), lineWidth: 1)
+                .stroke(Color.marketplaceBorder, lineWidth: 1)
         )
     }
 
     private func markerColor(_ marker: ActiveTimelineMarker) -> Color {
         switch marker {
         case .completed:
-            return Color(red: 0.08, green: 0.40, blue: 0.24)
+            return Color.marketplacePrimary
         case .active:
-            return Color(red: 0.69, green: 0.48, blue: 0.10)
+            return Color.marketplaceWarning
         case .pending:
-            return Color(red: 0.72, green: 0.72, blue: 0.70)
+            return Color.marketplacePending
         }
     }
 }

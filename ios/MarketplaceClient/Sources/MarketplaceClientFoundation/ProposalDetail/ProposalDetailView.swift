@@ -23,18 +23,18 @@ public struct ProposalDetailView: View {
                     VStack(alignment: .leading, spacing: 20) {
                         decisionBanner
                             .accessibilitySortPriority(5)
-                        exchangeHero(snapshot)
-                            .accessibilitySortPriority(4)
-                        participantFlow(snapshot.participantNodes)
-                            .accessibilitySortPriority(3)
-                        explainabilitySection(snapshot.explainabilityCards)
-                            .accessibilitySortPriority(2)
                         decisionActions
+                            .accessibilitySortPriority(4)
+                        exchangeHero(snapshot)
+                            .accessibilitySortPriority(3)
+                        participantFlow(snapshot.participantNodes)
+                            .accessibilitySortPriority(2)
+                        explainabilitySection(snapshot.explainabilityCards)
                             .accessibilitySortPriority(1)
                     }
                     .padding(16)
                 }
-                .background(Color(red: 0.97, green: 0.97, blue: 0.96))
+                .background(Color.marketplaceSurface)
             } else {
                 FallbackStateView(state: .loading(message: "Preparing detail"))
             }
@@ -64,15 +64,15 @@ public struct ProposalDetailView: View {
         case .idle:
             EmptyView()
         case .accepting:
-            statusPill(text: "Accepting proposal...", fill: Color(red: 0.89, green: 0.95, blue: 0.92), ink: Color(red: 0.08, green: 0.40, blue: 0.24))
+            statusPill(text: "Accepting proposal...", fill: Color.marketplacePrimaryLight, ink: Color.marketplacePrimary)
         case .accepted(let commitID):
-            statusPill(text: "Accepted · \(commitID)", fill: Color(red: 0.89, green: 0.95, blue: 0.92), ink: Color(red: 0.08, green: 0.40, blue: 0.24))
+            statusPill(text: "Accepted · \(commitID)", fill: Color.marketplacePrimaryLight, ink: Color.marketplacePrimary)
         case .declining:
-            statusPill(text: "Declining proposal...", fill: Color(red: 0.98, green: 0.92, blue: 0.91), ink: Color(red: 0.63, green: 0.28, blue: 0.25))
+            statusPill(text: "Declining proposal...", fill: Color.marketplaceDangerLight, ink: Color.marketplaceDanger)
         case .declined(let commitID):
-            statusPill(text: "Declined · \(commitID)", fill: Color(red: 0.98, green: 0.92, blue: 0.91), ink: Color(red: 0.63, green: 0.28, blue: 0.25))
+            statusPill(text: "Declined · \(commitID)", fill: Color.marketplaceDangerLight, ink: Color.marketplaceDanger)
         case .failed(let message):
-            statusPill(text: message, fill: Color(red: 0.98, green: 0.92, blue: 0.91), ink: Color(red: 0.63, green: 0.28, blue: 0.25))
+            statusPill(text: message, fill: Color.marketplaceDangerLight, ink: Color.marketplaceDanger)
         }
     }
 
@@ -110,7 +110,7 @@ public struct ProposalDetailView: View {
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .overlay(
             RoundedRectangle(cornerRadius: 14)
-                .stroke(Color(red: 0.91, green: 0.90, blue: 0.87), lineWidth: 1)
+                .stroke(Color.marketplaceBorder, lineWidth: 1)
         )
     }
 
@@ -125,7 +125,7 @@ public struct ProposalDetailView: View {
         }
         .padding(10)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(red: 0.97, green: 0.97, blue: 0.95))
+        .background(Color.marketplaceSurfaceAlt)
         .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 
@@ -149,7 +149,7 @@ public struct ProposalDetailView: View {
                                 .lineLimit(1)
                         }
                         .padding(10)
-                        .background(Color(red: 0.97, green: 0.97, blue: 0.95))
+                        .background(Color.marketplaceSurfaceAlt)
                         .clipShape(RoundedRectangle(cornerRadius: 10))
 
                         if index < nodes.count - 1 {
@@ -165,7 +165,7 @@ public struct ProposalDetailView: View {
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .overlay(
             RoundedRectangle(cornerRadius: 14)
-                .stroke(Color(red: 0.91, green: 0.90, blue: 0.87), lineWidth: 1)
+                .stroke(Color.marketplaceBorder, lineWidth: 1)
         )
     }
 
@@ -190,7 +190,7 @@ public struct ProposalDetailView: View {
                         .foregroundStyle(.primary)
                 }
                 .padding(10)
-                .background(Color(red: 0.97, green: 0.97, blue: 0.95))
+                .background(Color.marketplaceSurfaceAlt)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
             }
         }
@@ -199,7 +199,7 @@ public struct ProposalDetailView: View {
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .overlay(
             RoundedRectangle(cornerRadius: 14)
-                .stroke(Color(red: 0.91, green: 0.90, blue: 0.87), lineWidth: 1)
+                .stroke(Color.marketplaceBorder, lineWidth: 1)
         )
     }
 
@@ -212,8 +212,8 @@ public struct ProposalDetailView: View {
                     .font(.marketplace(.body).weight(.semibold))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 11)
-                    .foregroundStyle(Color(red: 0.63, green: 0.28, blue: 0.25))
-                    .background(Color(red: 0.98, green: 0.92, blue: 0.91))
+                    .foregroundStyle(Color.marketplaceDanger)
+                    .background(Color.marketplaceDangerLight)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
             }
             .buttonStyle(.plain)
@@ -231,7 +231,7 @@ public struct ProposalDetailView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 11)
                     .foregroundStyle(.white)
-                    .background(Color(red: 0.08, green: 0.40, blue: 0.24))
+                    .background(Color.marketplacePrimary)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
             }
             .buttonStyle(.plain)
@@ -253,7 +253,7 @@ public struct ProposalDetailView: View {
         }
         .padding(.horizontal, 7)
         .padding(.vertical, 4)
-        .background(Color(red: 0.94, green: 0.94, blue: 0.92))
+        .background(Color.marketplaceNeutral)
         .clipShape(Capsule())
     }
 }

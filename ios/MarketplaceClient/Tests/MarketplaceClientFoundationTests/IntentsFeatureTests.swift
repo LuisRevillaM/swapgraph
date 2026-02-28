@@ -156,6 +156,37 @@ final class IntentsViewModelFeatureTests: XCTestCase {
         XCTAssertEqual(try XCTUnwrap(viewModel.medianFirstIntentSeconds), trace.elapsedSeconds, accuracy: 0.001)
     }
 
+    func testOpenComposerWithPrefilledAssetLocksOfferingField() async throws {
+        let repository = StubIntentsRepository(intents: [], proposals: [])
+        let viewModel = IntentsViewModel(
+            repository: repository,
+            watchSnapshotStore: InMemoryIntentWatchSnapshotStore(),
+            analyticsClient: nil,
+            actorID: "u1"
+        )
+
+        viewModel.openComposer(prefilledAssetID: "asset_prefill")
+
+        XCTAssertTrue(viewModel.isComposerPresented)
+        XCTAssertTrue(viewModel.isOfferingAssetLocked)
+        XCTAssertEqual(viewModel.composerDraft.offeringAssetID, "asset_prefill")
+    }
+
+    func testOpenComposerWithoutPrefillLeavesOfferingFieldEditable() async throws {
+        let repository = StubIntentsRepository(intents: [], proposals: [])
+        let viewModel = IntentsViewModel(
+            repository: repository,
+            watchSnapshotStore: InMemoryIntentWatchSnapshotStore(),
+            analyticsClient: nil,
+            actorID: "u1"
+        )
+
+        viewModel.openComposer()
+
+        XCTAssertTrue(viewModel.isComposerPresented)
+        XCTAssertFalse(viewModel.isOfferingAssetLocked)
+    }
+
     private func sampleIntent(id: String) -> SwapIntent {
         IntentComposerDraft(
             offeringAssetID: "asset_a",

@@ -25,8 +25,8 @@ public struct ReceiptsView: View {
                         }
                         FallbackStateView(
                             state: .empty(
-                                title: "No receipts yet",
-                                message: "Completed or unwound cycles will appear here."
+                                title: "No history yet",
+                                message: "Your first receipt appears here after a trade completes."
                             )
                         )
                     }
@@ -54,7 +54,7 @@ public struct ReceiptsView: View {
                         }
                         .padding(16)
                     }
-                    .background(Color(red: 0.97, green: 0.97, blue: 0.96))
+                    .background(Color.marketplaceSurface)
                 }
             } else {
                 FallbackStateView(state: .loading(message: "Preparing receipts"))
@@ -114,7 +114,7 @@ private struct ReceiptRowCard: View {
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .overlay(
             RoundedRectangle(cornerRadius: 14)
-                .stroke(Color(red: 0.91, green: 0.90, blue: 0.87), lineWidth: 1)
+                .stroke(Color.marketplaceBorder, lineWidth: 1)
         )
         .accessibilityElement(children: .combine)
     }
@@ -122,11 +122,11 @@ private struct ReceiptRowCard: View {
     private func outcomeColor(_ outcome: ReceiptOutcomeKind) -> Color {
         switch outcome {
         case .completed:
-            return Color(red: 0.08, green: 0.40, blue: 0.24)
+            return Color.marketplacePrimary
         case .failed:
-            return Color(red: 0.63, green: 0.28, blue: 0.25)
+            return Color.marketplaceDanger
         case .unwound:
-            return Color(red: 0.69, green: 0.48, blue: 0.10)
+            return Color.marketplaceWarning
         }
     }
 
@@ -141,7 +141,7 @@ private struct ReceiptRowCard: View {
         }
         .padding(.horizontal, 6)
         .padding(.vertical, 4)
-        .background(Color(red: 0.94, green: 0.94, blue: 0.92))
+        .background(Color.marketplaceNeutral)
         .clipShape(Capsule())
     }
 }
@@ -162,7 +162,7 @@ private struct ReceiptDetailView: View {
             }
             .padding(16)
         }
-        .background(Color(red: 0.97, green: 0.97, blue: 0.96))
+        .background(Color.marketplaceSurface)
         .navigationTitle("Receipt")
         .toolbar {
             ToolbarItem(placement: .automatic) {
@@ -198,7 +198,7 @@ private struct ReceiptDetailView: View {
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .overlay(
             RoundedRectangle(cornerRadius: 14)
-                .stroke(Color(red: 0.91, green: 0.90, blue: 0.87), lineWidth: 1)
+                .stroke(Color.marketplaceBorder, lineWidth: 1)
         )
     }
 
@@ -219,7 +219,7 @@ private struct ReceiptDetailView: View {
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .overlay(
             RoundedRectangle(cornerRadius: 14)
-                .stroke(Color(red: 0.91, green: 0.90, blue: 0.87), lineWidth: 1)
+                .stroke(Color.marketplaceBorder, lineWidth: 1)
         )
     }
 
@@ -238,7 +238,7 @@ private struct ReceiptDetailView: View {
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .overlay(
             RoundedRectangle(cornerRadius: 14)
-                .stroke(Color(red: 0.91, green: 0.90, blue: 0.87), lineWidth: 1)
+                .stroke(Color.marketplaceBorder, lineWidth: 1)
         )
     }
 
@@ -264,7 +264,7 @@ private struct ReceiptDetailView: View {
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .overlay(
             RoundedRectangle(cornerRadius: 14)
-                .stroke(Color(red: 0.91, green: 0.90, blue: 0.87), lineWidth: 1)
+                .stroke(Color.marketplaceBorder, lineWidth: 1)
         )
     }
 
@@ -284,11 +284,11 @@ private struct ReceiptDetailView: View {
     private func outcomeColor(_ outcome: ReceiptOutcomeKind) -> Color {
         switch outcome {
         case .completed:
-            return Color(red: 0.08, green: 0.40, blue: 0.24)
+            return Color.marketplacePrimary
         case .failed:
-            return Color(red: 0.63, green: 0.28, blue: 0.25)
+            return Color.marketplaceDanger
         case .unwound:
-            return Color(red: 0.69, green: 0.48, blue: 0.10)
+            return Color.marketplaceWarning
         }
     }
 }

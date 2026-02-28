@@ -24,6 +24,7 @@ public final class IntentsViewModel: ObservableObject {
     @Published public var isComposerPresented = false
     @Published public var composerDraft = IntentComposerDraft()
     @Published public private(set) var composerIssues: [IntentComposerValidationIssue] = []
+    @Published public private(set) var isOfferingAssetLocked = false
     @Published public private(set) var editingIntentID: String?
     @Published public private(set) var journeyTraces: [IntentJourneyTrace] = []
     @Published public private(set) var firstIntentDurationsSeconds: [Double] = []
@@ -128,8 +129,10 @@ public final class IntentsViewModel: ObservableObject {
     public func openComposer(prefilledAssetID: String? = nil) {
         editingIntentID = nil
         composerDraft = IntentComposerDraft()
-        if let prefilledAssetID {
-            composerDraft.offeringAssetID = prefilledAssetID
+        let prefilled = prefilledAssetID?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        isOfferingAssetLocked = !prefilled.isEmpty
+        if isOfferingAssetLocked {
+            composerDraft.offeringAssetID = prefilled
         }
         composerIssues = []
         isComposerPresented = true
@@ -152,6 +155,7 @@ public final class IntentsViewModel: ObservableObject {
         guard let intent = intentsByID[intentID] else { return }
 
         editingIntentID = intentID
+        isOfferingAssetLocked = false
         composerDraft = IntentComposerDraft.from(intent: intent)
         composerIssues = []
         isComposerPresented = true
@@ -170,6 +174,7 @@ public final class IntentsViewModel: ObservableObject {
     public func dismissComposer() {
         isComposerPresented = false
         composerIssues = []
+        isOfferingAssetLocked = false
         editingIntentID = nil
     }
 
@@ -319,6 +324,7 @@ public final class IntentsViewModel: ObservableObject {
 
             isComposerPresented = false
             composerIssues = []
+            isOfferingAssetLocked = false
             return true
         } catch let error as MarketplaceClientError {
             intentsByID.removeValue(forKey: intentID)
@@ -370,6 +376,7 @@ public final class IntentsViewModel: ObservableObject {
 
             isComposerPresented = false
             composerIssues = []
+            isOfferingAssetLocked = false
             editingIntentID = nil
             return true
         } catch let error as MarketplaceClientError {

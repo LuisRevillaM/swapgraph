@@ -55,8 +55,8 @@ public final class ActiveViewModel: ObservableObject {
             snapshot = nil
             staleDataState = nil
             fallbackState = .empty(
-                title: "No active swap selected",
-                message: "Open an active cycle to track settlement progress."
+                title: "No swaps in progress",
+                message: "Accept a match from your Matches tab to start a trade."
             )
             return
         }

@@ -25,8 +25,8 @@ public struct InboxView: View {
                         }
                         FallbackStateView(
                             state: .empty(
-                                title: "No proposals yet",
-                                message: "Keep your intents active and proposals will appear here."
+                                title: "No matches yet",
+                                message: "Your trades are being matched right now. Proposals appear here automatically."
                             )
                         )
                     }
@@ -126,7 +126,7 @@ private struct ProposalInboxRowCard: View {
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .overlay(
             RoundedRectangle(cornerRadius: 14)
-                .stroke(Color(red: 0.91, green: 0.90, blue: 0.87), lineWidth: 1)
+                .stroke(Color.marketplaceBorder, lineWidth: 1)
         )
         .accessibilityElement(children: .combine)
     }
@@ -137,14 +137,14 @@ private struct ProposalInboxRowCard: View {
 
         switch row.urgencyBand {
         case .actNow:
-            fill = Color(red: 0.98, green: 0.92, blue: 0.91)
-            ink = Color(red: 0.63, green: 0.28, blue: 0.25)
+            fill = Color.marketplaceDangerLight
+            ink = Color.marketplaceDanger
         case .highConfidence:
-            fill = Color(red: 0.89, green: 0.95, blue: 0.92)
-            ink = Color(red: 0.08, green: 0.40, blue: 0.24)
+            fill = Color.marketplacePrimaryLight
+            ink = Color.marketplacePrimary
         case .standard:
-            fill = Color(red: 0.94, green: 0.94, blue: 0.92)
-            ink = Color(red: 0.28, green: 0.28, blue: 0.28)
+            fill = Color.marketplaceNeutral
+            ink = Color.marketplaceNeutralMid
         }
 
         return Text(row.statusCue)
@@ -166,7 +166,7 @@ private struct ProposalInboxRowCard: View {
         }
         .padding(.horizontal, 6)
         .padding(.vertical, 4)
-        .background(Color(red: 0.94, green: 0.94, blue: 0.92))
+        .background(Color.marketplaceNeutral)
         .clipShape(Capsule())
     }
 }

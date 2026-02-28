@@ -11,11 +11,11 @@ public enum MarketplaceTab: String, CaseIterable, Identifiable, Sendable {
 
     public var title: String {
         switch self {
-        case .items: return "Items"
-        case .intents: return "Intents"
-        case .inbox: return "Inbox"
-        case .active: return "Active"
-        case .receipts: return "Receipts"
+        case .items: return "My Items"
+        case .intents: return "Trades"
+        case .inbox: return "Matches"
+        case .active: return "In Progress"
+        case .receipts: return "History"
         }
     }
 
