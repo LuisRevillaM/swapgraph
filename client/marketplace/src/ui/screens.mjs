@@ -89,9 +89,9 @@ function renderItemsCards(state) {
 
   if (itemModel.cards.length === 0) {
     return shellCard(
-      'No tradable cards yet',
-      'Post your first intent to populate inventory demand cards and start continuous matching.',
-      '<button type="button" class="inline-action" data-action="composer.open">Post first intent</button>'
+      'No tradable items yet',
+      'Your inventory appears here once items are loaded. Tap "Trade this" on any item to start finding matches.',
+      ''
     );
   }
 
@@ -135,6 +135,14 @@ function renderPilotLocker(state) {
               <p class="u-text-sm u-weight-600">${escapeHtml(item.name)}</p>
               <p class="u-text-sm u-ink-3">${escapeHtml(item.blurb)}</p>
             </figcaption>
+            <button
+              type="button"
+              class="btn-primary-inline u-text-sm"
+              data-action="composer.openWithAsset"
+              data-asset-id="${escapeHtml(item.assetId)}"
+            >
+              Trade this
+            </button>
           </figure>
         `).join('')}
       </div>
@@ -172,10 +180,6 @@ function renderPilotSquadFeed(state) {
 function renderItems(state) {
   const projection = state?.caches?.inventoryAwakening?.value ?? null;
   const summary = projection?.swappabilitySummary ?? null;
-  const notificationPrefs = state?.ui?.notificationPrefs?.values ?? null;
-  const channelCount = Number(notificationPrefs?.channels?.proposal === true)
-    + Number(notificationPrefs?.channels?.active === true)
-    + Number(notificationPrefs?.channels?.receipt === true);
 
   const summaryLine = summary
     ? `<p class="u-text-base u-ink-2">Active intents <span class="u-text-data">${escapeHtml(String(summary.activeIntents))}</span> · Cycle opportunities <span class="u-text-data">${escapeHtml(String(summary.cycleOpportunities))}</span> · Avg confidence <span class="u-text-data">${escapeHtml(String(summary.averageConfidenceBps))}</span> bps</p>`
@@ -189,17 +193,6 @@ function renderItems(state) {
       ${renderDemandBanner(projection)}
       ${renderPilotLocker(state)}
       ${renderPilotSquadFeed(state)}
-      <article class="card">
-        <div class="proposal-section-head">
-          <h3 class="u-text-md u-weight-600">Notification controls</h3>
-          <span class="u-text-sm u-ink-3">${escapeHtml(String(channelCount))} channels on</span>
-        </div>
-        <p class="u-text-base u-ink-2">Quiet hours: <span class="u-text-data">${escapeHtml(quietHoursLabel(notificationPrefs))}</span></p>
-        <p class="u-text-base u-ink-2">Proposal, Active, and Receipt alerts can be tuned without affecting matching itself.</p>
-        <div class="card-foot">
-          <button type="button" class="inline-action" data-action="notifications.openPrefs">Adjust alerts</button>
-        </div>
-      </article>
       ${renderItemsSort(state?.ui?.itemsSort)}
       ${renderItemsCards(state)}
     </section>
@@ -255,7 +248,7 @@ function renderComposer(state) {
         <form data-form="intent-composer" class="composer-form">
           <input type="hidden" name="mode" value="${escapeHtml(mode)}" />
           <div class="field">
-            <label class="u-text-sm u-weight-600" for="composer-offering-asset">Offering asset id</label>
+            <label class="u-text-sm u-weight-600" for="composer-offering-asset">Giving away</label>
             <input
               id="composer-offering-asset"
               class="field-input"
@@ -264,27 +257,13 @@ function renderComposer(state) {
               value="${escapeHtml(String(draft.offeringAssetId ?? ''))}"
               placeholder="e.g. ak47_vulcan_mw_1"
               autocomplete="off"
+              ${draft.offeringAssetId ? 'readonly' : ''}
             />
             ${renderComposerValidation(errors, 'offeringAssetId')}
           </div>
 
           <div class="field">
-            <label class="u-text-sm u-weight-600" for="composer-offer-value">Offer value (USD)</label>
-            <input
-              id="composer-offer-value"
-              class="field-input"
-              type="number"
-              min="1"
-              step="1"
-              name="offer_value_usd"
-              value="${escapeHtml(String(draft.offerValueUsd ?? 120))}"
-              autocomplete="off"
-            />
-            ${renderComposerValidation(errors, 'offerValueUsd')}
-          </div>
-
-          <div class="field">
-            <label class="u-text-sm u-weight-600" for="composer-want-category">Want target</label>
+            <label class="u-text-sm u-weight-600" for="composer-want-category">Looking for</label>
             <input
               id="composer-want-category"
               class="field-input"
@@ -297,64 +276,83 @@ function renderComposer(state) {
             ${renderComposerValidation(errors, 'wantCategory')}
           </div>
 
-          <div class="field">
-            <p class="u-text-sm u-weight-600">Acceptable wear</p>
-            <div class="choice-row">
-              ${composerWearOptions().map(wear => `
-                <label class="choice-chip">
-                  <input
-                    type="checkbox"
-                    name="acceptable_wear"
-                    value="${wear}"
-                    ${selectedWear.has(wear) ? 'checked' : ''}
-                  />
-                  <span>${wear}</span>
-                </label>
-              `).join('')}
-            </div>
-            ${renderComposerValidation(errors, 'acceptableWear')}
-          </div>
+          <details class="composer-advanced">
+            <summary class="u-text-sm u-weight-600 u-ink-2">Advanced options</summary>
 
-          <div class="field">
-            <p class="u-text-sm u-weight-600">Value tolerance</p>
-            <div class="choice-row">
-              ${composerValueToleranceOptions().map(option => `
-                <label class="choice-chip">
-                  <input
-                    type="radio"
-                    name="value_tolerance_usd"
-                    value="${option}"
-                    ${selectedTolerance === option ? 'checked' : ''}
-                  />
-                  <span>± $${option}</span>
-                </label>
-              `).join('')}
+            <div class="field">
+              <label class="u-text-sm u-weight-600" for="composer-offer-value">Offer value (USD)</label>
+              <input
+                id="composer-offer-value"
+                class="field-input"
+                type="number"
+                min="1"
+                step="1"
+                name="offer_value_usd"
+                value="${escapeHtml(String(draft.offerValueUsd ?? 120))}"
+                autocomplete="off"
+              />
+              ${renderComposerValidation(errors, 'offerValueUsd')}
             </div>
-            ${renderComposerValidation(errors, 'valueToleranceUsd')}
-          </div>
 
-          <div class="field">
-            <p class="u-text-sm u-weight-600">Max cycle length</p>
-            <div class="choice-row">
-              ${composerMaxCycleLengthOptions().map(option => `
-                <label class="choice-chip">
-                  <input
-                    type="radio"
-                    name="max_cycle_length"
-                    value="${option}"
-                    ${selectedCycleLength === option ? 'checked' : ''}
-                  />
-                  <span>${option}-way</span>
-                </label>
-              `).join('')}
+            <div class="field">
+              <p class="u-text-sm u-weight-600">Acceptable wear</p>
+              <div class="choice-row">
+                ${composerWearOptions().map(wear => `
+                  <label class="choice-chip">
+                    <input
+                      type="checkbox"
+                      name="acceptable_wear"
+                      value="${wear}"
+                      ${selectedWear.has(wear) ? 'checked' : ''}
+                    />
+                    <span>${wear}</span>
+                  </label>
+                `).join('')}
+              </div>
+              ${renderComposerValidation(errors, 'acceptableWear')}
             </div>
-            ${renderComposerValidation(errors, 'maxCycleLength')}
-          </div>
+
+            <div class="field">
+              <p class="u-text-sm u-weight-600">Value tolerance</p>
+              <div class="choice-row">
+                ${composerValueToleranceOptions().map(option => `
+                  <label class="choice-chip">
+                    <input
+                      type="radio"
+                      name="value_tolerance_usd"
+                      value="${option}"
+                      ${selectedTolerance === option ? 'checked' : ''}
+                    />
+                    <span>± $${option}</span>
+                  </label>
+                `).join('')}
+              </div>
+              ${renderComposerValidation(errors, 'valueToleranceUsd')}
+            </div>
+
+            <div class="field">
+              <p class="u-text-sm u-weight-600">Max cycle length</p>
+              <div class="choice-row">
+                ${composerMaxCycleLengthOptions().map(option => `
+                  <label class="choice-chip">
+                    <input
+                      type="radio"
+                      name="max_cycle_length"
+                      value="${option}"
+                      ${selectedCycleLength === option ? 'checked' : ''}
+                    />
+                    <span>${option}-way</span>
+                  </label>
+                `).join('')}
+              </div>
+              ${renderComposerValidation(errors, 'maxCycleLength')}
+            </div>
+          </details>
 
           <div class="field-actions">
             <button type="button" class="btn-inline" data-action="composer.close">Cancel</button>
             <button type="submit" class="btn-primary-inline" ${composerState.submitting ? 'disabled' : ''}>
-              ${composerState.submitting ? 'Saving…' : (mode === 'edit' ? 'Save intent' : 'Post intent')}
+              ${composerState.submitting ? 'Saving…' : (mode === 'edit' ? 'Save changes' : 'Start matching')}
             </button>
           </div>
         </form>
@@ -370,9 +368,9 @@ function renderIntents(state) {
 
   const emptyState = intents.length === 0
     ? shellCard(
-      'No standing intents',
-      'Create a structured intent and the system keeps watching continuously.',
-      '<button type="button" class="inline-action" data-action="composer.open">Post new intent</button>'
+      'No trades yet',
+      'Post your first trade to start matching. The system watches continuously for the best swaps.',
+      '<button type="button" class="inline-action" data-action="composer.open">Post your first trade</button>'
     )
     : `
       <section class="intent-list" aria-label="Standing intents">
@@ -510,9 +508,9 @@ function renderInboxList(state) {
         <p class="u-cap">Inbox</p>
         <h2 class="u-display">Proposal Inbox</h2>
         ${shellCard(
-          'No active proposals',
-          'The matcher is running continuously. New opportunities appear here as soon as they meet your constraints.',
-          '<span class="pill tone-neutral">Watching for high-confidence cycles</span>'
+          'No matches yet',
+          'Your trades are being matched right now. Proposals appear here automatically when the system finds a good swap.',
+          '<span class="pill tone-signal">Always matching</span>'
         )}
       </section>
     `;
@@ -570,6 +568,27 @@ function renderProposalDetail(state, proposalId) {
         ${decisionStatus}
       </div>
 
+      <div class="proposal-actions">
+        <button
+          type="button"
+          class="inline-action danger"
+          data-action="proposal.decline"
+          data-proposal-id="${escapeHtml(detail.proposalId)}"
+          ${pendingDecision || accepted || declined ? 'disabled' : ''}
+        >
+          ${pendingDecision && mutation?.decision === 'decline' ? 'Declining…' : 'Decline'}
+        </button>
+        <button
+          type="button"
+          class="btn-primary-inline"
+          data-action="proposal.accept"
+          data-proposal-id="${escapeHtml(detail.proposalId)}"
+          ${pendingDecision || accepted || declined ? 'disabled' : ''}
+        >
+          ${pendingDecision && mutation?.decision === 'accept' ? 'Accepting…' : 'Accept swap'}
+        </button>
+      </div>
+
       <section class="proposal-hero" aria-label="Exchange summary">
         <article class="hero-item">
           <p class="u-cap">Give</p>
@@ -613,27 +632,6 @@ function renderProposalDetail(state, proposalId) {
           `).join('')}
         </div>
       </section>
-
-      <div class="proposal-actions">
-        <button
-          type="button"
-          class="inline-action danger"
-          data-action="proposal.decline"
-          data-proposal-id="${escapeHtml(detail.proposalId)}"
-          ${pendingDecision || accepted || declined ? 'disabled' : ''}
-        >
-          ${pendingDecision && mutation?.decision === 'decline' ? 'Declining…' : 'Decline'}
-        </button>
-        <button
-          type="button"
-          class="btn-primary-inline"
-          data-action="proposal.accept"
-          data-proposal-id="${escapeHtml(detail.proposalId)}"
-          ${pendingDecision || accepted || declined ? 'disabled' : ''}
-        >
-          ${pendingDecision && mutation?.decision === 'accept' ? 'Accepting…' : 'Accept swap'}
-        </button>
-      </div>
     </section>
   `;
 }
@@ -661,9 +659,9 @@ function renderActive(state) {
         <p class="u-cap">Active</p>
         <h2 class="u-display">Settlement Timeline</h2>
         ${shellCard(
-          'No active cycle selected',
-          'Open <span class="u-text-data">#/active/cycle/{cycle_id}</span> to inspect an in-flight settlement with explicit next actions and wait reasons.',
-          '<span class="pill tone-neutral">timeline clarity checkpoint</span>'
+          'No swaps in progress',
+          'Accept a match from your Matches tab to start a trade. Active swaps and their settlement timeline appear here.',
+          '<span class="pill tone-neutral">Waiting for your first accepted match</span>'
         )}
       </section>
     `;
@@ -955,9 +953,9 @@ function renderReceiptsList(state) {
         <h2 class="u-display">Verified Records</h2>
         <p class="u-text-base u-ink-2">Completed and unwound cycles appear here with verification metadata.</p>
         ${shellCard(
-          'No receipts yet',
-          'Complete or unwind a cycle to generate signed receipt records with outcome metadata.',
-          '<span class="pill tone-neutral">Status · Type · Verification · Value delta</span>'
+          'No history yet',
+          'Your first receipt appears here after a trade completes. Every swap gets a verified record.',
+          '<span class="pill tone-neutral">Waiting for your first completed trade</span>'
         )}
       </section>
     `;

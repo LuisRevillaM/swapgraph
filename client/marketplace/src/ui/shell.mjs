@@ -3,9 +3,13 @@ import { keyboardNextTab, panelA11yId, tabA11yId } from '../features/accessibili
 import { escapeHtml } from '../utils/format.mjs';
 import { renderTabScreen } from './screens.mjs';
 
-function renderTabButtons(activeTab) {
+function renderTabButtons(activeTab, badgeCounts = {}) {
   return MARKETPLACE_TABS.map(tab => {
     const isActive = tab.id === activeTab;
+    const badge = badgeCounts[tab.id] ?? 0;
+    const badgeHtml = badge > 0
+      ? `<span class="tab-badge" aria-label="${badge} new">${badge}</span>`
+      : '';
     return `
       <button
         type="button"
@@ -15,11 +19,12 @@ function renderTabButtons(activeTab) {
         id="${tabA11yId(tab.id)}"
         aria-controls="${panelA11yId(tab.id)}"
         aria-selected="${isActive ? 'true' : 'false'}"
-        aria-label="${tab.label}"
+        aria-label="${tab.label}${badge > 0 ? `, ${badge} new` : ''}"
         aria-current="${isActive ? 'page' : 'false'}"
       >
         <span class="tab-icon" aria-hidden="true">${tab.icon}</span>
         <span class="tab-label u-text-sm">${tab.label}</span>
+        ${badgeHtml}
       </button>
     `;
   }).join('');
@@ -135,7 +140,8 @@ export function createMarketplaceShell({ root, onNavigate, onReload, onUiEvent =
       cycleId: actionTarget.getAttribute('data-cycle-id') ?? null,
       actionKey: actionTarget.getAttribute('data-action-key') ?? null,
       sort: actionTarget.getAttribute('data-sort') ?? null,
-      rank: actionTarget.getAttribute('data-rank') ?? null
+      rank: actionTarget.getAttribute('data-rank') ?? null,
+      assetId: actionTarget.getAttribute('data-asset-id') ?? null
     });
   });
 
@@ -180,7 +186,9 @@ export function createMarketplaceShell({ root, onNavigate, onReload, onUiEvent =
   return {
     render(state) {
       const activeTab = state?.route?.tab ?? 'items';
-      tabbar.innerHTML = renderTabButtons(activeTab);
+      const proposalCount = state?.caches?.proposals?.items?.length ?? 0;
+      const badgeCounts = proposalCount > 0 ? { inbox: proposalCount } : {};
+      tabbar.innerHTML = renderTabButtons(activeTab, badgeCounts);
 
       const isOnline = state?.network?.online !== false;
       if (livePill) {

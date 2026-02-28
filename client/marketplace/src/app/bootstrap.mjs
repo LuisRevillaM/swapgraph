@@ -1155,6 +1155,19 @@ export function bootstrapMarketplaceClient({ root, windowRef = window }) {
       return;
     }
 
+    if (event.type === 'composer.openWithAsset') {
+      const assetId = event.assetId ?? '';
+      if (assetId) {
+        router.navigate({ tab: 'intents', params: {} });
+        store.openComposer({
+          mode: 'create',
+          draft: defaultComposerDraft({ offeringAssetId: assetId })
+        });
+        analytics.track('marketplace.intent_composer_opened', { mode: 'create', source: 'trade_this', asset_id: assetId });
+      }
+      return;
+    }
+
     if (event.type === 'composer.open') {
       openComposer('create');
       return;

@@ -42,11 +42,10 @@ function baseState() {
   };
 }
 
-test('items screen shows notification controls summary', () => {
+test('items screen omits inline notification controls card', () => {
   const html = renderTabScreen(baseState());
-  assert.match(html, /Notification controls/);
-  assert.match(html, /quiet hours/i);
-  assert.match(html, /data-action=\"notifications.openPrefs\"/);
+  assert.doesNotMatch(html, /Notification controls/);
+  assert.doesNotMatch(html, /quiet hours/i);
 });
 
 test('notification preferences overlay renders channel and quiet-hour controls', () => {
@@ -60,4 +59,3 @@ test('notification preferences overlay renders channel and quiet-hour controls',
   assert.match(html, /quiet_start_hour/);
   assert.match(html, /data-action=\"notifications.closePrefs\"/);
 });
-

@@ -74,7 +74,7 @@ test('active screen renders fallback when no cycle is selected or cached', () =>
   const noCycle = baseState();
   noCycle.route.params = {};
   const noCycleHtml = renderTabScreen(noCycle);
-  assert.match(noCycleHtml, /No active cycle selected/);
+  assert.match(noCycleHtml, /No swaps in progress/);
 
   const noTimeline = baseState();
   noTimeline.caches.timeline = {};
