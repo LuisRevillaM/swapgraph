@@ -36,6 +36,55 @@ function normalizeStringList(value, maxItems = 5) {
   return out;
 }
 
+function titleCaseWords(value) {
+  const text = typeof value === 'string' ? value.trim() : '';
+  if (!text) return '';
+  return text
+    .replaceAll('_', ' ')
+    .split(/\s+/g)
+    .filter(Boolean)
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+function isGenericDemoTitle(value) {
+  const text = typeof value === 'string' ? value.trim().toLowerCase() : '';
+  if (!text) return true;
+  return text.startsWith('demo output for ')
+    || text.startsWith('creative output by ')
+    || text.startsWith('demo output')
+    || text.startsWith('creative output');
+}
+
+function shortPromptLabel(value) {
+  const text = typeof value === 'string' ? value.trim() : '';
+  if (!text) return null;
+  const trimmed = text.replace(/\s+by\s+.+$/i, '').trim();
+  if (!trimmed) return null;
+  const words = trimmed.split(/\s+/g).filter(Boolean);
+  const head = words.slice(0, 6).join(' ');
+  return words.length > 6 ? `${head}…` : head;
+}
+
+function normalizePostTitle({
+  rawTitle,
+  actorId,
+  styleTags = [],
+  promptSpec,
+  deliverableType,
+  intentId
+}) {
+  if (rawTitle && !isGenericDemoTitle(rawTitle)) return rawTitle;
+  const styleTag = Array.isArray(styleTags) && styleTags.length > 0 ? styleTags[0] : null;
+  const deliverable = deliverableType ? titleCaseWords(String(deliverableType)) : 'Creative Piece';
+  const promptLabel = shortPromptLabel(promptSpec);
+  if (styleTag) return `${titleCaseWords(styleTag)} ${deliverable}`;
+  if (promptLabel) return promptLabel;
+  if (actorId) return `${titleCaseWords(actorId)} ${deliverable}`;
+  if (intentId) return `Creative Intent ${intentId}`;
+  return 'Creative Post';
+}
+
 function normalizeCapabilityToken(value) {
   if (!value || typeof value !== 'object') return null;
   const tokenId = firstNonEmptyString(value.token_id, value.id);
@@ -443,6 +492,17 @@ export function buildDemoLiveBoardSnapshot({
       const metadata = offer?.metadata ?? {};
       const proof = offer?.proof ?? {};
       const deliverableType = firstNonEmptyString(metadata?.deliverable_type, metadata?.output_type, metadata?.type);
+      const styleTags = normalizeStringList(metadata?.style_tags, 8);
+      const promptSpec = firstNonEmptyString(
+        metadata?.prompt_spec,
+        metadata?.description,
+        metadata?.brief
+      );
+      const rawTitle = firstNonEmptyString(
+        metadata?.title,
+        metadata?.name,
+        actor?.id ? `Demo output for ${actor.id}` : null
+      );
       return {
         intent_id: intent?.id ?? null,
         actor_id: actor?.id ?? null,
@@ -450,22 +510,21 @@ export function buildDemoLiveBoardSnapshot({
         status: firstNonEmptyString(intent?.status) ?? 'unknown',
         posted_at: asIso(proof?.verified_at) ?? asIso(intent?.updated_at) ?? null,
         asset_id: firstNonEmptyString(offer?.asset_id),
-        title: firstNonEmptyString(
-          metadata?.title,
-          metadata?.name,
-          actor?.id ? `Demo output for ${actor.id}` : null
-        ),
-        prompt_spec: firstNonEmptyString(
-          metadata?.prompt_spec,
-          metadata?.description,
-          metadata?.brief
-        ),
+        title: normalizePostTitle({
+          rawTitle,
+          actorId: actor?.id ?? null,
+          styleTags,
+          promptSpec,
+          deliverableType,
+          intentId: intent?.id ?? null
+        }),
+        prompt_spec: promptSpec,
         agent_message: firstNonEmptyString(
           metadata?.intent_message,
           metadata?.agent_note,
           metadata?.note
         ),
-        style_tags: normalizeStringList(metadata?.style_tags, 8),
+        style_tags: styleTags,
         deliverable_type: deliverableType ?? null,
         value_usd: asNumber(metadata?.value_usd) ?? asNumber(metadata?.list_price_usd) ?? asNumber(intent?.value_band?.max_usd),
         delivery_targets: normalizeStringList(metadata?.delivery_target_options, 6),
