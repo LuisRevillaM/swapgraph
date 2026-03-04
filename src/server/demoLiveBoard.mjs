@@ -2089,6 +2089,21 @@ export function renderDemoLiveBoardHtml() {
 
     <section class="panel">
       <div class="panel-head">
+        <h2 id="inspector-title">Inspector</h2>
+        <button id="inspector-close" class="trigger-btn" type="button">Clear</button>
+      </div>
+      <div class="inspector-body" id="inspector-body">
+        <div class="live-empty">Click any post, edge, or match from either feed to inspect details.</div>
+      </div>
+      <div class="inspector-cycle-graph-wrap" id="inspector-cycle-graph-wrap" hidden>
+        <div class="cycle-graph-shell">
+          <svg id="cycle-graph" class="cycle-graph" viewBox="0 0 520 240" role="img" aria-label="Selected match cycle graph"></svg>
+          <div class="cycle-sub" id="cycle-graph-meta">Select a match to render graph.</div>
+        </div>
+      </div>
+    </section>
+    <section class="panel">
+      <div class="panel-head">
         <h2>Live Feeds</h2>
         <div class="controls-right">
           <label class="toggle-pill">Left
@@ -2116,21 +2131,6 @@ export function renderDemoLiveBoardHtml() {
           <div class="live-feed-title" id="feed-right-title">Edges being placed</div>
           <div class="live-list" id="feed-right-list"></div>
         </section>
-      </div>
-    </section>
-    <section class="panel">
-      <div class="panel-head">
-        <h2 id="inspector-title">Inspector</h2>
-        <button id="inspector-close" class="trigger-btn" type="button">Clear</button>
-      </div>
-      <div class="inspector-body" id="inspector-body">
-        <div class="live-empty">Click any post, edge, or match from either feed to inspect details.</div>
-      </div>
-      <div class="inspector-cycle-graph-wrap" id="inspector-cycle-graph-wrap" hidden>
-        <div class="cycle-graph-shell">
-          <svg id="cycle-graph" class="cycle-graph" viewBox="0 0 520 240" role="img" aria-label="Selected match cycle graph"></svg>
-          <div class="cycle-sub" id="cycle-graph-meta">Select a match to render graph.</div>
-        </div>
       </div>
     </section>
   </main>
