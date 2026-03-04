@@ -1462,13 +1462,56 @@ export function renderDemoLiveBoardHtml() {
     .inspector-value strong {
       color: var(--ink);
     }
-    .inspector-media {
-      width: 100%;
-      max-width: 420px;
-      border-radius: var(--radius-sm);
+    .inspector-media-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: var(--sp-2);
+    }
+    .inspector-media-card {
+      margin: 0;
+      display: grid;
+      gap: 6px;
+    }
+    .inspector-media-btn {
       border: 1px solid var(--line-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0;
+      margin: 0;
       background: var(--line-subtle);
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      position: relative;
+      cursor: zoom-in;
+      display: block;
+    }
+    .inspector-media-btn img {
+      width: 100%;
+      height: 100%;
+      display: block;
       object-fit: cover;
+      background: var(--line-subtle);
+    }
+    .inspector-media-btn.broken {
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #eceff3, #e4e9ee);
+    }
+    .inspector-media-btn.broken::before {
+      content: 'Image unavailable';
+      font-family: var(--mono);
+      font-size: var(--text-2xs);
+      color: var(--muted);
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+    .inspector-media-label {
+      font-family: var(--mono);
+      font-size: var(--text-2xs);
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin: 0;
     }
     .inspector-match-grid {
       display: grid;
@@ -2870,16 +2913,29 @@ export function renderDemoLiveBoardHtml() {
       selectedCycleId = null;
     }
 
+    function renderInspectorMediaCard({ imageUrl, title, label }) {
+      const src = typeof imageUrl === 'string' ? imageUrl.trim() : '';
+      if (!src) return '';
+      const imageTitle = title || label || 'preview';
+      return '<figure class="inspector-media-card">'
+        + '<button class="inspector-media-btn" type="button" data-expand-image="1" data-image-url="' + esc(src) + '" data-image-title="' + esc(imageTitle) + '">'
+        + '<img src="' + esc(src) + '" alt="' + esc(imageTitle) + '" loading="eager" decoding="async" onerror="this.style.display=\\'none\\'; this.parentElement.classList.add(\\'broken\\');">'
+        + '</button>'
+        + '<figcaption class="inspector-media-label">' + esc(label || 'Preview') + '</figcaption>'
+        + '</figure>';
+    }
+
     function renderPostInspector(post) {
       if (!inspectorBody) return;
       const wants = Array.isArray(post?.wanted_asset_ids)
         ? post.wanted_asset_ids.map(value => String(value || '').trim()).filter(Boolean)
         : [];
-      const media = post?.image_url
-        ? '<button class="post-media-btn" type="button" data-expand-image="1" data-image-url="' + esc(post.image_url) + '" data-image-title="' + esc(post?.title ?? 'post preview') + '">'
-          + '<img class="inspector-media" src="' + esc(post.image_url) + '" alt="' + esc(post?.title ?? 'post preview') + '" loading="lazy">'
-          + '</button>'
-        : '';
+      const mediaCard = renderInspectorMediaCard({
+        imageUrl: post?.image_url ?? null,
+        title: post?.title ?? 'post preview',
+        label: 'Selected Post'
+      });
+      const media = mediaCard ? ('<div class="inspector-media-grid">' + mediaCard + '</div>') : '';
       const rows = [
         ['Actor', esc(post?.actor_id ?? 'unknown')],
         ['Title', '<strong>' + esc(post?.title ?? 'Untitled') + '</strong>'],
@@ -2900,16 +2956,16 @@ export function renderDemoLiveBoardHtml() {
       if (!inspectorBody) return;
       const source = entry?.source_post ?? {};
       const target = entry?.target_post ?? null;
-      const sourceImage = source?.image_url
-        ? '<button class="post-media-btn" type="button" data-expand-image="1" data-image-url="' + esc(source.image_url) + '" data-image-title="' + esc(source?.title ?? 'source post') + '">'
-          + '<img class="inspector-media" src="' + esc(source.image_url) + '" alt="' + esc(source?.title ?? 'source post') + '" loading="lazy">'
-          + '</button>'
-        : '';
-      const targetImage = target?.image_url
-        ? '<button class="post-media-btn" type="button" data-expand-image="1" data-image-url="' + esc(target.image_url) + '" data-image-title="' + esc(target?.title ?? 'target post') + '">'
-          + '<img class="inspector-media" src="' + esc(target.image_url) + '" alt="' + esc(target?.title ?? 'target post') + '" loading="lazy">'
-          + '</button>'
-        : '';
+      const sourceImage = renderInspectorMediaCard({
+        imageUrl: source?.image_url ?? null,
+        title: source?.title ?? 'source post',
+        label: 'From'
+      });
+      const targetImage = renderInspectorMediaCard({
+        imageUrl: target?.image_url ?? null,
+        title: target?.title ?? 'target post',
+        label: 'Target'
+      });
       const sourceTitle = source?.title ?? source?.asset_id ?? 'post';
       const wantedTitle = target?.title ?? entry?.wanted_asset_id ?? 'asset';
       const rows = [
@@ -2924,8 +2980,10 @@ export function renderDemoLiveBoardHtml() {
         + '<div class="inspector-value"><code>offer_asset=' + esc(source?.asset_id ?? 'n/a') + '</code><br>'
         + '<code>want_asset=' + esc(entry?.wanted_asset_id ?? 'n/a') + '</code>'
         + '</div></details>';
-      setInspectorBodyMarkup(sourceImage
-        + (targetImage ? targetImage : '')
+      const media = sourceImage || targetImage
+        ? ('<div class="inspector-media-grid">' + sourceImage + targetImage + '</div>')
+        : '';
+      setInspectorBodyMarkup(media
         + rows.map(([key, value]) => (
           '<div class="inspector-row"><div class="inspector-key">' + esc(key) + '</div><div class="inspector-value">' + value + '</div></div>'
         )).join('')
