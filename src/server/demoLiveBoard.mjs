@@ -36,6 +36,42 @@ function normalizeStringList(value, maxItems = 5) {
   return out;
 }
 
+function imageUrlFromAsset(asset, { forceFallback = false } = {}) {
+  const metadata = asset?.metadata ?? {};
+  const explicit = firstNonEmptyString(
+    metadata?.preview_image_url,
+    metadata?.image_url,
+    metadata?.artifact_url,
+    metadata?.thumbnail_url
+  );
+  if (!forceFallback && explicit) return explicit;
+  const assetId = firstNonEmptyString(asset?.asset_id);
+  if (!assetId) return null;
+  const deliverableType = firstNonEmptyString(metadata?.deliverable_type, metadata?.output_type, metadata?.type);
+  if (metadata?.demo_kind === 'creative_labor_asset' || String(deliverableType ?? '').toLowerCase().includes('image')) {
+    return `https://picsum.photos/seed/${encodeURIComponent(assetId)}/1024/768`;
+  }
+  return null;
+}
+
+function summarizeAssetRow(asset, { fallbackTitle = null } = {}) {
+  if (!asset || typeof asset !== 'object') return null;
+  const metadata = asset?.metadata ?? {};
+  const deliverableType = firstNonEmptyString(
+    metadata?.deliverable_type,
+    metadata?.output_type,
+    metadata?.type
+  );
+  return {
+    asset_id: firstNonEmptyString(asset?.asset_id),
+    title: firstNonEmptyString(metadata?.title, metadata?.name, fallbackTitle),
+    prompt_spec: firstNonEmptyString(metadata?.prompt_spec, metadata?.description, metadata?.brief),
+    deliverable_type: deliverableType ?? null,
+    value_usd: asNumber(metadata?.value_usd) ?? asNumber(metadata?.list_price_usd),
+    image_url: imageUrlFromAsset(asset)
+  };
+}
+
 function normalizeActor(input) {
   const type = typeof input?.type === 'string' ? input.type.trim() : '';
   const id = typeof input?.id === 'string' ? input.id.trim() : '';
@@ -313,21 +349,7 @@ export function buildDemoLiveBoardSnapshot({ store, nowIso = new Date().toISOStr
       const offer = Array.isArray(intent?.offer) && intent.offer.length > 0 ? intent.offer[0] : null;
       const metadata = offer?.metadata ?? {};
       const proof = offer?.proof ?? {};
-      const deliverableType = firstNonEmptyString(
-        metadata?.deliverable_type,
-        metadata?.output_type,
-        metadata?.type
-      );
-      const explicitImageUrl = firstNonEmptyString(
-        metadata?.preview_image_url,
-        metadata?.image_url,
-        metadata?.artifact_url,
-        metadata?.thumbnail_url
-      );
-      const fallbackImageUrl = (metadata?.demo_kind === 'creative_labor_asset' || String(deliverableType ?? '').toLowerCase().includes('image'))
-        && typeof offer?.asset_id === 'string'
-        ? `https://picsum.photos/seed/${encodeURIComponent(offer.asset_id)}/1024/768`
-        : null;
+      const deliverableType = firstNonEmptyString(metadata?.deliverable_type, metadata?.output_type, metadata?.type);
       return {
         intent_id: intent?.id ?? null,
         actor_id: actor?.id ?? null,
@@ -348,10 +370,55 @@ export function buildDemoLiveBoardSnapshot({ store, nowIso = new Date().toISOStr
         deliverable_type: deliverableType ?? null,
         value_usd: asNumber(metadata?.value_usd) ?? asNumber(metadata?.list_price_usd) ?? asNumber(intent?.value_band?.max_usd),
         delivery_targets: normalizeStringList(metadata?.delivery_target_options, 6),
-        image_url: explicitImageUrl ?? fallbackImageUrl
+        image_url: imageUrlFromAsset(offer)
       };
     }),
     'posted_at'
+  ).slice(0, limit);
+
+  const timelineByCycleId = new Map();
+  for (const timeline of timelines) {
+    const cycleId = firstNonEmptyString(timeline?.cycle_id);
+    if (!cycleId) continue;
+    timelineByCycleId.set(cycleId, timeline);
+  }
+
+  const receiptByCycleId = new Map();
+  for (const receipt of receipts) {
+    const cycleId = firstNonEmptyString(receipt?.cycle_id);
+    if (!cycleId) continue;
+    receiptByCycleId.set(cycleId, receipt);
+  }
+
+  const recentTradeCycles = sortByIsoDescending(
+    proposals.map(proposal => {
+      const cycleId = firstNonEmptyString(proposal?.id);
+      const timeline = cycleId ? timelineByCycleId.get(cycleId) ?? null : null;
+      const receipt = cycleId ? receiptByCycleId.get(cycleId) ?? null : null;
+      const participants = Array.isArray(proposal?.participants) ? proposal.participants : [];
+      return {
+        cycle_id: cycleId,
+        state: firstNonEmptyString(receipt?.final_state, timeline?.state) ?? 'proposed',
+        updated_at: asIso(receipt?.created_at) ?? asIso(timeline?.updated_at) ?? asIso(proposal?.expires_at),
+        receipt_id: firstNonEmptyString(receipt?.id),
+        participant_count: participants.length,
+        participants: participants.map(participant => {
+          const actor = normalizeActor(participant?.actor);
+          const giveAsset = Array.isArray(participant?.give) && participant.give.length > 0 ? participant.give[0] : null;
+          const getAsset = Array.isArray(participant?.get) && participant.get.length > 0 ? participant.get[0] : null;
+          return {
+            actor_id: actor?.id ?? null,
+            actor_type: actor?.type ?? null,
+            intent_id: firstNonEmptyString(participant?.intent_id),
+            give_count: Array.isArray(participant?.give) ? participant.give.length : 0,
+            get_count: Array.isArray(participant?.get) ? participant.get.length : 0,
+            gives: summarizeAssetRow(giveAsset, { fallbackTitle: actor?.id ? `From ${actor.id}` : 'Give leg' }),
+            gets: summarizeAssetRow(getAsset, { fallbackTitle: actor?.id ? `For ${actor.id}` : 'Get leg' })
+          };
+        })
+      };
+    }),
+    'updated_at'
   ).slice(0, limit);
 
   const actorMap = new Map();
@@ -427,6 +494,7 @@ export function buildDemoLiveBoardSnapshot({ store, nowIso = new Date().toISOStr
     lanes: buildLaneRows({ actorRows, laneHints: defaultHints, nowIso }),
     actors: actorRows.slice(0, limit),
     posts: recentPosts,
+    trade_cycles: recentTradeCycles,
     cycles: recentCycles,
     receipts: recentReceipts,
     matching_runs: recentMatchingRuns,
@@ -651,6 +719,93 @@ export function renderDemoLiveBoardHtml() {
       color: #6b7280;
       font-family: var(--mono);
     }
+    .trade-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .trade-card {
+      border: 1px solid #e7ebf1;
+      border-radius: 12px;
+      background: #ffffff;
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+    }
+    .trade-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .trade-meta {
+      font-size: 0.72rem;
+      color: #6b7280;
+      font-family: var(--mono);
+    }
+    .trade-rows {
+      display: grid;
+      gap: 7px;
+    }
+    .trade-row {
+      display: grid;
+      grid-template-columns: minmax(0, 92px) minmax(0, 1fr) 24px minmax(0, 1fr);
+      gap: 7px;
+      align-items: stretch;
+    }
+    .trade-actor {
+      border: 1px solid #e5eaf1;
+      border-radius: 10px;
+      padding: 8px 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #334155;
+      background: #f9fbfe;
+      font-family: var(--mono);
+      word-break: break-word;
+    }
+    .trade-item {
+      border: 1px solid #e8ecf4;
+      border-radius: 10px;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: 76px auto;
+      background: #fff;
+    }
+    .trade-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #f5f7fb;
+    }
+    .trade-item-copy {
+      padding: 6px;
+      display: grid;
+      gap: 4px;
+      font-size: 0.68rem;
+      color: #4b5563;
+      font-family: var(--mono);
+    }
+    .trade-item-copy strong {
+      font-size: 0.72rem;
+      color: #1f2937;
+      line-height: 1.25;
+      font-family: var(--sans);
+      font-weight: 700;
+    }
+    .trade-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      color: #64748b;
+      font-weight: 700;
+      font-family: var(--mono);
+    }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -729,6 +884,9 @@ export function renderDemoLiveBoardHtml() {
       .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .grid-3 { grid-template-columns: 1fr; }
       .post-grid { grid-template-columns: 1fr; }
+      .trade-grid { grid-template-columns: 1fr; }
+      .trade-row { grid-template-columns: 1fr; }
+      .trade-arrow { transform: rotate(90deg); }
     }
   </style>
 </head>
@@ -755,6 +913,11 @@ export function renderDemoLiveBoardHtml() {
     <section class="panel">
       <h2>Creative Posts</h2>
       <div class="post-grid" id="posts-grid"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Trade Cycles</h2>
+      <div class="trade-grid" id="trade-cycles-grid"></div>
     </section>
 
     <section class="panel">
@@ -846,6 +1009,7 @@ export function renderDemoLiveBoardHtml() {
     const receiptsBody = byId('receipts-body');
     const runsBody = byId('runs-body');
     const postsGrid = byId('posts-grid');
+    const tradeCyclesGrid = byId('trade-cycles-grid');
     const feed = byId('feed');
     const meta = byId('meta');
     const pollStatus = byId('poll-status');
@@ -973,6 +1137,41 @@ export function renderDemoLiveBoardHtml() {
       }).join('');
     }
 
+    function renderTradeCycles(rows) {
+      if (!rows || rows.length === 0) {
+        tradeCyclesGrid.innerHTML = '<div class="empty">No cycles yet. Trigger a cycle to watch the trade legs.</div>';
+        return;
+      }
+      tradeCyclesGrid.innerHTML = rows.map(cycle => {
+        const state = cycle.state || 'proposed';
+        const receipt = cycle.receipt_id ? ('receipt ' + cycle.receipt_id) : 'no receipt yet';
+        const updated = cycle.updated_at ? shortAgo(cycle.updated_at) : 'n/a';
+        const participantRows = (cycle.participants || []).map(participant => {
+          const gives = participant.gives || {};
+          const gets = participant.gets || {};
+          const giveValue = Number.isFinite(gives.value_usd) ? ('$' + gives.value_usd) : 'n/a';
+          const getValue = Number.isFinite(gets.value_usd) ? ('$' + gets.value_usd) : 'n/a';
+          return '<div class="trade-row">'
+            + '<div class="trade-actor">' + esc(participant.actor_id || 'actor') + '</div>'
+            + '<div class="trade-item">'
+            + (gives.image_url ? '<img src="' + esc(gives.image_url) + '" alt="' + esc(gives.title || gives.asset_id || 'give asset') + '" loading="lazy">' : '<img alt="no give image" loading="lazy">')
+            + '<div class="trade-item-copy"><span>Gives</span><strong>' + esc(gives.title || gives.asset_id || 'asset') + '</strong><span>' + esc((gives.deliverable_type || 'asset') + ' • ' + giveValue) + '</span></div>'
+            + '</div>'
+            + '<div class="trade-arrow">→</div>'
+            + '<div class="trade-item">'
+            + (gets.image_url ? '<img src="' + esc(gets.image_url) + '" alt="' + esc(gets.title || gets.asset_id || 'get asset') + '" loading="lazy">' : '<img alt="no get image" loading="lazy">')
+            + '<div class="trade-item-copy"><span>Gets</span><strong>' + esc(gets.title || gets.asset_id || 'asset') + '</strong><span>' + esc((gets.deliverable_type || 'asset') + ' • ' + getValue) + '</span></div>'
+            + '</div>'
+            + '</div>';
+        }).join('');
+        return '<article class="trade-card">'
+          + '<div class="trade-head"><code>' + esc(cycle.cycle_id || 'cycle') + '</code><span class="badge">' + esc(state) + '</span></div>'
+          + '<div class="trade-meta">' + esc(receipt + ' • updated ' + updated) + '</div>'
+          + '<div class="trade-rows">' + participantRows + '</div>'
+          + '</article>';
+      }).join('');
+    }
+
     function renderFeed(rows) {
       if (!rows || rows.length === 0) {
         feed.innerHTML = '<div class="empty">No events yet.</div>';
@@ -1042,6 +1241,7 @@ export function renderDemoLiveBoardHtml() {
 
         renderCards(snapshot.funnel ?? {});
         renderPosts(snapshot.posts ?? []);
+        renderTradeCycles(snapshot.trade_cycles ?? []);
         renderLanes(snapshot.lanes ?? []);
         renderCycles(snapshot.cycles ?? []);
         renderReceipts(snapshot.receipts ?? []);

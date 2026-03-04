@@ -23,6 +23,8 @@ test('demo live board serves html and snapshot without actor auth', async () => 
     assert.match(htmlResponse.headers.get('content-type') ?? '', /text\/html/i);
     const html = await htmlResponse.text();
     assert.match(html, /SwapGraph Live Board/);
+    assert.match(html, /Start New Agent Cycle/);
+    assert.match(html, /Trade Cycles/);
 
     const snapshotResponse = await requestJson({
       baseUrl: runtime.baseUrl,
@@ -38,6 +40,8 @@ test('demo live board serves html and snapshot without actor auth', async () => 
     assert.ok(snapshotResponse.body.snapshot.events.length <= 5);
     assert.ok(Array.isArray(snapshotResponse.body?.snapshot?.lanes));
     assert.equal(snapshotResponse.body.snapshot.lanes.length, 2);
+    assert.ok(Array.isArray(snapshotResponse.body?.snapshot?.trade_cycles));
+    assert.ok(snapshotResponse.body.snapshot.trade_cycles.length >= 1);
   } finally {
     await runtime.close();
   }
@@ -76,6 +80,14 @@ test('demo live board can trigger a new two-agent cycle from UI endpoint', async
     assert.ok(snapshotResponse.body.snapshot.posts.some(post => typeof post.image_url === 'string' && post.image_url.length > 0));
     assert.ok(snapshotResponse.body.snapshot.posts.some(post => post.actor_id === 'workshop'));
     assert.ok(snapshotResponse.body.snapshot.posts.some(post => post.actor_id === 'architects_dream'));
+    assert.ok(Array.isArray(snapshotResponse.body?.snapshot?.trade_cycles));
+    assert.ok(snapshotResponse.body.snapshot.trade_cycles.length >= 1);
+    const cycle = snapshotResponse.body.snapshot.trade_cycles[0];
+    assert.equal(typeof cycle?.cycle_id, 'string');
+    assert.ok(Array.isArray(cycle?.participants));
+    assert.ok(cycle.participants.length >= 2);
+    assert.ok(cycle.participants.some(row => typeof row?.gives?.image_url === 'string' && row.gives.image_url.length > 0));
+    assert.ok(cycle.participants.some(row => typeof row?.gets?.image_url === 'string' && row.gets.image_url.length > 0));
   } finally {
     await runtime.close();
   }
