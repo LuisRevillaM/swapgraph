@@ -1803,28 +1803,52 @@ export function renderDemoLiveBoardHtml() {
         };
       });
       const pointByActorId = new Map(points.map(point => [point.actor_id, point]));
-
       const edges = [];
+      const edgeSet = new Set();
+      const addEdge = (from, to) => {
+        const a = String(from ?? '').trim();
+        const b = String(to ?? '').trim();
+        if (!a || !b || a === b) return;
+        const key = a + '>' + b;
+        if (edgeSet.has(key)) return;
+        edgeSet.add(key);
+        edges.push({ from: a, to: b });
+      };
+
       for (const participant of participants) {
-        const from = String(participant?.actor_id ?? '').trim();
-        if (!from) continue;
+        const actorId = String(participant?.actor_id ?? '').trim();
+        if (!actorId) continue;
         const givesAssetId = participant?.gives?.asset_id ? String(participant.gives.asset_id) : null;
-        let to = null;
+        const getsAssetId = participant?.gets?.asset_id ? String(participant.gets.asset_id) : null;
+
         if (givesAssetId) {
-          for (const candidate of participants) {
+          const consumer = participants.find(candidate => {
+            const candidateActorId = String(candidate?.actor_id ?? '').trim();
             const candidateGetsAssetId = candidate?.gets?.asset_id ? String(candidate.gets.asset_id) : null;
-            if (candidateGetsAssetId && candidateGetsAssetId === givesAssetId) {
-              to = String(candidate?.actor_id ?? '').trim();
-              break;
-            }
-          }
+            return candidateActorId !== actorId && candidateGetsAssetId && candidateGetsAssetId === givesAssetId;
+          });
+          if (consumer) addEdge(actorId, consumer?.actor_id);
         }
-        if (!to) {
-          const fromIdx = actorIds.indexOf(from);
-          to = fromIdx >= 0 ? actorIds[(fromIdx + 1) % actorIds.length] : null;
+
+        if (getsAssetId) {
+          const provider = participants.find(candidate => {
+            const candidateActorId = String(candidate?.actor_id ?? '').trim();
+            const candidateGivesAssetId = candidate?.gives?.asset_id ? String(candidate.gives.asset_id) : null;
+            return candidateActorId !== actorId && candidateGivesAssetId && candidateGivesAssetId === getsAssetId;
+          });
+          if (provider) addEdge(provider?.actor_id, actorId);
         }
-        if (!to || from === to) continue;
-        edges.push({ from, to });
+      }
+
+      if (edges.length === 0) {
+        for (let idx = 0; idx < actorIds.length; idx += 1) {
+          const from = actorIds[idx];
+          const to = actorIds[(idx + 1) % actorIds.length];
+          addEdge(from, to);
+        }
+      }
+      if (actorIds.length === 2 && edges.length === 1) {
+        addEdge(edges[0].to, edges[0].from);
       }
 
       const markerDefs = '<defs>'
@@ -1836,9 +1860,31 @@ export function renderDemoLiveBoardHtml() {
         const fromPoint = pointByActorId.get(edge.from);
         const toPoint = pointByActorId.get(edge.to);
         if (!fromPoint || !toPoint) return '';
-        return '<path class="cycle-edge" d="M ' + fromPoint.x.toFixed(2) + ' ' + fromPoint.y.toFixed(2)
-          + ' L ' + toPoint.x.toFixed(2) + ' ' + toPoint.y.toFixed(2)
-          + '" marker-end="url(#cycle-arrowhead)" style="animation-delay:' + (idx * 0.18).toFixed(2) + 's"></path>';
+        const reciprocalKey = edge.to + '>' + edge.from;
+        const hasReciprocal = edgeSet.has(reciprocalKey);
+        const dx = toPoint.x - fromPoint.x;
+        const dy = toPoint.y - fromPoint.y;
+        const dist = Math.max(1, Math.hypot(dx, dy));
+        const ux = dx / dist;
+        const uy = dy / dist;
+        const trim = 26;
+        const sx = fromPoint.x + (ux * trim);
+        const sy = fromPoint.y + (uy * trim);
+        const ex = toPoint.x - (ux * trim);
+        const ey = toPoint.y - (uy * trim);
+        let d = 'M ' + sx.toFixed(2) + ' ' + sy.toFixed(2) + ' L ' + ex.toFixed(2) + ' ' + ey.toFixed(2);
+        if (hasReciprocal && actorIds.length === 2) {
+          const nx = -uy;
+          const ny = ux;
+          const sign = String(edge.from).localeCompare(String(edge.to)) <= 0 ? 1 : -1;
+          const curvature = 34 * sign;
+          const mx = (sx + ex) / 2;
+          const my = (sy + ey) / 2;
+          const cxCtrl = mx + (nx * curvature);
+          const cyCtrl = my + (ny * curvature);
+          d = 'M ' + sx.toFixed(2) + ' ' + sy.toFixed(2) + ' Q ' + cxCtrl.toFixed(2) + ' ' + cyCtrl.toFixed(2) + ' ' + ex.toFixed(2) + ' ' + ey.toFixed(2);
+        }
+        return '<path class="cycle-edge" d="' + d + '" marker-end="url(#cycle-arrowhead)" style="animation-delay:' + (idx * 0.18).toFixed(2) + 's"></path>';
       }).join('');
       const nodeSvg = points.map(point => {
         return '<g>'
