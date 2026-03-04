@@ -1314,11 +1314,9 @@ export function renderDemoLiveBoardHtml() {
       display: grid;
       gap: var(--sp-2);
       align-content: start;
-      overflow-y: auto;
-      max-height: 560px;
-      padding-right: var(--sp-1);
-      scrollbar-width: thin;
-      scrollbar-color: var(--line) transparent;
+      overflow-y: visible;
+      max-height: none;
+      padding-right: 0;
     }
     .live-list::-webkit-scrollbar { width: 5px; }
     .live-list::-webkit-scrollbar-track { background: transparent; }
@@ -1438,7 +1436,7 @@ export function renderDemoLiveBoardHtml() {
       display: grid;
       grid-template-columns: 100px minmax(0, 1fr);
       gap: var(--sp-3);
-      align-items: baseline;
+      align-items: start;
     }
     .inspector-row code {
       font-family: var(--mono);
@@ -1479,11 +1477,15 @@ export function renderDemoLiveBoardHtml() {
       margin: 0;
       background: var(--line-subtle);
       width: 100%;
-      aspect-ratio: 16 / 9;
+      min-height: 150px;
+      height: clamp(160px, 22vh, 260px);
       overflow: hidden;
       position: relative;
       cursor: zoom-in;
       display: block;
+    }
+    .inspector-media-grid.single .inspector-media-btn {
+      height: clamp(200px, 28vh, 320px);
     }
     .inspector-media-btn img {
       width: 100%;
@@ -1572,12 +1574,14 @@ export function renderDemoLiveBoardHtml() {
       min-height: 340px;
     }
     .feeds-panel .live-list {
-      max-height: calc(var(--stage-panel-h) - 210px);
+      max-height: none;
+      overflow-y: visible;
     }
     .viz-panel {
       display: grid;
       grid-template-rows: auto auto 1fr;
       gap: var(--sp-2);
+      overflow: visible;
     }
     .viz-panel .panel-head {
       margin-bottom: 0;
@@ -1586,16 +1590,12 @@ export function renderDemoLiveBoardHtml() {
       margin-top: 0;
     }
     .viz-panel .inspector-body {
-      max-height: calc(var(--stage-panel-h) - 330px);
+      max-height: none;
       min-height: 0;
-      overflow: auto;
-      padding-right: var(--sp-1);
-      scrollbar-width: thin;
-      scrollbar-color: var(--line) transparent;
+      overflow: visible;
+      padding-right: 0;
+      align-content: start;
     }
-    .viz-panel .inspector-body::-webkit-scrollbar { width: 5px; }
-    .viz-panel .inspector-body::-webkit-scrollbar-track { background: transparent; }
-    .viz-panel .inspector-body::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
     .viz-panel .cycle-graph-shell {
       min-height: 290px;
       padding: var(--sp-3);
@@ -2219,8 +2219,8 @@ export function renderDemoLiveBoardHtml() {
       }
       .primary-stage { grid-template-columns: 1fr; }
       .live-feeds-grid { grid-template-columns: 1fr; }
-      .feeds-panel .live-list { max-height: 520px; }
-      .viz-panel .inspector-body { max-height: none; }
+      .feeds-panel .live-list { max-height: none; }
+      .viz-panel .inspector-body { max-height: none; overflow: visible; }
       .essentials { grid-template-columns: 1fr; }
       .post-grid { grid-template-columns: 1fr; }
       .trade-grid { grid-template-columns: 1fr; }
