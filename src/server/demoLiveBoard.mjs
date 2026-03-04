@@ -1117,11 +1117,23 @@ export function renderDemoLiveBoardHtml() {
     }
     .trigger-btn:disabled::after { opacity: 0; }
     .trigger-status {
-      margin: var(--sp-1) 0 0;
+      margin: 0;
       color: var(--muted);
       font-size: var(--text-xs);
       font-family: var(--mono);
-      line-height: 1.5;
+      line-height: 1.4;
+    }
+    .status-strip {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--sp-2);
+      margin: var(--sp-2) 0 0;
+    }
+    .status-strip .trigger-status {
+      border: 1px solid var(--line-subtle);
+      border-radius: var(--radius-sm);
+      background: var(--surface-elevated);
+      padding: 6px 9px;
     }
     .state-guide {
       margin-top: var(--sp-3);
@@ -1445,6 +1457,35 @@ export function renderDemoLiveBoardHtml() {
     }
     .inspector-cycle-graph-wrap {
       margin-top: var(--sp-3);
+    }
+    .primary-stage {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.95fr);
+      gap: var(--sp-3);
+      align-items: start;
+    }
+    .feeds-panel .live-feed-column {
+      min-height: 300px;
+    }
+    .feeds-panel .live-list {
+      max-height: 420px;
+    }
+    .viz-panel .inspector-body {
+      max-height: 280px;
+      overflow: auto;
+      padding-right: 4px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--line) transparent;
+    }
+    .viz-panel .inspector-body::-webkit-scrollbar { width: 5px; }
+    .viz-panel .inspector-body::-webkit-scrollbar-track { background: transparent; }
+    .viz-panel .inspector-body::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+    .viz-panel .cycle-graph-shell {
+      min-height: 220px;
+      padding: var(--sp-2);
+    }
+    .viz-panel .cycle-graph {
+      height: 210px;
     }
 
     /* ─── Layout ─── */
@@ -2019,6 +2060,8 @@ export function renderDemoLiveBoardHtml() {
     /* ─── Responsive ─── */
     @media (max-width: 980px) {
       .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .status-strip { grid-template-columns: 1fr; }
+      .primary-stage { grid-template-columns: 1fr; }
       .live-feeds-grid { grid-template-columns: 1fr; }
       .essentials { grid-template-columns: 1fr; }
       .post-grid { grid-template-columns: 1fr; }
@@ -2051,10 +2094,12 @@ export function renderDemoLiveBoardHtml() {
           <button id="cadence-toggle" class="trigger-btn" type="button">Start Cadence</button>
         </div>
       </div>
-      <p class="trigger-status" id="trigger-status">Use Run Wave for one burst, or cadence for continuous posting.</p>
-      <p class="trigger-status" id="cadence-status">Cadence paused. Start cadence to continuously post and match.</p>
+      <div class="status-strip">
+        <p class="trigger-status" id="trigger-status">Wave idle.</p>
+        <p class="trigger-status" id="cadence-status">Cadence paused.</p>
+      </div>
       <details class="advanced-controls">
-        <summary>Advanced controls</summary>
+        <summary>Advanced setup</summary>
         <div class="advanced-controls-body">
           <div class="controls-right">
             <label class="toggle-pill"><input id="workspace-only-toggle" type="checkbox" checked>Only workspace actors</label>
@@ -2075,63 +2120,57 @@ export function renderDemoLiveBoardHtml() {
           </div>
         </div>
       </details>
-      <details class="legend-details">
-        <summary>Cycle state legend</summary>
-        <div class="state-guide" aria-label="Cycle lifecycle legend">
-          <div class="guide-chip proposed"><strong>Proposed</strong><span>candidate cycle found, waiting for accepts</span></div>
-          <div class="guide-chip pending"><strong>Escrow</strong><span>participants confirm deposits and lock intents</span></div>
-          <div class="guide-chip executing"><strong>Executing</strong><span>fulfillment runs and artifacts are delivered</span></div>
-          <div class="guide-chip completed"><strong>Completed</strong><span>receipt minted and balances finalized</span></div>
-          <div class="guide-chip failed"><strong>Failed</strong><span>cycle closed, funds/assets released or refunded</span></div>
-        </div>
-      </details>
     </section>
-
-    <section class="panel">
-      <div class="panel-head">
-        <h2 id="inspector-title">Inspector</h2>
-        <button id="inspector-close" class="trigger-btn" type="button">Clear</button>
-      </div>
-      <div class="inspector-body" id="inspector-body">
-        <div class="live-empty">Click any post, edge, or match from either feed to inspect details.</div>
-      </div>
-      <div class="inspector-cycle-graph-wrap" id="inspector-cycle-graph-wrap" hidden>
-        <div class="cycle-graph-shell">
-          <svg id="cycle-graph" class="cycle-graph" viewBox="0 0 520 240" role="img" aria-label="Selected match cycle graph"></svg>
-          <div class="cycle-sub" id="cycle-graph-meta">Select a match to render graph.</div>
+    <section class="primary-stage">
+      <section class="panel feeds-panel">
+        <div class="panel-head">
+          <h2>Live Feeds</h2>
+          <div class="controls-right">
+            <label class="toggle-pill">Left
+              <select id="feed-left-kind" class="feed-select">
+                <option value="posts">Posts</option>
+                <option value="edges">Edges</option>
+                <option value="matches">Matches</option>
+              </select>
+            </label>
+            <label class="toggle-pill">Right
+              <select id="feed-right-kind" class="feed-select">
+                <option value="matches">Matches</option>
+                <option value="edges">Edges</option>
+                <option value="posts">Posts</option>
+              </select>
+            </label>
+          </div>
         </div>
-      </div>
-    </section>
-    <section class="panel">
-      <div class="panel-head">
-        <h2>Live Feeds</h2>
-        <div class="controls-right">
-          <label class="toggle-pill">Left
-            <select id="feed-left-kind" class="feed-select">
-              <option value="posts">Posts</option>
-              <option value="edges">Edges</option>
-              <option value="matches">Matches</option>
-            </select>
-          </label>
-          <label class="toggle-pill">Right
-            <select id="feed-right-kind" class="feed-select">
-              <option value="edges">Edges</option>
-              <option value="matches">Matches</option>
-              <option value="posts">Posts</option>
-            </select>
-          </label>
+        <div class="live-feeds-grid">
+          <section class="live-feed-column">
+            <div class="live-feed-title" id="feed-left-title">Posts coming through</div>
+            <div class="live-list" id="feed-left-list"></div>
+          </section>
+          <section class="live-feed-column">
+            <div class="live-feed-title" id="feed-right-title">Matches found</div>
+            <div class="live-list" id="feed-right-list"></div>
+          </section>
         </div>
-      </div>
-      <div class="live-feeds-grid">
-        <section class="live-feed-column">
-          <div class="live-feed-title" id="feed-left-title">Posts coming through</div>
-          <div class="live-list" id="feed-left-list"></div>
-        </section>
-        <section class="live-feed-column">
-          <div class="live-feed-title" id="feed-right-title">Edges being placed</div>
-          <div class="live-list" id="feed-right-list"></div>
-        </section>
-      </div>
+      </section>
+      <section class="panel viz-panel">
+        <div class="panel-head">
+          <h2>Visualization</h2>
+          <div class="controls-right">
+            <span class="badge" id="inspector-title">No Selection</span>
+            <button id="inspector-close" class="trigger-btn" type="button">Clear</button>
+          </div>
+        </div>
+        <div class="inspector-cycle-graph-wrap" id="inspector-cycle-graph-wrap" hidden>
+          <div class="cycle-graph-shell">
+            <svg id="cycle-graph" class="cycle-graph" viewBox="0 0 520 240" role="img" aria-label="Selected match cycle graph"></svg>
+            <div class="cycle-sub" id="cycle-graph-meta">Select a match to render graph.</div>
+          </div>
+        </div>
+        <div class="inspector-body" id="inspector-body">
+          <div class="live-empty">Click any post, edge, or match from either feed to inspect details.</div>
+        </div>
+      </section>
     </section>
   </main>
 
@@ -2674,7 +2713,7 @@ export function renderDemoLiveBoardHtml() {
     }
 
     function renderInspectorEmpty(text = 'Click any post, edge, or match from either feed to inspect details.') {
-      if (inspectorTitle) inspectorTitle.textContent = 'Inspector';
+      if (inspectorTitle) inspectorTitle.textContent = 'No Selection';
       if (inspectorBody) inspectorBody.innerHTML = '<div class="live-empty">' + esc(text) + '</div>';
       if (inspectorCycleGraphWrap) inspectorCycleGraphWrap.hidden = true;
       if (cycleGraph) cycleGraph.innerHTML = '';
@@ -2831,7 +2870,7 @@ export function renderDemoLiveBoardHtml() {
 
     function renderLiveFeeds(snapshot) {
       const leftKind = normalizeFeedKind(feedLeftKindSelect?.value, 'posts');
-      const rightKind = normalizeFeedKind(feedRightKindSelect?.value, leftKind === 'edges' ? 'matches' : 'edges');
+      const rightKind = normalizeFeedKind(feedRightKindSelect?.value, leftKind === 'matches' ? 'edges' : 'matches');
       if (feedLeftKindSelect && feedLeftKindSelect.value !== leftKind) feedLeftKindSelect.value = leftKind;
       if (feedRightKindSelect && feedRightKindSelect.value !== rightKind) feedRightKindSelect.value = rightKind;
       feedEntryMap = new Map();
@@ -2840,7 +2879,14 @@ export function renderDemoLiveBoardHtml() {
       if (selectedFeedEntryKey && feedEntryMap.has(selectedFeedEntryKey)) {
         renderInspectorEntry(feedEntryMap.get(selectedFeedEntryKey));
       } else {
-        selectedFeedEntryKey = leftRender.firstEntryKey || rightRender.firstEntryKey || null;
+        let firstMatchEntryKey = null;
+        for (const [entryKey, row] of feedEntryMap.entries()) {
+          if (row?.kind === 'matches') {
+            firstMatchEntryKey = entryKey;
+            break;
+          }
+        }
+        selectedFeedEntryKey = firstMatchEntryKey || leftRender.firstEntryKey || rightRender.firstEntryKey || null;
         if (selectedFeedEntryKey) renderInspectorEntry(feedEntryMap.get(selectedFeedEntryKey) ?? null);
         else renderInspectorEmpty('No posts, edges, or matches yet. Run a wave to generate activity.');
       }
@@ -2873,7 +2919,7 @@ export function renderDemoLiveBoardHtml() {
 
     function selectedFeedKinds() {
       const left = normalizeFeedKind(feedLeftKindSelect?.value, 'posts');
-      const right = normalizeFeedKind(feedRightKindSelect?.value, left === 'edges' ? 'matches' : 'edges');
+      const right = normalizeFeedKind(feedRightKindSelect?.value, left === 'matches' ? 'edges' : 'matches');
       return { left, right };
     }
 
@@ -3115,7 +3161,7 @@ export function renderDemoLiveBoardHtml() {
     }
     if (feedRightKindSelect) {
       const initialSearch = new URLSearchParams(window.location.search);
-      feedRightKindSelect.value = normalizeFeedKind(initialSearch.get('feed_right'), 'edges');
+      feedRightKindSelect.value = normalizeFeedKind(initialSearch.get('feed_right'), 'matches');
       feedRightKindSelect.addEventListener('change', () => {
         renderLiveFeeds(latestSnapshot ?? {});
         void load();
