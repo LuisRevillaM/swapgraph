@@ -485,7 +485,7 @@ export function buildDemoLiveBoardSnapshot({ store, nowIso = new Date().toISOStr
   const normalizedLaneHints = normalizeLaneHints(laneHints);
   const defaultHints = normalizedLaneHints.length > 0
     ? normalizedLaneHints
-    : ['workshop', 'architects_dream', 'graph_board', 'marketplace'];
+    : ['workshop', 'architects_dream', 'cto', 'toxins', 'graph_board', 'marketplace'];
 
   return {
     generated_at: nowIso,
@@ -1217,7 +1217,11 @@ export function renderDemoLiveBoardHtml() {
           throw new Error(msg);
         }
         const cycle = payload?.demo_cycle ?? {};
-        setTriggerStatus('Cycle ready: ' + (cycle.proposal_id || 'n/a') + (cycle.receipt_id ? ' • receipt ' + cycle.receipt_id : ''));
+        const firstCycle = Array.isArray(cycle.settled_cycles) ? cycle.settled_cycles[0] : null;
+        const cycleCount = Number.isFinite(cycle.cycle_count) ? cycle.cycle_count : (Array.isArray(cycle.settled_cycles) ? cycle.settled_cycles.length : 1);
+        const proposalId = cycle.proposal_id || firstCycle?.proposal_id || 'n/a';
+        const receiptId = cycle.receipt_id || firstCycle?.receipt_id || null;
+        setTriggerStatus('Cycles ready: ' + cycleCount + ' • first ' + proposalId + (receiptId ? ' • receipt ' + receiptId : ''));
         await load();
       } catch (error) {
         setTriggerStatus('Trigger failed: ' + error.message);
@@ -1229,7 +1233,7 @@ export function renderDemoLiveBoardHtml() {
     async function load() {
       const search = new URLSearchParams(window.location.search);
       if (!search.get('limit')) search.set('limit', '25');
-      if (!search.get('lanes')) search.set('lanes', 'workshop,architects_dream,graph_board,marketplace');
+      if (!search.get('lanes')) search.set('lanes', 'workshop,architects_dream,cto,toxins,graph_board,marketplace');
       const url = '/demo/live-board/snapshot?' + search.toString();
       const started = Date.now();
       try {

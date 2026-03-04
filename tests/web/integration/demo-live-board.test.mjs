@@ -47,7 +47,7 @@ test('demo live board serves html and snapshot without actor auth', async () => 
   }
 });
 
-test('demo live board can trigger a new two-agent cycle from UI endpoint', async () => {
+test('demo live board can trigger new four-workspace cycles from UI endpoint', async () => {
   const runtime = await startRuntimeHarness();
 
   try {
@@ -62,24 +62,32 @@ test('demo live board can trigger a new two-agent cycle from UI endpoint', async
     assert.equal(triggerResponse.status, 200);
     const triggerBody = await triggerResponse.json();
     assert.equal(triggerBody?.ok, true);
-    assert.equal(typeof triggerBody?.demo_cycle?.proposal_id, 'string');
-    assert.equal(typeof triggerBody?.demo_cycle?.receipt_id, 'string');
-    assert.equal(triggerBody?.demo_cycle?.final_state, 'completed');
+    assert.equal(triggerBody?.demo_cycle?.scenario, 'four_workspace_demo_cycle');
+    assert.ok(Array.isArray(triggerBody?.demo_cycle?.actors));
+    assert.ok(triggerBody.demo_cycle.actors.includes('workshop'));
+    assert.ok(triggerBody.demo_cycle.actors.includes('architects_dream'));
+    assert.ok(triggerBody.demo_cycle.actors.includes('cto'));
+    assert.ok(triggerBody.demo_cycle.actors.includes('toxins'));
+    assert.ok(Array.isArray(triggerBody?.demo_cycle?.settled_cycles));
+    assert.ok(triggerBody.demo_cycle.settled_cycles.length >= 1);
+    assert.ok(triggerBody.demo_cycle.settled_cycles.every(row => row.final_state === 'completed'));
 
     const snapshotResponse = await requestJson({
       baseUrl: runtime.baseUrl,
       method: 'GET',
-      path: '/demo/live-board/snapshot?limit=10&lanes=workshop,architects_dream,marketplace'
+      path: '/demo/live-board/snapshot?limit=10&lanes=workshop,architects_dream,cto,toxins,marketplace'
     });
     assert.equal(snapshotResponse.status, 200);
     assert.equal(snapshotResponse.body?.ok, true);
     assert.ok((snapshotResponse.body?.snapshot?.funnel?.receipts_completed ?? 0) >= 1);
     assert.ok((snapshotResponse.body?.snapshot?.funnel?.commits_total ?? 0) >= 1);
     assert.ok(Array.isArray(snapshotResponse.body?.snapshot?.posts));
-    assert.ok(snapshotResponse.body.snapshot.posts.length >= 2);
+    assert.ok(snapshotResponse.body.snapshot.posts.length >= 4);
     assert.ok(snapshotResponse.body.snapshot.posts.some(post => typeof post.image_url === 'string' && post.image_url.length > 0));
     assert.ok(snapshotResponse.body.snapshot.posts.some(post => post.actor_id === 'workshop'));
     assert.ok(snapshotResponse.body.snapshot.posts.some(post => post.actor_id === 'architects_dream'));
+    assert.ok(snapshotResponse.body.snapshot.posts.some(post => post.actor_id === 'cto'));
+    assert.ok(snapshotResponse.body.snapshot.posts.some(post => post.actor_id === 'toxins'));
     assert.ok(Array.isArray(snapshotResponse.body?.snapshot?.trade_cycles));
     assert.ok(snapshotResponse.body.snapshot.trade_cycles.length >= 1);
     const cycle = snapshotResponse.body.snapshot.trade_cycles[0];
