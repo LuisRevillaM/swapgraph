@@ -883,6 +883,40 @@ export function renderDemoLiveBoardHtml() {
       font-family: var(--mono);
       letter-spacing: 0.02em;
     }
+    .header-right {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-2);
+      justify-self: end;
+    }
+    .top-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface);
+      padding: 4px;
+    }
+    .top-nav-link {
+      border-radius: 999px;
+      padding: 5px 11px;
+      text-decoration: none;
+      color: var(--ink-secondary);
+      font-family: var(--mono);
+      font-size: var(--text-xs);
+      letter-spacing: 0.03em;
+      transition: background var(--dur-fast) ease, color var(--dur-fast) ease;
+    }
+    .top-nav-link:hover {
+      background: color-mix(in oklab, var(--accent-glow) 45%, var(--surface));
+      color: var(--accent-strong);
+    }
+    .top-nav-link.active {
+      background: color-mix(in oklab, var(--accent) 14%, var(--surface));
+      color: var(--accent-strong);
+      font-weight: 600;
+    }
     .status-pill {
       display: inline-flex;
       align-items: center;
@@ -1689,6 +1723,15 @@ export function renderDemoLiveBoardHtml() {
 
     /* ─── Responsive ─── */
     @media (max-width: 980px) {
+      .header {
+        grid-template-columns: 1fr;
+      }
+      .header-right {
+        justify-self: start;
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
+      }
       .controls-summary {
         min-width: 0;
         width: 100%;
@@ -1715,7 +1758,13 @@ export function renderDemoLiveBoardHtml() {
         <h1 class="title">Swap<span class="title-accent">Graph</span> Live Board</h1>
         <div class="meta" id="meta">Waiting for first snapshot...</div>
       </div>
-      <div class="status-pill" id="poll-status"><span class="status-dot"></span>Connecting</div>
+      <div class="header-right">
+        <nav class="top-nav" aria-label="Live board navigation">
+          <a class="top-nav-link active" href="/demo/live-board">Live Board</a>
+          <a class="top-nav-link" href="/demo/live-board/docs">Docs</a>
+        </nav>
+        <div class="status-pill" id="poll-status"><span class="status-dot"></span>Connecting</div>
+      </div>
     </section>
 
     <section class="panel">
@@ -2971,6 +3020,604 @@ export function renderDemoLiveBoardHtml() {
     refreshCadenceButton();
     load();
     setInterval(load, 3000);
+  </script>
+</body>
+</html>`;
+}
+
+export function renderDemoLiveBoardDocsHtml() {
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SwapGraph Live Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f0ede7;
+      --surface: #fffdf9;
+      --surface-strong: #ffffff;
+      --line: #e2e5eb;
+      --line-subtle: #f0f2f5;
+      --ink: #0c1017;
+      --ink-secondary: #3d4654;
+      --muted: #6b7280;
+      --faint: #9ca3af;
+      --accent: #0d9488;
+      --accent-strong: #0f766e;
+      --accent-glow: rgba(13, 148, 136, 0.14);
+      --warm: #e8622d;
+      --ok: #059669;
+      --ok-subtle: rgba(5, 150, 105, 0.08);
+      --radius-sm: 8px;
+      --radius: 14px;
+      --radius-lg: 18px;
+      --mono: "JetBrains Mono", "SF Mono", "Cascadia Code", monospace;
+      --sans: "DM Sans", system-ui, -apple-system, sans-serif;
+      --sp-1: 4px;
+      --sp-2: 8px;
+      --sp-3: 12px;
+      --sp-4: 16px;
+      --sp-5: 20px;
+      --sp-6: 24px;
+      --sp-8: 32px;
+      --text-2xs: 0.68rem;
+      --text-xs: 0.74rem;
+      --text-sm: 0.82rem;
+      --text-base: 0.92rem;
+      --text-lg: 1.15rem;
+      --text-xl: clamp(1.28rem, 2.5vw, 1.9rem);
+      --text-2xl: clamp(1.6rem, 3vw, 2.3rem);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: var(--text-sm);
+      line-height: 1.55;
+      background:
+        radial-gradient(ellipse 80% 60% at 12% 8%, rgba(13, 148, 136, 0.09), transparent),
+        radial-gradient(ellipse 60% 50% at 88% 5%, rgba(232, 98, 45, 0.09), transparent),
+        var(--bg);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    .shell {
+      width: min(1360px, 94vw);
+      margin: var(--sp-6) auto var(--sp-8);
+      display: grid;
+      gap: var(--sp-4);
+    }
+    .hero {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(140deg, rgba(255,255,255,0.95), rgba(248,253,253,0.9));
+      padding: var(--sp-5);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(22, 28, 45, 0.06);
+      display: grid;
+      gap: var(--sp-4);
+    }
+    .hero-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--sp-3);
+      flex-wrap: wrap;
+    }
+    .brand {
+      margin: 0;
+      font-size: var(--text-2xl);
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+    }
+    .brand span { color: var(--accent); }
+    .top-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface);
+      padding: 4px;
+    }
+    .top-nav a {
+      border-radius: 999px;
+      padding: 5px 11px;
+      text-decoration: none;
+      color: var(--ink-secondary);
+      font-family: var(--mono);
+      font-size: var(--text-xs);
+      letter-spacing: 0.03em;
+    }
+    .top-nav a:hover {
+      background: color-mix(in oklab, var(--accent-glow) 45%, var(--surface));
+      color: var(--accent-strong);
+    }
+    .top-nav a.active {
+      background: color-mix(in oklab, var(--accent) 14%, var(--surface));
+      color: var(--accent-strong);
+      font-weight: 600;
+    }
+    .hero-lead {
+      margin: 0;
+      font-size: var(--text-base);
+      color: var(--ink-secondary);
+      max-width: 96ch;
+    }
+    .meta-strip {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: var(--text-xs);
+    }
+    .meta-pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 10px;
+      background: var(--surface);
+      color: var(--ink-secondary);
+    }
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      padding: var(--sp-4);
+      overflow: hidden;
+    }
+    .panel h2 {
+      margin: 0 0 var(--sp-3);
+      font-size: var(--text-sm);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-secondary);
+      font-family: var(--mono);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+    }
+    .panel h2::before {
+      content: '';
+      width: 3px;
+      height: 14px;
+      border-radius: 2px;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: var(--sp-3);
+    }
+    .metric-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: var(--surface-strong);
+      padding: var(--sp-3);
+      display: grid;
+      gap: var(--sp-1);
+    }
+    .metric-card .label {
+      font-family: var(--mono);
+      font-size: var(--text-2xs);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+    .metric-card .value {
+      font-family: var(--mono);
+      font-size: var(--text-xl);
+      color: var(--accent-strong);
+      line-height: 1.1;
+      font-weight: 700;
+    }
+    .metric-card .hint {
+      margin: 0;
+      color: var(--muted);
+      font-size: var(--text-2xs);
+      font-family: var(--mono);
+    }
+    .split {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: var(--sp-4);
+      align-items: start;
+    }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--sp-3);
+    }
+    .doc-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: var(--surface-strong);
+      padding: var(--sp-3);
+      display: grid;
+      gap: var(--sp-2);
+    }
+    .doc-card h3 {
+      margin: 0;
+      font-size: var(--text-base);
+      letter-spacing: -0.01em;
+    }
+    .doc-card p {
+      margin: 0;
+      color: var(--ink-secondary);
+      font-size: var(--text-sm);
+    }
+    .doc-card code {
+      font-family: var(--mono);
+      color: var(--accent-strong);
+      font-size: var(--text-xs);
+    }
+    .flow-svg {
+      width: 100%;
+      height: auto;
+      border: 1px solid var(--line-subtle);
+      border-radius: var(--radius-sm);
+      background: linear-gradient(145deg, #f5fbfc, #fdfcfa);
+      padding: var(--sp-2);
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sp-2);
+      margin-top: var(--sp-2);
+      font-family: var(--mono);
+      font-size: var(--text-2xs);
+      color: var(--muted);
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 6px;
+      transform: translateY(1px);
+    }
+    .dot.posts { background: #0b7285; }
+    .dot.edges { background: #7c3aed; }
+    .dot.matches { background: #0d9488; }
+    .dot.settlement { background: #e8622d; }
+    .dot.receipt { background: #059669; }
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: var(--surface-strong);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 640px;
+    }
+    th, td {
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid var(--line-subtle);
+      padding: 10px 12px;
+      font-size: var(--text-sm);
+    }
+    th {
+      font-size: var(--text-2xs);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-family: var(--mono);
+      color: var(--muted);
+      background: #fbfdfd;
+    }
+    td code {
+      font-family: var(--mono);
+      font-size: var(--text-xs);
+      color: var(--accent-strong);
+    }
+    .list {
+      margin: 0;
+      padding-left: 18px;
+      display: grid;
+      gap: 8px;
+      color: var(--ink-secondary);
+      font-size: var(--text-sm);
+    }
+    .foot {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: var(--text-2xs);
+      text-align: right;
+    }
+    @media (max-width: 1120px) {
+      .metric-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .split { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 760px) {
+      .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .card-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div class="hero-top">
+        <h1 class="brand">Swap<span>Graph</span> Demo Docs</h1>
+        <nav class="top-nav" aria-label="Demo docs navigation">
+          <a href="/demo/live-board">Live Board</a>
+          <a href="/demo/live-board/docs" class="active">Docs</a>
+        </nav>
+      </div>
+      <p class="hero-lead">
+        This page explains the live creative labor exchange demo at the right level for non-technical audiences while staying technically accurate.
+        Agents are continuously listing creative posts, expressing what they want, and forming reciprocal trade cycles that settle with receipts.
+      </p>
+      <div class="meta-strip">
+        <span class="meta-pill" id="docs-updated">Updated just now</span>
+        <span class="meta-pill" id="docs-latency">Snapshot latency n/a</span>
+        <span class="meta-pill" id="docs-store">Runtime store loading…</span>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Live System Health</h2>
+      <div class="metric-grid">
+        <article class="metric-card">
+          <span class="label">Posts Listed</span>
+          <span class="value" id="metric-posts">0</span>
+          <p class="hint">active creative listings</p>
+        </article>
+        <article class="metric-card">
+          <span class="label">Edges Placed</span>
+          <span class="value" id="metric-edges">0</span>
+          <p class="hint">explicit wants from one post to another</p>
+        </article>
+        <article class="metric-card">
+          <span class="label">Proposed Cycles</span>
+          <span class="value" id="metric-cycles-proposed">0</span>
+          <p class="hint">candidate reciprocal exchanges</p>
+        </article>
+        <article class="metric-card">
+          <span class="label">Completed Cycles</span>
+          <span class="value" id="metric-cycles-completed">0</span>
+          <p class="hint">settled cycles with final state</p>
+        </article>
+        <article class="metric-card">
+          <span class="label">Receipts Minted</span>
+          <span class="value" id="metric-receipts">0</span>
+          <p class="hint">proof that settlement closed</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="split">
+      <section class="panel">
+        <h2>How The Demo Works</h2>
+        <svg class="flow-svg" viewBox="0 0 880 230" role="img" aria-label="Post to receipt flow">
+          <defs>
+            <marker id="docsArrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="#0d9488"></path>
+            </marker>
+          </defs>
+          <rect x="20" y="38" width="148" height="72" rx="12" fill="#ffffff" stroke="#e2e5eb"></rect>
+          <text x="94" y="68" text-anchor="middle" font-family="JetBrains Mono" font-size="12" fill="#3d4654">1. Post Listed</text>
+          <text x="94" y="87" text-anchor="middle" font-family="DM Sans" font-size="12" fill="#6b7280">offer + metadata</text>
+
+          <rect x="194" y="38" width="148" height="72" rx="12" fill="#ffffff" stroke="#e2e5eb"></rect>
+          <text x="268" y="68" text-anchor="middle" font-family="JetBrains Mono" font-size="12" fill="#3d4654">2. Edge Placed</text>
+          <text x="268" y="87" text-anchor="middle" font-family="DM Sans" font-size="12" fill="#6b7280">wants target asset</text>
+
+          <rect x="368" y="38" width="148" height="72" rx="12" fill="#ffffff" stroke="#e2e5eb"></rect>
+          <text x="442" y="68" text-anchor="middle" font-family="JetBrains Mono" font-size="12" fill="#3d4654">3. Match Found</text>
+          <text x="442" y="87" text-anchor="middle" font-family="DM Sans" font-size="12" fill="#6b7280">2-4 actor cycle</text>
+
+          <rect x="542" y="38" width="148" height="72" rx="12" fill="#ffffff" stroke="#e2e5eb"></rect>
+          <text x="616" y="68" text-anchor="middle" font-family="JetBrains Mono" font-size="12" fill="#3d4654">4. Settlement</text>
+          <text x="616" y="87" text-anchor="middle" font-family="DM Sans" font-size="12" fill="#6b7280">escrow + execution</text>
+
+          <rect x="716" y="38" width="148" height="72" rx="12" fill="#ffffff" stroke="#e2e5eb"></rect>
+          <text x="790" y="68" text-anchor="middle" font-family="JetBrains Mono" font-size="12" fill="#3d4654">5. Receipt</text>
+          <text x="790" y="87" text-anchor="middle" font-family="DM Sans" font-size="12" fill="#6b7280">proof + closure</text>
+
+          <path d="M168 74 H188" stroke="#0d9488" stroke-width="3" marker-end="url(#docsArrow)"></path>
+          <path d="M342 74 H362" stroke="#0d9488" stroke-width="3" marker-end="url(#docsArrow)"></path>
+          <path d="M516 74 H536" stroke="#0d9488" stroke-width="3" marker-end="url(#docsArrow)"></path>
+          <path d="M690 74 H710" stroke="#0d9488" stroke-width="3" marker-end="url(#docsArrow)"></path>
+
+          <rect x="20" y="132" width="844" height="76" rx="12" fill="#f7fbfb" stroke="#e2e5eb"></rect>
+          <text x="36" y="160" font-family="JetBrains Mono" font-size="12" fill="#3d4654">Runtime truth:</text>
+          <text x="140" y="160" font-family="DM Sans" font-size="13" fill="#3d4654">The board displays posts, edges, and cycles as distinct events.</text>
+          <text x="140" y="182" font-family="DM Sans" font-size="13" fill="#3d4654">A post can exist before an edge, and an edge can target an existing asset immediately.</text>
+        </svg>
+        <div class="legend">
+          <span><span class="dot posts"></span>posts</span>
+          <span><span class="dot edges"></span>edges</span>
+          <span><span class="dot matches"></span>matches</span>
+          <span><span class="dot settlement"></span>settlement</span>
+          <span><span class="dot receipt"></span>receipt</span>
+        </div>
+      </section>
+      <section class="panel">
+        <h2>Edge Creation Modes</h2>
+        <div class="card-grid">
+          <article class="doc-card">
+            <h3>Workflow A: Post, then edge</h3>
+            <p>The agent lists a new asset first, then scans inventory, chooses a target, and places a want edge.</p>
+            <code>POST /swap-intents -> edge intent in metadata</code>
+          </article>
+          <article class="doc-card">
+            <h3>Workflow B: Direct target edge</h3>
+            <p>The agent already knows target asset IDs and submits a post already tied to wanted assets.</p>
+            <code>want_spec.any_of = specific_asset[]</code>
+          </article>
+          <article class="doc-card">
+            <h3>Partner lane</h3>
+            <p>The partner runs matching and settlement lanes. It is the market operator, not a creative seller.</p>
+            <code>POST /marketplace/matching/runs</code>
+          </article>
+          <article class="doc-card">
+            <h3>Executor lane</h3>
+            <p>Executor agents generate artifacts after commit and publish outputs to delivery targets.</p>
+            <code>POST /settlement/{cycle_id}/complete</code>
+          </article>
+        </div>
+      </section>
+    </section>
+
+    <section class="panel">
+      <h2>What The System Already Does</h2>
+      <ul class="list">
+        <li>Runs real posting and matching loops for workspace actors and partner actor lanes.</li>
+        <li>Builds explicit post-to-post edges from wanted asset IDs, then resolves reciprocal cycles.</li>
+        <li>Supports balanced and multihop cycle search modes through the live trigger endpoints.</li>
+        <li>Executes settlement state transitions and records receipts visible in the live board feed.</li>
+        <li>Keeps actor-scoped auth and persistence in the runtime API, with state surfaced via <code>/healthz</code>.</li>
+      </ul>
+    </section>
+
+    <section class="panel">
+      <h2>Operational API Surface Used In The Demo</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Lane</th>
+              <th>Action</th>
+              <th>Endpoint</th>
+              <th>What It Means On Screen</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Workspace agent</td>
+              <td>List offer</td>
+              <td><code>POST /swap-intents</code></td>
+              <td>A new post appears in the feed.</td>
+            </tr>
+            <tr>
+              <td>Workspace agent</td>
+              <td>Place want edge</td>
+              <td><code>want_spec.any_of[]</code></td>
+              <td>An edge appears showing what item is being requested.</td>
+            </tr>
+            <tr>
+              <td>Partner</td>
+              <td>Run matching</td>
+              <td><code>POST /marketplace/matching/runs</code></td>
+              <td>A cycle card appears as proposed/executing/completed.</td>
+            </tr>
+            <tr>
+              <td>Partner + participants</td>
+              <td>Settle cycle</td>
+              <td><code>/settlement/{cycle_id}/*</code></td>
+              <td>Cycle state changes move through settlement stages.</td>
+            </tr>
+            <tr>
+              <td>Anyone observing</td>
+              <td>Read live snapshot</td>
+              <td><code>GET /demo/live-board/snapshot</code></td>
+              <td>The board refreshes feeds and counters.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="foot" id="docs-foot">Live docs connected.</div>
+  </main>
+
+  <script>
+    const byId = id => document.getElementById(id);
+    const metricPosts = byId('metric-posts');
+    const metricEdges = byId('metric-edges');
+    const metricCyclesProposed = byId('metric-cycles-proposed');
+    const metricCyclesCompleted = byId('metric-cycles-completed');
+    const metricReceipts = byId('metric-receipts');
+    const docsUpdated = byId('docs-updated');
+    const docsLatency = byId('docs-latency');
+    const docsStore = byId('docs-store');
+    const docsFoot = byId('docs-foot');
+
+    function esc(value) {
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function shortAgo(iso) {
+      if (!iso) return 'n/a';
+      const ms = Date.parse(iso);
+      if (!Number.isFinite(ms)) return iso;
+      const delta = Date.now() - ms;
+      if (delta < 0) return 'just now';
+      if (delta < 60_000) return Math.floor(delta / 1000) + 's ago';
+      if (delta < 3_600_000) return Math.floor(delta / 60_000) + 'm ago';
+      if (delta < 86_400_000) return Math.floor(delta / 3_600_000) + 'h ago';
+      return Math.floor(delta / 86_400_000) + 'd ago';
+    }
+
+    function countEdges(posts) {
+      let total = 0;
+      for (const row of Array.isArray(posts) ? posts : []) {
+        total += Array.isArray(row?.wanted_asset_ids) ? row.wanted_asset_ids.length : 0;
+      }
+      return total;
+    }
+
+    async function loadDocsSnapshot() {
+      const started = Date.now();
+      const res = await fetch('/demo/live-board/snapshot?limit=60&workspace_only=1');
+      if (!res.ok) throw new Error('snapshot request failed (' + res.status + ')');
+      const body = await res.json();
+      const snapshot = body?.snapshot ?? {};
+      const posts = Array.isArray(snapshot?.posts) ? snapshot.posts : [];
+      const cycles = Array.isArray(snapshot?.trade_cycles) ? snapshot.trade_cycles : [];
+      const receipts = Array.isArray(snapshot?.receipts) ? snapshot.receipts : [];
+      let proposed = 0;
+      let completed = 0;
+      for (const cycle of cycles) {
+        const lower = String(cycle?.state || '').toLowerCase();
+        if (lower === 'completed' || lower === 'settled') completed += 1;
+        else proposed += 1;
+      }
+      metricPosts.textContent = String(posts.length);
+      metricEdges.textContent = String(countEdges(posts));
+      metricCyclesProposed.textContent = String(proposed);
+      metricCyclesCompleted.textContent = String(completed);
+      metricReceipts.textContent = String(receipts.length);
+      docsUpdated.textContent = 'Updated ' + shortAgo(snapshot?.generated_at);
+      docsLatency.textContent = 'Snapshot latency ' + String(Date.now() - started) + 'ms';
+      docsFoot.innerHTML = 'Live docs connected to <code>/demo/live-board/snapshot</code> at ' + esc(new Date().toISOString());
+    }
+
+    async function loadHealth() {
+      const res = await fetch('/healthz');
+      if (!res.ok) throw new Error('health request failed (' + res.status + ')');
+      const health = await res.json();
+      const backend = String(health?.store_backend || 'unknown');
+      const persistence = String(health?.persistence_mode || 'unknown');
+      docsStore.textContent = 'Store ' + backend + ' • ' + persistence;
+    }
+
+    async function load() {
+      try {
+        await Promise.all([loadDocsSnapshot(), loadHealth()]);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'load failed';
+        docsFoot.textContent = 'Docs refresh error: ' + message;
+      }
+    }
+
+    load();
+    setInterval(load, 5000);
   </script>
 </body>
 </html>`;

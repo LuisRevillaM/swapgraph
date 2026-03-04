@@ -9,7 +9,7 @@ import { CommitService } from '../commit/commitService.mjs';
 import { ingestPollingResponse } from '../delivery/proposalIngestService.mjs';
 import { CycleProposalsReadService } from '../read/cycleProposalsReadService.mjs';
 import { SettlementReadService } from '../read/settlementReadService.mjs';
-import { buildDemoLiveBoardSnapshot, renderDemoLiveBoardHtml } from './demoLiveBoard.mjs';
+import { buildDemoLiveBoardSnapshot, renderDemoLiveBoardDocsHtml, renderDemoLiveBoardHtml } from './demoLiveBoard.mjs';
 import { runDemoLiveBoardTriggerCycle } from './demoLiveBoardTriggerCycle.mjs';
 import { CycleProposalsCommitService } from '../service/cycleProposalsCommitService.mjs';
 import { CommercialPolicyService } from '../service/commercialPolicyService.mjs';
@@ -396,6 +396,15 @@ export function createRuntimeApiServer({
           status: 200,
           correlationId,
           html: renderDemoLiveBoardHtml()
+        });
+      }
+
+      if (method === 'GET' && pathname === '/demo/live-board/docs') {
+        return sendHtml({
+          res,
+          status: 200,
+          correlationId,
+          html: renderDemoLiveBoardDocsHtml()
         });
       }
 

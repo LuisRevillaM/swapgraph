@@ -23,9 +23,20 @@ test('demo live board serves html and snapshot without actor auth', async () => 
     assert.match(htmlResponse.headers.get('content-type') ?? '', /text\/html/i);
     const html = await htmlResponse.text();
     assert.match(html, /SwapGraph Live Board/);
+    assert.match(html, /\/demo\/live-board\/docs/);
     assert.match(html, /Start New Agent Cycle/);
     assert.match(html, /Live Feeds/);
     assert.match(html, /Visualization/);
+
+    const docsResponse = await fetch(`${runtime.baseUrl}/demo/live-board/docs`, {
+      headers: { accept: 'text/html' }
+    });
+    assert.equal(docsResponse.status, 200);
+    assert.match(docsResponse.headers.get('content-type') ?? '', /text\/html/i);
+    const docsHtml = await docsResponse.text();
+    assert.match(docsHtml, /Demo Docs/);
+    assert.match(docsHtml, /Live System Health/);
+    assert.match(docsHtml, /How The Demo Works/);
 
     const snapshotResponse = await requestJson({
       baseUrl: runtime.baseUrl,
