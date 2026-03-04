@@ -24,7 +24,8 @@ test('demo live board serves html and snapshot without actor auth', async () => 
     const html = await htmlResponse.text();
     assert.match(html, /SwapGraph Live Board/);
     assert.match(html, /Start New Agent Cycle/);
-    assert.match(html, /Trade Cycles/);
+    assert.match(html, /Live Feeds/);
+    assert.match(html, /Inspector/);
 
     const snapshotResponse = await requestJson({
       baseUrl: runtime.baseUrl,

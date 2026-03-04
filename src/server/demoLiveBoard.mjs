@@ -99,6 +99,29 @@ function normalizeCapabilityToken(value) {
   };
 }
 
+function parseWantAssetId(value) {
+  const raw = typeof value === 'string' ? value.trim() : '';
+  if (!raw) return null;
+  const idx = raw.lastIndexOf(':');
+  return idx >= 0 ? raw.slice(idx + 1).trim() : raw;
+}
+
+function extractWantedAssetIds(intent) {
+  const anyOf = Array.isArray(intent?.want_spec?.any_of) ? intent.want_spec.any_of : [];
+  const out = [];
+  const seen = new Set();
+  for (const clause of anyOf) {
+    if (!clause || clause.type !== 'specific_asset') continue;
+    const assetId = parseWantAssetId(firstNonEmptyString(clause?.asset_key, clause?.assetKey));
+    if (!assetId) continue;
+    const dedupeKey = assetId.toLowerCase();
+    if (seen.has(dedupeKey)) continue;
+    seen.add(dedupeKey);
+    out.push(assetId);
+  }
+  return out;
+}
+
 function withPostNoveltyScores(rows) {
   const safeRows = Array.isArray(rows) ? rows : [];
   const tagCounts = new Map();
@@ -559,6 +582,7 @@ export function buildDemoLiveBoardSnapshot({
         status: firstNonEmptyString(intent?.status) ?? 'unknown',
         posted_at: asIso(proof?.verified_at) ?? asIso(intent?.updated_at) ?? null,
         asset_id: firstNonEmptyString(offer?.asset_id),
+        wanted_asset_ids: extractWantedAssetIds(intent),
         title: normalizePostTitle({
           rawTitle,
           actorId: actor?.id ?? null,
@@ -1284,9 +1308,23 @@ export function renderDemoLiveBoardHtml() {
       display: grid;
       gap: 6px;
     }
-    .live-item.kind-products { border-left-color: #0b7285; }
-    .live-item.kind-intents { border-left-color: #7c3aed; }
-    .live-item.kind-cycles { border-left-color: var(--accent); }
+    .live-item.clickable {
+      cursor: pointer;
+      transition: border-color var(--dur-fast) ease, box-shadow var(--dur-fast) ease, transform var(--dur-fast) var(--ease-out-expo);
+    }
+    .live-item.clickable:hover {
+      transform: translateY(-1px);
+      border-color: color-mix(in oklab, var(--accent) 30%, var(--line-subtle));
+      box-shadow: 0 4px 14px var(--accent-glow);
+    }
+    .live-item.clickable.active {
+      border-color: color-mix(in oklab, var(--accent) 45%, var(--line-subtle));
+      box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent) 35%, transparent), 0 8px 20px var(--accent-glow);
+      transform: translateY(-1px);
+    }
+    .live-item.kind-posts { border-left-color: #0b7285; }
+    .live-item.kind-edges { border-left-color: #7c3aed; }
+    .live-item.kind-matches { border-left-color: var(--accent); }
     .live-item-head {
       display: flex;
       justify-content: space-between;
@@ -1343,6 +1381,70 @@ export function renderDemoLiveBoardHtml() {
       font-family: var(--mono);
       padding: var(--sp-3);
       text-align: center;
+    }
+    .inspector-body {
+      display: grid;
+      gap: var(--sp-3);
+    }
+    .inspector-row {
+      display: grid;
+      grid-template-columns: 120px minmax(0, 1fr);
+      gap: var(--sp-2);
+      align-items: start;
+    }
+    .inspector-row code {
+      font-family: var(--mono);
+      font-size: var(--text-xs);
+      color: var(--ink-secondary);
+      word-break: break-word;
+    }
+    .inspector-key {
+      font-family: var(--mono);
+      font-size: 0.66rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--faint);
+      padding-top: 2px;
+    }
+    .inspector-value {
+      color: var(--ink-secondary);
+      font-size: var(--text-sm);
+      line-height: 1.45;
+    }
+    .inspector-value strong {
+      color: var(--ink);
+    }
+    .inspector-media {
+      width: 100%;
+      max-width: 420px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--line-subtle);
+      background: var(--line-subtle);
+      object-fit: cover;
+    }
+    .inspector-match-grid {
+      display: grid;
+      gap: var(--sp-2);
+    }
+    .inspector-match-leg {
+      border: 1px solid var(--line-subtle);
+      border-radius: var(--radius-sm);
+      padding: var(--sp-2);
+      font-family: var(--mono);
+      font-size: var(--text-xs);
+      color: var(--ink-secondary);
+      background: var(--surface-elevated);
+    }
+    .inspector-match-leg strong {
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: var(--text-sm);
+    }
+    .inspector-cycle-graph-wrap[hidden] {
+      display: none;
+    }
+    .inspector-cycle-graph-wrap {
+      margin-top: var(--sp-3);
     }
 
     /* ─── Layout ─── */
@@ -1937,8 +2039,6 @@ export function renderDemoLiveBoardHtml() {
       <div class="status-pill" id="poll-status"><span class="status-dot"></span>Connecting</div>
     </section>
 
-    <section class="panel quick-stats" id="quick-stats"></section>
-
     <section class="panel">
       <div class="panel-head">
         <h2>Live Controls</h2>
@@ -1993,59 +2093,46 @@ export function renderDemoLiveBoardHtml() {
         <div class="controls-right">
           <label class="toggle-pill">Left
             <select id="feed-left-kind" class="feed-select">
-              <option value="products">Products</option>
-              <option value="intents">Intents</option>
-              <option value="cycles">Cycles</option>
+              <option value="posts">Posts</option>
+              <option value="edges">Edges</option>
+              <option value="matches">Matches</option>
             </select>
           </label>
           <label class="toggle-pill">Right
             <select id="feed-right-kind" class="feed-select">
-              <option value="intents">Intents</option>
-              <option value="cycles">Cycles</option>
-              <option value="products">Products</option>
+              <option value="edges">Edges</option>
+              <option value="matches">Matches</option>
+              <option value="posts">Posts</option>
             </select>
           </label>
         </div>
       </div>
       <div class="live-feeds-grid">
         <section class="live-feed-column">
-          <div class="live-feed-title" id="feed-left-title">Products coming through</div>
+          <div class="live-feed-title" id="feed-left-title">Posts coming through</div>
           <div class="live-list" id="feed-left-list"></div>
         </section>
         <section class="live-feed-column">
-          <div class="live-feed-title" id="feed-right-title">Intents being placed</div>
+          <div class="live-feed-title" id="feed-right-title">Edges being placed</div>
           <div class="live-list" id="feed-right-list"></div>
         </section>
       </div>
     </section>
-    <details class="advanced-layout">
-      <summary>Advanced visualizations</summary>
-      <section class="essentials">
-        <section class="panel stack">
-          <div>
-            <h2>Animated Cycle Graph</h2>
-            <div class="cycle-graph-shell">
-              <svg id="cycle-graph" class="cycle-graph" viewBox="0 0 520 240" role="img" aria-label="Latest trade cycle graph"></svg>
-              <div class="cycle-sub" id="cycle-graph-meta">Waiting for cycle data…</div>
-            </div>
-          </div>
-          <div>
-            <h2>Trade Cycles</h2>
-            <div class="trade-grid" id="trade-cycles-grid"></div>
-          </div>
-        </section>
-        <section class="panel stack">
-          <div>
-            <h2>Creative Posts</h2>
-            <div class="post-grid" id="posts-grid"></div>
-          </div>
-          <div>
-            <h2>Recent Activity</h2>
-            <div class="feed" id="feed"></div>
-          </div>
-        </section>
-      </section>
-    </details>
+    <section class="panel">
+      <div class="panel-head">
+        <h2 id="inspector-title">Inspector</h2>
+        <button id="inspector-close" class="trigger-btn" type="button">Clear</button>
+      </div>
+      <div class="inspector-body" id="inspector-body">
+        <div class="live-empty">Click any post, edge, or match from either feed to inspect details.</div>
+      </div>
+      <div class="inspector-cycle-graph-wrap" id="inspector-cycle-graph-wrap" hidden>
+        <div class="cycle-graph-shell">
+          <svg id="cycle-graph" class="cycle-graph" viewBox="0 0 520 240" role="img" aria-label="Selected match cycle graph"></svg>
+          <div class="cycle-sub" id="cycle-graph-meta">Select a match to render graph.</div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <div id="lightbox" class="lightbox" aria-hidden="true">
@@ -2074,6 +2161,10 @@ export function renderDemoLiveBoardHtml() {
     const feedRightTitle = byId('feed-right-title');
     const feedLeftKindSelect = byId('feed-left-kind');
     const feedRightKindSelect = byId('feed-right-kind');
+    const inspectorTitle = byId('inspector-title');
+    const inspectorBody = byId('inspector-body');
+    const inspectorClose = byId('inspector-close');
+    const inspectorCycleGraphWrap = byId('inspector-cycle-graph-wrap');
     const meta = byId('meta');
     const pollStatus = byId('poll-status');
     const triggerCycleButton = byId('trigger-cycle');
@@ -2090,6 +2181,8 @@ export function renderDemoLiveBoardHtml() {
     const lightboxTitle = byId('lightbox-title');
     const lightboxClose = byId('lightbox-close');
     let selectedCycleId = null;
+    let selectedFeedEntryKey = null;
+    let feedEntryMap = new Map();
     let latestTradeCycles = [];
     let tradedAssetIds = new Set();
     let seenPostIds = new Set();
@@ -2473,88 +2566,257 @@ export function renderDemoLiveBoardHtml() {
       }).join('');
     }
 
-    function normalizeFeedKind(value, fallback = 'products') {
+    function normalizeFeedKind(value, fallback = 'posts') {
       const raw = String(value || '').trim().toLowerCase();
-      if (raw === 'products' || raw === 'intents' || raw === 'cycles') return raw;
+      if (raw === 'products') return 'posts';
+      if (raw === 'intents') return 'edges';
+      if (raw === 'cycles') return 'matches';
+      if (raw === 'posts' || raw === 'edges' || raw === 'matches') return raw;
       return fallback;
     }
 
     function feedTitleForKind(kind) {
-      if (kind === 'intents') return 'Intents being placed';
-      if (kind === 'cycles') return 'Cycles found';
-      return 'Products coming through';
+      if (kind === 'edges') return 'Edges being placed';
+      if (kind === 'matches') return 'Matches found';
+      return 'Posts coming through';
     }
 
     function formatUsd(value) {
       return Number.isFinite(value) ? ('$' + value) : 'n/a';
     }
 
+    function entryKeyForRow(row, idx) {
+      const baseId = row?.id ? String(row.id) : ('row_' + idx);
+      return String(row?.entry_key || (String(row?.kind || 'item') + ':' + baseId));
+    }
+
+    function buildEdgeRows(posts) {
+      const safePosts = Array.isArray(posts) ? posts : [];
+      const byAssetId = new Map();
+      for (const post of safePosts) {
+        const assetId = typeof post?.asset_id === 'string' ? post.asset_id.trim() : '';
+        if (!assetId || byAssetId.has(assetId)) continue;
+        byAssetId.set(assetId, post);
+      }
+      const rows = [];
+      const seen = new Set();
+      for (let idx = 0; idx < safePosts.length; idx += 1) {
+        const source = safePosts[idx];
+        const sourceKey = source?.intent_id || source?.asset_id || ('post_' + idx);
+        const wanted = Array.isArray(source?.wanted_asset_ids)
+          ? source.wanted_asset_ids.map(value => String(value || '').trim()).filter(Boolean)
+          : [];
+        for (const wantedAssetId of wanted) {
+          const edgeKey = sourceKey + '->' + wantedAssetId;
+          if (seen.has(edgeKey)) continue;
+          seen.add(edgeKey);
+          const target = byAssetId.get(wantedAssetId) ?? null;
+          rows.push({
+            kind: 'edges',
+            id: edgeKey,
+            entry_key: 'edge:' + edgeKey,
+            time: source?.posted_at ?? null,
+            actor: source?.actor_id ?? 'unknown',
+            title: (source?.actor_id ?? 'actor') + ' wants ' + (target?.title ?? wantedAssetId),
+            subtitle: target
+              ? ('From ' + (target?.actor_id ?? 'unknown') + ': ' + (target?.title ?? target?.asset_id ?? wantedAssetId))
+              : ('Target asset not listed yet: ' + wantedAssetId),
+            meta: 'offer ' + (source?.asset_id ?? 'n/a') + ' • want ' + wantedAssetId,
+            image_url: source?.image_url ?? null,
+            source_post: source,
+            target_post: target,
+            wanted_asset_id: wantedAssetId
+          });
+        }
+      }
+      return rows;
+    }
+
     function buildLiveFeedRows(kind, snapshot) {
       const posts = Array.isArray(snapshot?.posts) ? snapshot.posts : [];
-      const events = Array.isArray(snapshot?.events) ? snapshot.events : [];
       const tradeCycles = Array.isArray(snapshot?.trade_cycles) ? snapshot.trade_cycles : [];
-      if (kind === 'products') {
-        return posts.slice(0, 24).map(row => ({
+      if (kind === 'posts') {
+        return posts.slice(0, 24).map((row, idx) => ({
           kind,
-          id: row.intent_id ?? row.asset_id ?? row.title ?? 'product',
+          id: row.intent_id ?? row.asset_id ?? row.title ?? ('post_' + idx),
+          entry_key: 'post:' + (row.intent_id ?? row.asset_id ?? String(idx)),
           time: row.posted_at,
           actor: row.actor_id ?? 'unknown',
           title: row.title ?? row.intent_id ?? 'Untitled',
           subtitle: row.prompt_spec ?? '',
           meta: (row.deliverable_type ?? 'deliverable') + ' • ' + formatUsd(row.value_usd),
-          image_url: row.image_url ?? null
+          image_url: row.image_url ?? null,
+          post: row
         }));
       }
-      if (kind === 'intents') {
-        const intentEvents = events
-          .filter(row => String(row?.type || '').startsWith('intent.'))
-          .slice(0, 24)
-          .map(row => ({
-            kind,
-            id: row.id ?? row.intent_id ?? row.type,
-            time: row.occurred_at,
-            actor: row.actor_id ?? 'system',
-            title: row.type ?? 'intent',
-            subtitle: row.summary ?? '',
-            meta: row.intent_id ? ('intent ' + row.intent_id) : ''
-          }));
-        if (intentEvents.length > 0) return intentEvents;
-        return posts.slice(0, 24).map(row => ({
-          kind,
-          id: row.intent_id ?? row.asset_id ?? row.title ?? 'intent',
-          time: row.posted_at,
-          actor: row.actor_id ?? 'unknown',
-          title: 'intent.posted',
-          subtitle: (row.actor_id ?? 'actor') + ' listed ' + (row.deliverable_type ?? 'deliverable'),
-          meta: row.intent_id ? ('intent ' + row.intent_id) : ''
-        }));
+      if (kind === 'edges') {
+        return buildEdgeRows(posts).slice(0, 24);
       }
-      return tradeCycles.slice(0, 24).map(row => {
+      return tradeCycles.slice(0, 24).map((row, idx) => {
         const actors = Array.isArray(row?.participants)
           ? row.participants.map(participant => participant?.actor_id).filter(Boolean).slice(0, 4)
           : [];
+        const stateSummary = classifyTradeState(row?.state);
         return {
-          kind,
-          id: row.cycle_id ?? 'cycle',
+          kind: 'matches',
+          id: row.cycle_id ?? ('cycle_' + idx),
+          entry_key: 'match:' + (row.cycle_id ?? String(idx)),
           time: row.updated_at,
           actor: actors.join(' • ') || 'actors',
-          title: String(row.state || 'proposed'),
-          subtitle: row.cycle_id ?? 'cycle',
+          title: (row.cycle_id ?? 'cycle') + ' • ' + stateSummary.label,
+          subtitle: actors.length > 0 ? actors.join(' → ') : 'participants pending',
           meta: (Number.isFinite(row.participant_count) ? row.participant_count : actors.length) + '-actor cycle'
-            + (row.receipt_id ? (' • receipt ' + row.receipt_id) : '')
+            + (row.receipt_id ? (' • receipt ' + row.receipt_id) : ''),
+          image_url: null,
+          cycle: row
         };
       });
     }
 
+    function renderInspectorEmpty(text = 'Click any post, edge, or match from either feed to inspect details.') {
+      if (inspectorTitle) inspectorTitle.textContent = 'Inspector';
+      if (inspectorBody) inspectorBody.innerHTML = '<div class="live-empty">' + esc(text) + '</div>';
+      if (inspectorCycleGraphWrap) inspectorCycleGraphWrap.hidden = true;
+      if (cycleGraph) cycleGraph.innerHTML = '';
+      if (cycleGraphMeta) cycleGraphMeta.textContent = 'Select a match to render graph.';
+      selectedCycleId = null;
+    }
+
+    function renderPostInspector(post) {
+      if (!inspectorBody) return;
+      const wants = Array.isArray(post?.wanted_asset_ids)
+        ? post.wanted_asset_ids.map(value => String(value || '').trim()).filter(Boolean)
+        : [];
+      const media = post?.image_url
+        ? '<button class="post-media-btn" type="button" data-expand-image="1" data-image-url="' + esc(post.image_url) + '" data-image-title="' + esc(post?.title ?? 'post preview') + '">'
+          + '<img class="inspector-media" src="' + esc(post.image_url) + '" alt="' + esc(post?.title ?? 'post preview') + '" loading="lazy">'
+          + '</button>'
+        : '';
+      const rows = [
+        ['Actor', esc(post?.actor_id ?? 'unknown')],
+        ['Title', '<strong>' + esc(post?.title ?? 'Untitled') + '</strong>'],
+        ['Trade Request', esc(post?.agent_message ?? post?.prompt_spec ?? 'No request provided')],
+        ['Offer', esc((post?.deliverable_type ?? 'deliverable') + ' • ' + formatUsd(post?.value_usd))],
+        ['Wants', wants.length > 0 ? wants.map(esc).join(', ') : 'Open request']
+      ];
+      inspectorBody.innerHTML = media + rows.map(([key, value]) => (
+        '<div class="inspector-row"><div class="inspector-key">' + esc(key) + '</div><div class="inspector-value">' + value + '</div></div>'
+      )).join('');
+      if (inspectorCycleGraphWrap) inspectorCycleGraphWrap.hidden = true;
+      if (cycleGraph) cycleGraph.innerHTML = '';
+      if (cycleGraphMeta) cycleGraphMeta.textContent = 'Select a match to render graph.';
+      selectedCycleId = null;
+    }
+
+    function renderEdgeInspector(entry) {
+      if (!inspectorBody) return;
+      const source = entry?.source_post ?? {};
+      const target = entry?.target_post ?? null;
+      const sourceImage = source?.image_url
+        ? '<button class="post-media-btn" type="button" data-expand-image="1" data-image-url="' + esc(source.image_url) + '" data-image-title="' + esc(source?.title ?? 'source post') + '">'
+          + '<img class="inspector-media" src="' + esc(source.image_url) + '" alt="' + esc(source?.title ?? 'source post') + '" loading="lazy">'
+          + '</button>'
+        : '';
+      const targetImage = target?.image_url
+        ? '<button class="post-media-btn" type="button" data-expand-image="1" data-image-url="' + esc(target.image_url) + '" data-image-title="' + esc(target?.title ?? 'target post') + '">'
+          + '<img class="inspector-media" src="' + esc(target.image_url) + '" alt="' + esc(target?.title ?? 'target post') + '" loading="lazy">'
+          + '</button>'
+        : '';
+      const rows = [
+        ['From', '<strong>' + esc(source?.actor_id ?? 'unknown') + '</strong> listed ' + esc(source?.title ?? source?.asset_id ?? 'post')],
+        ['Wants', esc(entry?.wanted_asset_id ?? 'asset')],
+        ['Target', target
+          ? ('<strong>' + esc(target?.actor_id ?? 'unknown') + '</strong> listed ' + esc(target?.title ?? target?.asset_id ?? entry?.wanted_asset_id ?? 'asset'))
+          : 'Target not listed yet'],
+        ['Edge Logic', esc((source?.asset_id ?? 'unknown asset') + ' -> ' + (entry?.wanted_asset_id ?? 'unknown asset'))]
+      ];
+      inspectorBody.innerHTML = sourceImage
+        + (targetImage ? targetImage : '')
+        + rows.map(([key, value]) => (
+          '<div class="inspector-row"><div class="inspector-key">' + esc(key) + '</div><div class="inspector-value">' + value + '</div></div>'
+        )).join('');
+      if (inspectorCycleGraphWrap) inspectorCycleGraphWrap.hidden = true;
+      if (cycleGraph) cycleGraph.innerHTML = '';
+      if (cycleGraphMeta) cycleGraphMeta.textContent = 'Select a match to render graph.';
+      selectedCycleId = null;
+    }
+
+    function renderMatchInspector(cycle) {
+      if (!inspectorBody) return;
+      const participants = Array.isArray(cycle?.participants) ? cycle.participants : [];
+      const stateSummary = classifyTradeState(cycle?.state);
+      const legs = participants.map(participant => {
+        const gives = participant?.gives ?? {};
+        const gets = participant?.gets ?? {};
+        return '<div class="inspector-match-leg">'
+          + '<strong>' + esc(participant?.actor_id ?? 'actor') + '</strong><br>'
+          + 'gives ' + esc(gives?.title ?? gives?.asset_id ?? 'asset') + ' (' + esc(formatUsd(gives?.value_usd)) + ')<br>'
+          + 'gets ' + esc(gets?.title ?? gets?.asset_id ?? 'asset') + ' (' + esc(formatUsd(gets?.value_usd)) + ')'
+          + '</div>';
+      }).join('');
+      const rows = [
+        ['Cycle', '<code>' + esc(cycle?.cycle_id ?? 'cycle') + '</code>'],
+        ['State', esc(stateSummary.label + ' • ' + stateSummary.explainer)],
+        ['Updated', esc(shortAgo(cycle?.updated_at))],
+        ['Receipt', esc(cycle?.receipt_id ?? 'pending')]
+      ];
+      inspectorBody.innerHTML = rows.map(([key, value]) => (
+        '<div class="inspector-row"><div class="inspector-key">' + esc(key) + '</div><div class="inspector-value">' + value + '</div></div>'
+      )).join('') + '<div class="inspector-match-grid">' + (legs || '<div class="live-empty">No participant legs yet.</div>') + '</div>';
+      if (inspectorCycleGraphWrap) inspectorCycleGraphWrap.hidden = false;
+      selectedCycleId = typeof cycle?.cycle_id === 'string' ? cycle.cycle_id : null;
+      renderCycleGraph([cycle]);
+    }
+
+    function renderInspectorEntry(entry) {
+      if (!entry) {
+        renderInspectorEmpty();
+        return;
+      }
+      if (entry.kind === 'posts') {
+        if (inspectorTitle) inspectorTitle.textContent = 'Post';
+        renderPostInspector(entry.post ?? null);
+        return;
+      }
+      if (entry.kind === 'edges') {
+        if (inspectorTitle) inspectorTitle.textContent = 'Edge';
+        renderEdgeInspector(entry);
+        return;
+      }
+      if (inspectorTitle) inspectorTitle.textContent = 'Match';
+      renderMatchInspector(entry.cycle ?? null);
+    }
+
+    function syncFeedSelectionHighlight() {
+      const nodes = document.querySelectorAll('.live-item[data-entry-key]');
+      for (const node of nodes) {
+        const key = node.getAttribute('data-entry-key');
+        node.classList.toggle('active', Boolean(key) && key === selectedFeedEntryKey);
+      }
+    }
+
+    function openInspectorByEntryKey(entryKey) {
+      const key = typeof entryKey === 'string' ? entryKey.trim() : '';
+      if (!key) return;
+      selectedFeedEntryKey = key;
+      renderInspectorEntry(feedEntryMap.get(key) ?? null);
+      syncFeedSelectionHighlight();
+    }
+
     function renderLiveFeedColumn({ container, titleNode, kind, snapshot }) {
-      if (!container) return;
+      if (!container) return { firstEntryKey: null };
       if (titleNode) titleNode.textContent = feedTitleForKind(kind);
       const rows = buildLiveFeedRows(kind, snapshot);
       if (rows.length === 0) {
         container.innerHTML = '<div class="live-empty">No ' + esc(kind) + ' events yet.</div>';
-        return;
+        return { firstEntryKey: null };
       }
-      container.innerHTML = rows.map(row => {
+      let firstEntryKey = null;
+      container.innerHTML = rows.map((row, idx) => {
+        const entryKey = entryKeyForRow(row, idx);
+        if (!firstEntryKey) firstEntryKey = entryKey;
+        feedEntryMap.set(entryKey, row);
+        const isActive = entryKey === selectedFeedEntryKey;
         const head = '<div class="live-item-head"><span class="badge">' + esc(row.actor || 'actor') + '</span><span>' + esc(shortAgo(row.time)) + '</span></div>';
         const copy = '<p class="live-item-title">' + esc(row.title || 'item') + '</p>'
           + (row.subtitle ? ('<p class="live-item-sub">' + esc(row.subtitle) + '</p>') : '')
@@ -2562,17 +2824,27 @@ export function renderDemoLiveBoardHtml() {
         const body = row.image_url
           ? ('<div class="live-item-row"><img class="live-thumb" src="' + esc(row.image_url) + '" alt="' + esc(row.title || 'preview') + '" loading="lazy"><div>' + copy + '</div></div>')
           : copy;
-        return '<article class="live-item kind-' + esc(row.kind) + '">' + head + body + '</article>';
+        return '<article class="live-item clickable kind-' + esc(row.kind) + (isActive ? ' active' : '') + '" role="button" tabindex="0" data-entry-key="' + esc(entryKey) + '">' + head + body + '</article>';
       }).join('');
+      return { firstEntryKey };
     }
 
     function renderLiveFeeds(snapshot) {
-      const leftKind = normalizeFeedKind(feedLeftKindSelect?.value, 'products');
-      const rightKind = normalizeFeedKind(feedRightKindSelect?.value, leftKind === 'intents' ? 'cycles' : 'intents');
+      const leftKind = normalizeFeedKind(feedLeftKindSelect?.value, 'posts');
+      const rightKind = normalizeFeedKind(feedRightKindSelect?.value, leftKind === 'edges' ? 'matches' : 'edges');
       if (feedLeftKindSelect && feedLeftKindSelect.value !== leftKind) feedLeftKindSelect.value = leftKind;
       if (feedRightKindSelect && feedRightKindSelect.value !== rightKind) feedRightKindSelect.value = rightKind;
-      renderLiveFeedColumn({ container: feedLeftList, titleNode: feedLeftTitle, kind: leftKind, snapshot });
-      renderLiveFeedColumn({ container: feedRightList, titleNode: feedRightTitle, kind: rightKind, snapshot });
+      feedEntryMap = new Map();
+      const leftRender = renderLiveFeedColumn({ container: feedLeftList, titleNode: feedLeftTitle, kind: leftKind, snapshot });
+      const rightRender = renderLiveFeedColumn({ container: feedRightList, titleNode: feedRightTitle, kind: rightKind, snapshot });
+      if (selectedFeedEntryKey && feedEntryMap.has(selectedFeedEntryKey)) {
+        renderInspectorEntry(feedEntryMap.get(selectedFeedEntryKey));
+      } else {
+        selectedFeedEntryKey = leftRender.firstEntryKey || rightRender.firstEntryKey || null;
+        if (selectedFeedEntryKey) renderInspectorEntry(feedEntryMap.get(selectedFeedEntryKey) ?? null);
+        else renderInspectorEmpty('No posts, edges, or matches yet. Run a wave to generate activity.');
+      }
+      syncFeedSelectionHighlight();
     }
 
     function setPollStatus(kind, text) {
@@ -2600,8 +2872,8 @@ export function renderDemoLiveBoardHtml() {
     }
 
     function selectedFeedKinds() {
-      const left = normalizeFeedKind(feedLeftKindSelect?.value, 'products');
-      const right = normalizeFeedKind(feedRightKindSelect?.value, left === 'intents' ? 'cycles' : 'intents');
+      const left = normalizeFeedKind(feedLeftKindSelect?.value, 'posts');
+      const right = normalizeFeedKind(feedRightKindSelect?.value, left === 'edges' ? 'matches' : 'edges');
       return { left, right };
     }
 
@@ -2793,19 +3065,8 @@ export function renderDemoLiveBoardHtml() {
         seenPostIds = currentPostIds;
         seenCycleIds = currentCycleIds;
         hasInitialSnapshot = true;
-        if (selectedCycleId && !tradeCycles.some(row => row?.cycle_id === selectedCycleId)) {
-          selectedCycleId = null;
-        }
-        if (!selectedCycleId && tradeCycles.length > 0) {
-          selectedCycleId = tradeCycles[0]?.cycle_id ?? null;
-        }
 
-        renderQuickStats(snapshot.funnel ?? {}, snapshot);
         renderLiveFeeds(snapshot);
-        renderPosts(snapshotPosts);
-        renderTradeCycles(tradeCycles);
-        renderCycleGraph(tradeCycles);
-        renderFeed(snapshot.events ?? []);
 
         const latencyMs = Date.now() - started;
         const visibility = snapshot.workspace_only ? 'workspace-only' : 'all actors';
@@ -2846,7 +3107,7 @@ export function renderDemoLiveBoardHtml() {
     }
     if (feedLeftKindSelect) {
       const initialSearch = new URLSearchParams(window.location.search);
-      feedLeftKindSelect.value = normalizeFeedKind(initialSearch.get('feed_left'), 'products');
+      feedLeftKindSelect.value = normalizeFeedKind(initialSearch.get('feed_left'), 'posts');
       feedLeftKindSelect.addEventListener('change', () => {
         renderLiveFeeds(latestSnapshot ?? {});
         void load();
@@ -2854,7 +3115,7 @@ export function renderDemoLiveBoardHtml() {
     }
     if (feedRightKindSelect) {
       const initialSearch = new URLSearchParams(window.location.search);
-      feedRightKindSelect.value = normalizeFeedKind(initialSearch.get('feed_right'), 'intents');
+      feedRightKindSelect.value = normalizeFeedKind(initialSearch.get('feed_right'), 'edges');
       feedRightKindSelect.addEventListener('change', () => {
         renderLiveFeeds(latestSnapshot ?? {});
         void load();
@@ -2902,6 +3163,46 @@ export function renderDemoLiveBoardHtml() {
         selectedCycleId = cycleId;
         renderTradeCycles(latestTradeCycles);
         renderCycleGraph(latestTradeCycles);
+      });
+    }
+    function bindFeedInspectorInteractions(container) {
+      if (!container) return;
+      container.addEventListener('click', event => {
+        const imageTrigger = event.target instanceof Element ? event.target.closest('[data-expand-image=\"1\"]') : null;
+        if (imageTrigger) {
+          const imageUrl = imageTrigger.getAttribute('data-image-url');
+          const title = imageTrigger.getAttribute('data-image-title');
+          openLightbox({ imageUrl, title });
+          return;
+        }
+        const item = event.target instanceof Element ? event.target.closest('.live-item[data-entry-key]') : null;
+        if (!item) return;
+        openInspectorByEntryKey(item.getAttribute('data-entry-key'));
+      });
+      container.addEventListener('keydown', event => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        const item = event.target instanceof Element ? event.target.closest('.live-item[data-entry-key]') : null;
+        if (!item) return;
+        event.preventDefault();
+        openInspectorByEntryKey(item.getAttribute('data-entry-key'));
+      });
+    }
+    bindFeedInspectorInteractions(feedLeftList);
+    bindFeedInspectorInteractions(feedRightList);
+    if (inspectorBody) {
+      inspectorBody.addEventListener('click', event => {
+        const imageTrigger = event.target instanceof Element ? event.target.closest('[data-expand-image=\"1\"]') : null;
+        if (!imageTrigger) return;
+        const imageUrl = imageTrigger.getAttribute('data-image-url');
+        const title = imageTrigger.getAttribute('data-image-title');
+        openLightbox({ imageUrl, title });
+      });
+    }
+    if (inspectorClose) {
+      inspectorClose.addEventListener('click', () => {
+        selectedFeedEntryKey = null;
+        renderInspectorEmpty();
+        syncFeedSelectionHighlight();
       });
     }
     if (lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
