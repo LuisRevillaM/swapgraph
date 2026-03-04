@@ -1516,19 +1516,35 @@ export function renderDemoLiveBoardHtml() {
       margin-top: var(--sp-3);
     }
     .primary-stage {
+      --stage-panel-h: clamp(680px, 74vh, 860px);
       display: grid;
       grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
       gap: var(--sp-4);
       align-items: start;
     }
+    .primary-stage > .panel {
+      min-height: var(--stage-panel-h);
+    }
     .feeds-panel .live-feed-column {
       min-height: 340px;
     }
     .feeds-panel .live-list {
-      max-height: 480px;
+      max-height: calc(var(--stage-panel-h) - 210px);
+    }
+    .viz-panel {
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: var(--sp-2);
+    }
+    .viz-panel .panel-head {
+      margin-bottom: 0;
+    }
+    .viz-panel .inspector-cycle-graph-wrap {
+      margin-top: 0;
     }
     .viz-panel .inspector-body {
-      max-height: 360px;
+      max-height: calc(var(--stage-panel-h) - 330px);
+      min-height: 0;
       overflow: auto;
       padding-right: var(--sp-1);
       scrollbar-width: thin;
@@ -1538,11 +1554,11 @@ export function renderDemoLiveBoardHtml() {
     .viz-panel .inspector-body::-webkit-scrollbar-track { background: transparent; }
     .viz-panel .inspector-body::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
     .viz-panel .cycle-graph-shell {
-      min-height: 230px;
+      min-height: 290px;
       padding: var(--sp-3);
     }
     .viz-panel .cycle-graph {
-      height: 220px;
+      height: 270px;
     }
 
     /* ─── Layout ─── */
@@ -2152,8 +2168,16 @@ export function renderDemoLiveBoardHtml() {
         min-width: 0;
         width: 100%;
       }
+      .primary-stage {
+        --stage-panel-h: auto;
+      }
+      .primary-stage > .panel {
+        min-height: 0;
+      }
       .primary-stage { grid-template-columns: 1fr; }
       .live-feeds-grid { grid-template-columns: 1fr; }
+      .feeds-panel .live-list { max-height: 520px; }
+      .viz-panel .inspector-body { max-height: none; }
       .essentials { grid-template-columns: 1fr; }
       .post-grid { grid-template-columns: 1fr; }
       .trade-grid { grid-template-columns: 1fr; }
