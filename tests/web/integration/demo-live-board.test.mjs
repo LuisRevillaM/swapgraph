@@ -42,3 +42,41 @@ test('demo live board serves html and snapshot without actor auth', async () => 
     await runtime.close();
   }
 });
+
+test('demo live board can trigger a new two-agent cycle from UI endpoint', async () => {
+  const runtime = await startRuntimeHarness();
+
+  try {
+    const triggerResponse = await fetch(`${runtime.baseUrl}/demo/live-board/trigger-cycle`, {
+      method: 'POST',
+      headers: {
+        accept: 'application/json',
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({})
+    });
+    assert.equal(triggerResponse.status, 200);
+    const triggerBody = await triggerResponse.json();
+    assert.equal(triggerBody?.ok, true);
+    assert.equal(typeof triggerBody?.demo_cycle?.proposal_id, 'string');
+    assert.equal(typeof triggerBody?.demo_cycle?.receipt_id, 'string');
+    assert.equal(triggerBody?.demo_cycle?.final_state, 'completed');
+
+    const snapshotResponse = await requestJson({
+      baseUrl: runtime.baseUrl,
+      method: 'GET',
+      path: '/demo/live-board/snapshot?limit=10&lanes=workshop,architects_dream,marketplace'
+    });
+    assert.equal(snapshotResponse.status, 200);
+    assert.equal(snapshotResponse.body?.ok, true);
+    assert.ok((snapshotResponse.body?.snapshot?.funnel?.receipts_completed ?? 0) >= 1);
+    assert.ok((snapshotResponse.body?.snapshot?.funnel?.commits_total ?? 0) >= 1);
+    assert.ok(Array.isArray(snapshotResponse.body?.snapshot?.posts));
+    assert.ok(snapshotResponse.body.snapshot.posts.length >= 2);
+    assert.ok(snapshotResponse.body.snapshot.posts.some(post => typeof post.image_url === 'string' && post.image_url.length > 0));
+    assert.ok(snapshotResponse.body.snapshot.posts.some(post => post.actor_id === 'workshop'));
+    assert.ok(snapshotResponse.body.snapshot.posts.some(post => post.actor_id === 'architects_dream'));
+  } finally {
+    await runtime.close();
+  }
+});

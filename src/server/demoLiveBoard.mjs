@@ -8,6 +8,34 @@ function asIso(value) {
   return typeof value === 'string' && parseIsoMs(value) !== null ? value : null;
 }
 
+function asNumber(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function firstNonEmptyString(...values) {
+  for (const value of values) {
+    if (typeof value === 'string' && value.trim()) return value.trim();
+  }
+  return null;
+}
+
+function normalizeStringList(value, maxItems = 5) {
+  if (!Array.isArray(value)) return [];
+  const out = [];
+  const seen = new Set();
+  for (const raw of value) {
+    const next = typeof raw === 'string' ? raw.trim() : '';
+    if (!next) continue;
+    const key = next.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(next);
+    if (out.length >= maxItems) break;
+  }
+  return out;
+}
+
 function normalizeActor(input) {
   const type = typeof input?.type === 'string' ? input.type.trim() : '';
   const id = typeof input?.id === 'string' ? input.id.trim() : '';
@@ -279,6 +307,53 @@ export function buildDemoLiveBoardSnapshot({ store, nowIso = new Date().toISOStr
     'recorded_at'
   ).slice(0, limit);
 
+  const recentPosts = sortByIsoDescending(
+    intents.map(intent => {
+      const actor = normalizeActor(intent?.actor);
+      const offer = Array.isArray(intent?.offer) && intent.offer.length > 0 ? intent.offer[0] : null;
+      const metadata = offer?.metadata ?? {};
+      const proof = offer?.proof ?? {};
+      const deliverableType = firstNonEmptyString(
+        metadata?.deliverable_type,
+        metadata?.output_type,
+        metadata?.type
+      );
+      const explicitImageUrl = firstNonEmptyString(
+        metadata?.preview_image_url,
+        metadata?.image_url,
+        metadata?.artifact_url,
+        metadata?.thumbnail_url
+      );
+      const fallbackImageUrl = (metadata?.demo_kind === 'creative_labor_asset' || String(deliverableType ?? '').toLowerCase().includes('image'))
+        && typeof offer?.asset_id === 'string'
+        ? `https://picsum.photos/seed/${encodeURIComponent(offer.asset_id)}/1024/768`
+        : null;
+      return {
+        intent_id: intent?.id ?? null,
+        actor_id: actor?.id ?? null,
+        actor_type: actor?.type ?? null,
+        status: firstNonEmptyString(intent?.status) ?? 'unknown',
+        posted_at: asIso(proof?.verified_at) ?? asIso(intent?.updated_at) ?? null,
+        asset_id: firstNonEmptyString(offer?.asset_id),
+        title: firstNonEmptyString(
+          metadata?.title,
+          metadata?.name,
+          actor?.id ? `Demo output for ${actor.id}` : null
+        ),
+        prompt_spec: firstNonEmptyString(
+          metadata?.prompt_spec,
+          metadata?.description,
+          metadata?.brief
+        ),
+        deliverable_type: deliverableType ?? null,
+        value_usd: asNumber(metadata?.value_usd) ?? asNumber(metadata?.list_price_usd) ?? asNumber(intent?.value_band?.max_usd),
+        delivery_targets: normalizeStringList(metadata?.delivery_target_options, 6),
+        image_url: explicitImageUrl ?? fallbackImageUrl
+      };
+    }),
+    'posted_at'
+  ).slice(0, limit);
+
   const actorMap = new Map();
   const ensureActor = actor => {
     const normalized = normalizeActor(actor);
@@ -351,6 +426,7 @@ export function buildDemoLiveBoardSnapshot({ store, nowIso = new Date().toISOStr
     funnel,
     lanes: buildLaneRows({ actorRows, laneHints: defaultHints, nowIso }),
     actors: actorRows.slice(0, limit),
+    posts: recentPosts,
     cycles: recentCycles,
     receipts: recentReceipts,
     matching_runs: recentMatchingRuns,
@@ -478,10 +554,102 @@ export function renderDemoLiveBoardHtml() {
       letter-spacing: 0.05em;
       color: #374151;
     }
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .trigger-btn {
+      border: 1px solid color-mix(in oklab, var(--accent) 45%, var(--line));
+      background: linear-gradient(135deg, #ecfdfd, #fff8f2);
+      color: var(--accent-strong);
+      border-radius: 999px;
+      padding: 8px 13px;
+      font-size: 0.77rem;
+      font-family: var(--mono);
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      transition: transform 120ms ease, opacity 120ms ease;
+    }
+    .trigger-btn:hover { transform: translateY(-1px); }
+    .trigger-btn:disabled {
+      cursor: default;
+      opacity: 0.65;
+      transform: none;
+    }
+    .trigger-status {
+      margin: 2px 0 0;
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-family: var(--mono);
+    }
     .grid-3 {
       display: grid;
       grid-template-columns: 1.15fr 1fr 1fr;
       gap: 12px;
+    }
+    .post-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .post-card {
+      border: 1px solid #e8ebf2;
+      border-radius: 12px;
+      background: #ffffff;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: 160px auto;
+      min-height: 264px;
+    }
+    .post-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #f5f7fb;
+    }
+    .post-copy {
+      padding: 9px 10px 11px;
+      display: grid;
+      gap: 5px;
+    }
+    .post-copy .top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 0.74rem;
+      color: #1f2937;
+      font-weight: 700;
+    }
+    .post-copy .title {
+      margin: 0;
+      font-size: 0.82rem;
+      line-height: 1.25;
+      color: #111827;
+      text-transform: none;
+      letter-spacing: normal;
+      font-weight: 700;
+    }
+    .post-copy .prompt {
+      margin: 0;
+      font-size: 0.74rem;
+      line-height: 1.35;
+      color: #4b5563;
+      font-family: var(--mono);
+      min-height: 42px;
+    }
+    .post-copy .meta-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      font-size: 0.72rem;
+      color: #6b7280;
+      font-family: var(--mono);
     }
     table {
       width: 100%;
@@ -560,6 +728,7 @@ export function renderDemoLiveBoardHtml() {
     @media (max-width: 980px) {
       .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .grid-3 { grid-template-columns: 1fr; }
+      .post-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -574,6 +743,19 @@ export function renderDemoLiveBoardHtml() {
     </section>
 
     <section class="cards" id="cards"></section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Demo Controls</h2>
+        <button id="trigger-cycle" class="trigger-btn" type="button">Start New Agent Cycle</button>
+      </div>
+      <p class="trigger-status" id="trigger-status">Creates a workshop + architects_dream cycle and runs matching, commit, settlement, and receipt.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Creative Posts</h2>
+      <div class="post-grid" id="posts-grid"></div>
+    </section>
 
     <section class="panel">
       <h2>Lane Activity</h2>
@@ -663,9 +845,12 @@ export function renderDemoLiveBoardHtml() {
     const cyclesBody = byId('cycles-body');
     const receiptsBody = byId('receipts-body');
     const runsBody = byId('runs-body');
+    const postsGrid = byId('posts-grid');
     const feed = byId('feed');
     const meta = byId('meta');
     const pollStatus = byId('poll-status');
+    const triggerCycleButton = byId('trigger-cycle');
+    const triggerStatus = byId('trigger-status');
 
     function esc(value) {
       return String(value)
@@ -764,6 +949,30 @@ export function renderDemoLiveBoardHtml() {
       }).join('');
     }
 
+    function renderPosts(rows) {
+      if (!rows || rows.length === 0) {
+        postsGrid.innerHTML = '<div class="empty">No creative posts yet. Trigger a cycle to generate one.</div>';
+        return;
+      }
+      postsGrid.innerHTML = rows.map(row => {
+        const image = row.image_url
+          ? '<img src="' + esc(row.image_url) + '" alt="' + esc(row.title ?? row.intent_id ?? 'post') + '" loading="lazy">'
+          : '<img alt="No preview" loading="lazy">';
+        const value = Number.isFinite(row.value_usd) ? '$' + row.value_usd : 'n/a';
+        const actor = row.actor_id ? row.actor_id : 'unknown';
+        const posted = row.posted_at ? shortAgo(row.posted_at) : 'n/a';
+        return '<article class="post-card">'
+          + image
+          + '<div class="post-copy">'
+          + '<div class="top"><span class="badge">' + esc(actor) + '</span><span>' + esc(posted) + '</span></div>'
+          + '<p class="title">' + esc(row.title ?? row.intent_id ?? 'Untitled') + '</p>'
+          + '<p class="prompt">' + esc(row.prompt_spec ?? 'No prompt provided') + '</p>'
+          + '<div class="meta-row"><span>' + esc(row.deliverable_type ?? 'deliverable') + '</span><span>' + esc(value) + '</span></div>'
+          + '</div>'
+          + '</article>';
+      }).join('');
+    }
+
     function renderFeed(rows) {
       if (!rows || rows.length === 0) {
         feed.innerHTML = '<div class="empty">No events yet.</div>';
@@ -786,6 +995,38 @@ export function renderDemoLiveBoardHtml() {
       pollStatus.textContent = text;
     }
 
+    function setTriggerStatus(text) {
+      triggerStatus.textContent = text;
+    }
+
+    async function triggerCycle() {
+      if (!triggerCycleButton) return;
+      triggerCycleButton.disabled = true;
+      setTriggerStatus('Starting new cycle...');
+      try {
+        const response = await fetch('/demo/live-board/trigger-cycle', {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            accept: 'application/json'
+          },
+          body: JSON.stringify({})
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || payload?.ok !== true) {
+          const msg = payload?.error?.message || payload?.error?.code || ('request failed (' + response.status + ')');
+          throw new Error(msg);
+        }
+        const cycle = payload?.demo_cycle ?? {};
+        setTriggerStatus('Cycle ready: ' + (cycle.proposal_id || 'n/a') + (cycle.receipt_id ? ' • receipt ' + cycle.receipt_id : ''));
+        await load();
+      } catch (error) {
+        setTriggerStatus('Trigger failed: ' + error.message);
+      } finally {
+        triggerCycleButton.disabled = false;
+      }
+    }
+
     async function load() {
       const search = new URLSearchParams(window.location.search);
       if (!search.get('limit')) search.set('limit', '25');
@@ -800,6 +1041,7 @@ export function renderDemoLiveBoardHtml() {
         const snapshot = payload?.snapshot ?? {};
 
         renderCards(snapshot.funnel ?? {});
+        renderPosts(snapshot.posts ?? []);
         renderLanes(snapshot.lanes ?? []);
         renderCycles(snapshot.cycles ?? []);
         renderReceipts(snapshot.receipts ?? []);
@@ -815,6 +1057,7 @@ export function renderDemoLiveBoardHtml() {
       }
     }
 
+    if (triggerCycleButton) triggerCycleButton.addEventListener('click', triggerCycle);
     load();
     setInterval(load, 4000);
   </script>

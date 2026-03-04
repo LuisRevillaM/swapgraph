@@ -10,6 +10,7 @@ import { ingestPollingResponse } from '../delivery/proposalIngestService.mjs';
 import { CycleProposalsReadService } from '../read/cycleProposalsReadService.mjs';
 import { SettlementReadService } from '../read/settlementReadService.mjs';
 import { buildDemoLiveBoardSnapshot, renderDemoLiveBoardHtml } from './demoLiveBoard.mjs';
+import { runDemoLiveBoardTriggerCycle } from './demoLiveBoardTriggerCycle.mjs';
 import { CycleProposalsCommitService } from '../service/cycleProposalsCommitService.mjs';
 import { CommercialPolicyService } from '../service/commercialPolicyService.mjs';
 import { LiquidityAutonomyPolicyService } from '../service/liquidityAutonomyPolicyService.mjs';
@@ -393,6 +394,41 @@ export function createRuntimeApiServer({
             snapshot
           }
         });
+      }
+
+      if (method === 'POST' && pathname === '/demo/live-board/trigger-cycle') {
+        await readJsonBody(req);
+        try {
+          const demoCycle = runDemoLiveBoardTriggerCycle({
+            swapIntents,
+            marketplaceMatching,
+            proposalsRead,
+            commitsApi,
+            settlementWrite
+          });
+          shouldPersist = true;
+          return sendJson({
+            res,
+            status: 200,
+            correlationId,
+            body: {
+              correlation_id: correlationId,
+              ok: true,
+              demo_cycle: demoCycle,
+              state: summarizeState(store)
+            }
+          });
+        } catch (error) {
+          const message = error instanceof Error ? error.message : 'demo trigger failed';
+          return sendJson({
+            res,
+            status: 409,
+            correlationId,
+            body: errorBody(correlationId, 'CONFLICT', message, {
+              reason_code: 'demo_live_board_trigger_failed'
+            })
+          });
+        }
       }
 
       if (method === 'POST' && pathname === '/dev/seed/m5') {
