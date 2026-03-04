@@ -747,8 +747,9 @@ export function renderDemoLiveBoardHtml() {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    /* ─── Motion tokens ─── */
+    /* ─── Design tokens ─── */
     :root {
+      /* Motion */
       --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
       --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
       --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -758,10 +759,7 @@ export function renderDemoLiveBoardHtml() {
       --dur-slow: 480ms;
       --dur-dramatic: 700ms;
       --stagger-step: 60ms;
-    }
-
-    /* ─── Design tokens ─── */
-    :root {
+      /* Color */
       --bg: #f0ede7;
       --surface: #fffdf9;
       --surface-strong: #ffffff;
@@ -837,54 +835,17 @@ export function renderDemoLiveBoardHtml() {
       from { opacity: 0; transform: translateY(12px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    @keyframes shimmer {
-      0% { background-position: -200% 0; }
-      100% { background-position: 200% 0; }
-    }
     @keyframes pulseRing {
       0%, 100% { transform: scale(1); opacity: 1; }
       50% { transform: scale(1.8); opacity: 0; }
-    }
-    @keyframes pulseDot {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
     }
     @keyframes flow {
       from { stroke-dashoffset: 0; }
       to { stroke-dashoffset: -36; }
     }
-    @keyframes nodeEntrance {
-      from { r: 0; opacity: 0; }
-      to { r: 22; opacity: 1; }
-    }
-    @keyframes edgeEntrance {
-      from { stroke-dashoffset: 100; opacity: 0; }
-      to { stroke-dashoffset: 0; opacity: 1; }
-    }
     @keyframes lightboxIn {
       from { opacity: 0; transform: scale(0.92) translateY(20px); }
       to { opacity: 1; transform: scale(1) translateY(0); }
-    }
-    @keyframes countPulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.06); }
-      100% { transform: scale(1); }
-    }
-    @keyframes newCardPulse {
-      0% {
-        box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 45%, transparent);
-      }
-      100% {
-        box-shadow: 0 0 0 14px rgba(13, 148, 136, 0);
-      }
-    }
-
-    .section-enter {
-      animation: fadeSlideUp var(--dur-normal) var(--ease-out-expo) both;
     }
 
     /* ─── Header ─── */
@@ -959,85 +920,6 @@ export function renderDemoLiveBoardHtml() {
     .status-pill.bad .status-dot { background: var(--bad); }
     .status-pill.bad { color: var(--bad); border-color: color-mix(in oklab, var(--bad) 35%, var(--line)); background: var(--bad-subtle); }
 
-    /* ─── Metric cards ─── */
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: var(--sp-3);
-      animation: fadeSlideUp var(--dur-normal) var(--ease-out-expo) both;
-      animation-delay: calc(var(--stagger-step) * 1);
-    }
-    .card {
-      position: relative;
-      background: var(--surface-elevated);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: var(--sp-4) var(--sp-4) var(--sp-3);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
-      transition: transform var(--dur-fast) var(--ease-out-expo), box-shadow var(--dur-fast) var(--ease-out-expo);
-      overflow: hidden;
-    }
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, var(--accent), var(--accent-strong));
-      opacity: 0;
-      transition: opacity var(--dur-fast) ease;
-    }
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.06), 0 12px 28px rgba(0,0,0,0.05);
-    }
-    .card:hover::before { opacity: 1; }
-    .card h3 {
-      margin: 0;
-      font-size: var(--text-xs);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted);
-      font-weight: 600;
-    }
-    .card .value {
-      margin-top: var(--sp-2);
-      font-size: var(--text-2xl);
-      font-weight: 700;
-      font-family: var(--mono);
-      color: var(--accent-strong);
-      line-height: 1.1;
-      letter-spacing: -0.02em;
-    }
-    .card .value.changed {
-      animation: countPulse var(--dur-normal) var(--ease-spring);
-    }
-    .quick-stats {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--sp-2);
-      align-items: center;
-      padding: var(--sp-3);
-    }
-    .quick-pill {
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      background: var(--surface-elevated);
-      color: var(--ink-secondary);
-      font-family: var(--mono);
-      font-size: var(--text-xs);
-      padding: 5px 10px;
-      display: inline-flex;
-      gap: 6px;
-      align-items: baseline;
-    }
-    .quick-pill strong {
-      font-size: var(--text-base);
-      color: var(--accent-strong);
-      letter-spacing: -0.01em;
-      font-weight: 700;
-    }
 
     /* ─── Panel ─── */
     .panel {
@@ -1286,6 +1168,32 @@ export function renderDemoLiveBoardHtml() {
       font-size: var(--text-xs);
       color: var(--ink-secondary);
     }
+    /* ─── Primary stage layout ─── */
+    .primary-stage {
+      --stage-panel-h: clamp(680px, 74vh, 860px);
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: var(--sp-4);
+      align-items: start;
+    }
+    .primary-stage > .panel {
+      min-height: var(--stage-panel-h);
+    }
+
+    /* ─── Viz panel ─── */
+    .viz-panel {
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: var(--sp-2);
+      overflow: visible;
+    }
+    .viz-panel .panel-head { margin-bottom: 0; }
+    .viz-panel .inspector-cycle-graph-wrap { margin-top: 0; }
+    .viz-panel .inspector-body { align-content: start; }
+    .viz-panel .cycle-graph-shell { min-height: 290px; padding: var(--sp-3); }
+    .viz-panel .cycle-graph { height: 270px; }
+
+    /* ─── Feeds panel ─── */
     .live-feeds-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1296,7 +1204,7 @@ export function renderDemoLiveBoardHtml() {
       border-radius: var(--radius);
       background: var(--surface-elevated);
       padding: var(--sp-3);
-      min-height: 380px;
+      min-height: 340px;
       display: grid;
       grid-template-rows: auto 1fr;
       gap: var(--sp-3);
@@ -1314,9 +1222,6 @@ export function renderDemoLiveBoardHtml() {
       display: grid;
       gap: var(--sp-2);
       align-content: start;
-      overflow-y: visible;
-      max-height: none;
-      padding-right: 0;
     }
     .live-list::-webkit-scrollbar { width: 5px; }
     .live-list::-webkit-scrollbar-track { background: transparent; }
@@ -1560,61 +1465,6 @@ export function renderDemoLiveBoardHtml() {
     .inspector-cycle-graph-wrap {
       margin-top: var(--sp-3);
     }
-    .primary-stage {
-      --stage-panel-h: clamp(680px, 74vh, 860px);
-      display: grid;
-      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-      gap: var(--sp-4);
-      align-items: start;
-    }
-    .primary-stage > .panel {
-      min-height: var(--stage-panel-h);
-    }
-    .feeds-panel .live-feed-column {
-      min-height: 340px;
-    }
-    .feeds-panel .live-list {
-      max-height: none;
-      overflow-y: visible;
-    }
-    .viz-panel {
-      display: grid;
-      grid-template-rows: auto auto 1fr;
-      gap: var(--sp-2);
-      overflow: visible;
-    }
-    .viz-panel .panel-head {
-      margin-bottom: 0;
-    }
-    .viz-panel .inspector-cycle-graph-wrap {
-      margin-top: 0;
-    }
-    .viz-panel .inspector-body {
-      max-height: none;
-      min-height: 0;
-      overflow: visible;
-      padding-right: 0;
-      align-content: start;
-    }
-    .viz-panel .cycle-graph-shell {
-      min-height: 290px;
-      padding: var(--sp-3);
-    }
-    .viz-panel .cycle-graph {
-      height: 270px;
-    }
-
-    /* ─── Layout ─── */
-    .essentials {
-      display: grid;
-      grid-template-columns: 1.15fr 1fr;
-      gap: var(--sp-4);
-      align-items: start;
-    }
-    .stack {
-      display: grid;
-      gap: var(--sp-4);
-    }
 
     /* ─── Cycle graph ─── */
     .cycle-graph-shell {
@@ -1677,303 +1527,7 @@ export function renderDemoLiveBoardHtml() {
       z-index: 1;
     }
 
-    /* ─── Post cards ─── */
-    .post-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: var(--sp-3);
-    }
-    .post-card {
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      background: var(--surface-elevated);
-      overflow: hidden;
-      display: grid;
-      grid-template-rows: 170px auto;
-      min-height: 280px;
-      transition: transform var(--dur-fast) var(--ease-out-expo), box-shadow var(--dur-fast) var(--ease-out-expo), border-color var(--dur-fast) ease;
-    }
-    .post-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
-      border-color: color-mix(in oklab, var(--accent) 30%, var(--line));
-    }
-    .post-card.is-new {
-      border-color: color-mix(in oklab, var(--accent) 65%, var(--line));
-      box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent) 30%, transparent), 0 10px 24px rgba(13, 148, 136, 0.14);
-      animation: newCardPulse 1.2s var(--ease-out-expo) 2;
-    }
-    .post-media-btn {
-      border: none;
-      padding: 0;
-      margin: 0;
-      background: transparent;
-      width: 100%;
-      height: 100%;
-      cursor: zoom-in;
-      overflow: hidden;
-      position: relative;
-    }
-    .post-media-btn::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.3) 100%);
-      opacity: 0;
-      transition: opacity var(--dur-fast) ease;
-      pointer-events: none;
-    }
-    .post-card:hover .post-media-btn::after { opacity: 1; }
-    .post-card img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      background: var(--line-subtle);
-      transition: transform var(--dur-slow) var(--ease-out-expo);
-    }
-    .post-card:hover img {
-      transform: scale(1.04);
-    }
-    .post-copy {
-      padding: var(--sp-3);
-      display: grid;
-      gap: var(--sp-1);
-    }
-    .post-copy .top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--sp-2);
-      font-size: var(--text-xs);
-      color: var(--ink-secondary);
-      font-weight: 600;
-    }
-    .post-copy .top-left {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      align-items: center;
-    }
-    .post-copy .title {
-      margin: 0;
-      font-size: var(--text-sm);
-      line-height: 1.3;
-      color: var(--ink);
-      text-transform: none;
-      letter-spacing: -0.005em;
-      font-weight: 700;
-    }
-    .post-copy .prompt {
-      margin: 0;
-      font-size: var(--text-xs);
-      line-height: 1.45;
-      color: var(--muted);
-      font-family: var(--mono);
-      min-height: 36px;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    .post-copy .agent-note {
-      margin: 0;
-      font-size: var(--text-xs);
-      line-height: 1.4;
-      color: var(--accent-strong);
-      font-family: var(--sans);
-      font-weight: 600;
-      font-style: italic;
-    }
-    .post-copy .meta-row {
-      display: flex;
-      justify-content: space-between;
-      gap: var(--sp-2);
-      align-items: center;
-      font-size: var(--text-xs);
-      color: var(--faint);
-      font-family: var(--mono);
-    }
-    .post-detail {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height var(--dur-normal) var(--ease-out-expo), opacity var(--dur-fast) ease;
-      opacity: 0;
-    }
-    .post-card:hover .post-detail,
-    .post-card:focus-within .post-detail {
-      max-height: 120px;
-      opacity: 1;
-    }
-    .token-row {
-      font-size: var(--text-2xs);
-      color: var(--faint);
-      font-family: var(--mono);
-      border-top: 1px dashed var(--line);
-      padding-top: var(--sp-1);
-      margin-top: var(--sp-1);
-      word-break: break-word;
-      line-height: 1.4;
-    }
 
-    /* ─── Trade cycles ─── */
-    .trade-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: var(--sp-3);
-    }
-    .trade-card {
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      background: var(--surface-elevated);
-      padding: var(--sp-3);
-      display: grid;
-      gap: var(--sp-2);
-      position: relative;
-    }
-    .trade-card.clickable {
-      cursor: pointer;
-      transition: all var(--dur-fast) var(--ease-out-expo);
-    }
-    .trade-card.clickable:hover {
-      transform: translateY(-2px);
-      border-color: color-mix(in oklab, var(--accent) 40%, var(--line));
-      box-shadow: 0 8px 24px var(--accent-glow);
-    }
-    .trade-card.active {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 2px var(--accent-glow-strong), 0 8px 24px var(--accent-glow);
-    }
-    .trade-card.is-new {
-      border-color: color-mix(in oklab, var(--accent) 65%, var(--line));
-      box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent) 35%, transparent), 0 10px 24px rgba(13, 148, 136, 0.16);
-      animation: newCardPulse 1.2s var(--ease-out-expo) 2;
-    }
-    .trade-card.active::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, var(--accent), var(--warm));
-      border-radius: var(--radius) var(--radius) 0 0;
-    }
-    .trade-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--sp-2);
-    }
-    .trade-head-right {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-    .trade-head code {
-      font-family: var(--mono);
-      font-size: var(--text-xs);
-      font-weight: 600;
-      color: var(--ink-secondary);
-    }
-    .trade-meta {
-      font-size: var(--text-xs);
-      color: var(--faint);
-      font-family: var(--mono);
-    }
-    .trade-rows {
-      display: grid;
-      gap: var(--sp-2);
-    }
-    .trade-row {
-      display: grid;
-      grid-template-columns: minmax(0, 88px) minmax(0, 1fr) 28px minmax(0, 1fr);
-      gap: var(--sp-2);
-      align-items: stretch;
-    }
-    .trade-actor {
-      border: 1px solid var(--line-subtle);
-      border-radius: var(--radius-sm);
-      padding: var(--sp-2) var(--sp-1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      font-size: var(--text-xs);
-      font-weight: 700;
-      color: var(--ink-secondary);
-      background: linear-gradient(135deg, #f8fafb, #fafbfc);
-      font-family: var(--mono);
-      word-break: break-word;
-    }
-    .trade-item {
-      border: 1px solid var(--line);
-      border-radius: var(--radius-sm);
-      overflow: hidden;
-      display: grid;
-      grid-template-rows: 80px auto;
-      background: var(--surface-strong);
-    }
-    .trade-item img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      background: var(--line-subtle);
-    }
-    .trade-item-copy {
-      padding: var(--sp-2);
-      display: grid;
-      gap: 3px;
-      font-size: var(--text-2xs);
-      color: var(--muted);
-      font-family: var(--mono);
-    }
-    .trade-item-copy strong {
-      font-size: var(--text-xs);
-      color: var(--ink-secondary);
-      line-height: 1.25;
-      font-family: var(--sans);
-      font-weight: 700;
-    }
-    .trade-arrow {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--accent);
-      font-weight: 700;
-    }
-    .trade-arrow svg {
-      width: 20px;
-      height: 20px;
-    }
-
-    /* ─── Tables ─── */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: var(--text-sm);
-    }
-    th, td {
-      border-top: 1px solid var(--line-subtle);
-      padding: var(--sp-2);
-      text-align: left;
-      vertical-align: top;
-    }
-    th {
-      color: var(--muted);
-      font-size: var(--text-xs);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-weight: 600;
-      border-top: none;
-    }
-    td code {
-      font-family: var(--mono);
-      font-size: var(--text-xs);
-      color: var(--ink-secondary);
-      word-break: break-all;
-    }
 
     /* ─── Badges ─── */
     .badge {
@@ -2050,71 +1604,6 @@ export function renderDemoLiveBoardHtml() {
       color: var(--ok);
       border-color: color-mix(in oklab, var(--ok) 35%, var(--line));
       background: var(--ok-subtle);
-    }
-
-    /* ─── Activity feed ─── */
-    .feed {
-      display: grid;
-      gap: var(--sp-2);
-      max-height: 380px;
-      overflow-y: auto;
-      padding-right: var(--sp-1);
-      scrollbar-width: thin;
-      scrollbar-color: var(--line) transparent;
-    }
-    .feed::-webkit-scrollbar { width: 5px; }
-    .feed::-webkit-scrollbar-track { background: transparent; }
-    .feed::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
-    .feed-item {
-      border: 1px solid var(--line-subtle);
-      border-left: 3px solid var(--line);
-      border-radius: 2px var(--radius-sm) var(--radius-sm) 2px;
-      padding: var(--sp-2) var(--sp-3);
-      background: var(--surface-elevated);
-      display: grid;
-      gap: 2px;
-      transition: border-left-color var(--dur-fast) ease, background var(--dur-fast) ease;
-    }
-    .feed-item:hover {
-      background: color-mix(in oklab, var(--accent-glow) 30%, var(--surface-elevated));
-    }
-    .feed-item.ev-cycle { border-left-color: var(--accent); }
-    .feed-item.ev-settlement { border-left-color: var(--warm); }
-    .feed-item.ev-receipt { border-left-color: var(--ok); }
-    .feed-item.ev-intent { border-left-color: #8b5cf6; }
-    .feed-item .row-a {
-      font-size: var(--text-xs);
-      color: var(--ink-secondary);
-      display: flex;
-      justify-content: space-between;
-      gap: var(--sp-2);
-      align-items: baseline;
-      font-weight: 500;
-    }
-    .feed-item .row-a strong {
-      font-weight: 600;
-    }
-    .feed-item .row-a .feed-time {
-      color: var(--faint);
-      font-family: var(--mono);
-      font-size: var(--text-2xs);
-      white-space: nowrap;
-    }
-    .feed-item .row-b {
-      font-size: var(--text-2xs);
-      color: var(--faint);
-      font-family: var(--mono);
-      word-break: break-word;
-      line-height: 1.45;
-    }
-
-    /* ─── Empty states ─── */
-    .empty {
-      color: var(--faint);
-      font-size: var(--text-sm);
-      padding: var(--sp-4);
-      text-align: center;
-      font-style: italic;
     }
 
     /* ─── Lightbox ─── */
@@ -2196,12 +1685,10 @@ export function renderDemoLiveBoardHtml() {
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
       }
-      .post-card:hover img { transform: none; }
     }
 
     /* ─── Responsive ─── */
     @media (max-width: 980px) {
-      .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .controls-summary {
         min-width: 0;
         width: 100%;
@@ -2213,19 +1700,10 @@ export function renderDemoLiveBoardHtml() {
       }
       .primary-stage {
         --stage-panel-h: auto;
+        grid-template-columns: 1fr;
       }
-      .primary-stage > .panel {
-        min-height: 0;
-      }
-      .primary-stage { grid-template-columns: 1fr; }
+      .primary-stage > .panel { min-height: 0; }
       .live-feeds-grid { grid-template-columns: 1fr; }
-      .feeds-panel .live-list { max-height: none; }
-      .viz-panel .inspector-body { max-height: none; overflow: visible; }
-      .essentials { grid-template-columns: 1fr; }
-      .post-grid { grid-template-columns: 1fr; }
-      .trade-grid { grid-template-columns: 1fr; }
-      .trade-row { grid-template-columns: 1fr; }
-      .trade-arrow svg { transform: rotate(90deg); }
       .state-guide { grid-template-columns: 1fr; }
     }
   </style>
