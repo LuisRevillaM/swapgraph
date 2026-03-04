@@ -137,3 +137,58 @@ test('demo live board trigger supports multihop mode with 4-actor cycle', async 
     await runtime.close();
   }
 });
+
+test('demo live board can trigger post and match waves for cadence mode', async () => {
+  const runtime = await startRuntimeHarness();
+
+  try {
+    const postWaveResponse = await fetch(`${runtime.baseUrl}/demo/live-board/trigger-wave`, {
+      method: 'POST',
+      headers: {
+        accept: 'application/json',
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({ phase: 'post', mode: 'balanced' })
+    });
+    assert.equal(postWaveResponse.status, 200);
+    const postWaveBody = await postWaveResponse.json();
+    assert.equal(postWaveBody?.ok, true);
+    assert.equal(postWaveBody?.demo_wave?.scenario, 'four_workspace_post_wave');
+    assert.equal(postWaveBody?.demo_wave?.phase, 'post');
+    assert.ok(Array.isArray(postWaveBody?.demo_wave?.created_intents));
+    assert.ok(postWaveBody.demo_wave.created_intents.length >= 4);
+    assert.equal(postWaveBody?.demo_wave?.proposal_count, 0);
+    assert.equal(postWaveBody?.demo_wave?.cycle_count, 0);
+
+    const matchWaveResponse = await fetch(`${runtime.baseUrl}/demo/live-board/trigger-wave`, {
+      method: 'POST',
+      headers: {
+        accept: 'application/json',
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({ phase: 'match', mode: 'multihop' })
+    });
+    assert.equal(matchWaveResponse.status, 200);
+    const matchWaveBody = await matchWaveResponse.json();
+    assert.equal(matchWaveBody?.ok, true);
+    assert.equal(matchWaveBody?.demo_wave?.scenario, 'four_workspace_post_wave');
+    assert.equal(matchWaveBody?.demo_wave?.phase, 'match');
+    assert.ok(Array.isArray(matchWaveBody?.demo_wave?.created_intents));
+    assert.ok(matchWaveBody.demo_wave.created_intents.length >= 4);
+    assert.ok(Number.isFinite(matchWaveBody?.demo_wave?.proposal_count));
+    assert.ok(Array.isArray(matchWaveBody?.demo_wave?.proposed_cycles));
+    assert.ok(matchWaveBody?.demo_wave?.cycle_count === 0);
+
+    const snapshotResponse = await requestJson({
+      baseUrl: runtime.baseUrl,
+      method: 'GET',
+      path: '/demo/live-board/snapshot?limit=50&workspace_only=1'
+    });
+    assert.equal(snapshotResponse.status, 200);
+    assert.equal(snapshotResponse.body?.ok, true);
+    assert.ok(Array.isArray(snapshotResponse.body?.snapshot?.events));
+    assert.ok(snapshotResponse.body.snapshot.events.some(row => row.type === 'intent.posted'));
+  } finally {
+    await runtime.close();
+  }
+});

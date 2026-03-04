@@ -399,6 +399,18 @@ export function buildDemoLiveBoardSnapshot({
 
   const commitCycleIds = new Set(commits.map(commit => commit?.cycle_id).filter(Boolean));
   const receiptCycleIds = new Set(receipts.map(receipt => receipt?.cycle_id).filter(Boolean));
+  const proposalRunIdByProposalId = state.marketplace_matching_proposal_runs ?? {};
+  const matchingRunById = new Map(
+    matchingRuns
+      .map(run => [firstNonEmptyString(run?.run_id), run])
+      .filter(([runId]) => Boolean(runId))
+  );
+  const proposalRecordedAt = proposalId => {
+    const runId = firstNonEmptyString(proposalRunIdByProposalId?.[proposalId]);
+    if (!runId) return null;
+    const run = matchingRunById.get(runId);
+    return asIso(run?.recorded_at);
+  };
 
   const funnel = {
     intents_total: intents.length,
@@ -419,22 +431,59 @@ export function buildDemoLiveBoardSnapshot({
     receipts_failed: receipts.filter(receipt => receipt?.final_state === 'failed').length
   };
 
+  const rawEventRows = events.map(event => {
+    const actor = normalizeActor(event?.actor);
+    const payload = event?.payload ?? {};
+    const receipt = payload?.receipt ?? {};
+    return {
+      id: event?.event_id ?? null,
+      type: event?.type ?? 'event',
+      occurred_at: asIso(event?.occurred_at),
+      actor_type: actor?.type ?? null,
+      actor_id: actor?.id ?? null,
+      cycle_id: typeof payload.cycle_id === 'string' ? payload.cycle_id : (typeof receipt.cycle_id === 'string' ? receipt.cycle_id : null),
+      intent_id: typeof payload.intent_id === 'string' ? payload.intent_id : null,
+      summary: summarizeEvent(event)
+    };
+  });
+  const syntheticIntentEvents = intents.map((intent, idx) => {
+    const actor = normalizeActor(intent?.actor);
+    const offer = Array.isArray(intent?.offer) && intent.offer.length > 0 ? intent.offer[0] : null;
+    const metadata = offer?.metadata ?? {};
+    const deliverableType = firstNonEmptyString(metadata?.deliverable_type, metadata?.output_type, metadata?.type) ?? 'deliverable';
+    const occurredAt = asIso(offer?.proof?.verified_at) ?? asIso(intent?.updated_at);
+    return {
+      id: `intent_posted_${firstNonEmptyString(intent?.id) ?? String(idx)}`,
+      type: 'intent.posted',
+      occurred_at: occurredAt,
+      actor_type: actor?.type ?? null,
+      actor_id: actor?.id ?? null,
+      cycle_id: null,
+      intent_id: firstNonEmptyString(intent?.id),
+      summary: `${actor?.id ?? 'actor'} listed ${deliverableType}`
+    };
+  });
+  const syntheticProposalEvents = proposals.map((proposal, idx) => {
+    const proposalId = firstNonEmptyString(proposal?.id);
+    const participants = Array.isArray(proposal?.participants) ? proposal.participants : [];
+    const actorIds = participants
+      .map(row => firstNonEmptyString(row?.actor?.id))
+      .filter(Boolean);
+    const occurredAt = proposalRecordedAt(proposalId) ?? asIso(proposal?.expires_at);
+    return {
+      id: `cycle_proposed_${proposalId ?? String(idx)}`,
+      type: 'cycle.proposed',
+      occurred_at: occurredAt,
+      actor_type: 'partner',
+      actor_id: 'marketplace',
+      cycle_id: proposalId,
+      intent_id: firstNonEmptyString(participants[0]?.intent_id),
+      summary: `proposal built for ${actorIds.length}-actor cycle`
+    };
+  });
+
   const recentEvents = sortByIsoDescending(
-    events.map(event => {
-      const actor = normalizeActor(event?.actor);
-      const payload = event?.payload ?? {};
-      const receipt = payload?.receipt ?? {};
-      return {
-        id: event?.event_id ?? null,
-        type: event?.type ?? 'event',
-        occurred_at: asIso(event?.occurred_at),
-        actor_type: actor?.type ?? null,
-        actor_id: actor?.id ?? null,
-        cycle_id: typeof payload.cycle_id === 'string' ? payload.cycle_id : (typeof receipt.cycle_id === 'string' ? receipt.cycle_id : null),
-        intent_id: typeof payload.intent_id === 'string' ? payload.intent_id : null,
-        summary: summarizeEvent(event)
-      };
-    }),
+    [...rawEventRows, ...syntheticIntentEvents, ...syntheticProposalEvents].filter(row => parseIsoMs(row?.occurred_at) !== null),
     'occurred_at'
   ).slice(0, limit);
 
@@ -559,7 +608,7 @@ export function buildDemoLiveBoardSnapshot({
       return {
         cycle_id: cycleId,
         state: firstNonEmptyString(receipt?.final_state, timeline?.state) ?? 'proposed',
-        updated_at: asIso(receipt?.created_at) ?? asIso(timeline?.updated_at) ?? asIso(proposal?.expires_at),
+        updated_at: asIso(receipt?.created_at) ?? asIso(timeline?.updated_at) ?? proposalRecordedAt(cycleId) ?? asIso(proposal?.expires_at),
         receipt_id: firstNonEmptyString(receipt?.id),
         participant_count: participants.length,
         participants: participants.map(participant => {
@@ -800,6 +849,14 @@ export function renderDemoLiveBoardHtml() {
       50% { transform: scale(1.06); }
       100% { transform: scale(1); }
     }
+    @keyframes newCardPulse {
+      0% {
+        box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 45%, transparent);
+      }
+      100% {
+        box-shadow: 0 0 0 14px rgba(13, 148, 136, 0);
+      }
+    }
 
     .section-enter {
       animation: fadeSlideUp var(--dur-normal) var(--ease-out-expo) both;
@@ -1017,6 +1074,52 @@ export function renderDemoLiveBoardHtml() {
       font-family: var(--mono);
       line-height: 1.5;
     }
+    .state-guide {
+      margin-top: var(--sp-3);
+      display: grid;
+      gap: var(--sp-2);
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    }
+    .guide-chip {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 7px 9px;
+      background: var(--surface-elevated);
+      display: grid;
+      gap: 2px;
+      font-family: var(--mono);
+      line-height: 1.35;
+    }
+    .guide-chip strong {
+      font-size: 0.67rem;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: var(--ink-secondary);
+    }
+    .guide-chip span {
+      font-size: 0.62rem;
+      color: var(--faint);
+    }
+    .guide-chip.proposed {
+      border-color: color-mix(in oklab, var(--accent) 30%, var(--line));
+      background: color-mix(in oklab, var(--accent-glow) 55%, var(--surface-elevated));
+    }
+    .guide-chip.pending {
+      border-color: color-mix(in oklab, #0369a1 35%, var(--line));
+      background: rgba(3, 105, 161, 0.08);
+    }
+    .guide-chip.executing {
+      border-color: color-mix(in oklab, var(--warn) 40%, var(--line));
+      background: var(--warn-subtle);
+    }
+    .guide-chip.completed {
+      border-color: color-mix(in oklab, var(--ok) 35%, var(--line));
+      background: var(--ok-subtle);
+    }
+    .guide-chip.failed {
+      border-color: color-mix(in oklab, var(--bad) 35%, var(--line));
+      background: var(--bad-subtle);
+    }
     .toggle-pill {
       display: inline-flex;
       align-items: center;
@@ -1037,6 +1140,34 @@ export function renderDemoLiveBoardHtml() {
       width: 14px;
       height: 14px;
       accent-color: var(--accent);
+    }
+    .cadence-input {
+      width: 62px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-family: var(--mono);
+      font-size: var(--text-xs);
+      color: var(--ink-secondary);
+      background: var(--surface);
+      outline: none;
+      appearance: textfield;
+      -moz-appearance: textfield;
+    }
+    .cadence-input::-webkit-outer-spin-button,
+    .cadence-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .cadence-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px color-mix(in oklab, var(--accent) 20%, transparent);
+    }
+    .trigger-btn.running {
+      border-color: color-mix(in oklab, var(--ok) 45%, var(--line));
+      color: var(--ok);
+      background: var(--ok-subtle);
+      box-shadow: 0 0 0 1px color-mix(in oklab, var(--ok) 30%, transparent), 0 4px 14px color-mix(in oklab, var(--ok) 22%, transparent);
     }
 
     /* ─── Layout ─── */
@@ -1133,6 +1264,11 @@ export function renderDemoLiveBoardHtml() {
       box-shadow: 0 8px 24px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
       border-color: color-mix(in oklab, var(--accent) 30%, var(--line));
     }
+    .post-card.is-new {
+      border-color: color-mix(in oklab, var(--accent) 65%, var(--line));
+      box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent) 30%, transparent), 0 10px 24px rgba(13, 148, 136, 0.14);
+      animation: newCardPulse 1.2s var(--ease-out-expo) 2;
+    }
     .post-media-btn {
       border: none;
       padding: 0;
@@ -1177,6 +1313,12 @@ export function renderDemoLiveBoardHtml() {
       font-size: var(--text-xs);
       color: var(--ink-secondary);
       font-weight: 600;
+    }
+    .post-copy .top-left {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
     }
     .post-copy .title {
       margin: 0;
@@ -1266,6 +1408,11 @@ export function renderDemoLiveBoardHtml() {
       border-color: var(--accent);
       box-shadow: 0 0 0 2px var(--accent-glow-strong), 0 8px 24px var(--accent-glow);
     }
+    .trade-card.is-new {
+      border-color: color-mix(in oklab, var(--accent) 65%, var(--line));
+      box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent) 35%, transparent), 0 10px 24px rgba(13, 148, 136, 0.16);
+      animation: newCardPulse 1.2s var(--ease-out-expo) 2;
+    }
     .trade-card.active::before {
       content: '';
       position: absolute;
@@ -1281,6 +1428,13 @@ export function renderDemoLiveBoardHtml() {
       align-items: center;
       justify-content: space-between;
       gap: var(--sp-2);
+    }
+    .trade-head-right {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
     .trade-head code {
       font-family: var(--mono);
@@ -1410,6 +1564,33 @@ export function renderDemoLiveBoardHtml() {
     .badge.proposed { color: var(--accent); border-color: color-mix(in oklab, var(--accent) 30%, var(--line)); background: var(--accent-glow); }
     .badge.pending { color: #0369a1; border-color: color-mix(in oklab, #0369a1 30%, var(--line)); background: rgba(3, 105, 161, 0.08); }
     .badge.failed { color: var(--bad); border-color: color-mix(in oklab, var(--bad) 30%, var(--line)); background: var(--bad-subtle); }
+    .badge.new {
+      color: #0f766e;
+      border-color: color-mix(in oklab, var(--accent) 45%, var(--line));
+      background: color-mix(in oklab, var(--accent-glow) 70%, #ffffff);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+    .badge.fresh {
+      color: #0b7285;
+      border-color: color-mix(in oklab, #0b7285 35%, var(--line));
+      background: rgba(11, 114, 133, 0.08);
+    }
+    .badge.seen {
+      color: var(--warm);
+      border-color: color-mix(in oklab, var(--warm) 40%, var(--line));
+      background: var(--warm-glow);
+    }
+    .badge.listed {
+      color: var(--ok);
+      border-color: color-mix(in oklab, var(--ok) 32%, var(--line));
+      background: var(--ok-subtle);
+    }
+    .badge.unlisted {
+      color: var(--muted);
+      border-color: var(--line);
+      background: var(--surface);
+    }
 
     /* ─── Activity feed ─── */
     .feed {
@@ -1566,6 +1747,7 @@ export function renderDemoLiveBoardHtml() {
       .trade-grid { grid-template-columns: 1fr; }
       .trade-row { grid-template-columns: 1fr; }
       .trade-arrow svg { transform: rotate(90deg); }
+      .state-guide { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -1592,10 +1774,31 @@ export function renderDemoLiveBoardHtml() {
               <option value="multihop">Multi-hop</option>
             </select>
           </label>
+          <label class="toggle-pill">Wave
+            <select id="wave-phase" style="border:none;background:transparent;font-family:var(--mono);font-size:0.75rem;">
+              <option value="match">Post + Match</option>
+              <option value="post">Post Only</option>
+              <option value="settle">Full Settle</option>
+            </select>
+          </label>
+          <label class="toggle-pill">Cadence
+            <input id="cadence-seconds" class="cadence-input" type="number" min="5" max="3600" step="1" value="30" aria-label="Cadence seconds">
+            <span>s</span>
+          </label>
+          <button id="trigger-wave" class="trigger-btn" type="button">Run Wave Now</button>
+          <button id="cadence-toggle" class="trigger-btn" type="button">Start Cadence</button>
           <button id="trigger-cycle" class="trigger-btn" type="button">Start New Agent Cycle</button>
         </div>
       </div>
       <p class="trigger-status" id="trigger-status">Balanced mode explores emergent pairings. Multi-hop mode biases ring-style 4-actor exchanges.</p>
+      <p class="trigger-status" id="cadence-status">Cadence paused. Start cadence to continuously post and match.</p>
+      <div class="state-guide" aria-label="Cycle lifecycle legend">
+        <div class="guide-chip proposed"><strong>Proposed</strong><span>candidate cycle found, waiting for accepts</span></div>
+        <div class="guide-chip pending"><strong>Escrow</strong><span>participants confirm deposits and lock intents</span></div>
+        <div class="guide-chip executing"><strong>Executing</strong><span>fulfillment runs and artifacts are delivered</span></div>
+        <div class="guide-chip completed"><strong>Completed</strong><span>receipt minted and balances finalized</span></div>
+        <div class="guide-chip failed"><strong>Failed</strong><span>cycle closed, funds/assets released or refunded</span></div>
+      </div>
     </section>
 
     <section class="essentials">
@@ -1655,15 +1858,29 @@ export function renderDemoLiveBoardHtml() {
     const meta = byId('meta');
     const pollStatus = byId('poll-status');
     const triggerCycleButton = byId('trigger-cycle');
+    const triggerWaveButton = byId('trigger-wave');
+    const cadenceToggleButton = byId('cadence-toggle');
     const triggerModeSelect = byId('trigger-mode');
+    const wavePhaseSelect = byId('wave-phase');
+    const cadenceSecondsInput = byId('cadence-seconds');
     const workspaceOnlyToggle = byId('workspace-only-toggle');
     const triggerStatus = byId('trigger-status');
+    const cadenceStatus = byId('cadence-status');
     const lightbox = byId('lightbox');
     const lightboxImage = byId('lightbox-image');
     const lightboxTitle = byId('lightbox-title');
     const lightboxClose = byId('lightbox-close');
     let selectedCycleId = null;
     let latestTradeCycles = [];
+    let tradedAssetIds = new Set();
+    let seenPostIds = new Set();
+    let seenCycleIds = new Set();
+    let newPostIds = new Set();
+    let newCycleIds = new Set();
+    let hasInitialSnapshot = false;
+    let cadenceTimer = null;
+    let cadenceTick = 0;
+    let cadenceInFlight = false;
 
     function esc(value) {
       return String(value)
@@ -1684,6 +1901,51 @@ export function renderDemoLiveBoardHtml() {
       if (delta < 3_600_000) return Math.floor(delta / 60_000) + 'm ago';
       if (delta < 86_400_000) return Math.floor(delta / 3_600_000) + 'h ago';
       return Math.floor(delta / 86_400_000) + 'd ago';
+    }
+
+    function normalizeState(value) {
+      return String(value || 'proposed').toLowerCase();
+    }
+
+    function classifyTradeState(value) {
+      const lower = normalizeState(value);
+      if (lower === 'completed' || lower === 'settled') {
+        return { className: 'settled', label: 'completed', explainer: 'receipt minted, balances finalized' };
+      }
+      if (lower === 'failed') {
+        return { className: 'failed', label: 'failed', explainer: 'cycle closed and legs released/refunded' };
+      }
+      if (lower === 'executing') {
+        return { className: 'executing', label: 'executing', explainer: 'fulfillment and delivery in progress' };
+      }
+      if (lower.startsWith('escrow.')) {
+        return { className: 'pending', label: lower.replace('escrow.', 'escrow '), explainer: 'waiting on escrow/deposit confirmations' };
+      }
+      return { className: 'proposed', label: 'proposed', explainer: 'candidate cycle waiting for accepts' };
+    }
+
+    function titleCaseCompact(value) {
+      const text = String(value || '').trim();
+      if (!text) return 'unknown';
+      return text
+        .replaceAll('_', ' ')
+        .split(/\s+/g)
+        .filter(Boolean)
+        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(' ');
+    }
+
+    function buildTradedAssetIds(cycles) {
+      const out = new Set();
+      for (const cycle of Array.isArray(cycles) ? cycles : []) {
+        for (const participant of Array.isArray(cycle?.participants) ? cycle.participants : []) {
+          const giveId = participant?.gives?.asset_id;
+          const getId = participant?.gets?.asset_id;
+          if (typeof giveId === 'string' && giveId.trim()) out.add(giveId.trim());
+          if (typeof getId === 'string' && getId.trim()) out.add(getId.trim());
+        }
+      }
+      return out;
     }
 
     function parseBooleanParam(value, fallback) {
@@ -1740,15 +2002,31 @@ export function renderDemoLiveBoardHtml() {
         const tags = Array.isArray(row.style_tags) && row.style_tags.length > 0 ? row.style_tags.join(' · ') : null;
         const agentNote = row.agent_message ? row.agent_message : null;
         const capability = row.delivery_capability_token ?? null;
+        const postKey = (typeof row.intent_id === 'string' && row.intent_id.trim())
+          ? row.intent_id.trim()
+          : (typeof row.asset_id === 'string' && row.asset_id.trim() ? row.asset_id.trim() : null);
+        const isNew = postKey ? newPostIds.has(postKey) : false;
+        const hasTradedHistory = typeof row.asset_id === 'string' && row.asset_id.trim()
+          ? tradedAssetIds.has(row.asset_id.trim())
+          : false;
+        const listingStatus = String(row.status || 'unknown').toLowerCase();
+        const listedClass = listingStatus === 'active' ? 'listed' : 'unlisted';
+        const listedLabel = listingStatus === 'active' ? 'listed now' : titleCaseCompact(listingStatus);
+        const historyClass = hasTradedHistory ? 'seen' : 'fresh';
+        const historyLabel = hasTradedHistory ? 'seen in cycle' : 'new to market';
         const tokenBits = [];
         if (capability?.token_id) tokenBits.push(capability.token_id);
         if (capability?.delivery_target) tokenBits.push(capability.delivery_target);
         if (capability?.expires_at) tokenBits.push('exp ' + shortAgo(capability.expires_at));
         const tokenRow = tokenBits.length > 0 ? ('<div class="token-row">capability: ' + esc(tokenBits.join(' • ')) + '</div>') : '';
-        return '<article class="post-card">'
+        return '<article class="post-card' + (isNew ? ' is-new' : '') + '">'
           + image
           + '<div class="post-copy">'
-          + '<div class="top"><span class="badge">' + esc(actor) + '</span><span>' + esc(posted) + '</span></div>'
+          + '<div class="top"><div class="top-left"><span class="badge">' + esc(actor) + '</span>'
+          + '<span class="badge ' + esc(listedClass) + '">' + esc(listedLabel) + '</span>'
+          + '<span class="badge ' + esc(historyClass) + '">' + esc(historyLabel) + '</span>'
+          + (isNew ? '<span class="badge new">NEW</span>' : '')
+          + '</div><span>' + esc(posted) + '</span></div>'
           + '<p class="title">' + esc(row.title ?? row.intent_id ?? 'Untitled') + '</p>'
           + '<p class="prompt">' + esc(row.prompt_spec ?? 'No prompt provided') + '</p>'
           + (agentNote ? ('<p class="agent-note">"' + esc(agentNote) + '"</p>') : '')
@@ -1785,20 +2063,12 @@ export function renderDemoLiveBoardHtml() {
       }
       tradeCyclesGrid.innerHTML = rows.map(cycle => {
         const state = cycle.state || 'proposed';
-        const stateLower = String(state).toLowerCase();
-        const stateBadgeClass = stateLower === 'completed' || stateLower === 'settled'
-          ? 'settled'
-          : stateLower === 'failed'
-            ? 'failed'
-            : stateLower === 'executing'
-              ? 'executing'
-              : stateLower.startsWith('escrow.')
-                ? 'pending'
-                : 'proposed';
+        const stateSummary = classifyTradeState(state);
         const receipt = cycle.receipt_id ? ('receipt ' + cycle.receipt_id) : 'no receipt yet';
         const updated = cycle.updated_at ? shortAgo(cycle.updated_at) : 'n/a';
         const cycleId = cycle.cycle_id || '';
         const isActive = cycleId && cycleId === selectedCycleId;
+        const isNew = cycleId ? newCycleIds.has(cycleId) : false;
         const participantRows = (cycle.participants || []).map(participant => {
           const gives = participant.gives || {};
           const gets = participant.gets || {};
@@ -1817,9 +2087,9 @@ export function renderDemoLiveBoardHtml() {
             + '</div>'
             + '</div>';
         }).join('');
-        return '<article class="trade-card clickable' + (isActive ? ' active' : '') + '" data-cycle-id="' + esc(cycleId) + '" role="button" tabindex="0" aria-label="Focus cycle ' + esc(cycleId || 'cycle') + '">'
-          + '<div class="trade-head"><code>' + esc(cycle.cycle_id || 'cycle') + '</code><span class="badge ' + esc(stateBadgeClass) + '">' + esc(state) + '</span></div>'
-          + '<div class="trade-meta">' + esc(receipt + ' • updated ' + updated) + '</div>'
+        return '<article class="trade-card clickable' + (isActive ? ' active' : '') + (isNew ? ' is-new' : '') + '" data-cycle-id="' + esc(cycleId) + '" role="button" tabindex="0" aria-label="Focus cycle ' + esc(cycleId || 'cycle') + '">'
+          + '<div class="trade-head"><code>' + esc(cycle.cycle_id || 'cycle') + '</code><div class="trade-head-right"><span class="badge ' + esc(stateSummary.className) + '">' + esc(stateSummary.label) + '</span>' + (isNew ? '<span class="badge new">NEW</span>' : '') + '</div></div>'
+          + '<div class="trade-meta">' + esc(receipt + ' • updated ' + updated + ' • ' + stateSummary.explainer) + '</div>'
           + '<div class="trade-rows">' + participantRows + '</div>'
           + '</article>';
       }).join('');
@@ -1953,7 +2223,8 @@ export function renderDemoLiveBoardHtml() {
       }).join('');
       cycleGraph.innerHTML = markerDefs + edgeSvg + nodeSvg;
       const state = cycle?.state ? cycle.state : 'proposed';
-      cycleGraphMeta.textContent = 'Cycle ' + (cycle?.cycle_id ?? 'n/a') + ' • ' + state + ' • ' + actorIds.length + '-actor flow';
+      const stateSummary = classifyTradeState(state);
+      cycleGraphMeta.textContent = 'Cycle ' + (cycle?.cycle_id ?? 'n/a') + ' • ' + stateSummary.label + ' • ' + actorIds.length + '-actor flow • ' + stateSummary.explainer;
     }
 
     function renderFeed(rows) {
@@ -1988,10 +2259,120 @@ export function renderDemoLiveBoardHtml() {
       triggerStatus.textContent = text;
     }
 
+    function setCadenceStatus(text) {
+      if (cadenceStatus) cadenceStatus.textContent = text;
+    }
+
+    function selectedMode() {
+      return triggerModeSelect?.value === 'multihop' ? 'multihop' : 'balanced';
+    }
+
+    function selectedWavePhase() {
+      const raw = String(wavePhaseSelect?.value || 'match').toLowerCase();
+      if (raw === 'post') return 'post';
+      if (raw === 'settle') return 'settle';
+      return 'match';
+    }
+
+    function cadenceIntervalMs() {
+      const raw = Number.parseInt(String(cadenceSecondsInput?.value ?? ''), 10);
+      const seconds = Number.isFinite(raw) ? Math.max(5, Math.min(3600, raw)) : 30;
+      if (cadenceSecondsInput) cadenceSecondsInput.value = String(seconds);
+      return seconds * 1000;
+    }
+
+    function cadenceRunning() {
+      return cadenceTimer !== null;
+    }
+
+    function refreshCadenceButton() {
+      if (!cadenceToggleButton) return;
+      const running = cadenceRunning();
+      cadenceToggleButton.textContent = running ? 'Pause Cadence' : 'Start Cadence';
+      cadenceToggleButton.classList.toggle('running', running);
+    }
+
+    async function triggerWave({ source = 'manual' } = {}) {
+      if (cadenceInFlight) return null;
+      cadenceInFlight = true;
+      if (triggerWaveButton) triggerWaveButton.disabled = true;
+      const mode = selectedMode();
+      const phase = selectedWavePhase();
+      const start = Date.now();
+      try {
+        const response = await fetch('/demo/live-board/trigger-wave', {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            accept: 'application/json'
+          },
+          body: JSON.stringify({ mode, phase })
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || payload?.ok !== true) {
+          const msg = payload?.error?.message || payload?.error?.code || ('request failed (' + response.status + ')');
+          throw new Error(msg);
+        }
+        const wave = payload?.demo_wave ?? {};
+        const createdCount = Array.isArray(wave.created_intents) ? wave.created_intents.length : 0;
+        const proposalCount = Number.isFinite(wave.proposal_count)
+          ? wave.proposal_count
+          : (Array.isArray(wave.proposed_cycles) ? wave.proposed_cycles.length : 0);
+        const settledCount = Number.isFinite(wave.cycle_count)
+          ? wave.cycle_count
+          : (Array.isArray(wave.settled_cycles) ? wave.settled_cycles.length : 0);
+        const latency = Date.now() - start;
+        setTriggerStatus('Wave: +'
+          + createdCount + ' intents • '
+          + proposalCount + ' proposed • '
+          + settledCount + ' settled • '
+          + mode + '/' + phase + ' • '
+          + latency + 'ms');
+        if (source === 'cadence') {
+          const secs = Math.max(1, Math.floor(cadenceIntervalMs() / 1000));
+          setCadenceStatus('Cadence running • tick ' + cadenceTick + ' • every ' + secs + 's • mode ' + mode + ' • phase ' + phase);
+        }
+        await load();
+        return wave;
+      } catch (error) {
+        setTriggerStatus('Wave failed: ' + error.message);
+        if (source === 'cadence') setCadenceStatus('Cadence error: ' + error.message);
+        return null;
+      } finally {
+        cadenceInFlight = false;
+        if (triggerWaveButton) triggerWaveButton.disabled = false;
+      }
+    }
+
+    function stopCadence() {
+      if (cadenceTimer !== null) {
+        window.clearInterval(cadenceTimer);
+        cadenceTimer = null;
+      }
+      refreshCadenceButton();
+      setCadenceStatus('Cadence paused. Start cadence to continuously post and match.');
+    }
+
+    function startCadence() {
+      stopCadence();
+      cadenceTick = 0;
+      const intervalMs = cadenceIntervalMs();
+      const seconds = Math.max(1, Math.floor(intervalMs / 1000));
+      setCadenceStatus('Cadence starting • every ' + seconds + 's');
+      refreshCadenceButton();
+      cadenceTimer = window.setInterval(() => {
+        cadenceTick += 1;
+        void triggerWave({ source: 'cadence' });
+      }, intervalMs);
+      cadenceTick += 1;
+      void triggerWave({ source: 'cadence' });
+      refreshCadenceButton();
+    }
+
     async function triggerCycle() {
       if (!triggerCycleButton) return;
       triggerCycleButton.disabled = true;
-      const mode = triggerModeSelect?.value === 'multihop' ? 'multihop' : 'balanced';
+      const mode = selectedMode();
       setTriggerStatus('Starting new ' + mode + ' cycle...');
       try {
         const response = await fetch('/demo/live-board/trigger-cycle', {
@@ -2026,8 +2407,10 @@ export function renderDemoLiveBoardHtml() {
       const search = new URLSearchParams(window.location.search);
       if (!search.get('limit')) search.set('limit', '25');
       if (!search.get('lanes')) search.set('lanes', 'workshop,architects_dream,cto,toxins,graph_board,marketplace');
-      const triggerMode = triggerModeSelect?.value === 'multihop' ? 'multihop' : 'balanced';
+      const triggerMode = selectedMode();
       search.set('trigger_mode', triggerMode);
+      search.set('wave_phase', selectedWavePhase());
+      search.set('cadence_s', String(Math.max(5, Math.floor(cadenceIntervalMs() / 1000))));
       const workspaceOnly = workspaceOnlyToggle
         ? workspaceOnlyToggle.checked
         : isWorkspaceOnlyEnabled(search);
@@ -2043,6 +2426,38 @@ export function renderDemoLiveBoardHtml() {
         const snapshot = payload?.snapshot ?? {};
         const tradeCycles = Array.isArray(snapshot.trade_cycles) ? snapshot.trade_cycles : [];
         latestTradeCycles = tradeCycles;
+        tradedAssetIds = buildTradedAssetIds(tradeCycles);
+        const snapshotPosts = Array.isArray(snapshot.posts) ? snapshot.posts : [];
+        const currentPostIds = new Set(
+          snapshotPosts
+            .map(row => {
+              const intentId = typeof row?.intent_id === 'string' ? row.intent_id.trim() : '';
+              if (intentId) return intentId;
+              const assetId = typeof row?.asset_id === 'string' ? row.asset_id.trim() : '';
+              return assetId;
+            })
+            .filter(Boolean)
+        );
+        const currentCycleIds = new Set(
+          tradeCycles
+            .map(row => (typeof row?.cycle_id === 'string' ? row.cycle_id.trim() : ''))
+            .filter(Boolean)
+        );
+        const nextNewPostIds = new Set();
+        const nextNewCycleIds = new Set();
+        if (hasInitialSnapshot) {
+          for (const id of currentPostIds) {
+            if (!seenPostIds.has(id)) nextNewPostIds.add(id);
+          }
+          for (const id of currentCycleIds) {
+            if (!seenCycleIds.has(id)) nextNewCycleIds.add(id);
+          }
+        }
+        newPostIds = nextNewPostIds;
+        newCycleIds = nextNewCycleIds;
+        seenPostIds = currentPostIds;
+        seenCycleIds = currentCycleIds;
+        hasInitialSnapshot = true;
         if (selectedCycleId && !tradeCycles.some(row => row?.cycle_id === selectedCycleId)) {
           selectedCycleId = null;
         }
@@ -2051,15 +2466,19 @@ export function renderDemoLiveBoardHtml() {
         }
 
         renderCards(snapshot.funnel ?? {});
-        renderPosts(snapshot.posts ?? []);
+        renderPosts(snapshotPosts);
         renderTradeCycles(tradeCycles);
         renderCycleGraph(tradeCycles);
         renderFeed(snapshot.events ?? []);
 
         const latencyMs = Date.now() - started;
         const visibility = snapshot.workspace_only ? 'workspace-only' : 'all actors';
-        meta.textContent = 'Updated ' + shortAgo(snapshot.generated_at) + ' • latency ' + latencyMs + 'ms • ' + visibility;
-        setPollStatus('ok', 'Live');
+        const burstParts = [];
+        if (newPostIds.size > 0) burstParts.push('+' + newPostIds.size + ' new post' + (newPostIds.size === 1 ? '' : 's'));
+        if (newCycleIds.size > 0) burstParts.push('+' + newCycleIds.size + ' new cycle' + (newCycleIds.size === 1 ? '' : 's'));
+        const burst = burstParts.length > 0 ? (' • ' + burstParts.join(' • ')) : '';
+        meta.textContent = 'Updated ' + shortAgo(snapshot.generated_at) + ' • latency ' + latencyMs + 'ms • ' + visibility + burst;
+        setPollStatus('ok', burstParts.length > 0 ? ('Live • ' + burstParts.join(' • ')) : 'Live');
       } catch (error) {
         meta.textContent = 'Snapshot error: ' + error.message;
         setPollStatus('bad', 'Disconnected');
@@ -2078,6 +2497,27 @@ export function renderDemoLiveBoardHtml() {
       const mode = initialSearch.get('trigger_mode');
       triggerModeSelect.value = mode === 'multihop' ? 'multihop' : 'balanced';
       triggerModeSelect.addEventListener('change', () => {
+        void load();
+      });
+    }
+    if (wavePhaseSelect) {
+      const initialSearch = new URLSearchParams(window.location.search);
+      const phase = String(initialSearch.get('wave_phase') || '').toLowerCase();
+      wavePhaseSelect.value = phase === 'post' || phase === 'settle' ? phase : 'match';
+      wavePhaseSelect.addEventListener('change', () => {
+        void load();
+      });
+    }
+    if (cadenceSecondsInput) {
+      const initialSearch = new URLSearchParams(window.location.search);
+      const cadenceRaw = Number.parseInt(String(initialSearch.get('cadence_s') ?? ''), 10);
+      if (Number.isFinite(cadenceRaw)) cadenceSecondsInput.value = String(Math.max(5, Math.min(3600, cadenceRaw)));
+      cadenceSecondsInput.addEventListener('change', () => {
+        const seconds = Math.max(5, Math.floor(cadenceIntervalMs() / 1000));
+        setCadenceStatus(cadenceRunning()
+          ? ('Cadence interval updated • every ' + seconds + 's')
+          : ('Cadence paused • interval ' + seconds + 's ready'));
+        if (cadenceRunning()) startCadence();
         void load();
       });
     }
@@ -2122,8 +2562,19 @@ export function renderDemoLiveBoardHtml() {
       if (event.key === 'Escape') closeLightbox();
     });
     if (triggerCycleButton) triggerCycleButton.addEventListener('click', triggerCycle);
+    if (triggerWaveButton) triggerWaveButton.addEventListener('click', () => {
+      void triggerWave({ source: 'manual' });
+    });
+    if (cadenceToggleButton) cadenceToggleButton.addEventListener('click', () => {
+      if (cadenceRunning()) stopCadence();
+      else startCadence();
+    });
+    window.addEventListener('beforeunload', () => {
+      stopCadence();
+    });
+    refreshCadenceButton();
     load();
-    setInterval(load, 4000);
+    setInterval(load, 3000);
   </script>
 </body>
 </html>`;

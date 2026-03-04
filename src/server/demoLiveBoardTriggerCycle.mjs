@@ -153,11 +153,18 @@ export function runDemoLiveBoardTriggerCycle({
   proposalsRead,
   commitsApi,
   settlementWrite,
-  mode = 'balanced'
+  mode = 'balanced',
+  phase = 'settle'
 }) {
   const runNonce = token();
   const nowIso = new Date().toISOString();
   const normalizedMode = trimOrNull(mode)?.toLowerCase() === 'multihop' ? 'multihop' : 'balanced';
+  const normalizedPhase = (() => {
+    const raw = trimOrNull(phase)?.toLowerCase();
+    if (raw === 'post') return 'post';
+    if (raw === 'match' || raw === 'proposal' || raw === 'propose') return 'match';
+    return 'settle';
+  })();
 
   const actorTemplates = [
     {
@@ -227,11 +234,13 @@ export function runDemoLiveBoardTriggerCycle({
       })();
     const wantAssetIds = wantActorIds.map(wantActorId => assetByActorId[wantActorId]).filter(Boolean);
     const styleTags = Array.isArray(actor.style_tags) ? actor.style_tags : [];
+    const primaryTag = styleTags[0] ?? 'visual';
+    const secondaryTag = styleTags.find(tag => String(tag).toLowerCase() !== String(primaryTag).toLowerCase()) ?? 'distinct';
     const intentMessagePool = [
-      `I want a result with stronger ${styleTags[0] ?? 'visual'} personality.`,
-      `Seeking a weird but coherent exchange, not generic output.`,
-      `I can deliver fast if I get a distinct style back.`,
-      `Looking for high-signal art direction and unique composition.`
+      `Wanted: ${primaryTag} mood with ${secondaryTag} structure. Avoid generic stock composition.`,
+      `Need a bold ${primaryTag} direction with clear hierarchy. No safe/default aesthetics.`,
+      `Trade request: deliver a ${primaryTag} piece that feels authored, not template-built.`,
+      `Push ${primaryTag} further with ${secondaryTag} detail. Keep it surprising but legible.`
     ];
     const intentMessage = randomPick(intentMessagePool);
     const styleTag = randomPick(styleTags) || 'signature';
@@ -273,6 +282,24 @@ export function runDemoLiveBoardTriggerCycle({
       intent_id: intentId,
       asset_id: offerAssetId
     });
+  }
+
+  if (normalizedPhase === 'post') {
+    return {
+      scenario: 'four_workspace_post_wave',
+      phase: normalizedPhase,
+      mode: normalizedMode,
+      run_nonce: runNonce,
+      actors: actors.map(actor => actor.id),
+      created_intents: createdIntentRows,
+      proposed_cycles: [],
+      proposal_count: 0,
+      settled_cycles: [],
+      cycle_count: 0,
+      proposal_id: null,
+      receipt_id: null,
+      final_state: 'posted'
+    };
   }
 
   let selectedProposalRows = [];
@@ -324,11 +351,59 @@ export function runDemoLiveBoardTriggerCycle({
   }
 
   if (selectedProposalRows.length === 0) {
+    if (normalizedPhase === 'match') {
+      return {
+        scenario: 'four_workspace_post_wave',
+        phase: normalizedPhase,
+        mode: normalizedMode,
+        run_nonce: runNonce,
+        matching_run_id: selectedRunId,
+        actors: actors.map(actor => actor.id),
+        created_intents: createdIntentRows,
+        proposed_cycles: [],
+        proposal_count: 0,
+        settled_cycles: [],
+        cycle_count: 0,
+        proposal_id: null,
+        receipt_id: null,
+        final_state: 'matched_none'
+      };
+    }
     throw new Error('matching did not produce compatible workspace cycles for the current four-actor run');
   }
 
   const uniqueProposalIds = Array.from(new Set(selectedProposalRows.map(row => row.proposalId).filter(Boolean)));
   const selectedProposalById = new Map(selectedProposalRows.map(row => [row.proposalId, row.proposal]));
+
+  if (normalizedPhase === 'match') {
+    const proposedCycles = uniqueProposalIds.map(proposalId => {
+      const proposal = selectedProposalById.get(proposalId);
+      const participants = Array.isArray(proposal?.participants) ? proposal.participants : [];
+      return {
+        proposal_id: proposalId,
+        participant_actor_ids: participants.map(row => trimOrNull(row?.actor?.id)).filter(Boolean),
+        participant_intent_ids: participants.map(row => trimOrNull(row?.intent_id)).filter(Boolean),
+        state: 'proposed'
+      };
+    });
+    return {
+      scenario: 'four_workspace_post_wave',
+      phase: normalizedPhase,
+      mode: normalizedMode,
+      run_nonce: runNonce,
+      matching_run_id: selectedRunId,
+      actors: actors.map(actor => actor.id),
+      created_intents: createdIntentRows,
+      proposed_cycles: proposedCycles,
+      proposal_count: proposedCycles.length,
+      settled_cycles: [],
+      cycle_count: 0,
+      proposal_id: proposedCycles[0]?.proposal_id ?? null,
+      receipt_id: null,
+      final_state: proposedCycles.length > 0 ? 'proposed' : 'matched_none'
+    };
+  }
+
   const settledCycles = [];
 
   for (const proposalId of uniqueProposalIds) {
@@ -405,6 +480,7 @@ export function runDemoLiveBoardTriggerCycle({
 
   return {
     scenario: 'four_workspace_demo_cycle',
+    phase: normalizedPhase,
     mode: normalizedMode,
     run_nonce: runNonce,
     matching_run_id: selectedRunId,

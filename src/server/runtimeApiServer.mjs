@@ -86,6 +86,21 @@ function parseBooleanFlag(value, fallback = false) {
   return fallback;
 }
 
+function parseTriggerMode(value) {
+  const raw = trimOrNull(value);
+  return raw && raw.toLowerCase() === 'multihop' ? 'multihop' : 'balanced';
+}
+
+function parseTriggerPhase(value, fallback = 'match') {
+  const raw = trimOrNull(value);
+  if (!raw) return fallback;
+  const normalized = raw.toLowerCase();
+  if (normalized === 'post') return 'post';
+  if (normalized === 'match' || normalized === 'proposal' || normalized === 'propose') return 'match';
+  if (normalized === 'settle' || normalized === 'full' || normalized === 'cycle') return 'settle';
+  return fallback;
+}
+
 function errorBody(correlationId, code, message, details = {}) {
   return {
     correlation_id: correlationId,
@@ -410,8 +425,7 @@ export function createRuntimeApiServer({
 
       if (method === 'POST' && pathname === '/demo/live-board/trigger-cycle') {
         const body = await readJsonBody(req);
-        const triggerModeRaw = trimOrNull(body?.mode);
-        const triggerMode = triggerModeRaw && triggerModeRaw.toLowerCase() === 'multihop' ? 'multihop' : 'balanced';
+        const triggerMode = parseTriggerMode(body?.mode);
         try {
           const demoCycle = runDemoLiveBoardTriggerCycle({
             swapIntents,
@@ -419,7 +433,8 @@ export function createRuntimeApiServer({
             proposalsRead,
             commitsApi,
             settlementWrite,
-            mode: triggerMode
+            mode: triggerMode,
+            phase: 'settle'
           });
           shouldPersist = true;
           return sendJson({
@@ -441,6 +456,45 @@ export function createRuntimeApiServer({
             correlationId,
             body: errorBody(correlationId, 'CONFLICT', message, {
               reason_code: 'demo_live_board_trigger_failed'
+            })
+          });
+        }
+      }
+
+      if (method === 'POST' && pathname === '/demo/live-board/trigger-wave') {
+        const body = await readJsonBody(req);
+        const triggerMode = parseTriggerMode(body?.mode);
+        const triggerPhase = parseTriggerPhase(body?.phase, 'match');
+        try {
+          const demoWave = runDemoLiveBoardTriggerCycle({
+            swapIntents,
+            marketplaceMatching,
+            proposalsRead,
+            commitsApi,
+            settlementWrite,
+            mode: triggerMode,
+            phase: triggerPhase
+          });
+          shouldPersist = true;
+          return sendJson({
+            res,
+            status: 200,
+            correlationId,
+            body: {
+              correlation_id: correlationId,
+              ok: true,
+              demo_wave: demoWave,
+              state: summarizeState(store)
+            }
+          });
+        } catch (error) {
+          const message = error instanceof Error ? error.message : 'demo wave trigger failed';
+          return sendJson({
+            res,
+            status: 409,
+            correlationId,
+            body: errorBody(correlationId, 'CONFLICT', message, {
+              reason_code: 'demo_live_board_wave_trigger_failed'
             })
           });
         }
