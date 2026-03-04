@@ -9,6 +9,7 @@ import { CommitService } from '../commit/commitService.mjs';
 import { ingestPollingResponse } from '../delivery/proposalIngestService.mjs';
 import { CycleProposalsReadService } from '../read/cycleProposalsReadService.mjs';
 import { SettlementReadService } from '../read/settlementReadService.mjs';
+import { buildDemoLiveBoardSnapshot, renderDemoLiveBoardHtml } from './demoLiveBoard.mjs';
 import { CycleProposalsCommitService } from '../service/cycleProposalsCommitService.mjs';
 import { CommercialPolicyService } from '../service/commercialPolicyService.mjs';
 import { LiquidityAutonomyPolicyService } from '../service/liquidityAutonomyPolicyService.mjs';
@@ -50,6 +51,28 @@ function trimOrNull(value) {
 function parseScopes(raw) {
   if (!raw || typeof raw !== 'string') return [];
   return Array.from(new Set(raw.split(/[,\s]+/g).map(x => x.trim()).filter(Boolean))).sort();
+}
+
+function parsePositiveInt(value, { fallback = 25, min = 1, max = 200 } = {}) {
+  const parsed = Number.parseInt(String(value ?? ''), 10);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(max, Math.max(min, parsed));
+}
+
+function parseCsvList(value, { maxItems = 20, maxItemLength = 80 } = {}) {
+  if (!value || typeof value !== 'string') return [];
+  const out = [];
+  const seen = new Set();
+  for (const raw of value.split(',')) {
+    const trimmed = raw.trim();
+    if (!trimmed || trimmed.length > maxItemLength) continue;
+    const key = trimmed.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(trimmed);
+    if (out.length >= maxItems) break;
+  }
+  return out;
 }
 
 function errorBody(correlationId, code, message, details = {}) {
@@ -104,6 +127,16 @@ function sendJson({ res, status, body, correlationId }) {
     'x-correlation-id': corr
   });
   res.end(JSON.stringify(body));
+}
+
+function sendHtml({ res, status, html, correlationId }) {
+  const corr = correlationId ?? randomUUID();
+  res.writeHead(status, {
+    'content-type': 'text/html; charset=utf-8',
+    'cache-control': 'no-store',
+    'x-correlation-id': corr
+  });
+  res.end(html);
 }
 
 function parseActorAuth({ req, allowAnonymous = false }) {
@@ -327,6 +360,37 @@ export function createRuntimeApiServer({
             persistence_mode: persistenceMode,
             store_path: resolvedStorePath,
             state: summarizeState(store)
+          }
+        });
+      }
+
+      if (method === 'GET' && pathname === '/demo/live-board') {
+        return sendHtml({
+          res,
+          status: 200,
+          correlationId,
+          html: renderDemoLiveBoardHtml()
+        });
+      }
+
+      if (method === 'GET' && pathname === '/demo/live-board/snapshot') {
+        const query = toQueryObject(url.searchParams);
+        const limit = parsePositiveInt(query.limit, { fallback: 25, min: 1, max: 200 });
+        const laneHints = parseCsvList(query.lanes, { maxItems: 20, maxItemLength: 80 });
+        const snapshot = buildDemoLiveBoardSnapshot({
+          store,
+          nowIso: new Date().toISOString(),
+          limit,
+          laneHints
+        });
+        return sendJson({
+          res,
+          status: 200,
+          correlationId,
+          body: {
+            correlation_id: correlationId,
+            ok: true,
+            snapshot
           }
         });
       }
