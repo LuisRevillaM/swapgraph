@@ -76,6 +76,16 @@ function parseCsvList(value, { maxItems = 20, maxItemLength = 80 } = {}) {
   return out;
 }
 
+function parseBooleanFlag(value, fallback = false) {
+  if (typeof value === 'boolean') return value;
+  if (typeof value !== 'string') return fallback;
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) return fallback;
+  if (normalized === '1' || normalized === 'true' || normalized === 'yes' || normalized === 'on') return true;
+  if (normalized === '0' || normalized === 'false' || normalized === 'no' || normalized === 'off') return false;
+  return fallback;
+}
+
 function errorBody(correlationId, code, message, details = {}) {
   return {
     correlation_id: correlationId,
@@ -378,11 +388,13 @@ export function createRuntimeApiServer({
         const query = toQueryObject(url.searchParams);
         const limit = parsePositiveInt(query.limit, { fallback: 25, min: 1, max: 200 });
         const laneHints = parseCsvList(query.lanes, { maxItems: 20, maxItemLength: 80 });
+        const workspaceOnly = parseBooleanFlag(query.workspace_only, false);
         const snapshot = buildDemoLiveBoardSnapshot({
           store,
           nowIso: new Date().toISOString(),
           limit,
-          laneHints
+          laneHints,
+          workspaceOnly
         });
         return sendJson({
           res,
@@ -397,14 +409,17 @@ export function createRuntimeApiServer({
       }
 
       if (method === 'POST' && pathname === '/demo/live-board/trigger-cycle') {
-        await readJsonBody(req);
+        const body = await readJsonBody(req);
+        const triggerModeRaw = trimOrNull(body?.mode);
+        const triggerMode = triggerModeRaw && triggerModeRaw.toLowerCase() === 'multihop' ? 'multihop' : 'balanced';
         try {
           const demoCycle = runDemoLiveBoardTriggerCycle({
             swapIntents,
             marketplaceMatching,
             proposalsRead,
             commitsApi,
-            settlementWrite
+            settlementWrite,
+            mode: triggerMode
           });
           shouldPersist = true;
           return sendJson({

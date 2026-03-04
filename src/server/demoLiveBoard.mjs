@@ -36,6 +36,38 @@ function normalizeStringList(value, maxItems = 5) {
   return out;
 }
 
+function normalizeCapabilityToken(value) {
+  if (!value || typeof value !== 'object') return null;
+  const tokenId = firstNonEmptyString(value.token_id, value.id);
+  const deliveryTarget = firstNonEmptyString(value.delivery_target, value.target);
+  if (!tokenId && !deliveryTarget) return null;
+  return {
+    token_id: tokenId,
+    delivery_target: deliveryTarget,
+    issued_by: firstNonEmptyString(value.issued_by),
+    expires_at: asIso(value.expires_at),
+    scope: normalizeStringList(value.scope, 6)
+  };
+}
+
+function withPostNoveltyScores(rows) {
+  const safeRows = Array.isArray(rows) ? rows : [];
+  const tagCounts = new Map();
+  for (const row of safeRows) {
+    const tags = normalizeStringList(row?.style_tags, 8).map(tag => tag.toLowerCase());
+    for (const tag of tags) {
+      tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
+    }
+  }
+  return safeRows.map(row => {
+    const tags = normalizeStringList(row?.style_tags, 8).map(tag => tag.toLowerCase());
+    if (tags.length === 0) return { ...row, novelty_score: null };
+    const total = tags.reduce((acc, tag) => acc + (1 / Math.max(1, tagCounts.get(tag) ?? 1)), 0);
+    const noveltyScore = Math.round((total / tags.length) * 100);
+    return { ...row, novelty_score: noveltyScore };
+  });
+}
+
 function imageUrlFromAsset(asset, { forceFallback = false } = {}) {
   const metadata = asset?.metadata ?? {};
   const explicit = firstNonEmptyString(
@@ -245,15 +277,76 @@ function buildLaneRows({ actorRows, laneHints, nowIso }) {
   });
 }
 
-export function buildDemoLiveBoardSnapshot({ store, nowIso = new Date().toISOString(), limit = 25, laneHints = [] }) {
+export function buildDemoLiveBoardSnapshot({
+  store,
+  nowIso = new Date().toISOString(),
+  limit = 25,
+  laneHints = [],
+  workspaceOnly = false,
+  workspaceActorIds = []
+}) {
   const state = store?.state ?? {};
-  const intents = Object.values(state.intents ?? {});
-  const proposals = Object.values(state.proposals ?? {});
-  const commits = Object.values(state.commits ?? {});
-  const timelines = Object.values(state.timelines ?? {});
-  const receipts = Object.values(state.receipts ?? {});
-  const events = Array.isArray(state.events) ? state.events : [];
-  const matchingRuns = Object.values(state.marketplace_matching_runs ?? {});
+  const defaultWorkspaceActors = ['workshop', 'architects_dream', 'cto', 'toxins', 'graph_board', 'marketplace'];
+  const workspaceSet = new Set(
+    (Array.isArray(workspaceActorIds) && workspaceActorIds.length > 0 ? workspaceActorIds : defaultWorkspaceActors)
+      .map(x => String(x ?? '').trim().toLowerCase())
+      .filter(Boolean)
+  );
+  const isWorkspaceActorId = actorId => workspaceSet.has(String(actorId ?? '').trim().toLowerCase());
+  const eventCycleId = event => {
+    const payload = event?.payload ?? {};
+    const receipt = payload?.receipt ?? {};
+    return firstNonEmptyString(payload?.cycle_id, receipt?.cycle_id);
+  };
+
+  const allIntents = Object.values(state.intents ?? {});
+  const allProposals = Object.values(state.proposals ?? {});
+  const allCommits = Object.values(state.commits ?? {});
+  const allTimelines = Object.values(state.timelines ?? {});
+  const allReceipts = Object.values(state.receipts ?? {});
+  const allEvents = Array.isArray(state.events) ? state.events : [];
+  const allMatchingRuns = Object.values(state.marketplace_matching_runs ?? {});
+
+  const intents = workspaceOnly
+    ? allIntents.filter(intent => isWorkspaceActorId(intent?.actor?.id))
+    : allIntents;
+  const proposals = workspaceOnly
+    ? allProposals.filter(proposal => {
+      const participants = Array.isArray(proposal?.participants) ? proposal.participants : [];
+      return participants.length > 0 && participants.every(row => isWorkspaceActorId(row?.actor?.id));
+    })
+    : allProposals;
+  const commits = workspaceOnly
+    ? allCommits.filter(commit => {
+      const participants = Array.isArray(commit?.participants) ? commit.participants : [];
+      return participants.length > 0 && participants.every(row => isWorkspaceActorId(row?.actor?.id));
+    })
+    : allCommits;
+  const timelines = workspaceOnly
+    ? allTimelines.filter(timeline => {
+      const actors = uniqueActorsFromTimeline(timeline);
+      return actors.length > 0 && actors.every(actor => isWorkspaceActorId(actor?.id));
+    })
+    : allTimelines;
+
+  const workspaceCycleIds = new Set([
+    ...proposals.map(row => firstNonEmptyString(row?.id)).filter(Boolean),
+    ...timelines.map(row => firstNonEmptyString(row?.cycle_id)).filter(Boolean)
+  ]);
+
+  const receipts = workspaceOnly
+    ? allReceipts.filter(receipt => workspaceCycleIds.has(firstNonEmptyString(receipt?.cycle_id)))
+    : allReceipts;
+  const events = workspaceOnly
+    ? allEvents.filter(event => {
+      if (isWorkspaceActorId(event?.actor?.id)) return true;
+      const cycleId = eventCycleId(event);
+      return cycleId ? workspaceCycleIds.has(cycleId) : false;
+    })
+    : allEvents;
+  const matchingRuns = workspaceOnly
+    ? allMatchingRuns.filter(run => isWorkspaceActorId(run?.requested_by?.id))
+    : allMatchingRuns;
 
   const commitCycleIds = new Set(commits.map(commit => commit?.cycle_id).filter(Boolean));
   const receiptCycleIds = new Set(receipts.map(receipt => receipt?.cycle_id).filter(Boolean));
@@ -343,7 +436,7 @@ export function buildDemoLiveBoardSnapshot({ store, nowIso = new Date().toISOStr
     'recorded_at'
   ).slice(0, limit);
 
-  const recentPosts = sortByIsoDescending(
+  const sortedPosts = sortByIsoDescending(
     intents.map(intent => {
       const actor = normalizeActor(intent?.actor);
       const offer = Array.isArray(intent?.offer) && intent.offer.length > 0 ? intent.offer[0] : null;
@@ -367,14 +460,22 @@ export function buildDemoLiveBoardSnapshot({ store, nowIso = new Date().toISOStr
           metadata?.description,
           metadata?.brief
         ),
+        agent_message: firstNonEmptyString(
+          metadata?.intent_message,
+          metadata?.agent_note,
+          metadata?.note
+        ),
+        style_tags: normalizeStringList(metadata?.style_tags, 8),
         deliverable_type: deliverableType ?? null,
         value_usd: asNumber(metadata?.value_usd) ?? asNumber(metadata?.list_price_usd) ?? asNumber(intent?.value_band?.max_usd),
         delivery_targets: normalizeStringList(metadata?.delivery_target_options, 6),
+        delivery_capability_token: normalizeCapabilityToken(metadata?.delivery_capability_token),
         image_url: imageUrlFromAsset(offer)
       };
     }),
     'posted_at'
-  ).slice(0, limit);
+  );
+  const recentPosts = withPostNoveltyScores(sortedPosts.slice(0, limit));
 
   const timelineByCycleId = new Map();
   for (const timeline of timelines) {
@@ -490,6 +591,7 @@ export function buildDemoLiveBoardSnapshot({ store, nowIso = new Date().toISOStr
   return {
     generated_at: nowIso,
     limit,
+    workspace_only: workspaceOnly === true,
     funnel,
     lanes: buildLaneRows({ actorRows, laneHints: defaultHints, nowIso }),
     actors: actorRows.slice(0, limit),
@@ -629,6 +731,13 @@ export function renderDemoLiveBoardHtml() {
       gap: 10px;
       margin-bottom: 8px;
     }
+    .controls-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
     .trigger-btn {
       border: 1px solid color-mix(in oklab, var(--accent) 45%, var(--line));
       background: linear-gradient(135deg, #ecfdfd, #fff8f2);
@@ -654,14 +763,82 @@ export function renderDemoLiveBoardHtml() {
       font-size: 0.8rem;
       font-family: var(--mono);
     }
-    .grid-3 {
+    .toggle-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border: 1px solid #dbe1ea;
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: #ffffff;
+      font-size: 0.75rem;
+      color: #334155;
+      font-family: var(--mono);
+      user-select: none;
+    }
+    .toggle-pill input {
+      margin: 0;
+      width: 14px;
+      height: 14px;
+    }
+    .essentials {
       display: grid;
-      grid-template-columns: 1.15fr 1fr 1fr;
+      grid-template-columns: 1.15fr 1fr;
       gap: 12px;
+      align-items: start;
+    }
+    .stack {
+      display: grid;
+      gap: 12px;
+    }
+    .cycle-graph-shell {
+      border: 1px solid #e8ecf2;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #f7fcff, #fffdfb);
+      min-height: 250px;
+      padding: 10px;
+    }
+    .cycle-graph {
+      width: 100%;
+      height: 240px;
+      display: block;
+    }
+    .cycle-node {
+      fill: #ffffff;
+      stroke: #0f8f8f;
+      stroke-width: 2;
+    }
+    .cycle-edge {
+      fill: none;
+      stroke: #0f8f8f;
+      stroke-width: 2.6;
+      stroke-linecap: round;
+      stroke-dasharray: 8 10;
+      animation: flow 2.2s linear infinite;
+    }
+    .cycle-arrow {
+      fill: #0f8f8f;
+    }
+    .cycle-label {
+      font-size: 11px;
+      fill: #0f172a;
+      text-anchor: middle;
+      font-family: var(--mono);
+      font-weight: 600;
+    }
+    .cycle-sub {
+      font-size: 11px;
+      color: #64748b;
+      font-family: var(--mono);
+      margin-top: 6px;
+    }
+    @keyframes flow {
+      from { stroke-dashoffset: 0; }
+      to { stroke-dashoffset: -36; }
     }
     .post-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
     }
     .post-card {
@@ -710,6 +887,14 @@ export function renderDemoLiveBoardHtml() {
       font-family: var(--mono);
       min-height: 42px;
     }
+    .post-copy .agent-note {
+      margin: 0;
+      font-size: 0.72rem;
+      line-height: 1.35;
+      color: #0f766e;
+      font-family: var(--sans);
+      font-weight: 600;
+    }
     .post-copy .meta-row {
       display: flex;
       justify-content: space-between;
@@ -718,6 +903,15 @@ export function renderDemoLiveBoardHtml() {
       font-size: 0.72rem;
       color: #6b7280;
       font-family: var(--mono);
+    }
+    .token-row {
+      font-size: 0.68rem;
+      color: #475569;
+      font-family: var(--mono);
+      border-top: 1px dashed #e5e7eb;
+      padding-top: 6px;
+      margin-top: 2px;
+      word-break: break-word;
     }
     .trade-grid {
       display: grid;
@@ -882,7 +1076,7 @@ export function renderDemoLiveBoardHtml() {
     }
     @media (max-width: 980px) {
       .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .grid-3 { grid-template-columns: 1fr; }
+      .essentials { grid-template-columns: 1fr; }
       .post-grid { grid-template-columns: 1fr; }
       .trade-grid { grid-template-columns: 1fr; }
       .trade-row { grid-template-columns: 1fr; }
@@ -905,115 +1099,67 @@ export function renderDemoLiveBoardHtml() {
     <section class="panel">
       <div class="panel-head">
         <h2>Demo Controls</h2>
-        <button id="trigger-cycle" class="trigger-btn" type="button">Start New Agent Cycle</button>
+        <div class="controls-right">
+          <label class="toggle-pill"><input id="workspace-only-toggle" type="checkbox" checked>Only workspace actors</label>
+          <label class="toggle-pill">Mode
+            <select id="trigger-mode" style="border:none;background:transparent;font-family:var(--mono);font-size:0.75rem;">
+              <option value="balanced">Balanced</option>
+              <option value="multihop">Multi-hop</option>
+            </select>
+          </label>
+          <button id="trigger-cycle" class="trigger-btn" type="button">Start New Agent Cycle</button>
+        </div>
       </div>
-      <p class="trigger-status" id="trigger-status">Creates a workshop + architects_dream cycle and runs matching, commit, settlement, and receipt.</p>
+      <p class="trigger-status" id="trigger-status">Balanced mode explores emergent pairings. Multi-hop mode biases ring-style 4-actor exchanges.</p>
     </section>
 
-    <section class="panel">
-      <h2>Creative Posts</h2>
-      <div class="post-grid" id="posts-grid"></div>
-    </section>
-
-    <section class="panel">
-      <h2>Trade Cycles</h2>
-      <div class="trade-grid" id="trade-cycles-grid"></div>
-    </section>
-
-    <section class="panel">
-      <h2>Lane Activity</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Lane</th>
-            <th>Status</th>
-            <th>Actors</th>
-            <th>Intents</th>
-            <th>Commits</th>
-            <th>Deposits</th>
-            <th>Receipts</th>
-            <th>Last Seen</th>
-          </tr>
-        </thead>
-        <tbody id="lanes-body"></tbody>
-      </table>
-    </section>
-
-    <section class="grid-3">
-      <section class="panel">
-        <h2>Cycles</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Cycle</th>
-              <th>State</th>
-              <th>Legs</th>
-              <th>Updated</th>
-            </tr>
-          </thead>
-          <tbody id="cycles-body"></tbody>
-        </table>
+    <section class="essentials">
+      <section class="panel stack">
+        <div>
+          <h2>Animated Cycle Graph</h2>
+          <div class="cycle-graph-shell">
+            <svg id="cycle-graph" class="cycle-graph" viewBox="0 0 520 240" role="img" aria-label="Latest trade cycle graph"></svg>
+            <div class="cycle-sub" id="cycle-graph-meta">Waiting for cycle data…</div>
+          </div>
+        </div>
+        <div>
+          <h2>Trade Cycles</h2>
+          <div class="trade-grid" id="trade-cycles-grid"></div>
+        </div>
       </section>
-      <section class="panel">
-        <h2>Receipts</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Receipt</th>
-              <th>State</th>
-              <th>Assets</th>
-              <th>Created</th>
-            </tr>
-          </thead>
-          <tbody id="receipts-body"></tbody>
-        </table>
+      <section class="panel stack">
+        <div>
+          <h2>Creative Posts</h2>
+          <div class="post-grid" id="posts-grid"></div>
+        </div>
+        <div>
+          <h2>Recent Activity</h2>
+          <div class="feed" id="feed"></div>
+        </div>
       </section>
-      <section class="panel">
-        <h2>Matching Runs</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Run</th>
-              <th>Selected</th>
-              <th>Candidates</th>
-              <th>Recorded</th>
-            </tr>
-          </thead>
-          <tbody id="runs-body"></tbody>
-        </table>
-      </section>
-    </section>
-
-    <section class="panel">
-      <h2>Recent Activity</h2>
-      <div class="feed" id="feed"></div>
     </section>
   </main>
 
   <script>
     const CARD_ORDER = [
       ['Active Intents', 'intents_active'],
-      ['Open Proposals', 'proposals_open'],
-      ['Committed Cycles', 'proposals_committed'],
-      ['Escrow Pending', 'timelines_escrow_pending'],
-      ['Escrow Ready', 'timelines_escrow_ready'],
-      ['Executing', 'timelines_executing'],
+      ['Live Cycles', 'timelines_executing'],
       ['Completed Cycles', 'timelines_completed'],
       ['Completed Receipts', 'receipts_completed']
     ];
 
     const byId = id => document.getElementById(id);
     const cards = byId('cards');
-    const lanesBody = byId('lanes-body');
-    const cyclesBody = byId('cycles-body');
-    const receiptsBody = byId('receipts-body');
-    const runsBody = byId('runs-body');
+    const cycleGraph = byId('cycle-graph');
+    const cycleGraphMeta = byId('cycle-graph-meta');
     const postsGrid = byId('posts-grid');
     const tradeCyclesGrid = byId('trade-cycles-grid');
     const feed = byId('feed');
     const meta = byId('meta');
     const pollStatus = byId('poll-status');
     const triggerCycleButton = byId('trigger-cycle');
+    const triggerModeSelect = byId('trigger-mode');
+    const workspaceOnlyToggle = byId('workspace-only-toggle');
     const triggerStatus = byId('trigger-status');
 
     function esc(value) {
@@ -1037,79 +1183,35 @@ export function renderDemoLiveBoardHtml() {
       return Math.floor(delta / 86_400_000) + 'd ago';
     }
 
+    function parseBooleanParam(value, fallback) {
+      if (typeof value !== 'string') return fallback;
+      const normalized = value.trim().toLowerCase();
+      if (!normalized) return fallback;
+      if (normalized === '1' || normalized === 'true' || normalized === 'yes' || normalized === 'on') return true;
+      if (normalized === '0' || normalized === 'false' || normalized === 'no' || normalized === 'off') return false;
+      return fallback;
+    }
+
+    function isWorkspaceOnlyEnabled(searchParams) {
+      const raw = searchParams.get('workspace_only');
+      if (raw === null) return true;
+      return parseBooleanParam(raw, true);
+    }
+
+    function syncLocationSearch(searchParams) {
+      const next = searchParams.toString();
+      const current = window.location.search.startsWith('?')
+        ? window.location.search.slice(1)
+        : window.location.search;
+      if (next === current) return;
+      const nextUrl = window.location.pathname + (next ? ('?' + next) : '');
+      window.history.replaceState(null, '', nextUrl);
+    }
+
     function renderCards(funnel) {
       cards.innerHTML = CARD_ORDER.map(([label, key]) => {
         const value = Number.isFinite(funnel?.[key]) ? funnel[key] : 0;
         return '<article class="card"><h3>' + esc(label) + '</h3><div class="value">' + esc(value) + '</div></article>';
-      }).join('');
-    }
-
-    function renderLanes(rows) {
-      if (!rows || rows.length === 0) {
-        lanesBody.innerHTML = '<tr><td colspan="8" class="empty">No lane hints configured.</td></tr>';
-        return;
-      }
-      lanesBody.innerHTML = rows.map(row => {
-        const actorPreview = row.actor_ids.slice(0, 2).join(', ');
-        const actorLabel = row.actor_count > 0
-          ? esc(actorPreview + (row.actor_count > 2 ? ', +' + (row.actor_count - 2) : ''))
-          : 'none';
-        return '<tr>'
-          + '<td><code>' + esc(row.lane) + '</code></td>'
-          + '<td><span class="badge ' + esc(row.status) + '">' + esc(row.status) + '</span></td>'
-          + '<td>' + actorLabel + '</td>'
-          + '<td>' + esc(row.intents_posted) + '</td>'
-          + '<td>' + esc(row.commit_accepts) + '</td>'
-          + '<td>' + esc(row.deposits_confirmed) + '</td>'
-          + '<td>' + esc(row.receipts_created) + '</td>'
-          + '<td>' + esc(shortAgo(row.last_seen_at)) + '</td>'
-          + '</tr>';
-      }).join('');
-    }
-
-    function renderCycles(rows) {
-      if (!rows || rows.length === 0) {
-        cyclesBody.innerHTML = '<tr><td colspan="4" class="empty">No settlement timelines yet.</td></tr>';
-        return;
-      }
-      cyclesBody.innerHTML = rows.map(row => {
-        const legs = row.legs_released + '/' + row.legs_total + ' released';
-        return '<tr>'
-          + '<td><code>' + esc(row.cycle_id ?? 'n/a') + '</code></td>'
-          + '<td><span class="badge">' + esc(row.state ?? 'n/a') + '</span></td>'
-          + '<td>' + esc(legs) + '</td>'
-          + '<td>' + esc(shortAgo(row.updated_at)) + '</td>'
-          + '</tr>';
-      }).join('');
-    }
-
-    function renderReceipts(rows) {
-      if (!rows || rows.length === 0) {
-        receiptsBody.innerHTML = '<tr><td colspan="4" class="empty">No receipts yet.</td></tr>';
-        return;
-      }
-      receiptsBody.innerHTML = rows.map(row => {
-        return '<tr>'
-          + '<td><code>' + esc(row.id ?? 'n/a') + '</code></td>'
-          + '<td><span class="badge">' + esc(row.final_state ?? 'n/a') + '</span></td>'
-          + '<td>' + esc(row.asset_count) + '</td>'
-          + '<td>' + esc(shortAgo(row.created_at)) + '</td>'
-          + '</tr>';
-      }).join('');
-    }
-
-    function renderRuns(rows) {
-      if (!rows || rows.length === 0) {
-        runsBody.innerHTML = '<tr><td colspan="4" class="empty">No matching runs recorded.</td></tr>';
-        return;
-      }
-      runsBody.innerHTML = rows.map(row => {
-        return '<tr>'
-          + '<td><code>' + esc(row.run_id ?? 'n/a') + '</code></td>'
-          + '<td>' + esc(row.selected_proposals_count) + '</td>'
-          + '<td>' + esc(row.candidate_cycles) + '</td>'
-          + '<td>' + esc(shortAgo(row.recorded_at)) + '</td>'
-          + '</tr>';
       }).join('');
     }
 
@@ -1125,13 +1227,25 @@ export function renderDemoLiveBoardHtml() {
         const value = Number.isFinite(row.value_usd) ? '$' + row.value_usd : 'n/a';
         const actor = row.actor_id ? row.actor_id : 'unknown';
         const posted = row.posted_at ? shortAgo(row.posted_at) : 'n/a';
+        const novelty = Number.isFinite(row.novelty_score) ? ('Novelty ' + row.novelty_score) : 'Novelty n/a';
+        const tags = Array.isArray(row.style_tags) && row.style_tags.length > 0 ? row.style_tags.join(' · ') : null;
+        const agentNote = row.agent_message ? row.agent_message : null;
+        const capability = row.delivery_capability_token ?? null;
+        const tokenBits = [];
+        if (capability?.token_id) tokenBits.push(capability.token_id);
+        if (capability?.delivery_target) tokenBits.push(capability.delivery_target);
+        if (capability?.expires_at) tokenBits.push('exp ' + shortAgo(capability.expires_at));
+        const tokenRow = tokenBits.length > 0 ? ('<div class="token-row">capability: ' + esc(tokenBits.join(' • ')) + '</div>') : '';
         return '<article class="post-card">'
           + image
           + '<div class="post-copy">'
           + '<div class="top"><span class="badge">' + esc(actor) + '</span><span>' + esc(posted) + '</span></div>'
           + '<p class="title">' + esc(row.title ?? row.intent_id ?? 'Untitled') + '</p>'
           + '<p class="prompt">' + esc(row.prompt_spec ?? 'No prompt provided') + '</p>'
+          + (agentNote ? ('<p class="agent-note">"' + esc(agentNote) + '"</p>') : '')
           + '<div class="meta-row"><span>' + esc(row.deliverable_type ?? 'deliverable') + '</span><span>' + esc(value) + '</span></div>'
+          + '<div class="meta-row"><span>' + esc(novelty) + '</span><span>' + esc(tags ?? '') + '</span></div>'
+          + tokenRow
           + '</div>'
           + '</article>';
       }).join('');
@@ -1172,6 +1286,79 @@ export function renderDemoLiveBoardHtml() {
       }).join('');
     }
 
+    function renderCycleGraph(rows) {
+      if (!cycleGraph || !cycleGraphMeta) return;
+      if (!rows || rows.length === 0) {
+        cycleGraph.innerHTML = '';
+        cycleGraphMeta.textContent = 'No cycle yet. Trigger one to watch actor flows.';
+        return;
+      }
+      const cycle = rows[0] ?? null;
+      const participants = Array.isArray(cycle?.participants) ? cycle.participants : [];
+      const actorIds = Array.from(new Set(participants.map(row => String(row?.actor_id ?? '').trim()).filter(Boolean)));
+      if (actorIds.length < 2) {
+        cycleGraph.innerHTML = '';
+        cycleGraphMeta.textContent = 'Cycle has insufficient participants to render graph.';
+        return;
+      }
+      const w = 520;
+      const h = 240;
+      const cx = w / 2;
+      const cy = h / 2;
+      const radius = Math.min(w, h) * 0.33;
+      const points = actorIds.map((actorId, idx) => {
+        const angle = (-Math.PI / 2) + ((Math.PI * 2 * idx) / actorIds.length);
+        return {
+          actor_id: actorId,
+          x: cx + (Math.cos(angle) * radius),
+          y: cy + (Math.sin(angle) * radius)
+        };
+      });
+      const pointByActorId = new Map(points.map(point => [point.actor_id, point]));
+
+      const edges = [];
+      for (const participant of participants) {
+        const from = String(participant?.actor_id ?? '').trim();
+        if (!from) continue;
+        const givesAssetId = participant?.gives?.asset_id ? String(participant.gives.asset_id) : null;
+        let to = null;
+        if (givesAssetId) {
+          for (const candidate of participants) {
+            const candidateGetsAssetId = candidate?.gets?.asset_id ? String(candidate.gets.asset_id) : null;
+            if (candidateGetsAssetId && candidateGetsAssetId === givesAssetId) {
+              to = String(candidate?.actor_id ?? '').trim();
+              break;
+            }
+          }
+        }
+        if (!to) {
+          const fromIdx = actorIds.indexOf(from);
+          to = fromIdx >= 0 ? actorIds[(fromIdx + 1) % actorIds.length] : null;
+        }
+        if (!to || from === to) continue;
+        edges.push({ from, to });
+      }
+
+      const markerDefs = '<defs><marker id="cycle-arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon class="cycle-arrow" points="0 0, 10 3.5, 0 7"></polygon></marker></defs>';
+      const edgeSvg = edges.map((edge, idx) => {
+        const fromPoint = pointByActorId.get(edge.from);
+        const toPoint = pointByActorId.get(edge.to);
+        if (!fromPoint || !toPoint) return '';
+        return '<path class="cycle-edge" d="M ' + fromPoint.x.toFixed(2) + ' ' + fromPoint.y.toFixed(2)
+          + ' L ' + toPoint.x.toFixed(2) + ' ' + toPoint.y.toFixed(2)
+          + '" marker-end="url(#cycle-arrowhead)" style="animation-delay:' + (idx * 0.18).toFixed(2) + 's"></path>';
+      }).join('');
+      const nodeSvg = points.map(point => {
+        return '<g>'
+          + '<circle class="cycle-node" cx="' + point.x.toFixed(2) + '" cy="' + point.y.toFixed(2) + '" r="22"></circle>'
+          + '<text class="cycle-label" x="' + point.x.toFixed(2) + '" y="' + (point.y + 4).toFixed(2) + '">' + esc(point.actor_id) + '</text>'
+          + '</g>';
+      }).join('');
+      cycleGraph.innerHTML = markerDefs + edgeSvg + nodeSvg;
+      const state = cycle?.state ? cycle.state : 'proposed';
+      cycleGraphMeta.textContent = 'Cycle ' + (cycle?.cycle_id ?? 'n/a') + ' • ' + state + ' • ' + actorIds.length + '-actor flow';
+    }
+
     function renderFeed(rows) {
       if (!rows || rows.length === 0) {
         feed.innerHTML = '<div class="empty">No events yet.</div>';
@@ -1201,7 +1388,8 @@ export function renderDemoLiveBoardHtml() {
     async function triggerCycle() {
       if (!triggerCycleButton) return;
       triggerCycleButton.disabled = true;
-      setTriggerStatus('Starting new cycle...');
+      const mode = triggerModeSelect?.value === 'multihop' ? 'multihop' : 'balanced';
+      setTriggerStatus('Starting new ' + mode + ' cycle...');
       try {
         const response = await fetch('/demo/live-board/trigger-cycle', {
           method: 'POST',
@@ -1209,7 +1397,7 @@ export function renderDemoLiveBoardHtml() {
             'content-type': 'application/json',
             accept: 'application/json'
           },
-          body: JSON.stringify({})
+          body: JSON.stringify({ mode })
         });
         const payload = await response.json().catch(() => ({}));
         if (!response.ok || payload?.ok !== true) {
@@ -1221,7 +1409,8 @@ export function renderDemoLiveBoardHtml() {
         const cycleCount = Number.isFinite(cycle.cycle_count) ? cycle.cycle_count : (Array.isArray(cycle.settled_cycles) ? cycle.settled_cycles.length : 1);
         const proposalId = cycle.proposal_id || firstCycle?.proposal_id || 'n/a';
         const receiptId = cycle.receipt_id || firstCycle?.receipt_id || null;
-        setTriggerStatus('Cycles ready: ' + cycleCount + ' • first ' + proposalId + (receiptId ? ' • receipt ' + receiptId : ''));
+        const modeUsed = cycle.mode ? cycle.mode : mode;
+        setTriggerStatus('Cycles ready: ' + cycleCount + ' • mode ' + modeUsed + ' • first ' + proposalId + (receiptId ? ' • receipt ' + receiptId : ''));
         await load();
       } catch (error) {
         setTriggerStatus('Trigger failed: ' + error.message);
@@ -1234,6 +1423,13 @@ export function renderDemoLiveBoardHtml() {
       const search = new URLSearchParams(window.location.search);
       if (!search.get('limit')) search.set('limit', '25');
       if (!search.get('lanes')) search.set('lanes', 'workshop,architects_dream,cto,toxins,graph_board,marketplace');
+      const triggerMode = triggerModeSelect?.value === 'multihop' ? 'multihop' : 'balanced';
+      search.set('trigger_mode', triggerMode);
+      const workspaceOnly = workspaceOnlyToggle
+        ? workspaceOnlyToggle.checked
+        : isWorkspaceOnlyEnabled(search);
+      search.set('workspace_only', workspaceOnly ? '1' : '0');
+      syncLocationSearch(search);
       const url = '/demo/live-board/snapshot?' + search.toString();
       const started = Date.now();
       try {
@@ -1246,14 +1442,12 @@ export function renderDemoLiveBoardHtml() {
         renderCards(snapshot.funnel ?? {});
         renderPosts(snapshot.posts ?? []);
         renderTradeCycles(snapshot.trade_cycles ?? []);
-        renderLanes(snapshot.lanes ?? []);
-        renderCycles(snapshot.cycles ?? []);
-        renderReceipts(snapshot.receipts ?? []);
-        renderRuns(snapshot.matching_runs ?? []);
+        renderCycleGraph(snapshot.trade_cycles ?? []);
         renderFeed(snapshot.events ?? []);
 
         const latencyMs = Date.now() - started;
-        meta.textContent = 'Updated ' + shortAgo(snapshot.generated_at) + ' • latency ' + latencyMs + 'ms';
+        const visibility = snapshot.workspace_only ? 'workspace-only' : 'all actors';
+        meta.textContent = 'Updated ' + shortAgo(snapshot.generated_at) + ' • latency ' + latencyMs + 'ms • ' + visibility;
         setPollStatus('ok', 'Live');
       } catch (error) {
         meta.textContent = 'Snapshot error: ' + error.message;
@@ -1261,6 +1455,21 @@ export function renderDemoLiveBoardHtml() {
       }
     }
 
+    if (workspaceOnlyToggle) {
+      const initialSearch = new URLSearchParams(window.location.search);
+      workspaceOnlyToggle.checked = isWorkspaceOnlyEnabled(initialSearch);
+      workspaceOnlyToggle.addEventListener('change', () => {
+        void load();
+      });
+    }
+    if (triggerModeSelect) {
+      const initialSearch = new URLSearchParams(window.location.search);
+      const mode = initialSearch.get('trigger_mode');
+      triggerModeSelect.value = mode === 'multihop' ? 'multihop' : 'balanced';
+      triggerModeSelect.addEventListener('change', () => {
+        void load();
+      });
+    }
     if (triggerCycleButton) triggerCycleButton.addEventListener('click', triggerCycle);
     load();
     setInterval(load, 4000);

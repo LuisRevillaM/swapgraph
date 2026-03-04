@@ -65,6 +65,12 @@ import {
   withIdempotency
 } from './marketplaceMatchingResponseHelpers.mjs';
 
+function parseBoundedInt(value, { fallback, min, max }) {
+  const parsed = Number.parseInt(String(value ?? ''), 10);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(max, Math.max(min, parsed));
+}
+
 export class MarketplaceMatchingService {
   /**
    * @param {{ store: import('../store/jsonStateStore.mjs').JsonStateStore }} opts
@@ -136,9 +142,14 @@ export class MarketplaceMatchingService {
           : 0;
 
         const edgeIntents = activeEdgeIntentsForMatching({ store: this.store, nowIso: requestedAt });
+        const v1MaxCycleLength = parseBoundedInt(process.env.MATCHING_V1_MAX_CYCLE_LENGTH, {
+          fallback: 4,
+          min: 2,
+          max: 8
+        });
         const v1Config = {
           min_cycle_length: 2,
-          max_cycle_length: 3,
+          max_cycle_length: v1MaxCycleLength,
           include_cycle_diagnostics: false,
           max_cycles_explored: null,
           timeout_ms: null
