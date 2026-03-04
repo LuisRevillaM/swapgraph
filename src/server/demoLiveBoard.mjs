@@ -988,6 +988,31 @@ export function renderDemoLiveBoardHtml() {
     .card .value.changed {
       animation: countPulse var(--dur-normal) var(--ease-spring);
     }
+    .quick-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sp-2);
+      align-items: center;
+      padding: var(--sp-3);
+    }
+    .quick-pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface-elevated);
+      color: var(--ink-secondary);
+      font-family: var(--mono);
+      font-size: var(--text-xs);
+      padding: 5px 10px;
+      display: inline-flex;
+      gap: 6px;
+      align-items: baseline;
+    }
+    .quick-pill strong {
+      font-size: 0.9rem;
+      color: var(--accent-strong);
+      letter-spacing: -0.01em;
+      font-weight: 700;
+    }
 
     /* ─── Panel ─── */
     .panel {
@@ -1168,6 +1193,156 @@ export function renderDemoLiveBoardHtml() {
       color: var(--ok);
       background: var(--ok-subtle);
       box-shadow: 0 0 0 1px color-mix(in oklab, var(--ok) 30%, transparent), 0 4px 14px color-mix(in oklab, var(--ok) 22%, transparent);
+    }
+    .advanced-controls,
+    .legend-details,
+    .advanced-layout {
+      margin-top: var(--sp-3);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: var(--surface-elevated);
+      overflow: hidden;
+    }
+    .advanced-controls > summary,
+    .legend-details > summary,
+    .advanced-layout > summary {
+      cursor: pointer;
+      list-style: none;
+      font-family: var(--mono);
+      font-size: var(--text-xs);
+      color: var(--ink-secondary);
+      padding: var(--sp-2) var(--sp-3);
+      background: color-mix(in oklab, var(--surface-elevated) 75%, var(--accent-glow));
+      user-select: none;
+    }
+    .advanced-controls > summary::-webkit-details-marker,
+    .legend-details > summary::-webkit-details-marker,
+    .advanced-layout > summary::-webkit-details-marker {
+      display: none;
+    }
+    .advanced-controls[open] > summary,
+    .legend-details[open] > summary,
+    .advanced-layout[open] > summary {
+      border-bottom: 1px solid var(--line-subtle);
+    }
+    .advanced-controls-body {
+      padding: var(--sp-3);
+    }
+    .legend-details .state-guide {
+      margin-top: 0;
+      padding: var(--sp-3);
+    }
+    .feed-select {
+      border: none;
+      background: transparent;
+      font-family: var(--mono);
+      font-size: var(--text-xs);
+      color: var(--ink-secondary);
+    }
+    .live-feeds-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--sp-3);
+    }
+    .live-feed-column {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: var(--surface-elevated);
+      padding: var(--sp-2);
+      min-height: 360px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: var(--sp-2);
+    }
+    .live-feed-title {
+      font-family: var(--mono);
+      font-size: var(--text-xs);
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 0 var(--sp-1);
+    }
+    .live-list {
+      display: grid;
+      gap: var(--sp-2);
+      align-content: start;
+      overflow-y: auto;
+      max-height: 520px;
+      padding-right: var(--sp-1);
+      scrollbar-width: thin;
+      scrollbar-color: var(--line) transparent;
+    }
+    .live-list::-webkit-scrollbar { width: 5px; }
+    .live-list::-webkit-scrollbar-track { background: transparent; }
+    .live-list::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+    .live-item {
+      border: 1px solid var(--line-subtle);
+      border-left: 3px solid var(--line);
+      border-radius: 2px var(--radius-sm) var(--radius-sm) 2px;
+      background: var(--surface);
+      padding: var(--sp-2);
+      display: grid;
+      gap: 6px;
+    }
+    .live-item.kind-products { border-left-color: #0b7285; }
+    .live-item.kind-intents { border-left-color: #7c3aed; }
+    .live-item.kind-cycles { border-left-color: var(--accent); }
+    .live-item-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--sp-2);
+      font-family: var(--mono);
+      font-size: 0.66rem;
+      color: var(--faint);
+    }
+    .live-item-row {
+      display: grid;
+      grid-template-columns: 68px minmax(0, 1fr);
+      gap: var(--sp-2);
+      align-items: start;
+    }
+    .live-thumb {
+      width: 68px;
+      height: 68px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: var(--line-subtle);
+      border: 1px solid var(--line-subtle);
+    }
+    .live-item-title {
+      margin: 0;
+      font-size: var(--text-sm);
+      color: var(--ink);
+      line-height: 1.25;
+      font-weight: 700;
+    }
+    .live-item-sub {
+      margin: 0;
+      font-size: var(--text-xs);
+      color: var(--muted);
+      font-family: var(--mono);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .live-item-meta {
+      margin: 0;
+      font-size: 0.66rem;
+      color: var(--faint);
+      font-family: var(--mono);
+      line-height: 1.35;
+      word-break: break-word;
+    }
+    .live-empty {
+      color: var(--faint);
+      font-size: var(--text-xs);
+      font-style: italic;
+      font-family: var(--mono);
+      padding: var(--sp-3);
+      text-align: center;
     }
 
     /* ─── Layout ─── */
@@ -1742,6 +1917,7 @@ export function renderDemoLiveBoardHtml() {
     /* ─── Responsive ─── */
     @media (max-width: 980px) {
       .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .live-feeds-grid { grid-template-columns: 1fr; }
       .essentials { grid-template-columns: 1fr; }
       .post-grid { grid-template-columns: 1fr; }
       .trade-grid { grid-template-columns: 1fr; }
@@ -1761,71 +1937,115 @@ export function renderDemoLiveBoardHtml() {
       <div class="status-pill" id="poll-status"><span class="status-dot"></span>Connecting</div>
     </section>
 
-    <section class="cards" id="cards"></section>
+    <section class="panel quick-stats" id="quick-stats"></section>
 
     <section class="panel">
       <div class="panel-head">
-        <h2>Demo Controls</h2>
+        <h2>Live Controls</h2>
         <div class="controls-right">
-          <label class="toggle-pill"><input id="workspace-only-toggle" type="checkbox" checked>Only workspace actors</label>
-          <label class="toggle-pill">Mode
-            <select id="trigger-mode" style="border:none;background:transparent;font-family:var(--mono);font-size:0.75rem;">
-              <option value="balanced">Balanced</option>
-              <option value="multihop">Multi-hop</option>
-            </select>
-          </label>
-          <label class="toggle-pill">Wave
-            <select id="wave-phase" style="border:none;background:transparent;font-family:var(--mono);font-size:0.75rem;">
-              <option value="match">Post + Match</option>
-              <option value="post">Post Only</option>
-              <option value="settle">Full Settle</option>
-            </select>
-          </label>
           <label class="toggle-pill">Cadence
             <input id="cadence-seconds" class="cadence-input" type="number" min="5" max="3600" step="1" value="30" aria-label="Cadence seconds">
             <span>s</span>
           </label>
           <button id="trigger-wave" class="trigger-btn" type="button">Run Wave Now</button>
           <button id="cadence-toggle" class="trigger-btn" type="button">Start Cadence</button>
-          <button id="trigger-cycle" class="trigger-btn" type="button">Start New Agent Cycle</button>
         </div>
       </div>
-      <p class="trigger-status" id="trigger-status">Balanced mode explores emergent pairings. Multi-hop mode biases ring-style 4-actor exchanges.</p>
+      <p class="trigger-status" id="trigger-status">Use Run Wave for one burst, or cadence for continuous posting.</p>
       <p class="trigger-status" id="cadence-status">Cadence paused. Start cadence to continuously post and match.</p>
-      <div class="state-guide" aria-label="Cycle lifecycle legend">
-        <div class="guide-chip proposed"><strong>Proposed</strong><span>candidate cycle found, waiting for accepts</span></div>
-        <div class="guide-chip pending"><strong>Escrow</strong><span>participants confirm deposits and lock intents</span></div>
-        <div class="guide-chip executing"><strong>Executing</strong><span>fulfillment runs and artifacts are delivered</span></div>
-        <div class="guide-chip completed"><strong>Completed</strong><span>receipt minted and balances finalized</span></div>
-        <div class="guide-chip failed"><strong>Failed</strong><span>cycle closed, funds/assets released or refunded</span></div>
-      </div>
-    </section>
-
-    <section class="essentials">
-      <section class="panel stack">
-        <div>
-          <h2>Animated Cycle Graph</h2>
-          <div class="cycle-graph-shell">
-            <svg id="cycle-graph" class="cycle-graph" viewBox="0 0 520 240" role="img" aria-label="Latest trade cycle graph"></svg>
-            <div class="cycle-sub" id="cycle-graph-meta">Waiting for cycle data…</div>
+      <details class="advanced-controls">
+        <summary>Advanced controls</summary>
+        <div class="advanced-controls-body">
+          <div class="controls-right">
+            <label class="toggle-pill"><input id="workspace-only-toggle" type="checkbox" checked>Only workspace actors</label>
+            <label class="toggle-pill">Mode
+              <select id="trigger-mode" class="feed-select">
+                <option value="balanced">Balanced</option>
+                <option value="multihop">Multi-hop</option>
+              </select>
+            </label>
+            <label class="toggle-pill">Wave
+              <select id="wave-phase" class="feed-select">
+                <option value="match">Post + Match</option>
+                <option value="post">Post Only</option>
+                <option value="settle">Full Settle</option>
+              </select>
+            </label>
+            <button id="trigger-cycle" class="trigger-btn" type="button">Start New Agent Cycle</button>
           </div>
         </div>
-        <div>
-          <h2>Trade Cycles</h2>
-          <div class="trade-grid" id="trade-cycles-grid"></div>
+      </details>
+      <details class="legend-details">
+        <summary>Cycle state legend</summary>
+        <div class="state-guide" aria-label="Cycle lifecycle legend">
+          <div class="guide-chip proposed"><strong>Proposed</strong><span>candidate cycle found, waiting for accepts</span></div>
+          <div class="guide-chip pending"><strong>Escrow</strong><span>participants confirm deposits and lock intents</span></div>
+          <div class="guide-chip executing"><strong>Executing</strong><span>fulfillment runs and artifacts are delivered</span></div>
+          <div class="guide-chip completed"><strong>Completed</strong><span>receipt minted and balances finalized</span></div>
+          <div class="guide-chip failed"><strong>Failed</strong><span>cycle closed, funds/assets released or refunded</span></div>
         </div>
-      </section>
-      <section class="panel stack">
-        <div>
-          <h2>Creative Posts</h2>
-          <div class="post-grid" id="posts-grid"></div>
-        </div>
-        <div>
-          <h2>Recent Activity</h2>
-          <div class="feed" id="feed"></div>
-        </div>
-      </section>
+      </details>
     </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Live Feeds</h2>
+        <div class="controls-right">
+          <label class="toggle-pill">Left
+            <select id="feed-left-kind" class="feed-select">
+              <option value="products">Products</option>
+              <option value="intents">Intents</option>
+              <option value="cycles">Cycles</option>
+            </select>
+          </label>
+          <label class="toggle-pill">Right
+            <select id="feed-right-kind" class="feed-select">
+              <option value="intents">Intents</option>
+              <option value="cycles">Cycles</option>
+              <option value="products">Products</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <div class="live-feeds-grid">
+        <section class="live-feed-column">
+          <div class="live-feed-title" id="feed-left-title">Products coming through</div>
+          <div class="live-list" id="feed-left-list"></div>
+        </section>
+        <section class="live-feed-column">
+          <div class="live-feed-title" id="feed-right-title">Intents being placed</div>
+          <div class="live-list" id="feed-right-list"></div>
+        </section>
+      </div>
+    </section>
+    <details class="advanced-layout">
+      <summary>Advanced visualizations</summary>
+      <section class="essentials">
+        <section class="panel stack">
+          <div>
+            <h2>Animated Cycle Graph</h2>
+            <div class="cycle-graph-shell">
+              <svg id="cycle-graph" class="cycle-graph" viewBox="0 0 520 240" role="img" aria-label="Latest trade cycle graph"></svg>
+              <div class="cycle-sub" id="cycle-graph-meta">Waiting for cycle data…</div>
+            </div>
+          </div>
+          <div>
+            <h2>Trade Cycles</h2>
+            <div class="trade-grid" id="trade-cycles-grid"></div>
+          </div>
+        </section>
+        <section class="panel stack">
+          <div>
+            <h2>Creative Posts</h2>
+            <div class="post-grid" id="posts-grid"></div>
+          </div>
+          <div>
+            <h2>Recent Activity</h2>
+            <div class="feed" id="feed"></div>
+          </div>
+        </section>
+      </section>
+    </details>
   </main>
 
   <div id="lightbox" class="lightbox" aria-hidden="true">
@@ -1841,20 +2061,19 @@ export function renderDemoLiveBoardHtml() {
   </div>
 
   <script>
-    const CARD_ORDER = [
-      ['Active Intents', 'intents_active'],
-      ['Live Cycles', 'timelines_executing'],
-      ['Completed Cycles', 'timelines_completed'],
-      ['Completed Receipts', 'receipts_completed']
-    ];
-
     const byId = id => document.getElementById(id);
-    const cards = byId('cards');
+    const quickStats = byId('quick-stats');
     const cycleGraph = byId('cycle-graph');
     const cycleGraphMeta = byId('cycle-graph-meta');
     const postsGrid = byId('posts-grid');
     const tradeCyclesGrid = byId('trade-cycles-grid');
     const feed = byId('feed');
+    const feedLeftList = byId('feed-left-list');
+    const feedRightList = byId('feed-right-list');
+    const feedLeftTitle = byId('feed-left-title');
+    const feedRightTitle = byId('feed-right-title');
+    const feedLeftKindSelect = byId('feed-left-kind');
+    const feedRightKindSelect = byId('feed-right-kind');
     const meta = byId('meta');
     const pollStatus = byId('poll-status');
     const triggerCycleButton = byId('trigger-cycle');
@@ -1881,6 +2100,7 @@ export function renderDemoLiveBoardHtml() {
     let cadenceTimer = null;
     let cadenceTick = 0;
     let cadenceInFlight = false;
+    let latestSnapshot = null;
 
     function esc(value) {
       return String(value)
@@ -1973,14 +2193,17 @@ export function renderDemoLiveBoardHtml() {
       window.history.replaceState(null, '', nextUrl);
     }
 
-    let prevCardValues = {};
-    function renderCards(funnel) {
-      cards.innerHTML = CARD_ORDER.map(([label, key]) => {
-        const value = Number.isFinite(funnel?.[key]) ? funnel[key] : 0;
-        const changed = prevCardValues[key] !== undefined && prevCardValues[key] !== value;
-        prevCardValues[key] = value;
-        return '<article class="card"><h3>' + esc(label) + '</h3><div class="value' + (changed ? ' changed' : '') + '">' + esc(value) + '</div></article>';
-      }).join('');
+    function renderQuickStats(funnel, snapshot) {
+      if (!quickStats) return;
+      const rows = [
+        { label: 'open listings', value: Number.isFinite(funnel?.intents_active) ? funnel.intents_active : 0 },
+        { label: 'proposed cycles', value: Number.isFinite(funnel?.proposals_open) ? funnel.proposals_open : 0 },
+        { label: 'settled cycles', value: Number.isFinite(funnel?.timelines_completed) ? funnel.timelines_completed : 0 },
+        { label: 'matching runs', value: Array.isArray(snapshot?.matching_runs) ? snapshot.matching_runs.length : 0 }
+      ];
+      quickStats.innerHTML = rows.map(row => (
+        '<span class="quick-pill"><strong>' + esc(row.value) + '</strong><span>' + esc(row.label) + '</span></span>'
+      )).join('');
     }
 
     function renderPosts(rows) {
@@ -2250,6 +2473,108 @@ export function renderDemoLiveBoardHtml() {
       }).join('');
     }
 
+    function normalizeFeedKind(value, fallback = 'products') {
+      const raw = String(value || '').trim().toLowerCase();
+      if (raw === 'products' || raw === 'intents' || raw === 'cycles') return raw;
+      return fallback;
+    }
+
+    function feedTitleForKind(kind) {
+      if (kind === 'intents') return 'Intents being placed';
+      if (kind === 'cycles') return 'Cycles found';
+      return 'Products coming through';
+    }
+
+    function formatUsd(value) {
+      return Number.isFinite(value) ? ('$' + value) : 'n/a';
+    }
+
+    function buildLiveFeedRows(kind, snapshot) {
+      const posts = Array.isArray(snapshot?.posts) ? snapshot.posts : [];
+      const events = Array.isArray(snapshot?.events) ? snapshot.events : [];
+      const tradeCycles = Array.isArray(snapshot?.trade_cycles) ? snapshot.trade_cycles : [];
+      if (kind === 'products') {
+        return posts.slice(0, 24).map(row => ({
+          kind,
+          id: row.intent_id ?? row.asset_id ?? row.title ?? 'product',
+          time: row.posted_at,
+          actor: row.actor_id ?? 'unknown',
+          title: row.title ?? row.intent_id ?? 'Untitled',
+          subtitle: row.prompt_spec ?? '',
+          meta: (row.deliverable_type ?? 'deliverable') + ' • ' + formatUsd(row.value_usd),
+          image_url: row.image_url ?? null
+        }));
+      }
+      if (kind === 'intents') {
+        const intentEvents = events
+          .filter(row => String(row?.type || '').startsWith('intent.'))
+          .slice(0, 24)
+          .map(row => ({
+            kind,
+            id: row.id ?? row.intent_id ?? row.type,
+            time: row.occurred_at,
+            actor: row.actor_id ?? 'system',
+            title: row.type ?? 'intent',
+            subtitle: row.summary ?? '',
+            meta: row.intent_id ? ('intent ' + row.intent_id) : ''
+          }));
+        if (intentEvents.length > 0) return intentEvents;
+        return posts.slice(0, 24).map(row => ({
+          kind,
+          id: row.intent_id ?? row.asset_id ?? row.title ?? 'intent',
+          time: row.posted_at,
+          actor: row.actor_id ?? 'unknown',
+          title: 'intent.posted',
+          subtitle: (row.actor_id ?? 'actor') + ' listed ' + (row.deliverable_type ?? 'deliverable'),
+          meta: row.intent_id ? ('intent ' + row.intent_id) : ''
+        }));
+      }
+      return tradeCycles.slice(0, 24).map(row => {
+        const actors = Array.isArray(row?.participants)
+          ? row.participants.map(participant => participant?.actor_id).filter(Boolean).slice(0, 4)
+          : [];
+        return {
+          kind,
+          id: row.cycle_id ?? 'cycle',
+          time: row.updated_at,
+          actor: actors.join(' • ') || 'actors',
+          title: String(row.state || 'proposed'),
+          subtitle: row.cycle_id ?? 'cycle',
+          meta: (Number.isFinite(row.participant_count) ? row.participant_count : actors.length) + '-actor cycle'
+            + (row.receipt_id ? (' • receipt ' + row.receipt_id) : '')
+        };
+      });
+    }
+
+    function renderLiveFeedColumn({ container, titleNode, kind, snapshot }) {
+      if (!container) return;
+      if (titleNode) titleNode.textContent = feedTitleForKind(kind);
+      const rows = buildLiveFeedRows(kind, snapshot);
+      if (rows.length === 0) {
+        container.innerHTML = '<div class="live-empty">No ' + esc(kind) + ' events yet.</div>';
+        return;
+      }
+      container.innerHTML = rows.map(row => {
+        const head = '<div class="live-item-head"><span class="badge">' + esc(row.actor || 'actor') + '</span><span>' + esc(shortAgo(row.time)) + '</span></div>';
+        const copy = '<p class="live-item-title">' + esc(row.title || 'item') + '</p>'
+          + (row.subtitle ? ('<p class="live-item-sub">' + esc(row.subtitle) + '</p>') : '')
+          + (row.meta ? ('<p class="live-item-meta">' + esc(row.meta) + '</p>') : '');
+        const body = row.image_url
+          ? ('<div class="live-item-row"><img class="live-thumb" src="' + esc(row.image_url) + '" alt="' + esc(row.title || 'preview') + '" loading="lazy"><div>' + copy + '</div></div>')
+          : copy;
+        return '<article class="live-item kind-' + esc(row.kind) + '">' + head + body + '</article>';
+      }).join('');
+    }
+
+    function renderLiveFeeds(snapshot) {
+      const leftKind = normalizeFeedKind(feedLeftKindSelect?.value, 'products');
+      const rightKind = normalizeFeedKind(feedRightKindSelect?.value, leftKind === 'intents' ? 'cycles' : 'intents');
+      if (feedLeftKindSelect && feedLeftKindSelect.value !== leftKind) feedLeftKindSelect.value = leftKind;
+      if (feedRightKindSelect && feedRightKindSelect.value !== rightKind) feedRightKindSelect.value = rightKind;
+      renderLiveFeedColumn({ container: feedLeftList, titleNode: feedLeftTitle, kind: leftKind, snapshot });
+      renderLiveFeedColumn({ container: feedRightList, titleNode: feedRightTitle, kind: rightKind, snapshot });
+    }
+
     function setPollStatus(kind, text) {
       pollStatus.className = 'status-pill ' + kind;
       pollStatus.innerHTML = '<span class="status-dot"></span>' + esc(text);
@@ -2272,6 +2597,12 @@ export function renderDemoLiveBoardHtml() {
       if (raw === 'post') return 'post';
       if (raw === 'settle') return 'settle';
       return 'match';
+    }
+
+    function selectedFeedKinds() {
+      const left = normalizeFeedKind(feedLeftKindSelect?.value, 'products');
+      const right = normalizeFeedKind(feedRightKindSelect?.value, left === 'intents' ? 'cycles' : 'intents');
+      return { left, right };
     }
 
     function cadenceIntervalMs() {
@@ -2410,6 +2741,9 @@ export function renderDemoLiveBoardHtml() {
       const triggerMode = selectedMode();
       search.set('trigger_mode', triggerMode);
       search.set('wave_phase', selectedWavePhase());
+      const selectedFeeds = selectedFeedKinds();
+      search.set('feed_left', selectedFeeds.left);
+      search.set('feed_right', selectedFeeds.right);
       search.set('cadence_s', String(Math.max(5, Math.floor(cadenceIntervalMs() / 1000))));
       const workspaceOnly = workspaceOnlyToggle
         ? workspaceOnlyToggle.checked
@@ -2424,6 +2758,7 @@ export function renderDemoLiveBoardHtml() {
         if (!response.ok) throw new Error('snapshot request failed (' + response.status + ')');
         const payload = await response.json();
         const snapshot = payload?.snapshot ?? {};
+        latestSnapshot = snapshot;
         const tradeCycles = Array.isArray(snapshot.trade_cycles) ? snapshot.trade_cycles : [];
         latestTradeCycles = tradeCycles;
         tradedAssetIds = buildTradedAssetIds(tradeCycles);
@@ -2465,7 +2800,8 @@ export function renderDemoLiveBoardHtml() {
           selectedCycleId = tradeCycles[0]?.cycle_id ?? null;
         }
 
-        renderCards(snapshot.funnel ?? {});
+        renderQuickStats(snapshot.funnel ?? {}, snapshot);
+        renderLiveFeeds(snapshot);
         renderPosts(snapshotPosts);
         renderTradeCycles(tradeCycles);
         renderCycleGraph(tradeCycles);
@@ -2505,6 +2841,22 @@ export function renderDemoLiveBoardHtml() {
       const phase = String(initialSearch.get('wave_phase') || '').toLowerCase();
       wavePhaseSelect.value = phase === 'post' || phase === 'settle' ? phase : 'match';
       wavePhaseSelect.addEventListener('change', () => {
+        void load();
+      });
+    }
+    if (feedLeftKindSelect) {
+      const initialSearch = new URLSearchParams(window.location.search);
+      feedLeftKindSelect.value = normalizeFeedKind(initialSearch.get('feed_left'), 'products');
+      feedLeftKindSelect.addEventListener('change', () => {
+        renderLiveFeeds(latestSnapshot ?? {});
+        void load();
+      });
+    }
+    if (feedRightKindSelect) {
+      const initialSearch = new URLSearchParams(window.location.search);
+      feedRightKindSelect.value = normalizeFeedKind(initialSearch.get('feed_right'), 'intents');
+      feedRightKindSelect.addEventListener('change', () => {
+        renderLiveFeeds(latestSnapshot ?? {});
         void load();
       });
     }
