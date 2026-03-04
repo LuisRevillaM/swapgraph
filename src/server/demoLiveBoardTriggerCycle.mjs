@@ -48,6 +48,7 @@ function intentPayload({
   wantAssetIds,
   valueUsd,
   nowIso,
+  title = null,
   styleHint,
   styleTags = [],
   intentMessage = null,
@@ -70,7 +71,7 @@ function intentPayload({
           demo_kind: 'creative_labor_asset',
           reality_mode: 'simulated',
           deliverable_type: 'image_banner',
-          title: `Demo output for ${titleActor}`,
+          title: title || `Creative output by ${titleActor}`,
           prompt_spec: `${styleHint} by ${titleActor}`,
           intent_message: intentMessage,
           style_tags: styleTags,
@@ -207,6 +208,8 @@ export function runDemoLiveBoardTriggerCycle({
   const userWriteAuth = actorAuth(['swap_intents:write', 'commits:write', 'settlement:write']);
   const partnerWriteAuth = actorAuth(['settlement:write', 'cycle_proposals:read', 'settlement:read', 'receipts:read']);
   const partnerReadAuth = actorAuth(['cycle_proposals:read', 'settlement:read', 'receipts:read']);
+  const titleNouns = ['Atlas', 'Signal', 'Bloom', 'Circuit', 'Orbit', 'Pulse', 'Prism', 'Field'];
+  const titleQualifiers = ['Edition', 'Study', 'Series', 'Draft', 'Cut', 'Pass', 'Composite', 'Variant'];
 
   for (const actor of actors) {
     const intentId = intentByActorId[actor.id];
@@ -231,6 +234,8 @@ export function runDemoLiveBoardTriggerCycle({
       `Looking for high-signal art direction and unique composition.`
     ];
     const intentMessage = randomPick(intentMessagePool);
+    const styleTag = randomPick(styleTags) || 'signature';
+    const title = `${randomPick(titleNouns) || 'Artifact'} ${randomPick(titleQualifiers) || 'Edition'}: ${styleTag} ${actorDisplayName(actor.id)}`;
     const deliveryTarget = randomPick([
       'discord:channel:1468821039050915988',
       'discord:channel:1476417618104680639'
@@ -254,6 +259,7 @@ export function runDemoLiveBoardTriggerCycle({
         wantAssetIds,
         valueUsd: actor.value_usd,
         nowIso,
+        title,
         styleHint: actor.style_hint,
         styleTags,
         intentMessage,

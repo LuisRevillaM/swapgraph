@@ -850,6 +850,15 @@ export function renderDemoLiveBoardHtml() {
       grid-template-rows: 160px auto;
       min-height: 264px;
     }
+    .post-media-btn {
+      border: none;
+      padding: 0;
+      margin: 0;
+      background: transparent;
+      width: 100%;
+      height: 100%;
+      cursor: zoom-in;
+    }
     .post-card img {
       width: 100%;
       height: 100%;
@@ -925,6 +934,19 @@ export function renderDemoLiveBoardHtml() {
       padding: 10px;
       display: grid;
       gap: 8px;
+    }
+    .trade-card.clickable {
+      cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+    }
+    .trade-card.clickable:hover {
+      transform: translateY(-1px);
+      border-color: #a7d6d6;
+      box-shadow: 0 8px 20px rgba(15, 143, 143, 0.14);
+    }
+    .trade-card.active {
+      border-color: #0f8f8f;
+      box-shadow: 0 0 0 2px rgba(15, 143, 143, 0.2);
     }
     .trade-head {
       display: flex;
@@ -1074,6 +1096,64 @@ export function renderDemoLiveBoardHtml() {
       font-size: 0.84rem;
       padding: 8px 4px;
     }
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(9, 12, 17, 0.72);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      z-index: 60;
+    }
+    .lightbox.open {
+      display: flex;
+    }
+    .lightbox-card {
+      width: min(980px, 94vw);
+      max-height: 92vh;
+      background: #0b1118;
+      border: 1px solid #1f2937;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+    .lightbox-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      color: #dbe4ee;
+      font-size: 0.76rem;
+      font-family: var(--mono);
+      background: #111827;
+      border-bottom: 1px solid #1f2937;
+    }
+    .lightbox-head button {
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: #e5e7eb;
+      border-radius: 8px;
+      cursor: pointer;
+      padding: 4px 8px;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+    }
+    .lightbox-body {
+      display: grid;
+      place-items: center;
+      padding: 8px;
+      background: #050a12;
+    }
+    .lightbox-body img {
+      max-width: 100%;
+      max-height: 80vh;
+      object-fit: contain;
+      border-radius: 8px;
+    }
     @media (max-width: 980px) {
       .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .essentials { grid-template-columns: 1fr; }
@@ -1140,6 +1220,18 @@ export function renderDemoLiveBoardHtml() {
     </section>
   </main>
 
+  <div id="lightbox" class="lightbox" aria-hidden="true">
+    <div class="lightbox-card">
+      <div class="lightbox-head">
+        <span id="lightbox-title">Preview</span>
+        <button id="lightbox-close" type="button">Close</button>
+      </div>
+      <div class="lightbox-body">
+        <img id="lightbox-image" alt="Expanded post preview" loading="lazy">
+      </div>
+    </div>
+  </div>
+
   <script>
     const CARD_ORDER = [
       ['Active Intents', 'intents_active'],
@@ -1161,6 +1253,12 @@ export function renderDemoLiveBoardHtml() {
     const triggerModeSelect = byId('trigger-mode');
     const workspaceOnlyToggle = byId('workspace-only-toggle');
     const triggerStatus = byId('trigger-status');
+    const lightbox = byId('lightbox');
+    const lightboxImage = byId('lightbox-image');
+    const lightboxTitle = byId('lightbox-title');
+    const lightboxClose = byId('lightbox-close');
+    let selectedCycleId = null;
+    let latestTradeCycles = [];
 
     function esc(value) {
       return String(value)
@@ -1221,8 +1319,11 @@ export function renderDemoLiveBoardHtml() {
         return;
       }
       postsGrid.innerHTML = rows.map(row => {
+        const imageTitle = row.title ?? row.intent_id ?? 'post';
         const image = row.image_url
-          ? '<img src="' + esc(row.image_url) + '" alt="' + esc(row.title ?? row.intent_id ?? 'post') + '" loading="lazy">'
+          ? '<button class="post-media-btn" type="button" data-expand-image="1" data-image-url="' + esc(row.image_url) + '" data-image-title="' + esc(imageTitle) + '">'
+            + '<img src="' + esc(row.image_url) + '" alt="' + esc(imageTitle) + '" loading="lazy">'
+            + '</button>'
           : '<img alt="No preview" loading="lazy">';
         const value = Number.isFinite(row.value_usd) ? '$' + row.value_usd : 'n/a';
         const actor = row.actor_id ? row.actor_id : 'unknown';
@@ -1251,6 +1352,22 @@ export function renderDemoLiveBoardHtml() {
       }).join('');
     }
 
+    function openLightbox({ imageUrl, title }) {
+      if (!lightbox || !lightboxImage || !lightboxTitle) return;
+      if (!imageUrl) return;
+      lightboxImage.src = imageUrl;
+      lightboxTitle.textContent = title || 'Preview';
+      lightbox.classList.add('open');
+      lightbox.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeLightbox() {
+      if (!lightbox || !lightboxImage) return;
+      lightbox.classList.remove('open');
+      lightbox.setAttribute('aria-hidden', 'true');
+      lightboxImage.removeAttribute('src');
+    }
+
     function renderTradeCycles(rows) {
       if (!rows || rows.length === 0) {
         tradeCyclesGrid.innerHTML = '<div class="empty">No cycles yet. Trigger a cycle to watch the trade legs.</div>';
@@ -1260,6 +1377,8 @@ export function renderDemoLiveBoardHtml() {
         const state = cycle.state || 'proposed';
         const receipt = cycle.receipt_id ? ('receipt ' + cycle.receipt_id) : 'no receipt yet';
         const updated = cycle.updated_at ? shortAgo(cycle.updated_at) : 'n/a';
+        const cycleId = cycle.cycle_id || '';
+        const isActive = cycleId && cycleId === selectedCycleId;
         const participantRows = (cycle.participants || []).map(participant => {
           const gives = participant.gives || {};
           const gets = participant.gets || {};
@@ -1278,7 +1397,7 @@ export function renderDemoLiveBoardHtml() {
             + '</div>'
             + '</div>';
         }).join('');
-        return '<article class="trade-card">'
+        return '<article class="trade-card clickable' + (isActive ? ' active' : '') + '" data-cycle-id="' + esc(cycleId) + '" role="button" tabindex="0" aria-label="Focus cycle ' + esc(cycleId || 'cycle') + '">'
           + '<div class="trade-head"><code>' + esc(cycle.cycle_id || 'cycle') + '</code><span class="badge">' + esc(state) + '</span></div>'
           + '<div class="trade-meta">' + esc(receipt + ' • updated ' + updated) + '</div>'
           + '<div class="trade-rows">' + participantRows + '</div>'
@@ -1289,11 +1408,19 @@ export function renderDemoLiveBoardHtml() {
     function renderCycleGraph(rows) {
       if (!cycleGraph || !cycleGraphMeta) return;
       if (!rows || rows.length === 0) {
+        selectedCycleId = null;
         cycleGraph.innerHTML = '';
         cycleGraphMeta.textContent = 'No cycle yet. Trigger one to watch actor flows.';
         return;
       }
-      const cycle = rows[0] ?? null;
+      let cycle = null;
+      if (selectedCycleId) {
+        cycle = rows.find(row => row?.cycle_id === selectedCycleId) ?? null;
+      }
+      if (!cycle) {
+        cycle = rows[0] ?? null;
+        selectedCycleId = cycle?.cycle_id ?? null;
+      }
       const participants = Array.isArray(cycle?.participants) ? cycle.participants : [];
       const actorIds = Array.from(new Set(participants.map(row => String(row?.actor_id ?? '').trim()).filter(Boolean)));
       if (actorIds.length < 2) {
@@ -1438,11 +1565,19 @@ export function renderDemoLiveBoardHtml() {
         if (!response.ok) throw new Error('snapshot request failed (' + response.status + ')');
         const payload = await response.json();
         const snapshot = payload?.snapshot ?? {};
+        const tradeCycles = Array.isArray(snapshot.trade_cycles) ? snapshot.trade_cycles : [];
+        latestTradeCycles = tradeCycles;
+        if (selectedCycleId && !tradeCycles.some(row => row?.cycle_id === selectedCycleId)) {
+          selectedCycleId = null;
+        }
+        if (!selectedCycleId && tradeCycles.length > 0) {
+          selectedCycleId = tradeCycles[0]?.cycle_id ?? null;
+        }
 
         renderCards(snapshot.funnel ?? {});
         renderPosts(snapshot.posts ?? []);
-        renderTradeCycles(snapshot.trade_cycles ?? []);
-        renderCycleGraph(snapshot.trade_cycles ?? []);
+        renderTradeCycles(tradeCycles);
+        renderCycleGraph(tradeCycles);
         renderFeed(snapshot.events ?? []);
 
         const latencyMs = Date.now() - started;
@@ -1470,6 +1605,46 @@ export function renderDemoLiveBoardHtml() {
         void load();
       });
     }
+    if (postsGrid) {
+      postsGrid.addEventListener('click', event => {
+        const target = event.target instanceof Element ? event.target.closest('[data-expand-image=\"1\"]') : null;
+        if (!target) return;
+        const imageUrl = target.getAttribute('data-image-url');
+        const title = target.getAttribute('data-image-title');
+        openLightbox({ imageUrl, title });
+      });
+    }
+    if (tradeCyclesGrid) {
+      tradeCyclesGrid.addEventListener('click', event => {
+        const card = event.target instanceof Element ? event.target.closest('.trade-card[data-cycle-id]') : null;
+        if (!card) return;
+        const cycleId = card.getAttribute('data-cycle-id');
+        if (!cycleId) return;
+        selectedCycleId = cycleId;
+        renderTradeCycles(latestTradeCycles);
+        renderCycleGraph(latestTradeCycles);
+      });
+      tradeCyclesGrid.addEventListener('keydown', event => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        const card = event.target instanceof Element ? event.target.closest('.trade-card[data-cycle-id]') : null;
+        if (!card) return;
+        const cycleId = card.getAttribute('data-cycle-id');
+        if (!cycleId) return;
+        event.preventDefault();
+        selectedCycleId = cycleId;
+        renderTradeCycles(latestTradeCycles);
+        renderCycleGraph(latestTradeCycles);
+      });
+    }
+    if (lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
+    if (lightbox) {
+      lightbox.addEventListener('click', event => {
+        if (event.target === lightbox) closeLightbox();
+      });
+    }
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape') closeLightbox();
+    });
     if (triggerCycleButton) triggerCycleButton.addEventListener('click', triggerCycle);
     load();
     setInterval(load, 4000);
