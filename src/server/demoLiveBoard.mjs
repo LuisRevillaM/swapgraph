@@ -1073,6 +1073,18 @@ export function renderDemoLiveBoardHtml() {
       gap: var(--sp-3);
       margin-bottom: var(--sp-3);
     }
+    .controls-bar {
+      margin-bottom: var(--sp-2);
+    }
+    .controls-summary {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-2);
+      min-width: 280px;
+    }
+    .controls-summary h2 {
+      margin: 0;
+    }
     .controls-right {
       display: flex;
       align-items: center;
@@ -1124,17 +1136,15 @@ export function renderDemoLiveBoardHtml() {
       font-family: var(--mono);
       line-height: 1.5;
     }
-    .status-strip {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: var(--sp-3);
-      margin: var(--sp-3) 0 0;
-    }
-    .status-strip .trigger-status {
+    .control-status {
       border: 1px solid var(--line-subtle);
       border-radius: var(--radius-sm);
       background: var(--surface-elevated);
-      padding: var(--sp-2) var(--sp-3);
+      padding: 6px 10px;
+      min-width: 280px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .state-guide {
       margin-top: var(--sp-3);
@@ -1348,6 +1358,24 @@ export function renderDemoLiveBoardHtml() {
       font-size: var(--text-2xs);
       color: var(--muted);
     }
+    .live-item-time {
+      color: var(--faint);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .live-item-time.tier-hot {
+      color: var(--ok);
+      font-weight: 700;
+    }
+    .live-item-time.tier-fresh {
+      color: color-mix(in oklab, var(--ok) 68%, var(--ink-secondary));
+    }
+    .live-item-time.tier-warm {
+      color: color-mix(in oklab, var(--warm) 62%, var(--ink-secondary));
+    }
+    .live-item-time.tier-stale {
+      color: var(--faint);
+    }
     .live-item-row {
       display: grid;
       grid-template-columns: 76px minmax(0, 1fr);
@@ -1400,6 +1428,11 @@ export function renderDemoLiveBoardHtml() {
     .inspector-body {
       display: grid;
       gap: var(--sp-3);
+      opacity: 1;
+      transition: opacity var(--dur-fast) ease;
+    }
+    .inspector-body.changing {
+      opacity: 0.35;
     }
     .inspector-row {
       display: grid;
@@ -1440,6 +1473,25 @@ export function renderDemoLiveBoardHtml() {
     .inspector-match-grid {
       display: grid;
       gap: var(--sp-2);
+    }
+    .inspector-raw {
+      margin-top: var(--sp-2);
+      border: 1px dashed var(--line);
+      border-radius: var(--radius-sm);
+      background: var(--surface-elevated);
+      padding: var(--sp-2);
+    }
+    .inspector-raw > summary {
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: var(--text-2xs);
+      color: var(--muted);
+      user-select: none;
+    }
+    .inspector-raw code {
+      font-family: var(--mono);
+      font-size: var(--text-2xs);
+      color: var(--ink-secondary);
     }
     .inspector-match-leg {
       border: 1px solid var(--line-subtle);
@@ -1916,6 +1968,30 @@ export function renderDemoLiveBoardHtml() {
       border-color: var(--line);
       background: var(--surface);
     }
+    .inspector-kind {
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+    .inspector-kind.is-none {
+      color: var(--muted);
+      border-color: var(--line);
+      background: var(--surface);
+    }
+    .inspector-kind.is-post {
+      color: #0b7285;
+      border-color: color-mix(in oklab, #0b7285 35%, var(--line));
+      background: rgba(11, 114, 133, 0.1);
+    }
+    .inspector-kind.is-edge {
+      color: #7c3aed;
+      border-color: color-mix(in oklab, #7c3aed 35%, var(--line));
+      background: rgba(124, 58, 237, 0.1);
+    }
+    .inspector-kind.is-match {
+      color: var(--ok);
+      border-color: color-mix(in oklab, var(--ok) 35%, var(--line));
+      background: var(--ok-subtle);
+    }
 
     /* ─── Activity feed ─── */
     .feed {
@@ -2067,7 +2143,15 @@ export function renderDemoLiveBoardHtml() {
     /* ─── Responsive ─── */
     @media (max-width: 980px) {
       .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .status-strip { grid-template-columns: 1fr; }
+      .controls-summary {
+        min-width: 0;
+        width: 100%;
+        justify-content: flex-start;
+      }
+      .control-status {
+        min-width: 0;
+        width: 100%;
+      }
       .primary-stage { grid-template-columns: 1fr; }
       .live-feeds-grid { grid-template-columns: 1fr; }
       .essentials { grid-template-columns: 1fr; }
@@ -2090,9 +2174,18 @@ export function renderDemoLiveBoardHtml() {
     </section>
 
     <section class="panel">
-      <div class="panel-head">
-        <h2>Live Controls</h2>
+      <div class="panel-head controls-bar">
+        <div class="controls-summary">
+          <h2>Live Controls</h2>
+          <p class="trigger-status control-status" id="control-status">Wave idle.</p>
+        </div>
         <div class="controls-right">
+          <label class="toggle-pill">Mode
+            <select id="trigger-mode" class="feed-select">
+              <option value="balanced">Balanced</option>
+              <option value="multihop">Multi-hop</option>
+            </select>
+          </label>
           <label class="toggle-pill">Cadence
             <input id="cadence-seconds" class="cadence-input" type="number" min="5" max="3600" step="1" value="30" aria-label="Cadence seconds">
             <span>s</span>
@@ -2101,21 +2194,11 @@ export function renderDemoLiveBoardHtml() {
           <button id="cadence-toggle" class="trigger-btn" type="button">Start Cadence</button>
         </div>
       </div>
-      <div class="status-strip">
-        <p class="trigger-status" id="trigger-status">Wave idle.</p>
-        <p class="trigger-status" id="cadence-status">Cadence paused.</p>
-      </div>
       <details class="advanced-controls">
         <summary>Advanced setup</summary>
         <div class="advanced-controls-body">
           <div class="controls-right">
             <label class="toggle-pill"><input id="workspace-only-toggle" type="checkbox" checked>Only workspace actors</label>
-            <label class="toggle-pill">Mode
-              <select id="trigger-mode" class="feed-select">
-                <option value="balanced">Balanced</option>
-                <option value="multihop">Multi-hop</option>
-              </select>
-            </label>
             <label class="toggle-pill">Wave
               <select id="wave-phase" class="feed-select">
                 <option value="match">Post + Match</option>
@@ -2164,7 +2247,7 @@ export function renderDemoLiveBoardHtml() {
         <div class="panel-head">
           <h2>Visualization</h2>
           <div class="controls-right">
-            <span class="badge" id="inspector-title">No Selection</span>
+            <span class="badge inspector-kind is-none" id="inspector-title">No Selection</span>
             <button id="inspector-close" class="trigger-btn" type="button">Clear</button>
           </div>
         </div>
@@ -2220,8 +2303,7 @@ export function renderDemoLiveBoardHtml() {
     const wavePhaseSelect = byId('wave-phase');
     const cadenceSecondsInput = byId('cadence-seconds');
     const workspaceOnlyToggle = byId('workspace-only-toggle');
-    const triggerStatus = byId('trigger-status');
-    const cadenceStatus = byId('cadence-status');
+    const controlStatus = byId('control-status');
     const lightbox = byId('lightbox');
     const lightboxImage = byId('lightbox-image');
     const lightboxTitle = byId('lightbox-title');
@@ -2240,6 +2322,7 @@ export function renderDemoLiveBoardHtml() {
     let cadenceTick = 0;
     let cadenceInFlight = false;
     let latestSnapshot = null;
+    let inspectorBodyTransitionTimer = null;
 
     function esc(value) {
       return String(value)
@@ -2260,6 +2343,18 @@ export function renderDemoLiveBoardHtml() {
       if (delta < 3_600_000) return Math.floor(delta / 60_000) + 'm ago';
       if (delta < 86_400_000) return Math.floor(delta / 3_600_000) + 'h ago';
       return Math.floor(delta / 86_400_000) + 'd ago';
+    }
+
+    function recencyTierClass(iso) {
+      if (!iso) return 'tier-stale';
+      const ms = Date.parse(iso);
+      if (!Number.isFinite(ms)) return 'tier-stale';
+      const delta = Date.now() - ms;
+      if (delta < 0) return 'tier-hot';
+      if (delta < 30_000) return 'tier-hot';
+      if (delta < 60_000) return 'tier-fresh';
+      if (delta < 300_000) return 'tier-warm';
+      return 'tier-stale';
     }
 
     function normalizeState(value) {
@@ -2667,7 +2762,9 @@ export function renderDemoLiveBoardHtml() {
             subtitle: target
               ? ('From ' + (target?.actor_id ?? 'unknown') + ': ' + (target?.title ?? target?.asset_id ?? wantedAssetId))
               : ('Target asset not listed yet: ' + wantedAssetId),
-            meta: 'offer ' + (source?.asset_id ?? 'n/a') + ' • want ' + wantedAssetId,
+            meta: 'offers ' + (source?.title ?? source?.asset_id ?? 'asset')
+              + ' • wants '
+              + (target?.title ?? wantedAssetId),
             image_url: source?.image_url ?? null,
             source_post: source,
             target_post: target,
@@ -2719,9 +2816,30 @@ export function renderDemoLiveBoardHtml() {
       });
     }
 
+    function setInspectorKind(kind, label) {
+      if (!inspectorTitle) return;
+      inspectorTitle.textContent = label;
+      inspectorTitle.classList.remove('is-none', 'is-post', 'is-edge', 'is-match');
+      if (kind === 'post') inspectorTitle.classList.add('is-post');
+      else if (kind === 'edge') inspectorTitle.classList.add('is-edge');
+      else if (kind === 'match') inspectorTitle.classList.add('is-match');
+      else inspectorTitle.classList.add('is-none');
+    }
+
+    function setInspectorBodyMarkup(markup) {
+      if (!inspectorBody) return;
+      inspectorBody.classList.add('changing');
+      if (inspectorBodyTransitionTimer !== null) window.clearTimeout(inspectorBodyTransitionTimer);
+      inspectorBodyTransitionTimer = window.setTimeout(() => {
+        if (!inspectorBody) return;
+        inspectorBody.innerHTML = markup;
+        inspectorBody.classList.remove('changing');
+      }, 90);
+    }
+
     function renderInspectorEmpty(text = 'Click any post, edge, or match from either feed to inspect details.') {
-      if (inspectorTitle) inspectorTitle.textContent = 'No Selection';
-      if (inspectorBody) inspectorBody.innerHTML = '<div class="live-empty">' + esc(text) + '</div>';
+      setInspectorKind('none', 'No Selection');
+      setInspectorBodyMarkup('<div class="live-empty">' + esc(text) + '</div>');
       if (inspectorCycleGraphWrap) inspectorCycleGraphWrap.hidden = true;
       if (cycleGraph) cycleGraph.innerHTML = '';
       if (cycleGraphMeta) cycleGraphMeta.textContent = 'Select a match to render graph.';
@@ -2745,9 +2863,9 @@ export function renderDemoLiveBoardHtml() {
         ['Offer', esc((post?.deliverable_type ?? 'deliverable') + ' • ' + formatUsd(post?.value_usd))],
         ['Wants', wants.length > 0 ? wants.map(esc).join(', ') : 'Open request']
       ];
-      inspectorBody.innerHTML = media + rows.map(([key, value]) => (
+      setInspectorBodyMarkup(media + rows.map(([key, value]) => (
         '<div class="inspector-row"><div class="inspector-key">' + esc(key) + '</div><div class="inspector-value">' + value + '</div></div>'
-      )).join('');
+      )).join(''));
       if (inspectorCycleGraphWrap) inspectorCycleGraphWrap.hidden = true;
       if (cycleGraph) cycleGraph.innerHTML = '';
       if (cycleGraphMeta) cycleGraphMeta.textContent = 'Select a match to render graph.';
@@ -2768,19 +2886,26 @@ export function renderDemoLiveBoardHtml() {
           + '<img class="inspector-media" src="' + esc(target.image_url) + '" alt="' + esc(target?.title ?? 'target post') + '" loading="lazy">'
           + '</button>'
         : '';
+      const sourceTitle = source?.title ?? source?.asset_id ?? 'post';
+      const wantedTitle = target?.title ?? entry?.wanted_asset_id ?? 'asset';
       const rows = [
-        ['From', '<strong>' + esc(source?.actor_id ?? 'unknown') + '</strong> listed ' + esc(source?.title ?? source?.asset_id ?? 'post')],
-        ['Wants', esc(entry?.wanted_asset_id ?? 'asset')],
+        ['From', '<strong>' + esc(source?.actor_id ?? 'unknown') + '</strong> listed ' + esc(sourceTitle)],
+        ['Wants', esc(wantedTitle)],
         ['Target', target
           ? ('<strong>' + esc(target?.actor_id ?? 'unknown') + '</strong> listed ' + esc(target?.title ?? target?.asset_id ?? entry?.wanted_asset_id ?? 'asset'))
           : 'Target not listed yet'],
-        ['Edge Logic', esc((source?.asset_id ?? 'unknown asset') + ' -> ' + (entry?.wanted_asset_id ?? 'unknown asset'))]
+        ['Edge Logic', esc((source?.actor_id ?? 'source') + ' -> ' + (target?.actor_id ?? 'open market'))]
       ];
-      inspectorBody.innerHTML = sourceImage
+      const rawDetails = '<details class="inspector-raw"><summary>Raw IDs</summary>'
+        + '<div class="inspector-value"><code>offer_asset=' + esc(source?.asset_id ?? 'n/a') + '</code><br>'
+        + '<code>want_asset=' + esc(entry?.wanted_asset_id ?? 'n/a') + '</code>'
+        + '</div></details>';
+      setInspectorBodyMarkup(sourceImage
         + (targetImage ? targetImage : '')
         + rows.map(([key, value]) => (
           '<div class="inspector-row"><div class="inspector-key">' + esc(key) + '</div><div class="inspector-value">' + value + '</div></div>'
-        )).join('');
+        )).join('')
+        + rawDetails);
       if (inspectorCycleGraphWrap) inspectorCycleGraphWrap.hidden = true;
       if (cycleGraph) cycleGraph.innerHTML = '';
       if (cycleGraphMeta) cycleGraphMeta.textContent = 'Select a match to render graph.';
@@ -2806,9 +2931,9 @@ export function renderDemoLiveBoardHtml() {
         ['Updated', esc(shortAgo(cycle?.updated_at))],
         ['Receipt', esc(cycle?.receipt_id ?? 'pending')]
       ];
-      inspectorBody.innerHTML = rows.map(([key, value]) => (
+      setInspectorBodyMarkup(rows.map(([key, value]) => (
         '<div class="inspector-row"><div class="inspector-key">' + esc(key) + '</div><div class="inspector-value">' + value + '</div></div>'
-      )).join('') + '<div class="inspector-match-grid">' + (legs || '<div class="live-empty">No participant legs yet.</div>') + '</div>';
+      )).join('') + '<div class="inspector-match-grid">' + (legs || '<div class="live-empty">No participant legs yet.</div>') + '</div>');
       if (inspectorCycleGraphWrap) inspectorCycleGraphWrap.hidden = false;
       selectedCycleId = typeof cycle?.cycle_id === 'string' ? cycle.cycle_id : null;
       renderCycleGraph([cycle]);
@@ -2820,16 +2945,16 @@ export function renderDemoLiveBoardHtml() {
         return;
       }
       if (entry.kind === 'posts') {
-        if (inspectorTitle) inspectorTitle.textContent = 'Post';
+        setInspectorKind('post', 'Post');
         renderPostInspector(entry.post ?? null);
         return;
       }
       if (entry.kind === 'edges') {
-        if (inspectorTitle) inspectorTitle.textContent = 'Edge';
+        setInspectorKind('edge', 'Edge');
         renderEdgeInspector(entry);
         return;
       }
-      if (inspectorTitle) inspectorTitle.textContent = 'Match';
+      setInspectorKind('match', 'Match');
       renderMatchInspector(entry.cycle ?? null);
     }
 
@@ -2863,7 +2988,8 @@ export function renderDemoLiveBoardHtml() {
         if (!firstEntryKey) firstEntryKey = entryKey;
         feedEntryMap.set(entryKey, row);
         const isActive = entryKey === selectedFeedEntryKey;
-        const head = '<div class="live-item-head"><span class="badge">' + esc(row.actor || 'actor') + '</span><span>' + esc(shortAgo(row.time)) + '</span></div>';
+        const timeTier = recencyTierClass(row.time);
+        const head = '<div class="live-item-head"><span class="badge">' + esc(row.actor || 'actor') + '</span><span class="live-item-time ' + esc(timeTier) + '">' + esc(shortAgo(row.time)) + '</span></div>';
         const copy = '<p class="live-item-title">' + esc(row.title || 'item') + '</p>'
           + (row.subtitle ? ('<p class="live-item-sub">' + esc(row.subtitle) + '</p>') : '')
           + (row.meta ? ('<p class="live-item-meta">' + esc(row.meta) + '</p>') : '');
@@ -2905,12 +3031,16 @@ export function renderDemoLiveBoardHtml() {
       pollStatus.innerHTML = '<span class="status-dot"></span>' + esc(text);
     }
 
+    function setControlStatus(text) {
+      if (controlStatus) controlStatus.textContent = text;
+    }
+
     function setTriggerStatus(text) {
-      triggerStatus.textContent = text;
+      setControlStatus(text);
     }
 
     function setCadenceStatus(text) {
-      if (cadenceStatus) cadenceStatus.textContent = text;
+      setControlStatus(text);
     }
 
     function selectedMode() {
@@ -3006,7 +3136,7 @@ export function renderDemoLiveBoardHtml() {
         cadenceTimer = null;
       }
       refreshCadenceButton();
-      setCadenceStatus('Cadence paused. Start cadence to continuously post and match.');
+      setCadenceStatus('Cadence paused.');
     }
 
     function startCadence() {
