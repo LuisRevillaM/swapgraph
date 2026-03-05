@@ -23,6 +23,7 @@ import { LiquidityTransparencyService } from '../service/liquidityTransparencySe
 import { MetricsNetworkHealthService } from '../service/metricsNetworkHealthService.mjs';
 import { MarketplaceMatchingService } from '../service/marketplaceMatchingService.mjs';
 import { EdgeIntentService } from '../service/edgeIntentService.mjs';
+import { MarketService } from '../service/marketService.mjs';
 import { PartnerLiquidityProviderGovernanceService } from '../service/partnerLiquidityProviderGovernanceService.mjs';
 import { PlatformInventoryDisputeFacadeService } from '../service/platformInventoryDisputeFacadeService.mjs';
 import { ProductSurfaceReadinessService } from '../service/productSurfaceReadinessService.mjs';
@@ -295,6 +296,8 @@ function summarizeState(store) {
     marketplace_matching_runs: Object.keys(store.state.marketplace_matching_runs ?? {}).length,
     marketplace_matching_proposals: Object.keys(store.state.marketplace_matching_proposal_runs ?? {}).length,
     edge_intents: Object.keys(store.state.edge_intents ?? {}).length,
+    market_listings: Object.keys(store.state.market_listings ?? {}).length,
+    market_edges: Object.keys(store.state.market_edges ?? {}).length,
     commercial_policies: Object.keys(store.state.commercial_policies ?? {}).length,
     commercial_policy_audit_entries: Array.isArray(store.state.commercial_policy_audit) ? store.state.commercial_policy_audit.length : 0
   };
@@ -352,6 +355,7 @@ export function createRuntimeApiServer({
   const productSurface = new ProductSurfaceReadinessService({ store });
   const marketplaceMatching = new MarketplaceMatchingService({ store });
   const edgeIntents = new EdgeIntentService({ store });
+  const market = new MarketService({ store });
   const commercialPolicy = new CommercialPolicyService({ store });
   const liquidityTransparency = new LiquidityTransparencyService({ store });
   const liquidityProviders = new LiquidityProviderService({ store });
@@ -730,6 +734,130 @@ export function createRuntimeApiServer({
       const edgeIntentGet = routeMatch(pathname, /^\/edge-intents\/([^/]+)$/);
       if (method === 'GET' && edgeIntentGet) {
         const result = edgeIntents.getEdgeIntent({ actor, auth, edgeIntentId: edgeIntentGet[0] });
+        return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
+      }
+
+      if (method === 'POST' && pathname === '/market/listings') {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = market.createListing({ actor, auth, idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      const marketListingPatch = routeMatch(pathname, /^\/market\/listings\/([^/]+)$/);
+      if (method === 'PATCH' && marketListingPatch) {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = market.patchListing({ actor, auth, listingId: marketListingPatch[0], idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      const marketListingPause = routeMatch(pathname, /^\/market\/listings\/([^/]+)\/pause$/);
+      if (method === 'POST' && marketListingPause) {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = market.pauseListing({ actor, auth, listingId: marketListingPause[0], idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      const marketListingClose = routeMatch(pathname, /^\/market\/listings\/([^/]+)\/close$/);
+      if (method === 'POST' && marketListingClose) {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = market.closeListing({ actor, auth, listingId: marketListingClose[0], idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      const marketListingGet = routeMatch(pathname, /^\/market\/listings\/([^/]+)$/);
+      if (method === 'GET' && marketListingGet) {
+        const result = market.getListing({ actor, auth, listingId: marketListingGet[0] });
+        return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
+      }
+
+      if (method === 'GET' && pathname === '/market/listings') {
+        const query = toQueryObject(url.searchParams);
+        const result = market.listListings({ actor, auth, query });
+        return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
+      }
+
+      if (method === 'POST' && pathname === '/market/edges') {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = market.createEdge({ actor, auth, idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      const marketEdgeAccept = routeMatch(pathname, /^\/market\/edges\/([^/]+)\/accept$/);
+      if (method === 'POST' && marketEdgeAccept) {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = market.acceptEdge({ actor, auth, edgeId: marketEdgeAccept[0], idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      const marketEdgeDecline = routeMatch(pathname, /^\/market\/edges\/([^/]+)\/decline$/);
+      if (method === 'POST' && marketEdgeDecline) {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = market.declineEdge({ actor, auth, edgeId: marketEdgeDecline[0], idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      const marketEdgeWithdraw = routeMatch(pathname, /^\/market\/edges\/([^/]+)\/withdraw$/);
+      if (method === 'POST' && marketEdgeWithdraw) {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = market.withdrawEdge({ actor, auth, edgeId: marketEdgeWithdraw[0], idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      const marketEdgeGet = routeMatch(pathname, /^\/market\/edges\/([^/]+)$/);
+      if (method === 'GET' && marketEdgeGet) {
+        const result = market.getEdge({ actor, auth, edgeId: marketEdgeGet[0] });
+        return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
+      }
+
+      if (method === 'GET' && pathname === '/market/edges') {
+        const query = toQueryObject(url.searchParams);
+        const result = market.listEdges({ actor, auth, query });
+        return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
+      }
+
+      if (method === 'GET' && pathname === '/market/feed') {
+        const query = toQueryObject(url.searchParams);
+        const result = market.getFeed({ actor, auth, query });
         return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
       }
 

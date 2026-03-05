@@ -1,0 +1,1412 @@
+import { authorizeApiOperation } from '../core/authz.mjs';
+import { idempotencyScopeKey, payloadHash } from '../core/idempotency.mjs';
+
+const LISTING_KINDS = new Set(['post', 'want', 'capability']);
+const LISTING_STATUS = new Set(['open', 'paused', 'closed', 'suspended']);
+const EDGE_TYPES = new Set(['interest', 'offer', 'counter', 'block']);
+const EDGE_STATUS = new Set(['open', 'accepted', 'declined', 'withdrawn', 'expired']);
+const REF_KINDS = new Set(['listing']);
+
+function correlationId(op) {
+  return `corr_${String(op).replace(/[^a-zA-Z0-9]+/g, '_').toLowerCase()}`;
+}
+
+function clone(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function normalizeOptionalString(value) {
+  return typeof value === 'string' && value.trim() ? value.trim() : null;
+}
+
+function parseIsoMs(iso) {
+  const ms = Date.parse(String(iso ?? ''));
+  return Number.isFinite(ms) ? ms : null;
+}
+
+function parseLimit(value, fallback = 25) {
+  if (value === undefined || value === null || value === '') return fallback;
+  const n = Number.parseInt(String(value), 10);
+  if (!Number.isFinite(n) || n < 1) return null;
+  return Math.min(n, 100);
+}
+
+function errorResponse(correlationIdValue, code, message, details = {}) {
+  return {
+    correlation_id: correlationIdValue,
+    error: {
+      code,
+      message,
+      details
+    }
+  };
+}
+
+function ensureState(store) {
+  store.state.idempotency ||= {};
+  store.state.market_listings ||= {};
+  store.state.market_listing_counter ||= 0;
+  store.state.market_edges ||= {};
+  store.state.market_edge_counter ||= 0;
+}
+
+function nextListingId(store) {
+  store.state.market_listing_counter = Number(store.state.market_listing_counter ?? 0) + 1;
+  const n = String(store.state.market_listing_counter).padStart(6, '0');
+  return `listing_${n}`;
+}
+
+function nextEdgeId(store) {
+  store.state.market_edge_counter = Number(store.state.market_edge_counter ?? 0) + 1;
+  const n = String(store.state.market_edge_counter).padStart(6, '0');
+  return `edge_${n}`;
+}
+
+function actorEquals(a, b) {
+  return (a?.type ?? null) === (b?.type ?? null) && (a?.id ?? null) === (b?.id ?? null);
+}
+
+function listingOwnsActor(listing, actor) {
+  return actorEquals(listing?.owner_actor ?? null, actor ?? null);
+}
+
+function normalizeListingView(record) {
+  return {
+    listing_id: record.listing_id,
+    workspace_id: record.workspace_id,
+    owner_actor: clone(record.owner_actor),
+    kind: record.kind,
+    status: record.status,
+    title: record.title,
+    offer: clone(record.offer ?? []),
+    capability_profile: record.capability_profile ? clone(record.capability_profile) : null,
+    created_at: record.created_at,
+    updated_at: record.updated_at
+  };
+}
+
+function normalizeEdgeView(record) {
+  return {
+    edge_id: record.edge_id,
+    workspace_id: record.workspace_id,
+    source_ref: clone(record.source_ref),
+    target_ref: clone(record.target_ref),
+    edge_type: record.edge_type,
+    status: record.status,
+    terms_patch: record.terms_patch ? clone(record.terms_patch) : null,
+    expires_at: record.expires_at ?? null,
+    created_by: clone(record.created_by),
+    created_at: record.created_at,
+    updated_at: record.updated_at
+  };
+}
+
+function sortByUpdatedDescThenId(rows, idField) {
+  rows.sort((a, b) => {
+    const at = parseIsoMs(a.updated_at) ?? 0;
+    const bt = parseIsoMs(b.updated_at) ?? 0;
+    if (bt !== at) return bt - at;
+    const aid = String(a[idField] ?? '');
+    const bid = String(b[idField] ?? '');
+    return aid.localeCompare(bid);
+  });
+}
+
+function encodeCursor(parts) {
+  return parts.join('|');
+}
+
+function decodeCursor(raw, expectedParts) {
+  const v = normalizeOptionalString(raw);
+  if (!v) return null;
+  const parts = v.split('|');
+  if (parts.length !== expectedParts) return undefined;
+  if (parts.some(x => !x)) return undefined;
+  return parts;
+}
+
+function buildPaginationSlice({ rows, limit, cursorAfter, keyFn, cursorParts }) {
+  let start = 0;
+
+  if (cursorAfter) {
+    const decoded = decodeCursor(cursorAfter, cursorParts);
+    if (decoded === undefined) {
+      return {
+        ok: false,
+        code: 'CONSTRAINT_VIOLATION',
+        message: 'invalid cursor format',
+        details: { reason_code: 'market_feed_query_invalid', cursor_after: cursorAfter }
+      };
+    }
+
+    if (decoded) {
+      const idx = rows.findIndex(row => {
+        const key = keyFn(row);
+        return key.length === decoded.length && key.every((v, i) => String(v) === String(decoded[i]));
+      });
+
+      if (idx < 0) {
+        return {
+          ok: false,
+          code: 'CONSTRAINT_VIOLATION',
+          message: 'cursor not found',
+          details: { reason_code: 'market_cursor_not_found', cursor_after: cursorAfter }
+        };
+      }
+
+      start = idx + 1;
+    }
+  }
+
+  const page = rows.slice(start, start + limit);
+  const hasMore = start + limit < rows.length;
+  const nextCursor = hasMore && page.length > 0 ? encodeCursor(keyFn(page[page.length - 1])) : null;
+
+  return {
+    ok: true,
+    value: {
+      page,
+      nextCursor,
+      total: rows.length
+    }
+  };
+}
+
+function validateOfferArray(offer) {
+  if (!Array.isArray(offer) || offer.length < 1) return false;
+  return offer.every(item => !!item && typeof item === 'object' && !Array.isArray(item));
+}
+
+function isPlainObject(value) {
+  return !!value && typeof value === 'object' && !Array.isArray(value);
+}
+
+function normalizeRecordedAt(request, auth) {
+  return normalizeOptionalString(request?.recorded_at) ?? normalizeOptionalString(auth?.now_iso) ?? new Date().toISOString();
+}
+
+function normalizeListingKind(value) {
+  return normalizeOptionalString(value)?.toLowerCase() ?? null;
+}
+
+function normalizeListingStatus(value, fallback = 'open') {
+  return normalizeOptionalString(value)?.toLowerCase() ?? fallback;
+}
+
+function normalizeEdgeType(value) {
+  return normalizeOptionalString(value)?.toLowerCase() ?? null;
+}
+
+function normalizeEdgeStatus(value, fallback = 'open') {
+  return normalizeOptionalString(value)?.toLowerCase() ?? fallback;
+}
+
+function normalizeRef(value) {
+  if (!isPlainObject(value)) return null;
+  const kind = normalizeOptionalString(value.kind)?.toLowerCase() ?? null;
+  const id = normalizeOptionalString(value.id);
+  if (!kind || !id || !REF_KINDS.has(kind)) return null;
+  return { kind, id };
+}
+
+function normalizeActionRequest(request, auth) {
+  const recordedAt = normalizeRecordedAt(request, auth);
+  if (parseIsoMs(recordedAt) === null) return { ok: false, recordedAt: null };
+  return { ok: true, recordedAt };
+}
+
+function normalizeListQuery(query) {
+  const allowed = new Set(['workspace_id', 'owner_actor_type', 'owner_actor_id', 'kind', 'status', 'limit', 'cursor_after']);
+  for (const key of Object.keys(query ?? {})) {
+    if (!allowed.has(key)) {
+      return {
+        ok: false,
+        code: 'CONSTRAINT_VIOLATION',
+        message: 'invalid query parameter',
+        details: { reason_code: 'market_feed_query_invalid', key }
+      };
+    }
+  }
+
+  const workspaceId = normalizeOptionalString(query?.workspace_id);
+  const ownerActorType = normalizeOptionalString(query?.owner_actor_type);
+  const ownerActorId = normalizeOptionalString(query?.owner_actor_id);
+  const kind = normalizeListingKind(query?.kind);
+  const status = normalizeListingStatus(query?.status, null);
+  const limit = parseLimit(query?.limit, 25);
+  const cursorAfter = normalizeOptionalString(query?.cursor_after);
+
+  if (kind && !LISTING_KINDS.has(kind)) {
+    return {
+      ok: false,
+      code: 'CONSTRAINT_VIOLATION',
+      message: 'invalid listing kind filter',
+      details: { reason_code: 'market_listing_kind_invalid', kind }
+    };
+  }
+
+  if (status && !LISTING_STATUS.has(status)) {
+    return {
+      ok: false,
+      code: 'CONSTRAINT_VIOLATION',
+      message: 'invalid listing status filter',
+      details: { reason_code: 'market_listing_status_invalid', status }
+    };
+  }
+
+  if (limit === null) {
+    return {
+      ok: false,
+      code: 'CONSTRAINT_VIOLATION',
+      message: 'invalid limit',
+      details: { reason_code: 'market_feed_query_invalid', limit: query?.limit }
+    };
+  }
+
+  return {
+    ok: true,
+    value: {
+      workspace_id: workspaceId,
+      owner_actor_type: ownerActorType,
+      owner_actor_id: ownerActorId,
+      kind,
+      status,
+      limit,
+      cursor_after: cursorAfter
+    }
+  };
+}
+
+function normalizeEdgeListQuery(query) {
+  const allowed = new Set(['workspace_id', 'source_id', 'target_id', 'status', 'edge_type', 'limit', 'cursor_after']);
+  for (const key of Object.keys(query ?? {})) {
+    if (!allowed.has(key)) {
+      return {
+        ok: false,
+        code: 'CONSTRAINT_VIOLATION',
+        message: 'invalid query parameter',
+        details: { reason_code: 'market_feed_query_invalid', key }
+      };
+    }
+  }
+
+  const workspaceId = normalizeOptionalString(query?.workspace_id);
+  const sourceId = normalizeOptionalString(query?.source_id);
+  const targetId = normalizeOptionalString(query?.target_id);
+  const status = normalizeEdgeStatus(query?.status, null);
+  const edgeType = normalizeEdgeType(query?.edge_type);
+  const limit = parseLimit(query?.limit, 25);
+  const cursorAfter = normalizeOptionalString(query?.cursor_after);
+
+  if (status && !EDGE_STATUS.has(status)) {
+    return {
+      ok: false,
+      code: 'CONSTRAINT_VIOLATION',
+      message: 'invalid edge status filter',
+      details: { reason_code: 'market_edge_status_transition_invalid', status }
+    };
+  }
+
+  if (edgeType && !EDGE_TYPES.has(edgeType)) {
+    return {
+      ok: false,
+      code: 'CONSTRAINT_VIOLATION',
+      message: 'invalid edge type filter',
+      details: { reason_code: 'market_edge_invalid', edge_type: edgeType }
+    };
+  }
+
+  if (limit === null) {
+    return {
+      ok: false,
+      code: 'CONSTRAINT_VIOLATION',
+      message: 'invalid limit',
+      details: { reason_code: 'market_feed_query_invalid', limit: query?.limit }
+    };
+  }
+
+  return {
+    ok: true,
+    value: {
+      workspace_id: workspaceId,
+      source_id: sourceId,
+      target_id: targetId,
+      status,
+      edge_type: edgeType,
+      limit,
+      cursor_after: cursorAfter
+    }
+  };
+}
+
+function normalizeFeedQuery(query) {
+  const allowed = new Set(['workspace_id', 'item_type', 'limit', 'cursor_after']);
+  for (const key of Object.keys(query ?? {})) {
+    if (!allowed.has(key)) {
+      return {
+        ok: false,
+        code: 'CONSTRAINT_VIOLATION',
+        message: 'invalid query parameter',
+        details: { reason_code: 'market_feed_query_invalid', key }
+      };
+    }
+  }
+
+  const workspaceId = normalizeOptionalString(query?.workspace_id);
+  const itemType = normalizeOptionalString(query?.item_type)?.toLowerCase() ?? null;
+  const limit = parseLimit(query?.limit, 25);
+  const cursorAfter = normalizeOptionalString(query?.cursor_after);
+
+  if (itemType && itemType !== 'listing' && itemType !== 'edge') {
+    return {
+      ok: false,
+      code: 'CONSTRAINT_VIOLATION',
+      message: 'invalid item_type',
+      details: { reason_code: 'market_feed_query_invalid', item_type: itemType }
+    };
+  }
+
+  if (limit === null) {
+    return {
+      ok: false,
+      code: 'CONSTRAINT_VIOLATION',
+      message: 'invalid limit',
+      details: { reason_code: 'market_feed_query_invalid', limit: query?.limit }
+    };
+  }
+
+  return {
+    ok: true,
+    value: {
+      workspace_id: workspaceId,
+      item_type: itemType,
+      limit,
+      cursor_after: cursorAfter
+    }
+  };
+}
+
+export class MarketService {
+  /**
+   * @param {{ store: import('../store/jsonStateStore.mjs').JsonStateStore }} opts
+   */
+  constructor({ store }) {
+    if (!store) throw new Error('store is required');
+    this.store = store;
+    ensureState(this.store);
+  }
+
+  _authorize({ actor, auth, operationId, correlationId: corr }) {
+    const authz = authorizeApiOperation({ operationId, actor, auth, store: this.store });
+    if (!authz.ok) {
+      return {
+        ok: false,
+        body: errorResponse(corr, authz.error.code, authz.error.message, authz.error.details)
+      };
+    }
+    return { ok: true };
+  }
+
+  _withIdempotency({ actor, operationId, idempotencyKey, requestBody, correlationId: corr, handler }) {
+    const scopeKey = idempotencyScopeKey({ actor, operationId, idempotencyKey });
+    const requestHash = payloadHash(requestBody);
+    const existing = this.store.state.idempotency[scopeKey];
+
+    if (existing) {
+      if (existing.payload_hash === requestHash) {
+        return {
+          replayed: true,
+          result: clone(existing.result)
+        };
+      }
+
+      return {
+        replayed: false,
+        result: {
+          ok: false,
+          body: errorResponse(corr, 'IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH', 'idempotency key reused with a different payload', {
+            operation_id: operationId,
+            idempotency_key: idempotencyKey
+          })
+        }
+      };
+    }
+
+    const result = handler();
+    this.store.state.idempotency[scopeKey] = {
+      payload_hash: requestHash,
+      result: clone(result)
+    };
+
+    return { replayed: false, result };
+  }
+
+  _normalizeListingCreate({ request, actor, auth, correlationId: corr }) {
+    const listing = request?.listing;
+    if (!isPlainObject(listing)) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid market listing payload', {
+          reason_code: 'market_listing_invalid'
+        })
+      };
+    }
+
+    const recordedAt = normalizeRecordedAt(request, auth);
+    if (parseIsoMs(recordedAt) === null) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid listing timestamp', {
+          reason_code: 'market_listing_invalid',
+          recorded_at: request?.recorded_at ?? null
+        })
+      };
+    }
+
+    const workspaceId = normalizeOptionalString(listing.workspace_id);
+    const title = normalizeOptionalString(listing.title);
+    const kind = normalizeListingKind(listing.kind);
+    const status = normalizeListingStatus(listing.status, 'open');
+
+    if (!workspaceId || !title) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'missing required listing fields', {
+          reason_code: 'market_listing_invalid'
+        })
+      };
+    }
+
+    if (!kind || !LISTING_KINDS.has(kind)) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid listing kind', {
+          reason_code: 'market_listing_kind_invalid',
+          kind
+        })
+      };
+    }
+
+    if (!LISTING_STATUS.has(status) || status === 'closed' || status === 'suspended') {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid listing status', {
+          reason_code: 'market_listing_status_invalid',
+          status
+        })
+      };
+    }
+
+    const ownerActor = listing.owner_actor ?? actor;
+    if (!ownerActor || !normalizeOptionalString(ownerActor.type) || !normalizeOptionalString(ownerActor.id)) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid listing owner actor', {
+          reason_code: 'market_listing_invalid'
+        })
+      };
+    }
+
+    if (!actorEquals(ownerActor, actor)) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'FORBIDDEN', 'listing owner actor must match caller', {
+          reason_code: 'market_listing_forbidden',
+          actor,
+          owner_actor: ownerActor
+        })
+      };
+    }
+
+    const offer = listing.offer ?? [];
+    if (kind === 'post' && !validateOfferArray(offer)) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'post listings require non-empty offer', {
+          reason_code: 'market_listing_invalid'
+        })
+      };
+    }
+
+    if (kind === 'want' && Array.isArray(offer) && offer.length > 0) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'want listings must not provide offer', {
+          reason_code: 'market_listing_invalid'
+        })
+      };
+    }
+
+    const capabilityProfile = listing.capability_profile ?? null;
+    if (kind === 'capability') {
+      const deliverableSchema = capabilityProfile?.deliverable_schema;
+      const rateCard = capabilityProfile?.rate_card;
+      if (!isPlainObject(capabilityProfile) || !isPlainObject(deliverableSchema) || !isPlainObject(rateCard)) {
+        return {
+          ok: false,
+          body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'capability listings require capability profile', {
+            reason_code: 'market_listing_invalid'
+          })
+        };
+      }
+    }
+
+    if (kind !== 'capability' && capabilityProfile !== null) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'capability_profile is only valid for capability listings', {
+          reason_code: 'market_listing_invalid'
+        })
+      };
+    }
+
+    const requestedId = normalizeOptionalString(listing.listing_id);
+
+    return {
+      ok: true,
+      value: {
+        listing_id: requestedId,
+        workspace_id: workspaceId,
+        owner_actor: { type: ownerActor.type, id: ownerActor.id },
+        kind,
+        status,
+        title,
+        offer: clone(Array.isArray(offer) ? offer : []),
+        capability_profile: capabilityProfile ? clone(capabilityProfile) : null,
+        recorded_at: recordedAt
+      }
+    };
+  }
+
+  createListing({ actor, auth, idempotencyKey, request }) {
+    const op = 'marketListings.create';
+    const corr = correlationId(op);
+
+    const authz = this._authorize({ actor, auth, operationId: op, correlationId: corr });
+    if (!authz.ok) return { replayed: false, result: { ok: false, body: authz.body } };
+
+    return this._withIdempotency({
+      actor,
+      operationId: op,
+      idempotencyKey,
+      requestBody: request,
+      correlationId: corr,
+      handler: () => {
+        const normalized = this._normalizeListingCreate({ request, actor, auth, correlationId: corr });
+        if (!normalized.ok) return { ok: false, body: normalized.body };
+
+        const listingId = normalized.value.listing_id ?? nextListingId(this.store);
+        if (this.store.state.market_listings[listingId]) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'listing already exists', {
+              reason_code: 'market_listing_invalid',
+              listing_id: listingId
+            })
+          };
+        }
+
+        const record = {
+          listing_id: listingId,
+          workspace_id: normalized.value.workspace_id,
+          owner_actor: normalized.value.owner_actor,
+          kind: normalized.value.kind,
+          status: normalized.value.status,
+          title: normalized.value.title,
+          offer: normalized.value.offer,
+          capability_profile: normalized.value.capability_profile,
+          created_at: normalized.value.recorded_at,
+          updated_at: normalized.value.recorded_at
+        };
+
+        this.store.state.market_listings[listingId] = record;
+
+        return {
+          ok: true,
+          body: {
+            correlation_id: corr,
+            listing: normalizeListingView(record)
+          }
+        };
+      }
+    });
+  }
+
+  _loadListingOrError({ listingId, correlationId: corr }) {
+    const record = this.store.state.market_listings?.[listingId] ?? null;
+    if (!record) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'NOT_FOUND', 'listing not found', {
+          reason_code: 'market_listing_not_found',
+          listing_id: listingId
+        })
+      };
+    }
+    return { ok: true, record };
+  }
+
+  patchListing({ actor, auth, listingId, idempotencyKey, request }) {
+    const op = 'marketListings.patch';
+    const corr = correlationId(op);
+
+    const authz = this._authorize({ actor, auth, operationId: op, correlationId: corr });
+    if (!authz.ok) return { replayed: false, result: { ok: false, body: authz.body } };
+
+    return this._withIdempotency({
+      actor,
+      operationId: op,
+      idempotencyKey,
+      requestBody: request,
+      correlationId: corr,
+      handler: () => {
+        const load = this._loadListingOrError({ listingId, correlationId: corr });
+        if (!load.ok) return { ok: false, body: load.body };
+
+        const record = load.record;
+        if (!listingOwnsActor(record, actor)) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'FORBIDDEN', 'listing owner actor required', {
+              reason_code: 'market_listing_forbidden',
+              listing_id: listingId,
+              actor,
+              owner_actor: record.owner_actor
+            })
+          };
+        }
+
+        if (record.status === 'closed' || record.status === 'suspended') {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'listing status does not allow patch', {
+              reason_code: 'market_listing_status_invalid',
+              listing_id: listingId,
+              status: record.status
+            })
+          };
+        }
+
+        const patch = request?.patch;
+        if (!isPlainObject(patch)) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid listing patch payload', {
+              reason_code: 'market_listing_invalid'
+            })
+          };
+        }
+
+        const allowed = new Set(['title', 'offer', 'capability_profile']);
+        for (const key of Object.keys(patch)) {
+          if (!allowed.has(key)) {
+            return {
+              ok: false,
+              body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid listing patch field', {
+                reason_code: 'market_listing_invalid',
+                key
+              })
+            };
+          }
+        }
+
+        const recordedAt = normalizeRecordedAt(request, auth);
+        if (parseIsoMs(recordedAt) === null) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid listing timestamp', {
+              reason_code: 'market_listing_invalid',
+              recorded_at: request?.recorded_at ?? null
+            })
+          };
+        }
+
+        if (patch.title !== undefined) {
+          const title = normalizeOptionalString(patch.title);
+          if (!title) {
+            return {
+              ok: false,
+              body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid listing title', {
+                reason_code: 'market_listing_invalid'
+              })
+            };
+          }
+          record.title = title;
+        }
+
+        if (patch.offer !== undefined) {
+          if (record.kind === 'want') {
+            return {
+              ok: false,
+              body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'want listings must not provide offer', {
+                reason_code: 'market_listing_invalid'
+              })
+            };
+          }
+
+          if (!validateOfferArray(patch.offer)) {
+            return {
+              ok: false,
+              body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid listing offer', {
+                reason_code: 'market_listing_invalid'
+              })
+            };
+          }
+
+          record.offer = clone(patch.offer);
+        }
+
+        if (patch.capability_profile !== undefined) {
+          if (record.kind !== 'capability') {
+            return {
+              ok: false,
+              body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'capability_profile is only valid for capability listings', {
+                reason_code: 'market_listing_invalid'
+              })
+            };
+          }
+
+          const capabilityProfile = patch.capability_profile;
+          if (!isPlainObject(capabilityProfile)
+            || !isPlainObject(capabilityProfile.deliverable_schema)
+            || !isPlainObject(capabilityProfile.rate_card)) {
+            return {
+              ok: false,
+              body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid capability profile', {
+                reason_code: 'market_listing_invalid'
+              })
+            };
+          }
+
+          record.capability_profile = clone(capabilityProfile);
+        }
+
+        record.updated_at = recordedAt;
+
+        return {
+          ok: true,
+          body: {
+            correlation_id: corr,
+            listing: normalizeListingView(record)
+          }
+        };
+      }
+    });
+  }
+
+  _transitionListingStatus({ actor, auth, listingId, idempotencyKey, request, operationId, targetStatus }) {
+    const corr = correlationId(operationId);
+
+    const authz = this._authorize({ actor, auth, operationId, correlationId: corr });
+    if (!authz.ok) return { replayed: false, result: { ok: false, body: authz.body } };
+
+    return this._withIdempotency({
+      actor,
+      operationId,
+      idempotencyKey,
+      requestBody: request,
+      correlationId: corr,
+      handler: () => {
+        const load = this._loadListingOrError({ listingId, correlationId: corr });
+        if (!load.ok) return { ok: false, body: load.body };
+
+        const record = load.record;
+        if (!listingOwnsActor(record, actor)) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'FORBIDDEN', 'listing owner actor required', {
+              reason_code: 'market_listing_forbidden',
+              listing_id: listingId,
+              actor,
+              owner_actor: record.owner_actor
+            })
+          };
+        }
+
+        const normalized = normalizeActionRequest(request, auth);
+        if (!normalized.ok) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid listing timestamp', {
+              reason_code: 'market_listing_invalid',
+              recorded_at: request?.recorded_at ?? null
+            })
+          };
+        }
+
+        if (targetStatus === 'paused') {
+          if (record.status === 'paused') {
+            return {
+              ok: true,
+              body: {
+                correlation_id: corr,
+                listing: normalizeListingView(record)
+              }
+            };
+          }
+
+          if (record.status !== 'open') {
+            return {
+              ok: false,
+              body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid listing status transition', {
+                reason_code: 'market_listing_status_invalid',
+                listing_id: listingId,
+                from_status: record.status,
+                to_status: 'paused'
+              })
+            };
+          }
+        }
+
+        if (targetStatus === 'closed' && record.status === 'closed') {
+          return {
+            ok: true,
+            body: {
+              correlation_id: corr,
+              listing: normalizeListingView(record)
+            }
+          };
+        }
+
+        record.status = targetStatus;
+        record.updated_at = normalized.recordedAt;
+
+        return {
+          ok: true,
+          body: {
+            correlation_id: corr,
+            listing: normalizeListingView(record)
+          }
+        };
+      }
+    });
+  }
+
+  pauseListing({ actor, auth, listingId, idempotencyKey, request }) {
+    return this._transitionListingStatus({
+      actor,
+      auth,
+      listingId,
+      idempotencyKey,
+      request,
+      operationId: 'marketListings.pause',
+      targetStatus: 'paused'
+    });
+  }
+
+  closeListing({ actor, auth, listingId, idempotencyKey, request }) {
+    return this._transitionListingStatus({
+      actor,
+      auth,
+      listingId,
+      idempotencyKey,
+      request,
+      operationId: 'marketListings.close',
+      targetStatus: 'closed'
+    });
+  }
+
+  getListing({ actor, auth, listingId }) {
+    const op = 'marketListings.get';
+    const corr = correlationId(op);
+
+    const authz = this._authorize({ actor, auth, operationId: op, correlationId: corr });
+    if (!authz.ok) return { ok: false, body: authz.body };
+
+    const load = this._loadListingOrError({ listingId, correlationId: corr });
+    if (!load.ok) return { ok: false, body: load.body };
+
+    return {
+      ok: true,
+      body: {
+        correlation_id: corr,
+        listing: normalizeListingView(load.record)
+      }
+    };
+  }
+
+  listListings({ actor, auth, query }) {
+    const op = 'marketListings.list';
+    const corr = correlationId(op);
+
+    const authz = this._authorize({ actor, auth, operationId: op, correlationId: corr });
+    if (!authz.ok) return { ok: false, body: authz.body };
+
+    const normalized = normalizeListQuery(query ?? {});
+    if (!normalized.ok) {
+      return {
+        ok: false,
+        body: errorResponse(corr, normalized.code, normalized.message, normalized.details)
+      };
+    }
+
+    const rows = Object.values(this.store.state.market_listings ?? {})
+      .filter(row => {
+        if (normalized.value.workspace_id && row.workspace_id !== normalized.value.workspace_id) return false;
+        if (normalized.value.owner_actor_type && row.owner_actor?.type !== normalized.value.owner_actor_type) return false;
+        if (normalized.value.owner_actor_id && row.owner_actor?.id !== normalized.value.owner_actor_id) return false;
+        if (normalized.value.kind && row.kind !== normalized.value.kind) return false;
+        if (normalized.value.status && row.status !== normalized.value.status) return false;
+        return true;
+      });
+
+    sortByUpdatedDescThenId(rows, 'listing_id');
+
+    const page = buildPaginationSlice({
+      rows,
+      limit: normalized.value.limit,
+      cursorAfter: normalized.value.cursor_after,
+      keyFn: row => [row.updated_at, row.listing_id],
+      cursorParts: 2
+    });
+
+    if (!page.ok) {
+      return {
+        ok: false,
+        body: errorResponse(corr, page.code, page.message, page.details)
+      };
+    }
+
+    return {
+      ok: true,
+      body: {
+        correlation_id: corr,
+        listings: page.value.page.map(normalizeListingView),
+        total: page.value.total,
+        next_cursor: page.value.nextCursor
+      }
+    };
+  }
+
+  _resolveListingByRef(ref) {
+    if (ref?.kind !== 'listing') return null;
+    return this.store.state.market_listings?.[ref.id] ?? null;
+  }
+
+  createEdge({ actor, auth, idempotencyKey, request }) {
+    const op = 'marketEdges.create';
+    const corr = correlationId(op);
+
+    const authz = this._authorize({ actor, auth, operationId: op, correlationId: corr });
+    if (!authz.ok) return { replayed: false, result: { ok: false, body: authz.body } };
+
+    return this._withIdempotency({
+      actor,
+      operationId: op,
+      idempotencyKey,
+      requestBody: request,
+      correlationId: corr,
+      handler: () => {
+        const edge = request?.edge;
+        if (!isPlainObject(edge)) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid market edge payload', {
+              reason_code: 'market_edge_invalid'
+            })
+          };
+        }
+
+        const recordedAt = normalizeRecordedAt(request, auth);
+        if (parseIsoMs(recordedAt) === null) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid edge timestamp', {
+              reason_code: 'market_edge_invalid',
+              recorded_at: request?.recorded_at ?? null
+            })
+          };
+        }
+
+        const sourceRef = normalizeRef(edge.source_ref);
+        const targetRef = normalizeRef(edge.target_ref);
+        const edgeType = normalizeEdgeType(edge.edge_type);
+        const status = normalizeEdgeStatus(edge.status, 'open');
+
+        if (!sourceRef || !targetRef || sourceRef.id === targetRef.id || !edgeType || !EDGE_TYPES.has(edgeType) || status !== 'open') {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid market edge payload', {
+              reason_code: 'market_edge_invalid'
+            })
+          };
+        }
+
+        const sourceListing = this._resolveListingByRef(sourceRef);
+        const targetListing = this._resolveListingByRef(targetRef);
+        if (!sourceListing || !targetListing) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'NOT_FOUND', 'edge reference listing not found', {
+              reason_code: 'market_edge_not_found',
+              source_ref: sourceRef,
+              target_ref: targetRef
+            })
+          };
+        }
+
+        if (sourceListing.workspace_id !== targetListing.workspace_id) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'edge refs must share workspace', {
+              reason_code: 'market_edge_invalid',
+              source_workspace_id: sourceListing.workspace_id,
+              target_workspace_id: targetListing.workspace_id
+            })
+          };
+        }
+
+        if (!listingOwnsActor(sourceListing, actor)) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'FORBIDDEN', 'edge source owner actor required', {
+              reason_code: 'market_edge_target_owner_required',
+              actor,
+              source_owner_actor: sourceListing.owner_actor
+            })
+          };
+        }
+
+        const requestedId = normalizeOptionalString(edge.edge_id);
+        const edgeId = requestedId ?? nextEdgeId(this.store);
+        if (this.store.state.market_edges[edgeId]) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'edge already exists', {
+              reason_code: 'market_edge_invalid',
+              edge_id: edgeId
+            })
+          };
+        }
+
+        const expiresAt = normalizeOptionalString(edge.expires_at);
+        if (expiresAt && parseIsoMs(expiresAt) === null) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid edge expiry timestamp', {
+              reason_code: 'market_edge_invalid',
+              expires_at: edge.expires_at
+            })
+          };
+        }
+
+        const record = {
+          edge_id: edgeId,
+          workspace_id: sourceListing.workspace_id,
+          source_ref: sourceRef,
+          target_ref: targetRef,
+          edge_type: edgeType,
+          status,
+          terms_patch: isPlainObject(edge.terms_patch) ? clone(edge.terms_patch) : null,
+          expires_at: expiresAt,
+          created_by: { type: actor.type, id: actor.id },
+          created_at: recordedAt,
+          updated_at: recordedAt
+        };
+
+        this.store.state.market_edges[edgeId] = record;
+
+        return {
+          ok: true,
+          body: {
+            correlation_id: corr,
+            edge: normalizeEdgeView(record)
+          }
+        };
+      }
+    });
+  }
+
+  _loadEdgeOrError({ edgeId, correlationId: corr }) {
+    const record = this.store.state.market_edges?.[edgeId] ?? null;
+    if (!record) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'NOT_FOUND', 'edge not found', {
+          reason_code: 'market_edge_not_found',
+          edge_id: edgeId
+        })
+      };
+    }
+    return { ok: true, record };
+  }
+
+  _transitionEdge({ actor, auth, edgeId, idempotencyKey, request, operationId, targetStatus }) {
+    const corr = correlationId(operationId);
+
+    const authz = this._authorize({ actor, auth, operationId, correlationId: corr });
+    if (!authz.ok) return { replayed: false, result: { ok: false, body: authz.body } };
+
+    return this._withIdempotency({
+      actor,
+      operationId,
+      idempotencyKey,
+      requestBody: request,
+      correlationId: corr,
+      handler: () => {
+        const load = this._loadEdgeOrError({ edgeId, correlationId: corr });
+        if (!load.ok) return { ok: false, body: load.body };
+
+        const edge = load.record;
+        const sourceListing = this._resolveListingByRef(edge.source_ref);
+        const targetListing = this._resolveListingByRef(edge.target_ref);
+
+        const normalized = normalizeActionRequest(request, auth);
+        if (!normalized.ok) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid edge timestamp', {
+              reason_code: 'market_edge_invalid',
+              recorded_at: request?.recorded_at ?? null
+            })
+          };
+        }
+
+        if (edge.status !== 'open') {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid edge status transition', {
+              reason_code: 'market_edge_status_transition_invalid',
+              edge_id: edgeId,
+              from_status: edge.status,
+              to_status: targetStatus
+            })
+          };
+        }
+
+        if (targetStatus === 'withdrawn') {
+          if (!sourceListing || !listingOwnsActor(sourceListing, actor)) {
+            return {
+              ok: false,
+              body: errorResponse(corr, 'FORBIDDEN', 'edge source owner actor required for withdraw', {
+                reason_code: 'market_edge_target_owner_required',
+                edge_id: edgeId,
+                actor,
+                source_owner_actor: sourceListing?.owner_actor ?? null
+              })
+            };
+          }
+        } else if (!targetListing || !listingOwnsActor(targetListing, actor)) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'FORBIDDEN', 'edge target owner actor required', {
+              reason_code: 'market_edge_target_owner_required',
+              edge_id: edgeId,
+              actor,
+              target_owner_actor: targetListing?.owner_actor ?? null
+            })
+          };
+        }
+
+        edge.status = targetStatus;
+        edge.updated_at = normalized.recordedAt;
+
+        return {
+          ok: true,
+          body: {
+            correlation_id: corr,
+            edge: normalizeEdgeView(edge)
+          }
+        };
+      }
+    });
+  }
+
+  acceptEdge({ actor, auth, edgeId, idempotencyKey, request }) {
+    return this._transitionEdge({
+      actor,
+      auth,
+      edgeId,
+      idempotencyKey,
+      request,
+      operationId: 'marketEdges.accept',
+      targetStatus: 'accepted'
+    });
+  }
+
+  declineEdge({ actor, auth, edgeId, idempotencyKey, request }) {
+    return this._transitionEdge({
+      actor,
+      auth,
+      edgeId,
+      idempotencyKey,
+      request,
+      operationId: 'marketEdges.decline',
+      targetStatus: 'declined'
+    });
+  }
+
+  withdrawEdge({ actor, auth, edgeId, idempotencyKey, request }) {
+    return this._transitionEdge({
+      actor,
+      auth,
+      edgeId,
+      idempotencyKey,
+      request,
+      operationId: 'marketEdges.withdraw',
+      targetStatus: 'withdrawn'
+    });
+  }
+
+  getEdge({ actor, auth, edgeId }) {
+    const op = 'marketEdges.get';
+    const corr = correlationId(op);
+
+    const authz = this._authorize({ actor, auth, operationId: op, correlationId: corr });
+    if (!authz.ok) return { ok: false, body: authz.body };
+
+    const load = this._loadEdgeOrError({ edgeId, correlationId: corr });
+    if (!load.ok) return { ok: false, body: load.body };
+
+    return {
+      ok: true,
+      body: {
+        correlation_id: corr,
+        edge: normalizeEdgeView(load.record)
+      }
+    };
+  }
+
+  listEdges({ actor, auth, query }) {
+    const op = 'marketEdges.list';
+    const corr = correlationId(op);
+
+    const authz = this._authorize({ actor, auth, operationId: op, correlationId: corr });
+    if (!authz.ok) return { ok: false, body: authz.body };
+
+    const normalized = normalizeEdgeListQuery(query ?? {});
+    if (!normalized.ok) {
+      return {
+        ok: false,
+        body: errorResponse(corr, normalized.code, normalized.message, normalized.details)
+      };
+    }
+
+    const rows = Object.values(this.store.state.market_edges ?? {})
+      .filter(row => {
+        if (normalized.value.workspace_id && row.workspace_id !== normalized.value.workspace_id) return false;
+        if (normalized.value.source_id && row.source_ref?.id !== normalized.value.source_id) return false;
+        if (normalized.value.target_id && row.target_ref?.id !== normalized.value.target_id) return false;
+        if (normalized.value.status && row.status !== normalized.value.status) return false;
+        if (normalized.value.edge_type && row.edge_type !== normalized.value.edge_type) return false;
+        return true;
+      });
+
+    sortByUpdatedDescThenId(rows, 'edge_id');
+
+    const page = buildPaginationSlice({
+      rows,
+      limit: normalized.value.limit,
+      cursorAfter: normalized.value.cursor_after,
+      keyFn: row => [row.updated_at, row.edge_id],
+      cursorParts: 2
+    });
+
+    if (!page.ok) {
+      return {
+        ok: false,
+        body: errorResponse(corr, page.code, page.message, page.details)
+      };
+    }
+
+    return {
+      ok: true,
+      body: {
+        correlation_id: corr,
+        edges: page.value.page.map(normalizeEdgeView),
+        total: page.value.total,
+        next_cursor: page.value.nextCursor
+      }
+    };
+  }
+
+  getFeed({ actor, auth, query }) {
+    const op = 'marketFeed.get';
+    const corr = correlationId(op);
+
+    const authz = this._authorize({ actor, auth, operationId: op, correlationId: corr });
+    if (!authz.ok) return { ok: false, body: authz.body };
+
+    const normalized = normalizeFeedQuery(query ?? {});
+    if (!normalized.ok) {
+      return {
+        ok: false,
+        body: errorResponse(corr, normalized.code, normalized.message, normalized.details)
+      };
+    }
+
+    const items = [];
+
+    for (const listing of Object.values(this.store.state.market_listings ?? {})) {
+      if (normalized.value.workspace_id && listing.workspace_id !== normalized.value.workspace_id) continue;
+      if (normalized.value.item_type && normalized.value.item_type !== 'listing') continue;
+      items.push({
+        item_type: 'listing',
+        item_id: listing.listing_id,
+        workspace_id: listing.workspace_id,
+        occurred_at: listing.updated_at,
+        listing_summary: {
+          listing_id: listing.listing_id,
+          kind: listing.kind,
+          status: listing.status,
+          title: listing.title,
+          owner_actor: clone(listing.owner_actor),
+          updated_at: listing.updated_at
+        }
+      });
+    }
+
+    for (const edge of Object.values(this.store.state.market_edges ?? {})) {
+      if (normalized.value.workspace_id && edge.workspace_id !== normalized.value.workspace_id) continue;
+      if (normalized.value.item_type && normalized.value.item_type !== 'edge') continue;
+      items.push({
+        item_type: 'edge',
+        item_id: edge.edge_id,
+        workspace_id: edge.workspace_id,
+        occurred_at: edge.updated_at,
+        edge_summary: {
+          edge_id: edge.edge_id,
+          edge_type: edge.edge_type,
+          status: edge.status,
+          source_ref: clone(edge.source_ref),
+          target_ref: clone(edge.target_ref),
+          updated_at: edge.updated_at
+        }
+      });
+    }
+
+    items.sort((a, b) => {
+      const at = parseIsoMs(a.occurred_at) ?? 0;
+      const bt = parseIsoMs(b.occurred_at) ?? 0;
+      if (bt !== at) return bt - at;
+      const typeCmp = String(a.item_type).localeCompare(String(b.item_type));
+      if (typeCmp !== 0) return typeCmp;
+      return String(a.item_id).localeCompare(String(b.item_id));
+    });
+
+    const page = buildPaginationSlice({
+      rows: items,
+      limit: normalized.value.limit,
+      cursorAfter: normalized.value.cursor_after,
+      keyFn: item => [item.occurred_at, item.item_type, item.item_id],
+      cursorParts: 3
+    });
+
+    if (!page.ok) {
+      return {
+        ok: false,
+        body: errorResponse(corr, page.code, page.message, page.details)
+      };
+    }
+
+    return {
+      ok: true,
+      body: {
+        correlation_id: corr,
+        items: clone(page.value.page),
+        next_cursor: page.value.nextCursor,
+        server_time: normalizeOptionalString(auth?.now_iso) ?? new Date().toISOString()
+      }
+    };
+  }
+}
