@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketEdgeRef.schema.json",
+  "title": "MarketEdgeRef",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kind",
+    "id"
+  ],
+  "properties": {
+    "kind": {
+      "type": "string",
+      "enum": [
+        "listing"
+      ]
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

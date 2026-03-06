@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketListingPatchRequest.schema.json",
+  "title": "MarketListingPatchRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "patch"
+  ],
+  "properties": {
+    "patch": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "offer": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "capability_profile": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "deliverable_schema",
+            "rate_card"
+          ],
+          "properties": {
+            "deliverable_schema": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "rate_card": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "sla_hint": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "constraints": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

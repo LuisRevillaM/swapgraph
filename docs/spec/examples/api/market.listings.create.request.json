@@ -1,0 +1,20 @@
+{
+  "recorded_at": "2026-03-05T18:10:00.000Z",
+  "listing": {
+    "workspace_id": "ws_market_001",
+    "owner_actor": {
+      "type": "user",
+      "id": "user_market_a"
+    },
+    "kind": "post",
+    "title": "AK-47 | Redline (FT)",
+    "offer": [
+      {
+        "platform": "steam",
+        "app_id": 730,
+        "asset_id": "asset_ak_1"
+      }
+    ],
+    "status": "open"
+  }
+}

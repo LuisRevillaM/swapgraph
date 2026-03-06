@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketEdgeView.schema.json",
+  "title": "MarketEdgeView",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "edge_id",
+    "workspace_id",
+    "source_ref",
+    "target_ref",
+    "edge_type",
+    "status",
+    "terms_patch",
+    "expires_at",
+    "created_by",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "edge_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "workspace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_ref": {
+      "$ref": "MarketEdgeRef.schema.json"
+    },
+    "target_ref": {
+      "$ref": "MarketEdgeRef.schema.json"
+    },
+    "edge_type": {
+      "type": "string",
+      "enum": [
+        "interest",
+        "offer",
+        "counter",
+        "block"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "accepted",
+        "declined",
+        "withdrawn",
+        "expired"
+      ]
+    },
+    "terms_patch": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": true
+    },
+    "expires_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "created_by": {
+      "$ref": "ActorRef.schema.json"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

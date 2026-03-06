@@ -1084,6 +1084,90 @@
     {
       "file": "marketplace_matching_run.get.response.json",
       "schema": "MarketplaceMatchingRunGetResponse.schema.json"
+    },
+    {
+      "file": "market.listings.create.request.json",
+      "schema": "MarketListingCreateRequest.schema.json"
+    },
+    {
+      "file": "market.listings.create.response.json",
+      "schema": "MarketListingResponse.schema.json"
+    },
+    {
+      "file": "market.listings.patch.request.json",
+      "schema": "MarketListingPatchRequest.schema.json"
+    },
+    {
+      "file": "market.listings.patch.response.json",
+      "schema": "MarketListingResponse.schema.json"
+    },
+    {
+      "file": "market.listings.pause.request.json",
+      "schema": "MarketActionRequest.schema.json"
+    },
+    {
+      "file": "market.listings.pause.response.json",
+      "schema": "MarketListingResponse.schema.json"
+    },
+    {
+      "file": "market.listings.close.request.json",
+      "schema": "MarketActionRequest.schema.json"
+    },
+    {
+      "file": "market.listings.close.response.json",
+      "schema": "MarketListingResponse.schema.json"
+    },
+    {
+      "file": "market.listings.get.response.json",
+      "schema": "MarketListingResponse.schema.json"
+    },
+    {
+      "file": "market.listings.list.response.json",
+      "schema": "MarketListingListResponse.schema.json"
+    },
+    {
+      "file": "market.edges.create.request.json",
+      "schema": "MarketEdgeCreateRequest.schema.json"
+    },
+    {
+      "file": "market.edges.create.response.json",
+      "schema": "MarketEdgeResponse.schema.json"
+    },
+    {
+      "file": "market.edges.accept.request.json",
+      "schema": "MarketActionRequest.schema.json"
+    },
+    {
+      "file": "market.edges.accept.response.json",
+      "schema": "MarketEdgeResponse.schema.json"
+    },
+    {
+      "file": "market.edges.decline.request.json",
+      "schema": "MarketActionRequest.schema.json"
+    },
+    {
+      "file": "market.edges.decline.response.json",
+      "schema": "MarketEdgeResponse.schema.json"
+    },
+    {
+      "file": "market.edges.withdraw.request.json",
+      "schema": "MarketActionRequest.schema.json"
+    },
+    {
+      "file": "market.edges.withdraw.response.json",
+      "schema": "MarketEdgeResponse.schema.json"
+    },
+    {
+      "file": "market.edges.get.response.json",
+      "schema": "MarketEdgeResponse.schema.json"
+    },
+    {
+      "file": "market.edges.list.response.json",
+      "schema": "MarketEdgeListResponse.schema.json"
+    },
+    {
+      "file": "market.feed.get.response.json",
+      "schema": "MarketFeedGetResponse.schema.json"
     }
   ]
 }

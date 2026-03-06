@@ -292,6 +292,17 @@ Notes:
   - `marketplace_matching_invalid_request`
   - `marketplace_matching_asset_values_missing`
   - `marketplace_matching_run_not_found`
+  - `market_listing_invalid`
+  - `market_listing_kind_invalid`
+  - `market_listing_status_invalid`
+  - `market_listing_not_found`
+  - `market_listing_forbidden`
+  - `market_edge_invalid`
+  - `market_edge_not_found`
+  - `market_edge_target_owner_required`
+  - `market_edge_status_transition_invalid`
+  - `market_feed_query_invalid`
+  - `market_cursor_not_found`
   - `state_backend_unsupported`
   - `sqlite_unavailable`
   - `state_migration_source_missing`

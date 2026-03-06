@@ -114,6 +114,8 @@ Core scopes (v1):
 - `delegations:write`
 - `vault:read`
 - `vault:write`
+- `market:read`
+- `market:write`
 
 Notes:
 - `keys:*` endpoints are public in v1 (no auth required), but we still model a scope for completeness.

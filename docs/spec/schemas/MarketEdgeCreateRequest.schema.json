@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketEdgeCreateRequest.schema.json",
+  "title": "MarketEdgeCreateRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "edge"
+  ],
+  "properties": {
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_ref",
+        "target_ref",
+        "edge_type"
+      ],
+      "properties": {
+        "edge_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_ref": {
+          "$ref": "MarketEdgeRef.schema.json"
+        },
+        "target_ref": {
+          "$ref": "MarketEdgeRef.schema.json"
+        },
+        "edge_type": {
+          "type": "string",
+          "enum": [
+            "interest",
+            "offer",
+            "counter",
+            "block"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "open",
+            "accepted",
+            "declined",
+            "withdrawn",
+            "expired"
+          ]
+        },
+        "terms_patch": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

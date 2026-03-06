@@ -1,0 +1,44 @@
+{
+  "correlation_id": "corr_marketfeed_get",
+  "items": [
+    {
+      "item_type": "edge",
+      "item_id": "edge_000001",
+      "workspace_id": "ws_market_001",
+      "occurred_at": "2026-03-05T18:21:00.000Z",
+      "edge_summary": {
+        "edge_id": "edge_000001",
+        "edge_type": "interest",
+        "status": "accepted",
+        "source_ref": {
+          "kind": "listing",
+          "id": "listing_000001"
+        },
+        "target_ref": {
+          "kind": "listing",
+          "id": "listing_000002"
+        },
+        "updated_at": "2026-03-05T18:21:00.000Z"
+      }
+    },
+    {
+      "item_type": "listing",
+      "item_id": "listing_000001",
+      "workspace_id": "ws_market_001",
+      "occurred_at": "2026-03-05T18:14:00.000Z",
+      "listing_summary": {
+        "listing_id": "listing_000001",
+        "kind": "post",
+        "status": "closed",
+        "title": "AK-47 | Redline (FT) [Updated]",
+        "owner_actor": {
+          "type": "user",
+          "id": "user_market_a"
+        },
+        "updated_at": "2026-03-05T18:14:00.000Z"
+      }
+    }
+  ],
+  "next_cursor": null,
+  "server_time": "2026-03-05T18:25:00.000Z"
+}

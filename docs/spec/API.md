@@ -125,6 +125,27 @@ Auth headers (see `docs/spec/AUTH.md` for details):
     - `block` disables a directed edge, `allow` enables a directed edge, and `prefer` enables + ranks a directed edge
     - matching can form cycles from derived compatibility edges and/or explicit edge-intent edges
 
+- `Market`
+  - `POST /market/listings` (idempotent market listing create)
+  - `PATCH /market/listings/{listing_id}` (idempotent listing patch)
+  - `POST /market/listings/{listing_id}/pause` (idempotent listing pause transition)
+  - `POST /market/listings/{listing_id}/close` (idempotent listing close transition)
+  - `GET /market/listings/{listing_id}` (read listing)
+  - `GET /market/listings` (list listings with deterministic filters/cursor)
+  - `POST /market/edges` (idempotent market edge create)
+  - `POST /market/edges/{edge_id}/accept` (idempotent edge accept by target owner)
+  - `POST /market/edges/{edge_id}/decline` (idempotent edge decline by target owner)
+  - `POST /market/edges/{edge_id}/withdraw` (idempotent edge withdraw by source owner)
+  - `GET /market/edges/{edge_id}` (read edge)
+  - `GET /market/edges` (list edges with deterministic filters/cursor)
+  - `GET /market/feed` (typed listing/edge feed envelope with deterministic cursor continuity)
+  - market invariants:
+    - `post` listings require non-empty `offer`
+    - `want` listings are allowed with empty `offer`
+    - `capability` listings require `capability_profile.deliverable_schema` + `capability_profile.rate_card`
+    - edge transitions are deterministic (`open -> accepted|declined|withdrawn|expired`)
+    - feed/list cursors fail deterministically on malformed or stale anchors
+
 - `PartnerUi`
   - `GET /partner-ui/capabilities` (supported embedded surfaces/version matrix for partner actors)
   - `GET /partner-ui/bundles/{surface}` (surface payload bundle for partner embedding mode)

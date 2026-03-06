@@ -2951,6 +2951,235 @@
     },
     {
       "method": "POST",
+      "path": "/market/listings",
+      "operation_id": "marketListings.create",
+      "idempotency_required": true,
+      "request_schema": "MarketListingCreateRequest.schema.json",
+      "response_schema": "MarketListingResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner"
+        ],
+        "required_scopes": [
+          "market:write"
+        ]
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/market/listings/{listing_id}",
+      "operation_id": "marketListings.patch",
+      "idempotency_required": true,
+      "request_schema": "MarketListingPatchRequest.schema.json",
+      "response_schema": "MarketListingResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner"
+        ],
+        "required_scopes": [
+          "market:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/market/listings/{listing_id}/pause",
+      "operation_id": "marketListings.pause",
+      "idempotency_required": true,
+      "request_schema": "MarketActionRequest.schema.json",
+      "response_schema": "MarketListingResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner"
+        ],
+        "required_scopes": [
+          "market:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/market/listings/{listing_id}/close",
+      "operation_id": "marketListings.close",
+      "idempotency_required": true,
+      "request_schema": "MarketActionRequest.schema.json",
+      "response_schema": "MarketListingResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner"
+        ],
+        "required_scopes": [
+          "market:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/market/listings/{listing_id}",
+      "operation_id": "marketListings.get",
+      "idempotency_required": false,
+      "response_schema": "MarketListingResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner"
+        ],
+        "required_scopes": [
+          "market:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/market/listings",
+      "operation_id": "marketListings.list",
+      "idempotency_required": false,
+      "response_schema": "MarketListingListResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner"
+        ],
+        "required_scopes": [
+          "market:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/market/edges",
+      "operation_id": "marketEdges.create",
+      "idempotency_required": true,
+      "request_schema": "MarketEdgeCreateRequest.schema.json",
+      "response_schema": "MarketEdgeResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner"
+        ],
+        "required_scopes": [
+          "market:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/market/edges/{edge_id}/accept",
+      "operation_id": "marketEdges.accept",
+      "idempotency_required": true,
+      "request_schema": "MarketActionRequest.schema.json",
+      "response_schema": "MarketEdgeResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner"
+        ],
+        "required_scopes": [
+          "market:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/market/edges/{edge_id}/decline",
+      "operation_id": "marketEdges.decline",
+      "idempotency_required": true,
+      "request_schema": "MarketActionRequest.schema.json",
+      "response_schema": "MarketEdgeResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner"
+        ],
+        "required_scopes": [
+          "market:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/market/edges/{edge_id}/withdraw",
+      "operation_id": "marketEdges.withdraw",
+      "idempotency_required": true,
+      "request_schema": "MarketActionRequest.schema.json",
+      "response_schema": "MarketEdgeResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner"
+        ],
+        "required_scopes": [
+          "market:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/market/edges/{edge_id}",
+      "operation_id": "marketEdges.get",
+      "idempotency_required": false,
+      "response_schema": "MarketEdgeResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner"
+        ],
+        "required_scopes": [
+          "market:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/market/edges",
+      "operation_id": "marketEdges.list",
+      "idempotency_required": false,
+      "response_schema": "MarketEdgeListResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner"
+        ],
+        "required_scopes": [
+          "market:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/market/feed",
+      "operation_id": "marketFeed.get",
+      "idempotency_required": false,
+      "response_schema": "MarketFeedGetResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner"
+        ],
+        "required_scopes": [
+          "market:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/edge-intents",
       "operation_id": "edgeIntents.upsert",
       "idempotency_required": true,

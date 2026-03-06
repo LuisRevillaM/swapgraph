@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketListingCreateRequest.schema.json",
+  "title": "MarketListingCreateRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "listing"
+  ],
+  "properties": {
+    "listing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workspace_id",
+        "kind",
+        "title"
+      ],
+      "properties": {
+        "listing_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "workspace_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "owner_actor": {
+          "$ref": "ActorRef.schema.json"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "post",
+            "want",
+            "capability"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "open",
+            "paused",
+            "closed",
+            "suspended"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "offer": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "capability_profile": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "deliverable_schema",
+            "rate_card"
+          ],
+          "properties": {
+            "deliverable_schema": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "rate_card": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "sla_hint": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "constraints": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

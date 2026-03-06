@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketActionRequest.schema.json",
+  "title": "MarketActionRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

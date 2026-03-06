@@ -1,0 +1,14 @@
+{
+  "recorded_at": "2026-03-05T18:20:00.000Z",
+  "edge": {
+    "source_ref": {
+      "kind": "listing",
+      "id": "listing_000001"
+    },
+    "target_ref": {
+      "kind": "listing",
+      "id": "listing_000002"
+    },
+    "edge_type": "interest"
+  }
+}
