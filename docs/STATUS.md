@@ -1,9 +1,9 @@
 # Project Status — swapgraph
 
-Last updated: 2026-02-24
+Last updated: 2026-03-06
 
 ## Autopilot
-- Status: **implementation closure** (M139 verifier-complete; canary-routing + execution helpers extracted and parity-gated)
+- Status: **implementation active** (M140 verifier-complete on `marketplace-vnext-execution`; marketplace vNext contract rollout in progress)
 - Canonical plan: `docs/source/LATEST.md` (v2.0)
 
 ## Milestones (progress)
@@ -150,12 +150,13 @@ Last updated: 2026-02-24
 - M137: ✅ v2 execution helper extraction parity gate (fixtures-first, non-breaking) (canary-selection + v2 shadow execution helpers extracted from service into dedicated JS helper module with concrete TS parity module and deterministic extraction-contract verification)
 - M138: ✅ TS-shadow execution helper extraction parity gate (fixtures-first, non-breaking) (TS-shadow execution/persistence helper extracted from service into dedicated JS helper module with concrete TS parity module and deterministic extraction-contract verification)
 - M139: ✅ Canary routing helper extraction parity gate (fixtures-first, non-breaking) (canary routing/bootstrap helper extracted from service into dedicated JS helper module with concrete TS parity module and deterministic extraction-contract verification)
+- M140: ✅ Marketplace listings/edges/feed contract implementation (fixtures-first) (runtime market service + route wiring, manifest/schema/example contracts, market auth scope extension, deterministic reason-code floor, and hash-locked lifecycle verifier artifacts)
 
 ## Next
-- Current mode: matching performance + TS migration tranche M115–M139 is verifier-complete with v2 full-primary runtime, rollback/fallback controls, concrete TS matching-core modules, runtime TS shadow telemetry, service-level helper decomposition parity, TS service wrapper-removal compatibility gating, matcher-runner seam extraction, canary/rollback helper extraction, request/asset normalization helper extraction, proposal lifecycle helper extraction, state/bootstrap + edge-intent helper extraction, response/error/idempotency helper extraction, run-record helper extraction, canary decision helper extraction, v2 execution helper extraction, TS-shadow execution helper extraction, and canary routing/bootstrap helper extraction.
-- Immediate target: M140 TypeScript service migration phase 18 (remaining service orchestration extraction and concrete TS service cutover contract, non-breaking).
-- Follow-on contract decision: M120.1 optional global rollback shadow suppression toggle (`MATCHING_V2_ROLLBACK_SUPPRESS_SHADOW`, default `0`) with canary-mode proof.
-- TypeScript track (parallel, non-breaking): continue replacing `src-ts` wrappers module-by-module with concrete TS implementations behind parity gates.
+- Current mode: Marketplace vNext execution tranche is active on branch `marketplace-vnext-execution`; M140 contracts (listings/edges/feed) are verifier-complete.
+- Immediate target: M141 marketplace threads + message contract slice (API/schema/examples + deterministic verifier).
+- Follow-on target: M142 marketplace deal draft/accept/cancel + settlement-bridge contract slice.
+- Parallel track: preserve prior M115–M139 TS/canary baseline as stable while extending marketplace-surface contracts additively.
 - Runtime shell available for request/response validation: `npm run start:api` (`src/server/runtimeApiServer.mjs`).
 - CI baseline gate added: `.github/workflows/verify-baseline.yml` (includes `verify:m0`, baseline tranche, `verify:m98`, `verify:m99`, `verify:m100`, `verify:m101`, `verify:m102`, `verify:m103`, `verify:m104`, `verify:m105`, `verify:m106`, `verify:m107`, `verify:m108`, `verify:m109`, `verify:m110`, `verify:m111`, and `verify:m112`).
 

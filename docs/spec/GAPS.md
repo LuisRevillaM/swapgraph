@@ -200,6 +200,7 @@ Each item here must become at least one of:
 - Resolved (fixtures-first, partial): M112 (storage hardening and SQLite migration path: runtime backend selector + SQLite store activation, deterministic JSON<->SQLite migration tooling, and restart durability + backup/restore verifier coverage).
 - Resolved (integration-gated): M113 (Render deployment smoke hardening automation: service/disk/env/deploy/restart orchestration + live runtime smoke checks under credentialed integration gate; verifier artifacts captured under `artifacts/milestones/M113/latest/*`).
 - Resolved (fixtures-first): M114 (explicit edge-intent resource + hybrid graph matching integration: idempotent edge-intent upsert/list/get contracts with deterministic reason codes and matching support for derived+expressed edges with block suppression).
+- Resolved (fixtures-first): M140 (market listings/edges/feed contract implementation: runtime market service + route wiring, manifest/schema/example additions, market auth scope extension, deterministic listing/edge/feed reason-code floor, and hash-locked verifier artifacts).
 
 ---
 

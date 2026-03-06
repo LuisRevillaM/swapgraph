@@ -1,4 +1,4 @@
-# SwapGraph v2.0 Conformance Matrix (M114)
+# SwapGraph v2.0 Conformance Matrix (M140)
 
 M92_RELEASE_READY: true
 M97_EVIDENCE_REFRESH_READY: true
@@ -19,6 +19,7 @@ M111_MARKETPLACE_EXECUTION_LOOP_CONTRACTS_READY: true
 M112_STORAGE_HARDENING_SQLITE_MIGRATION_READY: true
 M113_RENDER_DEPLOYMENT_SMOKE_HARDENING_READY: true
 M114_EXPLICIT_EDGE_INTENTS_HYBRID_MATCHING_READY: true
+M140_MARKET_LISTING_EDGE_FEED_CONTRACTS_READY: true
 
 This matrix maps v2.0 plan gates and milestone tranches to deterministic, verifier-backed artifacts in this repo.
 
@@ -65,10 +66,12 @@ This matrix maps v2.0 plan gates and milestone tranches to deterministic, verifi
 - M112: storage hardening and SQLite migration path (runtime backend selector + SQLite store activation, deterministic JSON<->SQLite migration tooling, and restart durability + backup/restore parity verification).
 - M113: Render deployment smoke hardening automation (integration-gated Render service/disk/env/deploy/restart orchestration + live health/smoke and restart durability verification).
 - M114: explicit edge-intent + hybrid graph matching contracts (idempotent edge-intent upsert/list/get surfaces with deterministic reason codes and matcher support for derived+expressed edge construction with block suppression).
+- M115–M139: matching v2 canary/full-primary + TS shadow/helper extraction tranche (deterministic parity gates, rollback controls, and non-breaking extraction contracts).
+- M140: marketplace listings/edges/feed contracts (runtime service + route wiring, API manifest/schema/examples, market auth scopes, deterministic reason-code floor, and hash-locked lifecycle verifier artifacts).
 
 ## Release-Readiness Assertions
 
-- ✅ All milestone descriptors exist for M71–M114 (`docs/prd/Mxx.md`, `milestones/Mxx.yaml`, `verify/mxx.sh`).
-- ✅ Deterministic verification artifacts exist for M71–M114 under `artifacts/milestones/Mxx/latest/*`.
+- ✅ All milestone descriptors exist for M71–M140 (`docs/prd/Mxx.md`, `milestones/Mxx.yaml`, `verify/mxx.sh`).
+- ✅ Deterministic verification artifacts exist for M71–M140 under `artifacts/milestones/Mxx/latest/*`.
 - ✅ Spec gaps are closed to zero unresolved blocker state for this tranche.
 - ✅ `BLOCKERS.md` indicates no active blockers.

@@ -1,0 +1,395 @@
+{
+  "actors": {
+    "user_a": {
+      "type": "user",
+      "id": "user_a"
+    },
+    "user_b": {
+      "type": "user",
+      "id": "user_b"
+    },
+    "user_c": {
+      "type": "user",
+      "id": "user_c"
+    }
+  },
+  "seed_state": {
+    "intents": {},
+    "proposals": {},
+    "commits": {},
+    "timelines": {},
+    "receipts": {}
+  },
+  "operations": [
+    {
+      "op": "marketListings.create",
+      "actor_ref": "user_a",
+      "auth": {
+        "scopes": [
+          "market:write"
+        ]
+      },
+      "idempotency_key": "market-listing-a-create-v1",
+      "request": {
+        "recorded_at": "2026-03-06T00:00:00.000Z",
+        "listing": {
+          "listing_id": "listing_alpha",
+          "workspace_id": "ws_market_1",
+          "owner_actor": {
+            "type": "user",
+            "id": "user_a"
+          },
+          "kind": "post",
+          "status": "open",
+          "title": "AK-47 | Redline (FT)",
+          "offer": [
+            {
+              "platform": "steam",
+              "app_id": 730,
+              "asset_id": "asset_ak_1"
+            }
+          ]
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_listing_id": "listing_alpha",
+      "expect_listing_kind": "post",
+      "expect_listing_status": "open"
+    },
+    {
+      "op": "marketListings.create",
+      "actor_ref": "user_b",
+      "auth": {
+        "scopes": [
+          "market:write"
+        ]
+      },
+      "idempotency_key": "market-listing-b-create-v1",
+      "request": {
+        "recorded_at": "2026-03-06T00:00:01.000Z",
+        "listing": {
+          "listing_id": "listing_beta",
+          "workspace_id": "ws_market_1",
+          "owner_actor": {
+            "type": "user",
+            "id": "user_b"
+          },
+          "kind": "want",
+          "status": "open",
+          "title": "Looking for AWP Asiimov"
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_listing_id": "listing_beta",
+      "expect_listing_kind": "want",
+      "expect_listing_status": "open"
+    },
+    {
+      "op": "marketListings.create",
+      "actor_ref": "user_c",
+      "auth": {
+        "scopes": [
+          "market:write"
+        ]
+      },
+      "idempotency_key": "market-listing-c-create-v1",
+      "request": {
+        "recorded_at": "2026-03-06T00:00:02.000Z",
+        "listing": {
+          "listing_id": "listing_gamma",
+          "workspace_id": "ws_market_1",
+          "owner_actor": {
+            "type": "user",
+            "id": "user_c"
+          },
+          "kind": "capability",
+          "status": "open",
+          "title": "Broker-assisted Steam settlement",
+          "capability_profile": {
+            "deliverable_schema": {
+              "category": "broker_settlement"
+            },
+            "rate_card": {
+              "flat_fee_usd": 2.5
+            },
+            "sla_hint": {
+              "p95_minutes": 30
+            },
+            "constraints": {
+              "region": "global"
+            }
+          }
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_listing_id": "listing_gamma",
+      "expect_listing_kind": "capability",
+      "expect_listing_status": "open"
+    },
+    {
+      "op": "marketListings.create",
+      "actor_ref": "user_a",
+      "auth": {
+        "scopes": [
+          "market:write"
+        ]
+      },
+      "idempotency_key": "market-listing-a-create-v1",
+      "request": {
+        "recorded_at": "2026-03-06T00:00:00.000Z",
+        "listing": {
+          "listing_id": "listing_alpha",
+          "workspace_id": "ws_market_1",
+          "owner_actor": {
+            "type": "user",
+            "id": "user_a"
+          },
+          "kind": "post",
+          "status": "open",
+          "title": "AK-47 | Redline (FT)",
+          "offer": [
+            {
+              "platform": "steam",
+              "app_id": 730,
+              "asset_id": "asset_ak_1"
+            }
+          ]
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": true,
+      "expect_listing_id": "listing_alpha"
+    },
+    {
+      "op": "marketListings.patch",
+      "actor_ref": "user_a",
+      "auth": {
+        "scopes": [
+          "market:write"
+        ]
+      },
+      "listing_id": "listing_alpha",
+      "idempotency_key": "market-listing-a-patch-v1",
+      "request": {
+        "recorded_at": "2026-03-06T00:00:10.000Z",
+        "patch": {
+          "title": "AK-47 | Redline (FT) [Updated]"
+        }
+      },
+      "expect_ok": true,
+      "expect_listing_status": "open"
+    },
+    {
+      "op": "marketListings.pause",
+      "actor_ref": "user_a",
+      "auth": {
+        "scopes": [
+          "market:write"
+        ]
+      },
+      "listing_id": "listing_alpha",
+      "idempotency_key": "market-listing-a-pause-v1",
+      "request": {
+        "recorded_at": "2026-03-06T00:00:20.000Z"
+      },
+      "expect_ok": true,
+      "expect_listing_status": "paused"
+    },
+    {
+      "op": "marketListings.close",
+      "actor_ref": "user_a",
+      "auth": {
+        "scopes": [
+          "market:write"
+        ]
+      },
+      "listing_id": "listing_alpha",
+      "idempotency_key": "market-listing-a-close-v1",
+      "request": {
+        "recorded_at": "2026-03-06T00:00:30.000Z"
+      },
+      "expect_ok": true,
+      "expect_listing_status": "closed"
+    },
+    {
+      "op": "marketListings.get",
+      "actor_ref": "user_a",
+      "auth": {
+        "scopes": [
+          "market:read"
+        ]
+      },
+      "listing_id": "listing_alpha",
+      "expect_ok": true,
+      "expect_listing_status": "closed"
+    },
+    {
+      "op": "marketListings.list",
+      "actor_ref": "user_a",
+      "auth": {
+        "scopes": [
+          "market:read"
+        ]
+      },
+      "query": {
+        "workspace_id": "ws_market_1"
+      },
+      "expect_ok": true,
+      "expect_total": 3,
+      "expect_first_listing_id": "listing_alpha"
+    },
+    {
+      "op": "marketEdges.create",
+      "actor_ref": "user_b",
+      "auth": {
+        "scopes": [
+          "market:write"
+        ]
+      },
+      "idempotency_key": "market-edge-bg-create-v1",
+      "request": {
+        "recorded_at": "2026-03-06T00:01:00.000Z",
+        "edge": {
+          "edge_id": "edge_bg_1",
+          "source_ref": {
+            "kind": "listing",
+            "id": "listing_beta"
+          },
+          "target_ref": {
+            "kind": "listing",
+            "id": "listing_gamma"
+          },
+          "edge_type": "interest"
+        }
+      },
+      "expect_ok": true,
+      "expect_edge_id": "edge_bg_1",
+      "expect_edge_status": "open"
+    },
+    {
+      "op": "marketEdges.accept",
+      "actor_ref": "user_a",
+      "auth": {
+        "scopes": [
+          "market:write"
+        ]
+      },
+      "edge_id": "edge_bg_1",
+      "idempotency_key": "market-edge-bg-accept-bad-v1",
+      "request": {
+        "recorded_at": "2026-03-06T00:01:01.000Z"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "market_edge_target_owner_required"
+    },
+    {
+      "op": "marketEdges.accept",
+      "actor_ref": "user_c",
+      "auth": {
+        "scopes": [
+          "market:write"
+        ]
+      },
+      "edge_id": "edge_bg_1",
+      "idempotency_key": "market-edge-bg-accept-v1",
+      "request": {
+        "recorded_at": "2026-03-06T00:01:02.000Z"
+      },
+      "expect_ok": true,
+      "expect_edge_status": "accepted"
+    },
+    {
+      "op": "marketEdges.decline",
+      "actor_ref": "user_c",
+      "auth": {
+        "scopes": [
+          "market:write"
+        ]
+      },
+      "edge_id": "edge_bg_1",
+      "idempotency_key": "market-edge-bg-decline-after-accept-v1",
+      "request": {
+        "recorded_at": "2026-03-06T00:01:03.000Z"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "market_edge_status_transition_invalid"
+    },
+    {
+      "op": "marketEdges.get",
+      "actor_ref": "user_b",
+      "auth": {
+        "scopes": [
+          "market:read"
+        ]
+      },
+      "edge_id": "edge_bg_1",
+      "expect_ok": true,
+      "expect_edge_status": "accepted"
+    },
+    {
+      "op": "marketEdges.list",
+      "actor_ref": "user_b",
+      "auth": {
+        "scopes": [
+          "market:read"
+        ]
+      },
+      "query": {
+        "workspace_id": "ws_market_1"
+      },
+      "expect_ok": true,
+      "expect_total": 1,
+      "expect_first_edge_id": "edge_bg_1"
+    },
+    {
+      "op": "marketFeed.get",
+      "actor_ref": "user_a",
+      "auth": {
+        "scopes": [
+          "market:read"
+        ],
+        "now_iso": "2026-03-06T00:01:04.000Z"
+      },
+      "query": {
+        "workspace_id": "ws_market_1"
+      },
+      "expect_ok": true,
+      "expect_items_count": 4,
+      "expect_first_item_type": "edge",
+      "expect_first_item_id": "edge_bg_1"
+    },
+    {
+      "op": "marketFeed.get",
+      "actor_ref": "user_a",
+      "auth": {
+        "scopes": [
+          "market:read"
+        ]
+      },
+      "query": {
+        "workspace_id": "ws_market_1",
+        "limit": "0"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "market_feed_query_invalid"
+    },
+    {
+      "op": "marketListings.list",
+      "actor_ref": "user_a",
+      "auth": {
+        "scopes": [
+          "market:read"
+        ]
+      },
+      "query": {
+        "workspace_id": "ws_market_1",
+        "cursor_after": "2026-03-06T00:00:00.000Z|listing_missing"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "market_cursor_not_found"
+    }
+  ]
+}
