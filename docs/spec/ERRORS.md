@@ -303,6 +303,10 @@ Notes:
   - `market_edge_status_transition_invalid`
   - `market_feed_query_invalid`
   - `market_cursor_not_found`
+  - `market_thread_invalid`
+  - `market_thread_not_found`
+  - `market_thread_forbidden`
+  - `market_message_invalid`
   - `state_backend_unsupported`
   - `sqlite_unavailable`
   - `state_migration_source_missing`

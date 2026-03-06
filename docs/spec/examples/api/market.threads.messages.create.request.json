@@ -1,0 +1,9 @@
+{
+  "recorded_at": "2026-03-06T13:31:00.000Z",
+  "message": {
+    "message_type": "text",
+    "payload": {
+      "text": "Can you settle in 30 minutes?"
+    }
+  }
+}

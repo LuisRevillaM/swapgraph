@@ -74,6 +74,10 @@ export class JsonStateStore {
       market_listing_counter: 0,
       market_edges: {},
       market_edge_counter: 0,
+      market_threads: {},
+      market_thread_counter: 0,
+      market_messages: {},
+      market_message_counter: 0,
       commercial_policies: {},
       commercial_policy_audit: [],
       commercial_policy_export_checkpoints: {},
@@ -195,6 +199,10 @@ export class JsonStateStore {
         market_listing_counter: 0,
         market_edges: {},
         market_edge_counter: 0,
+        market_threads: {},
+        market_thread_counter: 0,
+        market_messages: {},
+        market_message_counter: 0,
         commercial_policies: {},
         commercial_policy_audit: [],
         commercial_policy_export_checkpoints: {},
@@ -317,6 +325,10 @@ export class JsonStateStore {
     this.state.market_listing_counter ||= 0;
     this.state.market_edges ||= {};
     this.state.market_edge_counter ||= 0;
+    this.state.market_threads ||= {};
+    this.state.market_thread_counter ||= 0;
+    this.state.market_messages ||= {};
+    this.state.market_message_counter ||= 0;
     this.state.commercial_policies ||= {};
     this.state.commercial_policy_audit ||= [];
     this.state.commercial_policy_export_checkpoints ||= {};

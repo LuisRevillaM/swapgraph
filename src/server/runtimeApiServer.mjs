@@ -298,6 +298,8 @@ function summarizeState(store) {
     edge_intents: Object.keys(store.state.edge_intents ?? {}).length,
     market_listings: Object.keys(store.state.market_listings ?? {}).length,
     market_edges: Object.keys(store.state.market_edges ?? {}).length,
+    market_threads: Object.keys(store.state.market_threads ?? {}).length,
+    market_messages: Object.keys(store.state.market_messages ?? {}).length,
     commercial_policies: Object.keys(store.state.commercial_policies ?? {}).length,
     commercial_policy_audit_entries: Array.isArray(store.state.commercial_policy_audit) ? store.state.commercial_policy_audit.length : 0
   };
@@ -858,6 +860,48 @@ export function createRuntimeApiServer({
       if (method === 'GET' && pathname === '/market/feed') {
         const query = toQueryObject(url.searchParams);
         const result = market.getFeed({ actor, auth, query });
+        return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
+      }
+
+      if (method === 'POST' && pathname === '/market/threads') {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = market.createThread({ actor, auth, idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      const marketThreadGet = routeMatch(pathname, /^\/market\/threads\/([^/]+)$/);
+      if (method === 'GET' && marketThreadGet) {
+        const result = market.getThread({ actor, auth, threadId: marketThreadGet[0] });
+        return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
+      }
+
+      if (method === 'GET' && pathname === '/market/threads') {
+        const query = toQueryObject(url.searchParams);
+        const result = market.listThreads({ actor, auth, query });
+        return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
+      }
+
+      const marketThreadMessagesCreate = routeMatch(pathname, /^\/market\/threads\/([^/]+)\/messages$/);
+      if (method === 'POST' && marketThreadMessagesCreate) {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = market.createThreadMessage({ actor, auth, threadId: marketThreadMessagesCreate[0], idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      const marketThreadMessagesList = routeMatch(pathname, /^\/market\/threads\/([^/]+)\/messages$/);
+      if (method === 'GET' && marketThreadMessagesList) {
+        const query = toQueryObject(url.searchParams);
+        const result = market.listThreadMessages({ actor, auth, threadId: marketThreadMessagesList[0], query });
         return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
       }
 

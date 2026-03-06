@@ -1,0 +1,239 @@
+{
+  "actors": {
+    "user_a": {
+      "type": "user",
+      "id": "user_a"
+    },
+    "user_b": {
+      "type": "user",
+      "id": "user_b"
+    },
+    "user_c": {
+      "type": "user",
+      "id": "user_c"
+    }
+  },
+  "seed_state": {
+    "market_threads": {},
+    "market_messages": {}
+  },
+  "operations": [
+    {
+      "op": "marketThreads.create",
+      "actor_ref": "user_a",
+      "auth": {
+        "scopes": [
+          "market:write"
+        ]
+      },
+      "idempotency_key": "market-thread-ab-create-v1",
+      "request": {
+        "recorded_at": "2026-03-06T14:00:00.000Z",
+        "thread": {
+          "thread_id": "thread_ab_1",
+          "workspace_id": "ws_market_1",
+          "participants": [
+            {
+              "type": "user",
+              "id": "user_a"
+            },
+            {
+              "type": "user",
+              "id": "user_b"
+            }
+          ]
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_thread_id": "thread_ab_1",
+      "expect_thread_status": "active"
+    },
+    {
+      "op": "marketThreads.create",
+      "actor_ref": "user_a",
+      "auth": {
+        "scopes": [
+          "market:write"
+        ]
+      },
+      "idempotency_key": "market-thread-ab-create-v1",
+      "request": {
+        "recorded_at": "2026-03-06T14:00:00.000Z",
+        "thread": {
+          "thread_id": "thread_ab_1",
+          "workspace_id": "ws_market_1",
+          "participants": [
+            {
+              "type": "user",
+              "id": "user_a"
+            },
+            {
+              "type": "user",
+              "id": "user_b"
+            }
+          ]
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": true,
+      "expect_thread_id": "thread_ab_1"
+    },
+    {
+      "op": "marketThreads.get",
+      "actor_ref": "user_c",
+      "auth": {
+        "scopes": [
+          "market:read"
+        ]
+      },
+      "thread_id": "thread_ab_1",
+      "expect_ok": false,
+      "expect_reason_code": "market_thread_forbidden"
+    },
+    {
+      "op": "marketThreads.get",
+      "actor_ref": "user_b",
+      "auth": {
+        "scopes": [
+          "market:read"
+        ]
+      },
+      "thread_id": "thread_ab_1",
+      "expect_ok": true,
+      "expect_thread_id": "thread_ab_1",
+      "expect_thread_status": "active"
+    },
+    {
+      "op": "marketThreads.list",
+      "actor_ref": "user_a",
+      "auth": {
+        "scopes": [
+          "market:read"
+        ]
+      },
+      "query": {
+        "workspace_id": "ws_market_1"
+      },
+      "expect_ok": true,
+      "expect_total": 1,
+      "expect_first_thread_id": "thread_ab_1"
+    },
+    {
+      "op": "marketThreadMessages.create",
+      "actor_ref": "user_a",
+      "auth": {
+        "scopes": [
+          "market:write"
+        ]
+      },
+      "thread_id": "thread_ab_1",
+      "idempotency_key": "market-thread-msg-a1-v1",
+      "request": {
+        "recorded_at": "2026-03-06T14:01:00.000Z",
+        "message": {
+          "message_id": "message_ab_1",
+          "message_type": "text",
+          "payload": {
+            "text": "Can we settle in 30 minutes?"
+          }
+        }
+      },
+      "expect_ok": true,
+      "expect_replayed": false,
+      "expect_message_id": "message_ab_1",
+      "expect_message_type": "text"
+    },
+    {
+      "op": "marketThreadMessages.create",
+      "actor_ref": "user_b",
+      "auth": {
+        "scopes": [
+          "market:write"
+        ]
+      },
+      "thread_id": "thread_ab_1",
+      "idempotency_key": "market-thread-msg-b2-v1",
+      "request": {
+        "recorded_at": "2026-03-06T14:01:10.000Z",
+        "message": {
+          "message_id": "message_ab_2",
+          "message_type": "terms_patch",
+          "payload": {
+            "fee_usd": 2.5,
+            "eta_minutes": 25
+          }
+        }
+      },
+      "expect_ok": true,
+      "expect_message_id": "message_ab_2",
+      "expect_message_type": "terms_patch"
+    },
+    {
+      "op": "marketThreadMessages.create",
+      "actor_ref": "user_c",
+      "auth": {
+        "scopes": [
+          "market:write"
+        ]
+      },
+      "thread_id": "thread_ab_1",
+      "idempotency_key": "market-thread-msg-c3-v1",
+      "request": {
+        "recorded_at": "2026-03-06T14:01:20.000Z",
+        "message": {
+          "message_type": "text",
+          "payload": {
+            "text": "I should not be able to post here"
+          }
+        }
+      },
+      "expect_ok": false,
+      "expect_reason_code": "market_thread_forbidden"
+    },
+    {
+      "op": "marketThreadMessages.list",
+      "actor_ref": "user_b",
+      "auth": {
+        "scopes": [
+          "market:read"
+        ]
+      },
+      "thread_id": "thread_ab_1",
+      "query": {},
+      "expect_ok": true,
+      "expect_total": 2,
+      "expect_first_message_id": "message_ab_1"
+    },
+    {
+      "op": "marketThreadMessages.list",
+      "actor_ref": "user_b",
+      "auth": {
+        "scopes": [
+          "market:read"
+        ]
+      },
+      "thread_id": "thread_ab_1",
+      "query": {
+        "message_type": "bogus"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "market_message_invalid"
+    },
+    {
+      "op": "marketThreadMessages.list",
+      "actor_ref": "user_b",
+      "auth": {
+        "scopes": [
+          "market:read"
+        ]
+      },
+      "thread_id": "thread_ab_1",
+      "query": {
+        "cursor_after": "2026-03-06T14:00:00.000Z|message_missing"
+      },
+      "expect_ok": false,
+      "expect_reason_code": "market_cursor_not_found"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketThreadView.schema.json",
+  "title": "MarketThreadView",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "thread_id",
+    "workspace_id",
+    "participants",
+    "status",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "thread_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "workspace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "participants": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "$ref": "ActorRef.schema.json"
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "closed"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

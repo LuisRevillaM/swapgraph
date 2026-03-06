@@ -1168,6 +1168,34 @@
     {
       "file": "market.feed.get.response.json",
       "schema": "MarketFeedGetResponse.schema.json"
+    },
+    {
+      "file": "market.threads.create.request.json",
+      "schema": "MarketThreadCreateRequest.schema.json"
+    },
+    {
+      "file": "market.threads.create.response.json",
+      "schema": "MarketThreadResponse.schema.json"
+    },
+    {
+      "file": "market.threads.get.response.json",
+      "schema": "MarketThreadResponse.schema.json"
+    },
+    {
+      "file": "market.threads.list.response.json",
+      "schema": "MarketThreadListResponse.schema.json"
+    },
+    {
+      "file": "market.threads.messages.create.request.json",
+      "schema": "MarketThreadMessageCreateRequest.schema.json"
+    },
+    {
+      "file": "market.threads.messages.create.response.json",
+      "schema": "MarketThreadMessageResponse.schema.json"
+    },
+    {
+      "file": "market.threads.messages.list.response.json",
+      "schema": "MarketThreadMessageListResponse.schema.json"
     }
   ]
 }

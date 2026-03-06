@@ -3180,6 +3180,93 @@
     },
     {
       "method": "POST",
+      "path": "/market/threads",
+      "operation_id": "marketThreads.create",
+      "idempotency_required": true,
+      "request_schema": "MarketThreadCreateRequest.schema.json",
+      "response_schema": "MarketThreadResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner"
+        ],
+        "required_scopes": [
+          "market:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/market/threads/{thread_id}",
+      "operation_id": "marketThreads.get",
+      "idempotency_required": false,
+      "response_schema": "MarketThreadResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner"
+        ],
+        "required_scopes": [
+          "market:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/market/threads",
+      "operation_id": "marketThreads.list",
+      "idempotency_required": false,
+      "response_schema": "MarketThreadListResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner"
+        ],
+        "required_scopes": [
+          "market:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/market/threads/{thread_id}/messages",
+      "operation_id": "marketThreadMessages.create",
+      "idempotency_required": true,
+      "request_schema": "MarketThreadMessageCreateRequest.schema.json",
+      "response_schema": "MarketThreadMessageResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner"
+        ],
+        "required_scopes": [
+          "market:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/market/threads/{thread_id}/messages",
+      "operation_id": "marketThreadMessages.list",
+      "idempotency_required": false,
+      "response_schema": "MarketThreadMessageListResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner"
+        ],
+        "required_scopes": [
+          "market:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/edge-intents",
       "operation_id": "edgeIntents.upsert",
       "idempotency_required": true,

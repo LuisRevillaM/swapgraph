@@ -1,0 +1,49 @@
+name: M141
+commands:
+  - cmd: "npm run verify:m141"
+artifacts:
+  - artifact: "docs/prd/M141.md"
+  - artifact: "docs/STATUS.md"
+  - artifact: "docs/spec/API.md"
+  - artifact: "docs/spec/AUTH.md"
+  - artifact: "docs/spec/ERRORS.md"
+  - artifact: "docs/spec/GAPS.md"
+  - artifact: "docs/spec/CONFORMANCE.md"
+
+  - artifact: "docs/spec/api/manifest.v1.json"
+  - artifact: "docs/spec/examples/api/_manifest.v1.json"
+
+  - artifact: "docs/spec/schemas/MarketThreadCreateRequest.schema.json"
+  - artifact: "docs/spec/schemas/MarketThreadView.schema.json"
+  - artifact: "docs/spec/schemas/MarketThreadResponse.schema.json"
+  - artifact: "docs/spec/schemas/MarketThreadListResponse.schema.json"
+  - artifact: "docs/spec/schemas/MarketThreadMessageCreateRequest.schema.json"
+  - artifact: "docs/spec/schemas/MarketThreadMessageView.schema.json"
+  - artifact: "docs/spec/schemas/MarketThreadMessageResponse.schema.json"
+  - artifact: "docs/spec/schemas/MarketThreadMessageListResponse.schema.json"
+
+  - artifact: "docs/spec/examples/api/market.threads.create.request.json"
+  - artifact: "docs/spec/examples/api/market.threads.create.response.json"
+  - artifact: "docs/spec/examples/api/market.threads.get.response.json"
+  - artifact: "docs/spec/examples/api/market.threads.list.response.json"
+  - artifact: "docs/spec/examples/api/market.threads.messages.create.request.json"
+  - artifact: "docs/spec/examples/api/market.threads.messages.create.response.json"
+  - artifact: "docs/spec/examples/api/market.threads.messages.list.response.json"
+
+  - artifact: "src/service/marketService.mjs"
+  - artifact: "src/server/runtimeApiServer.mjs"
+  - artifact: "src/store/jsonStateStore.mjs"
+
+  - artifact: "scripts/run-m141-market-threads-messages-scenario.mjs"
+  - artifact: "fixtures/release/m141_scenario.json"
+  - artifact: "fixtures/release/m141_expected.json"
+  - artifact: "milestones/M141.yaml"
+  - artifact: "verify/m141.sh"
+
+  - artifact: "artifacts/milestones/M141/latest/commands.log"
+  - artifact: "artifacts/milestones/M141/latest/schemas_validation.json"
+  - artifact: "artifacts/milestones/M141/latest/api_contract_validation.json"
+  - artifact: "artifacts/milestones/M141/latest/api_auth_validation.json"
+  - artifact: "artifacts/milestones/M141/latest/market_threads_messages_output.json"
+  - artifact: "artifacts/milestones/M141/latest/store.json"
+  - artifact: "artifacts/milestones/M141/latest/assertions.json"

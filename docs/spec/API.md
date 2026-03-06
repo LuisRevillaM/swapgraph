@@ -139,11 +139,18 @@ Auth headers (see `docs/spec/AUTH.md` for details):
   - `GET /market/edges/{edge_id}` (read edge)
   - `GET /market/edges` (list edges with deterministic filters/cursor)
   - `GET /market/feed` (typed listing/edge feed envelope with deterministic cursor continuity)
+  - `POST /market/threads` (idempotent thread create)
+  - `GET /market/threads/{thread_id}` (read thread)
+  - `GET /market/threads` (list participant-scoped threads with deterministic filters/cursor)
+  - `POST /market/threads/{thread_id}/messages` (idempotent message append)
+  - `GET /market/threads/{thread_id}/messages` (list participant-scoped messages with deterministic filters/cursor)
   - market invariants:
     - `post` listings require non-empty `offer`
     - `want` listings are allowed with empty `offer`
     - `capability` listings require `capability_profile.deliverable_schema` + `capability_profile.rate_card`
     - edge transitions are deterministic (`open -> accepted|declined|withdrawn|expired`)
+    - thread/message read-write access is participant-scoped
+    - thread creation requires caller participation and thread status starts at `active`
     - feed/list cursors fail deterministically on malformed or stale anchors
 
 - `PartnerUi`

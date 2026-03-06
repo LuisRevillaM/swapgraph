@@ -1,0 +1,16 @@
+{
+  "recorded_at": "2026-03-06T13:30:00.000Z",
+  "thread": {
+    "workspace_id": "ws_market_1",
+    "participants": [
+      {
+        "type": "user",
+        "id": "user_a"
+      },
+      {
+        "type": "user",
+        "id": "user_b"
+      }
+    ]
+  }
+}

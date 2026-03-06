@@ -157,6 +157,7 @@
     "verify:m138": "bash verify/m138.sh",
     "verify:m139": "bash verify/m139.sh",
     "verify:m140": "bash verify/m140.sh",
+    "verify:m141": "bash verify/m141.sh",
     "sync:matching-ts-shadow": "node scripts/sync-matching-ts-shadow-runtime.mjs",
     "verify:render:drill": "bash verify/render-drill.sh",
     "web:m1:tokens": "node scripts/web-m1/build-marketplace-token-artifacts.mjs",

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketThreadMessageCreateRequest.schema.json",
+  "title": "MarketThreadMessageCreateRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "message"
+  ],
+  "properties": {
+    "message": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "message_type",
+        "payload"
+      ],
+      "properties": {
+        "message_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message_type": {
+          "type": "string",
+          "enum": [
+            "text",
+            "terms_patch",
+            "system"
+          ]
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

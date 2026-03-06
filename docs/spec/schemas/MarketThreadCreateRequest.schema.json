@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketThreadCreateRequest.schema.json",
+  "title": "MarketThreadCreateRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "thread"
+  ],
+  "properties": {
+    "thread": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workspace_id",
+        "participants"
+      ],
+      "properties": {
+        "thread_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "workspace_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "participants": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "ActorRef.schema.json"
+          }
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "closed"
+          ]
+        }
+      }
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

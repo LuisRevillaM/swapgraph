@@ -5,6 +5,8 @@ const LISTING_KINDS = new Set(['post', 'want', 'capability']);
 const LISTING_STATUS = new Set(['open', 'paused', 'closed', 'suspended']);
 const EDGE_TYPES = new Set(['interest', 'offer', 'counter', 'block']);
 const EDGE_STATUS = new Set(['open', 'accepted', 'declined', 'withdrawn', 'expired']);
+const THREAD_STATUS = new Set(['active', 'closed']);
+const MESSAGE_TYPES = new Set(['text', 'terms_patch', 'system']);
 const REF_KINDS = new Set(['listing']);
 
 function correlationId(op) {
@@ -48,6 +50,10 @@ function ensureState(store) {
   store.state.market_listing_counter ||= 0;
   store.state.market_edges ||= {};
   store.state.market_edge_counter ||= 0;
+  store.state.market_threads ||= {};
+  store.state.market_thread_counter ||= 0;
+  store.state.market_messages ||= {};
+  store.state.market_message_counter ||= 0;
 }
 
 function nextListingId(store) {
@@ -60,6 +66,18 @@ function nextEdgeId(store) {
   store.state.market_edge_counter = Number(store.state.market_edge_counter ?? 0) + 1;
   const n = String(store.state.market_edge_counter).padStart(6, '0');
   return `edge_${n}`;
+}
+
+function nextThreadId(store) {
+  store.state.market_thread_counter = Number(store.state.market_thread_counter ?? 0) + 1;
+  const n = String(store.state.market_thread_counter).padStart(6, '0');
+  return `thread_${n}`;
+}
+
+function nextMessageId(store) {
+  store.state.market_message_counter = Number(store.state.market_message_counter ?? 0) + 1;
+  const n = String(store.state.market_message_counter).padStart(6, '0');
+  return `message_${n}`;
 }
 
 function actorEquals(a, b) {
@@ -98,6 +116,28 @@ function normalizeEdgeView(record) {
     created_by: clone(record.created_by),
     created_at: record.created_at,
     updated_at: record.updated_at
+  };
+}
+
+function normalizeThreadView(record) {
+  return {
+    thread_id: record.thread_id,
+    workspace_id: record.workspace_id,
+    participants: clone(record.participants),
+    status: record.status,
+    created_at: record.created_at,
+    updated_at: record.updated_at
+  };
+}
+
+function normalizeMessageView(record) {
+  return {
+    message_id: record.message_id,
+    thread_id: record.thread_id,
+    sender_actor: clone(record.sender_actor),
+    message_type: record.message_type,
+    payload: clone(record.payload),
+    created_at: record.created_at
   };
 }
 
@@ -207,6 +247,39 @@ function normalizeRef(value) {
   const id = normalizeOptionalString(value.id);
   if (!kind || !id || !REF_KINDS.has(kind)) return null;
   return { kind, id };
+}
+
+function normalizeActorRef(value) {
+  if (!isPlainObject(value)) return null;
+  const type = normalizeOptionalString(value.type);
+  const id = normalizeOptionalString(value.id);
+  if (!type || !id) return null;
+  return { type, id };
+}
+
+function normalizeParticipants(value) {
+  if (!Array.isArray(value) || value.length < 2) return null;
+  const out = [];
+  const seen = new Set();
+  for (const actor of value) {
+    const normalized = normalizeActorRef(actor);
+    if (!normalized) return null;
+    const key = `${normalized.type}:${normalized.id}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(normalized);
+  }
+  if (out.length < 2) return null;
+  out.sort((a, b) => {
+    const t = String(a.type).localeCompare(String(b.type));
+    if (t !== 0) return t;
+    return String(a.id).localeCompare(String(b.id));
+  });
+  return out;
+}
+
+function includesActor(participants, actor) {
+  return Array.isArray(participants) && participants.some(p => actorEquals(p, actor));
 }
 
 function normalizeActionRequest(request, auth) {
@@ -380,6 +453,111 @@ function normalizeFeedQuery(query) {
     value: {
       workspace_id: workspaceId,
       item_type: itemType,
+      limit,
+      cursor_after: cursorAfter
+    }
+  };
+}
+
+function normalizeThreadListQuery(query) {
+  const allowed = new Set(['workspace_id', 'status', 'participant_type', 'participant_id', 'limit', 'cursor_after']);
+  for (const key of Object.keys(query ?? {})) {
+    if (!allowed.has(key)) {
+      return {
+        ok: false,
+        code: 'CONSTRAINT_VIOLATION',
+        message: 'invalid query parameter',
+        details: { reason_code: 'market_feed_query_invalid', key }
+      };
+    }
+  }
+
+  const workspaceId = normalizeOptionalString(query?.workspace_id);
+  const status = normalizeOptionalString(query?.status)?.toLowerCase() ?? null;
+  const participantType = normalizeOptionalString(query?.participant_type);
+  const participantId = normalizeOptionalString(query?.participant_id);
+  const limit = parseLimit(query?.limit, 25);
+  const cursorAfter = normalizeOptionalString(query?.cursor_after);
+
+  if (status && !THREAD_STATUS.has(status)) {
+    return {
+      ok: false,
+      code: 'CONSTRAINT_VIOLATION',
+      message: 'invalid thread status filter',
+      details: { reason_code: 'market_thread_invalid', status }
+    };
+  }
+
+  if ((participantType && !participantId) || (!participantType && participantId)) {
+    return {
+      ok: false,
+      code: 'CONSTRAINT_VIOLATION',
+      message: 'participant_type and participant_id must be provided together',
+      details: { reason_code: 'market_feed_query_invalid' }
+    };
+  }
+
+  if (limit === null) {
+    return {
+      ok: false,
+      code: 'CONSTRAINT_VIOLATION',
+      message: 'invalid limit',
+      details: { reason_code: 'market_feed_query_invalid', limit: query?.limit }
+    };
+  }
+
+  return {
+    ok: true,
+    value: {
+      workspace_id: workspaceId,
+      status,
+      participant_type: participantType,
+      participant_id: participantId,
+      limit,
+      cursor_after: cursorAfter
+    }
+  };
+}
+
+function normalizeMessageListQuery(query) {
+  const allowed = new Set(['message_type', 'limit', 'cursor_after']);
+  for (const key of Object.keys(query ?? {})) {
+    if (!allowed.has(key)) {
+      return {
+        ok: false,
+        code: 'CONSTRAINT_VIOLATION',
+        message: 'invalid query parameter',
+        details: { reason_code: 'market_feed_query_invalid', key }
+      };
+    }
+  }
+
+  const messageType = normalizeOptionalString(query?.message_type)?.toLowerCase() ?? null;
+  const limit = parseLimit(query?.limit, 50);
+  const cursorAfter = normalizeOptionalString(query?.cursor_after);
+
+  if (messageType && !MESSAGE_TYPES.has(messageType)) {
+    return {
+      ok: false,
+      code: 'CONSTRAINT_VIOLATION',
+      message: 'invalid message_type filter',
+      details: { reason_code: 'market_message_invalid', message_type: messageType }
+    };
+  }
+
+  if (limit === null) {
+    return {
+      ok: false,
+      code: 'CONSTRAINT_VIOLATION',
+      message: 'invalid limit',
+      details: { reason_code: 'market_feed_query_invalid', limit: query?.limit }
+    };
+  }
+
+  return {
+    ok: true,
+    value: {
+      message_type: messageType,
       limit,
       cursor_after: cursorAfter
     }
@@ -1406,6 +1584,370 @@ export class MarketService {
         items: clone(page.value.page),
         next_cursor: page.value.nextCursor,
         server_time: normalizeOptionalString(auth?.now_iso) ?? new Date().toISOString()
+      }
+    };
+  }
+
+  _loadThreadOrError({ threadId, correlationId: corr }) {
+    const record = this.store.state.market_threads?.[threadId] ?? null;
+    if (!record) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'NOT_FOUND', 'thread not found', {
+          reason_code: 'market_thread_not_found',
+          thread_id: threadId
+        })
+      };
+    }
+    return { ok: true, record };
+  }
+
+  _requireThreadParticipant({ thread, actor, correlationId: corr }) {
+    if (includesActor(thread?.participants ?? [], actor)) return null;
+    return {
+      ok: false,
+      body: errorResponse(corr, 'FORBIDDEN', 'thread participant required', {
+        reason_code: 'market_thread_forbidden',
+        actor,
+        thread_id: thread?.thread_id ?? null
+      })
+    };
+  }
+
+  createThread({ actor, auth, idempotencyKey, request }) {
+    const op = 'marketThreads.create';
+    const corr = correlationId(op);
+
+    const authz = this._authorize({ actor, auth, operationId: op, correlationId: corr });
+    if (!authz.ok) return { replayed: false, result: { ok: false, body: authz.body } };
+
+    return this._withIdempotency({
+      actor,
+      operationId: op,
+      idempotencyKey,
+      requestBody: request,
+      correlationId: corr,
+      handler: () => {
+        const thread = request?.thread;
+        if (!isPlainObject(thread)) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid thread payload', {
+              reason_code: 'market_thread_invalid'
+            })
+          };
+        }
+
+        const recordedAt = normalizeRecordedAt(request, auth);
+        if (parseIsoMs(recordedAt) === null) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid thread timestamp', {
+              reason_code: 'market_thread_invalid',
+              recorded_at: request?.recorded_at ?? null
+            })
+          };
+        }
+
+        const workspaceId = normalizeOptionalString(thread.workspace_id);
+        const status = normalizeOptionalString(thread.status)?.toLowerCase() ?? 'active';
+        const participants = normalizeParticipants(thread.participants);
+
+        if (!workspaceId || !participants || !THREAD_STATUS.has(status) || status !== 'active') {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid thread payload', {
+              reason_code: 'market_thread_invalid'
+            })
+          };
+        }
+
+        if (!includesActor(participants, actor)) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'FORBIDDEN', 'thread participants must include caller', {
+              reason_code: 'market_thread_forbidden',
+              actor,
+              participants
+            })
+          };
+        }
+
+        const requestedId = normalizeOptionalString(thread.thread_id);
+        const threadId = requestedId ?? nextThreadId(this.store);
+        if (this.store.state.market_threads[threadId]) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'thread already exists', {
+              reason_code: 'market_thread_invalid',
+              thread_id: threadId
+            })
+          };
+        }
+
+        const record = {
+          thread_id: threadId,
+          workspace_id: workspaceId,
+          participants,
+          status,
+          created_at: recordedAt,
+          updated_at: recordedAt
+        };
+
+        this.store.state.market_threads[threadId] = record;
+
+        return {
+          ok: true,
+          body: {
+            correlation_id: corr,
+            thread: normalizeThreadView(record)
+          }
+        };
+      }
+    });
+  }
+
+  getThread({ actor, auth, threadId }) {
+    const op = 'marketThreads.get';
+    const corr = correlationId(op);
+
+    const authz = this._authorize({ actor, auth, operationId: op, correlationId: corr });
+    if (!authz.ok) return { ok: false, body: authz.body };
+
+    const load = this._loadThreadOrError({ threadId, correlationId: corr });
+    if (!load.ok) return { ok: false, body: load.body };
+
+    const participantGuard = this._requireThreadParticipant({ thread: load.record, actor, correlationId: corr });
+    if (participantGuard) return participantGuard;
+
+    return {
+      ok: true,
+      body: {
+        correlation_id: corr,
+        thread: normalizeThreadView(load.record)
+      }
+    };
+  }
+
+  listThreads({ actor, auth, query }) {
+    const op = 'marketThreads.list';
+    const corr = correlationId(op);
+
+    const authz = this._authorize({ actor, auth, operationId: op, correlationId: corr });
+    if (!authz.ok) return { ok: false, body: authz.body };
+
+    const normalized = normalizeThreadListQuery(query ?? {});
+    if (!normalized.ok) {
+      return {
+        ok: false,
+        body: errorResponse(corr, normalized.code, normalized.message, normalized.details)
+      };
+    }
+
+    const rows = Object.values(this.store.state.market_threads ?? {})
+      .filter(row => {
+        if (!includesActor(row.participants, actor)) return false;
+        if (normalized.value.workspace_id && row.workspace_id !== normalized.value.workspace_id) return false;
+        if (normalized.value.status && row.status !== normalized.value.status) return false;
+        if (normalized.value.participant_type || normalized.value.participant_id) {
+          if (!row.participants.some(p => p.type === normalized.value.participant_type && p.id === normalized.value.participant_id)) return false;
+        }
+        return true;
+      });
+
+    sortByUpdatedDescThenId(rows, 'thread_id');
+
+    const page = buildPaginationSlice({
+      rows,
+      limit: normalized.value.limit,
+      cursorAfter: normalized.value.cursor_after,
+      keyFn: row => [row.updated_at, row.thread_id],
+      cursorParts: 2
+    });
+
+    if (!page.ok) {
+      return {
+        ok: false,
+        body: errorResponse(corr, page.code, page.message, page.details)
+      };
+    }
+
+    return {
+      ok: true,
+      body: {
+        correlation_id: corr,
+        threads: page.value.page.map(normalizeThreadView),
+        total: page.value.total,
+        next_cursor: page.value.nextCursor
+      }
+    };
+  }
+
+  createThreadMessage({ actor, auth, threadId, idempotencyKey, request }) {
+    const op = 'marketThreadMessages.create';
+    const corr = correlationId(op);
+
+    const authz = this._authorize({ actor, auth, operationId: op, correlationId: corr });
+    if (!authz.ok) return { replayed: false, result: { ok: false, body: authz.body } };
+
+    return this._withIdempotency({
+      actor,
+      operationId: op,
+      idempotencyKey,
+      requestBody: request,
+      correlationId: corr,
+      handler: () => {
+        const load = this._loadThreadOrError({ threadId, correlationId: corr });
+        if (!load.ok) return { ok: false, body: load.body };
+
+        const thread = load.record;
+        const participantGuard = this._requireThreadParticipant({ thread, actor, correlationId: corr });
+        if (participantGuard) return participantGuard;
+
+        if (thread.status !== 'active') {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'thread is not active', {
+              reason_code: 'market_thread_invalid',
+              thread_id: threadId,
+              status: thread.status
+            })
+          };
+        }
+
+        const message = request?.message;
+        if (!isPlainObject(message)) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid message payload', {
+              reason_code: 'market_message_invalid'
+            })
+          };
+        }
+
+        const recordedAt = normalizeRecordedAt(request, auth);
+        if (parseIsoMs(recordedAt) === null) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid message timestamp', {
+              reason_code: 'market_message_invalid',
+              recorded_at: request?.recorded_at ?? null
+            })
+          };
+        }
+
+        const messageType = normalizeOptionalString(message.message_type)?.toLowerCase() ?? null;
+        const payload = message.payload;
+        if (!messageType || !MESSAGE_TYPES.has(messageType) || !isPlainObject(payload)) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid message payload', {
+              reason_code: 'market_message_invalid'
+            })
+          };
+        }
+
+        if (messageType === 'text' && !normalizeOptionalString(payload.text)) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'text messages require payload.text', {
+              reason_code: 'market_message_invalid'
+            })
+          };
+        }
+
+        const requestedMessageId = normalizeOptionalString(message.message_id);
+        const messageId = requestedMessageId ?? nextMessageId(this.store);
+        if (this.store.state.market_messages[messageId]) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'message already exists', {
+              reason_code: 'market_message_invalid',
+              message_id: messageId
+            })
+          };
+        }
+
+        const record = {
+          message_id: messageId,
+          thread_id: threadId,
+          sender_actor: { type: actor.type, id: actor.id },
+          message_type: messageType,
+          payload: clone(payload),
+          created_at: recordedAt
+        };
+
+        this.store.state.market_messages[messageId] = record;
+        thread.updated_at = recordedAt;
+
+        return {
+          ok: true,
+          body: {
+            correlation_id: corr,
+            message: normalizeMessageView(record)
+          }
+        };
+      }
+    });
+  }
+
+  listThreadMessages({ actor, auth, threadId, query }) {
+    const op = 'marketThreadMessages.list';
+    const corr = correlationId(op);
+
+    const authz = this._authorize({ actor, auth, operationId: op, correlationId: corr });
+    if (!authz.ok) return { ok: false, body: authz.body };
+
+    const load = this._loadThreadOrError({ threadId, correlationId: corr });
+    if (!load.ok) return { ok: false, body: load.body };
+
+    const participantGuard = this._requireThreadParticipant({ thread: load.record, actor, correlationId: corr });
+    if (participantGuard) return participantGuard;
+
+    const normalized = normalizeMessageListQuery(query ?? {});
+    if (!normalized.ok) {
+      return {
+        ok: false,
+        body: errorResponse(corr, normalized.code, normalized.message, normalized.details)
+      };
+    }
+
+    const rows = Object.values(this.store.state.market_messages ?? {})
+      .filter(row => row.thread_id === threadId)
+      .filter(row => {
+        if (normalized.value.message_type && row.message_type !== normalized.value.message_type) return false;
+        return true;
+      });
+
+    rows.sort((a, b) => {
+      const at = parseIsoMs(a.created_at) ?? 0;
+      const bt = parseIsoMs(b.created_at) ?? 0;
+      if (at !== bt) return at - bt;
+      return String(a.message_id).localeCompare(String(b.message_id));
+    });
+
+    const page = buildPaginationSlice({
+      rows,
+      limit: normalized.value.limit,
+      cursorAfter: normalized.value.cursor_after,
+      keyFn: row => [row.created_at, row.message_id],
+      cursorParts: 2
+    });
+
+    if (!page.ok) {
+      return {
+        ok: false,
+        body: errorResponse(corr, page.code, page.message, page.details)
+      };
+    }
+
+    return {
+      ok: true,
+      body: {
+        correlation_id: corr,
+        messages: page.value.page.map(normalizeMessageView),
+        total: page.value.total,
+        next_cursor: page.value.nextCursor
       }
     };
   }
