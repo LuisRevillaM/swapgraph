@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketModerationResponse.schema.json",
+  "title": "MarketModerationResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "moderation"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "moderation": {
+      "$ref": "MarketModerationView.schema.json"
+    }
+  }
+}

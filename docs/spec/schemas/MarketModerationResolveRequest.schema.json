@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketModerationResolveRequest.schema.json",
+  "title": "MarketModerationResolveRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["action"],
+  "properties": {
+    "action": {
+      "type": "string",
+      "enum": ["approve", "dismiss", "suspend_listing", "set_trusted", "set_watchlist", "set_blocked"]
+    },
+    "note": {
+      "type": "string"
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketTrustResponse.schema.json",
+  "title": "MarketTrustResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "actor",
+    "moderation_items"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "actor": {
+      "$ref": "ActorRef.schema.json"
+    },
+    "owner_profile": {
+      "anyOf": [
+        { "$ref": "MarketActorProfileView.schema.json" },
+        { "type": "null" }
+      ]
+    },
+    "quota": {
+      "anyOf": [
+        { "$ref": "MarketQuotaView.schema.json" },
+        { "type": "null" }
+      ]
+    },
+    "moderation_items": {
+      "type": "array",
+      "items": {
+        "$ref": "MarketModerationView.schema.json"
+      }
+    }
+  }
+}

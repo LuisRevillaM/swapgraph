@@ -858,6 +858,29 @@ export function createRuntimeApiServer({
         return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
       }
 
+      if (method === 'GET' && pathname === '/market/trust/me') {
+        const result = market.getTrustProfile({ actor, auth });
+        return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
+      }
+
+      if (method === 'GET' && pathname === '/market/moderation') {
+        const query = toQueryObject(url.searchParams);
+        const result = market.listModerationQueue({ actor, auth, query });
+        return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
+      }
+
+      const marketModerationResolve = routeMatch(pathname, /^\/market\/moderation\/([^/]+)\/resolve$/);
+      if (method === 'POST' && marketModerationResolve) {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = market.resolveModerationItem({ actor, auth, moderationId: marketModerationResolve[0], idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
       const marketListingPatch = routeMatch(pathname, /^\/market\/listings\/([^/]+)$/);
       if (method === 'PATCH' && marketListingPatch) {
         const idem = requireIdempotencyKey(req);

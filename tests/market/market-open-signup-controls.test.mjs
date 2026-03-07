@@ -135,6 +135,9 @@ test('listing creation is rate-limited and suspicious listings enter moderation 
   const moderationEntries = Object.values(store.state.market_moderation_queue);
   assert.equal(moderationEntries.length, 1);
   assert.deepEqual(moderationEntries[0].reason_codes.sort(), ['listing_many_urls', 'listing_offplatform_contact']);
+  const trust = market.getTrustProfile({ actor, auth });
+  assert.equal(trust.ok, true);
+  assert.equal(trust.body.moderation_items.length, 1);
 });
 
 test('deal creation is rate-limited per actor', () => {
@@ -269,4 +272,51 @@ test('completed public deals expose anonymous receipt reads', () => {
   });
   assert.equal(receipt.ok, true);
   assert.match(receipt.body.receipt.id, /^receipt_/);
+});
+
+test('moderator can resolve moderation item, block actor, and future writes are denied', () => {
+  const store = createStore();
+  const market = new MarketService({ store });
+  const actor = { type: 'user', id: 'owner_watchlist' };
+  const auth = marketAuth();
+
+  const suspicious = createListing(market, {
+    actor,
+    auth,
+    listingId: 'listing_block_me',
+    title: 'Fast offplatform deal',
+    description: 'dm me on telegram with https://one.example and https://two.example',
+    kind: 'want'
+  });
+  assert.equal(suspicious.ok, true);
+  const moderationId = Object.keys(store.state.market_moderation_queue)[0];
+  assert.ok(moderationId);
+
+  const moderator = { type: 'user', id: 'market_operator' };
+  const moderated = market.resolveModerationItem({
+    actor: moderator,
+    auth: { scopes: ['market:moderate', 'market:write'], now_iso: '2026-03-07T13:00:00.000Z' },
+    moderationId,
+    idempotencyKey: 'moderation_block',
+    request: {
+      action: 'set_blocked',
+      recorded_at: '2026-03-07T13:00:00.000Z',
+      note: 'spam probe'
+    }
+  }).result;
+
+  assert.equal(moderated.ok, true);
+  assert.equal(moderated.body.moderation.resolution.action, 'set_blocked');
+  assert.equal(store.state.market_actor_quotas['user:owner_watchlist'].trust_tier, 'blocked');
+
+  const denied = createListing(market, {
+    actor,
+    auth: { ...auth, now_iso: '2026-03-07T13:10:00.000Z' },
+    listingId: 'listing_after_block',
+    title: 'Should fail',
+    description: 'blocked actor write',
+    kind: 'want'
+  });
+  assert.equal(denied.ok, false);
+  assert.equal(denied.body.error.details.reason_code, 'market_actor_blocked');
 });

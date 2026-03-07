@@ -136,6 +136,17 @@ function actorProfileKey(actor) {
   return `${actor.type}:${actor.id}`;
 }
 
+function actorScopes(actor, auth) {
+  if (actor?.type === 'agent') {
+    return Array.isArray(auth?.delegation?.scopes) ? auth.delegation.scopes : [];
+  }
+  return Array.isArray(auth?.scopes) ? auth.scopes : [];
+}
+
+function authHasScope(actor, auth, scope) {
+  return actorScopes(actor, auth).includes(scope);
+}
+
 function openSignupEnabled() {
   const mode = normalizeOptionalString(process.env.MARKET_OPEN_SIGNUP_MODE)?.toLowerCase() ?? 'open';
   return !new Set(['off', 'closed', 'invite']).has(mode);
@@ -217,6 +228,39 @@ function normalizeActorProfileView(record) {
   };
 }
 
+function normalizeQuotaView(record) {
+  if (!record) return null;
+  return {
+    actor: record.actor ? clone(record.actor) : null,
+    trust_tier: record.trust_tier ?? 'open_signup',
+    credit_balance: Number(record.credit_balance ?? record.credits_available ?? 0),
+    listings_created: Number(record.listings_created ?? 0),
+    edges_created: Number(record.edges_created ?? 0),
+    deals_created: Number(record.deals_created ?? 0),
+    created_at: record.created_at ?? null,
+    updated_at: record.updated_at ?? null,
+    rate_windows: clone(record.rate_windows ?? {})
+  };
+}
+
+function normalizeModerationView(record) {
+  if (!record) return null;
+  return {
+    moderation_id: record.moderation_id,
+    status: record.status,
+    review_count: Number(record.review_count ?? 0),
+    reason_codes: clone(record.reason_codes ?? []),
+    subject_kind: record.subject_kind,
+    subject_id: record.subject_id,
+    actor: record.actor ? clone(record.actor) : null,
+    workspace_id: record.workspace_id ?? null,
+    evidence: clone(record.evidence ?? {}),
+    resolution: record.resolution ? clone(record.resolution) : null,
+    created_at: record.created_at ?? null,
+    updated_at: record.updated_at ?? null
+  };
+}
+
 function queueModerationReview(store, entry) {
   const key = moderationQueueKey(entry.subject_kind, entry.subject_id);
   const existing = store.state.market_moderation_queue[key] ?? null;
@@ -230,6 +274,7 @@ function queueModerationReview(store, entry) {
     actor: clone(entry.actor),
     workspace_id: entry.workspace_id ?? null,
     evidence: clone(entry.evidence ?? {}),
+    resolution: clone(existing?.resolution ?? null),
     created_at: existing?.created_at ?? entry.recorded_at,
     updated_at: entry.recorded_at
   };
@@ -261,6 +306,9 @@ function maybeQueueListingModeration({ store, listing, actorQuota, recordedAt })
     reasonCodes.push('listing_duplicate_title_burst');
     evidence.duplicate_title_count = duplicateTitleCount;
   }
+  if ((actorQuota?.trust_tier ?? 'open_signup') === 'watchlist') {
+    reasonCodes.push('trust_watchlist');
+  }
   if ((actorQuota?.trust_tier ?? 'open_signup') === 'open_signup' && reasonCodes.length > 0) {
     queueModerationReview(store, {
       subject_kind: 'listing',
@@ -272,6 +320,32 @@ function maybeQueueListingModeration({ store, listing, actorQuota, recordedAt })
       recorded_at: recordedAt
     });
   }
+  if ((actorQuota?.trust_tier ?? 'open_signup') === 'watchlist' && reasonCodes.length > 0) {
+    queueModerationReview(store, {
+      subject_kind: 'listing',
+      subject_id: listing.listing_id,
+      actor: listing.owner_actor,
+      workspace_id: listing.workspace_id,
+      reason_codes: reasonCodes,
+      evidence,
+      recorded_at: recordedAt
+    });
+  }
+}
+
+function moderationItemVisibleToActor(store, item, actor) {
+  if (!item || !actor) return false;
+  if (actorEquals(item.actor, actor)) return true;
+  if (item.subject_kind === 'listing') {
+    const listing = store.state.market_listings?.[item.subject_id] ?? null;
+    return listingOwnsActor(listing, actor);
+  }
+  return false;
+}
+
+function quotaTrustTier(store, actor) {
+  const key = actorProfileKey(actor);
+  return key ? (store.state.market_actor_quotas?.[key]?.trust_tier ?? 'open_signup') : 'open_signup';
 }
 
 function actorProfileSummary(store, actor) {
@@ -1209,6 +1283,158 @@ export class MarketService {
     };
   }
 
+  getTrustProfile({ actor, auth }) {
+    const op = 'marketTrust.get';
+    const corr = correlationId(op);
+    const authz = this._authorize({ actor, auth, operationId: op, correlationId: corr });
+    if (!authz.ok) return { ok: false, body: authz.body };
+
+    const subjectActor = resolveSubjectActor({ actor, auth });
+    const quota = normalizeQuotaView(this.store.state.market_actor_quotas?.[actorProfileKey(subjectActor)] ?? null);
+    const profile = normalizeActorProfileView(this.store.state.market_actor_profiles?.[actorProfileKey(subjectActor)] ?? null);
+    const moderationItems = Object.values(this.store.state.market_moderation_queue ?? {})
+      .filter(item => moderationItemVisibleToActor(this.store, item, subjectActor))
+      .sort((a, b) => String(b.updated_at ?? '').localeCompare(String(a.updated_at ?? '')))
+      .map(normalizeModerationView);
+
+    return {
+      ok: true,
+      body: {
+        correlation_id: corr,
+        actor: clone(subjectActor),
+        owner_profile: profile,
+        quota,
+        moderation_items: moderationItems
+      }
+    };
+  }
+
+  listModerationQueue({ actor, auth, query }) {
+    const op = 'marketModeration.list';
+    const corr = correlationId(op);
+    const authz = this._authorize({ actor, auth, operationId: op, correlationId: corr });
+    if (!authz.ok) return { ok: false, body: authz.body };
+
+    const subjectActor = resolveSubjectActor({ actor, auth });
+    const canModerate = authHasScope(actor, auth, 'market:moderate');
+    const statusFilter = normalizeOptionalString(query?.status)?.toLowerCase() ?? null;
+    const subjectKindFilter = normalizeOptionalString(query?.subject_kind)?.toLowerCase() ?? null;
+    const actorIdFilter = normalizeOptionalString(query?.actor_id);
+    const actorTypeFilter = normalizeOptionalString(query?.actor_type);
+
+    const rows = Object.values(this.store.state.market_moderation_queue ?? {})
+      .filter(item => {
+        if (!canModerate && !moderationItemVisibleToActor(this.store, item, subjectActor)) return false;
+        if (statusFilter && item.status !== statusFilter) return false;
+        if (subjectKindFilter && item.subject_kind !== subjectKindFilter) return false;
+        if (actorIdFilter && item.actor?.id !== actorIdFilter) return false;
+        if (actorTypeFilter && item.actor?.type !== actorTypeFilter) return false;
+        return true;
+      })
+      .sort((a, b) => String(b.updated_at ?? '').localeCompare(String(a.updated_at ?? '')));
+
+    return {
+      ok: true,
+      body: {
+        correlation_id: corr,
+        moderation_items: rows.map(normalizeModerationView),
+        total: rows.length,
+        actor_scope: canModerate ? 'moderator' : 'owner'
+      }
+    };
+  }
+
+  resolveModerationItem({ actor, auth, moderationId, idempotencyKey, request }) {
+    const op = 'marketModeration.resolve';
+    const corr = correlationId(op);
+    const authz = this._authorize({ actor, auth, operationId: op, correlationId: corr });
+    if (!authz.ok) return { replayed: false, result: { ok: false, body: authz.body } };
+
+    return this._withIdempotency({
+      actor,
+      operationId: op,
+      idempotencyKey,
+      requestBody: request,
+      correlationId: corr,
+      handler: () => {
+        const item = this.store.state.market_moderation_queue?.[moderationId] ?? null;
+        if (!item) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'NOT_FOUND', 'moderation item not found', {
+              reason_code: 'market_moderation_not_found',
+              moderation_id: moderationId
+            })
+          };
+        }
+
+        const action = normalizeOptionalString(request?.action)?.toLowerCase() ?? null;
+        const recordedAt = normalizeRecordedAt(request, auth);
+        const note = normalizeOptionalString(request?.note);
+        if (!action || !new Set(['approve', 'dismiss', 'suspend_listing', 'set_trusted', 'set_watchlist', 'set_blocked']).has(action) || parseIsoMs(recordedAt) === null) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid moderation resolution payload', {
+              reason_code: 'market_moderation_invalid',
+              action
+            })
+          };
+        }
+
+        const actorKey = actorProfileKey(item.actor);
+        const quota = actorKey ? ensureQuotaRecord(this.store, actorKey, {
+          actor: item.actor ? clone(item.actor) : null,
+          trust_tier: 'open_signup',
+          credit_balance: 1000,
+          listings_created: 0,
+          edges_created: 0,
+          deals_created: 0,
+          created_at: recordedAt,
+          updated_at: recordedAt
+        }) : null;
+
+        if (action === 'suspend_listing') {
+          const listing = item.subject_kind === 'listing' ? (this.store.state.market_listings?.[item.subject_id] ?? null) : null;
+          if (!listing) {
+            return {
+              ok: false,
+              body: errorResponse(corr, 'NOT_FOUND', 'listing not found for moderation item', {
+                reason_code: 'market_listing_not_found',
+                moderation_id: moderationId,
+                listing_id: item.subject_id
+              })
+            };
+          }
+          listing.status = 'suspended';
+          listing.updated_at = recordedAt;
+        }
+
+        if (quota && action === 'set_trusted') quota.trust_tier = 'trusted';
+        if (quota && action === 'set_watchlist') quota.trust_tier = 'watchlist';
+        if (quota && action === 'set_blocked') quota.trust_tier = 'blocked';
+        if (quota) quota.updated_at = recordedAt;
+
+        item.status = action === 'dismiss' ? 'dismissed' : 'resolved';
+        item.updated_at = recordedAt;
+        item.resolution = {
+          action,
+          note: note ?? null,
+          actor: actor ? clone(actor) : null,
+          trust_tier: quota?.trust_tier ?? null,
+          recorded_at: recordedAt
+        };
+
+        return {
+          ok: true,
+          body: {
+            correlation_id: corr,
+            moderation: normalizeModerationView(item)
+          }
+        };
+      }
+    });
+  }
+
   createListing({ actor, auth, idempotencyKey, request }) {
     const op = 'marketListings.create';
     const corr = correlationId(op);
@@ -1236,6 +1462,15 @@ export class MarketService {
           created_at: normalized.value.recorded_at,
           updated_at: normalized.value.recorded_at
         });
+        if ((ownerQuota.trust_tier ?? 'open_signup') === 'blocked') {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'FORBIDDEN', 'actor trust tier blocks listing creation', {
+              reason_code: 'market_actor_blocked',
+              actor: normalized.value.owner_actor
+            })
+          };
+        }
         const listingRateLimit = applyRateLimit({
           quotaRecord: ownerQuota,
           actionKey: 'listing_create',
@@ -1804,6 +2039,15 @@ export class MarketService {
           created_at: recordedAt,
           updated_at: recordedAt
         });
+        if ((subjectQuota.trust_tier ?? 'open_signup') === 'blocked') {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'FORBIDDEN', 'actor trust tier blocks edge creation', {
+              reason_code: 'market_actor_blocked',
+              actor: subjectActor
+            })
+          };
+        }
         const edgeRateLimit = applyRateLimit({
           quotaRecord: subjectQuota,
           actionKey: 'edge_create',

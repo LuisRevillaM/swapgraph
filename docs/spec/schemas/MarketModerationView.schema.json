@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketModerationView.schema.json",
+  "title": "MarketModerationView",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "moderation_id",
+    "status",
+    "review_count",
+    "reason_codes",
+    "subject_kind",
+    "subject_id",
+    "evidence"
+  ],
+  "properties": {
+    "moderation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pending_review", "resolved", "dismissed"]
+    },
+    "review_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "subject_kind": {
+      "type": "string",
+      "enum": ["listing"]
+    },
+    "subject_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "actor": {
+      "$ref": "ActorRef.schema.json"
+    },
+    "workspace_id": {
+      "type": ["string", "null"]
+    },
+    "evidence": {
+      "type": "object"
+    },
+    "resolution": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["action", "recorded_at"],
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": ["approve", "dismiss", "suspend_listing", "set_trusted", "set_watchlist", "set_blocked"]
+        },
+        "note": {
+          "type": ["string", "null"]
+        },
+        "actor": {
+          "$ref": "ActorRef.schema.json"
+        },
+        "trust_tier": {
+          "type": ["string", "null"]
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "created_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    }
+  }
+}

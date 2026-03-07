@@ -594,6 +594,15 @@ export class MarketDealService {
         }
 
         const actorQuota = this._ensureActorQuota(subjectActor);
+        if ((actorQuota.trust_tier ?? 'open_signup') === 'blocked') {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'FORBIDDEN', 'actor trust tier blocks deal creation', {
+              reason_code: 'market_actor_blocked',
+              actor: subjectActor
+            })
+          };
+        }
         const dealRateLimit = applyRateLimit({
           quotaRecord: actorQuota,
           actionKey: 'deal_create',

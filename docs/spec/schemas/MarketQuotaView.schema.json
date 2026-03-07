@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketQuotaView.schema.json",
+  "title": "MarketQuotaView",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "trust_tier",
+    "credit_balance",
+    "listings_created",
+    "edges_created",
+    "deals_created",
+    "rate_windows"
+  ],
+  "properties": {
+    "actor": {
+      "$ref": "ActorRef.schema.json"
+    },
+    "trust_tier": {
+      "type": "string",
+      "enum": ["anonymous", "open_signup", "trusted", "watchlist", "blocked"]
+    },
+    "credit_balance": {
+      "type": "number"
+    },
+    "listings_created": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "edges_created": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "deals_created": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "created_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "rate_windows": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["window_started_at", "count"],
+        "properties": {
+          "window_started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    }
+  }
+}
