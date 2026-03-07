@@ -11,12 +11,31 @@ API-first multi-reciprocity swap clearing network (Steam-first initial settlemen
 
 ## Quickstart
 ```bash
-npm i
-npm run verify:m0
-npm run verify:baseline
-npm run verify:m98
-npm run verify:m99
-npm run verify:m100
+npm ci
+AUTHZ_ENFORCE=1 MARKET_OPEN_SIGNUP_MODE=open npm run start:api
+```
+
+In a second terminal:
+```bash
+RUNTIME_SERVICE_URL=http://127.0.0.1:3005 npm run start:client
+```
+
+Open:
+- `http://127.0.0.1:4173`
+
+Run the market CLI smoke:
+```bash
+node scripts/market-cli.mjs smoke multi-agent
+```
+
+Hosted public beta:
+- UI: `https://swapgraph-market-vnext-ui.onrender.com`
+- API: `https://swapgraph-market-vnext-api.onrender.com`
+
+Anonymous health check:
+```bash
+curl -s https://swapgraph-market-vnext-api.onrender.com/healthz | jq
+curl -s https://swapgraph-market-vnext-api.onrender.com/market/stats | jq
 ```
 
 ## Runtime API Shell

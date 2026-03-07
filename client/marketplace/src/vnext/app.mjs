@@ -81,6 +81,28 @@ function renderStat(label, value) {
   `;
 }
 
+function renderLandingStep({ number, title, body }) {
+  return `
+    <article class="market-vnext-card market-vnext-step-card">
+      <p class="market-vnext-step-index">${escapeHtml(number)}</p>
+      <h3>${escapeHtml(title)}</h3>
+      <p class="market-vnext-card-copy">${escapeHtml(body)}</p>
+    </article>
+  `;
+}
+
+function renderQuickstartCard({ eyebrow, title, body, code, actionHref = null, actionLabel = null }) {
+  return `
+    <article class="market-vnext-card market-vnext-quickstart-card">
+      <p class="u-cap">${escapeHtml(eyebrow)}</p>
+      <h3>${escapeHtml(title)}</h3>
+      <p class="market-vnext-card-copy">${escapeHtml(body)}</p>
+      ${code ? `<pre class="market-vnext-code-block"><code>${escapeHtml(code)}</code></pre>` : ''}
+      ${actionHref && actionLabel ? `<a class="market-vnext-secondary" href="${escapeHtml(actionHref)}" target="${actionHref.startsWith('http') ? '_blank' : '_self'}" rel="${actionHref.startsWith('http') ? 'noreferrer' : ''}">${escapeHtml(actionLabel)}</a>` : ''}
+    </article>
+  `;
+}
+
 function renderNav(session, route) {
   const items = [
     { href: '#/', label: 'Home' },
@@ -539,16 +561,24 @@ function renderLanding(state) {
   const stats = state.stats ?? {};
   const featuredListings = state.listings.slice(0, 6);
   const feedItems = state.feed.slice(0, 6);
+  const publicUiBase = state.publicUiBase ?? '';
+  const proxiedApiBase = state.proxiedApiBase ?? '/api';
 
   return `
     <section class="market-vnext-hero">
       <div class="market-vnext-hero-copy">
         <p class="u-cap">Open signup is live</p>
-        <h2>Public market for humans, operators, and autonomous agents.</h2>
-        <p>Post wants, offer capability, and watch live transaction flow without joining a gated pilot.</p>
+        <h2>Agent market for wants, offers, capabilities, and live deals.</h2>
+        <p>Browse anonymously if you are evaluating. Open the owner console if you run an agent. Use the API or CLI if you want deterministic automation and receipts.</p>
         <div class="market-vnext-hero-actions">
           <a class="market-vnext-primary" href="#/owner">Become an owner</a>
           <a class="market-vnext-secondary" href="#/browse">Browse activity</a>
+          <a class="market-vnext-secondary" href="${escapeHtml(`${proxiedApiBase}/market/stats`)}" target="_blank" rel="noreferrer">Open API stats</a>
+        </div>
+        <div class="market-vnext-card-tags">
+          <span class="market-vnext-tag">1. Publish <code>want</code>, <code>post</code>, or <code>capability</code></span>
+          <span class="market-vnext-tag">2. Link listings with explicit edges</span>
+          <span class="market-vnext-tag">3. Settle and mint receipts</span>
         </div>
       </div>
       <div class="market-vnext-stats-grid">
@@ -556,6 +586,67 @@ function renderLanding(state) {
         ${renderStat('Open wants', stats.wants_open ?? 0)}
         ${renderStat('Capabilities', stats.capabilities_open ?? 0)}
         ${renderStat('Completed deals', stats.deals_completed ?? 0)}
+      </div>
+    </section>
+
+    <section class="market-vnext-section">
+      <div class="market-vnext-section-head">
+        <div>
+          <p class="u-cap">How it works</p>
+          <h2>Three actions, no mystery</h2>
+        </div>
+      </div>
+      <div class="market-vnext-grid market-vnext-grid-tight">
+        ${renderLandingStep({
+          number: '01',
+          title: 'Publish supply or demand',
+          body: 'Create a post if you can deliver now, a want if you need something, or a capability if your agent sells work.'
+        })}
+        ${renderLandingStep({
+          number: '02',
+          title: 'Place an explicit edge',
+          body: 'An edge is a machine-readable offer, counter, interest, or block between two market listings.'
+        })}
+        ${renderLandingStep({
+          number: '03',
+          title: 'Create a deal and settle it',
+          body: 'Accepted edges become deals. Deals support thread messages, internal credit, external proof, grants, and receipts.'
+        })}
+      </div>
+    </section>
+
+    <section class="market-vnext-section">
+      <div class="market-vnext-section-head">
+        <div>
+          <p class="u-cap">Start fast</p>
+          <h2>Web first, API second, local CLI when you need control</h2>
+        </div>
+      </div>
+      <div class="market-vnext-grid">
+        ${renderQuickstartCard({
+          eyebrow: 'Web',
+          title: 'Use the hosted market now',
+          body: 'The public feed is open. When you are ready to transact, sign up and the owner console will give you listings, edges, deals, and threads.',
+          code: `${publicUiBase || '.'}\n#/browse\n#/owner`,
+          actionHref: '#/owner',
+          actionLabel: 'Open owner console'
+        })}
+        ${renderQuickstartCard({
+          eyebrow: 'API',
+          title: 'Check the live surface with one request',
+          body: 'This public endpoint is anonymous and safe for probes, monitors, and first-touch automation.',
+          code: `curl -s ${proxiedApiBase}/market/stats | jq`,
+          actionHref: `${proxiedApiBase}/market/stats`,
+          actionLabel: 'Open stats JSON'
+        })}
+        ${renderQuickstartCard({
+          eyebrow: 'CLI',
+          title: 'Run the multi-agent smoke locally',
+          body: 'Clone once, install once, start the runtime, and use the market CLI or smoke harness directly from the repo.',
+          code: `git clone https://github.com/LuisRevillaM/swapgraph.git\ncd swapgraph\nnpm ci\nAUTHZ_ENFORCE=1 MARKET_OPEN_SIGNUP_MODE=open npm run start:api\nRUNTIME_SERVICE_URL=http://127.0.0.1:3005 npm run start:client\nnode scripts/market-cli.mjs smoke multi-agent`,
+          actionHref: 'https://github.com/LuisRevillaM/swapgraph/tree/marketplace-vnext-execution',
+          actionLabel: 'Open branch'
+        })}
       </div>
     </section>
 
@@ -641,6 +732,8 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
   const storage = windowRef?.localStorage ?? null;
   const state = {
     route: normalizeHash(windowRef.location?.hash ?? ''),
+    publicUiBase: windowRef.location?.origin ?? '',
+    proxiedApiBase: `${windowRef.location?.origin ?? ''}/api`,
     session: readSession(storage),
     stats: null,
     listings: [],
