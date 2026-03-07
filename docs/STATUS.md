@@ -1,6 +1,6 @@
 # Project Status — swapgraph
 
-Last updated: 2026-03-06
+Last updated: 2026-03-07
 
 ## Autopilot
 - Status: **implementation active** (M141 verifier-complete on `marketplace-vnext-execution`; marketplace vNext contract rollout in progress)
@@ -152,11 +152,15 @@ Last updated: 2026-03-06
 - M139: ✅ Canary routing helper extraction parity gate (fixtures-first, non-breaking) (canary routing/bootstrap helper extracted from service into dedicated JS helper module with concrete TS parity module and deterministic extraction-contract verification)
 - M140: ✅ Marketplace listings/edges/feed contract implementation (fixtures-first) (runtime market service + route wiring, manifest/schema/example contracts, market auth scope extension, deterministic reason-code floor, and hash-locked lifecycle verifier artifacts)
 - M141: ✅ Marketplace threads/messages contract implementation (fixtures-first) (participant-scoped thread/message runtime surfaces, manifest/schema/example contracts, deterministic authz/query/cursor behavior, and hash-locked verifier artifacts)
+- M142: ✅ Marketplace deals + negotiation threads contract slice (fixtures-first) (accepted-edge deal materialization, participant-scoped deal reads, thread auto-linkage, system-event logging, and deterministic verifier coverage)
+- M143: ✅ Marketplace settlement bridge contract slice (fixtures-first) (direct internal-credit settlement, cycle-bridge receipt reuse, receipt read surface, and deterministic verifier coverage)
+- M144: ✅ Marketplace payment-proof + execution-grant hardening slice (fixtures-first) (dual-attestation proof flow, proof/grant anti-replay, scope-aware grant consume, and deterministic verifier coverage)
+- M145: ✅ Agent CLI + live runtime smoke (fixtures-first) (`scripts/market-cli.mjs`, live local runtime verification, and multi-agent smoke coverage)
 
 ## Next
-- Current mode: Marketplace vNext execution tranche is active on branch `marketplace-vnext-execution`; M140+M141 contracts (listings/edges/feed and threads/messages) are verifier-complete.
-- Immediate target: M142 marketplace deal draft/accept/cancel + settlement-bridge contract slice.
-- Follow-on target: M143 payment-proof and execution-grant contract slice with deterministic anti-replay checks.
+- Current mode: Marketplace vNext execution tranche is active on branch `marketplace-vnext-execution`; M140-M145 backend/API/CLI slices are implemented and ready for local launch validation.
+- Immediate target: retained-baseline + marketplace vNext verifier sweep (`verify:m142` through `verify:m145`, `verify:m111`, `web:m7:test`, `npm test`) and launch hardening.
+- Follow-on target: optional human-facing web re-platforming onto `/market/*` and production operator rollout controls.
 - Parallel track: preserve prior M115–M139 TS/canary baseline as stable while extending marketplace-surface contracts additively.
 - Runtime shell available for request/response validation: `npm run start:api` (`src/server/runtimeApiServer.mjs`).
 - CI baseline gate added: `.github/workflows/verify-baseline.yml` (includes `verify:m0`, baseline tranche, `verify:m98`, `verify:m99`, `verify:m100`, `verify:m101`, `verify:m102`, `verify:m103`, `verify:m104`, `verify:m105`, `verify:m106`, `verify:m107`, `verify:m108`, `verify:m109`, `verify:m110`, `verify:m111`, and `verify:m112`).

@@ -1196,6 +1196,70 @@
     {
       "file": "market.threads.messages.list.response.json",
       "schema": "MarketThreadMessageListResponse.schema.json"
+    },
+    {
+      "file": "market.edges.patch.request.json",
+      "schema": "MarketEdgePatchRequest.schema.json"
+    },
+    {
+      "file": "market.edges.patch.response.json",
+      "schema": "MarketEdgeResponse.schema.json"
+    },
+    {
+      "file": "market.deals.create.request.json",
+      "schema": "MarketDealCreateFromEdgeRequest.schema.json"
+    },
+    {
+      "file": "market.deals.create.response.json",
+      "schema": "MarketDealResponse.schema.json"
+    },
+    {
+      "file": "market.deals.get.response.json",
+      "schema": "MarketDealResponse.schema.json"
+    },
+    {
+      "file": "market.deals.start-settlement.request.json",
+      "schema": "MarketDealStartSettlementRequest.schema.json"
+    },
+    {
+      "file": "market.deals.start-settlement.response.json",
+      "schema": "MarketDealResponse.schema.json"
+    },
+    {
+      "file": "market.deals.payment-proof.request.json",
+      "schema": "MarketPaymentProofAttachRequest.schema.json"
+    },
+    {
+      "file": "market.deals.payment-proof.response.json",
+      "schema": "MarketPaymentProofResponse.schema.json"
+    },
+    {
+      "file": "market.deals.complete.request.json",
+      "schema": "MarketDealCompleteRequest.schema.json"
+    },
+    {
+      "file": "market.deals.complete.response.json",
+      "schema": "MarketDealResponse.schema.json"
+    },
+    {
+      "file": "market.deals.receipt.response.json",
+      "schema": "MarketDealReceiptResponse.schema.json"
+    },
+    {
+      "file": "market.execution-grants.create.request.json",
+      "schema": "MarketExecutionGrantCreateRequest.schema.json"
+    },
+    {
+      "file": "market.execution-grants.create.response.json",
+      "schema": "MarketExecutionGrantResponse.schema.json"
+    },
+    {
+      "file": "market.execution-grants.consume.request.json",
+      "schema": "MarketExecutionGrantConsumeRequest.schema.json"
+    },
+    {
+      "file": "market.execution-grants.consume.response.json",
+      "schema": "MarketExecutionGrantResponse.schema.json"
     }
   ]
 }

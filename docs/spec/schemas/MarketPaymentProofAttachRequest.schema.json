@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketPaymentProofAttachRequest.schema.json",
+  "title": "MarketPaymentProofAttachRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["payment_proof"],
+  "properties": {
+    "payment_proof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payment_rail", "proof_fingerprint", "attestation_role"],
+      "properties": {
+        "proof_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "payment_rail": {
+          "type": "string",
+          "minLength": 1
+        },
+        "proof_fingerprint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "external_reference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "attestation_role": {
+          "type": "string",
+          "enum": ["payer", "payee"]
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "nonce": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

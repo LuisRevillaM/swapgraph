@@ -1,0 +1,9 @@
+name: M145
+commands:
+  - cmd: "npm run verify:m145"
+artifacts:
+  - artifact: "docs/prd/M145.md"
+  - artifact: "scripts/market-cli.mjs"
+  - artifact: "scripts/run-m145-market-agent-cli-smoke-scenario.mjs"
+  - artifact: "scripts/demo/run-market-vnext-five-agent-simulation.mjs"
+  - artifact: "verify/m145.sh"

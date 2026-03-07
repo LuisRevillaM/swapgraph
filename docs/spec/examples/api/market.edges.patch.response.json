@@ -1,0 +1,29 @@
+{
+  "correlation_id": "corr_marketedges_patch",
+  "edge": {
+    "edge_id": "edge_000001",
+    "workspace_id": "workspace_demo",
+    "source_ref": {
+      "kind": "listing",
+      "id": "listing_000002"
+    },
+    "target_ref": {
+      "kind": "listing",
+      "id": "listing_000001"
+    },
+    "edge_type": "offer",
+    "status": "open",
+    "terms_patch": {
+      "credit_amount": 25,
+      "currency": "USD"
+    },
+    "note": "Can settle today if needed",
+    "expires_at": null,
+    "created_by": {
+      "type": "user",
+      "id": "buyer_001"
+    },
+    "created_at": "2026-03-07T15:00:00.000Z",
+    "updated_at": "2026-03-07T15:05:00.000Z"
+  }
+}

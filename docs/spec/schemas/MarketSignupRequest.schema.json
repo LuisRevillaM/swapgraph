@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketSignupRequest.schema.json",
+  "title": "MarketSignupRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "display_name"
+  ],
+  "properties": {
+    "display_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "workspace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "owner_mode": {
+      "type": "string",
+      "enum": [
+        "agent_owner",
+        "operator",
+        "builder"
+      ]
+    },
+    "bio": {
+      "type": "string"
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

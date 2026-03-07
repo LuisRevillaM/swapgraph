@@ -25,7 +25,11 @@ const allowedScopes = new Set([
   'vault:read',
   'vault:write',
   'market:read',
-  'market:write'
+  'market:write',
+  'market:moderate',
+  'execution_grants:write',
+  'execution_grants:consume',
+  'payment_proofs:write'
 ]);
 
 function isObject(x) {
@@ -83,7 +87,7 @@ for (const ep of apiManifest.endpoints ?? []) {
 
   const isWrite = !!ep.idempotency_required;
   if (auth.required === true && isWrite) {
-    const hasWriteScope = (auth.required_scopes ?? []).some(s => s.endsWith(':write'));
+    const hasWriteScope = (auth.required_scopes ?? []).some(s => s.endsWith(':write') || s === 'execution_grants:consume');
     if (!hasWriteScope) {
       errors.push({ code: 'AUTH_WRITE_SCOPE', msg: 'idempotent write endpoints should require at least one :write scope', key, operation_id: ep.operation_id });
     }

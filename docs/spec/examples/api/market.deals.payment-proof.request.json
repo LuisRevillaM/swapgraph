@@ -1,0 +1,9 @@
+{
+  "payment_proof": {
+    "payment_rail": "stripe_transfer",
+    "proof_fingerprint": "proof-fp-demo-001",
+    "external_reference": "ch_123",
+    "attestation_role": "payer"
+  },
+  "recorded_at": "2026-03-07T15:12:00.000Z"
+}

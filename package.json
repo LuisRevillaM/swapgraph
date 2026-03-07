@@ -251,7 +251,11 @@
     "web:m7:check:sc-ds-01": "npm run web:m1:check:sc-ds-01",
     "web:m7:check:sc-ds-02": "npm run web:m1:check:sc-ds-02",
     "web:m7:check:required": "npm run web:m7:check:sc-ax-01 && npm run web:m7:check:sc-ax-02 && npm run web:m7:check:sc-ax-03 && npm run web:m7:check:sc-pf-01 && npm run web:m7:check:sc-pf-02 && npm run web:m7:check:sc-pf-03 && npm run web:m7:check:sc-sec-01 && npm run web:m7:check:sc-sec-02 && npm run web:m7:check:sc-sec-03 && npm run web:m7:check:sc-rr-01 && npm run web:m7:check:sc-rr-02 && npm run web:m7:check:sc-rr-03",
-    "web:m7:check:regressions": "npm run web:m7:check:sc-ux-02 && npm run web:m7:check:sc-ux-03 && npm run web:m7:check:sc-ux-04 && npm run web:m7:check:sc-an-01 && npm run web:m7:check:sc-an-02 && npm run web:m7:check:sc-rl-01 && npm run web:m7:check:sc-rl-03 && npm run web:m7:check:sc-api-01 && npm run web:m7:check:sc-api-03 && npm run web:m7:check:sc-api-04 && npm run web:m7:check:sc-ds-01 && npm run web:m7:check:sc-ds-02"
+    "web:m7:check:regressions": "npm run web:m7:check:sc-ux-02 && npm run web:m7:check:sc-ux-03 && npm run web:m7:check:sc-ux-04 && npm run web:m7:check:sc-an-01 && npm run web:m7:check:sc-an-02 && npm run web:m7:check:sc-rl-01 && npm run web:m7:check:sc-rl-03 && npm run web:m7:check:sc-api-01 && npm run web:m7:check:sc-api-03 && npm run web:m7:check:sc-api-04 && npm run web:m7:check:sc-ds-01 && npm run web:m7:check:sc-ds-02",
+    "verify:m142": "bash verify/m142.sh",
+    "verify:m143": "bash verify/m143.sh",
+    "verify:m144": "bash verify/m144.sh",
+    "verify:m145": "bash verify/m145.sh"
   },
   "devDependencies": {
     "ajv": "8.18.0",

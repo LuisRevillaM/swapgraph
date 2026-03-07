@@ -9,6 +9,7 @@
     "workspace_id",
     "participants",
     "status",
+    "anchor_ref",
     "created_at",
     "updated_at"
   ],
@@ -34,6 +35,31 @@
         "active",
         "closed"
       ]
+    },
+    "anchor_ref": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "id"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "listing",
+            "edge",
+            "deal"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
     },
     "created_at": {
       "type": "string",

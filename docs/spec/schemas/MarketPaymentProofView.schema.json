@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketPaymentProofView.schema.json",
+  "title": "MarketPaymentProofView",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "proof_id",
+    "deal_id",
+    "payment_rail",
+    "proof_fingerprint",
+    "external_reference",
+    "payer_actor",
+    "payee_actor",
+    "payer_attested_at",
+    "payee_attested_at",
+    "nonce",
+    "expires_at",
+    "consumed_at",
+    "created_at"
+  ],
+  "properties": {
+    "proof_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "deal_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "payment_rail": {
+      "type": "string",
+      "minLength": 1
+    },
+    "proof_fingerprint": {
+      "type": "string",
+      "minLength": 1
+    },
+    "external_reference": {
+      "type": ["string", "null"]
+    },
+    "payer_actor": {
+      "anyOf": [
+        {
+          "$ref": "ActorRef.schema.json"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "payee_actor": {
+      "anyOf": [
+        {
+          "$ref": "ActorRef.schema.json"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "payer_attested_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "payee_attested_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "nonce": {
+      "type": "string",
+      "minLength": 1
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "consumed_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

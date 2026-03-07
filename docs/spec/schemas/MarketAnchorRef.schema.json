@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketAnchorRef.schema.json",
+  "title": "MarketAnchorRef",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["kind", "id"],
+  "properties": {
+    "kind": {
+      "type": "string",
+      "enum": ["listing", "edge", "deal"]
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

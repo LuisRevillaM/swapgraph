@@ -1,0 +1,10 @@
+{
+  "patch": {
+    "terms_patch": {
+      "credit_amount": 25,
+      "currency": "USD"
+    },
+    "note": "Can settle today if needed"
+  },
+  "recorded_at": "2026-03-07T15:05:00.000Z"
+}

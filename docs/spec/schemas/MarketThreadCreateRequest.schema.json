@@ -37,6 +37,9 @@
             "active",
             "closed"
           ]
+        },
+        "anchor_ref": {
+          "$ref": "MarketAnchorRef.schema.json"
         }
       }
     },

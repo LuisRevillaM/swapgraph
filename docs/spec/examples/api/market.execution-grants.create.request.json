@@ -1,0 +1,15 @@
+{
+  "grant": {
+    "deal_id": "deal_000003",
+    "audience": {
+      "type": "agent",
+      "id": "capability_agent_001"
+    },
+    "scope": [
+      "execute:deliver"
+    ],
+    "grant_mode": "encrypted_envelope",
+    "ciphertext": "eyJlbmMiOiJhbGctZGVtbyJ9"
+  },
+  "recorded_at": "2026-03-07T15:20:00.000Z"
+}

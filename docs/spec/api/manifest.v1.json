@@ -2960,7 +2960,8 @@
         "required": true,
         "allowed_actor_types": [
           "user",
-          "partner"
+          "partner",
+          "agent"
         ],
         "required_scopes": [
           "market:write"
@@ -2978,7 +2979,8 @@
         "required": true,
         "allowed_actor_types": [
           "user",
-          "partner"
+          "partner",
+          "agent"
         ],
         "required_scopes": [
           "market:write"
@@ -2996,7 +2998,8 @@
         "required": true,
         "allowed_actor_types": [
           "user",
-          "partner"
+          "partner",
+          "agent"
         ],
         "required_scopes": [
           "market:write"
@@ -3014,11 +3017,45 @@
         "required": true,
         "allowed_actor_types": [
           "user",
-          "partner"
+          "partner",
+          "agent"
         ],
         "required_scopes": [
           "market:write"
         ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/market/signup",
+      "operation_id": "marketSignup.create",
+      "idempotency_required": true,
+      "request_schema": "MarketSignupRequest.schema.json",
+      "response_schema": "MarketSignupResponse.schema.json",
+      "auth": {
+        "required": false,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/market/stats",
+      "operation_id": "marketStats.get",
+      "idempotency_required": false,
+      "response_schema": "MarketStatsResponse.schema.json",
+      "auth": {
+        "required": false,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": []
       }
     },
     {
@@ -3028,14 +3065,13 @@
       "idempotency_required": false,
       "response_schema": "MarketListingResponse.schema.json",
       "auth": {
-        "required": true,
+        "required": false,
         "allowed_actor_types": [
           "user",
-          "partner"
+          "partner",
+          "agent"
         ],
-        "required_scopes": [
-          "market:read"
-        ]
+        "required_scopes": []
       }
     },
     {
@@ -3045,14 +3081,13 @@
       "idempotency_required": false,
       "response_schema": "MarketListingListResponse.schema.json",
       "auth": {
-        "required": true,
+        "required": false,
         "allowed_actor_types": [
           "user",
-          "partner"
+          "partner",
+          "agent"
         ],
-        "required_scopes": [
-          "market:read"
-        ]
+        "required_scopes": []
       }
     },
     {
@@ -3066,7 +3101,8 @@
         "required": true,
         "allowed_actor_types": [
           "user",
-          "partner"
+          "partner",
+          "agent"
         ],
         "required_scopes": [
           "market:write"
@@ -3084,7 +3120,8 @@
         "required": true,
         "allowed_actor_types": [
           "user",
-          "partner"
+          "partner",
+          "agent"
         ],
         "required_scopes": [
           "market:write"
@@ -3102,7 +3139,8 @@
         "required": true,
         "allowed_actor_types": [
           "user",
-          "partner"
+          "partner",
+          "agent"
         ],
         "required_scopes": [
           "market:write"
@@ -3120,7 +3158,8 @@
         "required": true,
         "allowed_actor_types": [
           "user",
-          "partner"
+          "partner",
+          "agent"
         ],
         "required_scopes": [
           "market:write"
@@ -3134,14 +3173,13 @@
       "idempotency_required": false,
       "response_schema": "MarketEdgeResponse.schema.json",
       "auth": {
-        "required": true,
+        "required": false,
         "allowed_actor_types": [
           "user",
-          "partner"
+          "partner",
+          "agent"
         ],
-        "required_scopes": [
-          "market:read"
-        ]
+        "required_scopes": []
       }
     },
     {
@@ -3151,14 +3189,13 @@
       "idempotency_required": false,
       "response_schema": "MarketEdgeListResponse.schema.json",
       "auth": {
-        "required": true,
+        "required": false,
         "allowed_actor_types": [
           "user",
-          "partner"
+          "partner",
+          "agent"
         ],
-        "required_scopes": [
-          "market:read"
-        ]
+        "required_scopes": []
       }
     },
     {
@@ -3168,14 +3205,13 @@
       "idempotency_required": false,
       "response_schema": "MarketFeedGetResponse.schema.json",
       "auth": {
-        "required": true,
+        "required": false,
         "allowed_actor_types": [
           "user",
-          "partner"
+          "partner",
+          "agent"
         ],
-        "required_scopes": [
-          "market:read"
-        ]
+        "required_scopes": []
       }
     },
     {
@@ -3189,7 +3225,8 @@
         "required": true,
         "allowed_actor_types": [
           "user",
-          "partner"
+          "partner",
+          "agent"
         ],
         "required_scopes": [
           "market:write"
@@ -3206,7 +3243,8 @@
         "required": true,
         "allowed_actor_types": [
           "user",
-          "partner"
+          "partner",
+          "agent"
         ],
         "required_scopes": [
           "market:read"
@@ -3223,7 +3261,8 @@
         "required": true,
         "allowed_actor_types": [
           "user",
-          "partner"
+          "partner",
+          "agent"
         ],
         "required_scopes": [
           "market:read"
@@ -3241,7 +3280,8 @@
         "required": true,
         "allowed_actor_types": [
           "user",
-          "partner"
+          "partner",
+          "agent"
         ],
         "required_scopes": [
           "market:write"
@@ -3258,10 +3298,180 @@
         "required": true,
         "allowed_actor_types": [
           "user",
-          "partner"
+          "partner",
+          "agent"
         ],
         "required_scopes": [
           "market:read"
+        ]
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/market/edges/{edge_id}",
+      "operation_id": "marketEdges.patch",
+      "idempotency_required": true,
+      "request_schema": "MarketEdgePatchRequest.schema.json",
+      "response_schema": "MarketEdgeResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": [
+          "market:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/market/deals/from-edge/{edge_id}",
+      "operation_id": "marketDeals.createFromEdge",
+      "idempotency_required": true,
+      "request_schema": "MarketDealCreateFromEdgeRequest.schema.json",
+      "response_schema": "MarketDealResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": [
+          "market:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/market/deals/{deal_id}",
+      "operation_id": "marketDeals.get",
+      "idempotency_required": false,
+      "response_schema": "MarketDealResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": [
+          "market:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/market/deals/{deal_id}/start-settlement",
+      "operation_id": "marketDeals.startSettlement",
+      "idempotency_required": true,
+      "request_schema": "MarketDealStartSettlementRequest.schema.json",
+      "response_schema": "MarketDealResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": [
+          "market:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/market/deals/{deal_id}/payment-proof",
+      "operation_id": "marketDeals.attachPaymentProof",
+      "idempotency_required": true,
+      "request_schema": "MarketPaymentProofAttachRequest.schema.json",
+      "response_schema": "MarketPaymentProofResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": [
+          "payment_proofs:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/market/deals/{deal_id}/complete",
+      "operation_id": "marketDeals.complete",
+      "idempotency_required": true,
+      "request_schema": "MarketDealCompleteRequest.schema.json",
+      "response_schema": "MarketDealResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": [
+          "market:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/market/deals/{deal_id}/receipt",
+      "operation_id": "marketDeals.receipt",
+      "idempotency_required": false,
+      "response_schema": "MarketDealReceiptResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": [
+          "receipts:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/market/execution-grants",
+      "operation_id": "marketExecutionGrants.create",
+      "idempotency_required": true,
+      "request_schema": "MarketExecutionGrantCreateRequest.schema.json",
+      "response_schema": "MarketExecutionGrantResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": [
+          "execution_grants:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/market/execution-grants/{grant_id}/consume",
+      "operation_id": "marketExecutionGrants.consume",
+      "idempotency_required": true,
+      "request_schema": "MarketExecutionGrantConsumeRequest.schema.json",
+      "response_schema": "MarketExecutionGrantResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": [
+          "execution_grants:consume"
         ]
       }
     },

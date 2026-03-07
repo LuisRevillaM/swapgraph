@@ -17,12 +17,39 @@
           "type": "string",
           "minLength": 1
         },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "offer": {
           "type": "array",
           "items": {
             "type": "object",
             "additionalProperties": true
           }
+        },
+        "want_spec": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": true
+        },
+        "budget": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": true
+        },
+        "constraints": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": true
         },
         "capability_profile": {
           "type": [
@@ -52,6 +79,13 @@
               "additionalProperties": true
             }
           }
+        },
+        "expires_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
         }
       }
     },

@@ -12,6 +12,7 @@
     "edge_type",
     "status",
     "terms_patch",
+    "note",
     "expires_at",
     "created_by",
     "created_at",
@@ -57,6 +58,12 @@
         "null"
       ],
       "additionalProperties": true
+    },
+    "note": {
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "expires_at": {
       "type": [

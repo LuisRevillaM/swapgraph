@@ -1,6 +1,7 @@
 import { bootstrapMarketplaceClient } from './src/app/bootstrap.mjs';
 import { disableServiceWorkerForRollback, serviceWorkerMode } from './src/app/serviceWorkerControl.mjs';
 import { mountPilotLogin, resolveActivePilotActorId } from './src/session/pilotLogin.mjs';
+import { isLegacyMarketplaceHashRoute, mountMarketplaceVNext } from './src/vnext/app.mjs';
 
 async function registerServiceWorker() {
   if (!('serviceWorker' in navigator)) return;
@@ -18,6 +19,13 @@ async function registerServiceWorker() {
 function mount() {
   const root = document.getElementById('app-root');
   if (!root) throw new Error('missing #app-root mount element');
+
+  const currentHash = window?.location?.hash ?? '';
+  if (!isLegacyMarketplaceHashRoute(currentHash)) {
+    mountMarketplaceVNext({ root, windowRef: window });
+    registerServiceWorker();
+    return;
+  }
 
   const activeActorId = resolveActivePilotActorId({
     storage: window?.localStorage ?? null,

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketDealStartSettlementRequest.schema.json",
+  "title": "MarketDealStartSettlementRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["settlement_mode"],
+  "properties": {
+    "settlement_mode": {
+      "type": "string",
+      "enum": ["internal_credit", "external_payment_proof", "cycle_bridge"]
+    },
+    "terms": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "cycle_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

@@ -20,7 +20,12 @@
       ],
       "capability_profile": null,
       "created_at": "2026-03-05T18:10:00.000Z",
-      "updated_at": "2026-03-05T18:14:00.000Z"
+      "updated_at": "2026-03-05T18:14:00.000Z",
+      "description": null,
+      "want_spec": null,
+      "budget": null,
+      "constraints": null,
+      "expires_at": null
     }
   ],
   "total": 1,

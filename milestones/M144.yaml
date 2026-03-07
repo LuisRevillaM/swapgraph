@@ -1,0 +1,9 @@
+name: M144
+commands:
+  - cmd: "npm run verify:m144"
+artifacts:
+  - artifact: "docs/prd/M144.md"
+  - artifact: "src/service/marketDealService.mjs"
+  - artifact: "src/service/marketExecutionGrantService.mjs"
+  - artifact: "scripts/run-m144-market-execution-grants-payment-proof-scenario.mjs"
+  - artifact: "verify/m144.sh"

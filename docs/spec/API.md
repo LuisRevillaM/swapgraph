@@ -126,29 +126,45 @@ Auth headers (see `docs/spec/AUTH.md` for details):
     - matching can form cycles from derived compatibility edges and/or explicit edge-intent edges
 
 - `Market`
+  - `POST /market/signup` (open-signup owner bootstrap; returns actor + workspace profile hints)
+  - `GET /market/stats` (public aggregate market counters for landing/read surfaces)
   - `POST /market/listings` (idempotent market listing create)
   - `PATCH /market/listings/{listing_id}` (idempotent listing patch)
   - `POST /market/listings/{listing_id}/pause` (idempotent listing pause transition)
   - `POST /market/listings/{listing_id}/close` (idempotent listing close transition)
-  - `GET /market/listings/{listing_id}` (read listing)
-  - `GET /market/listings` (list listings with deterministic filters/cursor)
+  - `GET /market/listings/{listing_id}` (public-safe listing read)
+  - `GET /market/listings` (public-safe listing browse with deterministic filters/cursor)
   - `POST /market/edges` (idempotent market edge create)
+  - `PATCH /market/edges/{edge_id}` (idempotent edge patch by source owner)
   - `POST /market/edges/{edge_id}/accept` (idempotent edge accept by target owner)
   - `POST /market/edges/{edge_id}/decline` (idempotent edge decline by target owner)
   - `POST /market/edges/{edge_id}/withdraw` (idempotent edge withdraw by source owner)
-  - `GET /market/edges/{edge_id}` (read edge)
-  - `GET /market/edges` (list edges with deterministic filters/cursor)
-  - `GET /market/feed` (typed listing/edge feed envelope with deterministic cursor continuity)
+  - `GET /market/edges/{edge_id}` (public-safe edge read)
+  - `GET /market/edges` (public-safe edge browse with deterministic filters/cursor)
+  - `GET /market/feed` (public typed listing/edge/deal feed envelope with deterministic cursor continuity)
   - `POST /market/threads` (idempotent thread create)
   - `GET /market/threads/{thread_id}` (read thread)
   - `GET /market/threads` (list participant-scoped threads with deterministic filters/cursor)
   - `POST /market/threads/{thread_id}/messages` (idempotent message append)
   - `GET /market/threads/{thread_id}/messages` (list participant-scoped messages with deterministic filters/cursor)
+  - `POST /market/deals/from-edge/{edge_id}` (idempotent deal materialization from an accepted edge)
+  - `GET /market/deals/{deal_id}` (read participant-scoped deal state)
+  - `POST /market/deals/{deal_id}/start-settlement` (idempotent settlement start for internal credit, external proof, or cycle bridge)
+  - `POST /market/deals/{deal_id}/payment-proof` (idempotent external payment proof attach/attestation)
+  - `POST /market/deals/{deal_id}/complete` (idempotent deal completion and receipt mint)
+  - `GET /market/deals/{deal_id}/receipt` (read receipt bridged from deal settlement state)
+  - `POST /market/execution-grants` (idempotent one-time execution grant issue)
+  - `POST /market/execution-grants/{grant_id}/consume` (idempotent audience-scoped one-time consume)
   - market invariants:
     - `post` listings require non-empty `offer`
     - `want` listings are allowed with empty `offer`
     - `capability` listings require `capability_profile.deliverable_schema` + `capability_profile.rate_card`
+    - open-signup is bootstrap-only: owner creation returns a user actor profile plus default workspace/scopes hints
+    - public browse hides suspended listings and dependent edges/deals
     - edge transitions are deterministic (`open -> accepted|declined|withdrawn|expired`)
+    - one active deal may exist per accepted edge
+    - external payment proof completion requires dual attestation and replay-protected proof fingerprints
+    - execution grants are one-time, audience-scoped, and TTL-bound
     - thread/message read-write access is participant-scoped
     - thread creation requires caller participation and thread status starts at `active`
     - feed/list cursors fail deterministically on malformed or stale anchors

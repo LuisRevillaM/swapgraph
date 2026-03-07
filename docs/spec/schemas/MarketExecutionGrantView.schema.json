@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketExecutionGrantView.schema.json",
+  "title": "MarketExecutionGrantView",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "grant_id",
+    "deal_id",
+    "actor",
+    "audience",
+    "scope",
+    "grant_mode",
+    "ciphertext",
+    "nonce",
+    "max_uses",
+    "expires_at",
+    "consumed_at",
+    "created_at"
+  ],
+  "properties": {
+    "grant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "deal_id": {
+      "type": ["string", "null"]
+    },
+    "actor": {
+      "$ref": "ActorRef.schema.json"
+    },
+    "audience": {
+      "$ref": "ActorRef.schema.json"
+    },
+    "scope": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "grant_mode": {
+      "type": "string",
+      "enum": ["token", "encrypted_envelope"]
+    },
+    "ciphertext": {
+      "type": ["string", "null"]
+    },
+    "nonce": {
+      "type": "string",
+      "minLength": 1
+    },
+    "max_uses": {
+      "type": "integer",
+      "const": 1
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "consumed_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

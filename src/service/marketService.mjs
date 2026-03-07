@@ -1,5 +1,6 @@
 import { authorizeApiOperation } from '../core/authz.mjs';
 import { idempotencyScopeKey, payloadHash } from '../core/idempotency.mjs';
+import { effectiveActorForDelegation } from '../core/tradingPolicyBoundaries.mjs';
 
 const LISTING_KINDS = new Set(['post', 'want', 'capability']);
 const LISTING_STATUS = new Set(['open', 'paused', 'closed', 'suspended']);
@@ -8,6 +9,14 @@ const EDGE_STATUS = new Set(['open', 'accepted', 'declined', 'withdrawn', 'expir
 const THREAD_STATUS = new Set(['active', 'closed']);
 const MESSAGE_TYPES = new Set(['text', 'terms_patch', 'system']);
 const REF_KINDS = new Set(['listing']);
+const ANCHOR_KINDS = new Set(['listing', 'edge', 'deal']);
+const DEFAULT_MARKET_SIGNUP_SCOPES = Object.freeze([
+  'market:read',
+  'market:write',
+  'receipts:read',
+  'payment_proofs:write',
+  'execution_grants:write'
+]);
 
 function correlationId(op) {
   return `corr_${String(op).replace(/[^a-zA-Z0-9]+/g, '_').toLowerCase()}`;
@@ -19,6 +28,10 @@ function clone(value) {
 
 function normalizeOptionalString(value) {
   return typeof value === 'string' && value.trim() ? value.trim() : null;
+}
+
+function normalizeOptionalObject(value) {
+  return isPlainObject(value) ? clone(value) : null;
 }
 
 function parseIsoMs(iso) {
@@ -54,6 +67,18 @@ function ensureState(store) {
   store.state.market_thread_counter ||= 0;
   store.state.market_messages ||= {};
   store.state.market_message_counter ||= 0;
+  store.state.market_deals ||= {};
+  store.state.market_deal_counter ||= 0;
+  store.state.market_payment_proofs ||= {};
+  store.state.market_payment_proof_counter ||= 0;
+  store.state.market_execution_grants ||= {};
+  store.state.market_execution_grant_counter ||= 0;
+  store.state.market_feed_events ||= {};
+  store.state.market_feed_event_counter ||= 0;
+  store.state.market_actor_profiles ||= {};
+  store.state.market_actor_profile_counter ||= 0;
+  store.state.market_actor_quotas ||= {};
+  store.state.market_moderation_queue ||= {};
 }
 
 function nextListingId(store) {
@@ -80,6 +105,11 @@ function nextMessageId(store) {
   return `message_${n}`;
 }
 
+function nextActorProfileCounter(store) {
+  store.state.market_actor_profile_counter = Number(store.state.market_actor_profile_counter ?? 0) + 1;
+  return store.state.market_actor_profile_counter;
+}
+
 function actorEquals(a, b) {
   return (a?.type ?? null) === (b?.type ?? null) && (a?.id ?? null) === (b?.id ?? null);
 }
@@ -88,16 +118,86 @@ function listingOwnsActor(listing, actor) {
   return actorEquals(listing?.owner_actor ?? null, actor ?? null);
 }
 
-function normalizeListingView(record) {
+function resolveSubjectActor({ actor, auth }) {
+  return effectiveActorForDelegation({ actor, auth }) ?? actor;
+}
+
+function slugifyLabel(value, fallback = 'owner') {
+  const normalized = String(value ?? '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+  return normalized || fallback;
+}
+
+function actorProfileKey(actor) {
+  if (!actor?.type || !actor?.id) return null;
+  return `${actor.type}:${actor.id}`;
+}
+
+function openSignupEnabled() {
+  const mode = normalizeOptionalString(process.env.MARKET_OPEN_SIGNUP_MODE)?.toLowerCase() ?? 'open';
+  return !new Set(['off', 'closed', 'invite']).has(mode);
+}
+
+function normalizeActorProfileView(record) {
+  if (!record) return null;
+  return {
+    actor: clone(record.actor),
+    display_name: record.display_name,
+    handle: record.handle,
+    owner_mode: record.owner_mode,
+    default_workspace_id: record.default_workspace_id,
+    bio: record.bio ?? null,
+    created_at: record.created_at,
+    updated_at: record.updated_at
+  };
+}
+
+function actorProfileSummary(store, actor) {
+  const key = actorProfileKey(actor);
+  if (!key) return null;
+  return normalizeActorProfileView(store.state.market_actor_profiles?.[key] ?? null);
+}
+
+function isPublicViewer(actor) {
+  return !actor?.type || !actor?.id;
+}
+
+function listingIsPublicVisible(listing) {
+  return !!listing && listing.status !== 'suspended';
+}
+
+function edgeIsPublicVisible(store, edge) {
+  if (!edge) return false;
+  const source = store.state.market_listings?.[edge.source_ref?.id] ?? null;
+  const target = store.state.market_listings?.[edge.target_ref?.id] ?? null;
+  return listingIsPublicVisible(source) && listingIsPublicVisible(target);
+}
+
+function dealIsPublicVisible(store, deal) {
+  if (!deal) return false;
+  const edge = store.state.market_edges?.[deal.origin_edge_id] ?? null;
+  return edgeIsPublicVisible(store, edge);
+}
+
+function normalizeListingView(record, store) {
   return {
     listing_id: record.listing_id,
     workspace_id: record.workspace_id,
     owner_actor: clone(record.owner_actor),
+    owner_profile: actorProfileSummary(store, record.owner_actor),
     kind: record.kind,
     status: record.status,
     title: record.title,
+    description: record.description ?? null,
     offer: clone(record.offer ?? []),
+    want_spec: record.want_spec ? clone(record.want_spec) : null,
+    budget: record.budget ? clone(record.budget) : null,
+    constraints: record.constraints ? clone(record.constraints) : null,
     capability_profile: record.capability_profile ? clone(record.capability_profile) : null,
+    expires_at: record.expires_at ?? null,
     created_at: record.created_at,
     updated_at: record.updated_at
   };
@@ -112,6 +212,7 @@ function normalizeEdgeView(record) {
     edge_type: record.edge_type,
     status: record.status,
     terms_patch: record.terms_patch ? clone(record.terms_patch) : null,
+    note: record.note ?? null,
     expires_at: record.expires_at ?? null,
     created_by: clone(record.created_by),
     created_at: record.created_at,
@@ -125,6 +226,7 @@ function normalizeThreadView(record) {
     workspace_id: record.workspace_id,
     participants: clone(record.participants),
     status: record.status,
+    anchor_ref: record.anchor_ref ? clone(record.anchor_ref) : null,
     created_at: record.created_at,
     updated_at: record.updated_at
   };
@@ -139,6 +241,10 @@ function normalizeMessageView(record) {
     payload: clone(record.payload),
     created_at: record.created_at
   };
+}
+
+function signupIdempotencyScopeKey(operationId, idempotencyKey) {
+  return `public|${operationId}|${idempotencyKey}`;
 }
 
 function sortByUpdatedDescThenId(rows, idField) {
@@ -246,6 +352,14 @@ function normalizeRef(value) {
   const kind = normalizeOptionalString(value.kind)?.toLowerCase() ?? null;
   const id = normalizeOptionalString(value.id);
   if (!kind || !id || !REF_KINDS.has(kind)) return null;
+  return { kind, id };
+}
+
+function normalizeAnchorRef(value) {
+  if (!isPlainObject(value)) return null;
+  const kind = normalizeOptionalString(value.kind)?.toLowerCase() ?? null;
+  const id = normalizeOptionalString(value.id);
+  if (!kind || !id || !ANCHOR_KINDS.has(kind)) return null;
   return { kind, id };
 }
 
@@ -413,7 +527,7 @@ function normalizeEdgeListQuery(query) {
 }
 
 function normalizeFeedQuery(query) {
-  const allowed = new Set(['workspace_id', 'item_type', 'limit', 'cursor_after']);
+  const allowed = new Set(['workspace_id', 'item_type', 'types', 'limit', 'cursor_after']);
   for (const key of Object.keys(query ?? {})) {
     if (!allowed.has(key)) {
       return {
@@ -427,15 +541,29 @@ function normalizeFeedQuery(query) {
 
   const workspaceId = normalizeOptionalString(query?.workspace_id);
   const itemType = normalizeOptionalString(query?.item_type)?.toLowerCase() ?? null;
+  const types = Array.from(new Set(String(query?.types ?? '')
+    .split(',')
+    .map(v => normalizeOptionalString(v)?.toLowerCase())
+    .filter(Boolean)));
   const limit = parseLimit(query?.limit, 25);
   const cursorAfter = normalizeOptionalString(query?.cursor_after);
 
-  if (itemType && itemType !== 'listing' && itemType !== 'edge') {
+  const validItemTypes = new Set(['listing', 'edge', 'deal']);
+  if (itemType && !validItemTypes.has(itemType)) {
     return {
       ok: false,
       code: 'CONSTRAINT_VIOLATION',
       message: 'invalid item_type',
       details: { reason_code: 'market_feed_query_invalid', item_type: itemType }
+    };
+  }
+
+  if (types.some(type => !validItemTypes.has(type))) {
+    return {
+      ok: false,
+      code: 'CONSTRAINT_VIOLATION',
+      message: 'invalid types filter',
+      details: { reason_code: 'market_feed_query_invalid', types }
     };
   }
 
@@ -453,6 +581,7 @@ function normalizeFeedQuery(query) {
     value: {
       workspace_id: workspaceId,
       item_type: itemType,
+      types,
       limit,
       cursor_after: cursorAfter
     }
@@ -675,7 +804,8 @@ export class MarketService {
       };
     }
 
-    const ownerActor = listing.owner_actor ?? actor;
+    const subjectActor = resolveSubjectActor({ actor, auth });
+    const ownerActor = listing.owner_actor ?? subjectActor;
     if (!ownerActor || !normalizeOptionalString(ownerActor.type) || !normalizeOptionalString(ownerActor.id)) {
       return {
         ok: false,
@@ -685,12 +815,12 @@ export class MarketService {
       };
     }
 
-    if (!actorEquals(ownerActor, actor)) {
+    if (!actorEquals(ownerActor, subjectActor)) {
       return {
         ok: false,
         body: errorResponse(corr, 'FORBIDDEN', 'listing owner actor must match caller', {
           reason_code: 'market_listing_forbidden',
-          actor,
+          actor: subjectActor,
           owner_actor: ownerActor
         })
       };
@@ -738,6 +868,21 @@ export class MarketService {
       };
     }
 
+    const description = normalizeOptionalString(listing.description);
+    const wantSpec = listing.want_spec === null ? null : normalizeOptionalObject(listing.want_spec);
+    const budget = listing.budget === null ? null : normalizeOptionalObject(listing.budget);
+    const constraints = listing.constraints === null ? null : normalizeOptionalObject(listing.constraints);
+    const expiresAt = normalizeOptionalString(listing.expires_at);
+    if (expiresAt && parseIsoMs(expiresAt) === null) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid listing expiry timestamp', {
+          reason_code: 'market_listing_invalid',
+          expires_at: listing.expires_at
+        })
+      };
+    }
+
     const requestedId = normalizeOptionalString(listing.listing_id);
 
     return {
@@ -749,9 +894,171 @@ export class MarketService {
         kind,
         status,
         title,
+        description,
         offer: clone(Array.isArray(offer) ? offer : []),
+        want_spec: wantSpec,
+        budget,
+        constraints,
         capability_profile: capabilityProfile ? clone(capabilityProfile) : null,
+        expires_at: expiresAt,
         recorded_at: recordedAt
+      }
+    };
+  }
+
+  signup({ actor, auth, idempotencyKey, request }) {
+    const op = 'marketSignup.create';
+    const corr = correlationId(op);
+    const authz = this._authorize({ actor, auth, operationId: op, correlationId: corr });
+    if (!authz.ok) return { replayed: false, result: { ok: false, body: authz.body } };
+
+    const scopeKey = signupIdempotencyScopeKey(op, idempotencyKey);
+    const requestHash = payloadHash(request);
+    const existing = this.store.state.idempotency[scopeKey];
+    if (existing) {
+      if (existing.payload_hash === requestHash) {
+        return { replayed: true, result: clone(existing.result) };
+      }
+      return {
+        replayed: false,
+        result: {
+          ok: false,
+          body: errorResponse(corr, 'IDEMPOTENCY_KEY_REUSE_PAYLOAD_MISMATCH', 'idempotency key reused with a different payload', {
+            operation_id: op,
+            idempotency_key: idempotencyKey
+          })
+        }
+      };
+    }
+
+    const result = (() => {
+      if (!openSignupEnabled()) {
+        return {
+          ok: false,
+          body: errorResponse(corr, 'FORBIDDEN', 'market signup is not open', {
+            reason_code: 'market_signup_closed'
+          })
+        };
+      }
+
+      const displayName = normalizeOptionalString(request?.display_name);
+      const bio = normalizeOptionalString(request?.bio);
+      const ownerMode = normalizeOptionalString(request?.owner_mode)?.toLowerCase() ?? 'agent_owner';
+      const requestedWorkspaceId = normalizeOptionalString(request?.workspace_id);
+      const recordedAt = normalizeRecordedAt(request, auth);
+
+      if (!displayName || parseIsoMs(recordedAt) === null) {
+        return {
+          ok: false,
+          body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid signup payload', {
+            reason_code: 'market_signup_invalid'
+          })
+        };
+      }
+
+      if (!new Set(['agent_owner', 'operator', 'builder']).has(ownerMode)) {
+        return {
+          ok: false,
+          body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid owner mode', {
+            reason_code: 'market_signup_invalid',
+            owner_mode: ownerMode
+          })
+        };
+      }
+
+      const counter = nextActorProfileCounter(this.store);
+      const slug = slugifyLabel(displayName);
+      const actorRef = { type: 'user', id: `owner_${slug}_${String(counter).padStart(4, '0')}` };
+      const workspaceId = requestedWorkspaceId ?? 'open_market';
+      const profile = {
+        actor: actorRef,
+        display_name: displayName,
+        handle: slug,
+        owner_mode: ownerMode,
+        default_workspace_id: workspaceId,
+        bio,
+        created_at: recordedAt,
+        updated_at: recordedAt
+      };
+
+      this.store.state.market_actor_profiles[actorProfileKey(actorRef)] = profile;
+      this.store.state.market_actor_quotas[actorProfileKey(actorRef)] ||= {
+        actor: clone(actorRef),
+        trust_tier: 'open_signup',
+        credits_available: 1000,
+        listings_created: 0,
+        edges_created: 0,
+        created_at: recordedAt,
+        updated_at: recordedAt
+      };
+
+      return {
+        ok: true,
+        body: {
+          correlation_id: corr,
+          actor: clone(actorRef),
+          owner_profile: normalizeActorProfileView(profile),
+          auth_hints: {
+            scopes: clone(DEFAULT_MARKET_SIGNUP_SCOPES)
+          }
+        }
+      };
+    })();
+
+    this.store.state.idempotency[scopeKey] = {
+      payload_hash: requestHash,
+      result: clone(result)
+    };
+    return { replayed: false, result };
+  }
+
+  getStats({ actor, auth }) {
+    const op = 'marketStats.get';
+    const corr = correlationId(op);
+    const authz = this._authorize({ actor, auth, operationId: op, correlationId: corr });
+    if (!authz.ok) return { ok: false, body: authz.body };
+
+    const visibleListings = Object.values(this.store.state.market_listings ?? {}).filter(listingIsPublicVisible);
+    const visibleEdges = Object.values(this.store.state.market_edges ?? {}).filter(edge => edgeIsPublicVisible(this.store, edge));
+    const visibleDeals = Object.values(this.store.state.market_deals ?? {}).filter(deal => dealIsPublicVisible(this.store, deal));
+    const actorKeys = new Set();
+    const workspaces = new Set();
+    let latestActivityAt = null;
+
+    for (const listing of visibleListings) {
+      workspaces.add(listing.workspace_id);
+      const key = actorProfileKey(listing.owner_actor);
+      if (key) actorKeys.add(key);
+      if (!latestActivityAt || (parseIsoMs(listing.updated_at) ?? 0) > (parseIsoMs(latestActivityAt) ?? 0)) latestActivityAt = listing.updated_at;
+    }
+    for (const edge of visibleEdges) {
+      workspaces.add(edge.workspace_id);
+      if (!latestActivityAt || (parseIsoMs(edge.updated_at) ?? 0) > (parseIsoMs(latestActivityAt) ?? 0)) latestActivityAt = edge.updated_at;
+    }
+    for (const deal of visibleDeals) {
+      workspaces.add(deal.workspace_id);
+      for (const participant of deal.participants ?? []) {
+        const key = actorProfileKey(participant);
+        if (key) actorKeys.add(key);
+      }
+      if (!latestActivityAt || (parseIsoMs(deal.updated_at) ?? 0) > (parseIsoMs(latestActivityAt) ?? 0)) latestActivityAt = deal.updated_at;
+    }
+
+    return {
+      ok: true,
+      body: {
+        correlation_id: corr,
+        stats: {
+          actors: actorKeys.size,
+          workspaces: workspaces.size,
+          listings_open: visibleListings.filter(row => row.status === 'open').length,
+          wants_open: visibleListings.filter(row => row.kind === 'want' && row.status === 'open').length,
+          capabilities_open: visibleListings.filter(row => row.kind === 'capability' && row.status === 'open').length,
+          edges_open: visibleEdges.filter(row => row.status === 'open').length,
+          deals_active: visibleDeals.filter(row => row.status !== 'completed' && row.status !== 'failed' && row.status !== 'cancelled').length,
+          deals_completed: visibleDeals.filter(row => row.status === 'completed').length,
+          latest_activity_at: latestActivityAt
+        }
       }
     };
   }
@@ -791,8 +1098,13 @@ export class MarketService {
           kind: normalized.value.kind,
           status: normalized.value.status,
           title: normalized.value.title,
+          description: normalized.value.description,
           offer: normalized.value.offer,
+          want_spec: normalized.value.want_spec,
+          budget: normalized.value.budget,
+          constraints: normalized.value.constraints,
           capability_profile: normalized.value.capability_profile,
+          expires_at: normalized.value.expires_at,
           created_at: normalized.value.recorded_at,
           updated_at: normalized.value.recorded_at
         };
@@ -803,7 +1115,7 @@ export class MarketService {
           ok: true,
           body: {
             correlation_id: corr,
-            listing: normalizeListingView(record)
+            listing: normalizeListingView(record, this.store)
           }
         };
       }
@@ -842,13 +1154,14 @@ export class MarketService {
         if (!load.ok) return { ok: false, body: load.body };
 
         const record = load.record;
-        if (!listingOwnsActor(record, actor)) {
+        const subjectActor = resolveSubjectActor({ actor, auth });
+        if (!listingOwnsActor(record, subjectActor)) {
           return {
             ok: false,
             body: errorResponse(corr, 'FORBIDDEN', 'listing owner actor required', {
               reason_code: 'market_listing_forbidden',
               listing_id: listingId,
-              actor,
+              actor: subjectActor,
               owner_actor: record.owner_actor
             })
           };
@@ -875,7 +1188,7 @@ export class MarketService {
           };
         }
 
-        const allowed = new Set(['title', 'offer', 'capability_profile']);
+        const allowed = new Set(['title', 'description', 'offer', 'want_spec', 'budget', 'constraints', 'capability_profile', 'expires_at']);
         for (const key of Object.keys(patch)) {
           if (!allowed.has(key)) {
             return {
@@ -912,6 +1225,10 @@ export class MarketService {
           record.title = title;
         }
 
+        if (patch.description !== undefined) {
+          record.description = normalizeOptionalString(patch.description);
+        }
+
         if (patch.offer !== undefined) {
           if (record.kind === 'want') {
             return {
@@ -932,6 +1249,18 @@ export class MarketService {
           }
 
           record.offer = clone(patch.offer);
+        }
+
+        if (patch.want_spec !== undefined) {
+          record.want_spec = patch.want_spec === null ? null : normalizeOptionalObject(patch.want_spec);
+        }
+
+        if (patch.budget !== undefined) {
+          record.budget = patch.budget === null ? null : normalizeOptionalObject(patch.budget);
+        }
+
+        if (patch.constraints !== undefined) {
+          record.constraints = patch.constraints === null ? null : normalizeOptionalObject(patch.constraints);
         }
 
         if (patch.capability_profile !== undefined) {
@@ -959,13 +1288,27 @@ export class MarketService {
           record.capability_profile = clone(capabilityProfile);
         }
 
+        if (patch.expires_at !== undefined) {
+          const expiresAt = normalizeOptionalString(patch.expires_at);
+          if (expiresAt && parseIsoMs(expiresAt) === null) {
+            return {
+              ok: false,
+              body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid listing expiry timestamp', {
+                reason_code: 'market_listing_invalid',
+                expires_at: patch.expires_at
+              })
+            };
+          }
+          record.expires_at = expiresAt;
+        }
+
         record.updated_at = recordedAt;
 
         return {
           ok: true,
           body: {
             correlation_id: corr,
-            listing: normalizeListingView(record)
+            listing: normalizeListingView(record, this.store)
           }
         };
       }
@@ -989,13 +1332,14 @@ export class MarketService {
         if (!load.ok) return { ok: false, body: load.body };
 
         const record = load.record;
-        if (!listingOwnsActor(record, actor)) {
+        const subjectActor = resolveSubjectActor({ actor, auth });
+        if (!listingOwnsActor(record, subjectActor)) {
           return {
             ok: false,
             body: errorResponse(corr, 'FORBIDDEN', 'listing owner actor required', {
               reason_code: 'market_listing_forbidden',
               listing_id: listingId,
-              actor,
+              actor: subjectActor,
               owner_actor: record.owner_actor
             })
           };
@@ -1018,7 +1362,7 @@ export class MarketService {
               ok: true,
               body: {
                 correlation_id: corr,
-                listing: normalizeListingView(record)
+                listing: normalizeListingView(record, this.store)
               }
             };
           }
@@ -1041,7 +1385,7 @@ export class MarketService {
             ok: true,
             body: {
               correlation_id: corr,
-              listing: normalizeListingView(record)
+              listing: normalizeListingView(record, this.store)
             }
           };
         }
@@ -1053,7 +1397,7 @@ export class MarketService {
           ok: true,
           body: {
             correlation_id: corr,
-            listing: normalizeListingView(record)
+            listing: normalizeListingView(record, this.store)
           }
         };
       }
@@ -1093,12 +1437,21 @@ export class MarketService {
 
     const load = this._loadListingOrError({ listingId, correlationId: corr });
     if (!load.ok) return { ok: false, body: load.body };
+    if (isPublicViewer(actor) && !listingIsPublicVisible(load.record)) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'NOT_FOUND', 'listing not found', {
+          reason_code: 'market_listing_not_found',
+          listing_id: listingId
+        })
+      };
+    }
 
     return {
       ok: true,
       body: {
         correlation_id: corr,
-        listing: normalizeListingView(load.record)
+        listing: normalizeListingView(load.record, this.store)
       }
     };
   }
@@ -1120,6 +1473,7 @@ export class MarketService {
 
     const rows = Object.values(this.store.state.market_listings ?? {})
       .filter(row => {
+        if (isPublicViewer(actor) && !listingIsPublicVisible(row)) return false;
         if (normalized.value.workspace_id && row.workspace_id !== normalized.value.workspace_id) return false;
         if (normalized.value.owner_actor_type && row.owner_actor?.type !== normalized.value.owner_actor_type) return false;
         if (normalized.value.owner_actor_id && row.owner_actor?.id !== normalized.value.owner_actor_id) return false;
@@ -1149,7 +1503,7 @@ export class MarketService {
       ok: true,
       body: {
         correlation_id: corr,
-        listings: page.value.page.map(normalizeListingView),
+        listings: page.value.page.map(row => normalizeListingView(row, this.store)),
         total: page.value.total,
         next_cursor: page.value.nextCursor
       }
@@ -1234,12 +1588,25 @@ export class MarketService {
           };
         }
 
-        if (!listingOwnsActor(sourceListing, actor)) {
+        if ((sourceListing.expires_at && (parseIsoMs(sourceListing.expires_at) ?? 0) < (parseIsoMs(recordedAt) ?? 0))
+          || (targetListing.expires_at && (parseIsoMs(targetListing.expires_at) ?? 0) < (parseIsoMs(recordedAt) ?? 0))) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'expired listing cannot be linked', {
+              reason_code: 'market_edge_invalid',
+              source_listing_id: sourceListing.listing_id,
+              target_listing_id: targetListing.listing_id
+            })
+          };
+        }
+
+        const subjectActor = resolveSubjectActor({ actor, auth });
+        if (!listingOwnsActor(sourceListing, subjectActor)) {
           return {
             ok: false,
             body: errorResponse(corr, 'FORBIDDEN', 'edge source owner actor required', {
               reason_code: 'market_edge_target_owner_required',
-              actor,
+              actor: subjectActor,
               source_owner_actor: sourceListing.owner_actor
             })
           };
@@ -1276,8 +1643,9 @@ export class MarketService {
           edge_type: edgeType,
           status,
           terms_patch: isPlainObject(edge.terms_patch) ? clone(edge.terms_patch) : null,
+          note: normalizeOptionalString(edge.note),
           expires_at: expiresAt,
-          created_by: { type: actor.type, id: actor.id },
+          created_by: { type: subjectActor.type, id: subjectActor.id },
           created_at: recordedAt,
           updated_at: recordedAt
         };
@@ -1328,6 +1696,7 @@ export class MarketService {
         const edge = load.record;
         const sourceListing = this._resolveListingByRef(edge.source_ref);
         const targetListing = this._resolveListingByRef(edge.target_ref);
+        const subjectActor = resolveSubjectActor({ actor, auth });
 
         const normalized = normalizeActionRequest(request, auth);
         if (!normalized.ok) {
@@ -1352,25 +1721,49 @@ export class MarketService {
           };
         }
 
+        if (edge.expires_at && (parseIsoMs(edge.expires_at) ?? 0) < (parseIsoMs(normalized.recordedAt) ?? 0)) {
+          edge.status = 'expired';
+          edge.updated_at = normalized.recordedAt;
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'edge has expired', {
+              reason_code: 'market_edge_status_transition_invalid',
+              edge_id: edgeId,
+              expires_at: edge.expires_at
+            })
+          };
+        }
+
+        if ((sourceListing?.expires_at && (parseIsoMs(sourceListing.expires_at) ?? 0) < (parseIsoMs(normalized.recordedAt) ?? 0))
+          || (targetListing?.expires_at && (parseIsoMs(targetListing.expires_at) ?? 0) < (parseIsoMs(normalized.recordedAt) ?? 0))) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'expired listing cannot transition edge', {
+              reason_code: 'market_edge_status_transition_invalid',
+              edge_id: edgeId
+            })
+          };
+        }
+
         if (targetStatus === 'withdrawn') {
-          if (!sourceListing || !listingOwnsActor(sourceListing, actor)) {
+          if (!sourceListing || !listingOwnsActor(sourceListing, subjectActor)) {
             return {
               ok: false,
               body: errorResponse(corr, 'FORBIDDEN', 'edge source owner actor required for withdraw', {
                 reason_code: 'market_edge_target_owner_required',
                 edge_id: edgeId,
-                actor,
+                actor: subjectActor,
                 source_owner_actor: sourceListing?.owner_actor ?? null
               })
             };
           }
-        } else if (!targetListing || !listingOwnsActor(targetListing, actor)) {
+        } else if (!targetListing || !listingOwnsActor(targetListing, subjectActor)) {
           return {
             ok: false,
             body: errorResponse(corr, 'FORBIDDEN', 'edge target owner actor required', {
               reason_code: 'market_edge_target_owner_required',
               edge_id: edgeId,
-              actor,
+              actor: subjectActor,
               target_owner_actor: targetListing?.owner_actor ?? null
             })
           };
@@ -1399,6 +1792,105 @@ export class MarketService {
       request,
       operationId: 'marketEdges.accept',
       targetStatus: 'accepted'
+    });
+  }
+
+  patchEdge({ actor, auth, edgeId, idempotencyKey, request }) {
+    const op = 'marketEdges.patch';
+    const corr = correlationId(op);
+
+    const authz = this._authorize({ actor, auth, operationId: op, correlationId: corr });
+    if (!authz.ok) return { replayed: false, result: { ok: false, body: authz.body } };
+
+    return this._withIdempotency({
+      actor,
+      operationId: op,
+      idempotencyKey,
+      requestBody: request,
+      correlationId: corr,
+      handler: () => {
+        const load = this._loadEdgeOrError({ edgeId, correlationId: corr });
+        if (!load.ok) return { ok: false, body: load.body };
+
+        const edge = load.record;
+        const subjectActor = resolveSubjectActor({ actor, auth });
+        const sourceListing = this._resolveListingByRef(edge.source_ref);
+        if (!sourceListing || !listingOwnsActor(sourceListing, subjectActor)) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'FORBIDDEN', 'edge source owner actor required', {
+              reason_code: 'market_edge_target_owner_required',
+              edge_id: edgeId,
+              actor: subjectActor,
+              source_owner_actor: sourceListing?.owner_actor ?? null
+            })
+          };
+        }
+
+        if (edge.status !== 'open') {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'edge status does not allow patch', {
+              reason_code: 'market_edge_status_transition_invalid',
+              edge_id: edgeId,
+              status: edge.status
+            })
+          };
+        }
+
+        const patch = request?.patch;
+        if (!isPlainObject(patch)) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid market edge patch payload', {
+              reason_code: 'market_edge_invalid'
+            })
+          };
+        }
+
+        const recordedAt = normalizeRecordedAt(request, auth);
+        if (parseIsoMs(recordedAt) === null) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid edge timestamp', {
+              reason_code: 'market_edge_invalid',
+              recorded_at: request?.recorded_at ?? null
+            })
+          };
+        }
+
+        if (patch.terms_patch !== undefined) {
+          edge.terms_patch = patch.terms_patch === null ? null : (isPlainObject(patch.terms_patch) ? clone(patch.terms_patch) : null);
+        }
+
+        if (patch.note !== undefined) {
+          edge.note = normalizeOptionalString(patch.note);
+        }
+
+        if (patch.expires_at !== undefined) {
+          const expiresAt = normalizeOptionalString(patch.expires_at);
+          if (expiresAt && parseIsoMs(expiresAt) === null) {
+            return {
+              ok: false,
+              body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid edge expiry timestamp', {
+                reason_code: 'market_edge_invalid',
+                expires_at: patch.expires_at
+              })
+            };
+          }
+          edge.expires_at = expiresAt;
+        }
+
+        edge.updated_at = recordedAt;
+
+        return {
+          ok: true,
+          body: {
+            correlation_id: corr,
+            edge: normalizeEdgeView(edge)
+          }
+        };
+      }
     });
   }
 
@@ -1435,6 +1927,15 @@ export class MarketService {
 
     const load = this._loadEdgeOrError({ edgeId, correlationId: corr });
     if (!load.ok) return { ok: false, body: load.body };
+    if (isPublicViewer(actor) && !edgeIsPublicVisible(this.store, load.record)) {
+      return {
+        ok: false,
+        body: errorResponse(corr, 'NOT_FOUND', 'edge not found', {
+          reason_code: 'market_edge_not_found',
+          edge_id: edgeId
+        })
+      };
+    }
 
     return {
       ok: true,
@@ -1462,6 +1963,7 @@ export class MarketService {
 
     const rows = Object.values(this.store.state.market_edges ?? {})
       .filter(row => {
+        if (isPublicViewer(actor) && !edgeIsPublicVisible(this.store, row)) return false;
         if (normalized.value.workspace_id && row.workspace_id !== normalized.value.workspace_id) return false;
         if (normalized.value.source_id && row.source_ref?.id !== normalized.value.source_id) return false;
         if (normalized.value.target_id && row.target_ref?.id !== normalized.value.target_id) return false;
@@ -1516,8 +2018,10 @@ export class MarketService {
     const items = [];
 
     for (const listing of Object.values(this.store.state.market_listings ?? {})) {
+      if (isPublicViewer(actor) && !listingIsPublicVisible(listing)) continue;
       if (normalized.value.workspace_id && listing.workspace_id !== normalized.value.workspace_id) continue;
       if (normalized.value.item_type && normalized.value.item_type !== 'listing') continue;
+      if (normalized.value.types.length > 0 && !normalized.value.types.includes('listing')) continue;
       items.push({
         item_type: 'listing',
         item_id: listing.listing_id,
@@ -1529,14 +2033,17 @@ export class MarketService {
           status: listing.status,
           title: listing.title,
           owner_actor: clone(listing.owner_actor),
+          owner_profile: actorProfileSummary(this.store, listing.owner_actor),
           updated_at: listing.updated_at
         }
       });
     }
 
     for (const edge of Object.values(this.store.state.market_edges ?? {})) {
+      if (isPublicViewer(actor) && !edgeIsPublicVisible(this.store, edge)) continue;
       if (normalized.value.workspace_id && edge.workspace_id !== normalized.value.workspace_id) continue;
       if (normalized.value.item_type && normalized.value.item_type !== 'edge') continue;
+      if (normalized.value.types.length > 0 && !normalized.value.types.includes('edge')) continue;
       items.push({
         item_type: 'edge',
         item_id: edge.edge_id,
@@ -1549,6 +2056,28 @@ export class MarketService {
           source_ref: clone(edge.source_ref),
           target_ref: clone(edge.target_ref),
           updated_at: edge.updated_at
+        }
+      });
+    }
+
+    for (const deal of Object.values(this.store.state.market_deals ?? {})) {
+      if (isPublicViewer(actor) && !dealIsPublicVisible(this.store, deal)) continue;
+      if (normalized.value.workspace_id && deal.workspace_id !== normalized.value.workspace_id) continue;
+      if (normalized.value.item_type && normalized.value.item_type !== 'deal') continue;
+      if (normalized.value.types.length > 0 && !normalized.value.types.includes('deal')) continue;
+      items.push({
+        item_type: 'deal',
+        item_id: deal.deal_id,
+        workspace_id: deal.workspace_id,
+        occurred_at: deal.updated_at,
+        deal_summary: {
+          deal_id: deal.deal_id,
+          origin_edge_id: deal.origin_edge_id,
+          settlement_mode: deal.settlement_mode ?? null,
+          status: deal.status,
+          participants: clone(deal.participants ?? []),
+          receipt_ref: deal.receipt_ref ?? null,
+          updated_at: deal.updated_at
         }
       });
     }
@@ -1652,8 +2181,10 @@ export class MarketService {
         const workspaceId = normalizeOptionalString(thread.workspace_id);
         const status = normalizeOptionalString(thread.status)?.toLowerCase() ?? 'active';
         const participants = normalizeParticipants(thread.participants);
+        const anchorRef = thread.anchor_ref === undefined ? null : normalizeAnchorRef(thread.anchor_ref);
+        const subjectActor = resolveSubjectActor({ actor, auth });
 
-        if (!workspaceId || !participants || !THREAD_STATUS.has(status) || status !== 'active') {
+        if (!workspaceId || !participants || !THREAD_STATUS.has(status) || status !== 'active' || (thread.anchor_ref !== undefined && !anchorRef)) {
           return {
             ok: false,
             body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid thread payload', {
@@ -1662,12 +2193,12 @@ export class MarketService {
           };
         }
 
-        if (!includesActor(participants, actor)) {
+        if (!includesActor(participants, subjectActor)) {
           return {
             ok: false,
             body: errorResponse(corr, 'FORBIDDEN', 'thread participants must include caller', {
               reason_code: 'market_thread_forbidden',
-              actor,
+              actor: subjectActor,
               participants
             })
           };
@@ -1690,6 +2221,7 @@ export class MarketService {
           workspace_id: workspaceId,
           participants,
           status,
+          anchor_ref: anchorRef,
           created_at: recordedAt,
           updated_at: recordedAt
         };
@@ -1717,7 +2249,7 @@ export class MarketService {
     const load = this._loadThreadOrError({ threadId, correlationId: corr });
     if (!load.ok) return { ok: false, body: load.body };
 
-    const participantGuard = this._requireThreadParticipant({ thread: load.record, actor, correlationId: corr });
+    const participantGuard = this._requireThreadParticipant({ thread: load.record, actor: resolveSubjectActor({ actor, auth }), correlationId: corr });
     if (participantGuard) return participantGuard;
 
     return {
@@ -1744,9 +2276,10 @@ export class MarketService {
       };
     }
 
+    const subjectActor = resolveSubjectActor({ actor, auth });
     const rows = Object.values(this.store.state.market_threads ?? {})
       .filter(row => {
-        if (!includesActor(row.participants, actor)) return false;
+        if (!includesActor(row.participants, subjectActor)) return false;
         if (normalized.value.workspace_id && row.workspace_id !== normalized.value.workspace_id) return false;
         if (normalized.value.status && row.status !== normalized.value.status) return false;
         if (normalized.value.participant_type || normalized.value.participant_id) {
@@ -1801,7 +2334,8 @@ export class MarketService {
         if (!load.ok) return { ok: false, body: load.body };
 
         const thread = load.record;
-        const participantGuard = this._requireThreadParticipant({ thread, actor, correlationId: corr });
+        const subjectActor = resolveSubjectActor({ actor, auth });
+        const participantGuard = this._requireThreadParticipant({ thread, actor: subjectActor, correlationId: corr });
         if (participantGuard) return participantGuard;
 
         if (thread.status !== 'active') {
@@ -1871,7 +2405,7 @@ export class MarketService {
         const record = {
           message_id: messageId,
           thread_id: threadId,
-          sender_actor: { type: actor.type, id: actor.id },
+          sender_actor: { type: subjectActor.type, id: subjectActor.id },
           message_type: messageType,
           payload: clone(payload),
           created_at: recordedAt
@@ -1901,7 +2435,7 @@ export class MarketService {
     const load = this._loadThreadOrError({ threadId, correlationId: corr });
     if (!load.ok) return { ok: false, body: load.body };
 
-    const participantGuard = this._requireThreadParticipant({ thread: load.record, actor, correlationId: corr });
+    const participantGuard = this._requireThreadParticipant({ thread: load.record, actor: resolveSubjectActor({ actor, auth }), correlationId: corr });
     if (participantGuard) return participantGuard;
 
     const normalized = normalizeMessageListQuery(query ?? {});

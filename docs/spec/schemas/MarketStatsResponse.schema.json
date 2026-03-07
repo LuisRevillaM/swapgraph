@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketStatsResponse.schema.json",
+  "title": "MarketStatsResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correlation_id",
+    "stats"
+  ],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stats": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actors",
+        "workspaces",
+        "listings_open",
+        "wants_open",
+        "capabilities_open",
+        "edges_open",
+        "deals_active",
+        "deals_completed",
+        "latest_activity_at"
+      ],
+      "properties": {
+        "actors": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "workspaces": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "listings_open": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "wants_open": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "capabilities_open": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "edges_open": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "deals_active": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "deals_completed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "latest_activity_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

@@ -116,11 +116,16 @@ Core scopes (v1):
 - `vault:write`
 - `market:read`
 - `market:write`
+- `market:moderate`
+- `execution_grants:write`
+- `execution_grants:consume`
+- `payment_proofs:write`
 
 Notes:
 - `keys:*` endpoints are public in v1 (no auth required), but we still model a scope for completeness.
+- market public read surfaces (`GET /market/stats`, `GET /market/listings*`, `GET /market/edges*`, `GET /market/feed`) and `POST /market/signup` are intentionally open in vNext so lurkers and new owners can onboard without pre-provisioned credentials.
 - `delegations:*` endpoints are user-scoped in v1 (users create/revoke grants for their own user identity).
-- Agent scopes exist only with delegation; v1 fixtures support agent access for SwapIntents and reads under delegation (when `AUTHZ_ENFORCE=1`).
+- Agent scopes exist only with delegation; v1 fixtures support agent access for SwapIntents and the market surface under delegation (when `AUTHZ_ENFORCE=1`).
 - Vault custody publication/read is partner-scoped in v1 (`vault:*`), while vault holding deposit/withdraw is user-scoped and reservation controls are partner-scoped.
 
 ## Enforcement source of truth

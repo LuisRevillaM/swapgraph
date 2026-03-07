@@ -24,6 +24,9 @@ import { MetricsNetworkHealthService } from '../service/metricsNetworkHealthServ
 import { MarketplaceMatchingService } from '../service/marketplaceMatchingService.mjs';
 import { EdgeIntentService } from '../service/edgeIntentService.mjs';
 import { MarketService } from '../service/marketService.mjs';
+import { DelegationsService } from '../service/delegationsService.mjs';
+import { MarketDealService } from '../service/marketDealService.mjs';
+import { MarketExecutionGrantService } from '../service/marketExecutionGrantService.mjs';
 import { PartnerLiquidityProviderGovernanceService } from '../service/partnerLiquidityProviderGovernanceService.mjs';
 import { PlatformInventoryDisputeFacadeService } from '../service/platformInventoryDisputeFacadeService.mjs';
 import { ProductSurfaceReadinessService } from '../service/productSurfaceReadinessService.mjs';
@@ -245,6 +248,17 @@ function routeMatch(pathname, re) {
   return m.slice(1).map(decodeURIComponent);
 }
 
+function allowsAnonymousActor({ method, pathname }) {
+  if (method === 'POST' && pathname === '/market/signup') return true;
+  if (method === 'GET' && pathname === '/market/stats') return true;
+  if (method === 'GET' && pathname === '/market/listings') return true;
+  if (method === 'GET' && pathname === '/market/edges') return true;
+  if (method === 'GET' && pathname === '/market/feed') return true;
+  if (method === 'GET' && /^\/market\/listings\/[^/]+$/.test(pathname)) return true;
+  if (method === 'GET' && /^\/market\/edges\/[^/]+$/.test(pathname)) return true;
+  return false;
+}
+
 function summarizeState(store) {
   const liquidityInventorySnapshots = Object.values(store.state.liquidity_inventory_snapshots ?? {})
     .reduce((sum, rows) => sum + (Array.isArray(rows) ? rows.length : 0), 0);
@@ -358,6 +372,9 @@ export function createRuntimeApiServer({
   const marketplaceMatching = new MarketplaceMatchingService({ store });
   const edgeIntents = new EdgeIntentService({ store });
   const market = new MarketService({ store });
+  const delegations = new DelegationsService({ store });
+  const marketDeals = new MarketDealService({ store });
+  const marketExecutionGrants = new MarketExecutionGrantService({ store });
   const commercialPolicy = new CommercialPolicyService({ store });
   const liquidityTransparency = new LiquidityTransparencyService({ store });
   const liquidityProviders = new LiquidityProviderService({ store });
@@ -549,7 +566,7 @@ export function createRuntimeApiServer({
         });
       }
 
-      const authParsed = parseActorAuth({ req });
+      const authParsed = parseActorAuth({ req, allowAnonymous: allowsAnonymousActor({ method, pathname }) });
       if (!authParsed.ok) {
         return sendJson({
           res,
@@ -739,6 +756,36 @@ export function createRuntimeApiServer({
         return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
       }
 
+      if (method === 'POST' && pathname === '/delegations') {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const occurredAt = trimOrNull(req.headers['x-now-iso']) ?? new Date().toISOString();
+        const out = delegations.create({ actor, auth, idempotencyKey: idem.value, requestBody: body, occurredAt });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      const delegationGet = routeMatch(pathname, /^\/delegations\/([^/]+)$/);
+      if (method === 'GET' && delegationGet) {
+        const result = delegations.get({ actor, auth, delegationId: delegationGet[0] });
+        return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
+      }
+
+      const delegationRevoke = routeMatch(pathname, /^\/delegations\/([^/]+)\/revoke$/);
+      if (method === 'POST' && delegationRevoke) {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = delegations.revoke({ actor, auth, idempotencyKey: idem.value, delegationId: delegationRevoke[0], requestBody: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
       if (method === 'POST' && pathname === '/market/listings') {
         const idem = requireIdempotencyKey(req);
         if (!idem.ok) {
@@ -748,6 +795,22 @@ export function createRuntimeApiServer({
         const out = market.createListing({ actor, auth, idempotencyKey: idem.value, request: body });
         shouldPersist = true;
         return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      if (method === 'POST' && pathname === '/market/signup') {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = market.signup({ actor, auth, idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      if (method === 'GET' && pathname === '/market/stats') {
+        const result = market.getStats({ actor, auth });
+        return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
       }
 
       const marketListingPatch = routeMatch(pathname, /^\/market\/listings\/([^/]+)$/);
@@ -805,6 +868,18 @@ export function createRuntimeApiServer({
         }
         const body = await readJsonBody(req);
         const out = market.createEdge({ actor, auth, idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      const marketEdgePatch = routeMatch(pathname, /^\/market\/edges\/([^/]+)$/);
+      if (method === 'PATCH' && marketEdgePatch) {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = market.patchEdge({ actor, auth, edgeId: marketEdgePatch[0], idempotencyKey: idem.value, request: body });
         shouldPersist = true;
         return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
       }
@@ -903,6 +978,89 @@ export function createRuntimeApiServer({
         const query = toQueryObject(url.searchParams);
         const result = market.listThreadMessages({ actor, auth, threadId: marketThreadMessagesList[0], query });
         return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
+      }
+
+      const marketDealFromEdge = routeMatch(pathname, /^\/market\/deals\/from-edge\/([^/]+)$/);
+      if (method === 'POST' && marketDealFromEdge) {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = marketDeals.createFromEdge({ actor, auth, edgeId: marketDealFromEdge[0], idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      const marketDealGet = routeMatch(pathname, /^\/market\/deals\/([^/]+)$/);
+      if (method === 'GET' && marketDealGet) {
+        const result = marketDeals.get({ actor, auth, dealId: marketDealGet[0] });
+        return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
+      }
+
+      const marketDealStartSettlement = routeMatch(pathname, /^\/market\/deals\/([^/]+)\/start-settlement$/);
+      if (method === 'POST' && marketDealStartSettlement) {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = marketDeals.startSettlement({ actor, auth, dealId: marketDealStartSettlement[0], idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      const marketDealPaymentProof = routeMatch(pathname, /^\/market\/deals\/([^/]+)\/payment-proof$/);
+      if (method === 'POST' && marketDealPaymentProof) {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = marketDeals.attachPaymentProof({ actor, auth, dealId: marketDealPaymentProof[0], idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      const marketDealComplete = routeMatch(pathname, /^\/market\/deals\/([^/]+)\/complete$/);
+      if (method === 'POST' && marketDealComplete) {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = marketDeals.complete({ actor, auth, dealId: marketDealComplete[0], idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      const marketDealReceipt = routeMatch(pathname, /^\/market\/deals\/([^/]+)\/receipt$/);
+      if (method === 'GET' && marketDealReceipt) {
+        const result = marketDeals.receipt({ actor, auth, dealId: marketDealReceipt[0] });
+        return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
+      }
+
+      if (method === 'POST' && pathname === '/market/execution-grants') {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = marketExecutionGrants.create({ actor, auth, idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      const marketExecutionGrantConsume = routeMatch(pathname, /^\/market\/execution-grants\/([^/]+)\/consume$/);
+      if (method === 'POST' && marketExecutionGrantConsume) {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = marketExecutionGrants.consume({ actor, auth, grantId: marketExecutionGrantConsume[0], idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
       }
 
       if (method === 'POST' && pathname === '/marketplace/matching/runs') {

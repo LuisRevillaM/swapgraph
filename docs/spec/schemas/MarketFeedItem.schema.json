@@ -15,7 +15,8 @@
       "type": "string",
       "enum": [
         "listing",
-        "edge"
+        "edge",
+        "deal"
       ]
     },
     "item_id": {
@@ -70,6 +71,9 @@
         "owner_actor": {
           "$ref": "ActorRef.schema.json"
         },
+        "owner_profile": {
+          "$ref": "MarketActorProfileView.schema.json"
+        },
         "updated_at": {
           "type": "string",
           "format": "date-time"
@@ -116,6 +120,67 @@
         },
         "target_ref": {
           "$ref": "MarketEdgeRef.schema.json"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "deal_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "deal_id",
+        "origin_edge_id",
+        "settlement_mode",
+        "status",
+        "updated_at"
+      ],
+      "properties": {
+        "deal_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "origin_edge_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "settlement_mode": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "internal_credit",
+            "external_payment_proof",
+            "cycle_bridge",
+            null
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "pending_accept",
+            "ready_for_settlement",
+            "settlement_in_progress",
+            "completed",
+            "failed",
+            "cancelled"
+          ]
+        },
+        "participants": {
+          "type": "array",
+          "items": {
+            "$ref": "ActorRef.schema.json"
+          }
+        },
+        "receipt_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "updated_at": {
           "type": "string",

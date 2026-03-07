@@ -1,0 +1,10 @@
+name: M142
+commands:
+  - cmd: "npm run verify:m142"
+artifacts:
+  - artifact: "docs/prd/M142.md"
+  - artifact: "src/service/marketDealService.mjs"
+  - artifact: "src/service/marketService.mjs"
+  - artifact: "src/server/runtimeApiServer.mjs"
+  - artifact: "scripts/run-m142-market-deals-threads-scenario.mjs"
+  - artifact: "verify/m142.sh"

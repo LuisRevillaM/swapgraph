@@ -1,0 +1,25 @@
+{
+  "correlation_id": "corr_marketexecutiongrants_create",
+  "grant": {
+    "grant_id": "grant_000001",
+    "deal_id": "deal_000003",
+    "actor": {
+      "type": "user",
+      "id": "buyer_001"
+    },
+    "audience": {
+      "type": "agent",
+      "id": "capability_agent_001"
+    },
+    "scope": [
+      "execute:deliver"
+    ],
+    "grant_mode": "encrypted_envelope",
+    "ciphertext": "eyJlbmMiOiJhbGctZGVtbyJ9",
+    "nonce": "grant-nonce-demo-001",
+    "max_uses": 1,
+    "expires_at": "2026-03-07T15:30:00.000Z",
+    "consumed_at": null,
+    "created_at": "2026-03-07T15:20:00.000Z"
+  }
+}

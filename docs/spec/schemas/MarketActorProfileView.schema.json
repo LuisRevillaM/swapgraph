@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketActorProfileView.schema.json",
+  "title": "MarketActorProfileView",
+  "type": [
+    "object",
+    "null"
+  ],
+  "additionalProperties": false,
+  "required": [
+    "actor",
+    "display_name",
+    "handle",
+    "owner_mode",
+    "default_workspace_id",
+    "bio",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "actor": {
+      "$ref": "ActorRef.schema.json"
+    },
+    "display_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "handle": {
+      "type": "string",
+      "minLength": 1
+    },
+    "owner_mode": {
+      "type": "string",
+      "enum": [
+        "agent_owner",
+        "operator",
+        "builder"
+      ]
+    },
+    "default_workspace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "bio": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

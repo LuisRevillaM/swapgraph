@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketDealView.schema.json",
+  "title": "MarketDealView",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "deal_id",
+    "workspace_id",
+    "origin_edge_id",
+    "participants",
+    "settlement_mode",
+    "status",
+    "terms",
+    "settlement_ref",
+    "receipt_ref",
+    "payment_proof_id",
+    "thread_id",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "deal_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "workspace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "origin_edge_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "participants": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "$ref": "ActorRef.schema.json"
+      }
+    },
+    "settlement_mode": {
+      "type": ["string", "null"],
+      "enum": ["internal_credit", "external_payment_proof", "cycle_bridge", null]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "pending_accept",
+        "ready_for_settlement",
+        "settlement_in_progress",
+        "completed",
+        "failed",
+        "cancelled"
+      ]
+    },
+    "terms": {
+      "type": ["object", "null"],
+      "additionalProperties": true
+    },
+    "settlement_ref": {
+      "type": ["string", "null"]
+    },
+    "receipt_ref": {
+      "type": ["string", "null"]
+    },
+    "payment_proof_id": {
+      "type": ["string", "null"]
+    },
+    "thread_id": {
+      "type": ["string", "null"]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

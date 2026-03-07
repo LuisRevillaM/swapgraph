@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketEdgePatchRequest.schema.json",
+  "title": "MarketEdgePatchRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["patch"],
+  "properties": {
+    "patch": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "terms_patch": {
+          "type": ["object", "null"],
+          "additionalProperties": true
+        },
+        "note": {
+          "type": ["string", "null"],
+          "minLength": 1
+        },
+        "expires_at": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        }
+      }
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

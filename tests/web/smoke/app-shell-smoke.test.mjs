@@ -49,6 +49,13 @@ test('marketplace shell serves mobile-first app entry and tab config', async () 
     assert.match(tabsText, /Inbox/);
     assert.match(tabsText, /Active/);
     assert.match(tabsText, /Receipts/);
+
+    const vnextResponse = await fetch(`${BASE_URL}/src/vnext/app.mjs`);
+    const vnextText = await vnextResponse.text();
+    assert.equal(vnextResponse.status, 200);
+    assert.match(vnextText, /Open signup is live/);
+    assert.match(vnextText, /Open Agent Market/);
+    assert.match(vnextText, /Place offer/);
   } finally {
     proc.kill('SIGTERM');
   }
