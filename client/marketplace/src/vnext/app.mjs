@@ -103,6 +103,98 @@ function renderQuickstartCard({ eyebrow, title, body, code, actionHref = null, a
   `;
 }
 
+function dedupeStrings(values) {
+  return Array.from(new Set(asArray(values).map(value => String(value ?? '').trim()).filter(Boolean)));
+}
+
+function offerLabels(listing) {
+  return asArray(listing?.offer)
+    .map(item => item?.label ?? item?.asset ?? item?.name ?? null)
+    .filter(Boolean);
+}
+
+function buildAgentIdentities(listings) {
+  const grouped = new Map();
+  for (const listing of asArray(listings)) {
+    const actor = listing?.owner_actor;
+    if (!actor?.type || !actor?.id) continue;
+    const key = `${actor.type}:${actor.id}`;
+    const existing = grouped.get(key) ?? {
+      actor,
+      display_name: listing?.owner_profile?.display_name ?? actor.id,
+      handle: listing?.owner_profile?.handle ?? actor.id,
+      owner_mode: listing?.owner_profile?.owner_mode ?? 'agent_owner',
+      bio: listing?.owner_profile?.bio ?? null,
+      latest_at: listing?.updated_at ?? null,
+      capability_titles: [],
+      capability_outputs: [],
+      asset_titles: [],
+      asset_outputs: [],
+      want_titles: [],
+      counts: { capability: 0, post: 0, want: 0 }
+    };
+
+    existing.latest_at = String(listing?.updated_at ?? '') > String(existing.latest_at ?? '') ? listing.updated_at : existing.latest_at;
+    if (listing.kind === 'capability') {
+      existing.counts.capability += 1;
+      existing.capability_titles.push(listing.title);
+      existing.capability_outputs.push(listing?.capability_profile?.deliverable_schema?.summary ?? listing.description ?? listing.title);
+    } else if (listing.kind === 'post') {
+      existing.counts.post += 1;
+      existing.asset_titles.push(listing.title);
+      existing.asset_outputs.push(...offerLabels(listing));
+    } else if (listing.kind === 'want') {
+      existing.counts.want += 1;
+      existing.want_titles.push(listing?.want_spec?.summary ?? listing.title);
+    }
+    grouped.set(key, existing);
+  }
+
+  return Array.from(grouped.values())
+    .map(identity => ({
+      ...identity,
+      capability_titles: dedupeStrings(identity.capability_titles).slice(0, 3),
+      capability_outputs: dedupeStrings(identity.capability_outputs).slice(0, 3),
+      asset_titles: dedupeStrings(identity.asset_titles).slice(0, 3),
+      asset_outputs: dedupeStrings(identity.asset_outputs).slice(0, 4),
+      want_titles: dedupeStrings(identity.want_titles).slice(0, 3)
+    }))
+    .sort((a, b) => {
+      const scoreA = (a.counts.capability * 3) + (a.counts.post * 2) + a.counts.want;
+      const scoreB = (b.counts.capability * 3) + (b.counts.post * 2) + b.counts.want;
+      if (scoreB !== scoreA) return scoreB - scoreA;
+      return String(b.latest_at ?? '').localeCompare(String(a.latest_at ?? ''));
+    });
+}
+
+function renderAgentIdentityCard(identity) {
+  const skills = dedupeStrings([...identity.capability_titles, ...identity.capability_outputs]).slice(0, 4);
+  const assets = dedupeStrings([...identity.asset_titles, ...identity.asset_outputs]).slice(0, 4);
+  const wants = dedupeStrings(identity.want_titles).slice(0, 3);
+
+  return `
+    <article class="market-vnext-card agent-identity-card">
+      <div class="market-vnext-card-head">
+        <span class="market-vnext-pill kind-capability">${escapeHtml(identity.owner_mode)}</span>
+        <span class="market-vnext-card-meta">@${escapeHtml(identity.handle)}</span>
+      </div>
+      <h3>${escapeHtml(identity.display_name)}</h3>
+      <p class="market-vnext-card-copy">${escapeHtml(identity.bio ?? 'Active in the open market with live machine-readable listings.')}</p>
+      <div class="market-vnext-card-tags">
+        <span class="market-vnext-tag">${escapeHtml(`${identity.counts.capability} capabilities`)}</span>
+        <span class="market-vnext-tag">${escapeHtml(`${identity.counts.post} assets`)}</span>
+        <span class="market-vnext-tag">${escapeHtml(`${identity.counts.want} wants`)}</span>
+      </div>
+      ${skills.length > 0 ? `<p class="market-vnext-inline-list"><strong>Skills:</strong> ${escapeHtml(skills.join(' • '))}</p>` : ''}
+      ${assets.length > 0 ? `<p class="market-vnext-inline-list"><strong>Assets:</strong> ${escapeHtml(assets.join(' • '))}</p>` : ''}
+      ${wants.length > 0 ? `<p class="market-vnext-inline-list"><strong>Looking for:</strong> ${escapeHtml(wants.join(' • '))}</p>` : ''}
+      <div class="market-vnext-card-foot">
+        <span>${escapeHtml(formatIsoShort(identity.latest_at))}</span>
+      </div>
+    </article>
+  `;
+}
+
 function renderNav(session, route) {
   const items = [
     { href: '#/', label: 'Home' },
@@ -561,6 +653,7 @@ function renderLanding(state) {
   const stats = state.stats ?? {};
   const featuredListings = state.listings.slice(0, 6);
   const feedItems = state.feed.slice(0, 6);
+  const identities = buildAgentIdentities(state.listings).slice(0, 4);
   const publicUiBase = state.publicUiBase ?? '';
   const proxiedApiBase = state.proxiedApiBase ?? '/api';
 
@@ -653,6 +746,20 @@ function renderLanding(state) {
     <section class="market-vnext-section">
       <div class="market-vnext-section-head">
         <div>
+          <p class="u-cap">Agent identities</p>
+          <h2>Who is already trading here</h2>
+        </div>
+      </div>
+      <div class="market-vnext-grid">
+        ${identities.length > 0
+          ? identities.map(identity => renderAgentIdentityCard(identity)).join('')
+          : '<p class="market-vnext-empty">No public agent identities yet.</p>'}
+      </div>
+    </section>
+
+    <section class="market-vnext-section">
+      <div class="market-vnext-section-head">
+        <div>
           <p class="u-cap">Featured market</p>
           <h2>What agents can act on right now</h2>
         </div>
@@ -678,14 +785,29 @@ function renderLanding(state) {
 }
 
 function renderBrowse(state) {
+  const identities = buildAgentIdentities(state.listings).slice(0, 8);
   return `
+    <section class="market-vnext-section">
+      <div class="market-vnext-section-head">
+        <div>
+          <p class="u-cap">Agent identities</p>
+          <h2>Operators, builders, and agent desks on the wire</h2>
+        </div>
+        ${state.session ? '<a class="market-vnext-primary" href="#/owner">Open owner console</a>' : ''}
+      </div>
+      <div class="market-vnext-grid">
+        ${identities.length > 0
+          ? identities.map(identity => renderAgentIdentityCard(identity)).join('')
+          : '<p class="market-vnext-empty">No public agent identities yet.</p>'}
+      </div>
+    </section>
+
     <section class="market-vnext-section">
       <div class="market-vnext-section-head">
         <div>
           <p class="u-cap">Public browse</p>
           <h2>Offers, wants, capabilities, and transactions</h2>
         </div>
-        ${state.session ? '<a class="market-vnext-primary" href="#/owner">Open owner console</a>' : ''}
       </div>
       <div class="market-vnext-grid">
         ${state.listings.map(listing => renderListingCard({ listing, session: state.session })).join('')}
