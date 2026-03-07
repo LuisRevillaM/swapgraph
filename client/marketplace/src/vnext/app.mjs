@@ -107,10 +107,66 @@ function dedupeStrings(values) {
   return Array.from(new Set(asArray(values).map(value => String(value ?? '').trim()).filter(Boolean)));
 }
 
+function stringList(value) {
+  if (Array.isArray(value)) return dedupeStrings(value);
+  if (typeof value === 'string' && value.trim()) return dedupeStrings(value.split(',').map(part => part.trim()));
+  return [];
+}
+
 function offerLabels(listing) {
   return asArray(listing?.offer)
     .map(item => item?.label ?? item?.asset ?? item?.name ?? null)
     .filter(Boolean);
+}
+
+function listingInterfaces(listing) {
+  const constraints = listing?.constraints ?? {};
+  return dedupeStrings([
+    ...stringList(constraints.interfaces),
+    ...stringList(constraints.protocols),
+    ...stringList(constraints.access_modes),
+    constraints.interface,
+    constraints.protocol,
+    constraints.access_mode
+  ]);
+}
+
+function listingSettlementModes(listing) {
+  const constraints = listing?.constraints ?? {};
+  return dedupeStrings([
+    ...stringList(constraints.settlement_modes),
+    ...stringList(constraints.settlements),
+    constraints.settlement_mode
+  ]);
+}
+
+function listingTurnaround(listing) {
+  const constraints = listing?.constraints ?? {};
+  if (typeof constraints.turnaround_hours === 'number' && Number.isFinite(constraints.turnaround_hours)) {
+    return `${constraints.turnaround_hours}h`;
+  }
+  return (
+    constraints.turnaround
+    ?? constraints.completion
+    ?? constraints.sla
+    ?? null
+  );
+}
+
+function listingAcceptsGrants(listing) {
+  const constraints = listing?.constraints ?? {};
+  return constraints.accepts_execution_grants === true
+    || constraints.execution_grants === true
+    || constraints.grant_handoff === true
+    || stringList(constraints.auth_modes).includes('execution_grant');
+}
+
+function listingExternalProof(listing) {
+  return listingSettlementModes(listing).includes('external_payment_proof');
+}
+
+function renderCopyButton({ label, text }) {
+  return `<button type="button" class="market-vnext-secondary" data-action="copy.text" data-copy-text="${escapeHtml(text)}">${escapeHtml(label)}</button>`;
 }
 
 function buildAgentIdentities(listings) {
@@ -131,14 +187,27 @@ function buildAgentIdentities(listings) {
       asset_titles: [],
       asset_outputs: [],
       want_titles: [],
+      interfaces: [],
+      settlement_modes: [],
+      accepts_grants: false,
+      supports_external_proof: false,
+      turnaround_samples: [],
+      sample_listing_id: listing?.listing_id ?? null,
       counts: { capability: 0, post: 0, want: 0 }
     };
 
     existing.latest_at = String(listing?.updated_at ?? '') > String(existing.latest_at ?? '') ? listing.updated_at : existing.latest_at;
+    existing.sample_listing_id = existing.sample_listing_id ?? listing?.listing_id ?? null;
+    existing.interfaces.push(...listingInterfaces(listing));
+    existing.settlement_modes.push(...listingSettlementModes(listing));
+    existing.accepts_grants = existing.accepts_grants || listingAcceptsGrants(listing);
+    existing.supports_external_proof = existing.supports_external_proof || listingExternalProof(listing);
+    if (listingTurnaround(listing)) existing.turnaround_samples.push(listingTurnaround(listing));
     if (listing.kind === 'capability') {
       existing.counts.capability += 1;
       existing.capability_titles.push(listing.title);
       existing.capability_outputs.push(listing?.capability_profile?.deliverable_schema?.summary ?? listing.description ?? listing.title);
+      existing.sample_listing_id = listing?.listing_id ?? existing.sample_listing_id;
     } else if (listing.kind === 'post') {
       existing.counts.post += 1;
       existing.asset_titles.push(listing.title);
@@ -157,7 +226,10 @@ function buildAgentIdentities(listings) {
       capability_outputs: dedupeStrings(identity.capability_outputs).slice(0, 3),
       asset_titles: dedupeStrings(identity.asset_titles).slice(0, 3),
       asset_outputs: dedupeStrings(identity.asset_outputs).slice(0, 4),
-      want_titles: dedupeStrings(identity.want_titles).slice(0, 3)
+      want_titles: dedupeStrings(identity.want_titles).slice(0, 3),
+      interfaces: dedupeStrings(identity.interfaces).slice(0, 4),
+      settlement_modes: dedupeStrings(identity.settlement_modes).slice(0, 3),
+      turnaround: dedupeStrings(identity.turnaround_samples)[0] ?? null
     }))
     .sort((a, b) => {
       const scoreA = (a.counts.capability * 3) + (a.counts.post * 2) + a.counts.want;
@@ -171,6 +243,15 @@ function renderAgentIdentityCard(identity) {
   const skills = dedupeStrings([...identity.capability_titles, ...identity.capability_outputs]).slice(0, 4);
   const assets = dedupeStrings([...identity.asset_titles, ...identity.asset_outputs]).slice(0, 4);
   const wants = dedupeStrings(identity.want_titles).slice(0, 3);
+  const protocols = dedupeStrings([
+    ...identity.interfaces,
+    identity.accepts_grants ? 'execution_grants' : null
+  ]).slice(0, 5);
+  const settlement = dedupeStrings([
+    ...identity.settlement_modes,
+    identity.supports_external_proof ? 'external_payment_proof' : null
+  ]).slice(0, 3);
+  const apiProbe = `/api/market/listings?owner_actor_type=${encodeURIComponent(identity.actor.type)}&owner_actor_id=${encodeURIComponent(identity.actor.id)}&limit=20`;
 
   return `
     <article class="market-vnext-card agent-identity-card">
@@ -185,11 +266,15 @@ function renderAgentIdentityCard(identity) {
         <span class="market-vnext-tag">${escapeHtml(`${identity.counts.post} assets`)}</span>
         <span class="market-vnext-tag">${escapeHtml(`${identity.counts.want} wants`)}</span>
       </div>
+      ${protocols.length > 0 ? `<p class="market-vnext-inline-list"><strong>Interfaces:</strong> ${escapeHtml(protocols.join(' • '))}</p>` : ''}
+      ${settlement.length > 0 ? `<p class="market-vnext-inline-list"><strong>Settlement:</strong> ${escapeHtml(settlement.join(' • '))}</p>` : ''}
+      ${identity.turnaround ? `<p class="market-vnext-inline-list"><strong>Turnaround:</strong> ${escapeHtml(identity.turnaround)}</p>` : ''}
       ${skills.length > 0 ? `<p class="market-vnext-inline-list"><strong>Skills:</strong> ${escapeHtml(skills.join(' • '))}</p>` : ''}
       ${assets.length > 0 ? `<p class="market-vnext-inline-list"><strong>Assets:</strong> ${escapeHtml(assets.join(' • '))}</p>` : ''}
       ${wants.length > 0 ? `<p class="market-vnext-inline-list"><strong>Looking for:</strong> ${escapeHtml(wants.join(' • '))}</p>` : ''}
       <div class="market-vnext-card-foot">
         <span>${escapeHtml(formatIsoShort(identity.latest_at))}</span>
+        ${renderCopyButton({ label: 'Copy API probe', text: `curl -s ${apiProbe} | jq` })}
       </div>
     </article>
   `;
@@ -233,6 +318,10 @@ function renderListingCard({ listing, session, action = null, compact = false })
   const offer = asArray(listing?.offer).map(item => item?.label ?? item?.asset ?? item?.name ?? JSON.stringify(item)).filter(Boolean);
   const capabilityRate = listing?.capability_profile?.rate_card?.usd ?? null;
   const kindLabel = listing.kind === 'want' ? 'Want' : (listing.kind === 'capability' ? 'Capability' : 'Post');
+  const protocols = listingInterfaces(listing).slice(0, 4);
+  const settlementModes = listingSettlementModes(listing).slice(0, 3);
+  const turnaround = listingTurnaround(listing);
+  const acceptsGrants = listingAcceptsGrants(listing);
 
   return `
     <article class="market-vnext-card listing-card">
@@ -247,10 +336,14 @@ function renderListingCard({ listing, session, action = null, compact = false })
         <span class="market-vnext-tag">status ${escapeHtml(listing.status)}</span>
         ${budget !== null ? `<span class="market-vnext-tag">budget $${escapeHtml(String(budget))}</span>` : ''}
         ${capabilityRate !== null ? `<span class="market-vnext-tag">rate $${escapeHtml(String(capabilityRate))}</span>` : ''}
+        ${acceptsGrants ? '<span class="market-vnext-tag">accepts grants</span>' : ''}
       </div>
       ${offer.length > 0 ? `<p class="market-vnext-inline-list"><strong>Offer:</strong> ${escapeHtml(offer.join(' • '))}</p>` : ''}
       ${listing?.want_spec?.summary ? `<p class="market-vnext-inline-list"><strong>Want:</strong> ${escapeHtml(String(listing.want_spec.summary))}</p>` : ''}
       ${listing?.capability_profile?.deliverable_schema?.summary ? `<p class="market-vnext-inline-list"><strong>Delivers:</strong> ${escapeHtml(String(listing.capability_profile.deliverable_schema.summary))}</p>` : ''}
+      ${protocols.length > 0 ? `<p class="market-vnext-inline-list"><strong>Interfaces:</strong> ${escapeHtml(protocols.join(' • '))}</p>` : ''}
+      ${settlementModes.length > 0 ? `<p class="market-vnext-inline-list"><strong>Settlement:</strong> ${escapeHtml(settlementModes.join(' • '))}</p>` : ''}
+      ${turnaround ? `<p class="market-vnext-inline-list"><strong>Turnaround:</strong> ${escapeHtml(turnaround)}</p>` : ''}
       <div class="market-vnext-card-foot">
         <span>${escapeHtml(formatIsoShort(listing.updated_at))}</span>
         ${action ?? (session ? `<button type="button" class="market-vnext-secondary" data-action="edge.compose" data-target-listing-id="${escapeHtml(listing.listing_id)}">Place offer</button>` : '')}
@@ -805,23 +898,23 @@ function renderBrowse(state) {
     <section class="market-vnext-section">
       <div class="market-vnext-section-head">
         <div>
-          <p class="u-cap">Public browse</p>
-          <h2>Offers, wants, capabilities, and transactions</h2>
-        </div>
-      </div>
-      <div class="market-vnext-grid">
-        ${state.listings.map(listing => renderListingCard({ listing, session: state.session })).join('')}
-      </div>
-    </section>
-    <section class="market-vnext-section">
-      <div class="market-vnext-section-head">
-        <div>
           <p class="u-cap">Live activity</p>
           <h2>Latest edges and deals</h2>
         </div>
       </div>
       <div class="market-vnext-grid">
         ${state.feed.map(item => renderFeedItem({ item, listingIndex: state.listingIndex, session: state.session })).join('')}
+      </div>
+    </section>
+    <section class="market-vnext-section">
+      <div class="market-vnext-section-head">
+        <div>
+          <p class="u-cap">Public browse</p>
+          <h2>Capabilities, wants, assets, and machine-readable offers</h2>
+        </div>
+      </div>
+      <div class="market-vnext-grid">
+        ${state.listings.map(listing => renderListingCard({ listing, session: state.session })).join('')}
       </div>
     </section>
   `;
@@ -1314,6 +1407,26 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
     if (action === 'thread.open') {
       state.activeThreadId = actionTarget.getAttribute('data-thread-id') || null;
       render();
+      return;
+    }
+    if (action === 'copy.text') {
+      const copyText = actionTarget.getAttribute('data-copy-text') ?? '';
+      const fallback = () => {
+        state.notice = 'Copy failed. Use the text shown in the card.';
+        render();
+      };
+      if (!copyText) {
+        fallback();
+        return;
+      }
+      const write = windowRef?.navigator?.clipboard?.writeText;
+      if (typeof write === 'function') {
+        write.call(windowRef.navigator.clipboard, copyText)
+          .then(() => setNotice('Copied API probe.'))
+          .catch(fallback);
+      } else {
+        fallback();
+      }
     }
   });
 
