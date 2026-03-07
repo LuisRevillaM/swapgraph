@@ -326,6 +326,95 @@ function renderEdgeComposer({ state, myOpenListings }) {
   `;
 }
 
+function renderDealPanel(state) {
+  const deals = state.deals ?? [];
+  const activeThreadId = state.activeThreadId ?? null;
+  const threadMessages = asArray(state.threadMessagesById?.[activeThreadId]);
+
+  return `
+    <section class="market-vnext-card">
+      <p class="u-cap">Deals</p>
+      <h2>${deals.length} active or historical deals</h2>
+      <div class="market-vnext-grid">
+        ${deals.length > 0
+          ? deals.map(deal => `
+            <article class="market-vnext-card deal-card">
+              <div class="market-vnext-card-head">
+                <span class="market-vnext-pill kind-deal">${escapeHtml(deal.settlement_mode ?? 'pending')}</span>
+                <span class="market-vnext-card-meta">${escapeHtml(deal.status)}</span>
+              </div>
+              <h3>${escapeHtml(deal.deal_id)}</h3>
+              <p class="market-vnext-card-copy">Participants: ${escapeHtml(asArray(deal.participants).map(actor => actor.id).join(' • '))}</p>
+              <div class="market-vnext-card-tags">
+                <span class="market-vnext-tag">edge ${escapeHtml(deal.origin_edge_id)}</span>
+                ${deal.receipt_ref ? `<span class="market-vnext-tag">receipt ${escapeHtml(deal.receipt_ref)}</span>` : ''}
+              </div>
+              <div class="market-vnext-card-foot">
+                <span>${escapeHtml(formatIsoShort(deal.updated_at))}</span>
+                <span class="market-vnext-inline-actions">
+                  ${deal.status === 'ready_for_settlement'
+                    ? `
+                      <button type="button" class="market-vnext-primary" data-action="deal.start" data-deal-id="${escapeHtml(deal.deal_id)}" data-settlement-mode="internal_credit">Start credit</button>
+                      <button type="button" class="market-vnext-secondary" data-action="deal.start" data-deal-id="${escapeHtml(deal.deal_id)}" data-settlement-mode="external_payment_proof">External proof</button>
+                    `
+                    : ''}
+                  ${deal.status === 'settlement_in_progress'
+                    ? `<button type="button" class="market-vnext-primary" data-action="deal.complete" data-deal-id="${escapeHtml(deal.deal_id)}">Complete</button>`
+                    : ''}
+                  ${deal.settlement_mode === 'external_payment_proof' && deal.status === 'settlement_in_progress'
+                    ? `
+                      <button type="button" class="market-vnext-secondary" data-action="deal.attest" data-deal-id="${escapeHtml(deal.deal_id)}" data-attestation-role="payer">Attest payer</button>
+                      <button type="button" class="market-vnext-secondary" data-action="deal.attest" data-deal-id="${escapeHtml(deal.deal_id)}" data-attestation-role="payee">Attest payee</button>
+                    `
+                    : ''}
+                  <button type="button" class="market-vnext-secondary" data-action="thread.open" data-thread-id="${escapeHtml(deal.thread_id ?? '')}">Thread</button>
+                  ${deal.receipt_ref ? `<button type="button" class="market-vnext-secondary" data-action="deal.receipt" data-deal-id="${escapeHtml(deal.deal_id)}">Receipt</button>` : ''}
+                </span>
+              </div>
+            </article>
+          `).join('')
+          : '<p class="market-vnext-empty">No deals yet. Accepted offers can be materialized into deals.</p>'}
+      </div>
+    </section>
+    <section class="market-vnext-card">
+      <p class="u-cap">Negotiation thread</p>
+      <h2>${activeThreadId ? escapeHtml(activeThreadId) : 'Select a deal thread'}</h2>
+      ${activeThreadId
+        ? `
+          <div class="market-vnext-thread-log">
+            ${threadMessages.length > 0
+              ? threadMessages.map(message => `
+                <article class="market-vnext-thread-message">
+                  <div class="market-vnext-card-head">
+                    <span class="market-vnext-card-meta">${escapeHtml(message.sender_actor?.id ?? 'system')}</span>
+                    <span class="market-vnext-card-meta">${escapeHtml(formatIsoShort(message.created_at))}</span>
+                  </div>
+                  <pre>${escapeHtml(JSON.stringify(message.payload, null, 2))}</pre>
+                </article>
+              `).join('')
+              : '<p class="market-vnext-empty">No messages yet.</p>'}
+          </div>
+          <form class="market-vnext-form" data-form="thread-message">
+            <input type="hidden" name="thread_id" value="${escapeHtml(activeThreadId)}" />
+            <label>
+              <span>Message type</span>
+              <select name="message_type">
+                <option value="text">Text</option>
+                <option value="terms_patch">Terms patch</option>
+              </select>
+            </label>
+            <label>
+              <span>Payload JSON</span>
+              <textarea name="payload_json" rows="4" placeholder='{\"text\":\"Can deliver in 2 hours\"}'></textarea>
+            </label>
+            <button type="submit" class="market-vnext-primary">Send message</button>
+          </form>
+        `
+        : '<p class="market-vnext-empty">Open a thread from a deal card to inspect or negotiate.</p>'}
+    </section>
+  `;
+}
+
 function renderOwnerPanel(state) {
   if (!state.session) {
     return `
@@ -406,7 +495,9 @@ function renderOwnerPanel(state) {
                         <button type="button" class="market-vnext-secondary" data-action="edge.decline" data-edge-id="${escapeHtml(edge.edge_id)}">Decline</button>
                       </span>
                     `
-                    : ''}
+                    : edge.status === 'accepted'
+                      ? `<button type="button" class="market-vnext-primary" data-action="deal.create" data-edge-id="${escapeHtml(edge.edge_id)}">Create deal</button>`
+                      : ''}
                 </div>
               </article>
             `).join('')
@@ -438,6 +529,8 @@ function renderOwnerPanel(state) {
             : '<p class="market-vnext-empty">No outbound offers yet.</p>'}
         </div>
       </section>
+
+      ${renderDealPanel(state)}
     </section>
   `;
 }
@@ -553,14 +646,20 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
     listings: [],
     feed: [],
     edges: [],
+    deals: [],
+    threads: [],
+    threadMessagesById: {},
     ownerListings: [],
     listingIndex: new Map(),
     edgeComposer: { targetListingId: null },
+    activeThreadId: null,
     loading: {
       page: true,
       signup: false,
       listing: false,
-      edge: false
+      edge: false,
+      deal: false,
+      thread: false
     },
     error: null,
     notice: null
@@ -605,16 +704,35 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
       if (state.session) {
         const workspace = encodeURIComponent(state.session.profile.default_workspace_id);
         const actorId = encodeURIComponent(state.session.actor.id);
-        const [ownerListingsRes, edgesRes] = await Promise.all([
+        const [ownerListingsRes, edgesRes, dealsRes, threadsRes] = await Promise.all([
           apiRequest({ path: `/market/listings?workspace_id=${workspace}&owner_actor_type=user&owner_actor_id=${actorId}&limit=100` }),
-          apiRequest({ path: `/market/edges?workspace_id=${workspace}&limit=100`, useSession: false })
+          apiRequest({ path: `/market/edges?workspace_id=${workspace}&limit=100`, useSession: false }),
+          apiRequest({ path: `/market/deals?workspace_id=${workspace}&limit=100` }),
+          apiRequest({ path: `/market/threads?workspace_id=${workspace}&limit=100` })
         ]);
         state.ownerListings = asArray(ownerListingsRes.listings);
         state.edges = asArray(edgesRes.edges);
+        state.deals = asArray(dealsRes.deals);
+        state.threads = asArray(threadsRes.threads);
         for (const listing of state.ownerListings) state.listingIndex.set(listing.listing_id, listing);
+        if (!state.activeThreadId && state.deals[0]?.thread_id) state.activeThreadId = state.deals[0].thread_id;
+        const messageLoads = await Promise.all(
+          state.threads
+            .filter(thread => thread.thread_id)
+            .slice(0, 12)
+            .map(async thread => {
+              const res = await apiRequest({ path: `/market/threads/${encodeURIComponent(thread.thread_id)}/messages?limit=100` });
+              return [thread.thread_id, asArray(res.messages)];
+            })
+        );
+        state.threadMessagesById = Object.fromEntries(messageLoads);
       } else {
         state.ownerListings = [];
         state.edges = [];
+        state.deals = [];
+        state.threads = [];
+        state.threadMessagesById = {};
+        state.activeThreadId = null;
       }
     } catch (error) {
       state.error = String(error?.message ?? error);
@@ -783,6 +901,126 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
     }
   }
 
+  async function handleCreateDeal(edgeId) {
+    if (!state.session || !edgeId) return;
+    try {
+      await apiRequest({
+        method: 'POST',
+        path: `/market/deals/from-edge/${encodeURIComponent(edgeId)}`,
+        body: { recorded_at: new Date().toISOString() }
+      });
+      setNotice('Deal created.');
+      await refresh();
+    } catch (error) {
+      state.error = String(error?.message ?? error);
+      render();
+    }
+  }
+
+  async function handleStartDeal(dealId, settlementMode) {
+    if (!state.session || !dealId || !settlementMode) return;
+    try {
+      await apiRequest({
+        method: 'POST',
+        path: `/market/deals/${encodeURIComponent(dealId)}/start-settlement`,
+        body: {
+          settlement_mode: settlementMode,
+          recorded_at: new Date().toISOString()
+        }
+      });
+      setNotice(`Settlement started with ${settlementMode}.`);
+      await refresh();
+    } catch (error) {
+      state.error = String(error?.message ?? error);
+      render();
+    }
+  }
+
+  async function handleDealAttestation(dealId, attestationRole) {
+    if (!state.session || !dealId || !attestationRole) return;
+    try {
+      await apiRequest({
+        method: 'POST',
+        path: `/market/deals/${encodeURIComponent(dealId)}/payment-proof`,
+        body: {
+          payment_proof: {
+            payment_rail: 'external_wire',
+            proof_fingerprint: `web_${dealId}`,
+            attestation_role: attestationRole
+          },
+          recorded_at: new Date().toISOString()
+        }
+      });
+      setNotice(`Recorded ${attestationRole} attestation.`);
+      await refresh();
+    } catch (error) {
+      state.error = String(error?.message ?? error);
+      render();
+    }
+  }
+
+  async function handleCompleteDeal(dealId) {
+    if (!state.session || !dealId) return;
+    try {
+      await apiRequest({
+        method: 'POST',
+        path: `/market/deals/${encodeURIComponent(dealId)}/complete`,
+        body: { recorded_at: new Date().toISOString() }
+      });
+      setNotice('Deal completed.');
+      await refresh();
+    } catch (error) {
+      state.error = String(error?.message ?? error);
+      render();
+    }
+  }
+
+  async function handleDealReceipt(dealId) {
+    if (!state.session || !dealId) return;
+    try {
+      const res = await apiRequest({
+        path: `/market/deals/${encodeURIComponent(dealId)}/receipt`
+      });
+      setNotice(`Receipt ${res.receipt?.id ?? 'available'} loaded.`);
+    } catch (error) {
+      state.error = String(error?.message ?? error);
+      render();
+    }
+  }
+
+  async function handleThreadMessage(form) {
+    if (!state.session) return;
+    state.loading.thread = true;
+    render();
+    const formData = new FormData(form);
+    const messageType = String(formData.get('message_type') ?? 'text');
+    const rawPayload = String(formData.get('payload_json') ?? '').trim();
+    const parsedPayload = toJsonOrNull(rawPayload);
+    const payload = parsedPayload ?? (messageType === 'text' ? { text: rawPayload } : { body: rawPayload });
+    try {
+      await apiRequest({
+        method: 'POST',
+        path: `/market/threads/${encodeURIComponent(String(formData.get('thread_id') ?? ''))}/messages`,
+        body: {
+          message: {
+            message_type: messageType,
+            payload
+          },
+          recorded_at: new Date().toISOString()
+        }
+      });
+      form.reset();
+      setNotice('Thread message posted.');
+      await refresh();
+    } catch (error) {
+      state.error = String(error?.message ?? error);
+      render();
+    } finally {
+      state.loading.thread = false;
+      render();
+    }
+  }
+
   async function handleCloseListing(listingId) {
     if (!state.session || !listingId) return;
     try {
@@ -836,6 +1074,31 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
     }
     if (action === 'listing.close') {
       handleCloseListing(actionTarget.getAttribute('data-listing-id'));
+      return;
+    }
+    if (action === 'deal.create') {
+      handleCreateDeal(actionTarget.getAttribute('data-edge-id'));
+      return;
+    }
+    if (action === 'deal.start') {
+      handleStartDeal(actionTarget.getAttribute('data-deal-id'), actionTarget.getAttribute('data-settlement-mode'));
+      return;
+    }
+    if (action === 'deal.complete') {
+      handleCompleteDeal(actionTarget.getAttribute('data-deal-id'));
+      return;
+    }
+    if (action === 'deal.attest') {
+      handleDealAttestation(actionTarget.getAttribute('data-deal-id'), actionTarget.getAttribute('data-attestation-role'));
+      return;
+    }
+    if (action === 'deal.receipt') {
+      handleDealReceipt(actionTarget.getAttribute('data-deal-id'));
+      return;
+    }
+    if (action === 'thread.open') {
+      state.activeThreadId = actionTarget.getAttribute('data-thread-id') || null;
+      render();
     }
   });
 
@@ -856,6 +1119,12 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
     if (edgeForm) {
       event.preventDefault();
       handleCreateEdge(edgeForm);
+      return;
+    }
+    const threadForm = event.target.closest('form[data-form="thread-message"]');
+    if (threadForm) {
+      event.preventDefault();
+      handleThreadMessage(threadForm);
     }
   });
 

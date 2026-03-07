@@ -148,6 +148,7 @@ Auth headers (see `docs/spec/AUTH.md` for details):
   - `POST /market/threads/{thread_id}/messages` (idempotent message append)
   - `GET /market/threads/{thread_id}/messages` (list participant-scoped messages with deterministic filters/cursor)
   - `POST /market/deals/from-edge/{edge_id}` (idempotent deal materialization from an accepted edge)
+  - `GET /market/deals` (participant-scoped deal list with deterministic filters/cursor)
   - `GET /market/deals/{deal_id}` (read participant-scoped deal state)
   - `POST /market/deals/{deal_id}/start-settlement` (idempotent settlement start for internal credit, external proof, or cycle bridge)
   - `POST /market/deals/{deal_id}/payment-proof` (idempotent external payment proof attach/attestation)

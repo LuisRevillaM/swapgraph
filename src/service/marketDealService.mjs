@@ -35,6 +35,77 @@ function parseIsoMs(iso) {
   return Number.isFinite(ms) ? ms : null;
 }
 
+function parseLimit(value, fallback = 25) {
+  if (value === undefined || value === null || value === '') return fallback;
+  const n = Number.parseInt(String(value), 10);
+  if (!Number.isFinite(n) || n < 1) return null;
+  return Math.min(n, 100);
+}
+
+function sortByUpdatedDescThenId(rows, idField) {
+  rows.sort((a, b) => {
+    const at = parseIsoMs(a.updated_at) ?? 0;
+    const bt = parseIsoMs(b.updated_at) ?? 0;
+    if (bt !== at) return bt - at;
+    return String(a[idField] ?? '').localeCompare(String(b[idField] ?? ''));
+  });
+}
+
+function encodeCursor(parts) {
+  return parts.join('|');
+}
+
+function decodeCursor(raw, expectedParts) {
+  const value = normalizeOptionalString(raw);
+  if (!value) return null;
+  const parts = value.split('|');
+  if (parts.length !== expectedParts) return undefined;
+  if (parts.some(part => !part)) return undefined;
+  return parts;
+}
+
+function buildPaginationSlice({ rows, limit, cursorAfter, keyFn, cursorParts }) {
+  let start = 0;
+  if (cursorAfter) {
+    const decoded = decodeCursor(cursorAfter, cursorParts);
+    if (decoded === undefined) {
+      return {
+        ok: false,
+        code: 'CONSTRAINT_VIOLATION',
+        message: 'invalid cursor format',
+        details: { reason_code: 'market_feed_query_invalid', cursor_after: cursorAfter }
+      };
+    }
+    if (decoded) {
+      const idx = rows.findIndex(row => {
+        const key = keyFn(row);
+        return key.length === decoded.length && key.every((v, i) => String(v) === String(decoded[i]));
+      });
+      if (idx < 0) {
+        return {
+          ok: false,
+          code: 'CONSTRAINT_VIOLATION',
+          message: 'cursor not found',
+          details: { reason_code: 'market_cursor_not_found', cursor_after: cursorAfter }
+        };
+      }
+      start = idx + 1;
+    }
+  }
+
+  const page = rows.slice(start, start + limit);
+  const hasMore = start + limit < rows.length;
+  const nextCursor = hasMore && page.length > 0 ? encodeCursor(keyFn(page[page.length - 1])) : null;
+  return {
+    ok: true,
+    value: {
+      page,
+      total: rows.length,
+      nextCursor
+    }
+  };
+}
+
 function normalizeRecordedAt(request, auth) {
   return normalizeOptionalString(request?.recorded_at) ?? normalizeOptionalString(auth?.now_iso) ?? new Date().toISOString();
 }
@@ -153,6 +224,61 @@ function normalizePositiveAmount(terms) {
     if (Number.isFinite(n) && n >= 0) return n;
   }
   return 0;
+}
+
+function normalizeDealListQuery(query) {
+  const allowed = new Set(['workspace_id', 'status', 'settlement_mode', 'limit', 'cursor_after']);
+  for (const key of Object.keys(query ?? {})) {
+    if (!allowed.has(key)) {
+      return {
+        ok: false,
+        code: 'CONSTRAINT_VIOLATION',
+        message: 'invalid query parameter',
+        details: { reason_code: 'market_feed_query_invalid', key }
+      };
+    }
+  }
+
+  const workspaceId = normalizeOptionalString(query?.workspace_id);
+  const status = normalizeOptionalString(query?.status)?.toLowerCase() ?? null;
+  const settlementMode = normalizeOptionalString(query?.settlement_mode)?.toLowerCase() ?? null;
+  const limit = parseLimit(query?.limit, 25);
+  const cursorAfter = normalizeOptionalString(query?.cursor_after);
+
+  if (status && !DEAL_STATUS.has(status)) {
+    return {
+      ok: false,
+      code: 'CONSTRAINT_VIOLATION',
+      message: 'invalid deal status filter',
+      details: { reason_code: 'market_deal_invalid', status }
+    };
+  }
+  if (settlementMode && !SETTLEMENT_MODES.has(settlementMode)) {
+    return {
+      ok: false,
+      code: 'CONSTRAINT_VIOLATION',
+      message: 'invalid settlement mode filter',
+      details: { reason_code: 'market_deal_invalid', settlement_mode: settlementMode }
+    };
+  }
+  if (limit === null) {
+    return {
+      ok: false,
+      code: 'CONSTRAINT_VIOLATION',
+      message: 'invalid limit',
+      details: { reason_code: 'market_feed_query_invalid', limit: query?.limit }
+    };
+  }
+  return {
+    ok: true,
+    value: {
+      workspace_id: workspaceId,
+      status,
+      settlement_mode: settlementMode,
+      limit,
+      cursor_after: cursorAfter
+    }
+  };
 }
 
 export class MarketDealService {
@@ -529,6 +655,54 @@ export class MarketDealService {
       body: {
         correlation_id: corr,
         deal: normalizeDealView(load.record)
+      }
+    };
+  }
+
+  list({ actor, auth, query }) {
+    const op = 'marketDeals.list';
+    const corr = correlationId(op);
+    const authz = this._authorize({ actor, auth, operationId: op, correlationId: corr });
+    if (!authz.ok) return { ok: false, body: authz.body };
+
+    const normalized = normalizeDealListQuery(query ?? {});
+    if (!normalized.ok) {
+      return {
+        ok: false,
+        body: errorResponse(corr, normalized.code, normalized.message, normalized.details)
+      };
+    }
+
+    const subjectActor = this._subjectActor({ actor, auth });
+    const rows = Object.values(this.store.state.market_deals ?? {}).filter(row => {
+      if (!includesActor(row.participants, subjectActor)) return false;
+      if (normalized.value.workspace_id && row.workspace_id !== normalized.value.workspace_id) return false;
+      if (normalized.value.status && row.status !== normalized.value.status) return false;
+      if (normalized.value.settlement_mode && row.settlement_mode !== normalized.value.settlement_mode) return false;
+      return true;
+    });
+
+    sortByUpdatedDescThenId(rows, 'deal_id');
+    const page = buildPaginationSlice({
+      rows,
+      limit: normalized.value.limit,
+      cursorAfter: normalized.value.cursor_after,
+      keyFn: row => [row.updated_at, row.deal_id],
+      cursorParts: 2
+    });
+    if (!page.ok) {
+      return {
+        ok: false,
+        body: errorResponse(corr, page.code, page.message, page.details)
+      };
+    }
+    return {
+      ok: true,
+      body: {
+        correlation_id: corr,
+        deals: page.value.page.map(normalizeDealView),
+        total: page.value.total,
+        next_cursor: page.value.nextCursor
       }
     };
   }

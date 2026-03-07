@@ -998,6 +998,12 @@ export function createRuntimeApiServer({
         return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
       }
 
+      if (method === 'GET' && pathname === '/market/deals') {
+        const query = toQueryObject(url.searchParams);
+        const result = marketDeals.list({ actor, auth, query });
+        return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
+      }
+
       const marketDealStartSettlement = routeMatch(pathname, /^\/market\/deals\/([^/]+)\/start-settlement$/);
       if (method === 'POST' && marketDealStartSettlement) {
         const idem = requireIdempotencyKey(req);

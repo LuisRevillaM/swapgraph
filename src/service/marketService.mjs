@@ -2371,14 +2371,32 @@ export class MarketService {
         }
 
         const messageType = normalizeOptionalString(message.message_type)?.toLowerCase() ?? null;
-        const payload = message.payload;
-        if (!messageType || !MESSAGE_TYPES.has(messageType) || !isPlainObject(payload)) {
+        const rawPayload = message.payload;
+        if (!messageType || !MESSAGE_TYPES.has(messageType) || !isPlainObject(rawPayload)) {
           return {
             ok: false,
             body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid message payload', {
               reason_code: 'market_message_invalid'
             })
           };
+        }
+
+        const payload = clone(rawPayload);
+        if (messageType === 'text') {
+          const normalizedText =
+            normalizeOptionalString(payload.text) ??
+            normalizeOptionalString(payload.body) ??
+            normalizeOptionalString(payload.message);
+          if (!normalizedText) {
+            return {
+              ok: false,
+              body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'text messages require payload.text', {
+                reason_code: 'market_message_invalid'
+              })
+            };
+          }
+          payload.text = normalizedText;
+          if (!normalizeOptionalString(payload.body)) payload.body = normalizedText;
         }
 
         if (messageType === 'text' && !normalizeOptionalString(payload.text)) {
@@ -2407,7 +2425,7 @@ export class MarketService {
           thread_id: threadId,
           sender_actor: { type: subjectActor.type, id: subjectActor.id },
           message_type: messageType,
-          payload: clone(payload),
+          payload,
           created_at: recordedAt
         };
 

@@ -3346,6 +3346,24 @@
     },
     {
       "method": "GET",
+      "path": "/market/deals",
+      "operation_id": "marketDeals.list",
+      "idempotency_required": false,
+      "response_schema": "MarketDealListResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": [
+          "market:read"
+        ]
+      }
+    },
+    {
+      "method": "GET",
       "path": "/market/deals/{deal_id}",
       "operation_id": "marketDeals.get",
       "idempotency_required": false,

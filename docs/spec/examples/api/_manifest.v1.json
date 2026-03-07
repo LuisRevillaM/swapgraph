@@ -1218,6 +1218,10 @@
       "schema": "MarketDealResponse.schema.json"
     },
     {
+      "file": "market.deals.list.response.json",
+      "schema": "MarketDealListResponse.schema.json"
+    },
+    {
       "file": "market.deals.start-settlement.request.json",
       "schema": "MarketDealStartSettlementRequest.schema.json"
     },

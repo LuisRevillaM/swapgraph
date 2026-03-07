@@ -6,8 +6,8 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const clientRoot = path.resolve(__dirname, '../client/marketplace');
 
-const host = process.env.CLIENT_HOST ?? '127.0.0.1';
-const port = Number.parseInt(String(process.env.CLIENT_PORT ?? '4173'), 10);
+const host = process.env.CLIENT_HOST ?? process.env.HOST ?? '127.0.0.1';
+const port = Number.parseInt(String(process.env.CLIENT_PORT ?? process.env.PORT ?? '4173'), 10);
 const runtimeBaseUrl = String(
   process.env.RUNTIME_SERVICE_URL
   ?? process.env.RENDER_SERVICE_URL
