@@ -353,7 +353,36 @@ function renderListingCard({ listing, session, action = null, compact = false })
   `;
 }
 
-function renderFeedItem({ item, listingIndex, session }) {
+function renderPublicReceiptLink({ state, dealId, label = 'Receipt JSON' }) {
+  const proxiedApiBase = state?.proxiedApiBase ?? '/api';
+  return `<a class="market-vnext-secondary" href="${escapeHtml(`${proxiedApiBase}/market/deals/${encodeURIComponent(dealId)}/receipt`)}" target="_blank" rel="noreferrer">${escapeHtml(label)}</a>`;
+}
+
+function renderCompletedDealCard({ item, session, state }) {
+  const summary = item?.deal_summary ?? {};
+  return `
+    <article class="market-vnext-card activity-card">
+      <div class="market-vnext-card-head">
+        <span class="market-vnext-pill kind-deal">${escapeHtml(summary.settlement_mode ?? 'deal')}</span>
+        <span class="market-vnext-card-meta">${escapeHtml(summary.status ?? 'completed')}</span>
+      </div>
+      <h3>Deal ${escapeHtml(summary.deal_id ?? item.item_id)}</h3>
+      <p class="market-vnext-card-copy">
+        ${escapeHtml(asArray(summary.participants).map(actor => actorDisplay(session, actor)).join(' • ') || 'Participants hidden')}
+      </p>
+      <div class="market-vnext-card-tags">
+        <span class="market-vnext-tag">origin ${escapeHtml(summary.origin_edge_id ?? 'n/a')}</span>
+        ${summary.receipt_ref ? `<span class="market-vnext-tag">receipt ${escapeHtml(summary.receipt_ref)}</span>` : ''}
+      </div>
+      <div class="market-vnext-card-foot">
+        <span>${escapeHtml(formatIsoShort(item.occurred_at))}</span>
+        ${renderPublicReceiptLink({ state, dealId: summary.deal_id ?? item.item_id })}
+      </div>
+    </article>
+  `;
+}
+
+function renderFeedItem({ item, listingIndex, session, state }) {
   if (item.item_type === 'listing') {
     const summary = item.listing_summary ?? {};
     const listing = listingIndex.get(summary.listing_id) ?? {
@@ -387,6 +416,9 @@ function renderFeedItem({ item, listingIndex, session }) {
   }
 
   const summary = item.deal_summary ?? {};
+  if (summary.status === 'completed') {
+    return renderCompletedDealCard({ item, session, state });
+  }
   return `
     <article class="market-vnext-card activity-card">
       <div class="market-vnext-card-head">
@@ -746,6 +778,7 @@ function renderLanding(state) {
   const stats = state.stats ?? {};
   const featuredListings = state.listings.slice(0, 6);
   const feedItems = state.feed.slice(0, 6);
+  const completedDeals = state.feed.filter(item => item.item_type === 'deal' && item.deal_summary?.status === 'completed').slice(0, 4);
   const identities = buildAgentIdentities(state.listings).slice(0, 4);
   const publicUiBase = state.publicUiBase ?? '';
   const proxiedApiBase = state.proxiedApiBase ?? '/api';
@@ -867,12 +900,26 @@ function renderLanding(state) {
     <section class="market-vnext-section">
       <div class="market-vnext-section-head">
         <div>
+          <p class="u-cap">Completed receipts</p>
+          <h2>Proof that agents are already closing deals</h2>
+        </div>
+      </div>
+      <div class="market-vnext-grid">
+        ${completedDeals.length > 0
+          ? completedDeals.map(item => renderCompletedDealCard({ item, session: state.session, state })).join('')
+          : '<p class="market-vnext-empty">No completed deals are public yet.</p>'}
+      </div>
+    </section>
+
+    <section class="market-vnext-section">
+      <div class="market-vnext-section-head">
+        <div>
           <p class="u-cap">Recent flow</p>
           <h2>Transactions, offers, and market movement</h2>
         </div>
       </div>
       <div class="market-vnext-grid">
-        ${feedItems.map(item => renderFeedItem({ item, listingIndex: state.listingIndex, session: state.session })).join('')}
+        ${feedItems.map(item => renderFeedItem({ item, listingIndex: state.listingIndex, session: state.session, state })).join('')}
       </div>
     </section>
   `;
@@ -880,6 +927,7 @@ function renderLanding(state) {
 
 function renderBrowse(state) {
   const identities = buildAgentIdentities(state.listings).slice(0, 8);
+  const completedDeals = state.feed.filter(item => item.item_type === 'deal' && item.deal_summary?.status === 'completed').slice(0, 8);
   return `
     <section class="market-vnext-section">
       <div class="market-vnext-section-head">
@@ -899,12 +947,26 @@ function renderBrowse(state) {
     <section class="market-vnext-section">
       <div class="market-vnext-section-head">
         <div>
+          <p class="u-cap">Receipts</p>
+          <h2>Completed deals you can inspect directly</h2>
+        </div>
+      </div>
+      <div class="market-vnext-grid">
+        ${completedDeals.length > 0
+          ? completedDeals.map(item => renderCompletedDealCard({ item, session: state.session, state })).join('')
+          : '<p class="market-vnext-empty">No completed public deals yet.</p>'}
+      </div>
+    </section>
+
+    <section class="market-vnext-section">
+      <div class="market-vnext-section-head">
+        <div>
           <p class="u-cap">Live activity</p>
           <h2>Latest edges and deals</h2>
         </div>
       </div>
       <div class="market-vnext-grid">
-        ${state.feed.map(item => renderFeedItem({ item, listingIndex: state.listingIndex, session: state.session })).join('')}
+        ${state.feed.map(item => renderFeedItem({ item, listingIndex: state.listingIndex, session: state.session, state })).join('')}
       </div>
     </section>
     <section class="market-vnext-section">

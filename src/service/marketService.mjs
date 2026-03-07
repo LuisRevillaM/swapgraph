@@ -141,6 +141,68 @@ function openSignupEnabled() {
   return !new Set(['off', 'closed', 'invite']).has(mode);
 }
 
+function parseRateLimitEnv(name, fallback) {
+  const raw = Number.parseInt(String(process.env[name] ?? fallback), 10);
+  if (!Number.isFinite(raw) || raw < 1) return fallback;
+  return raw;
+}
+
+function startOfHourIso(iso) {
+  const ms = parseIsoMs(iso);
+  if (ms === null) return null;
+  const date = new Date(ms);
+  date.setUTCMinutes(0, 0, 0);
+  return date.toISOString();
+}
+
+function ensureQuotaRecord(store, key, defaults = {}) {
+  store.state.market_actor_quotas[key] ||= { ...clone(defaults) };
+  const record = store.state.market_actor_quotas[key];
+  record.rate_windows ||= {};
+  return record;
+}
+
+function applyRateLimit({ quotaRecord, actionKey, limit, recordedAt }) {
+  const windowStartedAt = startOfHourIso(recordedAt);
+  if (!windowStartedAt) return { ok: false, count: 0, limit };
+  const existing = quotaRecord.rate_windows[actionKey];
+  if (!existing || existing.window_started_at !== windowStartedAt) {
+    quotaRecord.rate_windows[actionKey] = {
+      window_started_at: windowStartedAt,
+      count: 0
+    };
+  }
+  const bucket = quotaRecord.rate_windows[actionKey];
+  if (bucket.count >= limit) {
+    return {
+      ok: false,
+      count: bucket.count,
+      limit,
+      window_started_at: bucket.window_started_at
+    };
+  }
+  bucket.count += 1;
+  return {
+    ok: true,
+    count: bucket.count,
+    limit,
+    window_started_at: bucket.window_started_at
+  };
+}
+
+function countUrls(value) {
+  const matches = String(value ?? '').match(/https?:\/\/|www\./gi);
+  return matches ? matches.length : 0;
+}
+
+function includesOffplatformContact(value) {
+  return /(telegram|whatsapp|signal|discord\.gg|dm me|contact me off-platform)/i.test(String(value ?? ''));
+}
+
+function moderationQueueKey(kind, subjectId) {
+  return `${kind}:${subjectId}`;
+}
+
 function normalizeActorProfileView(record) {
   if (!record) return null;
   return {
@@ -153,6 +215,63 @@ function normalizeActorProfileView(record) {
     created_at: record.created_at,
     updated_at: record.updated_at
   };
+}
+
+function queueModerationReview(store, entry) {
+  const key = moderationQueueKey(entry.subject_kind, entry.subject_id);
+  const existing = store.state.market_moderation_queue[key] ?? null;
+  store.state.market_moderation_queue[key] = {
+    moderation_id: existing?.moderation_id ?? key,
+    status: existing?.status ?? 'pending_review',
+    review_count: Number(existing?.review_count ?? 0) + 1,
+    reason_codes: Array.from(new Set([...(existing?.reason_codes ?? []), ...(entry.reason_codes ?? [])])).sort(),
+    subject_kind: entry.subject_kind,
+    subject_id: entry.subject_id,
+    actor: clone(entry.actor),
+    workspace_id: entry.workspace_id ?? null,
+    evidence: clone(entry.evidence ?? {}),
+    created_at: existing?.created_at ?? entry.recorded_at,
+    updated_at: entry.recorded_at
+  };
+}
+
+function maybeQueueListingModeration({ store, listing, actorQuota, recordedAt }) {
+  const reasonCodes = [];
+  const evidence = {};
+  const combinedText = [
+    listing.title,
+    listing.description,
+    JSON.stringify(listing.want_spec ?? null),
+    JSON.stringify(listing.constraints ?? null)
+  ].filter(Boolean).join('\n');
+  const urlCount = countUrls(combinedText);
+  if (urlCount >= 2) {
+    reasonCodes.push('listing_many_urls');
+    evidence.url_count = urlCount;
+  }
+  if (includesOffplatformContact(combinedText)) {
+    reasonCodes.push('listing_offplatform_contact');
+  }
+  const duplicateTitleCount = Object.values(store.state.market_listings ?? {}).filter(candidate => (
+    candidate.owner_actor?.type === listing.owner_actor?.type
+    && candidate.owner_actor?.id === listing.owner_actor?.id
+    && String(candidate.title ?? '').trim().toLowerCase() === String(listing.title ?? '').trim().toLowerCase()
+  )).length;
+  if (duplicateTitleCount >= 3) {
+    reasonCodes.push('listing_duplicate_title_burst');
+    evidence.duplicate_title_count = duplicateTitleCount;
+  }
+  if ((actorQuota?.trust_tier ?? 'open_signup') === 'open_signup' && reasonCodes.length > 0) {
+    queueModerationReview(store, {
+      subject_kind: 'listing',
+      subject_id: listing.listing_id,
+      actor: listing.owner_actor,
+      workspace_id: listing.workspace_id,
+      reason_codes: reasonCodes,
+      evidence,
+      recorded_at: recordedAt
+    });
+  }
 }
 
 function actorProfileSummary(store, actor) {
@@ -946,6 +1065,7 @@ export class MarketService {
       const ownerMode = normalizeOptionalString(request?.owner_mode)?.toLowerCase() ?? 'agent_owner';
       const requestedWorkspaceId = normalizeOptionalString(request?.workspace_id);
       const recordedAt = normalizeRecordedAt(request, auth);
+      const clientFingerprint = normalizeOptionalString(auth?.client_fingerprint) ?? 'unknown';
 
       if (!displayName || parseIsoMs(recordedAt) === null) {
         return {
@@ -962,6 +1082,30 @@ export class MarketService {
           body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid owner mode', {
             reason_code: 'market_signup_invalid',
             owner_mode: ownerMode
+          })
+        };
+      }
+
+      const signupQuota = ensureQuotaRecord(this.store, `client:${clientFingerprint}`, {
+        actor: { type: 'client', id: clientFingerprint },
+        trust_tier: 'anonymous',
+        created_at: recordedAt,
+        updated_at: recordedAt
+      });
+      const signupRateLimit = applyRateLimit({
+        quotaRecord: signupQuota,
+        actionKey: 'signup_create',
+        limit: parseRateLimitEnv('MARKET_SIGNUP_RATE_LIMIT_PER_HOUR', 6),
+        recordedAt
+      });
+      signupQuota.updated_at = recordedAt;
+      if (!signupRateLimit.ok) {
+        return {
+          ok: false,
+          body: errorResponse(corr, 'FORBIDDEN', 'signup rate limit exceeded', {
+            reason_code: 'market_signup_rate_limited',
+            limit: signupRateLimit.limit,
+            window_started_at: signupRateLimit.window_started_at
           })
         };
       }
@@ -988,8 +1132,10 @@ export class MarketService {
         credits_available: 1000,
         listings_created: 0,
         edges_created: 0,
+        deals_created: 0,
         created_at: recordedAt,
-        updated_at: recordedAt
+        updated_at: recordedAt,
+        rate_windows: {}
       };
 
       return {
@@ -1079,6 +1225,34 @@ export class MarketService {
       handler: () => {
         const normalized = this._normalizeListingCreate({ request, actor, auth, correlationId: corr });
         if (!normalized.ok) return { ok: false, body: normalized.body };
+        const ownerQuotaKey = actorProfileKey(normalized.value.owner_actor);
+        const ownerQuota = ensureQuotaRecord(this.store, ownerQuotaKey, {
+          actor: clone(normalized.value.owner_actor),
+          trust_tier: 'open_signup',
+          credit_balance: 1000,
+          listings_created: 0,
+          edges_created: 0,
+          deals_created: 0,
+          created_at: normalized.value.recorded_at,
+          updated_at: normalized.value.recorded_at
+        });
+        const listingRateLimit = applyRateLimit({
+          quotaRecord: ownerQuota,
+          actionKey: 'listing_create',
+          limit: parseRateLimitEnv('MARKET_LISTING_RATE_LIMIT_PER_HOUR', 60),
+          recordedAt: normalized.value.recorded_at
+        });
+        ownerQuota.updated_at = normalized.value.recorded_at;
+        if (!listingRateLimit.ok) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'FORBIDDEN', 'listing rate limit exceeded', {
+              reason_code: 'market_listing_rate_limited',
+              limit: listingRateLimit.limit,
+              window_started_at: listingRateLimit.window_started_at
+            })
+          };
+        }
 
         const listingId = normalized.value.listing_id ?? nextListingId(this.store);
         if (this.store.state.market_listings[listingId]) {
@@ -1110,6 +1284,13 @@ export class MarketService {
         };
 
         this.store.state.market_listings[listingId] = record;
+        ownerQuota.listings_created = Number(ownerQuota.listings_created ?? 0) + 1;
+        maybeQueueListingModeration({
+          store: this.store,
+          listing: record,
+          actorQuota: ownerQuota,
+          recordedAt: normalized.value.recorded_at
+        });
 
         return {
           ok: true,
@@ -1612,6 +1793,35 @@ export class MarketService {
           };
         }
 
+        const subjectQuotaKey = actorProfileKey(subjectActor);
+        const subjectQuota = ensureQuotaRecord(this.store, subjectQuotaKey, {
+          actor: clone(subjectActor),
+          trust_tier: 'open_signup',
+          credit_balance: 1000,
+          listings_created: 0,
+          edges_created: 0,
+          deals_created: 0,
+          created_at: recordedAt,
+          updated_at: recordedAt
+        });
+        const edgeRateLimit = applyRateLimit({
+          quotaRecord: subjectQuota,
+          actionKey: 'edge_create',
+          limit: parseRateLimitEnv('MARKET_EDGE_RATE_LIMIT_PER_HOUR', 120),
+          recordedAt
+        });
+        subjectQuota.updated_at = recordedAt;
+        if (!edgeRateLimit.ok) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'FORBIDDEN', 'edge rate limit exceeded', {
+              reason_code: 'market_edge_rate_limited',
+              limit: edgeRateLimit.limit,
+              window_started_at: edgeRateLimit.window_started_at
+            })
+          };
+        }
+
         const requestedId = normalizeOptionalString(edge.edge_id);
         const edgeId = requestedId ?? nextEdgeId(this.store);
         if (this.store.state.market_edges[edgeId]) {
@@ -1651,6 +1861,7 @@ export class MarketService {
         };
 
         this.store.state.market_edges[edgeId] = record;
+        subjectQuota.edges_created = Number(subjectQuota.edges_created ?? 0) + 1;
 
         return {
           ok: true,

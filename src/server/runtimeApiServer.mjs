@@ -1,5 +1,5 @@
 import { createServer } from 'node:http';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -169,6 +169,20 @@ function sendHtml({ res, status, html, correlationId }) {
   res.end(html);
 }
 
+function extractForwardedIp(req) {
+  const cf = trimOrNull(req.headers['cf-connecting-ip']);
+  if (cf) return cf;
+  const forwarded = trimOrNull(req.headers['x-forwarded-for']);
+  if (forwarded) return forwarded.split(',')[0]?.trim() ?? null;
+  return trimOrNull(req.socket?.remoteAddress) ?? null;
+}
+
+function requestClientFingerprint(req) {
+  const ip = extractForwardedIp(req) ?? 'unknown';
+  const ua = trimOrNull(req.headers['user-agent']) ?? 'unknown';
+  return createHash('sha256').update(`${ip}|${ua}`).digest('hex').slice(0, 20);
+}
+
 function parseActorAuth({ req, allowAnonymous = false }) {
   const authz = trimOrNull(req.headers.authorization);
   if (authz?.startsWith('Bearer sgdt1.')) {
@@ -176,7 +190,18 @@ function parseActorAuth({ req, allowAnonymous = false }) {
     if (!parsed.ok) {
       return { ok: false, code: parsed.error.code, message: parsed.error.message, details: parsed.error.details };
     }
-    return { ok: true, actor: parsed.actor, auth: parsed.auth };
+    return {
+      ok: true,
+      actor: parsed.actor,
+      auth: {
+        ...parsed.auth,
+        client_fingerprint: requestClientFingerprint(req),
+        request_source: {
+          ip_hint: extractForwardedIp(req),
+          user_agent: trimOrNull(req.headers['user-agent'])
+        }
+      }
+    };
   }
 
   const actorTypeHeader = trimOrNull(req.headers['x-actor-type']);
@@ -191,7 +216,19 @@ function parseActorAuth({ req, allowAnonymous = false }) {
   }
 
   if (!actorType || !actorId) {
-    if (allowAnonymous) return { ok: true, actor: null, auth: {} };
+    if (allowAnonymous) {
+      return {
+        ok: true,
+        actor: null,
+        auth: {
+          client_fingerprint: requestClientFingerprint(req),
+          request_source: {
+            ip_hint: extractForwardedIp(req),
+            user_agent: trimOrNull(req.headers['user-agent'])
+          }
+        }
+      };
+    }
     return {
       ok: false,
       code: 'UNAUTHORIZED',
@@ -217,7 +254,14 @@ function parseActorAuth({ req, allowAnonymous = false }) {
 
   const scopes = parseScopes(trimOrNull(req.headers['x-auth-scopes']) ?? trimOrNull(req.headers['x-scopes']) ?? '');
   const nowIso = trimOrNull(req.headers['x-now-iso']);
-  const auth = { scopes };
+  const auth = {
+    scopes,
+    client_fingerprint: requestClientFingerprint(req),
+    request_source: {
+      ip_hint: extractForwardedIp(req),
+      user_agent: trimOrNull(req.headers['user-agent'])
+    }
+  };
   if (nowIso) auth.now_iso = nowIso;
 
   return {
@@ -256,6 +300,7 @@ function allowsAnonymousActor({ method, pathname }) {
   if (method === 'GET' && pathname === '/market/feed') return true;
   if (method === 'GET' && /^\/market\/listings\/[^/]+$/.test(pathname)) return true;
   if (method === 'GET' && /^\/market\/edges\/[^/]+$/.test(pathname)) return true;
+  if (method === 'GET' && /^\/market\/deals\/[^/]+\/receipt$/.test(pathname)) return true;
   return false;
 }
 

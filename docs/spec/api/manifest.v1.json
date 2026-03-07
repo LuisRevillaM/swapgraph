@@ -3444,15 +3444,13 @@
       "idempotency_required": false,
       "response_schema": "MarketDealReceiptResponse.schema.json",
       "auth": {
-        "required": true,
+        "required": false,
         "allowed_actor_types": [
           "user",
           "partner",
           "agent"
         ],
-        "required_scopes": [
-          "receipts:read"
-        ]
+        "required_scopes": []
       }
     },
     {

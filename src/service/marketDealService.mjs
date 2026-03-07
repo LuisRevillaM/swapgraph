@@ -226,6 +226,69 @@ function normalizePositiveAmount(terms) {
   return 0;
 }
 
+function parseRateLimitEnv(name, fallback) {
+  const raw = Number.parseInt(String(process.env[name] ?? fallback), 10);
+  if (!Number.isFinite(raw) || raw < 1) return fallback;
+  return raw;
+}
+
+function startOfHourIso(iso) {
+  const ms = parseIsoMs(iso);
+  if (ms === null) return null;
+  const date = new Date(ms);
+  date.setUTCMinutes(0, 0, 0);
+  return date.toISOString();
+}
+
+function ensureRateWindow(record, actionKey, windowStartedAt) {
+  record.rate_windows ||= {};
+  if (!record.rate_windows[actionKey] || record.rate_windows[actionKey].window_started_at !== windowStartedAt) {
+    record.rate_windows[actionKey] = {
+      window_started_at: windowStartedAt,
+      count: 0
+    };
+  }
+  return record.rate_windows[actionKey];
+}
+
+function applyRateLimit({ quotaRecord, actionKey, limit, recordedAt }) {
+  const windowStartedAt = startOfHourIso(recordedAt);
+  if (!windowStartedAt) return { ok: false, count: 0, limit };
+  const bucket = ensureRateWindow(quotaRecord, actionKey, windowStartedAt);
+  if (bucket.count >= limit) {
+    return {
+      ok: false,
+      count: bucket.count,
+      limit,
+      window_started_at: bucket.window_started_at
+    };
+  }
+  bucket.count += 1;
+  return {
+    ok: true,
+    count: bucket.count,
+    limit,
+    window_started_at: bucket.window_started_at
+  };
+}
+
+function listingIsPublicVisible(listing) {
+  return !!listing && listing.status !== 'suspended';
+}
+
+function edgeIsPublicVisible(store, edge) {
+  if (!edge) return false;
+  const source = store.state.market_listings?.[edge.source_ref?.id] ?? null;
+  const target = store.state.market_listings?.[edge.target_ref?.id] ?? null;
+  return listingIsPublicVisible(source) && listingIsPublicVisible(target);
+}
+
+function dealIsPublicVisible(store, deal) {
+  if (!deal) return false;
+  const edge = store.state.market_edges?.[deal.origin_edge_id] ?? null;
+  return edgeIsPublicVisible(store, edge);
+}
+
 function normalizeDealListQuery(query) {
   const allowed = new Set(['workspace_id', 'status', 'settlement_mode', 'limit', 'cursor_after']);
   for (const key of Object.keys(query ?? {})) {
@@ -407,7 +470,8 @@ export class MarketDealService {
 
   _ensureActorQuota(actor) {
     const key = `${actor?.type}:${actor?.id}`;
-    this.store.state.market_actor_quotas[key] ||= { credit_balance: 100 };
+    this.store.state.market_actor_quotas[key] ||= { credit_balance: 100, rate_windows: {}, deals_created: 0 };
+    this.store.state.market_actor_quotas[key].rate_windows ||= {};
     return this.store.state.market_actor_quotas[key];
   }
 
@@ -529,6 +593,25 @@ export class MarketDealService {
           };
         }
 
+        const actorQuota = this._ensureActorQuota(subjectActor);
+        const dealRateLimit = applyRateLimit({
+          quotaRecord: actorQuota,
+          actionKey: 'deal_create',
+          limit: parseRateLimitEnv('MARKET_DEAL_RATE_LIMIT_PER_HOUR', 60),
+          recordedAt
+        });
+        actorQuota.updated_at = recordedAt;
+        if (!dealRateLimit.ok) {
+          return {
+            ok: false,
+            body: errorResponse(corr, 'FORBIDDEN', 'deal rate limit exceeded', {
+              reason_code: 'market_deal_rate_limited',
+              limit: dealRateLimit.limit,
+              window_started_at: dealRateLimit.window_started_at
+            })
+          };
+        }
+
         if (edge.status !== 'accepted' || edge.edge_type === 'block') {
           return {
             ok: false,
@@ -617,6 +700,7 @@ export class MarketDealService {
         };
 
         this.store.state.market_deals[dealId] = record;
+        actorQuota.deals_created = Number(actorQuota.deals_created ?? 0) + 1;
         this._appendSystemMessage({
           threadId: thread.thread_id,
           recordedAt,
@@ -1103,13 +1187,25 @@ export class MarketDealService {
     const authz = this._authorize({ actor, auth, operationId: op, correlationId: corr });
     if (!authz.ok) return { ok: false, body: authz.body };
 
-    const subjectActor = this._subjectActor({ actor, auth });
     const load = this._loadDealOrError({ dealId, correlationId: corr });
     if (!load.ok) return { ok: false, body: load.body };
 
     const deal = load.record;
-    const participantGuard = this._ensureParticipant({ deal, actor: subjectActor, correlationId: corr });
-    if (participantGuard) return participantGuard;
+    if (!actor) {
+      if (!dealIsPublicVisible(this.store, deal) || deal.status !== 'completed') {
+        return {
+          ok: false,
+          body: errorResponse(corr, 'NOT_FOUND', 'receipt not found', {
+            reason_code: 'market_receipt_not_found',
+            deal_id: dealId
+          })
+        };
+      }
+    } else {
+      const subjectActor = this._subjectActor({ actor, auth });
+      const participantGuard = this._ensureParticipant({ deal, actor: subjectActor, correlationId: corr });
+      if (participantGuard) return participantGuard;
+    }
 
     const cycleId = deal.settlement_ref ?? deal.deal_id;
     const receipt = this.store.state.receipts?.[cycleId] ?? null;
