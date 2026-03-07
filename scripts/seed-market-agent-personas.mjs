@@ -29,6 +29,10 @@ async function request(path, { method = 'GET', body, actor, publicRequest = fals
   return json;
 }
 
+function actorKey(actor) {
+  return actor ? `${actor.type}:${actor.id}` : 'unknown';
+}
+
 const personas = [
   {
     display_name: 'Memory Cartographer',
@@ -215,21 +219,40 @@ const personas = [
 async function main() {
   const existing = await request('/market/listings?limit=300', { publicRequest: true });
   const existingTitles = new Set((existing.listings ?? []).map(listing => listing.title));
+  const existingSessionsByName = new Map();
+  for (const listing of existing.listings ?? []) {
+    const displayName = listing?.owner_profile?.display_name;
+    if (!displayName || existingSessionsByName.has(displayName)) continue;
+    existingSessionsByName.set(displayName, {
+      persona: displayName,
+      actor: listing.owner_actor,
+      workspace_id: listing.workspace_id,
+      created_titles: []
+    });
+  }
   const sessions = [];
 
   for (const persona of personas) {
-    const signup = await request('/market/signup', {
-      method: 'POST',
-      publicRequest: true,
-      body: {
-        display_name: persona.display_name,
-        owner_mode: persona.owner_mode,
-        bio: persona.bio,
-        recorded_at: new Date().toISOString()
-      }
-    });
-    const actor = signup.actor;
-    const workspaceId = signup.owner_profile.default_workspace_id;
+    const existingSession = existingSessionsByName.get(persona.display_name);
+    let actor;
+    let workspaceId;
+    if (existingSession) {
+      actor = existingSession.actor;
+      workspaceId = existingSession.workspace_id;
+    } else {
+      const signup = await request('/market/signup', {
+        method: 'POST',
+        publicRequest: true,
+        body: {
+          display_name: persona.display_name,
+          owner_mode: persona.owner_mode,
+          bio: persona.bio,
+          recorded_at: new Date().toISOString()
+        }
+      });
+      actor = signup.actor;
+      workspaceId = signup.owner_profile.default_workspace_id;
+    }
     const createdTitles = [];
     for (const listing of persona.listings) {
       if (existingTitles.has(listing.title)) continue;
@@ -242,13 +265,34 @@ async function main() {
         }
       });
       createdTitles.push(listing.title);
+      existingTitles.add(listing.title);
     }
-    sessions.push({ persona: persona.display_name, actor, created_titles: createdTitles });
+    sessions.push({ persona: persona.display_name, actor, workspace_id: workspaceId, created_titles: createdTitles });
   }
 
   const refreshed = await request('/market/listings?limit=300', { publicRequest: true });
   const byTitle = new Map((refreshed.listings ?? []).map(listing => [listing.title, listing]));
   const actorByName = new Map(sessions.map(session => [session.persona, session.actor]));
+  const existingDealsBySignature = new Set();
+  const workspaceActors = new Map();
+  for (const session of sessions) {
+    const actor = session.actor;
+    if (!actor || workspaceActors.has(actorKey(actor))) continue;
+    workspaceActors.set(actorKey(actor), actor);
+  }
+  for (const actor of workspaceActors.values()) {
+    const dealsResponse = await request('/market/deals?workspace_id=open_market&limit=300', { actor });
+    const edgesResponse = await request('/market/edges?workspace_id=open_market&limit=300', { actor });
+    const edgeById = new Map((edgesResponse.edges ?? []).map(edge => [edge.edge_id, edge]));
+    for (const deal of dealsResponse.deals ?? []) {
+      const edge = edgeById.get(deal.origin_edge_id);
+      if (!edge) continue;
+      const sourceId = edge?.source_ref?.id;
+      const targetId = edge?.target_ref?.id;
+      if (!sourceId || !targetId) continue;
+      existingDealsBySignature.add(`${sourceId}->${targetId}`);
+    }
+  }
   const completedDeals = [];
 
   for (const [buyerName, wantTitle, sellerName, capabilityTitle, amount, note] of [
@@ -260,6 +304,8 @@ async function main() {
     const source = byTitle.get(wantTitle);
     const target = byTitle.get(capabilityTitle);
     if (!buyer || !seller || !source || !target) continue;
+    const signature = `${source.listing_id}->${target.listing_id}`;
+    if (existingDealsBySignature.has(signature)) continue;
 
     const edge = await request('/market/edges', {
       method: 'POST',
@@ -295,6 +341,7 @@ async function main() {
       actor: seller,
       body: { recorded_at: new Date().toISOString() }
     });
+    existingDealsBySignature.add(signature);
     completedDeals.push({ deal_id: completed.deal.deal_id, buyer: buyerName, seller: sellerName, status: completed.deal.status });
   }
 
