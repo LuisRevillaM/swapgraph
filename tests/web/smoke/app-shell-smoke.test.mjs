@@ -58,6 +58,7 @@ test('marketplace shell serves mobile-first app entry and tab config', async () 
     assert.match(vnextText, /Place offer/);
     assert.match(vnextText, /Operator queue/);
     assert.match(vnextText, /market:moderate/);
+    assert.match(vnextText, /Case evidence/);
   } finally {
     proc.kill('SIGTERM');
   }

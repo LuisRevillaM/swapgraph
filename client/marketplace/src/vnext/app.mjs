@@ -746,6 +746,7 @@ function renderModerationQueuePanel(state) {
                   <div class="market-vnext-card-foot">
                     <span>${escapeHtml(formatIsoShort(item.updated_at))}</span>
                     <span class="market-vnext-inline-actions">
+                      <button type="button" class="market-vnext-secondary" data-action="moderation.inspect" data-moderation-id="${escapeHtml(item.moderation_id)}">Inspect</button>
                       <button type="button" class="market-vnext-secondary" data-action="moderation.resolve" data-moderation-id="${escapeHtml(item.moderation_id)}" data-resolution-action="approve">Approve</button>
                       <button type="button" class="market-vnext-secondary" data-action="moderation.resolve" data-moderation-id="${escapeHtml(item.moderation_id)}" data-resolution-action="dismiss">Dismiss</button>
                       <button type="button" class="market-vnext-secondary" data-action="moderation.resolve" data-moderation-id="${escapeHtml(item.moderation_id)}" data-resolution-action="set_watchlist">Watchlist</button>
@@ -761,6 +762,115 @@ function renderModerationQueuePanel(state) {
           `).join('')
           : '<p class="market-vnext-empty">No moderation items are queued right now.</p>'}
       </div>
+    </section>
+  `;
+}
+
+function renderModerationEvidencePanel(state) {
+  const moderationId = state.activeModerationId ?? null;
+  const selected = asArray(state.moderationQueue).find(item => item.moderation_id === moderationId) ?? null;
+  const evidence = state.moderationEvidence ?? null;
+  const listing = evidence?.listing ?? null;
+  const relatedEdges = asArray(evidence?.edges);
+  const relatedDeals = asArray(evidence?.deals);
+  const thread = evidence?.thread ?? null;
+  const threadMessages = asArray(evidence?.thread_messages);
+
+  if (!selected) {
+    return `
+      <section class="market-vnext-card">
+        <p class="u-cap">Case evidence</p>
+        <h2>Select a moderation item</h2>
+        <p class="market-vnext-card-copy">Inspect pulls the listing, related edges, related deals, and available thread context into one operator view.</p>
+      </section>
+    `;
+  }
+
+  return `
+    <section class="market-vnext-card">
+      <p class="u-cap">Case evidence</p>
+      <h2>${escapeHtml(selected.moderation_id)}</h2>
+      <div class="market-vnext-card-tags">
+        <span class="market-vnext-tag">${escapeHtml(selected.status)}</span>
+        <span class="market-vnext-tag">${escapeHtml(selected.subject_kind)}</span>
+        <span class="market-vnext-tag">workspace ${escapeHtml(selected.workspace_id ?? 'n/a')}</span>
+      </div>
+      <p class="market-vnext-inline-list"><strong>Reasons:</strong> ${escapeHtml(selected.reason_codes.join(' • ') || 'None')}</p>
+      <p class="market-vnext-inline-list"><strong>Evidence:</strong> ${escapeHtml(JSON.stringify(selected.evidence ?? {}))}</p>
+      ${state.loading.opsEvidence ? '<p class="market-vnext-loading">Loading evidence…</p>' : ''}
+      ${listing ? renderListingCard({ listing, session: state.session }) : '<p class="market-vnext-empty">No listing payload loaded.</p>'}
+      <div class="market-vnext-section-head">
+        <div>
+          <p class="u-cap">Related edges</p>
+          <h2>${relatedEdges.length} edges touching this listing</h2>
+        </div>
+      </div>
+      <div class="market-vnext-grid">
+        ${relatedEdges.length > 0
+          ? relatedEdges.map(edge => `
+            <article class="market-vnext-card edge-card">
+              <div class="market-vnext-card-head">
+                <span class="market-vnext-pill kind-edge">${escapeHtml(edge.edge_type)}</span>
+                <span class="market-vnext-card-meta">${escapeHtml(edge.status)}</span>
+              </div>
+              <h3>${escapeHtml(edge.edge_id)}</h3>
+              <p class="market-vnext-card-copy">${escapeHtml(edge.note ?? 'No note')}</p>
+              <p class="market-vnext-inline-list"><strong>Source:</strong> ${escapeHtml(edge.source_ref?.id ?? 'n/a')}</p>
+              <p class="market-vnext-inline-list"><strong>Target:</strong> ${escapeHtml(edge.target_ref?.id ?? 'n/a')}</p>
+            </article>
+          `).join('')
+          : '<p class="market-vnext-empty">No related edges found.</p>'}
+      </div>
+      <div class="market-vnext-section-head">
+        <div>
+          <p class="u-cap">Related deals</p>
+          <h2>${relatedDeals.length} deals from those edges</h2>
+        </div>
+      </div>
+      <div class="market-vnext-grid">
+        ${relatedDeals.length > 0
+          ? relatedDeals.map(deal => `
+            <article class="market-vnext-card deal-card">
+              <div class="market-vnext-card-head">
+                <span class="market-vnext-pill kind-deal">${escapeHtml(deal.settlement_mode ?? 'pending')}</span>
+                <span class="market-vnext-card-meta">${escapeHtml(deal.status)}</span>
+              </div>
+              <h3>${escapeHtml(deal.deal_id)}</h3>
+              <p class="market-vnext-card-copy">Participants: ${escapeHtml(asArray(deal.participants).map(actor => actor.id).join(' • '))}</p>
+              <div class="market-vnext-card-foot">
+                <span>${escapeHtml(formatIsoShort(deal.updated_at))}</span>
+                <span class="market-vnext-inline-actions">
+                  ${deal.thread_id ? `<button type="button" class="market-vnext-secondary" data-action="thread.open" data-thread-id="${escapeHtml(deal.thread_id)}">Thread</button>` : ''}
+                  ${deal.receipt_ref ? `<button type="button" class="market-vnext-secondary" data-action="deal.receipt" data-deal-id="${escapeHtml(deal.deal_id)}">Receipt</button>` : ''}
+                </span>
+              </div>
+            </article>
+          `).join('')
+          : '<p class="market-vnext-empty">No related deals found.</p>'}
+      </div>
+      <div class="market-vnext-section-head">
+        <div>
+          <p class="u-cap">Thread evidence</p>
+          <h2>${thread?.thread_id ? escapeHtml(thread.thread_id) : 'No linked thread yet'}</h2>
+        </div>
+      </div>
+      ${thread?.thread_id
+        ? `
+          <div class="market-vnext-thread-log">
+            ${threadMessages.length > 0
+              ? threadMessages.map(message => `
+                <article class="market-vnext-thread-message">
+                  <div class="market-vnext-card-head">
+                    <span class="market-vnext-card-meta">${escapeHtml(message.sender_actor?.id ?? 'system')}</span>
+                    <span class="market-vnext-card-meta">${escapeHtml(formatIsoShort(message.created_at))}</span>
+                  </div>
+                  <pre>${escapeHtml(JSON.stringify(message.payload, null, 2))}</pre>
+                </article>
+              `).join('')
+              : '<p class="market-vnext-empty">No thread messages recorded.</p>'}
+          </div>
+        `
+        : '<p class="market-vnext-empty">No thread linked to this moderation item.</p>'}
     </section>
   `;
 }
@@ -929,6 +1039,7 @@ function renderOpsPanel(state) {
         </div>
       </section>
       ${renderModerationQueuePanel(state)}
+      ${renderModerationEvidencePanel(state)}
     </section>
   `;
 }
@@ -1184,6 +1295,8 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
     ownerListings: [],
     trustProfile: null,
     moderationQueue: [],
+    moderationEvidence: null,
+    activeModerationId: null,
     listingIndex: new Map(),
     edgeComposer: { targetListingId: null },
     activeThreadId: null,
@@ -1194,6 +1307,8 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
       edge: false,
       deal: false,
       thread: false
+      ,
+      opsEvidence: false
     },
     error: null,
     notice: null
@@ -1255,6 +1370,10 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
         state.threads = asArray(threadsRes.threads);
         state.trustProfile = trustRes ?? null;
         state.moderationQueue = asArray(moderationRes.moderation_items);
+        if (state.activeModerationId && !state.moderationQueue.some(item => item.moderation_id === state.activeModerationId)) {
+          state.activeModerationId = null;
+          state.moderationEvidence = null;
+        }
         for (const listing of state.ownerListings) state.listingIndex.set(listing.listing_id, listing);
         if (!state.activeThreadId && state.deals[0]?.thread_id) state.activeThreadId = state.deals[0].thread_id;
         const messageLoads = await Promise.all(
@@ -1274,6 +1393,8 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
         state.threads = [];
         state.trustProfile = null;
         state.moderationQueue = [];
+        state.moderationEvidence = null;
+        state.activeModerationId = null;
         state.threadMessagesById = {};
         state.activeThreadId = null;
       }
@@ -1599,6 +1720,54 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
     }
   }
 
+  async function handleModerationInspect(moderationId) {
+    if (!state.session || !moderationId) return;
+    const item = asArray(state.moderationQueue).find(entry => entry.moderation_id === moderationId);
+    if (!item) return;
+    state.activeModerationId = moderationId;
+    state.loading.opsEvidence = true;
+    state.error = null;
+    render();
+    try {
+      let listing = null;
+      if (item.subject_kind === 'listing' && item.subject_id) {
+        const listingRes = await apiRequest({
+          path: `/market/listings/${encodeURIComponent(item.subject_id)}`
+        });
+        listing = listingRes.listing ?? null;
+      }
+      const workspace = encodeURIComponent(item.workspace_id ?? state.session.profile.default_workspace_id);
+      const [edgesRes, dealsRes, threadsRes] = await Promise.all([
+        apiRequest({ path: `/market/edges?workspace_id=${workspace}&limit=200`, useSession: false }),
+        apiRequest({ path: `/market/deals?workspace_id=${workspace}&limit=200` }),
+        apiRequest({ path: `/market/threads?workspace_id=${workspace}&limit=200` })
+      ]);
+      const edges = asArray(edgesRes.edges).filter(edge =>
+        edge.source_ref?.id === item.subject_id || edge.target_ref?.id === item.subject_id
+      );
+      const edgeIds = new Set(edges.map(edge => edge.edge_id));
+      const deals = asArray(dealsRes.deals).filter(deal => edgeIds.has(deal.origin_edge_id));
+      const threadIds = new Set(deals.map(deal => deal.thread_id).filter(Boolean));
+      const thread = asArray(threadsRes.threads).find(candidate => threadIds.has(candidate.thread_id)) ?? null;
+      let threadMessages = [];
+      if (thread?.thread_id) {
+        const messagesRes = await apiRequest({
+          path: `/market/threads/${encodeURIComponent(thread.thread_id)}/messages?limit=100`
+        });
+        threadMessages = asArray(messagesRes.messages);
+      }
+      state.moderationEvidence = { listing, edges, deals, thread, thread_messages: threadMessages };
+      if (thread?.thread_id) state.activeThreadId = thread.thread_id;
+      setNotice('Moderation evidence loaded.');
+    } catch (error) {
+      state.error = String(error?.message ?? error);
+      render();
+    } finally {
+      state.loading.opsEvidence = false;
+      render();
+    }
+  }
+
   function render() {
     root.innerHTML = renderApp(state);
   }
@@ -1643,6 +1812,10 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
         actionTarget.getAttribute('data-moderation-id'),
         actionTarget.getAttribute('data-resolution-action')
       );
+      return;
+    }
+    if (action === 'moderation.inspect') {
+      handleModerationInspect(actionTarget.getAttribute('data-moderation-id'));
       return;
     }
     if (action === 'deal.create') {
