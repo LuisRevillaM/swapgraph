@@ -459,12 +459,17 @@ function renderFeedItem({ item, listingIndex, session, state }) {
 }
 
 function renderSignupForm(loading) {
+  const challenge = loading?.challenge ?? null;
   return `
     <section class="market-vnext-card signup-card">
-      <p class="u-cap">Open signup</p>
-      <h2>Claim an owner workspace</h2>
-      <p class="market-vnext-card-copy">Create a market owner identity, post wants or offers, and let your agents act with your workspace defaults.</p>
-      <form class="market-vnext-form" data-form="signup">
+      <p class="u-cap">Owner auth</p>
+      <h2>Claim an owner workspace with a bearer session</h2>
+      <p class="market-vnext-card-copy">Start with your email, verify the challenge code, and the market issues a persistent bearer session for this browser.</p>
+      <form class="market-vnext-form" data-form="auth-start">
+        <label>
+          <span>Email</span>
+          <input name="email" type="email" placeholder="ops@example.com" required />
+        </label>
         <label>
           <span>Display name</span>
           <input name="display_name" type="text" placeholder="Northwind Agent Ops" required />
@@ -485,8 +490,25 @@ function renderSignupForm(loading) {
           <span>Bio</span>
           <textarea name="bio" rows="3" placeholder="What kind of work or trading flows do you manage?"></textarea>
         </label>
-        <button type="submit" class="market-vnext-primary"${loading ? ' disabled' : ''}>${loading ? 'Creating…' : 'Create workspace'}</button>
+        <button type="submit" class="market-vnext-primary"${loading?.start ? ' disabled' : ''}>${loading?.start ? 'Sending code…' : 'Send verification code'}</button>
       </form>
+      ${challenge
+        ? `
+          <section class="market-vnext-card">
+            <p class="u-cap">Verify</p>
+            <h3>${escapeHtml(challenge.email)}</h3>
+            <p class="market-vnext-card-copy">Enter the verification code to finish sign-in.${challenge.delivery_mode === 'inline_code' && challenge.verification_code ? ` Current code: ${escapeHtml(challenge.verification_code)}` : ''}</p>
+            <form class="market-vnext-form" data-form="auth-verify">
+              <input type="hidden" name="challenge_id" value="${escapeHtml(challenge.challenge_id)}" />
+              <label>
+                <span>Verification code</span>
+                <input name="verification_code" type="text" value="${escapeHtml(challenge.verification_code ?? '')}" placeholder="123456" required />
+              </label>
+              <button type="submit" class="market-vnext-primary"${loading?.verify ? ' disabled' : ''}>${loading?.verify ? 'Verifying…' : 'Verify and open workspace'}</button>
+            </form>
+          </section>
+        `
+        : ''}
     </section>
   `;
 }
@@ -963,7 +985,7 @@ function renderOwnerPanel(state) {
   if (!state.session) {
     return `
       <section class="market-vnext-owner-layout">
-        ${renderSignupForm(state.loading.signup)}
+        ${renderSignupForm({ start: state.loading.signup, verify: state.loading.authVerify, challenge: state.pendingAuthChallenge })}
         <section class="market-vnext-card">
           <p class="u-cap">Why sign up</p>
           <h2>Owner controls for agents</h2>
@@ -1395,6 +1417,7 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
     loading: {
       page: true,
       signup: false,
+      authVerify: false,
       listing: false,
       edge: false,
       deal: false,
@@ -1402,6 +1425,7 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
       ,
       opsEvidence: false
     },
+    pendingAuthChallenge: null,
     error: null,
     notice: null
   };
@@ -1410,7 +1434,9 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
     const headers = { accept: 'application/json' };
     if (body !== undefined) headers['content-type'] = 'application/json';
     if (method !== 'GET') headers['idempotency-key'] = createIdempotencyKey('web');
-    if (useSession && session?.actor?.type && session?.actor?.id) {
+    if (useSession && session?.token) {
+      headers.authorization = `Bearer ${session.token}`;
+    } else if (useSession && session?.actor?.type && session?.actor?.id) {
       headers['x-actor-type'] = session.actor.type;
       headers['x-actor-id'] = session.actor.id;
       headers['x-auth-scopes'] = asArray(session.scopes).join(' ');
@@ -1443,6 +1469,17 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
       state.listingIndex = new Map(state.listings.map(listing => [listing.listing_id, listing]));
 
       if (state.session) {
+        if (state.session.token) {
+          const authSession = await apiRequest({ path: '/market/auth/session' });
+          state.session = {
+            ...state.session,
+            actor: authSession.actor,
+            profile: authSession.owner_profile,
+            scopes: asArray(authSession.scopes),
+            email: authSession.email ?? null
+          };
+          writeSession(storage, state.session);
+        }
         const workspace = encodeURIComponent(state.session.profile.default_workspace_id);
         const actorId = encodeURIComponent(state.session.actor.id);
         const moderatorRequest = sessionHasScope(state.session, 'market:moderate')
@@ -1499,6 +1536,9 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
         state.activeThreadId = null;
       }
     } catch (error) {
+      if (state.session?.token && /user session required|invalid user session|authentication required/i.test(String(error?.message ?? ''))) {
+        persistSession(null);
+      }
       state.error = String(error?.message ?? error);
     } finally {
       state.loading.page = false;
@@ -1517,7 +1557,7 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
     writeSession(storage, session);
   }
 
-  async function handleSignup(form) {
+  async function handleAuthStart(form) {
     state.loading.signup = true;
     state.error = null;
     render();
@@ -1525,9 +1565,10 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
     try {
       const res = await apiRequest({
         method: 'POST',
-        path: '/market/signup',
+        path: '/market/auth/start',
         useSession: false,
         body: {
+          email: String(formData.get('email') ?? ''),
           display_name: String(formData.get('display_name') ?? ''),
           workspace_id: String(formData.get('workspace_id') ?? '').trim() || undefined,
           owner_mode: String(formData.get('owner_mode') ?? 'agent_owner'),
@@ -1535,20 +1576,52 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
           recorded_at: new Date().toISOString()
         }
       });
-      persistSession({
-        actor: res.actor,
-        profile: res.owner_profile,
-        scopes: asArray(res?.auth_hints?.scopes).length > 0 ? asArray(res.auth_hints.scopes) : [...DEFAULT_SIGNUP_SCOPES]
-      });
-      state.route = '/owner';
-      windowRef.location.hash = '#/owner';
-      setNotice('Workspace created. You can publish listings immediately.');
-      await refresh();
+      state.pendingAuthChallenge = res;
+      setNotice(res.delivery_mode === 'inline_code'
+        ? `Verification code issued for ${res.email}.`
+        : `Verification code sent to ${res.email}.`);
     } catch (error) {
       state.error = String(error?.message ?? error);
       render();
     } finally {
       state.loading.signup = false;
+      render();
+    }
+  }
+
+  async function handleAuthVerify(form) {
+    state.loading.authVerify = true;
+    state.error = null;
+    render();
+    const formData = new FormData(form);
+    try {
+      const res = await apiRequest({
+        method: 'POST',
+        path: '/market/auth/verify',
+        useSession: false,
+        body: {
+          challenge_id: String(formData.get('challenge_id') ?? ''),
+          verification_code: String(formData.get('verification_code') ?? ''),
+          recorded_at: new Date().toISOString()
+        }
+      });
+      persistSession({
+        token: res.session?.session_token ?? null,
+        actor: res.actor,
+        profile: res.owner_profile,
+        scopes: asArray(res.scopes),
+        email: res.email ?? null
+      });
+      state.pendingAuthChallenge = null;
+      state.route = '/owner';
+      windowRef.location.hash = '#/owner';
+      setNotice('Signed in. Owner workspace is ready.');
+      await refresh();
+    } catch (error) {
+      state.error = String(error?.message ?? error);
+      render();
+    } finally {
+      state.loading.authVerify = false;
       render();
     }
   }
@@ -1908,12 +1981,24 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
     if (!actionTarget) return;
     const action = actionTarget.getAttribute('data-action');
     if (action === 'session.logout') {
-      persistSession(null);
-      state.edgeComposer.targetListingId = null;
-      state.notice = 'Signed out.';
-      state.route = '/';
-      windowRef.location.hash = '#/';
-      refresh();
+      (async () => {
+        try {
+          if (state.session?.token) {
+            await apiRequest({
+              method: 'POST',
+              path: '/market/auth/logout',
+              body: { recorded_at: new Date().toISOString() }
+            });
+          }
+        } catch {}
+        persistSession(null);
+        state.pendingAuthChallenge = null;
+        state.edgeComposer.targetListingId = null;
+        state.notice = 'Signed out.';
+        state.route = '/';
+        windowRef.location.hash = '#/';
+        refresh();
+      })();
       return;
     }
     if (action === 'edge.compose') {
@@ -2000,10 +2085,16 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
   });
 
   root.addEventListener('submit', event => {
-    const signupForm = event.target.closest('form[data-form="signup"]');
-    if (signupForm) {
+    const authStartForm = event.target.closest('form[data-form="auth-start"]');
+    if (authStartForm) {
       event.preventDefault();
-      handleSignup(signupForm);
+      handleAuthStart(authStartForm);
+      return;
+    }
+    const authVerifyForm = event.target.closest('form[data-form="auth-verify"]');
+    if (authVerifyForm) {
+      event.preventDefault();
+      handleAuthVerify(authVerifyForm);
       return;
     }
     const listingForm = event.target.closest('form[data-form="listing-create"]');

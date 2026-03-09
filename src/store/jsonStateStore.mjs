@@ -90,6 +90,12 @@ export class JsonStateStore {
       market_actor_profile_counter: 0,
       market_actor_quotas: {},
       market_moderation_queue: {},
+      market_auth_identities: {},
+      market_auth_identity_counter: 0,
+      market_auth_challenges: {},
+      market_auth_challenge_counter: 0,
+      market_auth_sessions: {},
+      market_auth_session_counter: 0,
       commercial_policies: {},
       commercial_policy_audit: [],
       commercial_policy_export_checkpoints: {},
@@ -227,6 +233,12 @@ export class JsonStateStore {
         market_actor_profile_counter: 0,
         market_actor_quotas: {},
         market_moderation_queue: {},
+        market_auth_identities: {},
+        market_auth_identity_counter: 0,
+        market_auth_challenges: {},
+        market_auth_challenge_counter: 0,
+        market_auth_sessions: {},
+        market_auth_session_counter: 0,
         commercial_policies: {},
         commercial_policy_audit: [],
         commercial_policy_export_checkpoints: {},
@@ -353,6 +365,24 @@ export class JsonStateStore {
     this.state.market_thread_counter ||= 0;
     this.state.market_messages ||= {};
     this.state.market_message_counter ||= 0;
+    this.state.market_deals ||= {};
+    this.state.market_deal_counter ||= 0;
+    this.state.market_payment_proofs ||= {};
+    this.state.market_payment_proof_counter ||= 0;
+    this.state.market_execution_grants ||= {};
+    this.state.market_execution_grant_counter ||= 0;
+    this.state.market_feed_events ||= {};
+    this.state.market_feed_event_counter ||= 0;
+    this.state.market_actor_profiles ||= {};
+    this.state.market_actor_profile_counter ||= 0;
+    this.state.market_actor_quotas ||= {};
+    this.state.market_moderation_queue ||= {};
+    this.state.market_auth_identities ||= {};
+    this.state.market_auth_identity_counter ||= 0;
+    this.state.market_auth_challenges ||= {};
+    this.state.market_auth_challenge_counter ||= 0;
+    this.state.market_auth_sessions ||= {};
+    this.state.market_auth_session_counter ||= 0;
     this.state.commercial_policies ||= {};
     this.state.commercial_policy_audit ||= [];
     this.state.commercial_policy_export_checkpoints ||= {};

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketAuthChallengeStartResponse.schema.json",
+  "title": "MarketAuthChallengeStartResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["correlation_id", "challenge_id", "email", "expires_at", "delivery_mode"],
+  "properties": {
+    "correlation_id": { "type": "string", "minLength": 1 },
+    "challenge_id": { "type": "string", "minLength": 1 },
+    "email": { "type": "string", "minLength": 3 },
+    "expires_at": { "type": "string", "format": "date-time" },
+    "delivery_mode": { "type": "string", "enum": ["inline_code", "email"] },
+    "verification_code": { "type": ["string", "null"] }
+  }
+}

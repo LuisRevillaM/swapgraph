@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketAuthSessionView.schema.json",
+  "title": "MarketAuthSessionView",
+  "type": ["object", "null"],
+  "additionalProperties": false,
+  "required": ["session_id", "expires_at"],
+  "properties": {
+    "session_id": { "type": "string", "minLength": 1 },
+    "session_token": { "type": "string" },
+    "email": { "type": "string" },
+    "expires_at": { "type": "string", "format": "date-time" }
+  }
+}

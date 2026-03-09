@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketAuthChallengeStartRequest.schema.json",
+  "title": "MarketAuthChallengeStartRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["email", "display_name"],
+  "properties": {
+    "email": { "type": "string", "minLength": 3 },
+    "display_name": { "type": "string", "minLength": 1 },
+    "owner_mode": { "type": "string", "enum": ["agent_owner", "operator", "builder"] },
+    "workspace_id": { "type": "string" },
+    "bio": { "type": "string" },
+    "recorded_at": { "type": "string", "format": "date-time" }
+  }
+}

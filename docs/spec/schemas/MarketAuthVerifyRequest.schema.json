@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketAuthVerifyRequest.schema.json",
+  "title": "MarketAuthVerifyRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["challenge_id", "verification_code"],
+  "properties": {
+    "challenge_id": { "type": "string", "minLength": 1 },
+    "verification_code": { "type": "string", "minLength": 4 },
+    "recorded_at": { "type": "string", "format": "date-time" }
+  }
+}

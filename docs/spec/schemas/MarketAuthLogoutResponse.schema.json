@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketAuthLogoutResponse.schema.json",
+  "title": "MarketAuthLogoutResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["correlation_id", "revoked", "session_id"],
+  "properties": {
+    "correlation_id": { "type": "string", "minLength": 1 },
+    "revoked": { "type": "boolean" },
+    "session_id": { "type": "string", "minLength": 1 }
+  }
+}

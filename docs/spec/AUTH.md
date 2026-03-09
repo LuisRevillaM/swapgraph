@@ -18,6 +18,61 @@ In production, the principal is derived from request headers.
 - `Authorization: Bearer <session_token>`
   - resolves to `ActorRef { type:"user", id:"<user_id>" }`
 
+#### Market owner session format (vNext)
+- Prefix: `sgsu1.`
+- Wire format: `sgsu1.<session_id>.<secret>`
+- Session tokens are opaque bearer tokens backed by store state:
+  - `market_auth_sessions[session_id]`
+  - server stores only a hash of `<secret>`
+  - token replay is bounded by expiry and explicit revocation
+
+Market owner session lifecycle endpoints:
+- `POST /market/auth/start`
+  - anonymous
+  - starts an email verification challenge
+  - request includes:
+    - `email`
+    - `display_name`
+    - optional `workspace_id`
+    - optional `owner_mode`
+    - optional `bio`
+  - response includes:
+    - `challenge_id`
+    - `expires_at`
+    - `delivery_mode`
+    - `verification_code` only when inline delivery is enabled for local/beta use
+- `POST /market/auth/verify`
+  - anonymous
+  - consumes a valid challenge and issues a user session token
+  - creates the owner profile on first verification
+- `GET /market/auth/session`
+  - user-scoped
+  - returns the resolved user actor, owner profile, email, scopes, and session expiry
+- `POST /market/auth/logout`
+  - user-scoped
+  - revokes the current market session
+
+Market owner auth environment:
+- `MARKET_AUTH_CHALLENGE_TTL_SECS`
+  - default `900`
+- `MARKET_AUTH_SESSION_TTL_SECS`
+  - default `2592000`
+- `MARKET_AUTH_DELIVERY_MODE`
+  - default `inline_code`
+  - intended values:
+    - `inline_code` for local development / controlled beta
+    - external email delivery mode can be added without changing the bearer format
+- `MARKET_MODERATOR_EMAILS`
+  - comma-separated allowlist of emails that should receive `market:moderate` on session issuance
+
+Notes:
+- vNext market UI now prefers `sgsu1` bearer sessions for owners/operators.
+- Existing direct actor headers remain supported for fixtures, scripts, and backward-compatible local flows:
+  - `x-actor-type`
+  - `x-actor-id`
+  - `x-auth-scopes`
+- Existing delegation bearer tokens (`sgdt1`) remain the auth mechanism for agent actors.
+
 ### Agent auth (delegation tokens)
 - `Authorization: Bearer <delegation_token>`
   - resolves to `ActorRef { type:"agent", id:"<agent_id>" }`
@@ -124,6 +179,7 @@ Core scopes (v1):
 Notes:
 - `keys:*` endpoints are public in v1 (no auth required), but we still model a scope for completeness.
 - market public read surfaces (`GET /market/stats`, `GET /market/listings*`, `GET /market/edges*`, `GET /market/feed`) and `POST /market/signup` are intentionally open in vNext so lurkers and new owners can onboard without pre-provisioned credentials.
+- market auth challenge endpoints (`POST /market/auth/start`, `POST /market/auth/verify`) are intentionally open so new owners can establish a first-party user session without direct actor headers.
 - `delegations:*` endpoints are user-scoped in v1 (users create/revoke grants for their own user identity).
 - Agent scopes exist only with delegation; v1 fixtures support agent access for SwapIntents and the market surface under delegation (when `AUTHZ_ENFORCE=1`).
 - Vault custody publication/read is partner-scoped in v1 (`vault:*`), while vault holding deposit/withdraw is user-scoped and reservation controls are partner-scoped.

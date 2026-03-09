@@ -23,6 +23,7 @@ import { LiquidityTransparencyService } from '../service/liquidityTransparencySe
 import { MetricsNetworkHealthService } from '../service/metricsNetworkHealthService.mjs';
 import { MarketplaceMatchingService } from '../service/marketplaceMatchingService.mjs';
 import { EdgeIntentService } from '../service/edgeIntentService.mjs';
+import { MarketAuthService, resolveUserSessionToken } from '../service/marketAuthService.mjs';
 import { MarketService } from '../service/marketService.mjs';
 import { DelegationsService } from '../service/delegationsService.mjs';
 import { MarketDealService } from '../service/marketDealService.mjs';
@@ -183,8 +184,32 @@ function requestClientFingerprint(req) {
   return createHash('sha256').update(`${ip}|${ua}`).digest('hex').slice(0, 20);
 }
 
-function parseActorAuth({ req, allowAnonymous = false }) {
+function parseActorAuth({ req, allowAnonymous = false, store }) {
   const authz = trimOrNull(req.headers.authorization);
+  if (authz?.startsWith('Bearer sgsu1.')) {
+    const token = authz.replace(/^Bearer\s+/i, '').trim();
+    const resolved = resolveUserSessionToken({ store, tokenString: token });
+    if (!resolved.ok) {
+      return {
+        ok: false,
+        code: 'UNAUTHORIZED',
+        message: 'invalid user session',
+        details: { reason_code: resolved.error }
+      };
+    }
+    return {
+      ok: true,
+      actor: resolved.actor,
+      auth: {
+        ...resolved.auth,
+        client_fingerprint: requestClientFingerprint(req),
+        request_source: {
+          ip_hint: extractForwardedIp(req),
+          user_agent: trimOrNull(req.headers['user-agent'])
+        }
+      }
+    };
+  }
   if (authz?.startsWith('Bearer sgdt1.')) {
     const parsed = parseAuthHeaders({ headers: req.headers });
     if (!parsed.ok) {
@@ -293,6 +318,8 @@ function routeMatch(pathname, re) {
 }
 
 function allowsAnonymousActor({ method, pathname }) {
+  if (method === 'POST' && pathname === '/market/auth/start') return true;
+  if (method === 'POST' && pathname === '/market/auth/verify') return true;
   if (method === 'POST' && pathname === '/market/signup') return true;
   if (method === 'GET' && pathname === '/market/stats') return true;
   if (method === 'GET' && pathname === '/market/listings') return true;
@@ -417,6 +444,7 @@ export function createRuntimeApiServer({
   const marketplaceMatching = new MarketplaceMatchingService({ store });
   const edgeIntents = new EdgeIntentService({ store });
   const market = new MarketService({ store });
+  const marketAuth = new MarketAuthService({ store, market });
   const delegations = new DelegationsService({ store });
   const marketDeals = new MarketDealService({ store });
   const marketExecutionGrants = new MarketExecutionGrantService({ store });
@@ -611,7 +639,7 @@ export function createRuntimeApiServer({
         });
       }
 
-      const authParsed = parseActorAuth({ req, allowAnonymous: allowsAnonymousActor({ method, pathname }) });
+      const authParsed = parseActorAuth({ req, allowAnonymous: allowsAnonymousActor({ method, pathname }), store });
       if (!authParsed.ok) {
         return sendJson({
           res,
@@ -838,6 +866,44 @@ export function createRuntimeApiServer({
         }
         const body = await readJsonBody(req);
         const out = market.createListing({ actor, auth, idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      if (method === 'POST' && pathname === '/market/auth/start') {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = marketAuth.startChallenge({ actor, auth, idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      if (method === 'POST' && pathname === '/market/auth/verify') {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = marketAuth.verifyChallenge({ actor, auth, idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      if (method === 'GET' && pathname === '/market/auth/session') {
+        const out = marketAuth.getSession({ actor, auth });
+        return sendJson({ res, status: out.ok ? 200 : errorStatus(out.body?.error?.code), correlationId, body: out.body });
+      }
+
+      if (method === 'POST' && pathname === '/market/auth/logout') {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = marketAuth.logout({ actor, auth, idempotencyKey: idem.value, request: body });
         shouldPersist = true;
         return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
       }

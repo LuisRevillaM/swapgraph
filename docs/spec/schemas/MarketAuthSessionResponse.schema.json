@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketAuthSessionResponse.schema.json",
+  "title": "MarketAuthSessionResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["correlation_id", "actor", "owner_profile", "email", "scopes", "session"],
+  "properties": {
+    "correlation_id": { "type": "string", "minLength": 1 },
+    "actor": { "$ref": "ActorRef.schema.json" },
+    "owner_profile": { "$ref": "MarketActorProfileView.schema.json" },
+    "email": { "type": ["string", "null"] },
+    "scopes": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "session": { "$ref": "MarketAuthSessionView.schema.json" }
+  }
+}

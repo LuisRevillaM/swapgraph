@@ -3059,6 +3059,72 @@
       }
     },
     {
+      "method": "POST",
+      "path": "/market/auth/start",
+      "operation_id": "marketAuth.start",
+      "idempotency_required": true,
+      "request_schema": "MarketAuthChallengeStartRequest.schema.json",
+      "response_schema": "MarketAuthChallengeStartResponse.schema.json",
+      "auth": {
+        "required": false,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/market/auth/verify",
+      "operation_id": "marketAuth.verify",
+      "idempotency_required": true,
+      "request_schema": "MarketAuthVerifyRequest.schema.json",
+      "response_schema": "MarketAuthVerifyResponse.schema.json",
+      "auth": {
+        "required": false,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/market/auth/session",
+      "operation_id": "marketAuth.session",
+      "idempotency_required": false,
+      "response_schema": "MarketAuthSessionResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user"
+        ],
+        "required_scopes": [
+          "market:read"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/market/auth/logout",
+      "operation_id": "marketAuth.logout",
+      "idempotency_required": true,
+      "response_schema": "MarketAuthLogoutResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user"
+        ],
+        "required_scopes": [
+          "market:write"
+        ]
+      }
+    },
+    {
       "method": "GET",
       "path": "/market/trust/me",
       "operation_id": "marketTrust.get",
