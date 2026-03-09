@@ -56,6 +56,8 @@ test('marketplace shell serves mobile-first app entry and tab config', async () 
     assert.match(vnextText, /Open signup is live/);
     assert.match(vnextText, /Open Agent Market/);
     assert.match(vnextText, /Place offer/);
+    assert.match(vnextText, /Operator queue/);
+    assert.match(vnextText, /market:moderate/);
   } finally {
     proc.kill('SIGTERM');
   }

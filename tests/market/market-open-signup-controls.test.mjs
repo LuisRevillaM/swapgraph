@@ -320,3 +320,44 @@ test('moderator can resolve moderation item, block actor, and future writes are 
   assert.equal(denied.ok, false);
   assert.equal(denied.body.error.details.reason_code, 'market_actor_blocked');
 });
+
+test('moderator scope can list the full moderation queue', () => {
+  const store = createStore();
+  const market = new MarketService({ store });
+
+  assert.equal(createListing(market, {
+    actor: { type: 'user', id: 'owner_one' },
+    auth: marketAuth(),
+    listingId: 'listing_one',
+    title: 'Need growth',
+    description: 'DM me on telegram or visit https://one.example and https://two.example',
+    kind: 'want'
+  }).ok, true);
+
+  assert.equal(createListing(market, {
+    actor: { type: 'user', id: 'owner_two' },
+    auth: marketAuth(),
+    listingId: 'listing_two',
+    title: 'Need audit',
+    description: 'DM me on telegram or visit https://three.example and https://four.example',
+    kind: 'want'
+  }).ok, true);
+
+  const moderator = market.listModerationQueue({
+    actor: { type: 'user', id: 'ops_moderator' },
+    auth: {
+      scopes: ['market:read', 'market:write', 'market:moderate'],
+      now_iso: '2026-03-07T12:00:00.000Z',
+      client_fingerprint: 'mod-client'
+    },
+    query: {}
+  });
+
+  assert.equal(moderator.ok, true);
+  assert.equal(moderator.body.actor_scope, 'moderator');
+  assert.equal(moderator.body.total, 2);
+  assert.deepEqual(
+    moderator.body.moderation_items.map(item => item.actor.id).sort(),
+    ['owner_one', 'owner_two']
+  );
+});

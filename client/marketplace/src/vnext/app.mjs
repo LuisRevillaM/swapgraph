@@ -47,6 +47,10 @@ function writeSession(storage, session) {
   safeStorageWrite(storage, SESSION_STORAGE_KEY, JSON.stringify(session));
 }
 
+function sessionHasScope(session, scope) {
+  return asArray(session?.scopes).includes(scope);
+}
+
 function actorDisplay(session, actor) {
   if (!actor) return 'unknown';
   if (session?.profile?.actor?.type === actor.type && session?.profile?.actor?.id === actor.id) {
@@ -286,6 +290,9 @@ function renderNav(session, route) {
     { href: '#/browse', label: 'Browse' },
     { href: '#/owner', label: session ? 'Owner Console' : 'Join' }
   ];
+  if (sessionHasScope(session, 'market:moderate')) {
+    items.push({ href: '#/ops', label: 'Ops' });
+  }
 
   return `
     <header class="market-vnext-topbar">
@@ -686,6 +693,7 @@ function renderTrustPanel(state) {
           <p class="u-cap">Moderation</p>
           <h2>${moderationItems.length} items referencing your market activity</h2>
         </div>
+        ${sessionHasScope(state.session, 'market:moderate') ? '<a class="market-vnext-secondary" href="#/ops">Open operator queue</a>' : ''}
       </div>
       <div class="market-vnext-grid">
         ${moderationItems.length > 0
@@ -702,6 +710,56 @@ function renderTrustPanel(state) {
             </article>
           `).join('')
           : '<p class="market-vnext-empty">No moderation issues currently reference your market activity.</p>'}
+      </div>
+    </section>
+  `;
+}
+
+function renderModerationQueuePanel(state) {
+  const items = asArray(state.moderationQueue);
+  const pendingItems = items.filter(item => item.status === 'pending_review');
+  const resolvedItems = items.filter(item => item.status !== 'pending_review');
+
+  return `
+    <section class="market-vnext-card">
+      <p class="u-cap">Operator queue</p>
+      <h2>${pendingItems.length} pending review</h2>
+      <div class="market-vnext-card-tags">
+        <span class="market-vnext-tag">total ${escapeHtml(String(items.length))}</span>
+        <span class="market-vnext-tag">pending ${escapeHtml(String(pendingItems.length))}</span>
+        <span class="market-vnext-tag">resolved ${escapeHtml(String(resolvedItems.length))}</span>
+      </div>
+      <div class="market-vnext-grid">
+        ${items.length > 0
+          ? items.map(item => `
+            <article class="market-vnext-card">
+              <div class="market-vnext-card-head">
+                <span class="market-vnext-pill kind-edge">${escapeHtml(item.status)}</span>
+                <span class="market-vnext-card-meta">${escapeHtml(item.subject_kind)} ${escapeHtml(item.subject_id)}</span>
+              </div>
+              <h3>${escapeHtml(item.reason_codes.join(' • ') || 'No reason codes')}</h3>
+              <p class="market-vnext-card-copy">${escapeHtml(`actor ${item.actor?.type ?? 'unknown'}:${item.actor?.id ?? 'unknown'}`)}</p>
+              <p class="market-vnext-inline-list"><strong>Evidence:</strong> ${escapeHtml(JSON.stringify(item.evidence ?? {}))}</p>
+              ${item.resolution
+                ? `<p class="market-vnext-inline-list"><strong>Resolution:</strong> ${escapeHtml(item.resolution.action)}${item.resolution.trust_tier ? ` -> ${escapeHtml(item.resolution.trust_tier)}` : ''}</p>`
+                : `
+                  <div class="market-vnext-card-foot">
+                    <span>${escapeHtml(formatIsoShort(item.updated_at))}</span>
+                    <span class="market-vnext-inline-actions">
+                      <button type="button" class="market-vnext-secondary" data-action="moderation.resolve" data-moderation-id="${escapeHtml(item.moderation_id)}" data-resolution-action="approve">Approve</button>
+                      <button type="button" class="market-vnext-secondary" data-action="moderation.resolve" data-moderation-id="${escapeHtml(item.moderation_id)}" data-resolution-action="dismiss">Dismiss</button>
+                      <button type="button" class="market-vnext-secondary" data-action="moderation.resolve" data-moderation-id="${escapeHtml(item.moderation_id)}" data-resolution-action="set_watchlist">Watchlist</button>
+                      <button type="button" class="market-vnext-secondary" data-action="moderation.resolve" data-moderation-id="${escapeHtml(item.moderation_id)}" data-resolution-action="set_blocked">Block</button>
+                      ${item.subject_kind === 'listing'
+                        ? `<button type="button" class="market-vnext-primary" data-action="moderation.resolve" data-moderation-id="${escapeHtml(item.moderation_id)}" data-resolution-action="suspend_listing">Suspend listing</button>`
+                        : ''}
+                    </span>
+                  </div>
+                `}
+              ${item.resolution ? `<p class="market-vnext-idline">${escapeHtml(formatIsoShort(item.resolution.recorded_at ?? item.updated_at))}</p>` : ''}
+            </article>
+          `).join('')
+          : '<p class="market-vnext-empty">No moderation items are queued right now.</p>'}
       </div>
     </section>
   `;
@@ -825,6 +883,52 @@ function renderOwnerPanel(state) {
       </section>
 
       ${renderDealPanel(state)}
+    </section>
+  `;
+}
+
+function renderOpsPanel(state) {
+  if (!state.session) {
+    return `
+      <section class="market-vnext-owner-layout">
+        <section class="market-vnext-card">
+          <p class="u-cap">Operator access</p>
+          <h2>Sign in with a moderator-scoped session</h2>
+          <p class="market-vnext-card-copy">The operator queue is only available to sessions carrying <code>market:moderate</code>.</p>
+          <a class="market-vnext-primary" href="#/owner">Open owner console</a>
+        </section>
+      </section>
+    `;
+  }
+
+  if (!sessionHasScope(state.session, 'market:moderate')) {
+    return `
+      <section class="market-vnext-owner-layout">
+        <section class="market-vnext-card">
+          <p class="u-cap">Operator access</p>
+          <h2>${escapeHtml(state.session.profile.display_name)}</h2>
+          <p class="market-vnext-card-copy">This session can read and write market objects, but it does not carry <code>market:moderate</code>. The queue is intentionally hidden until a moderator-scoped session is used.</p>
+          <div class="market-vnext-card-tags">
+            ${asArray(state.session.scopes).map(scope => `<span class="market-vnext-tag">${escapeHtml(scope)}</span>`).join('')}
+          </div>
+        </section>
+      </section>
+    `;
+  }
+
+  return `
+    <section class="market-vnext-owner-layout">
+      <section class="market-vnext-card owner-profile-card">
+        <p class="u-cap">Operator console</p>
+        <h2>${escapeHtml(state.session.profile.display_name)}</h2>
+        <p class="market-vnext-card-copy">Moderator-scoped session over the open market queue.</p>
+        <div class="market-vnext-card-tags">
+          <span class="market-vnext-tag">actor ${escapeHtml(state.session.actor.id)}</span>
+          <span class="market-vnext-tag">workspace ${escapeHtml(state.session.profile.default_workspace_id)}</span>
+          <span class="market-vnext-tag">scope market:moderate</span>
+        </div>
+      </section>
+      ${renderModerationQueuePanel(state)}
     </section>
   `;
 }
@@ -1043,6 +1147,8 @@ function renderApp(state) {
   let content = '';
   if (route === '/browse') {
     content = renderBrowse(state);
+  } else if (route === '/ops') {
+    content = renderOpsPanel(state);
   } else if (route === '/owner' || route === '/join') {
     content = renderOwnerPanel(state);
   } else {
@@ -1077,6 +1183,7 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
     threadMessagesById: {},
     ownerListings: [],
     trustProfile: null,
+    moderationQueue: [],
     listingIndex: new Map(),
     edgeComposer: { targetListingId: null },
     activeThreadId: null,
@@ -1131,18 +1238,23 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
       if (state.session) {
         const workspace = encodeURIComponent(state.session.profile.default_workspace_id);
         const actorId = encodeURIComponent(state.session.actor.id);
-        const [ownerListingsRes, edgesRes, dealsRes, threadsRes, trustRes] = await Promise.all([
+        const moderatorRequest = sessionHasScope(state.session, 'market:moderate')
+          ? apiRequest({ path: '/market/moderation' })
+          : Promise.resolve({ moderation_items: [] });
+        const [ownerListingsRes, edgesRes, dealsRes, threadsRes, trustRes, moderationRes] = await Promise.all([
           apiRequest({ path: `/market/listings?workspace_id=${workspace}&owner_actor_type=user&owner_actor_id=${actorId}&limit=100` }),
           apiRequest({ path: `/market/edges?workspace_id=${workspace}&limit=100`, useSession: false }),
           apiRequest({ path: `/market/deals?workspace_id=${workspace}&limit=100` }),
           apiRequest({ path: `/market/threads?workspace_id=${workspace}&limit=100` }),
-          apiRequest({ path: '/market/trust/me' })
+          apiRequest({ path: '/market/trust/me' }),
+          moderatorRequest
         ]);
         state.ownerListings = asArray(ownerListingsRes.listings);
         state.edges = asArray(edgesRes.edges);
         state.deals = asArray(dealsRes.deals);
         state.threads = asArray(threadsRes.threads);
         state.trustProfile = trustRes ?? null;
+        state.moderationQueue = asArray(moderationRes.moderation_items);
         for (const listing of state.ownerListings) state.listingIndex.set(listing.listing_id, listing);
         if (!state.activeThreadId && state.deals[0]?.thread_id) state.activeThreadId = state.deals[0].thread_id;
         const messageLoads = await Promise.all(
@@ -1161,6 +1273,7 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
         state.deals = [];
         state.threads = [];
         state.trustProfile = null;
+        state.moderationQueue = [];
         state.threadMessagesById = {};
         state.activeThreadId = null;
       }
@@ -1467,6 +1580,25 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
     }
   }
 
+  async function handleModerationResolve(moderationId, action) {
+    if (!state.session || !moderationId || !action) return;
+    try {
+      await apiRequest({
+        method: 'POST',
+        path: `/market/moderation/${encodeURIComponent(moderationId)}/resolve`,
+        body: {
+          action,
+          recorded_at: new Date().toISOString()
+        }
+      });
+      setNotice(`Moderation item ${action} applied.`);
+      await refresh();
+    } catch (error) {
+      state.error = String(error?.message ?? error);
+      render();
+    }
+  }
+
   function render() {
     root.innerHTML = renderApp(state);
   }
@@ -1504,6 +1636,13 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
     }
     if (action === 'listing.close') {
       handleCloseListing(actionTarget.getAttribute('data-listing-id'));
+      return;
+    }
+    if (action === 'moderation.resolve') {
+      handleModerationResolve(
+        actionTarget.getAttribute('data-moderation-id'),
+        actionTarget.getAttribute('data-resolution-action')
+      );
       return;
     }
     if (action === 'deal.create') {
