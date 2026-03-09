@@ -85,6 +85,17 @@ function renderStat(label, value) {
   `;
 }
 
+function buildModerationQuery(filters) {
+  const params = new URLSearchParams();
+  const normalized = filters ?? {};
+  for (const [key, value] of Object.entries(normalized)) {
+    const text = String(value ?? '').trim();
+    if (text) params.set(key, text);
+  }
+  const query = params.toString();
+  return query ? `?${query}` : '';
+}
+
 function renderLandingStep({ number, title, body }) {
   return `
     <article class="market-vnext-card market-vnext-step-card">
@@ -719,6 +730,47 @@ function renderModerationQueuePanel(state) {
   const items = asArray(state.moderationQueue);
   const pendingItems = items.filter(item => item.status === 'pending_review');
   const resolvedItems = items.filter(item => item.status !== 'pending_review');
+  const filters = state.moderationFilters ?? {};
+  const filterSummary = Object.entries(filters)
+    .map(([key, value]) => [key, String(value ?? '').trim()])
+    .filter(([, value]) => value)
+    .map(([key, value]) => `${key}=${value}`);
+  const renderItemCard = item => `
+    <article class="market-vnext-card">
+      <div class="market-vnext-card-head">
+        <span class="market-vnext-pill kind-edge">${escapeHtml(item.status)}</span>
+        <span class="market-vnext-card-meta">${escapeHtml(item.subject_kind)} ${escapeHtml(item.subject_id)}</span>
+      </div>
+      <h3>${escapeHtml(item.reason_codes.join(' • ') || 'No reason codes')}</h3>
+      <p class="market-vnext-card-copy">${escapeHtml(`actor ${item.actor?.type ?? 'unknown'}:${item.actor?.id ?? 'unknown'}`)}</p>
+      <p class="market-vnext-inline-list"><strong>Workspace:</strong> ${escapeHtml(item.workspace_id ?? 'n/a')}</p>
+      <p class="market-vnext-inline-list"><strong>Evidence:</strong> ${escapeHtml(JSON.stringify(item.evidence ?? {}))}</p>
+      ${item.resolution
+        ? `
+          <p class="market-vnext-inline-list"><strong>Resolution:</strong> ${escapeHtml(item.resolution.action)}${item.resolution.trust_tier ? ` -> ${escapeHtml(item.resolution.trust_tier)}` : ''}</p>
+          <p class="market-vnext-inline-list"><strong>Resolved by:</strong> ${escapeHtml(item.resolution.actor?.id ?? 'unknown')}</p>
+          <div class="market-vnext-card-foot">
+            <span>${escapeHtml(formatIsoShort(item.resolution.recorded_at ?? item.updated_at))}</span>
+            <button type="button" class="market-vnext-secondary" data-action="moderation.inspect" data-moderation-id="${escapeHtml(item.moderation_id)}">Inspect</button>
+          </div>
+        `
+        : `
+          <div class="market-vnext-card-foot">
+            <span>${escapeHtml(formatIsoShort(item.updated_at))}</span>
+            <span class="market-vnext-inline-actions">
+              <button type="button" class="market-vnext-secondary" data-action="moderation.inspect" data-moderation-id="${escapeHtml(item.moderation_id)}">Inspect</button>
+              <button type="button" class="market-vnext-secondary" data-action="moderation.resolve" data-moderation-id="${escapeHtml(item.moderation_id)}" data-resolution-action="approve">Approve</button>
+              <button type="button" class="market-vnext-secondary" data-action="moderation.resolve" data-moderation-id="${escapeHtml(item.moderation_id)}" data-resolution-action="dismiss">Dismiss</button>
+              <button type="button" class="market-vnext-secondary" data-action="moderation.resolve" data-moderation-id="${escapeHtml(item.moderation_id)}" data-resolution-action="set_watchlist">Watchlist</button>
+              <button type="button" class="market-vnext-secondary" data-action="moderation.resolve" data-moderation-id="${escapeHtml(item.moderation_id)}" data-resolution-action="set_blocked">Block</button>
+              ${item.subject_kind === 'listing'
+                ? `<button type="button" class="market-vnext-primary" data-action="moderation.resolve" data-moderation-id="${escapeHtml(item.moderation_id)}" data-resolution-action="suspend_listing">Suspend listing</button>`
+                : ''}
+            </span>
+          </div>
+        `}
+    </article>
+  `;
 
   return `
     <section class="market-vnext-card">
@@ -728,39 +780,71 @@ function renderModerationQueuePanel(state) {
         <span class="market-vnext-tag">total ${escapeHtml(String(items.length))}</span>
         <span class="market-vnext-tag">pending ${escapeHtml(String(pendingItems.length))}</span>
         <span class="market-vnext-tag">resolved ${escapeHtml(String(resolvedItems.length))}</span>
+        ${filterSummary.map(entry => `<span class="market-vnext-tag">${escapeHtml(entry)}</span>`).join('')}
+      </div>
+      <form class="market-vnext-form" data-form="moderation-filters">
+        <label>
+          <span>Status</span>
+          <select name="status">
+            <option value="">All</option>
+            <option value="pending_review"${filters.status === 'pending_review' ? ' selected' : ''}>Pending review</option>
+            <option value="resolved"${filters.status === 'resolved' ? ' selected' : ''}>Resolved</option>
+            <option value="dismissed"${filters.status === 'dismissed' ? ' selected' : ''}>Dismissed</option>
+          </select>
+        </label>
+        <label>
+          <span>Reason code</span>
+          <input name="reason_code" type="text" value="${escapeHtml(filters.reason_code ?? '')}" placeholder="listing_many_urls" />
+        </label>
+        <label>
+          <span>Workspace</span>
+          <input name="workspace_id" type="text" value="${escapeHtml(filters.workspace_id ?? '')}" placeholder="open_market" />
+        </label>
+        <label>
+          <span>Actor ID</span>
+          <input name="actor_id" type="text" value="${escapeHtml(filters.actor_id ?? '')}" placeholder="owner_alpha" />
+        </label>
+        <label>
+          <span>Resolution action</span>
+          <select name="resolution_action">
+            <option value="">Any</option>
+            <option value="approve"${filters.resolution_action === 'approve' ? ' selected' : ''}>Approve</option>
+            <option value="dismiss"${filters.resolution_action === 'dismiss' ? ' selected' : ''}>Dismiss</option>
+            <option value="suspend_listing"${filters.resolution_action === 'suspend_listing' ? ' selected' : ''}>Suspend listing</option>
+            <option value="set_watchlist"${filters.resolution_action === 'set_watchlist' ? ' selected' : ''}>Watchlist</option>
+            <option value="set_blocked"${filters.resolution_action === 'set_blocked' ? ' selected' : ''}>Block</option>
+          </select>
+        </label>
+        <label>
+          <span>Resolved by actor</span>
+          <input name="resolved_by_actor_id" type="text" value="${escapeHtml(filters.resolved_by_actor_id ?? '')}" placeholder="market_operator" />
+        </label>
+        <div class="market-vnext-inline-actions">
+          <button type="submit" class="market-vnext-primary">Apply filters</button>
+          <button type="button" class="market-vnext-secondary" data-action="moderation.filters.reset">Reset</button>
+        </div>
+      </form>
+      <div class="market-vnext-section-head">
+        <div>
+          <p class="u-cap">Pending queue</p>
+          <h2>${pendingItems.length} items</h2>
+        </div>
       </div>
       <div class="market-vnext-grid">
-        ${items.length > 0
-          ? items.map(item => `
-            <article class="market-vnext-card">
-              <div class="market-vnext-card-head">
-                <span class="market-vnext-pill kind-edge">${escapeHtml(item.status)}</span>
-                <span class="market-vnext-card-meta">${escapeHtml(item.subject_kind)} ${escapeHtml(item.subject_id)}</span>
-              </div>
-              <h3>${escapeHtml(item.reason_codes.join(' • ') || 'No reason codes')}</h3>
-              <p class="market-vnext-card-copy">${escapeHtml(`actor ${item.actor?.type ?? 'unknown'}:${item.actor?.id ?? 'unknown'}`)}</p>
-              <p class="market-vnext-inline-list"><strong>Evidence:</strong> ${escapeHtml(JSON.stringify(item.evidence ?? {}))}</p>
-              ${item.resolution
-                ? `<p class="market-vnext-inline-list"><strong>Resolution:</strong> ${escapeHtml(item.resolution.action)}${item.resolution.trust_tier ? ` -> ${escapeHtml(item.resolution.trust_tier)}` : ''}</p>`
-                : `
-                  <div class="market-vnext-card-foot">
-                    <span>${escapeHtml(formatIsoShort(item.updated_at))}</span>
-                    <span class="market-vnext-inline-actions">
-                      <button type="button" class="market-vnext-secondary" data-action="moderation.inspect" data-moderation-id="${escapeHtml(item.moderation_id)}">Inspect</button>
-                      <button type="button" class="market-vnext-secondary" data-action="moderation.resolve" data-moderation-id="${escapeHtml(item.moderation_id)}" data-resolution-action="approve">Approve</button>
-                      <button type="button" class="market-vnext-secondary" data-action="moderation.resolve" data-moderation-id="${escapeHtml(item.moderation_id)}" data-resolution-action="dismiss">Dismiss</button>
-                      <button type="button" class="market-vnext-secondary" data-action="moderation.resolve" data-moderation-id="${escapeHtml(item.moderation_id)}" data-resolution-action="set_watchlist">Watchlist</button>
-                      <button type="button" class="market-vnext-secondary" data-action="moderation.resolve" data-moderation-id="${escapeHtml(item.moderation_id)}" data-resolution-action="set_blocked">Block</button>
-                      ${item.subject_kind === 'listing'
-                        ? `<button type="button" class="market-vnext-primary" data-action="moderation.resolve" data-moderation-id="${escapeHtml(item.moderation_id)}" data-resolution-action="suspend_listing">Suspend listing</button>`
-                        : ''}
-                    </span>
-                  </div>
-                `}
-              ${item.resolution ? `<p class="market-vnext-idline">${escapeHtml(formatIsoShort(item.resolution.recorded_at ?? item.updated_at))}</p>` : ''}
-            </article>
-          `).join('')
-          : '<p class="market-vnext-empty">No moderation items are queued right now.</p>'}
+        ${pendingItems.length > 0
+          ? pendingItems.map(renderItemCard).join('')
+          : '<p class="market-vnext-empty">No pending moderation items match the current filter.</p>'}
+      </div>
+      <div class="market-vnext-section-head">
+        <div>
+          <p class="u-cap">Resolution history</p>
+          <h2>${resolvedItems.length} reviewed items</h2>
+        </div>
+      </div>
+      <div class="market-vnext-grid">
+        ${resolvedItems.length > 0
+          ? resolvedItems.map(renderItemCard).join('')
+          : '<p class="market-vnext-empty">No resolved moderation history matches the current filter.</p>'}
       </div>
     </section>
   `;
@@ -1295,6 +1379,14 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
     ownerListings: [],
     trustProfile: null,
     moderationQueue: [],
+    moderationFilters: {
+      status: '',
+      reason_code: '',
+      workspace_id: '',
+      actor_id: '',
+      resolution_action: '',
+      resolved_by_actor_id: ''
+    },
     moderationEvidence: null,
     activeModerationId: null,
     listingIndex: new Map(),
@@ -1354,7 +1446,7 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
         const workspace = encodeURIComponent(state.session.profile.default_workspace_id);
         const actorId = encodeURIComponent(state.session.actor.id);
         const moderatorRequest = sessionHasScope(state.session, 'market:moderate')
-          ? apiRequest({ path: '/market/moderation' })
+          ? apiRequest({ path: `/market/moderation${buildModerationQuery(state.moderationFilters)}` })
           : Promise.resolve({ moderation_items: [] });
         const [ownerListingsRes, edgesRes, dealsRes, threadsRes, trustRes, moderationRes] = await Promise.all([
           apiRequest({ path: `/market/listings?workspace_id=${workspace}&owner_actor_type=user&owner_actor_id=${actorId}&limit=100` }),
@@ -1393,6 +1485,14 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
         state.threads = [];
         state.trustProfile = null;
         state.moderationQueue = [];
+        state.moderationFilters = {
+          status: '',
+          reason_code: '',
+          workspace_id: '',
+          actor_id: '',
+          resolution_action: '',
+          resolved_by_actor_id: ''
+        };
         state.moderationEvidence = null;
         state.activeModerationId = null;
         state.threadMessagesById = {};
@@ -1768,6 +1868,37 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
     }
   }
 
+  async function handleModerationFilters(form) {
+    const formData = new FormData(form);
+    state.moderationFilters = {
+      status: String(formData.get('status') ?? '').trim(),
+      reason_code: String(formData.get('reason_code') ?? '').trim(),
+      workspace_id: String(formData.get('workspace_id') ?? '').trim(),
+      actor_id: String(formData.get('actor_id') ?? '').trim(),
+      resolution_action: String(formData.get('resolution_action') ?? '').trim(),
+      resolved_by_actor_id: String(formData.get('resolved_by_actor_id') ?? '').trim()
+    };
+    state.activeModerationId = null;
+    state.moderationEvidence = null;
+    setNotice('Moderation filters updated.');
+    await refresh();
+  }
+
+  async function resetModerationFilters() {
+    state.moderationFilters = {
+      status: '',
+      reason_code: '',
+      workspace_id: '',
+      actor_id: '',
+      resolution_action: '',
+      resolved_by_actor_id: ''
+    };
+    state.activeModerationId = null;
+    state.moderationEvidence = null;
+    setNotice('Moderation filters reset.');
+    await refresh();
+  }
+
   function render() {
     root.innerHTML = renderApp(state);
   }
@@ -1816,6 +1947,10 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
     }
     if (action === 'moderation.inspect') {
       handleModerationInspect(actionTarget.getAttribute('data-moderation-id'));
+      return;
+    }
+    if (action === 'moderation.filters.reset') {
+      resetModerationFilters();
       return;
     }
     if (action === 'deal.create') {
@@ -1887,6 +2022,12 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
     if (threadForm) {
       event.preventDefault();
       handleThreadMessage(threadForm);
+      return;
+    }
+    const moderationFiltersForm = event.target.closest('form[data-form="moderation-filters"]');
+    if (moderationFiltersForm) {
+      event.preventDefault();
+      handleModerationFilters(moderationFiltersForm);
     }
   });
 

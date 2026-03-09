@@ -361,3 +361,56 @@ test('moderator scope can list the full moderation queue', () => {
     ['owner_one', 'owner_two']
   );
 });
+
+test('moderation queue supports reason, workspace, and resolution filters', () => {
+  const store = createStore();
+  const market = new MarketService({ store });
+
+  assert.equal(createListing(market, {
+    actor: { type: 'user', id: 'owner_filter' },
+    auth: marketAuth(),
+    listingId: 'listing_filter',
+    title: 'Need growth',
+    description: 'DM me on telegram or visit https://one.example and https://two.example',
+    kind: 'want',
+    workspaceId: 'open_market'
+  }).ok, true);
+
+  const moderationId = Object.keys(store.state.market_moderation_queue)[0];
+  assert.ok(moderationId);
+  assert.equal(market.resolveModerationItem({
+    actor: { type: 'user', id: 'market_operator' },
+    auth: { scopes: ['market:moderate', 'market:write'], now_iso: '2026-03-07T13:00:00.000Z' },
+    moderationId,
+    idempotencyKey: 'moderation_watchlist',
+    request: {
+      action: 'set_watchlist',
+      recorded_at: '2026-03-07T13:00:00.000Z',
+      note: 'watch'
+    }
+  }).result.ok, true);
+
+  const moderator = {
+    actor: { type: 'user', id: 'ops_moderator' },
+    auth: {
+      scopes: ['market:read', 'market:write', 'market:moderate'],
+      now_iso: '2026-03-07T13:10:00.000Z',
+      client_fingerprint: 'mod-client'
+    }
+  };
+
+  const byReason = market.listModerationQueue({
+    ...moderator,
+    query: { reason_code: 'listing_many_urls' }
+  });
+  assert.equal(byReason.ok, true);
+  assert.equal(byReason.body.total, 1);
+
+  const byWorkspace = market.listModerationQueue({
+    ...moderator,
+    query: { workspace_id: 'open_market', resolution_action: 'set_watchlist', resolved_by_actor_id: 'market_operator' }
+  });
+  assert.equal(byWorkspace.ok, true);
+  assert.equal(byWorkspace.body.total, 1);
+  assert.equal(byWorkspace.body.moderation_items[0].resolution.action, 'set_watchlist');
+});

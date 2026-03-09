@@ -1321,6 +1321,10 @@ export class MarketService {
     const subjectKindFilter = normalizeOptionalString(query?.subject_kind)?.toLowerCase() ?? null;
     const actorIdFilter = normalizeOptionalString(query?.actor_id);
     const actorTypeFilter = normalizeOptionalString(query?.actor_type);
+    const workspaceIdFilter = normalizeOptionalString(query?.workspace_id);
+    const reasonCodeFilter = normalizeOptionalString(query?.reason_code)?.toLowerCase() ?? null;
+    const resolutionActionFilter = normalizeOptionalString(query?.resolution_action)?.toLowerCase() ?? null;
+    const resolvedByActorIdFilter = normalizeOptionalString(query?.resolved_by_actor_id);
 
     const rows = Object.values(this.store.state.market_moderation_queue ?? {})
       .filter(item => {
@@ -1329,6 +1333,10 @@ export class MarketService {
         if (subjectKindFilter && item.subject_kind !== subjectKindFilter) return false;
         if (actorIdFilter && item.actor?.id !== actorIdFilter) return false;
         if (actorTypeFilter && item.actor?.type !== actorTypeFilter) return false;
+        if (workspaceIdFilter && item.workspace_id !== workspaceIdFilter) return false;
+        if (reasonCodeFilter && !(Array.isArray(item.reason_codes) ? item.reason_codes : []).some(code => String(code).toLowerCase() === reasonCodeFilter)) return false;
+        if (resolutionActionFilter && item.resolution?.action !== resolutionActionFilter) return false;
+        if (resolvedByActorIdFilter && item.resolution?.actor?.id !== resolvedByActorIdFilter) return false;
         return true;
       })
       .sort((a, b) => String(b.updated_at ?? '').localeCompare(String(a.updated_at ?? '')));
