@@ -81,6 +81,11 @@ function stopRuntime(child) {
   child.kill('SIGTERM');
 }
 
+function configuredBaseUrl() {
+  const raw = process.env.SWAPGRAPH_BASE_URL ?? process.env.MARKET_EXPERIMENT_BASE_URL ?? '';
+  return typeof raw === 'string' && raw.trim() ? raw.trim().replace(/\/+$/g, '') : null;
+}
+
 function key(prefix) {
   return `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
 }
@@ -286,11 +291,12 @@ async function runCycleFlow(baseUrl) {
 
 async function main() {
   const rootDir = process.cwd();
-  const tmpRoot = mkdtempSync(path.join(tmpdir(), 'swapgraph-agent-market-loop-'));
-  const port = 3300 + Math.floor(Math.random() * 200);
-  const stateFile = path.join(tmpRoot, 'runtime-state.json');
-  const baseUrl = `http://127.0.0.1:${port}`;
-  const runtime = startRuntime({ rootDir, port, stateFile });
+  const configured = configuredBaseUrl();
+  const tmpRoot = configured ? null : mkdtempSync(path.join(tmpdir(), 'swapgraph-agent-market-loop-'));
+  const port = configured ? null : 3300 + Math.floor(Math.random() * 200);
+  const stateFile = configured ? null : path.join(tmpRoot, 'runtime-state.json');
+  const baseUrl = configured ?? `http://127.0.0.1:${port}`;
+  const runtime = configured ? null : startRuntime({ rootDir, port, stateFile });
   const evidenceDir = path.join(rootDir, 'docs', 'evidence', 'market-vnext');
   mkdirSync(evidenceDir, { recursive: true });
   const evidencePath = path.join(evidenceDir, 'agent-market-loop.latest.json');
@@ -304,6 +310,7 @@ async function main() {
       ok: true,
       checked_at: nowIso(),
       base_url: baseUrl,
+      mode: configured ? 'hosted' : 'local',
       direct,
       mixed,
       cycle
@@ -311,7 +318,7 @@ async function main() {
     writeFileSync(evidencePath, `${JSON.stringify(out, null, 2)}\n`);
     process.stdout.write(`${JSON.stringify(out, null, 2)}\n`);
   } finally {
-    stopRuntime(runtime.child);
+    if (runtime?.child) stopRuntime(runtime.child);
   }
 }
 

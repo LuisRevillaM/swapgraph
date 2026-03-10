@@ -74,17 +74,23 @@ function stopRuntime(child) {
   child.kill('SIGTERM');
 }
 
+function configuredBaseUrl() {
+  const raw = process.env.SWAPGRAPH_BASE_URL ?? process.env.MARKET_EXPERIMENT_BASE_URL ?? '';
+  return typeof raw === 'string' && raw.trim() ? raw.trim().replace(/\/+$/g, '') : null;
+}
+
 function key(prefix) {
   return `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 async function main() {
   const rootDir = process.cwd();
-  const tmpRoot = mkdtempSync(path.join(tmpdir(), 'swapgraph-agent-adversary-loop-'));
-  const port = 3500 + Math.floor(Math.random() * 200);
-  const stateFile = path.join(tmpRoot, 'runtime-state.json');
-  const baseUrl = `http://127.0.0.1:${port}`;
-  const runtime = startRuntime({ rootDir, port, stateFile });
+  const configured = configuredBaseUrl();
+  const tmpRoot = configured ? null : mkdtempSync(path.join(tmpdir(), 'swapgraph-agent-adversary-loop-'));
+  const port = configured ? null : 3500 + Math.floor(Math.random() * 200);
+  const stateFile = configured ? null : path.join(tmpRoot, 'runtime-state.json');
+  const baseUrl = configured ?? `http://127.0.0.1:${port}`;
+  const runtime = configured ? null : startRuntime({ rootDir, port, stateFile });
   const evidenceDir = path.join(rootDir, 'docs', 'evidence', 'market-vnext');
   mkdirSync(evidenceDir, { recursive: true });
   const evidencePath = path.join(evidenceDir, 'agent-adversary-loop.latest.json');
@@ -202,6 +208,7 @@ async function main() {
     const out = {
       ok: true,
       checked_at: nowIso(),
+      mode: configured ? 'hosted' : 'local',
       replay_same_plan_id: planFirst.body.plan.plan_id === planReplay.body.plan.plan_id,
       outsider_accept_status: outsiderAccept.status,
       outsider_complete_status: outsiderComplete.status,
@@ -220,7 +227,7 @@ async function main() {
     writeFileSync(evidencePath, `${JSON.stringify(out, null, 2)}\n`);
     process.stdout.write(`${JSON.stringify(out, null, 2)}\n`);
   } finally {
-    stopRuntime(runtime);
+    if (runtime) stopRuntime(runtime);
   }
 }
 
