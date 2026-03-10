@@ -15,6 +15,6 @@
     { "command": "npm test", "exit_code": 0 },
     { "command": "node scripts/run-market-vnext-finish-gate.mjs", "exit_code": 1 }
   ],
-  "commit": null,
+  "commit": "8ed82df",
   "timestamp": "2026-03-10T15:29:22Z"
 }

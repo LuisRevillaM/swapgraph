@@ -1,0 +1,21 @@
+id: M172-001
+title: Add feasibility-first candidate scoring and batch clearing policy for cycles
+status: ready
+priority: p1
+depends_on:
+  - M171-001
+summary: >
+  Rework candidate scoring so completion probability, trust confidence, and verification burden
+  dominate over raw novelty, and define batch-clearing behavior for multi-party cycles.
+files_expected:
+  - src/service/marketCandidateService.mjs
+  - docs/design/market-clearing-policy.md
+acceptance_criteria:
+  - Candidate scoring accounts for feasibility, trust, and verification cost.
+  - Cycle candidates can be computed under a batch-clearing policy.
+  - Scoring and clearing behavior are documented and testable.
+verification:
+  - node --test tests/market/market-blueprints-candidates.test.mjs
+  - node scripts/run-market-vnext-finish-gate.mjs
+commit_message: "Add feasibility-first market clearing policy"
+evidence_file: docs/evidence/market-vnext/M172-001.json

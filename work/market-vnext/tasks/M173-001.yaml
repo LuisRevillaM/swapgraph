@@ -22,5 +22,5 @@ verification:
   - node scripts/run-market-vnext-finish-gate.mjs
 commit_message: "Harden market plan failure and unwind handling"
 completed_at: 2026-03-10T15:29:22Z
-commit: PENDING
+commit: 8ed82df
 evidence_file: docs/evidence/market-vnext/M173-001.json

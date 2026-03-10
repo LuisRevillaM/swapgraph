@@ -18,6 +18,6 @@
     "docs/evidence/market-vnext/agent-market-loop.latest.json",
     "docs/evidence/market-vnext/agent-adversary-loop.latest.json"
   ],
-  "commit": null,
+  "commit": "2978b3a",
   "timestamp": "2026-03-10T15:35:28Z"
 }

@@ -18,4 +18,4 @@ verification:
 commit_message: "Define market obligation graph model"
 evidence_file: docs/evidence/market-vnext/M170-001.json
 completed_at: 2026-03-10T15:13:00.000Z
-commit: PENDING
+commit: 794a4a2

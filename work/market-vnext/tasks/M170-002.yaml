@@ -19,4 +19,4 @@ verification:
 commit_message: "Define market failure and trust semantics"
 evidence_file: docs/evidence/market-vnext/M170-002.json
 completed_at: 2026-03-10T15:15:00.000Z
-commit: PENDING
+commit: b4886ff

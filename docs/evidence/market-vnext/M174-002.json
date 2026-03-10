@@ -1,0 +1,15 @@
+{
+  "task_id": "M174-002",
+  "status": "done",
+  "summary": "Hardened the finish gate so it validates manifest consistency, dogfood evidence artifacts, and completed task records, and returns only actionable remaining work.",
+  "files_changed": [
+    "scripts/run-market-vnext-finish-gate.mjs",
+    "docs/plans/market-vnext-agent-execution.md",
+    "work/market-vnext/tasks/M174-002.yaml"
+  ],
+  "commands": [
+    { "command": "node scripts/run-market-vnext-finish-gate.mjs", "exit_code": 1 }
+  ],
+  "commit": null,
+  "timestamp": "2026-03-10T15:37:11Z"
+}

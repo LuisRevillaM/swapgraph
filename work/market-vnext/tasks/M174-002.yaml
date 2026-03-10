@@ -1,0 +1,22 @@
+id: M174-002
+title: Harden the market vnext finish gate
+status: done
+priority: p0
+depends_on:
+  - M174-001
+summary: >
+  Make the finish gate the canonical stop condition for autonomous execution by checking
+  completion conditions, key commands, and required artifacts directly.
+files_expected:
+  - scripts/run-market-vnext-finish-gate.mjs
+  - docs/plans/market-vnext-agent-execution.md
+acceptance_criteria:
+  - The finish gate emits deterministic JSON.
+  - Unmet completion conditions are explicit and actionable.
+  - The finish gate can be used as the terminal condition for autonomous execution.
+verification:
+  - node scripts/run-market-vnext-finish-gate.mjs
+commit_message: "Harden market vnext finish gate"
+completed_at: 2026-03-10T15:37:11Z
+commit: PENDING
+evidence_file: docs/evidence/market-vnext/M174-002.json

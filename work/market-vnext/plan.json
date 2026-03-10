@@ -1,0 +1,21 @@
+{
+  "plan_id": "market-vnext-agent-execution",
+  "title": "Market vNext Agent Execution Plan",
+  "plan_doc": "docs/plans/market-vnext-agent-execution.md",
+  "task_dir": "work/market-vnext/tasks",
+  "evidence_dir": "docs/evidence/market-vnext",
+  "finish_gate_command": ["node", "scripts/run-market-vnext-finish-gate.mjs"],
+  "dispatch_command": ["node", "scripts/run-market-vnext-agent-dispatch.mjs"],
+  "stop_conditions": [
+    "finish_gate_complete",
+    "recorded_blocker"
+  ],
+  "task_statuses": [
+    "todo",
+    "ready",
+    "in_progress",
+    "blocked",
+    "done"
+  ],
+  "priority_order": ["p0", "p1", "p2", "p3"]
+}

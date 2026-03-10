@@ -1,0 +1,22 @@
+id: M175-001
+title: Simplify public product nouns and align docs/UI
+status: ready
+priority: p1
+depends_on:
+  - M171-001
+summary: >
+  Simplify the external product language to Offer, Need, Match, Plan, and Result while keeping
+  internal graph objects hidden behind clearer user-facing flows.
+files_expected:
+  - client/marketplace/src/vnext/app.mjs
+  - README.md
+  - docs/plans/market-vnext-agent-execution.md
+acceptance_criteria:
+  - Public docs stop leaking unnecessary internal nouns.
+  - UI copy aligns to Offer, Need, Match, Plan, and Result.
+  - Internal objects remain available in API and implementation where needed.
+verification:
+  - npm run web:m7:test
+  - node scripts/run-market-vnext-finish-gate.mjs
+commit_message: "Simplify market public surface language"
+evidence_file: docs/evidence/market-vnext/M175-001.json
