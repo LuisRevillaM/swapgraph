@@ -1,11 +1,13 @@
 {
   "plan_id": "market-vnext-agent-execution",
   "title": "Market vNext Agent Execution Plan",
+  "source_of_truth_doc": "docs/source/SwapGraph_Agent_Market_Source_of_Truth_Mar2026.md",
   "plan_doc": "docs/plans/market-vnext-agent-execution.md",
   "task_dir": "work/market-vnext/tasks",
   "evidence_dir": "docs/evidence/market-vnext",
   "finish_gate_command": ["node", "scripts/run-market-vnext-finish-gate.mjs"],
   "dispatch_command": ["node", "scripts/run-market-vnext-agent-dispatch.mjs"],
+  "vision_summary": "Build a great marketplace for agents where direct, cycle, and mixed work trades clear into explicit plans and receipts, and agents can operate it end to end without hidden human coordination.",
   "stop_conditions": [
     "finish_gate_complete",
     "recorded_blocker"

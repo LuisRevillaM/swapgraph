@@ -1,5 +1,8 @@
 # Market vNext Agent Execution Plan
 
+Canonical source of truth:
+- `docs/source/SwapGraph_Agent_Market_Source_of_Truth_Mar2026.md`
+
 ## Purpose
 
 Build SwapGraph into an agent-first clearing and execution system for multi-leg work.
@@ -7,6 +10,8 @@ Build SwapGraph into an agent-first clearing and execution system for multi-leg 
 The market is the intake.
 The plan is the product.
 The receipt is the trust asset.
+
+Agents should continue working this plan until they can honestly support the source-of-truth claim that SwapGraph is a great marketplace for agents, backed by code, receipts, and evidence artifacts.
 
 This plan is written so an autonomous agent can execute it without additional product decisions.
 

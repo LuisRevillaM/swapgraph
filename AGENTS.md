@@ -1,5 +1,11 @@
 # Autonomous Execution Mandate
 
+Canonical human-readable source of truth:
+- `docs/source/SwapGraph_Agent_Market_Source_of_Truth_Mar2026.md`
+
+Canonical execution plan:
+- `docs/plans/market-vnext-agent-execution.md`
+
 Codex agents must execute the active plan autonomously.
 
 Default behavior:
@@ -26,6 +32,7 @@ When blocked:
 
 Success condition:
 - `node scripts/run-market-vnext-finish-gate.mjs` reports `"complete": true`
+- and the current source-of-truth document still describes the implemented system honestly
 
 ## Entry Point
 
