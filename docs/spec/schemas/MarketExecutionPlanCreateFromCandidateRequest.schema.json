@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketExecutionPlanCreateFromCandidateRequest.schema.json",
+  "title": "MarketExecutionPlanCreateFromCandidateRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "plan_id": { "type": "string", "minLength": 1 }
+      }
+    },
+    "recorded_at": { "type": "string", "format": "date-time" }
+  }
+}

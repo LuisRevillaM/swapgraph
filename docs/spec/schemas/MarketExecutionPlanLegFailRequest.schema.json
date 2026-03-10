@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketExecutionPlanLegFailRequest.schema.json",
+  "title": "MarketExecutionPlanLegFailRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "failure_reason": { "type": "string", "minLength": 1 },
+    "recorded_at": { "type": "string", "format": "date-time" }
+  }
+}

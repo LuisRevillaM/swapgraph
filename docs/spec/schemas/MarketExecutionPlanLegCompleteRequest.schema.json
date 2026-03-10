@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketExecutionPlanLegCompleteRequest.schema.json",
+  "title": "MarketExecutionPlanLegCompleteRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "verification_result": { "type": "object", "additionalProperties": true },
+    "recorded_at": { "type": "string", "format": "date-time" }
+  }
+}

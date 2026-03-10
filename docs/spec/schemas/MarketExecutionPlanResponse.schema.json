@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketExecutionPlanResponse.schema.json",
+  "title": "MarketExecutionPlanResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["correlation_id", "plan"],
+  "properties": {
+    "correlation_id": { "type": "string", "minLength": 1 },
+    "plan": { "$ref": "MarketExecutionPlanView.schema.json" }
+  }
+}

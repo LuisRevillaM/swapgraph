@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketCandidateParticipantView.schema.json",
+  "title": "MarketCandidateParticipantView",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["actor", "input_ref", "gives_ref", "receives_from_actor", "title"],
+  "properties": {
+    "actor": { "$ref": "ActorRef.schema.json" },
+    "owner_profile": { "type": ["object", "null"], "additionalProperties": true },
+    "input_ref": { "$ref": "MarketEdgeRef.schema.json" },
+    "gives_ref": { "$ref": "MarketEdgeRef.schema.json" },
+    "receives_from_actor": { "$ref": "ActorRef.schema.json" },
+    "title": { "type": ["string", "null"] }
+  }
+}

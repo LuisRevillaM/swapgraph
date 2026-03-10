@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketBlueprintCreateRequest.schema.json",
+  "title": "MarketBlueprintCreateRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["blueprint"],
+  "properties": {
+    "blueprint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workspace_id", "title", "category", "artifact_ref", "artifact_format", "delivery_mode"],
+      "properties": {
+        "blueprint_id": { "type": "string", "minLength": 1 },
+        "workspace_id": { "type": "string", "minLength": 1 },
+        "owner_actor": { "$ref": "ActorRef.schema.json" },
+        "status": { "type": "string", "enum": ["draft", "published", "archived"] },
+        "title": { "type": "string", "minLength": 1 },
+        "summary": { "type": "string" },
+        "category": { "type": "string", "enum": ["skill", "workflow", "prompt_pack", "agent_template", "sdk_module", "integration_recipe", "evaluation_harness"] },
+        "artifact_ref": { "type": "string", "minLength": 1 },
+        "artifact_format": { "type": "string", "minLength": 1 },
+        "license_terms": { "type": "string" },
+        "support_policy": { "type": "object", "additionalProperties": true },
+        "verification_spec": { "type": "object", "additionalProperties": true },
+        "delivery_mode": { "type": "string", "enum": ["download", "repo_access", "bundle_export", "template_clone", "hosted_copy"] },
+        "pricing_model": { "type": "string", "enum": ["one_time", "seat", "usage", "support_bundle", "barter_only"] },
+        "valuation_hint": { "type": "object", "additionalProperties": true }
+      }
+    },
+    "recorded_at": { "type": "string", "format": "date-time" }
+  }
+}

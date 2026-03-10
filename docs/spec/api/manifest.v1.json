@@ -2969,6 +2969,114 @@
       }
     },
     {
+      "method": "POST",
+      "path": "/market/candidates/compute",
+      "operation_id": "marketCandidates.compute",
+      "idempotency_required": true,
+      "request_schema": "MarketCandidateComputeRequest.schema.json",
+      "response_schema": "MarketCandidateListResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": [
+          "market:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/market/candidates/{candidate_id}/accept",
+      "operation_id": "marketCandidates.accept",
+      "idempotency_required": true,
+      "request_schema": "MarketActionRequest.schema.json",
+      "response_schema": "MarketCandidateResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": [
+          "market:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/market/candidates/{candidate_id}/reject",
+      "operation_id": "marketCandidates.reject",
+      "idempotency_required": true,
+      "request_schema": "MarketActionRequest.schema.json",
+      "response_schema": "MarketCandidateResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": [
+          "market:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/market/candidates/{candidate_id}/refresh",
+      "operation_id": "marketCandidates.refresh",
+      "idempotency_required": true,
+      "request_schema": "MarketActionRequest.schema.json",
+      "response_schema": "MarketCandidateResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": [
+          "market:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/market/candidates/{candidate_id}",
+      "operation_id": "marketCandidates.get",
+      "idempotency_required": false,
+      "response_schema": "MarketCandidateResponse.schema.json",
+      "auth": {
+        "required": false,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/market/candidates",
+      "operation_id": "marketCandidates.list",
+      "idempotency_required": false,
+      "response_schema": "MarketCandidateListResponse.schema.json",
+      "auth": {
+        "required": false,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": []
+      }
+    },
+    {
       "method": "PATCH",
       "path": "/market/listings/{listing_id}",
       "operation_id": "marketListings.patch",
@@ -3048,6 +3156,114 @@
       "operation_id": "marketStats.get",
       "idempotency_required": false,
       "response_schema": "MarketStatsResponse.schema.json",
+      "auth": {
+        "required": false,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/market/blueprints",
+      "operation_id": "marketBlueprints.create",
+      "idempotency_required": true,
+      "request_schema": "MarketBlueprintCreateRequest.schema.json",
+      "response_schema": "MarketBlueprintResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": [
+          "market:write"
+        ]
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/market/blueprints/{blueprint_id}",
+      "operation_id": "marketBlueprints.patch",
+      "idempotency_required": true,
+      "request_schema": "MarketBlueprintPatchRequest.schema.json",
+      "response_schema": "MarketBlueprintResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": [
+          "market:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/market/blueprints/{blueprint_id}/publish",
+      "operation_id": "marketBlueprints.publish",
+      "idempotency_required": true,
+      "request_schema": "MarketActionRequest.schema.json",
+      "response_schema": "MarketBlueprintResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": [
+          "market:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/market/blueprints/{blueprint_id}/archive",
+      "operation_id": "marketBlueprints.archive",
+      "idempotency_required": true,
+      "request_schema": "MarketActionRequest.schema.json",
+      "response_schema": "MarketBlueprintResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": [
+          "market:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/market/blueprints/{blueprint_id}",
+      "operation_id": "marketBlueprints.get",
+      "idempotency_required": false,
+      "response_schema": "MarketBlueprintResponse.schema.json",
+      "auth": {
+        "required": false,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/market/blueprints",
+      "operation_id": "marketBlueprints.list",
+      "idempotency_required": false,
+      "response_schema": "MarketBlueprintListResponse.schema.json",
       "auth": {
         "required": false,
         "allowed_actor_types": [
@@ -3565,6 +3781,168 @@
       "operation_id": "marketDeals.receipt",
       "idempotency_required": false,
       "response_schema": "MarketDealReceiptResponse.schema.json",
+      "auth": {
+        "required": false,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/market/execution-plans/from-candidate/{candidate_id}",
+      "operation_id": "marketExecutionPlans.createFromCandidate",
+      "idempotency_required": true,
+      "request_schema": "MarketExecutionPlanCreateFromCandidateRequest.schema.json",
+      "response_schema": "MarketExecutionPlanResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": [
+          "market:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/market/execution-plans",
+      "operation_id": "marketExecutionPlans.list",
+      "idempotency_required": false,
+      "response_schema": "MarketExecutionPlanListResponse.schema.json",
+      "auth": {
+        "required": false,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/market/execution-plans/{plan_id}",
+      "operation_id": "marketExecutionPlans.get",
+      "idempotency_required": false,
+      "response_schema": "MarketExecutionPlanResponse.schema.json",
+      "auth": {
+        "required": false,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/market/execution-plans/{plan_id}/accept",
+      "operation_id": "marketExecutionPlans.accept",
+      "idempotency_required": true,
+      "request_schema": "MarketActionRequest.schema.json",
+      "response_schema": "MarketExecutionPlanResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": [
+          "market:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/market/execution-plans/{plan_id}/decline",
+      "operation_id": "marketExecutionPlans.decline",
+      "idempotency_required": true,
+      "request_schema": "MarketActionRequest.schema.json",
+      "response_schema": "MarketExecutionPlanResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": [
+          "market:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/market/execution-plans/{plan_id}/start-settlement",
+      "operation_id": "marketExecutionPlans.startSettlement",
+      "idempotency_required": true,
+      "request_schema": "MarketExecutionPlanStartSettlementRequest.schema.json",
+      "response_schema": "MarketExecutionPlanResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": [
+          "market:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/market/execution-plans/{plan_id}/complete-leg/{leg_id}",
+      "operation_id": "marketExecutionPlans.completeLeg",
+      "idempotency_required": true,
+      "request_schema": "MarketExecutionPlanLegCompleteRequest.schema.json",
+      "response_schema": "MarketExecutionPlanResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": [
+          "market:write"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/market/execution-plans/{plan_id}/fail-leg/{leg_id}",
+      "operation_id": "marketExecutionPlans.failLeg",
+      "idempotency_required": true,
+      "request_schema": "MarketExecutionPlanLegFailRequest.schema.json",
+      "response_schema": "MarketExecutionPlanResponse.schema.json",
+      "auth": {
+        "required": true,
+        "allowed_actor_types": [
+          "user",
+          "partner",
+          "agent"
+        ],
+        "required_scopes": [
+          "market:write"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/market/execution-plans/{plan_id}/receipt",
+      "operation_id": "marketExecutionPlans.receipt",
+      "idempotency_required": false,
+      "response_schema": "MarketExecutionPlanReceiptResponse.schema.json",
       "auth": {
         "required": false,
         "allowed_actor_types": [

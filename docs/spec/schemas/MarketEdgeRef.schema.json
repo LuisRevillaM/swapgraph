@@ -12,7 +12,8 @@
     "kind": {
       "type": "string",
       "enum": [
-        "listing"
+        "listing",
+        "blueprint"
       ]
     },
     "id": {

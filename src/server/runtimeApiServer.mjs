@@ -24,6 +24,9 @@ import { MetricsNetworkHealthService } from '../service/metricsNetworkHealthServ
 import { MarketplaceMatchingService } from '../service/marketplaceMatchingService.mjs';
 import { EdgeIntentService } from '../service/edgeIntentService.mjs';
 import { MarketAuthService, resolveUserSessionToken } from '../service/marketAuthService.mjs';
+import { MarketBlueprintService } from '../service/marketBlueprintService.mjs';
+import { MarketCandidateService } from '../service/marketCandidateService.mjs';
+import { MarketExecutionPlanService } from '../service/marketExecutionPlanService.mjs';
 import { MarketService } from '../service/marketService.mjs';
 import { DelegationsService } from '../service/delegationsService.mjs';
 import { MarketDealService } from '../service/marketDealService.mjs';
@@ -322,10 +325,14 @@ function allowsAnonymousActor({ method, pathname }) {
   if (method === 'POST' && pathname === '/market/auth/verify') return true;
   if (method === 'POST' && pathname === '/market/signup') return true;
   if (method === 'GET' && pathname === '/market/stats') return true;
+  if (method === 'GET' && pathname === '/market/blueprints') return true;
   if (method === 'GET' && pathname === '/market/listings') return true;
+  if (method === 'GET' && pathname === '/market/candidates') return true;
   if (method === 'GET' && pathname === '/market/edges') return true;
   if (method === 'GET' && pathname === '/market/feed') return true;
+  if (method === 'GET' && /^\/market\/blueprints\/[^/]+$/.test(pathname)) return true;
   if (method === 'GET' && /^\/market\/listings\/[^/]+$/.test(pathname)) return true;
+  if (method === 'GET' && /^\/market\/candidates\/[^/]+$/.test(pathname)) return true;
   if (method === 'GET' && /^\/market\/edges\/[^/]+$/.test(pathname)) return true;
   if (method === 'GET' && /^\/market\/deals\/[^/]+\/receipt$/.test(pathname)) return true;
   return false;
@@ -445,6 +452,9 @@ export function createRuntimeApiServer({
   const edgeIntents = new EdgeIntentService({ store });
   const market = new MarketService({ store });
   const marketAuth = new MarketAuthService({ store, market });
+  const marketBlueprints = new MarketBlueprintService({ store });
+  const marketCandidates = new MarketCandidateService({ store });
+  const marketExecutionPlans = new MarketExecutionPlanService({ store });
   const delegations = new DelegationsService({ store });
   const marketDeals = new MarketDealService({ store });
   const marketExecutionGrants = new MarketExecutionGrantService({ store });
@@ -870,6 +880,17 @@ export function createRuntimeApiServer({
         return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
       }
 
+      if (method === 'POST' && pathname === '/market/blueprints') {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = marketBlueprints.create({ actor, auth, idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
       if (method === 'POST' && pathname === '/market/auth/start') {
         const idem = requireIdempotencyKey(req);
         if (!idem.ok) {
@@ -921,6 +942,54 @@ export function createRuntimeApiServer({
 
       if (method === 'GET' && pathname === '/market/stats') {
         const result = market.getStats({ actor, auth });
+        return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
+      }
+
+      const marketBlueprintPatch = routeMatch(pathname, /^\/market\/blueprints\/([^/]+)$/);
+      if (method === 'PATCH' && marketBlueprintPatch) {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = marketBlueprints.patch({ actor, auth, blueprintId: marketBlueprintPatch[0], idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      const marketBlueprintPublish = routeMatch(pathname, /^\/market\/blueprints\/([^/]+)\/publish$/);
+      if (method === 'POST' && marketBlueprintPublish) {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = marketBlueprints.publish({ actor, auth, blueprintId: marketBlueprintPublish[0], idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      const marketBlueprintArchive = routeMatch(pathname, /^\/market\/blueprints\/([^/]+)\/archive$/);
+      if (method === 'POST' && marketBlueprintArchive) {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = marketBlueprints.archive({ actor, auth, blueprintId: marketBlueprintArchive[0], idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      const marketBlueprintGet = routeMatch(pathname, /^\/market\/blueprints\/([^/]+)$/);
+      if (method === 'GET' && marketBlueprintGet) {
+        const result = marketBlueprints.get({ actor, auth, blueprintId: marketBlueprintGet[0] });
+        return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
+      }
+
+      if (method === 'GET' && pathname === '/market/blueprints') {
+        const query = toQueryObject(url.searchParams);
+        const result = marketBlueprints.list({ actor, auth, query });
         return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
       }
 
@@ -992,6 +1061,65 @@ export function createRuntimeApiServer({
       if (method === 'GET' && pathname === '/market/listings') {
         const query = toQueryObject(url.searchParams);
         const result = market.listListings({ actor, auth, query });
+        return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
+      }
+
+      if (method === 'POST' && pathname === '/market/candidates/compute') {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = marketCandidates.compute({ actor, auth, idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      const marketCandidateAccept = routeMatch(pathname, /^\/market\/candidates\/([^/]+)\/accept$/);
+      if (method === 'POST' && marketCandidateAccept) {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = marketCandidates.accept({ actor, auth, candidateId: marketCandidateAccept[0], idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      const marketCandidateReject = routeMatch(pathname, /^\/market\/candidates\/([^/]+)\/reject$/);
+      if (method === 'POST' && marketCandidateReject) {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = marketCandidates.reject({ actor, auth, candidateId: marketCandidateReject[0], idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      const marketCandidateRefresh = routeMatch(pathname, /^\/market\/candidates\/([^/]+)\/refresh$/);
+      if (method === 'POST' && marketCandidateRefresh) {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = marketCandidates.refresh({ actor, auth, candidateId: marketCandidateRefresh[0], idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      const marketCandidateGet = routeMatch(pathname, /^\/market\/candidates\/([^/]+)$/);
+      if (method === 'GET' && marketCandidateGet) {
+        const result = marketCandidates.get({ actor, auth, candidateId: marketCandidateGet[0] });
+        return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
+      }
+
+      if (method === 'GET' && pathname === '/market/candidates') {
+        const query = toQueryObject(url.searchParams);
+        const result = marketCandidates.list({ actor, auth, query });
         return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
       }
 
@@ -1177,6 +1305,116 @@ export function createRuntimeApiServer({
       const marketDealReceipt = routeMatch(pathname, /^\/market\/deals\/([^/]+)\/receipt$/);
       if (method === 'GET' && marketDealReceipt) {
         const result = marketDeals.receipt({ actor, auth, dealId: marketDealReceipt[0] });
+        return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
+      }
+
+      const marketExecutionPlanCreate = routeMatch(pathname, /^\/market\/execution-plans\/from-candidate\/([^/]+)$/);
+      if (method === 'POST' && marketExecutionPlanCreate) {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = marketExecutionPlans.createFromCandidate({
+          actor,
+          auth,
+          candidateId: marketExecutionPlanCreate[0],
+          idempotencyKey: idem.value,
+          request: body
+        });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      const marketExecutionPlanGet = routeMatch(pathname, /^\/market\/execution-plans\/([^/]+)$/);
+      if (method === 'GET' && marketExecutionPlanGet) {
+        const result = marketExecutionPlans.get({ actor, auth, planId: marketExecutionPlanGet[0] });
+        return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
+      }
+
+      if (method === 'GET' && pathname === '/market/execution-plans') {
+        const query = toQueryObject(url.searchParams);
+        const result = marketExecutionPlans.list({ actor, auth, query });
+        return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
+      }
+
+      const marketExecutionPlanAccept = routeMatch(pathname, /^\/market\/execution-plans\/([^/]+)\/accept$/);
+      if (method === 'POST' && marketExecutionPlanAccept) {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = marketExecutionPlans.accept({ actor, auth, planId: marketExecutionPlanAccept[0], idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      const marketExecutionPlanDecline = routeMatch(pathname, /^\/market\/execution-plans\/([^/]+)\/decline$/);
+      if (method === 'POST' && marketExecutionPlanDecline) {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = marketExecutionPlans.decline({ actor, auth, planId: marketExecutionPlanDecline[0], idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      const marketExecutionPlanStartSettlement = routeMatch(pathname, /^\/market\/execution-plans\/([^/]+)\/start-settlement$/);
+      if (method === 'POST' && marketExecutionPlanStartSettlement) {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = marketExecutionPlans.startSettlement({ actor, auth, planId: marketExecutionPlanStartSettlement[0], idempotencyKey: idem.value, request: body });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      const marketExecutionPlanCompleteLeg = routeMatch(pathname, /^\/market\/execution-plans\/([^/]+)\/complete-leg\/([^/]+)$/);
+      if (method === 'POST' && marketExecutionPlanCompleteLeg) {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = marketExecutionPlans.completeLeg({
+          actor,
+          auth,
+          planId: marketExecutionPlanCompleteLeg[0],
+          legId: marketExecutionPlanCompleteLeg[1],
+          idempotencyKey: idem.value,
+          request: body
+        });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      const marketExecutionPlanFailLeg = routeMatch(pathname, /^\/market\/execution-plans\/([^/]+)\/fail-leg\/([^/]+)$/);
+      if (method === 'POST' && marketExecutionPlanFailLeg) {
+        const idem = requireIdempotencyKey(req);
+        if (!idem.ok) {
+          return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
+        }
+        const body = await readJsonBody(req);
+        const out = marketExecutionPlans.failLeg({
+          actor,
+          auth,
+          planId: marketExecutionPlanFailLeg[0],
+          legId: marketExecutionPlanFailLeg[1],
+          idempotencyKey: idem.value,
+          request: body
+        });
+        shouldPersist = true;
+        return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
+      }
+
+      const marketExecutionPlanReceipt = routeMatch(pathname, /^\/market\/execution-plans\/([^/]+)\/receipt$/);
+      if (method === 'GET' && marketExecutionPlanReceipt) {
+        const result = marketExecutionPlans.receipt({ actor, auth, planId: marketExecutionPlanReceipt[0] });
         return sendJson({ res, status: result.ok ? 200 : errorStatus(result.body?.error?.code), correlationId, body: result.body });
       }
 

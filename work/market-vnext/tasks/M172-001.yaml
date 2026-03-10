@@ -19,5 +19,5 @@ verification:
   - node scripts/run-market-vnext-finish-gate.mjs
 commit_message: "Add feasibility-first market clearing policy"
 completed_at: 2026-03-10T15:39:09Z
-commit: PENDING
+commit: 6a8974a
 evidence_file: docs/evidence/market-vnext/M172-001.json

@@ -18,5 +18,5 @@ verification:
   - node scripts/run-market-vnext-finish-gate.mjs
 commit_message: "Harden market vnext finish gate"
 completed_at: 2026-03-10T15:37:11Z
-commit: PENDING
+commit: 4a023e2
 evidence_file: docs/evidence/market-vnext/M174-002.json

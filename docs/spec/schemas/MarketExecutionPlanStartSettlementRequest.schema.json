@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketExecutionPlanStartSettlementRequest.schema.json",
+  "title": "MarketExecutionPlanStartSettlementRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "settlement_mode": { "type": "string", "enum": ["barter", "internal_credit", "external_payment_proof", "cycle_bridge"] },
+    "terms": { "type": "object", "additionalProperties": true },
+    "cycle_id": { "type": "string", "minLength": 1 },
+    "recorded_at": { "type": "string", "format": "date-time" }
+  }
+}

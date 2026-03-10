@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketBlueprintResponse.schema.json",
+  "title": "MarketBlueprintResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["correlation_id", "blueprint"],
+  "properties": {
+    "correlation_id": { "type": "string", "minLength": 1 },
+    "blueprint": { "$ref": "MarketBlueprintView.schema.json" }
+  }
+}

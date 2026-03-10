@@ -571,6 +571,57 @@ async function main() {
   const scopes = flags.scopes ? String(flags.scopes).split(/[,\s]+/g).filter(Boolean) : defaultScopes();
   const bearerToken = flags['bearer-token'] ?? process.env.SWAPGRAPH_BEARER_TOKEN ?? null;
 
+  if (group === 'blueprints') {
+    if (action === 'create') {
+      const blueprint = parseJsonFlag(flags.body, 'body')?.blueprint ?? {
+        workspace_id: required(flags.workspace, 'workspace'),
+        title: required(flags.title, 'title'),
+        summary: flags.summary,
+        category: required(flags.category, 'category'),
+        artifact_ref: required(flags['artifact-ref'], 'artifact-ref'),
+        artifact_format: required(flags['artifact-format'], 'artifact-format'),
+        license_terms: flags['license-terms'],
+        support_policy: parseJsonFlag(flags['support-policy-json'], 'support-policy-json'),
+        verification_spec: parseJsonFlag(flags['verification-spec-json'], 'verification-spec-json'),
+        delivery_mode: required(flags['delivery-mode'], 'delivery-mode'),
+        pricing_model: flags['pricing-model'],
+        valuation_hint: parseJsonFlag(flags['valuation-hint-json'], 'valuation-hint-json')
+      };
+      print(await api({ method: 'POST', path: '/market/blueprints', actor, scopes, bearerToken, idempotency: idempotencyKey('blueprints-create'), body: { blueprint, recorded_at: nowIso() } }));
+      return;
+    }
+    if (action === 'get') {
+      print(await api({ method: 'GET', path: `/market/blueprints/${required(flags.id, 'id')}`, actor, scopes, bearerToken }));
+      return;
+    }
+    if (action === 'list') {
+      print(await api({ method: 'GET', path: '/market/blueprints', actor, scopes, bearerToken, query: parseJsonFlag(flags.query, 'query') ?? { workspace_id: flags.workspace, status: flags.status, category: flags.category, delivery_mode: flags['delivery-mode'] } }));
+      return;
+    }
+    if (action === 'update') {
+      const patch = parseJsonFlag(flags.body, 'body')?.patch ?? {
+        title: flags.title,
+        summary: flags.summary,
+        category: flags.category,
+        artifact_ref: flags['artifact-ref'],
+        artifact_format: flags['artifact-format'],
+        license_terms: flags['license-terms'],
+        support_policy: parseJsonFlag(flags['support-policy-json'], 'support-policy-json'),
+        verification_spec: parseJsonFlag(flags['verification-spec-json'], 'verification-spec-json'),
+        delivery_mode: flags['delivery-mode'],
+        pricing_model: flags['pricing-model'],
+        valuation_hint: parseJsonFlag(flags['valuation-hint-json'], 'valuation-hint-json')
+      };
+      Object.keys(patch).forEach(key => patch[key] === undefined && delete patch[key]);
+      print(await api({ method: 'PATCH', path: `/market/blueprints/${required(flags.id, 'id')}`, actor, scopes, bearerToken, idempotency: idempotencyKey('blueprints-update'), body: { patch, recorded_at: nowIso() } }));
+      return;
+    }
+    if (action === 'publish' || action === 'archive') {
+      print(await api({ method: 'POST', path: `/market/blueprints/${required(flags.id, 'id')}/${action}`, actor, scopes, bearerToken, idempotency: idempotencyKey(`blueprints-${action}`), body: { recorded_at: nowIso() } }));
+      return;
+    }
+  }
+
   if (group === 'listings') {
     if (action === 'create') {
       const listing = parseJsonFlag(flags.body, 'body')?.listing ?? {
@@ -664,6 +715,32 @@ async function main() {
     }
   }
 
+  if (group === 'candidates') {
+    if (action === 'compute') {
+      const body = parseJsonFlag(flags.body, 'body') ?? {
+        workspace_id: required(flags.workspace, 'workspace'),
+        max_cycle_length: flags['max-cycle-length'],
+        max_candidates: flags['max-candidates'],
+        recorded_at: nowIso()
+      };
+      Object.keys(body).forEach(key => body[key] === undefined && delete body[key]);
+      print(await api({ method: 'POST', path: '/market/candidates/compute', actor, scopes, bearerToken, idempotency: idempotencyKey('candidates-compute'), body }));
+      return;
+    }
+    if (action === 'get') {
+      print(await api({ method: 'GET', path: `/market/candidates/${required(flags.id, 'id')}`, actor, scopes, bearerToken }));
+      return;
+    }
+    if (action === 'list') {
+      print(await api({ method: 'GET', path: '/market/candidates', actor, scopes, bearerToken, query: parseJsonFlag(flags.query, 'query') ?? { workspace_id: flags.workspace, status: flags.status, candidate_type: flags['candidate-type'] } }));
+      return;
+    }
+    if (action === 'accept' || action === 'reject' || action === 'refresh') {
+      print(await api({ method: 'POST', path: `/market/candidates/${required(flags.id, 'id')}/${action}`, actor, scopes, bearerToken, idempotency: idempotencyKey(`candidates-${action}`), body: { recorded_at: nowIso() } }));
+      return;
+    }
+  }
+
   if (group === 'threads') {
     if (action === 'create') {
       const participants = parseJsonFlag(flags['participants-json'], 'participants-json');
@@ -717,6 +794,48 @@ async function main() {
     }
     if (action === 'receipt') {
       print(await api({ method: 'GET', path: `/market/deals/${required(flags.id, 'id')}/receipt`, actor, scopes, bearerToken }));
+      return;
+    }
+  }
+
+  if (group === 'plans') {
+    if (action === 'create-from-candidate') {
+      const body = parseJsonFlag(flags.body, 'body') ?? { plan: parseJsonFlag(flags['plan-json'], 'plan-json'), recorded_at: nowIso() };
+      print(await api({ method: 'POST', path: `/market/execution-plans/from-candidate/${required(flags.candidate, 'candidate')}`, actor, scopes, bearerToken, idempotency: idempotencyKey('plans-create'), body }));
+      return;
+    }
+    if (action === 'get') {
+      print(await api({ method: 'GET', path: `/market/execution-plans/${required(flags.id, 'id')}`, actor, scopes, bearerToken }));
+      return;
+    }
+    if (action === 'list') {
+      print(await api({ method: 'GET', path: '/market/execution-plans', actor, scopes, bearerToken, query: parseJsonFlag(flags.query, 'query') ?? { workspace_id: flags.workspace, status: flags.status, plan_type: flags['plan-type'] } }));
+      return;
+    }
+    if (action === 'accept' || action === 'decline') {
+      print(await api({ method: 'POST', path: `/market/execution-plans/${required(flags.id, 'id')}/${action}`, actor, scopes, bearerToken, idempotency: idempotencyKey(`plans-${action}`), body: { recorded_at: nowIso() } }));
+      return;
+    }
+    if (action === 'start-settlement') {
+      const body = parseJsonFlag(flags.body, 'body') ?? { settlement_mode: flags['settlement-mode'], terms: parseJsonFlag(flags['terms-json'], 'terms-json'), cycle_id: flags['cycle-id'], recorded_at: nowIso() };
+      Object.keys(body).forEach(key => body[key] === undefined && delete body[key]);
+      print(await api({ method: 'POST', path: `/market/execution-plans/${required(flags.id, 'id')}/start-settlement`, actor, scopes, bearerToken, idempotency: idempotencyKey('plans-start'), body }));
+      return;
+    }
+    if (action === 'complete-leg') {
+      const body = parseJsonFlag(flags.body, 'body') ?? { verification_result: parseJsonFlag(flags['verification-json'], 'verification-json'), recorded_at: nowIso() };
+      Object.keys(body).forEach(key => body[key] === undefined && delete body[key]);
+      print(await api({ method: 'POST', path: `/market/execution-plans/${required(flags.id, 'id')}/complete-leg/${required(flags.leg, 'leg')}`, actor, scopes, bearerToken, idempotency: idempotencyKey('plans-complete-leg'), body }));
+      return;
+    }
+    if (action === 'fail-leg') {
+      const body = parseJsonFlag(flags.body, 'body') ?? { failure_reason: flags['failure-reason'], recorded_at: nowIso() };
+      Object.keys(body).forEach(key => body[key] === undefined && delete body[key]);
+      print(await api({ method: 'POST', path: `/market/execution-plans/${required(flags.id, 'id')}/fail-leg/${required(flags.leg, 'leg')}`, actor, scopes, bearerToken, idempotency: idempotencyKey('plans-fail-leg'), body }));
+      return;
+    }
+    if (action === 'receipt') {
+      print(await api({ method: 'GET', path: `/market/execution-plans/${required(flags.id, 'id')}/receipt`, actor, scopes, bearerToken }));
       return;
     }
   }

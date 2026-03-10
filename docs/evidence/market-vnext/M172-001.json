@@ -14,6 +14,6 @@
     { "command": "node scripts/validate-api-contract.mjs", "exit_code": 0 },
     { "command": "node scripts/run-market-vnext-finish-gate.mjs", "exit_code": 0 }
   ],
-  "commit": null,
+  "commit": "6a8974a",
   "timestamp": "2026-03-10T15:39:09Z"
 }

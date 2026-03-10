@@ -72,6 +72,11 @@ export class JsonStateStore {
       edge_intent_counter: 0,
       market_listings: {},
       market_listing_counter: 0,
+      market_blueprints: {},
+      market_blueprint_counter: 0,
+      market_candidates: {},
+      market_execution_plans: {},
+      market_execution_plan_counter: 0,
       market_edges: {},
       market_edge_counter: 0,
       market_threads: {},
@@ -215,6 +220,11 @@ export class JsonStateStore {
         edge_intent_counter: 0,
         market_listings: {},
         market_listing_counter: 0,
+        market_blueprints: {},
+        market_blueprint_counter: 0,
+        market_candidates: {},
+        market_execution_plans: {},
+        market_execution_plan_counter: 0,
         market_edges: {},
         market_edge_counter: 0,
         market_threads: {},
@@ -359,6 +369,11 @@ export class JsonStateStore {
     this.state.edge_intent_counter ||= 0;
     this.state.market_listings ||= {};
     this.state.market_listing_counter ||= 0;
+    this.state.market_blueprints ||= {};
+    this.state.market_blueprint_counter ||= 0;
+    this.state.market_candidates ||= {};
+    this.state.market_execution_plans ||= {};
+    this.state.market_execution_plan_counter ||= 0;
     this.state.market_edges ||= {};
     this.state.market_edge_counter ||= 0;
     this.state.market_threads ||= {};

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketCandidateLegView.schema.json",
+  "title": "MarketCandidateLegView",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["leg_id", "leg_type", "from_actor", "to_actor", "input_ref", "asset", "valuation_usd", "settlement_type", "blocking"],
+  "properties": {
+    "leg_id": { "type": "string", "minLength": 1 },
+    "leg_type": { "type": "string", "enum": ["asset_transfer", "service_delivery", "blueprint_delivery", "credit_transfer", "cash_payment"] },
+    "from_actor": { "$ref": "ActorRef.schema.json" },
+    "to_actor": { "$ref": "ActorRef.schema.json" },
+    "input_ref": { "$ref": "MarketEdgeRef.schema.json" },
+    "asset": { "type": ["object", "null"], "additionalProperties": true },
+    "valuation_usd": { "type": "number", "minimum": 0 },
+    "settlement_type": { "type": "string", "enum": ["barter", "credit", "cash"] },
+    "blocking": { "type": "boolean" }
+  }
+}
