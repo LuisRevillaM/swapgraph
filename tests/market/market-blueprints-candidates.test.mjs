@@ -170,6 +170,9 @@ test('candidate compute finds mixed direct blueprint-for-cash opportunity and su
   assert.equal(candidate.obligation_graph.obligations.length, candidate.legs_preview.length);
   assert.equal(candidate.execution_graph.steps.length, candidate.legs_preview.length);
   assert.ok(candidate.obligation_graph.participant_roles.every(row => row.principal && row.executor));
+  assert.equal(candidate.clearing_policy.mode, 'continuous');
+  assert.ok(candidate.score_breakdown.completion_probability > 0);
+  assert.ok(candidate.explanation.some(line => line.startsWith('clearing_mode=')));
 
   const buyerAccepted = candidates.accept({
     actor: buyer,
@@ -275,5 +278,8 @@ test('candidate compute translates legacy-style 3-party barter cycles from marke
   assert.equal(cycleCandidate.obligation_graph.obligations.length, 3);
   assert.equal(cycleCandidate.execution_graph.steps.length, 3);
   assert.equal(cycleCandidate.obligation_graph.fallback_policy.mode, 'recompute_or_expire');
+  assert.equal(cycleCandidate.clearing_policy.mode, 'batch_window');
+  assert.equal(cycleCandidate.clearing_policy.window_seconds, 60);
+  assert.ok(cycleCandidate.score_breakdown.trust_confidence > 0);
   assert.ok(cycleCandidate.explanation.some(line => /cycle_length=3/.test(line)));
 });

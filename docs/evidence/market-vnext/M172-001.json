@@ -1,0 +1,19 @@
+{
+  "task_id": "M172-001",
+  "status": "done",
+  "summary": "Added feasibility-first candidate scoring, explicit score breakdowns, continuous versus batch clearing policies, and the clearing-policy design doc that completes the finish gate.",
+  "files_changed": [
+    "src/service/marketCandidateService.mjs",
+    "docs/spec/schemas/MarketCandidateView.schema.json",
+    "tests/market/market-blueprints-candidates.test.mjs",
+    "docs/design/market-clearing-policy.md",
+    "work/market-vnext/tasks/M172-001.yaml"
+  ],
+  "commands": [
+    { "command": "node --test tests/market/market-blueprints-candidates.test.mjs", "exit_code": 0 },
+    { "command": "node scripts/validate-api-contract.mjs", "exit_code": 0 },
+    { "command": "node scripts/run-market-vnext-finish-gate.mjs", "exit_code": 0 }
+  ],
+  "commit": null,
+  "timestamp": "2026-03-10T15:39:09Z"
+}

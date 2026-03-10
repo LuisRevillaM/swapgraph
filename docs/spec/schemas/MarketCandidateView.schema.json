@@ -4,7 +4,7 @@
   "title": "MarketCandidateView",
   "type": "object",
   "additionalProperties": false,
-  "required": ["candidate_id", "workspace_id", "candidate_type", "status", "participants", "input_refs", "legs_preview", "valuation_summary", "settlement_summary", "score", "explanation", "legacy_refs", "obligation_graph", "execution_graph", "acceptance_state", "expires_at", "created_at", "updated_at"],
+  "required": ["candidate_id", "workspace_id", "candidate_type", "status", "participants", "input_refs", "legs_preview", "valuation_summary", "settlement_summary", "score", "score_breakdown", "clearing_policy", "explanation", "legacy_refs", "obligation_graph", "execution_graph", "acceptance_state", "expires_at", "created_at", "updated_at"],
   "properties": {
     "candidate_id": { "type": "string", "minLength": 1 },
     "workspace_id": { "type": "string", "minLength": 1 },
@@ -16,6 +16,8 @@
     "valuation_summary": { "type": "object", "additionalProperties": true },
     "settlement_summary": { "type": "object", "additionalProperties": true },
     "score": { "type": "number", "minimum": 0 },
+    "score_breakdown": { "type": "object", "additionalProperties": true },
+    "clearing_policy": { "type": "object", "additionalProperties": true },
     "explanation": { "type": "array", "items": { "type": "string" } },
     "legacy_refs": { "type": "object", "additionalProperties": true },
     "obligation_graph": { "type": "object", "additionalProperties": true },

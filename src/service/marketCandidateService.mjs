@@ -444,7 +444,54 @@ function buildCandidateExecutionGraph({ candidateId, participants, legsPreview }
   };
 }
 
-function translateProposal({ proposal, metaByIntentId, existingCandidate = null, recordedAt }) {
+function clamp01(value) {
+  return Math.max(0, Math.min(1, Number(value) || 0));
+}
+
+function scoreCandidate({ proposal, candidateType, participants, legsPreview }) {
+  const baseConfidence = clamp01(proposal.confidence_score ?? 0);
+  const trustConfidence = clamp01((participants ?? []).every(row => row?.actor?.id && row?.actor?.type) ? 0.92 : 0.6);
+  const verificationCost = (legsPreview ?? []).reduce((sum, leg) => {
+    if (leg.leg_type === 'cash_payment' || leg.leg_type === 'access_grant') return sum + 0.18;
+    if (leg.leg_type === 'blueprint_delivery' || leg.leg_type === 'service_delivery') return sum + 0.12;
+    return sum + 0.06;
+  }, 0);
+  const participantCoordinationCost = Math.max(0, ((participants?.length ?? 0) - 2) * 0.08);
+  const valueSpreadPenalty = Math.min(0.35, Math.max(0, Number(proposal.value_spread ?? 0) / 100));
+  const completionProbability = clamp01(baseConfidence - verificationCost - participantCoordinationCost - valueSpreadPenalty + 0.25);
+  const expectedSurplus = clamp01(1 - valueSpreadPenalty);
+  const rawScore = (expectedSurplus * completionProbability * trustConfidence) - verificationCost;
+  return {
+    trust_confidence: trustConfidence,
+    completion_probability: completionProbability,
+    expected_surplus: expectedSurplus,
+    verification_cost: Number(verificationCost.toFixed(3)),
+    participant_coordination_cost: Number(participantCoordinationCost.toFixed(3)),
+    value_spread_penalty: Number(valueSpreadPenalty.toFixed(3)),
+    raw_score: Number(rawScore.toFixed(3))
+  };
+}
+
+function clearingPolicyForCandidate({ candidateType, participants, maxCycleLength }) {
+  if (candidateType === 'cycle' || (participants?.length ?? 0) > 2) {
+    return {
+      mode: 'batch_window',
+      window_seconds: 60,
+      max_cycle_length: maxCycleLength,
+      commit_policy: 'all_participants_accept_before_materialization',
+      selection_priority: 'feasibility_first'
+    };
+  }
+  return {
+    mode: 'continuous',
+    window_seconds: 0,
+    max_cycle_length: maxCycleLength,
+    commit_policy: 'counterparty_accept_then_materialize',
+    selection_priority: 'feasibility_first'
+  };
+}
+
+function translateProposal({ proposal, metaByIntentId, existingCandidate = null, recordedAt, maxCycleLength }) {
   const participants = (proposal.participants ?? []).map((row, idx, all) => {
     const meta = metaByIntentId.get(row.intent_id) ?? null;
     return {
@@ -494,6 +541,8 @@ function translateProposal({ proposal, metaByIntentId, existingCandidate = null,
   const candidateType = hasMoneyLikeLeg ? 'mixed' : (proposal.participants?.length ?? 0) === 2 ? 'direct' : 'cycle';
   const candidateId = makeCandidateId(proposal.id);
   const status = candidateStatusFromAcceptance(acceptanceState);
+  const scoreBreakdown = scoreCandidate({ proposal, candidateType, participants, legsPreview });
+  const clearingPolicy = clearingPolicyForCandidate({ candidateType, participants, maxCycleLength });
   const obligationGraph = buildCandidateObligationGraph({
     candidateId,
     candidateType,
@@ -520,15 +569,23 @@ function translateProposal({ proposal, metaByIntentId, existingCandidate = null,
     valuation_summary: {
       confidence_score: Number(proposal.confidence_score ?? 0),
       value_spread: Number(proposal.value_spread ?? 0),
-      fee_breakdown: clone(proposal.fee_breakdown ?? [])
+      fee_breakdown: clone(proposal.fee_breakdown ?? []),
+      feasibility_priority: 'expected_surplus_x_completion_probability_x_trust_confidence'
     },
     settlement_summary: {
       mode: hasMoneyLikeLeg ? 'mixed' : 'barter',
       includes_cash: legsPreview.some(leg => leg.leg_type === 'cash_payment'),
       includes_credits: legsPreview.some(leg => leg.leg_type === 'credit_transfer')
     },
-    score: Number(proposal.confidence_score ?? 0),
-    explanation: Array.isArray(proposal.explainability) ? clone(proposal.explainability) : [],
+    score: clamp01(scoreBreakdown.raw_score),
+    score_breakdown: scoreBreakdown,
+    clearing_policy: clearingPolicy,
+    explanation: [
+      ...(Array.isArray(proposal.explainability) ? clone(proposal.explainability) : []),
+      `clearing_mode=${clearingPolicy.mode}`,
+      `completion_probability=${scoreBreakdown.completion_probability}`,
+      `trust_confidence=${scoreBreakdown.trust_confidence}`
+    ],
     legacy_refs: {
       proposal_id: proposal.id,
       matcher_engine: 'legacy_runMatching'
@@ -691,8 +748,13 @@ export class MarketCandidateService {
       proposal,
       metaByIntentId,
       existingCandidate: this.store.state.market_candidates?.[makeCandidateId(proposal.id)] ?? null,
-      recordedAt
+      recordedAt,
+      maxCycleLength
     }));
+    translated.sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      return String(a.candidate_id).localeCompare(String(b.candidate_id));
+    });
 
     for (const row of translated) {
       row.workspace_id = workspaceId;
