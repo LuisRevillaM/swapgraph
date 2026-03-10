@@ -1,6 +1,6 @@
 # SwapGraph Agent Market Source Of Truth
 
-Last updated: 2026-03-10T17:39:23Z
+Last updated: 2026-03-10T18:02:00Z
 
 ## Purpose
 
@@ -178,6 +178,9 @@ Agent bootstrap:
 Agent dogfood loops:
 - `node scripts/run-agent-market-loop.mjs`
 - `node scripts/run-agent-adversary-loop.mjs`
+
+Hosted production experiment:
+- `SWAPGRAPH_BASE_URL=https://swapgraph-market-vnext-api.onrender.com node scripts/run-hosted-market-production-experiment.mjs`
 
 ## Stop Condition
 

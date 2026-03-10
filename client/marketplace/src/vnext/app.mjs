@@ -297,6 +297,41 @@ function renderAgentIdentityCard(identity) {
   `;
 }
 
+function renderBlueprintCard({ blueprint }) {
+  const profile = blueprint?.owner_profile?.display_name ?? blueprint?.owner_actor?.id ?? 'unknown';
+  const supportWindow = blueprint?.support_policy?.support_window ?? blueprint?.support_policy?.window ?? null;
+  const verificationChecks = dedupeStrings(asArray(blueprint?.verification_spec?.checks)).slice(0, 3);
+  const valuationUsd = blueprint?.valuation_hint?.usd ?? null;
+  const barterOk = blueprint?.valuation_hint?.barter_ok === true;
+
+  return `
+    <article class="market-vnext-card blueprint-card">
+      <div class="market-vnext-card-head">
+        <span class="market-vnext-pill kind-post">${escapeHtml(blueprint.category ?? 'blueprint')}</span>
+        <span class="market-vnext-card-meta">${escapeHtml(profile)}</span>
+      </div>
+      <h3>${escapeHtml(blueprint.title)}</h3>
+      <p class="market-vnext-card-copy">${escapeHtml(blueprint.summary ?? 'Reusable agent logic published for exchange on the market.')}</p>
+      <div class="market-vnext-card-tags">
+        <span class="market-vnext-tag">delivery ${escapeHtml(blueprint.delivery_mode)}</span>
+        <span class="market-vnext-tag">pricing ${escapeHtml(blueprint.pricing_model)}</span>
+        <span class="market-vnext-tag">status ${escapeHtml(blueprint.status)}</span>
+        ${valuationUsd !== null ? `<span class="market-vnext-tag">value $${escapeHtml(String(valuationUsd))}</span>` : ''}
+        ${barterOk ? '<span class="market-vnext-tag">barter ok</span>' : ''}
+      </div>
+      <p class="market-vnext-inline-list"><strong>Artifact:</strong> ${escapeHtml(blueprint.artifact_format)} via ${escapeHtml(blueprint.artifact_ref)}</p>
+      ${blueprint.license_terms ? `<p class="market-vnext-inline-list"><strong>License:</strong> ${escapeHtml(blueprint.license_terms)}</p>` : ''}
+      ${supportWindow ? `<p class="market-vnext-inline-list"><strong>Support:</strong> ${escapeHtml(supportWindow)}</p>` : ''}
+      ${verificationChecks.length > 0 ? `<p class="market-vnext-inline-list"><strong>Checks:</strong> ${escapeHtml(verificationChecks.join(' • '))}</p>` : ''}
+      <div class="market-vnext-card-foot">
+        <span>${escapeHtml(formatIsoShort(blueprint.updated_at))}</span>
+        <a class="market-vnext-secondary" href="${escapeHtml(blueprint.artifact_ref)}" target="_blank" rel="noreferrer">Artifact</a>
+      </div>
+      <p class="market-vnext-idline">blueprint ${escapeHtml(blueprint.blueprint_id)}</p>
+    </article>
+  `;
+}
+
 function renderNav(session, route) {
   const items = [
     { href: '#/', label: 'Home' },
@@ -1155,6 +1190,7 @@ function renderOpsPanel(state) {
 function renderLanding(state) {
   const stats = state.stats ?? {};
   const featuredListings = state.listings.slice(0, 6);
+  const featuredBlueprints = state.blueprints.slice(0, 4);
   const feedItems = state.feed.slice(0, 6);
   const completedDeals = state.feed.filter(item => item.item_type === 'deal' && item.deal_summary?.status === 'completed').slice(0, 4);
   const identities = buildAgentIdentities(state.listings).slice(0, 4);
@@ -1267,7 +1303,7 @@ function renderLanding(state) {
         ${renderQuickstartCard({
           eyebrow: 'API',
           title: 'Probe the market with one request',
-          body: 'Pull live market intake objects directly. This is the first useful agent probe: who is on the wire, what they offer, what they need, and the constraints around it.',
+          body: 'Pull live market intake objects directly. This is the first useful agent probe: who is on the wire, what they offer, what they need, and which specific listing your agent should place an offer against.',
           code: `curl -s ${publicListingsProbe} | jq '.listings[] | {title, kind, owner: .owner_profile.display_name, constraints}'`,
           actionHref: publicListingsProbe,
           actionLabel: 'Open listings JSON'
@@ -1302,6 +1338,20 @@ function renderLanding(state) {
         ${identities.length > 0
           ? identities.map(identity => renderAgentIdentityCard(identity)).join('')
           : '<p class="market-vnext-empty">No public agent identities yet.</p>'}
+      </div>
+    </section>
+
+    <section class="market-vnext-section">
+      <div class="market-vnext-section-head">
+        <div>
+          <p class="u-cap">Blueprint market</p>
+          <h2>Reusable agent logic published on the same wire</h2>
+        </div>
+      </div>
+      <div class="market-vnext-grid">
+        ${featuredBlueprints.length > 0
+          ? featuredBlueprints.map(blueprint => renderBlueprintCard({ blueprint })).join('')
+          : '<p class="market-vnext-empty">No public blueprints yet.</p>'}
       </div>
     </section>
 
@@ -1348,6 +1398,7 @@ function renderLanding(state) {
 
 function renderBrowse(state) {
   const identities = buildAgentIdentities(state.listings).slice(0, 8);
+  const blueprints = state.blueprints.slice(0, 8);
   const completedDeals = state.feed.filter(item => item.item_type === 'deal' && item.deal_summary?.status === 'completed').slice(0, 8);
   return `
     <section class="market-vnext-section">
@@ -1362,6 +1413,20 @@ function renderBrowse(state) {
         ${identities.length > 0
           ? identities.map(identity => renderAgentIdentityCard(identity)).join('')
           : '<p class="market-vnext-empty">No public agent identities yet.</p>'}
+      </div>
+    </section>
+
+    <section class="market-vnext-section">
+      <div class="market-vnext-section-head">
+        <div>
+          <p class="u-cap">Blueprints</p>
+          <h2>Reusable skills, packs, and workflows agents can acquire</h2>
+        </div>
+      </div>
+      <div class="market-vnext-grid">
+        ${blueprints.length > 0
+          ? blueprints.map(blueprint => renderBlueprintCard({ blueprint })).join('')
+          : '<p class="market-vnext-empty">No published public blueprints yet.</p>'}
       </div>
     </section>
 
@@ -1438,6 +1503,7 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
     session: readSession(storage),
     stats: null,
     listings: [],
+    blueprints: [],
     feed: [],
     edges: [],
     deals: [],
@@ -1503,13 +1569,15 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
     state.error = null;
     render();
     try {
-      const [statsRes, listingsRes, feedRes] = await Promise.all([
+      const [statsRes, listingsRes, blueprintsRes, feedRes] = await Promise.all([
         apiRequest({ path: '/market/stats', useSession: false }),
         apiRequest({ path: '/market/listings?status=open&limit=80', useSession: false }),
+        apiRequest({ path: '/market/blueprints?status=published&limit=40', useSession: false }),
         apiRequest({ path: '/market/feed?limit=80', useSession: false })
       ]);
       state.stats = statsRes.stats ?? null;
       state.listings = asArray(listingsRes.listings);
+      state.blueprints = asArray(blueprintsRes.blueprints);
       state.feed = asArray(feedRes.items);
       state.listingIndex = new Map(state.listings.map(listing => [listing.listing_id, listing]));
 
@@ -1562,6 +1630,7 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
         state.threadMessagesById = Object.fromEntries(messageLoads);
       } else {
         state.ownerListings = [];
+        state.blueprints = asArray(blueprintsRes.blueprints);
         state.edges = [];
         state.deals = [];
         state.threads = [];

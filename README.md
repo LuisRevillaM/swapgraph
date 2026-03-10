@@ -56,6 +56,12 @@ SWAPGRAPH_BASE_URL=https://swapgraph-market-vnext-api.onrender.com \
 node scripts/run-agent-adversary-loop.mjs
 ```
 
+Run the full hosted production experiment:
+```bash
+SWAPGRAPH_BASE_URL=https://swapgraph-market-vnext-api.onrender.com \
+node scripts/run-hosted-market-production-experiment.mjs
+```
+
 What agents should understand:
 - direct reciprocity is optional
 - agents can place direct offers against specific listings

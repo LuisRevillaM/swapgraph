@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const base = String(process.env.MARKET_BASE_URL ?? 'https://swapgraph-market-vnext-api.onrender.com').replace(/\/+$/g, '');
+const base = String(process.env.SWAPGRAPH_BASE_URL ?? process.env.MARKET_BASE_URL ?? 'https://swapgraph-market-vnext-api.onrender.com').replace(/\/+$/g, '');
 const seedTag = process.env.MARKET_AGENT_SEED_TAG ?? 'agent-personas-v1';
 let seq = 0;
 
@@ -38,6 +38,21 @@ const personas = [
     display_name: 'Memory Cartographer',
     owner_mode: 'builder',
     bio: 'Maps long-running agent conversations into retrieval-ready memory graphs and recap indexes.',
+    blueprints: [
+      {
+        title: 'Long-memory retrieval graph template',
+        summary: 'Blueprint for turning transcripts and worklogs into retrieval-ready memory graphs.',
+        category: 'workflow',
+        artifact_ref: 'https://github.com/LuisRevillaM/swapgraph/tree/marketplace-vnext-execution#memory-cartographer',
+        artifact_format: 'markdown_bundle',
+        license_terms: 'evaluation use',
+        support_policy: { support_window: '7d', channel: 'market_thread' },
+        verification_spec: { checks: ['graph_present', 'timeline_present', 'retrieval_index_present'] },
+        delivery_mode: 'template_clone',
+        pricing_model: 'one_time',
+        valuation_hint: { usd: 180, barter_ok: true }
+      }
+    ],
     listings: [
       {
         kind: 'capability',
@@ -73,6 +88,21 @@ const personas = [
     display_name: 'Browser QA Swarm',
     owner_mode: 'operator',
     bio: 'Runs route sweeps, screenshot audits, and UI regressions across browser and device matrices.',
+    blueprints: [
+      {
+        title: 'Public route audit harness',
+        summary: 'Reusable route-manifest and screenshot-audit workflow for public web apps.',
+        category: 'evaluation_harness',
+        artifact_ref: 'https://github.com/LuisRevillaM/swapgraph/tree/marketplace-vnext-execution#browser-qa-swarm',
+        artifact_format: 'manifest_bundle',
+        license_terms: 'evaluation use',
+        support_policy: { support_window: '14d', channel: 'market_thread' },
+        verification_spec: { checks: ['manifest_present', 'screenshot_bundle_present', 'failure_summary_present'] },
+        delivery_mode: 'bundle_export',
+        pricing_model: 'barter_only',
+        valuation_hint: { barter_reference: 'route audit for deploy slot', barter_ok: true }
+      }
+    ],
     listings: [
       {
         kind: 'capability',
@@ -106,6 +136,21 @@ const personas = [
     display_name: 'Render SRE Agent',
     owner_mode: 'operator',
     bio: 'Deploys, restarts, rolls back, and inspects Render-hosted services for agent operators.',
+    blueprints: [
+      {
+        title: 'Render deploy rollback playbook',
+        summary: 'Structured deploy, health-check, and rollback blueprint for hosted agent stacks.',
+        category: 'integration_recipe',
+        artifact_ref: 'https://github.com/LuisRevillaM/swapgraph/tree/marketplace-vnext-execution#render-sre-agent',
+        artifact_format: 'ops_playbook',
+        license_terms: 'internal operator use',
+        support_policy: { support_window: '14d', channel: 'market_thread' },
+        verification_spec: { checks: ['deploy_steps_present', 'rollback_steps_present', 'health_checks_present'] },
+        delivery_mode: 'download',
+        pricing_model: 'support_bundle',
+        valuation_hint: { usd: 220, barter_ok: true }
+      }
+    ],
     listings: [
       {
         kind: 'capability',
@@ -141,6 +186,21 @@ const personas = [
     display_name: 'Procurement Router',
     owner_mode: 'builder',
     bio: 'Normalizes quotes, compares vendors, and routes purchase decisions for software buyers and agent teams.',
+    blueprints: [
+      {
+        title: 'Vendor quote normalization pack',
+        summary: 'Blueprint for standardizing messy vendor proposals into comparable matrices.',
+        category: 'sdk_module',
+        artifact_ref: 'https://github.com/LuisRevillaM/swapgraph/tree/marketplace-vnext-execution#procurement-router',
+        artifact_format: 'json_schema_bundle',
+        license_terms: 'team use',
+        support_policy: { support_window: '7d', channel: 'market_thread' },
+        verification_spec: { checks: ['normalized_table_present', 'delta_report_present'] },
+        delivery_mode: 'download',
+        pricing_model: 'one_time',
+        valuation_hint: { usd: 140, barter_ok: true }
+      }
+    ],
     listings: [
       {
         kind: 'capability',
@@ -174,6 +234,21 @@ const personas = [
     display_name: 'Voice Eval Desk',
     owner_mode: 'builder',
     bio: 'Scores voice agent interactions, annotates transcripts, and produces failure-mode breakdowns.',
+    blueprints: [
+      {
+        title: 'Voice evaluation scorecard pack',
+        summary: 'Prompt pack and rubric bundle for scoring voice agent interactions.',
+        category: 'prompt_pack',
+        artifact_ref: 'https://github.com/LuisRevillaM/swapgraph/tree/marketplace-vnext-execution#voice-eval-desk',
+        artifact_format: 'prompt_pack',
+        license_terms: 'evaluation use',
+        support_policy: { support_window: '7d', channel: 'market_thread' },
+        verification_spec: { checks: ['rubric_present', 'annotated_examples_present', 'taxonomy_present'] },
+        delivery_mode: 'download',
+        pricing_model: 'one_time',
+        valuation_hint: { usd: 160, barter_ok: true }
+      }
+    ],
     listings: [
       {
         kind: 'capability',
@@ -218,7 +293,9 @@ const personas = [
 
 async function main() {
   const existing = await request('/market/listings?limit=300', { publicRequest: true });
+  const existingBlueprintsResponse = await request('/market/blueprints?limit=300', { publicRequest: true });
   const existingTitles = new Set((existing.listings ?? []).map(listing => listing.title));
+  const existingBlueprintTitles = new Set((existingBlueprintsResponse.blueprints ?? []).map(blueprint => blueprint.title));
   const existingSessionsByName = new Map();
   for (const listing of existing.listings ?? []) {
     const displayName = listing?.owner_profile?.display_name;
@@ -254,6 +331,7 @@ async function main() {
       workspaceId = signup.owner_profile.default_workspace_id;
     }
     const createdTitles = [];
+    const createdBlueprintTitles = [];
     for (const listing of persona.listings) {
       if (existingTitles.has(listing.title)) continue;
       await request('/market/listings', {
@@ -267,7 +345,29 @@ async function main() {
       createdTitles.push(listing.title);
       existingTitles.add(listing.title);
     }
-    sessions.push({ persona: persona.display_name, actor, workspace_id: workspaceId, created_titles: createdTitles });
+    for (const blueprint of persona.blueprints ?? []) {
+      if (existingBlueprintTitles.has(blueprint.title)) continue;
+      const created = await request('/market/blueprints', {
+        method: 'POST',
+        actor,
+        body: {
+          blueprint: {
+            workspace_id: workspaceId,
+            owner_actor: actor,
+            ...blueprint
+          },
+          recorded_at: new Date().toISOString()
+        }
+      });
+      await request(`/market/blueprints/${created.blueprint.blueprint_id}/publish`, {
+        method: 'POST',
+        actor,
+        body: { recorded_at: new Date().toISOString() }
+      });
+      createdBlueprintTitles.push(blueprint.title);
+      existingBlueprintTitles.add(blueprint.title);
+    }
+    sessions.push({ persona: persona.display_name, actor, workspace_id: workspaceId, created_titles: createdTitles, created_blueprints: createdBlueprintTitles });
   }
 
   const refreshed = await request('/market/listings?limit=300', { publicRequest: true });

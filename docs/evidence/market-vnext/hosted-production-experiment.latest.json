@@ -1,0 +1,160 @@
+{
+  "ok": true,
+  "started_at": "2026-03-10T18:00:53.135Z",
+  "finished_at": "2026-03-10T18:01:00.678Z",
+  "base_url": "https://swapgraph-market-vnext-api.onrender.com",
+  "steps": [
+    {
+      "label": "seed",
+      "command": "node scripts/seed-market-agent-personas.mjs",
+      "status": 0,
+      "ok": true,
+      "parsed": {
+        "base_url": "https://swapgraph-market-vnext-api.onrender.com",
+        "seed_tag": "agent-personas-v1",
+        "seeded_personas": [
+          {
+            "persona": "Memory Cartographer",
+            "actor": {
+              "id": "owner_memory_cartographer_0001",
+              "type": "user"
+            },
+            "workspace_id": "open_market",
+            "created_titles": [],
+            "created_blueprints": []
+          },
+          {
+            "persona": "Browser QA Swarm",
+            "actor": {
+              "id": "owner_browser_qa_swarm_0002",
+              "type": "user"
+            },
+            "workspace_id": "open_market",
+            "created_titles": [],
+            "created_blueprints": []
+          },
+          {
+            "persona": "Render SRE Agent",
+            "actor": {
+              "id": "owner_render_sre_agent_0003",
+              "type": "user"
+            },
+            "workspace_id": "open_market",
+            "created_titles": [],
+            "created_blueprints": []
+          },
+          {
+            "persona": "Procurement Router",
+            "actor": {
+              "id": "owner_procurement_router_0004",
+              "type": "user"
+            },
+            "workspace_id": "open_market",
+            "created_titles": [],
+            "created_blueprints": []
+          },
+          {
+            "persona": "Voice Eval Desk",
+            "actor": {
+              "id": "owner_voice_eval_desk_0005",
+              "type": "user"
+            },
+            "workspace_id": "open_market",
+            "created_titles": [],
+            "created_blueprints": []
+          }
+        ],
+        "completed_deals": [],
+        "stats": {
+          "actors": 21,
+          "workspaces": 7,
+          "listings_open": 27,
+          "wants_open": 11,
+          "capabilities_open": 6,
+          "edges_open": 0,
+          "deals_active": 0,
+          "deals_completed": 5,
+          "latest_activity_at": "2026-03-10T17:56:52.813Z"
+        }
+      }
+    },
+    {
+      "label": "market_loop",
+      "command": "node scripts/run-agent-market-loop.mjs",
+      "status": 0,
+      "ok": true,
+      "parsed": {
+        "ok": true,
+        "checked_at": "2026-03-10T18:00:58.426Z",
+        "base_url": "https://swapgraph-market-vnext-api.onrender.com",
+        "mode": "hosted",
+        "direct": {
+          "workspace_id": "agent_direct_1773165654959",
+          "edge_id": "edge_000006",
+          "deal_id": "deal_000006",
+          "receipt_id": "receipt_deal_000006"
+        },
+        "mixed": {
+          "workspace_id": "agent_mixed_1773165655877",
+          "candidate_id": "candidate_cycle_01e2d66b0952",
+          "plan_id": "plan_000004",
+          "receipt_id": "receipt_plan_000004"
+        },
+        "cycle": {
+          "workspace_id": "agent_cycle_1773165657063",
+          "candidate_id": "candidate_cycle_1a66b7b4d42b",
+          "plan_id": "plan_000005",
+          "receipt_id": "receipt_plan_000005"
+        }
+      }
+    },
+    {
+      "label": "adversary_loop",
+      "command": "node scripts/run-agent-adversary-loop.mjs",
+      "status": 0,
+      "ok": true,
+      "parsed": {
+        "ok": true,
+        "checked_at": "2026-03-10T18:01:00.402Z",
+        "mode": "hosted",
+        "replay_same_plan_id": true,
+        "outsider_accept_status": 403,
+        "outsider_complete_status": 403,
+        "duplicate_failure_status": 400,
+        "final_plan_status": "unwound",
+        "final_receipt_state": "unwound"
+      }
+    },
+    {
+      "label": "stats",
+      "command": "node -e fetch(\"https://swapgraph-market-vnext-api.onrender.com/market/stats\")\n  .then(r => r.json())\n  .then(v => process.stdout.write(JSON.stringify(v)))",
+      "status": 0,
+      "ok": true,
+      "parsed": {
+        "correlation_id": "corr_marketstats_get",
+        "stats": {
+          "actors": 28,
+          "workspaces": 11,
+          "listings_open": 34,
+          "wants_open": 14,
+          "capabilities_open": 6,
+          "edges_open": 0,
+          "deals_active": 0,
+          "deals_completed": 6,
+          "latest_activity_at": "2026-03-10T18:00:58.898Z"
+        }
+      }
+    }
+  ],
+  "stats": {
+    "actors": 28,
+    "workspaces": 11,
+    "listings_open": 34,
+    "wants_open": 14,
+    "capabilities_open": 6,
+    "edges_open": 0,
+    "deals_active": 0,
+    "deals_completed": 6,
+    "latest_activity_at": "2026-03-10T18:00:58.898Z"
+  }
+}
