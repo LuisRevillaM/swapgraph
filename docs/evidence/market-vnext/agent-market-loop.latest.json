@@ -1,0 +1,23 @@
+{
+  "ok": true,
+  "checked_at": "2026-03-10T15:34:58.641Z",
+  "base_url": "http://127.0.0.1:3484",
+  "direct": {
+    "workspace_id": "agent_direct_1773156898575",
+    "edge_id": "edge_000001",
+    "deal_id": "deal_000001",
+    "receipt_id": "receipt_deal_000001"
+  },
+  "mixed": {
+    "workspace_id": "agent_mixed_1773156898601",
+    "candidate_id": "candidate_cycle_7e4e6ef3c2bd",
+    "plan_id": "plan_000001",
+    "receipt_id": "receipt_plan_000001"
+  },
+  "cycle": {
+    "workspace_id": "agent_cycle_1773156898620",
+    "candidate_id": "candidate_cycle_144f0a6e8371",
+    "plan_id": "plan_000002",
+    "receipt_id": "receipt_plan_000002"
+  }
+}

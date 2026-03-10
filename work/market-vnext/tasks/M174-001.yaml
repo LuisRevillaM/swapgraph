@@ -1,0 +1,25 @@
+id: M174-001
+title: Add clean-checkout bootstrap and agent dogfood loop
+status: done
+priority: p0
+depends_on: []
+summary: >
+  Provide a clean-checkout bootstrap path and a multi-agent dogfood script so Codex agents
+  can install, start the runtime, trade, settle, verify, and leave evidence automatically.
+files_expected:
+  - scripts/bootstrap-market-vnext-agent-dev.sh
+  - scripts/run-agent-market-loop.mjs
+  - scripts/run-agent-adversary-loop.mjs
+acceptance_criteria:
+  - A Codex agent can run the documented bootstrap from a clean checkout.
+  - A multi-agent loop exercises direct, cycle, and mixed flows.
+  - An adversary loop exercises replay, auth, and failure conditions.
+verification:
+  - bash scripts/bootstrap-market-vnext-agent-dev.sh
+  - node scripts/run-agent-market-loop.mjs
+  - node scripts/run-agent-adversary-loop.mjs
+  - node scripts/run-market-vnext-finish-gate.mjs
+commit_message: "Add market agent bootstrap and dogfood loops"
+completed_at: 2026-03-10T15:35:28Z
+commit: PENDING
+evidence_file: docs/evidence/market-vnext/M174-001.json

@@ -1,0 +1,10 @@
+{
+  "ok": true,
+  "checked_at": "2026-03-10T15:35:06.948Z",
+  "replay_same_plan_id": true,
+  "outsider_accept_status": 403,
+  "outsider_complete_status": 403,
+  "duplicate_failure_status": 400,
+  "final_plan_status": "unwound",
+  "final_receipt_state": "unwound"
+}

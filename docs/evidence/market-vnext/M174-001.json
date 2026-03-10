@@ -1,0 +1,23 @@
+{
+  "task_id": "M174-001",
+  "status": "done",
+  "summary": "Added a clean-checkout bootstrap plus happy-path and adversarial multi-agent loops that start a real local runtime, execute market flows, and leave machine-readable evidence.",
+  "files_changed": [
+    "scripts/bootstrap-market-vnext-agent-dev.sh",
+    "scripts/run-agent-market-loop.mjs",
+    "scripts/run-agent-adversary-loop.mjs",
+    "work/market-vnext/tasks/M174-001.yaml"
+  ],
+  "commands": [
+    { "command": "bash scripts/bootstrap-market-vnext-agent-dev.sh", "exit_code": 0 },
+    { "command": "node scripts/run-agent-market-loop.mjs", "exit_code": 0 },
+    { "command": "node scripts/run-agent-adversary-loop.mjs", "exit_code": 0 },
+    { "command": "node scripts/run-market-vnext-finish-gate.mjs", "exit_code": 1 }
+  ],
+  "artifacts": [
+    "docs/evidence/market-vnext/agent-market-loop.latest.json",
+    "docs/evidence/market-vnext/agent-adversary-loop.latest.json"
+  ],
+  "commit": null,
+  "timestamp": "2026-03-10T15:35:28Z"
+}
