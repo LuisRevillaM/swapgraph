@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketTransferLegView.schema.json",
+  "title": "MarketTransferLegView",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["leg_id", "plan_id", "leg_type", "from_actor", "to_actor", "status", "blocking", "depends_on_leg_ids", "valuation", "created_at", "updated_at"],
+  "properties": {
+    "leg_id": { "type": "string", "minLength": 1 },
+    "plan_id": { "type": "string", "minLength": 1 },
+    "leg_type": { "type": "string", "enum": ["asset_transfer", "service_delivery", "blueprint_delivery", "credit_transfer", "cash_payment", "access_grant", "verification_only"] },
+    "from_actor": { "$ref": "ActorRef.schema.json" },
+    "to_actor": { "$ref": "ActorRef.schema.json" },
+    "input_ref": { "anyOf": [{ "$ref": "MarketEdgeRef.schema.json" }, { "type": "null" }] },
+    "asset_ref": { "type": ["object", "null"], "additionalProperties": true },
+    "blueprint_ref": { "anyOf": [{ "$ref": "MarketEdgeRef.schema.json" }, { "type": "null" }] },
+    "capability_ref": { "anyOf": [{ "$ref": "MarketEdgeRef.schema.json" }, { "type": "null" }] },
+    "credit_instrument": { "type": ["object", "null"], "additionalProperties": true },
+    "cash_instrument": { "type": ["object", "null"], "additionalProperties": true },
+    "verification_spec": { "type": ["object", "null"], "additionalProperties": true },
+    "verification_result": { "type": ["object", "null"], "additionalProperties": true },
+    "failure_reason": { "type": ["string", "null"] },
+    "compensation_result": { "type": ["object", "null"], "additionalProperties": true },
+    "substitution_result": { "type": ["object", "null"], "additionalProperties": true },
+    "status": { "type": "string", "enum": ["pending", "completed", "failed", "compensated", "substituted"] },
+    "blocking": { "type": "boolean" },
+    "depends_on_leg_ids": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "valuation": { "type": "object", "additionalProperties": true },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" }
+  }
+}

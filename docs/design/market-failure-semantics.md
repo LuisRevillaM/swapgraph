@@ -248,6 +248,13 @@ Future work should extend this into:
 - substitution and compensation fields
 - terminal failure and unwind receipts
 
+The runtime now exposes the first concrete subset of that model:
+- plan state may move to `partially_complete` when one blocking leg finishes before others
+- plan state may move to `unwound` after partial completion plus blocking failure
+- leg state may move to `compensated` for reversed money-like legs
+- leg state may move to `substituted` when an alternate deliverable is accepted
+- participant-visible receipts may exist for `completed`, `compensated`, or `unwound` terminal outcomes
+
 ## Summary
 
 SwapGraph must treat failure as a designed part of settlement, not an afterthought.

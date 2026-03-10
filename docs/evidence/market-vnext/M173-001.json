@@ -1,0 +1,20 @@
+{
+  "task_id": "M173-001",
+  "status": "done",
+  "summary": "Hardened execution-plan failure semantics with partial completion, unwind, compensation, substitution, and participant-visible terminal receipts for non-happy-path outcomes.",
+  "files_changed": [
+    "src/service/marketExecutionPlanService.mjs",
+    "docs/spec/schemas/MarketExecutionPlanView.schema.json",
+    "docs/spec/schemas/MarketTransferLegView.schema.json",
+    "tests/market/market-execution-plans.test.mjs",
+    "docs/design/market-failure-semantics.md",
+    "work/market-vnext/tasks/M173-001.yaml"
+  ],
+  "commands": [
+    { "command": "node --test tests/market/market-execution-plans.test.mjs", "exit_code": 0 },
+    { "command": "npm test", "exit_code": 0 },
+    { "command": "node scripts/run-market-vnext-finish-gate.mjs", "exit_code": 1 }
+  ],
+  "commit": null,
+  "timestamp": "2026-03-10T15:29:22Z"
+}

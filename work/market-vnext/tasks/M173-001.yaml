@@ -1,0 +1,26 @@
+id: M173-001
+title: Harden settlement fallback and unwind behavior
+status: done
+priority: p0
+depends_on:
+  - M170-002
+  - M171-001
+summary: >
+  Extend execution plans so failure of one leg can be represented, compensated, substituted,
+  or unwound with explicit policy and receipt semantics.
+files_expected:
+  - src/service/marketExecutionPlanService.mjs
+  - tests/market/market-execution-plans.test.mjs
+  - docs/design/market-failure-semantics.md
+acceptance_criteria:
+  - Partial completion and unwind rules are represented explicitly.
+  - Failure paths are exercised in targeted tests.
+  - Receipts and failure explanations remain credible.
+verification:
+  - node --test tests/market/market-execution-plans.test.mjs
+  - npm test
+  - node scripts/run-market-vnext-finish-gate.mjs
+commit_message: "Harden market plan failure and unwind handling"
+completed_at: 2026-03-10T15:29:22Z
+commit: PENDING
+evidence_file: docs/evidence/market-vnext/M173-001.json

@@ -269,6 +269,9 @@ test('execution plans support mixed blueprint plus cash flow and mint signed rec
     idempotencyKey: 'plan-bp-complete-blueprint',
     request: { verification_result: { artifact_delivered: true }, recorded_at: sellerAuth.now_iso }
   }).result.ok, true);
+  const partial = plans.get({ actor: buyer, auth: buyerAuth, planId: createdPlan.body.plan.plan_id });
+  assert.equal(partial.ok, true);
+  assert.equal(partial.body.plan.status, 'partially_complete');
 
   const completed = plans.completeLeg({
     actor: cashLeg.from_actor,
@@ -385,6 +388,239 @@ test('execution plans fail closed when a participant fails a blocking leg', () =
   const receipt = plans.receipt({ actor: buyer, auth: buyerAuth, planId: createdPlan.body.plan.plan_id });
   assert.equal(receipt.ok, false);
   assert.equal(receipt.body.error.details.reason_code, 'market_receipt_not_found');
+});
+
+test('execution plans unwind and compensate reversible legs after partial completion failure', () => {
+  const store = createStore();
+  const market = new MarketService({ store });
+  const blueprints = new MarketBlueprintService({ store });
+  const candidates = new MarketCandidateService({ store });
+  const plans = new MarketExecutionPlanService({ store });
+  const seller = actor('plan_unwind_seller');
+  const buyer = actor('plan_unwind_buyer');
+  const sellerAuth = auth();
+  const buyerAuth = auth();
+
+  assert.equal(blueprints.create({
+    actor: seller,
+    auth: sellerAuth,
+    idempotencyKey: 'plan-unwind-blueprint',
+    request: {
+      recorded_at: sellerAuth.now_iso,
+      blueprint: {
+        blueprint_id: 'bp_unwind_plan',
+        workspace_id: 'plan_unwind_market',
+        title: 'Unwind blueprint',
+        category: 'workflow',
+        artifact_ref: 'https://example.com/unwind-blueprint.tgz',
+        artifact_format: 'tarball',
+        delivery_mode: 'download',
+        pricing_model: 'one_time',
+        valuation_hint: { usd_amount: 20 }
+      }
+    }
+  }).result.ok, true);
+  assert.equal(blueprints.publish({
+    actor: seller,
+    auth: sellerAuth,
+    blueprintId: 'bp_unwind_plan',
+    idempotencyKey: 'plan-unwind-blueprint-publish',
+    request: { recorded_at: sellerAuth.now_iso }
+  }).result.ok, true);
+  assert.equal(market.createListing({
+    actor: buyer,
+    auth: buyerAuth,
+    idempotencyKey: 'plan-unwind-want',
+    request: {
+      recorded_at: buyerAuth.now_iso,
+      listing: {
+        listing_id: 'plan_unwind_want',
+        workspace_id: 'plan_unwind_market',
+        kind: 'want',
+        title: 'Buyer wants unwind blueprint',
+        want_spec: { type: 'set', any_of: [{ type: 'category', category: 'blueprint:workflow' }] },
+        budget: { amount: 20, currency: 'USD' }
+      }
+    }
+  }).result.ok, true);
+
+  const computed = candidates.compute({
+    actor: buyer,
+    auth: buyerAuth,
+    idempotencyKey: 'plan-unwind-candidate',
+    request: {
+      workspace_id: 'plan_unwind_market',
+      max_cycle_length: 3,
+      max_candidates: 10,
+      recorded_at: buyerAuth.now_iso
+    }
+  }).result;
+  const candidate = computed.body.candidates.find(row => row.legs_preview.some(leg => leg.leg_type === 'blueprint_delivery'));
+  assert.ok(candidate);
+
+  const createdPlan = plans.createFromCandidate({
+    actor: buyer,
+    auth: buyerAuth,
+    candidateId: candidate.candidate_id,
+    idempotencyKey: 'plan-unwind-create',
+    request: { recorded_at: buyerAuth.now_iso }
+  }).result;
+  assert.equal(createdPlan.ok, true);
+  assert.equal(plans.accept({ actor: buyer, auth: buyerAuth, planId: createdPlan.body.plan.plan_id, idempotencyKey: 'plan-unwind-accept-buyer', request: { recorded_at: buyerAuth.now_iso } }).result.ok, true);
+  assert.equal(plans.accept({ actor: seller, auth: sellerAuth, planId: createdPlan.body.plan.plan_id, idempotencyKey: 'plan-unwind-accept-seller', request: { recorded_at: sellerAuth.now_iso } }).result.ok, true);
+  assert.equal(plans.startSettlement({ actor: buyer, auth: buyerAuth, planId: createdPlan.body.plan.plan_id, idempotencyKey: 'plan-unwind-start', request: { settlement_mode: 'external_payment_proof', recorded_at: buyerAuth.now_iso } }).result.ok, true);
+
+  const current = plans.get({ actor: buyer, auth: buyerAuth, planId: createdPlan.body.plan.plan_id }).body.plan;
+  const cashLeg = current.transfer_legs.find(row => row.leg_type === 'cash_payment');
+  const blueprintLeg = current.transfer_legs.find(row => row.leg_type === 'blueprint_delivery');
+  assert.ok(cashLeg);
+  assert.ok(blueprintLeg);
+
+  assert.equal(plans.completeLeg({
+    actor: cashLeg.from_actor,
+    auth: buyerAuth,
+    planId: current.plan_id,
+    legId: cashLeg.leg_id,
+    idempotencyKey: 'plan-unwind-complete-cash',
+    request: { verification_result: { payment_confirmed: true }, recorded_at: buyerAuth.now_iso }
+  }).result.ok, true);
+
+  const unwound = plans.failLeg({
+    actor: blueprintLeg.from_actor,
+    auth: sellerAuth,
+    planId: current.plan_id,
+    legId: blueprintLeg.leg_id,
+    idempotencyKey: 'plan-unwind-fail-blueprint',
+    request: { failure_reason: 'artifact_unavailable', recorded_at: sellerAuth.now_iso }
+  }).result;
+  assert.equal(unwound.ok, true);
+  assert.equal(unwound.body.plan.status, 'unwound');
+  assert.equal(unwound.body.plan.failure_summary.state, 'unwound');
+  const compensatedCashLeg = unwound.body.plan.transfer_legs.find(row => row.leg_id === cashLeg.leg_id);
+  assert.equal(compensatedCashLeg.status, 'compensated');
+
+  const receipt = plans.receipt({ actor: buyer, auth: buyerAuth, planId: current.plan_id });
+  assert.equal(receipt.ok, true);
+  assert.equal(receipt.body.receipt.final_state, 'unwound');
+});
+
+test('execution plans can resolve a failed leg by substitution and still complete', () => {
+  const store = createStore();
+  const market = new MarketService({ store });
+  const blueprints = new MarketBlueprintService({ store });
+  const candidates = new MarketCandidateService({ store });
+  const plans = new MarketExecutionPlanService({ store });
+  const seller = actor('plan_sub_seller');
+  const buyer = actor('plan_sub_buyer');
+  const sellerAuth = auth();
+  const buyerAuth = auth();
+
+  assert.equal(blueprints.create({
+    actor: seller,
+    auth: sellerAuth,
+    idempotencyKey: 'plan-sub-blueprint',
+    request: {
+      recorded_at: sellerAuth.now_iso,
+      blueprint: {
+        blueprint_id: 'bp_sub_plan',
+        workspace_id: 'plan_sub_market',
+        title: 'Sub blueprint',
+        category: 'workflow',
+        artifact_ref: 'https://example.com/sub-blueprint.tgz',
+        artifact_format: 'tarball',
+        delivery_mode: 'download',
+        pricing_model: 'one_time',
+        valuation_hint: { usd_amount: 20 }
+      }
+    }
+  }).result.ok, true);
+  assert.equal(blueprints.publish({
+    actor: seller,
+    auth: sellerAuth,
+    blueprintId: 'bp_sub_plan',
+    idempotencyKey: 'plan-sub-blueprint-publish',
+    request: { recorded_at: sellerAuth.now_iso }
+  }).result.ok, true);
+  assert.equal(market.createListing({
+    actor: buyer,
+    auth: buyerAuth,
+    idempotencyKey: 'plan-sub-want',
+    request: {
+      recorded_at: buyerAuth.now_iso,
+      listing: {
+        listing_id: 'plan_sub_want',
+        workspace_id: 'plan_sub_market',
+        kind: 'want',
+        title: 'Buyer wants sub blueprint',
+        want_spec: { type: 'set', any_of: [{ type: 'category', category: 'blueprint:workflow' }] },
+        budget: { amount: 20, currency: 'USD' }
+      }
+    }
+  }).result.ok, true);
+
+  const computed = candidates.compute({
+    actor: buyer,
+    auth: buyerAuth,
+    idempotencyKey: 'plan-sub-candidate',
+    request: {
+      workspace_id: 'plan_sub_market',
+      max_cycle_length: 3,
+      max_candidates: 10,
+      recorded_at: buyerAuth.now_iso
+    }
+  }).result;
+  const candidate = computed.body.candidates.find(row => row.legs_preview.some(leg => leg.leg_type === 'blueprint_delivery'));
+  assert.ok(candidate);
+
+  const createdPlan = plans.createFromCandidate({
+    actor: buyer,
+    auth: buyerAuth,
+    candidateId: candidate.candidate_id,
+    idempotencyKey: 'plan-sub-create',
+    request: { recorded_at: buyerAuth.now_iso }
+  }).result;
+  assert.equal(createdPlan.ok, true);
+  assert.equal(plans.accept({ actor: buyer, auth: buyerAuth, planId: createdPlan.body.plan.plan_id, idempotencyKey: 'plan-sub-accept-buyer', request: { recorded_at: buyerAuth.now_iso } }).result.ok, true);
+  assert.equal(plans.accept({ actor: seller, auth: sellerAuth, planId: createdPlan.body.plan.plan_id, idempotencyKey: 'plan-sub-accept-seller', request: { recorded_at: sellerAuth.now_iso } }).result.ok, true);
+  assert.equal(plans.startSettlement({ actor: buyer, auth: buyerAuth, planId: createdPlan.body.plan.plan_id, idempotencyKey: 'plan-sub-start', request: { settlement_mode: 'external_payment_proof', recorded_at: buyerAuth.now_iso } }).result.ok, true);
+
+  const current = plans.get({ actor: buyer, auth: buyerAuth, planId: createdPlan.body.plan.plan_id }).body.plan;
+  const blueprintLeg = current.transfer_legs.find(row => row.leg_type === 'blueprint_delivery');
+  const cashLeg = current.transfer_legs.find(row => row.leg_type === 'cash_payment');
+  assert.ok(blueprintLeg);
+  assert.ok(cashLeg);
+
+  assert.equal(plans.completeLeg({
+    actor: cashLeg.from_actor,
+    auth: buyerAuth,
+    planId: current.plan_id,
+    legId: cashLeg.leg_id,
+    idempotencyKey: 'plan-sub-complete-cash',
+    request: { verification_result: { payment_confirmed: true }, recorded_at: buyerAuth.now_iso }
+  }).result.ok, true);
+
+  const substituted = plans.failLeg({
+    actor: blueprintLeg.from_actor,
+    auth: sellerAuth,
+    planId: current.plan_id,
+    legId: blueprintLeg.leg_id,
+    idempotencyKey: 'plan-sub-fail-blueprint',
+    request: {
+      failure_reason: 'primary_artifact_missing',
+      resolution: 'substituted',
+      substitution_result: { replacement_artifact_ref: 'https://example.com/substitute-blueprint.tgz' },
+      recorded_at: sellerAuth.now_iso
+    }
+  }).result;
+  assert.equal(substituted.ok, true);
+  assert.equal(substituted.body.plan.status, 'completed');
+  const substitutedLeg = substituted.body.plan.transfer_legs.find(row => row.leg_id === blueprintLeg.leg_id);
+  assert.equal(substitutedLeg.status, 'substituted');
+  assert.equal(substituted.body.plan.failure_summary.state, 'completed_with_substitution');
+
+  const receipt = plans.receipt({ actor: buyer, auth: buyerAuth, planId: current.plan_id });
+  assert.equal(receipt.ok, true);
+  assert.equal(receipt.body.receipt.final_state, 'completed');
 });
 
 function actorEquals(a, b) {

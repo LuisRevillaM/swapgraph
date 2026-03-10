@@ -9,9 +9,11 @@ const PLAN_STATUS = new Set([
   'pending_participant_acceptance',
   'ready_for_settlement',
   'settlement_in_progress',
+  'partially_complete',
   'completed',
   'failed',
-  'cancelled'
+  'cancelled',
+  'unwound'
 ]);
 const LEG_TYPES = new Set([
   'asset_transfer',
@@ -22,7 +24,7 @@ const LEG_TYPES = new Set([
   'access_grant',
   'verification_only'
 ]);
-const LEG_STATUS = new Set(['pending', 'completed', 'failed']);
+const LEG_STATUS = new Set(['pending', 'completed', 'failed', 'compensated', 'substituted']);
 const SETTLEMENT_MODES = new Set(['barter', 'internal_credit', 'external_payment_proof', 'cycle_bridge']);
 
 function correlationId(op) {
@@ -236,6 +238,51 @@ function buildPlanExecutionGraph(record) {
   };
 }
 
+function legStatusSatisfiesBlocking(leg) {
+  return leg?.status === 'completed' || leg?.status === 'substituted';
+}
+
+function blockingProgressSummary(plan) {
+  const blockingLegs = (plan.transfer_legs ?? []).filter(leg => leg.blocking);
+  const completedLike = blockingLegs.filter(leg => legStatusSatisfiesBlocking(leg));
+  const pending = blockingLegs.filter(leg => !legStatusSatisfiesBlocking(leg) && leg.status !== 'failed' && leg.status !== 'compensated');
+  return {
+    total_blocking: blockingLegs.length,
+    completed_like: completedLike.length,
+    pending: pending.length,
+    has_partial_completion: completedLike.length > 0 && pending.length > 0
+  };
+}
+
+function compensationModeForLeg(leg) {
+  if (leg?.leg_type === 'cash_payment') return 'reverse_cash';
+  if (leg?.leg_type === 'credit_transfer') return 'reverse_credit';
+  if (leg?.leg_type === 'blueprint_delivery') return 'credit_or_cash_make_good';
+  return 'manual_make_good';
+}
+
+function applyUnwind(plan, recordedAt, failedLegId) {
+  const compensatedLegIds = [];
+  const irrevocableLegIds = [];
+  for (const leg of plan.transfer_legs ?? []) {
+    if (leg.leg_id === failedLegId) continue;
+    if (leg.status !== 'completed') continue;
+    if (leg.leg_type === 'cash_payment' || leg.leg_type === 'credit_transfer') {
+      leg.status = 'compensated';
+      leg.compensation_result = {
+        mode: compensationModeForLeg(leg),
+        reason: 'plan_unwound_after_blocking_failure',
+        recorded_at: recordedAt
+      };
+      leg.updated_at = recordedAt;
+      compensatedLegIds.push(leg.leg_id);
+      continue;
+    }
+    irrevocableLegIds.push(leg.leg_id);
+  }
+  return { compensatedLegIds, irrevocableLegIds };
+}
+
 function normalizePlanView(record) {
   return {
     plan_id: record.plan_id,
@@ -252,6 +299,7 @@ function normalizePlanView(record) {
     obligation_graph: buildPlanObligationGraph(record),
     execution_graph: buildPlanExecutionGraph(record),
     failure_policy: clone(record.failure_policy ?? {}),
+    failure_summary: clone(record.failure_summary ?? null),
     legacy_bridge: clone(record.legacy_bridge ?? {}),
     receipt_ref: record.receipt_ref ?? null,
     created_at: record.created_at,
@@ -708,7 +756,7 @@ export class MarketExecutionPlanService {
         if (parseIsoMs(recordedAt) === null) {
           return { ok: false, body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid leg completion timestamp', { reason_code: 'market_execution_plan_invalid', recorded_at: request?.recorded_at ?? null }) };
         }
-        if (plan.status !== 'settlement_in_progress') {
+        if (plan.status !== 'settlement_in_progress' && plan.status !== 'partially_complete') {
           return { ok: false, body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'execution plan is not in settlement', { reason_code: 'market_execution_plan_status_invalid', plan_id: planId, status: plan.status }) };
         }
 
@@ -737,11 +785,15 @@ export class MarketExecutionPlanService {
         leg.updated_at = recordedAt;
         plan.updated_at = recordedAt;
 
-        const blockingPending = plan.transfer_legs.some(row => row.blocking && row.status !== 'completed');
-        if (!blockingPending) {
+        const progress = blockingProgressSummary(plan);
+        if (progress.has_partial_completion) {
+          plan.status = 'partially_complete';
+        }
+        if (progress.pending === 0) {
           const receipt = this._mintReceipt({ plan, recordedAt, finalState: 'completed' });
           plan.receipt_ref = receipt.id;
           plan.status = 'completed';
+          plan.failure_summary = null;
         }
         return { ok: true, body: { correlation_id: corr, plan: normalizePlanView(plan) } };
       }
@@ -772,7 +824,7 @@ export class MarketExecutionPlanService {
         if (parseIsoMs(recordedAt) === null) {
           return { ok: false, body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'invalid leg failure timestamp', { reason_code: 'market_execution_plan_invalid', recorded_at: request?.recorded_at ?? null }) };
         }
-        if (plan.status !== 'settlement_in_progress') {
+        if (plan.status !== 'settlement_in_progress' && plan.status !== 'partially_complete') {
           return { ok: false, body: errorResponse(corr, 'CONSTRAINT_VIOLATION', 'execution plan is not in settlement', { reason_code: 'market_execution_plan_status_invalid', plan_id: planId, status: plan.status }) };
         }
 
@@ -786,11 +838,82 @@ export class MarketExecutionPlanService {
           return { ok: false, body: errorResponse(corr, 'CONFLICT', 'execution leg cannot transition to failed', { reason_code: 'market_execution_plan_leg_conflict', plan_id: planId, leg_id: legId, status: leg.status }) };
         }
 
-        leg.status = 'failed';
-        leg.failure_reason = normalizeOptionalString(request?.failure_reason) ?? 'execution_leg_failed';
+        const hadPartialCompletion = (plan.transfer_legs ?? []).some(row => row.blocking && legStatusSatisfiesBlocking(row));
+        const resolution = normalizeOptionalString(request?.resolution)?.toLowerCase() ?? null;
+        const failureReason = normalizeOptionalString(request?.failure_reason) ?? 'execution_leg_failed';
+        if (resolution === 'substituted') {
+          leg.status = 'substituted';
+          leg.substitution_result = isPlainObject(request?.substitution_result) ? clone(request.substitution_result) : {
+            summary: 'substitute deliverable accepted',
+            recorded_at: recordedAt
+          };
+        } else if (resolution === 'compensated') {
+          leg.status = 'compensated';
+          leg.compensation_result = isPlainObject(request?.compensation_result) ? clone(request.compensation_result) : {
+            mode: compensationModeForLeg(leg),
+            reason: failureReason,
+            recorded_at: recordedAt
+          };
+        } else {
+          leg.status = 'failed';
+        }
+        leg.failure_reason = failureReason;
         leg.updated_at = recordedAt;
-        plan.status = 'failed';
         plan.updated_at = recordedAt;
+        const progress = blockingProgressSummary(plan);
+        if (leg.status === 'substituted' && progress.pending === 0) {
+          const receipt = this._mintReceipt({ plan, recordedAt, finalState: 'completed' });
+          plan.receipt_ref = receipt.id;
+          plan.status = 'completed';
+          plan.failure_summary = {
+            state: 'completed_with_substitution',
+            failed_leg_id: legId,
+            resolution: 'substituted',
+            reason: failureReason,
+            recorded_at: recordedAt
+          };
+          return { ok: true, body: { correlation_id: corr, plan: normalizePlanView(plan) } };
+        }
+        if (leg.status === 'compensated') {
+          const receipt = this._mintReceipt({ plan, recordedAt, finalState: 'compensated' });
+          plan.receipt_ref = receipt.id;
+          plan.status = 'unwound';
+          plan.failure_summary = {
+            state: 'compensated',
+            failed_leg_id: legId,
+            resolution: 'compensated',
+            reason: failureReason,
+            partial_completion_detected: progress.has_partial_completion,
+            recorded_at: recordedAt
+          };
+          return { ok: true, body: { correlation_id: corr, plan: normalizePlanView(plan) } };
+        }
+        if (hadPartialCompletion) {
+          const unwind = applyUnwind(plan, recordedAt, legId);
+          const receipt = this._mintReceipt({ plan, recordedAt, finalState: 'unwound' });
+          plan.receipt_ref = receipt.id;
+          plan.status = 'unwound';
+          plan.failure_summary = {
+            state: 'unwound',
+            failed_leg_id: legId,
+            resolution: 'unwound',
+            reason: failureReason,
+            partial_completion_detected: true,
+            compensated_leg_ids: unwind.compensatedLegIds,
+            irrevocable_leg_ids: unwind.irrevocableLegIds,
+            recorded_at: recordedAt
+          };
+        } else {
+          plan.status = 'failed';
+          plan.failure_summary = {
+            state: 'failed',
+            failed_leg_id: legId,
+            resolution: 'failed',
+            reason: failureReason,
+            partial_completion_detected: false,
+            recorded_at: recordedAt
+          };
+        }
         return { ok: true, body: { correlation_id: corr, plan: normalizePlanView(plan) } };
       }
     });
