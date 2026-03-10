@@ -1,0 +1,22 @@
+id: M170-002
+title: Define failure, evidence, attestation, and guarantee semantics
+status: done
+priority: p0
+depends_on:
+  - M170-001
+summary: >
+  Write the state model for failure, fallback, unwind, evidence, attestation, and guarantee
+  so the market can settle and explain partial completion or default conditions credibly.
+files_expected:
+  - docs/design/market-failure-semantics.md
+  - docs/design/market-trust-artifacts.md
+acceptance_criteria:
+  - Plan-level and leg-level states are explicit.
+  - Evidence, attestation, and guarantee are separate terms with separate semantics.
+  - Unwind and fallback rules are defined for partial completion.
+verification:
+  - node scripts/run-market-vnext-finish-gate.mjs
+commit_message: "Define market failure and trust semantics"
+evidence_file: docs/evidence/market-vnext/M170-002.json
+completed_at: 2026-03-10T15:15:00.000Z
+commit: PENDING

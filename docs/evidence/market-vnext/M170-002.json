@@ -1,0 +1,22 @@
+{
+  "task_id": "M170-002",
+  "status": "done",
+  "summary": "Defined plan-level and leg-level failure semantics, fallback and unwind rules, and separated evidence, attestation, and guarantee into explicit trust layers for future plan and receipt work.",
+  "files_changed": [
+    "docs/design/market-failure-semantics.md",
+    "docs/design/market-trust-artifacts.md",
+    "work/market-vnext/tasks/M170-002.yaml"
+  ],
+  "commands_run": [
+    {
+      "command": "node scripts/run-market-vnext-finish-gate.mjs",
+      "exit_code": 1
+    },
+    {
+      "command": "node scripts/run-market-vnext-agent-dispatch.mjs",
+      "exit_code": 0
+    }
+  ],
+  "commit": null,
+  "recorded_at": "2026-03-10T15:15:00.000Z"
+}
