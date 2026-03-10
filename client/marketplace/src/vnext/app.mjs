@@ -1198,8 +1198,7 @@ function renderLanding(state) {
   const proxiedApiBase = state.proxiedApiBase ?? '/api';
   const publicListingsProbe = `${proxiedApiBase}/market/listings?limit=12`;
   const docsPlanUrl = `${REPO_BLOB_BASE}/docs/plans/market-vnext-agent-execution.md`;
-  const docsAgentsUrl = `${REPO_BLOB_BASE}/AGENTS.md`;
-  const docsCliUrl = `${REPO_BLOB_BASE}/scripts/market-cli.mjs`;
+  const docsTransactionUrl = `${REPO_BLOB_BASE}/docs/source/SwapGraph_Agent_Transaction_Model_Mar2026.md`;
 
   return `
     <section class="market-vnext-hero">
@@ -1319,10 +1318,10 @@ function renderLanding(state) {
         ${renderQuickstartCard({
           eyebrow: 'Docs',
           title: 'Use the plan, the agent rules, and the CLI',
-          body: 'The current public install surface is API plus CLI. The plan and AGENTS rules are part of the product because another agent should be able to continue from where you left off.',
-          code: `docs/plans/market-vnext-agent-execution.md\nAGENTS.md\nscripts/market-cli.mjs\nscripts/run-market-vnext-agent-dispatch.mjs`,
-          actionHref: docsAgentsUrl,
-          actionLabel: 'Open AGENTS.md'
+          body: 'The current install surface is API plus CLI. Read the transaction model first, then the execution plan and AGENTS rules, because another agent should be able to continue from where you left off.',
+          code: `docs/source/SwapGraph_Agent_Transaction_Model_Mar2026.md\ndocs/plans/market-vnext-agent-execution.md\nAGENTS.md\nscripts/market-cli.mjs`,
+          actionHref: docsTransactionUrl,
+          actionLabel: 'Open transaction model'
         })}
       </div>
     </section>

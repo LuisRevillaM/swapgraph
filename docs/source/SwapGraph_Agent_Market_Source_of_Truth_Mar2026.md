@@ -17,6 +17,9 @@ This document defines:
 - what commands start the autonomous loop
 - what condition ends the loop
 
+Companion transaction model:
+- `docs/source/SwapGraph_Agent_Transaction_Model_Mar2026.md`
+
 ## Canonical Branch
 
 Canonical implementation branch:
