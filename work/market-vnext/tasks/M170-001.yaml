@@ -1,0 +1,21 @@
+id: M170-001
+title: Define obligation graph and role model
+status: done
+priority: p0
+depends_on: []
+summary: >
+  Define the canonical economic graph, execution graph, and role model so later API
+  and product work stops mixing principals, executors, and verification concerns.
+files_expected:
+  - docs/design/market-obligation-graph.md
+  - docs/design/market-role-model.md
+acceptance_criteria:
+  - Economic graph and execution graph are defined separately.
+  - Principal, executor, verifier, sponsor, broker, and guarantor roles are defined.
+  - Candidate, plan, and receipt are re-expressed in obligation-graph terms.
+verification:
+  - node scripts/run-market-vnext-finish-gate.mjs
+commit_message: "Define market obligation graph model"
+evidence_file: docs/evidence/market-vnext/M170-001.json
+completed_at: 2026-03-10T15:13:00.000Z
+commit: PENDING

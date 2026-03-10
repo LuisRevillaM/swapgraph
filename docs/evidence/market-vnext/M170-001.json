@@ -1,0 +1,22 @@
+{
+  "task_id": "M170-001",
+  "status": "done",
+  "summary": "Defined the market obligation graph and separated the economic graph from the execution graph. Defined principal, executor, verifier, sponsor, broker, and guarantor roles so later market and settlement work can stop conflating liability, execution, and proof.",
+  "files_changed": [
+    "docs/design/market-obligation-graph.md",
+    "docs/design/market-role-model.md",
+    "work/market-vnext/tasks/M170-001.yaml"
+  ],
+  "commands_run": [
+    {
+      "command": "node scripts/run-market-vnext-finish-gate.mjs",
+      "exit_code": 1
+    },
+    {
+      "command": "node scripts/run-market-vnext-agent-dispatch.mjs",
+      "exit_code": 0
+    }
+  ],
+  "commit": null,
+  "recorded_at": "2026-03-10T15:13:00.000Z"
+}
