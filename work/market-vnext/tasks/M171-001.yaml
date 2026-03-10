@@ -1,0 +1,28 @@
+id: M171-001
+title: Refactor market candidate and execution plan model around obligation graphs
+status: done
+priority: p0
+depends_on:
+  - M170-001
+  - M170-002
+summary: >
+  Update the market-native candidate and execution plan model so they are described as
+  obligation graphs with role separation, dependencies, and explicit settlement and fallback fields.
+files_expected:
+  - src/service/marketCandidateService.mjs
+  - src/service/marketExecutionPlanService.mjs
+  - docs/spec/schemas/MarketCandidateView.schema.json
+  - docs/spec/schemas/MarketExecutionPlanView.schema.json
+acceptance_criteria:
+  - Candidate responses express obligation intent, not only preview legs.
+  - Execution plans expose principals, executors, verifiers, and dependency state where required.
+  - Schema and runtime stay contract-valid.
+verification:
+  - node scripts/validate-api-contract.mjs
+  - node --test tests/market/market-blueprints-candidates.test.mjs
+  - node --test tests/market/market-execution-plans.test.mjs
+  - node scripts/run-market-vnext-finish-gate.mjs
+commit_message: "Refactor market plans around obligation graphs"
+completed_at: 2026-03-10T15:23:52Z
+commit: PENDING
+evidence_file: docs/evidence/market-vnext/M171-001.json

@@ -1,0 +1,24 @@
+{
+  "task_id": "M171-001",
+  "status": "done",
+  "summary": "Refactored market candidates and execution plans to expose obligation-graph and execution-graph semantics with explicit role assignments and failure policy while preserving existing legs and participant fields.",
+  "files_changed": [
+    "src/service/marketCandidateService.mjs",
+    "src/service/marketExecutionPlanService.mjs",
+    "docs/spec/schemas/MarketCandidateView.schema.json",
+    "docs/spec/schemas/MarketExecutionPlanView.schema.json",
+    "tests/market/market-blueprints-candidates.test.mjs",
+    "tests/market/market-execution-plans.test.mjs",
+    "work/market-vnext/tasks/M171-001.yaml"
+  ],
+  "commands": [
+    { "command": "node scripts/validate-api-contract.mjs", "exit_code": 0 },
+    { "command": "node --test tests/market/market-blueprints-candidates.test.mjs", "exit_code": 0 },
+    { "command": "node --test tests/market/market-execution-plans.test.mjs", "exit_code": 0 },
+    { "command": "node scripts/run-market-vnext-finish-gate.mjs", "exit_code": 1 },
+    { "command": "npm test", "exit_code": 0 },
+    { "command": "npm run web:m7:test", "exit_code": 0 }
+  ],
+  "commit": null,
+  "timestamp": "2026-03-10T15:23:52Z"
+}

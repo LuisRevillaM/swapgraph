@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketExecutionPlanView.schema.json",
+  "title": "MarketExecutionPlanView",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["plan_id", "workspace_id", "origin_candidate_id", "plan_type", "status", "participants", "input_refs", "transfer_legs", "acceptance_state", "settlement_policy", "verification_policy", "obligation_graph", "execution_graph", "failure_policy", "legacy_bridge", "receipt_ref", "created_at", "updated_at"],
+  "properties": {
+    "plan_id": { "type": "string", "minLength": 1 },
+    "workspace_id": { "type": "string", "minLength": 1 },
+    "origin_candidate_id": { "type": "string", "minLength": 1 },
+    "plan_type": { "type": "string", "enum": ["direct", "cycle", "mixed_cycle"] },
+    "status": { "type": "string", "enum": ["draft", "pending_participant_acceptance", "ready_for_settlement", "settlement_in_progress", "completed", "failed", "cancelled"] },
+    "participants": { "type": "array", "items": { "$ref": "ActorRef.schema.json" } },
+    "input_refs": { "type": "array", "items": { "$ref": "MarketEdgeRef.schema.json" } },
+    "transfer_legs": { "type": "array", "items": { "$ref": "MarketTransferLegView.schema.json" } },
+    "acceptance_state": { "type": "object", "additionalProperties": { "type": "string", "enum": ["pending", "accepted", "rejected"] } },
+    "settlement_policy": { "type": "object", "additionalProperties": true },
+    "verification_policy": { "type": "object", "additionalProperties": true },
+    "obligation_graph": { "type": "object", "additionalProperties": true },
+    "execution_graph": { "type": "object", "additionalProperties": true },
+    "failure_policy": { "type": "object", "additionalProperties": true },
+    "legacy_bridge": { "type": "object", "additionalProperties": true },
+    "receipt_ref": { "type": ["string", "null"] },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" }
+  }
+}

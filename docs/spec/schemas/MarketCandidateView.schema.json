@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swapgraph.dev/schemas/MarketCandidateView.schema.json",
+  "title": "MarketCandidateView",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["candidate_id", "workspace_id", "candidate_type", "status", "participants", "input_refs", "legs_preview", "valuation_summary", "settlement_summary", "score", "explanation", "legacy_refs", "obligation_graph", "execution_graph", "acceptance_state", "expires_at", "created_at", "updated_at"],
+  "properties": {
+    "candidate_id": { "type": "string", "minLength": 1 },
+    "workspace_id": { "type": "string", "minLength": 1 },
+    "candidate_type": { "type": "string", "enum": ["direct", "cycle", "mixed"] },
+    "status": { "type": "string", "enum": ["open", "awaiting_acceptance", "accepted", "rejected", "expired", "superseded"] },
+    "participants": { "type": "array", "items": { "$ref": "MarketCandidateParticipantView.schema.json" } },
+    "input_refs": { "type": "array", "items": { "$ref": "MarketEdgeRef.schema.json" } },
+    "legs_preview": { "type": "array", "items": { "$ref": "MarketCandidateLegView.schema.json" } },
+    "valuation_summary": { "type": "object", "additionalProperties": true },
+    "settlement_summary": { "type": "object", "additionalProperties": true },
+    "score": { "type": "number", "minimum": 0 },
+    "explanation": { "type": "array", "items": { "type": "string" } },
+    "legacy_refs": { "type": "object", "additionalProperties": true },
+    "obligation_graph": { "type": "object", "additionalProperties": true },
+    "execution_graph": { "type": "object", "additionalProperties": true },
+    "acceptance_state": { "type": "object", "additionalProperties": { "type": "string", "enum": ["pending", "accepted", "rejected"] } },
+    "expires_at": { "type": ["string", "null"], "format": "date-time" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" }
+  }
+}
