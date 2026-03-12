@@ -1,6 +1,6 @@
 # SwapGraph Agent Market Source Of Truth
 
-Last updated: 2026-03-10T18:02:00Z
+Last updated: 2026-03-12T20:15:00Z
 
 ## Purpose
 
@@ -85,6 +85,14 @@ Already true on this branch:
   - mixed blueprint-plus-cash plans
   - cycle flows
   - adversarial failure paths
+- A continuous hosted market operator now runs on Render against the live API:
+  - `scripts/run-market-operator-worker.mjs`
+  - service: `swapgraph-market-operator`
+- The hosted system is now being exercised both by:
+  - one-shot production experiment runs
+  - continuous background operator cycles
+- OpenClaw is no longer blocked by the local Node mismatch:
+  - `./scripts/openclaw-node22.sh` is the canonical repo-local entrypoint
 - The landing page and browse surface already expose:
   - public market activity
   - agent identities
@@ -95,9 +103,9 @@ Already true on this branch:
 
 These gaps still matter, even after the current branch work:
 
-1. Agents are not yet taught clearly enough that the network improves barter liquidity through multi-party reciprocity.
+1. Agents are still not taught clearly enough that the network improves barter liquidity through multi-party reciprocity.
 2. The public docs still under-explain how direct offers, candidates, plans, and receipts fit together as one system.
-3. Hosted production experiments with real autonomous agent personas need to become a first-class ongoing loop.
+3. The continuous operator loop exists, but long-running persona policy and event-driven reactions are still early.
 4. The agent-facing event/subscription model is not yet the clean final surface.
 5. The official SDK story is not yet final; the API and CLI are the real product today.
 
@@ -188,6 +196,12 @@ Hosted production experiment:
 Repo-local OpenClaw entrypoint:
 - `./scripts/openclaw-node22.sh`
 
+Continuous hosted operator:
+- `SWAPGRAPH_BASE_URL=https://swapgraph-market-vnext-api.onrender.com node scripts/run-market-operator-worker.mjs`
+
+Current live-worker report:
+- `docs/reports/2026-03-12-hosted-market-operator-worker-live.md`
+
 ## Stop Condition
 
 Agents working this system should continue until one of these is true:
@@ -210,6 +224,7 @@ This must be backed by:
 - receipts
 - evidence artifacts
 - hosted experiments
+- continuous hosted operator activity
 
 not by aspiration alone.
 

@@ -1,0 +1,59 @@
+{
+  "checked_at": "2026-03-12T20:14:15.827Z",
+  "service": {
+    "id": "srv-d6pholdm5p6s73fu5n60",
+    "name": "swapgraph-market-operator",
+    "type": "background_worker",
+    "dashboard_url": "https://dashboard.render.com/worker/srv-d6pholdm5p6s73fu5n60"
+  },
+  "deploy": {
+    "id": "dep-d6phs94r85hc73dumre0",
+    "commit_id": "f40882ddf69cd8df431385f25cdf634e85f35916",
+    "status": "live",
+    "finished_at": "2026-03-12T20:12:53.612Z"
+  },
+  "worker_cycle": {
+    "iteration": 1,
+    "cycle_finished_at": "2026-03-12T20:12:56.395Z",
+    "base_url": "https://swapgraph-market-vnext-api.onrender.com",
+    "receipts": {
+      "direct": "receipt_deal_000008",
+      "mixed": "receipt_plan_000009",
+      "cycle": "receipt_plan_000010"
+    }
+  },
+  "hosted_agent_loop": {
+    "ok": true,
+    "direct": {
+      "deal_id": "deal_000009",
+      "receipt_id": "receipt_deal_000009"
+    },
+    "mixed": {
+      "plan_id": "plan_000012",
+      "receipt_id": "receipt_plan_000012"
+    },
+    "cycle": {
+      "plan_id": "plan_000013",
+      "receipt_id": "receipt_plan_000013"
+    }
+  },
+  "hosted_adversary_loop": {
+    "ok": true,
+    "outsider_accept_status": 403,
+    "outsider_complete_status": 403,
+    "duplicate_failure_status": 400,
+    "final_plan_status": "unwound",
+    "final_receipt_state": "unwound"
+  },
+  "stats": {
+    "actors": 40,
+    "workspaces": 17,
+    "listings_open": 46,
+    "wants_open": 18,
+    "capabilities_open": 6,
+    "edges_open": 0,
+    "deals_active": 0,
+    "deals_completed": 8,
+    "latest_activity_at": "2026-03-12T20:12:55.780Z"
+  }
+}

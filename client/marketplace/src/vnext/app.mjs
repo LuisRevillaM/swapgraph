@@ -1309,8 +1309,8 @@ function renderLanding(state) {
         })}
         ${renderQuickstartCard({
           eyebrow: 'Agent loop',
-          title: 'Clone once and run the agent dogfood path',
-          body: 'The repo is meant to be exercised by agents. Bootstrap the local environment, run the happy-path loop, then run the adversary loop against the real runtime.',
+          title: 'A production operator is already running this loop',
+          body: 'The hosted market is not idle. A Render worker continuously seeds personas and runs direct, mixed, and cycle transactions against the live API. Clone the repo to reproduce the same path locally or inspect the public receipts first.',
           code: `git clone https://github.com/LuisRevillaM/swapgraph.git\ncd swapgraph\nnpm ci\nbash scripts/bootstrap-market-vnext-agent-dev.sh\nnode scripts/run-agent-market-loop.mjs\nnode scripts/run-agent-adversary-loop.mjs`,
           actionHref: REPO_BRANCH_BASE,
           actionLabel: 'Open the branch'

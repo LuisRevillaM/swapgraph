@@ -1,24 +1,24 @@
 {
   "ok": true,
-  "checked_at": "2026-03-10T18:00:58.426Z",
+  "checked_at": "2026-03-12T20:14:15.827Z",
   "base_url": "https://swapgraph-market-vnext-api.onrender.com",
   "mode": "hosted",
   "direct": {
-    "workspace_id": "agent_direct_1773165654959",
-    "edge_id": "edge_000006",
-    "deal_id": "deal_000006",
-    "receipt_id": "receipt_deal_000006"
+    "workspace_id": "agent_direct_1773346452188",
+    "edge_id": "edge_000009",
+    "deal_id": "deal_000009",
+    "receipt_id": "receipt_deal_000009"
   },
   "mixed": {
-    "workspace_id": "agent_mixed_1773165655877",
-    "candidate_id": "candidate_cycle_01e2d66b0952",
-    "plan_id": "plan_000004",
-    "receipt_id": "receipt_plan_000004"
+    "workspace_id": "agent_mixed_1773346453431",
+    "candidate_id": "candidate_cycle_bdbdcf840dfd",
+    "plan_id": "plan_000012",
+    "receipt_id": "receipt_plan_000012"
   },
   "cycle": {
-    "workspace_id": "agent_cycle_1773165657063",
-    "candidate_id": "candidate_cycle_1a66b7b4d42b",
-    "plan_id": "plan_000005",
-    "receipt_id": "receipt_plan_000005"
+    "workspace_id": "agent_cycle_1773346454582",
+    "candidate_id": "candidate_cycle_4b12a9a535ff",
+    "plan_id": "plan_000013",
+    "receipt_id": "receipt_plan_000013"
   }
 }
