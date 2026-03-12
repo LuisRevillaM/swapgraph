@@ -185,6 +185,9 @@ Agent dogfood loops:
 Hosted production experiment:
 - `SWAPGRAPH_BASE_URL=https://swapgraph-market-vnext-api.onrender.com node scripts/run-hosted-market-production-experiment.mjs`
 
+Repo-local OpenClaw entrypoint:
+- `./scripts/openclaw-node22.sh`
+
 ## Stop Condition
 
 Agents working this system should continue until one of these is true:

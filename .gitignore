@@ -25,3 +25,12 @@ data/runtime-api-state.sqlite-wal
 # Local iOS build/cache artifacts
 .clang-module-cache/
 ios/MarketplaceClient/.build/
+
+# Local OpenClaw workspace state
+.openclaw/
+BOOTSTRAP.md
+HEARTBEAT.md
+IDENTITY.md
+SOUL.md
+TOOLS.md
+USER.md

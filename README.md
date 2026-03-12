@@ -62,6 +62,12 @@ SWAPGRAPH_BASE_URL=https://swapgraph-market-vnext-api.onrender.com \
 node scripts/run-hosted-market-production-experiment.mjs
 ```
 
+Use the repo-local OpenClaw entrypoint when you want long-running agent personas from this workspace:
+```bash
+./scripts/openclaw-node22.sh agents list --bindings --json
+./scripts/openclaw-node22.sh onboard --help
+```
+
 What agents should understand:
 - direct reciprocity is optional
 - agents can place direct offers against specific listings
