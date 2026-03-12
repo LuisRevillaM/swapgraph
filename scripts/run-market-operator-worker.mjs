@@ -4,9 +4,12 @@ import { spawnSync } from 'node:child_process';
 const baseUrl = String(process.env.SWAPGRAPH_BASE_URL ?? 'https://swapgraph-market-vnext-api.onrender.com').replace(/\/+$/g, '');
 const intervalMs = Math.max(60_000, Number.parseInt(String(process.env.MARKET_OPERATOR_INTERVAL_MS ?? '900000'), 10) || 900000);
 const adversaryEvery = Math.max(1, Number.parseInt(String(process.env.MARKET_OPERATOR_ADVERSARY_EVERY ?? '6'), 10) || 6);
+const retryAttempts = Math.max(1, Number.parseInt(String(process.env.MARKET_OPERATOR_RETRY_ATTEMPTS ?? '3'), 10) || 3);
+const retryDelayMs = Math.max(1_000, Number.parseInt(String(process.env.MARKET_OPERATOR_RETRY_DELAY_MS ?? '5000'), 10) || 5000);
 const runOnce = process.env.MARKET_OPERATOR_ONCE === '1';
 
-function runNodeScript(label, script) {
+function runNodeScript(label, script, options = {}) {
+  const { critical = true } = options;
   const startedAt = new Date().toISOString();
   const result = spawnSync(process.execPath, [script], {
     cwd: process.cwd(),
@@ -26,6 +29,7 @@ function runNodeScript(label, script) {
   return {
     label,
     script,
+    critical,
     started_at: startedAt,
     finished_at: new Date().toISOString(),
     status: result.status,
@@ -39,18 +43,42 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+async function runNodeScriptWithRetry(label, script, options = {}) {
+  let lastResult = null;
+  const attempts = [];
+  for (let attempt = 1; attempt <= retryAttempts; attempt += 1) {
+    const result = runNodeScript(label, script, options);
+    lastResult = result;
+    attempts.push({
+      attempt,
+      status: result.status,
+      ok: result.ok,
+      stderr: result.stderr
+    });
+    if (result.ok) {
+      result.attempts = attempts;
+      return result;
+    }
+    if (attempt < retryAttempts) {
+      await sleep(retryDelayMs);
+    }
+  }
+  lastResult.attempts = attempts;
+  return lastResult;
+}
+
 async function main() {
   let iteration = 0;
   for (;;) {
     iteration += 1;
     const cycleStartedAt = new Date().toISOString();
     const steps = [];
-    steps.push(runNodeScript('seed', 'scripts/seed-market-agent-personas.mjs'));
-    steps.push(runNodeScript('market_loop', 'scripts/run-agent-market-loop.mjs'));
+    steps.push(await runNodeScriptWithRetry('seed', 'scripts/seed-market-agent-personas.mjs', { critical: false }));
+    steps.push(await runNodeScriptWithRetry('market_loop', 'scripts/run-agent-market-loop.mjs', { critical: true }));
     if (iteration % adversaryEvery === 0) {
-      steps.push(runNodeScript('adversary_loop', 'scripts/run-agent-adversary-loop.mjs'));
+      steps.push(await runNodeScriptWithRetry('adversary_loop', 'scripts/run-agent-adversary-loop.mjs', { critical: true }));
     }
-    const ok = steps.every(step => step.ok);
+    const ok = steps.every(step => !step.critical || step.ok);
     const report = {
       kind: 'market_operator_worker_cycle',
       ok,
