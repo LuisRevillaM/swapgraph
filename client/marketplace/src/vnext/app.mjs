@@ -4,6 +4,10 @@ import { safeStorageRead, safeStorageWrite } from '../features/security/storageP
 const SESSION_STORAGE_KEY = 'swapgraph.marketplace.vnext.session.v1';
 const REPO_BRANCH_BASE = 'https://github.com/LuisRevillaM/swapgraph/tree/marketplace-vnext-execution';
 const REPO_BLOB_BASE = 'https://github.com/LuisRevillaM/swapgraph/blob/marketplace-vnext-execution';
+const DOCS_PROTOTYPE_URL = `${REPO_BLOB_BASE}/docs/source/SwapGraph_Agent_Barter_Prototype_Mar2026.md`;
+const DOCS_QUICKSTART_URL = `${REPO_BLOB_BASE}/docs/source/SwapGraph_Agent_Quickstart_Mar2026.md`;
+const DOCS_SOURCE_OF_TRUTH_URL = `${REPO_BLOB_BASE}/docs/source/SwapGraph_Agent_Market_Source_of_Truth_Mar2026.md`;
+const DOCS_TOPOLOGY_URL = `${REPO_BLOB_BASE}/docs/ops/Render_Agent_Market_Topology_Mar2026.md`;
 const DEFAULT_SIGNUP_SCOPES = Object.freeze([
   'market:read',
   'market:write',
@@ -118,6 +122,24 @@ function renderQuickstartCard({ eyebrow, title, body, code, actionHref = null, a
       ${actionHref && actionLabel ? `<a class="market-vnext-secondary" href="${escapeHtml(actionHref)}" target="${actionHref.startsWith('http') ? '_blank' : '_self'}" rel="${actionHref.startsWith('http') ? 'noreferrer' : ''}">${escapeHtml(actionLabel)}</a>` : ''}
     </article>
   `;
+}
+
+function listingKindLabel(kind) {
+  if (kind === 'want') return 'Need';
+  if (kind === 'capability') return 'Service offer';
+  return 'Offer';
+}
+
+function candidateTypeLabel(kind) {
+  if (kind === 'cycle') return 'Cycle';
+  if (kind === 'mixed') return 'Mixed';
+  return 'Direct';
+}
+
+function planTypeLabel(kind) {
+  if (kind === 'mixed_cycle') return 'Mixed plan';
+  if (kind === 'cycle') return 'Cycle plan';
+  return 'Direct plan';
 }
 
 function dedupeStrings(values) {
@@ -279,14 +301,14 @@ function renderAgentIdentityCard(identity) {
       <h3>${escapeHtml(identity.display_name)}</h3>
       <p class="market-vnext-card-copy">${escapeHtml(identity.bio ?? 'Active in the open market with live machine-readable listings.')}</p>
       <div class="market-vnext-card-tags">
-        <span class="market-vnext-tag">${escapeHtml(`${identity.counts.capability} capabilities`)}</span>
-        <span class="market-vnext-tag">${escapeHtml(`${identity.counts.post} assets`)}</span>
-        <span class="market-vnext-tag">${escapeHtml(`${identity.counts.want} wants`)}</span>
+        <span class="market-vnext-tag">${escapeHtml(`${identity.counts.capability} service offers`)}</span>
+        <span class="market-vnext-tag">${escapeHtml(`${identity.counts.post} offers`)}</span>
+        <span class="market-vnext-tag">${escapeHtml(`${identity.counts.want} needs`)}</span>
       </div>
       ${protocols.length > 0 ? `<p class="market-vnext-inline-list"><strong>Interfaces:</strong> ${escapeHtml(protocols.join(' • '))}</p>` : ''}
       ${settlement.length > 0 ? `<p class="market-vnext-inline-list"><strong>Settlement:</strong> ${escapeHtml(settlement.join(' • '))}</p>` : ''}
       ${identity.turnaround ? `<p class="market-vnext-inline-list"><strong>Turnaround:</strong> ${escapeHtml(identity.turnaround)}</p>` : ''}
-      ${skills.length > 0 ? `<p class="market-vnext-inline-list"><strong>Skills:</strong> ${escapeHtml(skills.join(' • '))}</p>` : ''}
+      ${skills.length > 0 ? `<p class="market-vnext-inline-list"><strong>Service menu:</strong> ${escapeHtml(skills.join(' • '))}</p>` : ''}
       ${assets.length > 0 ? `<p class="market-vnext-inline-list"><strong>Assets:</strong> ${escapeHtml(assets.join(' • '))}</p>` : ''}
       ${wants.length > 0 ? `<p class="market-vnext-inline-list"><strong>Looking for:</strong> ${escapeHtml(wants.join(' • '))}</p>` : ''}
       <div class="market-vnext-card-foot">
@@ -297,45 +319,11 @@ function renderAgentIdentityCard(identity) {
   `;
 }
 
-function renderBlueprintCard({ blueprint }) {
-  const profile = blueprint?.owner_profile?.display_name ?? blueprint?.owner_actor?.id ?? 'unknown';
-  const supportWindow = blueprint?.support_policy?.support_window ?? blueprint?.support_policy?.window ?? null;
-  const verificationChecks = dedupeStrings(asArray(blueprint?.verification_spec?.checks)).slice(0, 3);
-  const valuationUsd = blueprint?.valuation_hint?.usd ?? null;
-  const barterOk = blueprint?.valuation_hint?.barter_ok === true;
-
-  return `
-    <article class="market-vnext-card blueprint-card">
-      <div class="market-vnext-card-head">
-        <span class="market-vnext-pill kind-post">${escapeHtml(blueprint.category ?? 'blueprint')}</span>
-        <span class="market-vnext-card-meta">${escapeHtml(profile)}</span>
-      </div>
-      <h3>${escapeHtml(blueprint.title)}</h3>
-      <p class="market-vnext-card-copy">${escapeHtml(blueprint.summary ?? 'Reusable agent logic published for exchange on the market.')}</p>
-      <div class="market-vnext-card-tags">
-        <span class="market-vnext-tag">delivery ${escapeHtml(blueprint.delivery_mode)}</span>
-        <span class="market-vnext-tag">pricing ${escapeHtml(blueprint.pricing_model)}</span>
-        <span class="market-vnext-tag">status ${escapeHtml(blueprint.status)}</span>
-        ${valuationUsd !== null ? `<span class="market-vnext-tag">value $${escapeHtml(String(valuationUsd))}</span>` : ''}
-        ${barterOk ? '<span class="market-vnext-tag">barter ok</span>' : ''}
-      </div>
-      <p class="market-vnext-inline-list"><strong>Artifact:</strong> ${escapeHtml(blueprint.artifact_format)} via ${escapeHtml(blueprint.artifact_ref)}</p>
-      ${blueprint.license_terms ? `<p class="market-vnext-inline-list"><strong>License:</strong> ${escapeHtml(blueprint.license_terms)}</p>` : ''}
-      ${supportWindow ? `<p class="market-vnext-inline-list"><strong>Support:</strong> ${escapeHtml(supportWindow)}</p>` : ''}
-      ${verificationChecks.length > 0 ? `<p class="market-vnext-inline-list"><strong>Checks:</strong> ${escapeHtml(verificationChecks.join(' • '))}</p>` : ''}
-      <div class="market-vnext-card-foot">
-        <span>${escapeHtml(formatIsoShort(blueprint.updated_at))}</span>
-        <a class="market-vnext-secondary" href="${escapeHtml(blueprint.artifact_ref)}" target="_blank" rel="noreferrer">Artifact</a>
-      </div>
-      <p class="market-vnext-idline">blueprint ${escapeHtml(blueprint.blueprint_id)}</p>
-    </article>
-  `;
-}
-
 function renderNav(session, route) {
   const items = [
     { href: '#/', label: 'Home' },
     { href: '#/browse', label: 'Browse' },
+    { href: DOCS_QUICKSTART_URL, label: 'Docs', external: true },
     { href: '#/owner', label: session ? 'Owner Console' : 'Join' }
   ];
   if (sessionHasScope(session, 'market:moderate')) {
@@ -353,7 +341,7 @@ function renderNav(session, route) {
       </div>
       <nav class="market-vnext-nav" aria-label="Marketplace navigation">
         ${items.map(item => `
-          <a class="market-vnext-nav-link${route === normalizeHash(item.href) ? ' is-active' : ''}" href="${item.href}">
+          <a class="market-vnext-nav-link${item.external ? '' : (route === normalizeHash(item.href) ? ' is-active' : '')}" href="${item.href}"${item.external ? ' target="_blank" rel="noreferrer"' : ''}>
             ${escapeHtml(item.label)}
           </a>
         `).join('')}
@@ -372,7 +360,7 @@ function renderListingCard({ listing, session, action = null, compact = false })
   const budget = listing?.budget?.usd ?? listing?.budget?.amount_usd ?? null;
   const offer = asArray(listing?.offer).map(item => item?.label ?? item?.asset ?? item?.name ?? JSON.stringify(item)).filter(Boolean);
   const capabilityRate = listing?.capability_profile?.rate_card?.usd ?? null;
-  const kindLabel = listing.kind === 'want' ? 'Want' : (listing.kind === 'capability' ? 'Capability' : 'Post');
+  const kindLabel = listingKindLabel(listing.kind);
   const protocols = listingInterfaces(listing).slice(0, 4);
   const settlementModes = listingSettlementModes(listing).slice(0, 3);
   const turnaround = listingTurnaround(listing);
@@ -404,6 +392,71 @@ function renderListingCard({ listing, session, action = null, compact = false })
         ${action ?? (session ? `<button type="button" class="market-vnext-secondary" data-action="edge.compose" data-target-listing-id="${escapeHtml(listing.listing_id)}">Place offer</button>` : '')}
       </div>
       ${compact ? '' : `<p class="market-vnext-idline">listing ${escapeHtml(listing.listing_id)}</p>`}
+    </article>
+  `;
+}
+
+function renderCandidateCard({ candidate, session = null, canCreatePlan = false }) {
+  const participants = asArray(candidate?.participants).map(row => row?.actor?.id ?? 'unknown');
+  const legTypes = dedupeStrings(asArray(candidate?.legs_preview).map(leg => leg?.leg_type)).slice(0, 4);
+  const explanation = asArray(candidate?.explanation).slice(0, 2);
+
+  return `
+    <article class="market-vnext-card candidate-card">
+      <div class="market-vnext-card-head">
+        <span class="market-vnext-pill kind-edge">${escapeHtml(candidateTypeLabel(candidate?.candidate_type))}</span>
+        <span class="market-vnext-card-meta">${escapeHtml(candidate?.status ?? 'open')}</span>
+      </div>
+      <h3>${escapeHtml(candidate?.candidate_id ?? 'candidate')}</h3>
+      <p class="market-vnext-card-copy">${escapeHtml(participants.join(' • ') || 'No participants recorded')}</p>
+      <div class="market-vnext-card-tags">
+        <span class="market-vnext-tag">score ${escapeHtml(String(candidate?.score ?? 0))}</span>
+        <span class="market-vnext-tag">legs ${escapeHtml(String(asArray(candidate?.legs_preview).length))}</span>
+        <span class="market-vnext-tag">workspace ${escapeHtml(candidate?.workspace_id ?? 'n/a')}</span>
+      </div>
+      ${legTypes.length > 0 ? `<p class="market-vnext-inline-list"><strong>Legs:</strong> ${escapeHtml(legTypes.join(' • '))}</p>` : ''}
+      ${explanation.length > 0 ? `<p class="market-vnext-inline-list"><strong>Why:</strong> ${escapeHtml(explanation.join(' • '))}</p>` : ''}
+      <div class="market-vnext-card-foot">
+        <span>${escapeHtml(formatIsoShort(candidate?.updated_at ?? candidate?.created_at))}</span>
+        ${canCreatePlan && session ? `<button type="button" class="market-vnext-primary" data-action="candidate.plan" data-candidate-id="${escapeHtml(candidate.candidate_id)}">Create plan</button>` : ''}
+      </div>
+    </article>
+  `;
+}
+
+function renderPlanCard({ plan, state }) {
+  const participants = asArray(plan?.participants).map(actor => actor?.id ?? 'unknown');
+  const legTypes = dedupeStrings(asArray(plan?.transfer_legs).map(leg => leg?.leg_type)).slice(0, 5);
+  const acceptanceStates = Object.entries(plan?.acceptance_state ?? {}).map(([key, value]) => `${key}:${value}`);
+  const pendingLegs = asArray(plan?.transfer_legs).filter(leg => leg?.status === 'pending');
+
+  return `
+    <article class="market-vnext-card plan-card">
+      <div class="market-vnext-card-head">
+        <span class="market-vnext-pill kind-deal">${escapeHtml(planTypeLabel(plan?.plan_type))}</span>
+        <span class="market-vnext-card-meta">${escapeHtml(plan?.status ?? 'draft')}</span>
+      </div>
+      <h3>${escapeHtml(plan?.plan_id ?? 'plan')}</h3>
+      <p class="market-vnext-card-copy">${escapeHtml(participants.join(' • ') || 'No participants recorded')}</p>
+      <div class="market-vnext-card-tags">
+        <span class="market-vnext-tag">legs ${escapeHtml(String(asArray(plan?.transfer_legs).length))}</span>
+        ${plan?.receipt_ref ? `<span class="market-vnext-tag">receipt ${escapeHtml(plan.receipt_ref)}</span>` : ''}
+        <span class="market-vnext-tag">workspace ${escapeHtml(plan?.workspace_id ?? 'n/a')}</span>
+      </div>
+      ${legTypes.length > 0 ? `<p class="market-vnext-inline-list"><strong>Legs:</strong> ${escapeHtml(legTypes.join(' • '))}</p>` : ''}
+      ${acceptanceStates.length > 0 ? `<p class="market-vnext-inline-list"><strong>Acceptance:</strong> ${escapeHtml(acceptanceStates.join(' • '))}</p>` : ''}
+      <div class="market-vnext-card-foot">
+        <span>${escapeHtml(formatIsoShort(plan?.updated_at ?? plan?.created_at))}</span>
+        <span class="market-vnext-inline-actions">
+          ${plan?.status === 'pending_participant_acceptance' ? `<button type="button" class="market-vnext-secondary" data-action="plan.accept" data-plan-id="${escapeHtml(plan.plan_id)}">Accept</button>` : ''}
+          ${plan?.status === 'pending_participant_acceptance' ? `<button type="button" class="market-vnext-secondary" data-action="plan.decline" data-plan-id="${escapeHtml(plan.plan_id)}">Decline</button>` : ''}
+          ${plan?.status === 'ready_for_settlement' ? `<button type="button" class="market-vnext-primary" data-action="plan.start" data-plan-id="${escapeHtml(plan.plan_id)}">Start settlement</button>` : ''}
+          ${(plan?.status === 'settlement_in_progress' || plan?.status === 'partially_complete') && pendingLegs.length > 0
+            ? `<button type="button" class="market-vnext-secondary" data-action="plan.complete-leg" data-plan-id="${escapeHtml(plan.plan_id)}" data-leg-id="${escapeHtml(pendingLegs[0].leg_id)}">Complete next leg</button>`
+            : ''}
+          ${plan?.receipt_ref ? `<button type="button" class="market-vnext-secondary" data-action="plan.receipt" data-plan-id="${escapeHtml(plan.plan_id)}">Receipt JSON</button>` : ''}
+        </span>
+      </div>
     </article>
   `;
 }
@@ -555,15 +608,15 @@ function renderCreateListingForm(session, loading) {
   return `
     <section class="market-vnext-card owner-form-card">
       <p class="u-cap">Create listing</p>
-      <h2>Post supply, demand, or capability</h2>
+      <h2>Publish an offer, need, or service offer</h2>
       <form class="market-vnext-form" data-form="listing-create">
         <input type="hidden" name="workspace_id" value="${escapeHtml(session.profile.default_workspace_id)}" />
         <label>
           <span>Kind</span>
           <select name="kind">
-            <option value="want">Want</option>
-            <option value="post">Post</option>
-            <option value="capability">Capability</option>
+            <option value="want">Need</option>
+            <option value="post">Offer</option>
+            <option value="capability">Service offer</option>
           </select>
         </label>
         <label>
@@ -575,11 +628,11 @@ function renderCreateListingForm(session, loading) {
           <textarea name="description" rows="3" placeholder="Short, legible description for humans and agents"></textarea>
         </label>
         <label>
-          <span>Offer items (for posts, one per line)</span>
+          <span>Offer items (for offers, one per line)</span>
           <textarea name="offer_lines" rows="3" placeholder="GPU cluster slot&#10;Design review"></textarea>
         </label>
         <label>
-          <span>Want summary</span>
+          <span>Need summary</span>
           <textarea name="want_summary" rows="3" placeholder="Need a structured benchmark or service summary"></textarea>
         </label>
         <label>
@@ -587,11 +640,11 @@ function renderCreateListingForm(session, loading) {
           <input name="budget_usd" type="number" min="0" step="1" placeholder="500" />
         </label>
         <label>
-          <span>Capability deliverable</span>
+          <span>Service deliverable</span>
           <textarea name="deliverable_summary" rows="3" placeholder="Structured report with benchmark table and recommendation"></textarea>
         </label>
         <label>
-          <span>Capability rate USD</span>
+          <span>Service rate USD</span>
           <input name="rate_usd" type="number" min="0" step="1" placeholder="250" />
         </label>
         <label>
@@ -616,7 +669,7 @@ function renderEdgeComposer({ state, myOpenListings }) {
         <label>
           <span>Your source listing</span>
           <select name="source_listing_id">
-            ${myOpenListings.map(listing => `<option value="${escapeHtml(listing.listing_id)}">${escapeHtml(listing.title)} (${escapeHtml(listing.kind)})</option>`).join('')}
+            ${myOpenListings.map(listing => `<option value="${escapeHtml(listing.listing_id)}">${escapeHtml(listing.title)} (${escapeHtml(listingKindLabel(listing.kind))})</option>`).join('')}
           </select>
         </label>
         <label>
@@ -649,8 +702,8 @@ function renderDealPanel(state) {
 
   return `
     <section class="market-vnext-card">
-      <p class="u-cap">Deals</p>
-      <h2>${deals.length} active or historical deals</h2>
+      <p class="u-cap">Direct deals</p>
+      <h2>${deals.length} direct settlements and legacy flows</h2>
       <div class="market-vnext-grid">
         ${deals.length > 0
           ? deals.map(deal => `
@@ -689,7 +742,7 @@ function renderDealPanel(state) {
               </div>
             </article>
           `).join('')
-          : '<p class="market-vnext-empty">No deals yet. Accepted offers can be materialized into deals.</p>'}
+          : '<p class="market-vnext-empty">No direct deals yet. Accepted direct offers can still materialize into deals.</p>'}
       </div>
     </section>
     <section class="market-vnext-card">
@@ -1027,9 +1080,9 @@ function renderOwnerPanel(state) {
           <p class="u-cap">Why sign up</p>
           <h2>Owner controls for agents</h2>
           <ul class="market-vnext-bullets">
-            <li>Post wants, offers, and capabilities.</li>
+            <li>Publish needs, offers, and service offers.</li>
             <li>Review inbound offers and accept or decline them.</li>
-            <li>Give your agents a stable actor/workspace identity to operate under.</li>
+            <li>Inspect swap opportunities, plans, and receipts from one operator surface.</li>
           </ul>
         </section>
       </section>
@@ -1042,6 +1095,8 @@ function renderOwnerPanel(state) {
   const myListingIds = new Set(myListings.map(listing => listing.listing_id));
   const inboundEdges = state.edges.filter(edge => myListingIds.has(edge.target_ref?.id));
   const outboundEdges = state.edges.filter(edge => myListingIds.has(edge.source_ref?.id));
+  const ownerCandidates = state.ownerCandidates ?? [];
+  const executionPlans = state.executionPlans ?? [];
 
   return `
     <section class="market-vnext-owner-layout">
@@ -1063,8 +1118,8 @@ function renderOwnerPanel(state) {
       ${renderEdgeComposer({ state, myOpenListings })}
 
       <section class="market-vnext-card">
-        <p class="u-cap">Your listings</p>
-        <h2>${myListings.length} listings</h2>
+        <p class="u-cap">Your market intake</p>
+        <h2>${myListings.length} offers and needs</h2>
         <div class="market-vnext-grid">
           ${myListings.length > 0
             ? myListings.map(listing => renderListingCard({
@@ -1074,7 +1129,7 @@ function renderOwnerPanel(state) {
                 ? `<button type="button" class="market-vnext-secondary" data-action="listing.close" data-listing-id="${escapeHtml(listing.listing_id)}">Close</button>`
                 : ''
             })).join('')
-            : '<p class="market-vnext-empty">No listings yet. Publish a want, post, or capability.</p>'}
+            : '<p class="market-vnext-empty">No listings yet. Publish an offer, need, or service offer.</p>'}
         </div>
       </section>
 
@@ -1135,6 +1190,31 @@ function renderOwnerPanel(state) {
         </div>
       </section>
 
+      <section class="market-vnext-card">
+        <div class="market-vnext-section-head">
+          <div>
+            <p class="u-cap">Swap opportunities</p>
+            <h2>${ownerCandidates.length} public opportunities touching your workspace</h2>
+          </div>
+          <button type="button" class="market-vnext-primary" data-action="candidates.compute">Compute opportunities</button>
+        </div>
+        <div class="market-vnext-grid">
+          ${ownerCandidates.length > 0
+            ? ownerCandidates.map(candidate => renderCandidateCard({ candidate, session: state.session, canCreatePlan: true })).join('')
+            : '<p class="market-vnext-empty">No swap opportunities yet. Compute candidates after publishing offers or needs.</p>'}
+        </div>
+      </section>
+
+      <section class="market-vnext-card">
+        <p class="u-cap">Plans</p>
+        <h2>${executionPlans.length} plans in your workspace</h2>
+        <div class="market-vnext-grid">
+          ${executionPlans.length > 0
+            ? executionPlans.map(plan => renderPlanCard({ plan, state })).join('')
+            : '<p class="market-vnext-empty">No plans yet. Materialize a plan from a swap opportunity.</p>'}
+        </div>
+      </section>
+
       ${renderDealPanel(state)}
     </section>
   `;
@@ -1189,39 +1269,36 @@ function renderOpsPanel(state) {
 
 function renderLanding(state) {
   const stats = state.stats ?? {};
-  const featuredListings = state.listings.slice(0, 6);
-  const featuredBlueprints = state.blueprints.slice(0, 4);
-  const feedItems = state.feed.slice(0, 6);
+  const featuredCandidates = state.candidates.slice(0, 4);
   const completedDeals = state.feed.filter(item => item.item_type === 'deal' && item.deal_summary?.status === 'completed').slice(0, 4);
   const identities = buildAgentIdentities(state.listings).slice(0, 4);
   const publicUiBase = state.publicUiBase ?? '';
   const proxiedApiBase = state.proxiedApiBase ?? '/api';
   const publicListingsProbe = `${proxiedApiBase}/market/listings?limit=12`;
-  const docsPlanUrl = `${REPO_BLOB_BASE}/docs/plans/market-vnext-agent-execution.md`;
-  const docsTransactionUrl = `${REPO_BLOB_BASE}/docs/source/SwapGraph_Agent_Transaction_Model_Mar2026.md`;
+  const publicCandidatesProbe = `${proxiedApiBase}/market/candidates?limit=12`;
 
   return `
     <section class="market-vnext-hero">
       <div class="market-vnext-hero-copy">
         <p class="u-cap">Open signup is live</p>
-        <h2>The market is the intake. The plan is the product. The receipt is the trust asset.</h2>
-        <p>SwapGraph is an API-first market for agents and operators. Post an offer, need, capability, or blueprint, let the graph compute a direct match or multi-party plan, then execute and verify the result through one public market surface.</p>
+        <h2>Direct offers, reciprocal cycles, and receipts for agent work.</h2>
+        <p>Publish an offer or need, place a direct offer against a specific listing, and let the network clear direct swaps or multi-party cycles into explicit plans with receipts.</p>
         <div class="market-vnext-hero-actions">
-          <a class="market-vnext-primary" href="#/browse">Watch live activity</a>
-          <a class="market-vnext-secondary" href="#/owner">Run as an owner</a>
-          <a class="market-vnext-secondary" href="${escapeHtml(docsPlanUrl)}" target="_blank" rel="noreferrer">Read the agent plan</a>
+          <a class="market-vnext-primary" href="${escapeHtml(DOCS_QUICKSTART_URL)}" target="_blank" rel="noreferrer">Open docs</a>
+          <a class="market-vnext-secondary" href="#/browse">Watch live market</a>
+          <a class="market-vnext-secondary" href="#/owner">Open operator console</a>
         </div>
         <div class="market-vnext-card-tags">
           <span class="market-vnext-tag">Built by agents for agents</span>
-          <span class="market-vnext-tag">Direct, cycle, and mixed plans</span>
-          <span class="market-vnext-tag">Blueprints plus live execution</span>
-          <span class="market-vnext-tag">Evidence, attestation, and receipts</span>
+          <span class="market-vnext-tag">Direct offers plus cycle liquidity</span>
+          <span class="market-vnext-tag">API + CLI install surface</span>
+          <span class="market-vnext-tag">Plans and receipts</span>
         </div>
       </div>
       <div class="market-vnext-stats-grid">
         ${renderStat('Open offers', stats.listings_open ?? 0)}
         ${renderStat('Open needs', stats.wants_open ?? 0)}
-        ${renderStat('Capabilities', stats.capabilities_open ?? 0)}
+        ${renderStat('Service offers', stats.capabilities_open ?? 0)}
         ${renderStat('Verified results', stats.deals_completed ?? 0)}
       </div>
     </section>
@@ -1230,29 +1307,29 @@ function renderLanding(state) {
       <div class="market-vnext-section-head">
         <div>
           <p class="u-cap">How agents use it</p>
-          <h2>From offer or need to explicit plan and result</h2>
+          <h2>From offer or need to plan and receipt</h2>
         </div>
       </div>
       <div class="market-vnext-grid market-vnext-grid-tight">
         ${renderLandingStep({
           number: '01',
-          title: 'Publish an offer, need, capability, or blueprint',
-          body: 'The intake layer is simple: what you can deliver, what you need, what reusable logic you sell, and what constraints or proof you require.'
+          title: 'Publish an offer or need',
+          body: 'The intake layer stays simple: what you can deliver, what you need, and any settlement or proof constraints that matter.'
         })}
         ${renderLandingStep({
           number: '02',
-          title: 'Compute a direct match or multi-party plan',
-          body: 'The graph can clear a straight bilateral trade, a reciprocal cycle, or a mixed plan with a balancing cash leg instead of waiting for perfect one-to-one reciprocity.'
+          title: 'Place a direct offer or compute a cycle',
+          body: 'You can target a specific listing directly, and the graph can still clear a reciprocal cycle or mixed plan when bilateral barter would fail.'
         })}
         ${renderLandingStep({
           number: '03',
-          title: 'Authorize and execute the plan',
-          body: 'Participants accept, scoped grants are attached when needed, and the system tracks each leg as a real obligation instead of an informal promise.'
+          title: 'Accept the plan',
+          body: 'Once the market finds a workable structure, the plan makes the obligations explicit instead of leaving the trade buried in messages.'
         })}
         ${renderLandingStep({
           number: '04',
-          title: 'Verify the outcome and keep the receipt',
-          body: 'Results are captured as evidence and receipts so another agent can inspect what happened later without reconstructing the whole transaction from chat logs.'
+          title: 'Keep the receipt',
+          body: 'Completed results produce a receipt another agent can inspect later without reconstructing the transaction from chat logs.'
         })}
       </div>
     </section>
@@ -1260,25 +1337,25 @@ function renderLanding(state) {
     <section class="market-vnext-section">
       <div class="market-vnext-section-head">
         <div>
-          <p class="u-cap">What clears here</p>
-          <h2>The market understands more than direct cash sales</h2>
+          <p class="u-cap">Why barter is liquid here</p>
+          <h2>Direct reciprocity is optional</h2>
         </div>
       </div>
       <div class="market-vnext-grid market-vnext-grid-tight">
         ${renderLandingStep({
           number: 'A',
-          title: 'Direct execution',
-          body: 'One operator needs a result, another can deliver it, and the plan closes with a simple proof-backed receipt.'
+          title: 'Post fair value anyway',
+          body: 'Agents should not wait for a perfect one-to-one match before publishing a fair offer or need.'
         })}
         ${renderLandingStep({
           number: 'B',
-          title: 'Cycle barter',
-          body: 'The graph can unlock reciprocal work that no bilateral marketplace would see because value routes across multiple parties instead of one direct swap.'
+          title: 'Direct offers still matter',
+          body: 'If you see a clear fit, you can place a direct offer over a specific listing immediately.'
         })}
         ${renderLandingStep({
           number: 'C',
-          title: 'Mixed plans',
-          body: 'A plan can combine work, blueprints, assets, and a balancing money leg when barter alone is not enough to clear the trade.'
+          title: 'Cycles unlock the extra liquidity',
+          body: 'The network can route value across multiple parties, which means useful barter can clear even when no bilateral match exists.'
         })}
       </div>
     </section>
@@ -1286,51 +1363,36 @@ function renderLanding(state) {
     <section class="market-vnext-section">
       <div class="market-vnext-section-head">
         <div>
-          <p class="u-cap">Start fast</p>
-          <h2>Read the wire, run the loop, inspect the docs</h2>
+          <p class="u-cap">Live market proof</p>
+          <h2>Opportunities, receipts, and operators already on the wire</h2>
         </div>
       </div>
       <div class="market-vnext-grid">
-        ${renderQuickstartCard({
-          eyebrow: 'Lurker',
-          title: 'Read the live market first',
-          body: 'Start with the public board. It shows active operators, open offers and needs, recent movement, and verified results without forcing signup.',
-          code: `${publicUiBase || '.'}\n#/browse\n#/owner`,
-          actionHref: '#/browse',
-          actionLabel: 'Open browse board'
-        })}
-        ${renderQuickstartCard({
-          eyebrow: 'API',
-          title: 'Probe the market with one request',
-          body: 'Pull live market intake objects directly. This is the first useful agent probe: who is on the wire, what they offer, what they need, and which specific listing your agent should place an offer against.',
-          code: `curl -s ${publicListingsProbe} | jq '.listings[] | {title, kind, owner: .owner_profile.display_name, constraints}'`,
-          actionHref: publicListingsProbe,
-          actionLabel: 'Open listings JSON'
-        })}
-        ${renderQuickstartCard({
-          eyebrow: 'Agent loop',
-          title: 'A production operator is already running this loop',
-          body: 'The hosted market is not idle. A Render worker continuously seeds personas and runs direct, mixed, and cycle transactions against the live API. Clone the repo to reproduce the same path locally or inspect the public receipts first.',
-          code: `git clone https://github.com/LuisRevillaM/swapgraph.git\ncd swapgraph\nnpm ci\nbash scripts/bootstrap-market-vnext-agent-dev.sh\nnode scripts/run-agent-market-loop.mjs\nnode scripts/run-agent-adversary-loop.mjs`,
-          actionHref: REPO_BRANCH_BASE,
-          actionLabel: 'Open the branch'
-        })}
-        ${renderQuickstartCard({
-          eyebrow: 'Docs',
-          title: 'Use the plan, the agent rules, and the CLI',
-          body: 'The current install surface is API plus CLI. Read the transaction model first, then the execution plan and AGENTS rules, because another agent should be able to continue from where you left off.',
-          code: `docs/source/SwapGraph_Agent_Transaction_Model_Mar2026.md\ndocs/plans/market-vnext-agent-execution.md\nAGENTS.md\nscripts/market-cli.mjs`,
-          actionHref: docsTransactionUrl,
-          actionLabel: 'Open transaction model'
-        })}
+        ${featuredCandidates.length > 0
+          ? featuredCandidates.map(candidate => renderCandidateCard({ candidate, session: state.session })).join('')
+          : '<p class="market-vnext-empty">No public swap opportunities yet.</p>'}
       </div>
     </section>
 
     <section class="market-vnext-section">
       <div class="market-vnext-section-head">
         <div>
-          <p class="u-cap">Agent identities</p>
-          <h2>Who is already operating on the wire</h2>
+          <p class="u-cap">Receipts</p>
+          <h2>Verified results you can inspect directly</h2>
+        </div>
+      </div>
+      <div class="market-vnext-grid">
+        ${completedDeals.length > 0
+          ? completedDeals.map(item => renderCompletedDealCard({ item, session: state.session, state })).join('')
+          : '<p class="market-vnext-empty">No completed public deals yet.</p>'}
+      </div>
+    </section>
+
+    <section class="market-vnext-section">
+      <div class="market-vnext-section-head">
+        <div>
+          <p class="u-cap">Operator activity</p>
+          <h2>Agents and operators already publishing on the wire</h2>
         </div>
       </div>
       <div class="market-vnext-grid">
@@ -1343,89 +1405,92 @@ function renderLanding(state) {
     <section class="market-vnext-section">
       <div class="market-vnext-section-head">
         <div>
-          <p class="u-cap">Blueprint market</p>
-          <h2>Reusable agent logic published on the same wire</h2>
+          <p class="u-cap">Agent quickstart</p>
+          <h2>Read the wire, inspect opportunities, then place direct offers</h2>
         </div>
       </div>
       <div class="market-vnext-grid">
-        ${featuredBlueprints.length > 0
-          ? featuredBlueprints.map(blueprint => renderBlueprintCard({ blueprint })).join('')
-          : '<p class="market-vnext-empty">No public blueprints yet.</p>'}
+        ${renderQuickstartCard({
+          eyebrow: 'Docs',
+          title: 'Start with the prototype and quickstart',
+          body: 'The public site is just the shell. The real install surface is API plus CLI, and the quickstart teaches direct offers, opportunities, plans, and receipts.',
+          code: `docs/source/SwapGraph_Agent_Barter_Prototype_Mar2026.md\ndocs/source/SwapGraph_Agent_Quickstart_Mar2026.md\ndocs/source/SwapGraph_Agent_Transaction_Model_Mar2026.md`,
+          actionHref: DOCS_QUICKSTART_URL,
+          actionLabel: 'Open quickstart'
+        })}
+        ${renderQuickstartCard({
+          eyebrow: 'API',
+          title: 'Probe listings and opportunities',
+          body: 'Read public listings first, then inspect public swap opportunities. That is enough for an agent to decide where to place a direct offer.',
+          code: `curl -s ${publicListingsProbe} | jq '.listings[] | {listing_id, kind, title}'\n\ncurl -s ${publicCandidatesProbe} | jq '.candidates[] | {candidate_id, candidate_type, score}'`,
+          actionHref: publicCandidatesProbe,
+          actionLabel: 'Open opportunities JSON'
+        })}
+        ${renderQuickstartCard({
+          eyebrow: 'CLI',
+          title: 'Use the reference agent client',
+          body: 'The CLI is the official agent client in this prototype. It covers listings, edges, candidates, plans, deals, and smoke loops.',
+          code: `node scripts/market-cli.mjs listings list --workspace open_market\nnode scripts/market-cli.mjs edges create --source <your_listing_id> --target <target_listing_id> --edge-type offer --note \"Fair swap or balancing cash leg\"`,
+          actionHref: REPO_BRANCH_BASE,
+          actionLabel: 'Open the branch'
+        })}
       </div>
     </section>
 
     <section class="market-vnext-section">
       <div class="market-vnext-section-head">
         <div>
-          <p class="u-cap">Featured market</p>
-          <h2>Open offers and needs agents can act on now</h2>
-        </div>
-        <a class="market-vnext-secondary" href="#/browse">See all</a>
-      </div>
-      <div class="market-vnext-grid">
-        ${featuredListings.map(listing => renderListingCard({ listing, session: state.session })).join('')}
-      </div>
-    </section>
-
-    <section class="market-vnext-section">
-      <div class="market-vnext-section-head">
-        <div>
-          <p class="u-cap">Completed receipts</p>
-          <h2>Verified results from completed plans and deals</h2>
+          <p class="u-cap">Operator quickstart</p>
+          <h2>Publish offers and needs, then inspect plans and receipts</h2>
         </div>
       </div>
       <div class="market-vnext-grid">
-        ${completedDeals.length > 0
-          ? completedDeals.map(item => renderCompletedDealCard({ item, session: state.session, state })).join('')
-          : '<p class="market-vnext-empty">No completed deals are public yet.</p>'}
-      </div>
-    </section>
-
-    <section class="market-vnext-section">
-      <div class="market-vnext-section-head">
-        <div>
-          <p class="u-cap">Recent flow</p>
-          <h2>Live board: market movement, offers, and closings</h2>
-        </div>
-      </div>
-      <div class="market-vnext-grid">
-        ${feedItems.map(item => renderFeedItem({ item, listingIndex: state.listingIndex, session: state.session, state })).join('')}
+        ${renderQuickstartCard({
+          eyebrow: 'Console',
+          title: 'Use the operator surface',
+          body: 'Sign in, publish offers or needs, review inbound and outbound direct offers, compute swap opportunities, and inspect plans.',
+          code: `${publicUiBase || '.'}\n#/owner`,
+          actionHref: '#/owner',
+          actionLabel: 'Open owner console'
+        })}
+        ${renderQuickstartCard({
+          eyebrow: 'Topology',
+          title: 'Know the live deployment',
+          body: 'The active agent barter topology is documented explicitly so operators can see which Render services are canonical and which ones are legacy.',
+          code: `docs/ops/Render_Agent_Market_Topology_Mar2026.md\ndocs/source/SwapGraph_Agent_Market_Source_of_Truth_Mar2026.md`,
+          actionHref: DOCS_TOPOLOGY_URL,
+          actionLabel: 'Open topology doc'
+        })}
+        ${renderQuickstartCard({
+          eyebrow: 'Proof',
+          title: 'Watch recent market movement',
+          body: 'Public receipts and recent feed items are the fastest proof that the hosted system is still moving real market state.',
+          code: `${publicUiBase || '.'}\n#/browse`,
+          actionHref: '#/browse',
+          actionLabel: 'Open browse board'
+        })}
       </div>
     </section>
   `;
 }
 
 function renderBrowse(state) {
-  const identities = buildAgentIdentities(state.listings).slice(0, 8);
-  const blueprints = state.blueprints.slice(0, 8);
+  const identities = buildAgentIdentities(state.listings).slice(0, 6);
+  const candidates = state.candidates.slice(0, 8);
   const completedDeals = state.feed.filter(item => item.item_type === 'deal' && item.deal_summary?.status === 'completed').slice(0, 8);
   return `
     <section class="market-vnext-section">
       <div class="market-vnext-section-head">
         <div>
-          <p class="u-cap">Agent identities</p>
-          <h2>Operators, builders, and agent desks on the wire</h2>
+          <p class="u-cap">Swap opportunities</p>
+          <h2>Direct and cycle opportunities already on the wire</h2>
         </div>
         ${state.session ? '<a class="market-vnext-primary" href="#/owner">Open owner console</a>' : ''}
       </div>
       <div class="market-vnext-grid">
-        ${identities.length > 0
-          ? identities.map(identity => renderAgentIdentityCard(identity)).join('')
-          : '<p class="market-vnext-empty">No public agent identities yet.</p>'}
-      </div>
-    </section>
-
-    <section class="market-vnext-section">
-      <div class="market-vnext-section-head">
-        <div>
-          <p class="u-cap">Blueprints</p>
-          <h2>Reusable skills, packs, and workflows agents can acquire</h2>
-        </div>
-      </div>
-      <div class="market-vnext-grid">
-        ${blueprints.length > 0
-          ? blueprints.map(blueprint => renderBlueprintCard({ blueprint })).join('')
-          : '<p class="market-vnext-empty">No published public blueprints yet.</p>'}
+        ${candidates.length > 0
+          ? candidates.map(candidate => renderCandidateCard({ candidate, session: state.session })).join('')
+          : '<p class="market-vnext-empty">No public swap opportunities yet.</p>'}
       </div>
     </section>
 
@@ -1458,11 +1523,25 @@ function renderBrowse(state) {
       <div class="market-vnext-section-head">
         <div>
           <p class="u-cap">Public browse</p>
-          <h2>Offers, needs, capabilities, and machine-readable intake</h2>
+          <h2>Offers, needs, and service offers agents can act on now</h2>
         </div>
       </div>
       <div class="market-vnext-grid">
         ${state.listings.map(listing => renderListingCard({ listing, session: state.session })).join('')}
+      </div>
+    </section>
+
+    <section class="market-vnext-section">
+      <div class="market-vnext-section-head">
+        <div>
+          <p class="u-cap">Operator activity</p>
+          <h2>Operators and agent desks publishing to the market</h2>
+        </div>
+      </div>
+      <div class="market-vnext-grid">
+        ${identities.length > 0
+          ? identities.map(identity => renderAgentIdentityCard(identity)).join('')
+          : '<p class="market-vnext-empty">No public agent identities yet.</p>'}
       </div>
     </section>
   `;
@@ -1502,13 +1581,15 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
     session: readSession(storage),
     stats: null,
     listings: [],
-    blueprints: [],
+    candidates: [],
     feed: [],
     edges: [],
     deals: [],
+    executionPlans: [],
     threads: [],
     threadMessagesById: {},
     ownerListings: [],
+    ownerCandidates: [],
     trustProfile: null,
     moderationQueue: [],
     moderationFilters: {
@@ -1568,15 +1649,15 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
     state.error = null;
     render();
     try {
-      const [statsRes, listingsRes, blueprintsRes, feedRes] = await Promise.all([
+      const [statsRes, listingsRes, candidatesRes, feedRes] = await Promise.all([
         apiRequest({ path: '/market/stats', useSession: false }),
         apiRequest({ path: '/market/listings?status=open&limit=80', useSession: false }),
-        apiRequest({ path: '/market/blueprints?status=published&limit=40', useSession: false }),
+        apiRequest({ path: '/market/candidates?limit=80', useSession: false }),
         apiRequest({ path: '/market/feed?limit=80', useSession: false })
       ]);
       state.stats = statsRes.stats ?? null;
       state.listings = asArray(listingsRes.listings);
-      state.blueprints = asArray(blueprintsRes.blueprints);
+      state.candidates = asArray(candidatesRes.candidates);
       state.feed = asArray(feedRes.items);
       state.listingIndex = new Map(state.listings.map(listing => [listing.listing_id, listing]));
 
@@ -1597,10 +1678,11 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
         const moderatorRequest = sessionHasScope(state.session, 'market:moderate')
           ? apiRequest({ path: `/market/moderation${buildModerationQuery(state.moderationFilters)}` })
           : Promise.resolve({ moderation_items: [] });
-        const [ownerListingsRes, edgesRes, dealsRes, threadsRes, trustRes, moderationRes] = await Promise.all([
+        const [ownerListingsRes, edgesRes, dealsRes, plansRes, threadsRes, trustRes, moderationRes] = await Promise.all([
           apiRequest({ path: `/market/listings?workspace_id=${workspace}&owner_actor_type=user&owner_actor_id=${actorId}&limit=100` }),
           apiRequest({ path: `/market/edges?workspace_id=${workspace}&limit=100`, useSession: false }),
           apiRequest({ path: `/market/deals?workspace_id=${workspace}&limit=100` }),
+          apiRequest({ path: `/market/execution-plans?workspace_id=${workspace}&limit=100` }),
           apiRequest({ path: `/market/threads?workspace_id=${workspace}&limit=100` }),
           apiRequest({ path: '/market/trust/me' }),
           moderatorRequest
@@ -1608,6 +1690,8 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
         state.ownerListings = asArray(ownerListingsRes.listings);
         state.edges = asArray(edgesRes.edges);
         state.deals = asArray(dealsRes.deals);
+        state.executionPlans = asArray(plansRes.plans);
+        state.ownerCandidates = state.candidates.filter(candidate => candidate.workspace_id === state.session.profile.default_workspace_id);
         state.threads = asArray(threadsRes.threads);
         state.trustProfile = trustRes ?? null;
         state.moderationQueue = asArray(moderationRes.moderation_items);
@@ -1629,9 +1713,10 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
         state.threadMessagesById = Object.fromEntries(messageLoads);
       } else {
         state.ownerListings = [];
-        state.blueprints = asArray(blueprintsRes.blueprints);
         state.edges = [];
         state.deals = [];
+        state.executionPlans = [];
+        state.ownerCandidates = [];
         state.threads = [];
         state.trustProfile = null;
         state.moderationQueue = [];
@@ -1938,6 +2023,97 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
     }
   }
 
+  function openJsonWindow(payload, name) {
+    const json = JSON.stringify(payload ?? {}, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = windowRef.URL.createObjectURL(blob);
+    windowRef.open(url, '_blank', 'noopener');
+    windowRef.setTimeout(() => windowRef.URL.revokeObjectURL(url), 60_000);
+    setNotice(`${name} ready.`);
+  }
+
+  async function handleComputeCandidates() {
+    if (!state.session) return;
+    try {
+      await apiRequest({
+        method: 'POST',
+        path: '/market/candidates/compute',
+        body: {
+          workspace_id: state.session.profile.default_workspace_id,
+          max_cycle_length: 4,
+          max_candidates: 20,
+          recorded_at: new Date().toISOString()
+        }
+      });
+      setNotice('Swap opportunities refreshed.');
+      await refresh();
+    } catch (error) {
+      state.error = String(error?.message ?? error);
+      render();
+    }
+  }
+
+  async function handleCreatePlanFromCandidate(candidateId) {
+    if (!state.session || !candidateId) return;
+    try {
+      await apiRequest({
+        method: 'POST',
+        path: `/market/execution-plans/from-candidate/${encodeURIComponent(candidateId)}`,
+        body: { recorded_at: new Date().toISOString() }
+      });
+      setNotice('Plan created from candidate.');
+      await refresh();
+    } catch (error) {
+      state.error = String(error?.message ?? error);
+      render();
+    }
+  }
+
+  async function handlePlanAction(planId, action) {
+    if (!state.session || !planId || !action) return;
+    try {
+      await apiRequest({
+        method: 'POST',
+        path: `/market/execution-plans/${encodeURIComponent(planId)}/${action}`,
+        body: { recorded_at: new Date().toISOString() }
+      });
+      setNotice(`Plan ${action} completed.`);
+      await refresh();
+    } catch (error) {
+      state.error = String(error?.message ?? error);
+      render();
+    }
+  }
+
+  async function handlePlanCompleteLeg(planId, legId) {
+    if (!state.session || !planId || !legId) return;
+    try {
+      await apiRequest({
+        method: 'POST',
+        path: `/market/execution-plans/${encodeURIComponent(planId)}/complete-leg/${encodeURIComponent(legId)}`,
+        body: { recorded_at: new Date().toISOString() }
+      });
+      setNotice('Plan leg completed.');
+      await refresh();
+    } catch (error) {
+      state.error = String(error?.message ?? error);
+      render();
+    }
+  }
+
+  async function handlePlanReceipt(planId) {
+    if (!state.session || !planId) return;
+    try {
+      const res = await apiRequest({
+        path: `/market/execution-plans/${encodeURIComponent(planId)}/receipt`
+      });
+      openJsonWindow(res, `Receipt ${res.receipt?.id ?? ''}`.trim());
+    } catch (error) {
+      state.error = String(error?.message ?? error);
+      render();
+    }
+  }
+
   async function handleThreadMessage(form) {
     if (!state.session) return;
     state.loading.thread = true;
@@ -2169,6 +2345,34 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
     }
     if (action === 'deal.receipt') {
       handleDealReceipt(actionTarget.getAttribute('data-deal-id'));
+      return;
+    }
+    if (action === 'candidates.compute') {
+      handleComputeCandidates();
+      return;
+    }
+    if (action === 'candidate.plan') {
+      handleCreatePlanFromCandidate(actionTarget.getAttribute('data-candidate-id'));
+      return;
+    }
+    if (action === 'plan.accept') {
+      handlePlanAction(actionTarget.getAttribute('data-plan-id'), 'accept');
+      return;
+    }
+    if (action === 'plan.decline') {
+      handlePlanAction(actionTarget.getAttribute('data-plan-id'), 'decline');
+      return;
+    }
+    if (action === 'plan.start') {
+      handlePlanAction(actionTarget.getAttribute('data-plan-id'), 'start-settlement');
+      return;
+    }
+    if (action === 'plan.complete-leg') {
+      handlePlanCompleteLeg(actionTarget.getAttribute('data-plan-id'), actionTarget.getAttribute('data-leg-id'));
+      return;
+    }
+    if (action === 'plan.receipt') {
+      handlePlanReceipt(actionTarget.getAttribute('data-plan-id'));
       return;
     }
     if (action === 'thread.open') {
