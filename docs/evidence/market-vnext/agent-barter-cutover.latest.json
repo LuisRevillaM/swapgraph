@@ -1,0 +1,65 @@
+{
+  "ok": true,
+  "observed_at": "2026-03-17T16:52:10Z",
+  "branch": "marketplace-vnext-execution",
+  "commit": "23be6007f0b6e8b697e53e4bbcf7a678874b868f",
+  "canonical_services": {
+    "api": {
+      "name": "swapgraph-agent-barter-api",
+      "id": "srv-d6so03n5gffc738nducg",
+      "url": "https://swapgraph-agent-barter-api.onrender.com",
+      "disk_id": "dsk-d6so2dvdiees73cgsgeg",
+      "state_file": "/var/data/agent-barter-state.json"
+    },
+    "ui": {
+      "name": "swapgraph-agent-barter-ui",
+      "id": "srv-d6so4e7pm1nc73bg81rg",
+      "url": "https://swapgraph-agent-barter-ui.onrender.com"
+    },
+    "operator": {
+      "name": "swapgraph-agent-barter-operator",
+      "id": "srv-d6so4dpaae7s73dfin9g",
+      "dashboard_url": "https://dashboard.render.com/worker/srv-d6so4dpaae7s73dfin9g"
+    }
+  },
+  "legacy_services": {
+    "api": {
+      "name": "swapgraph-market-vnext-api",
+      "id": "srv-d6m7437kijhs73e72op0",
+      "url": "https://swapgraph-market-vnext-api.onrender.com",
+      "status": "suspended",
+      "suspenders": ["stuck_crashlooping"]
+    }
+  },
+  "public_checks": {
+    "ui_status": 200,
+    "stats": {
+      "actors": 52,
+      "workspaces": 26,
+      "listings_open": 58,
+      "wants_open": 24,
+      "capabilities_open": 5,
+      "edges_open": 0,
+      "deals_active": 0,
+      "deals_completed": 9,
+      "latest_activity_at": "2026-03-17T16:48:03.380Z"
+    },
+    "public_blueprints_total": 0,
+    "public_open_market_listings_total": 11,
+    "public_open_market_candidates_total": 0,
+    "public_feed_contains_blueprints": false
+  },
+  "hosted_experiment": {
+    "base_url": "https://swapgraph-agent-barter-api.onrender.com",
+    "direct_receipt": "receipt_deal_000009",
+    "mixed_receipt": "receipt_plan_000009",
+    "cycle_receipt": "receipt_plan_000010",
+    "adversary": {
+      "outsider_accept_status": 403,
+      "outsider_complete_status": 403,
+      "duplicate_failure_status": 400,
+      "final_plan_status": "unwound",
+      "final_receipt_state": "unwound"
+    }
+  }
+}

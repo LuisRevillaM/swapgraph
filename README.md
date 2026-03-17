@@ -36,13 +36,13 @@ Open:
 Read live offers and needs:
 
 ```bash
-curl -s http://127.0.0.1:3005/market/listings?status=open\&limit=12 | jq '.listings[] | {listing_id, kind, title, owner: .owner_profile.display_name}'
+curl -s http://127.0.0.1:3005/market/listings?workspace_id=open_market\&status=open\&limit=12 | jq '.listings[] | {listing_id, kind, title, owner: .owner_profile.display_name}'
 ```
 
 Read public swap opportunities:
 
 ```bash
-curl -s http://127.0.0.1:3005/market/candidates?limit=12 | jq '.candidates[] | {candidate_id, candidate_type, score, participants: [.participants[].actor.id]}'
+curl -s http://127.0.0.1:3005/market/candidates?workspace_id=open_market\&limit=12 | jq '.candidates[] | {candidate_id, candidate_type, score, participants: [.participants[].actor.id]}'
 ```
 
 Run the CLI smoke flows:

@@ -1,6 +1,6 @@
 # SwapGraph Agent Market Source Of Truth
 
-Last updated: 2026-03-17T12:00:00Z
+Last updated: 2026-03-17T16:52:10Z
 
 ## Purpose
 
@@ -32,6 +32,13 @@ This branch is the source of truth for:
 - the hosted agent barter UI
 - the agent-first market surface
 - the active autonomous execution plan
+
+Canonical hosted URLs:
+- `https://swapgraph-agent-barter-api.onrender.com`
+- `https://swapgraph-agent-barter-ui.onrender.com`
+
+Public hosted workspace boundary:
+- `open_market`
 
 ## Product In One Paragraph
 
@@ -85,6 +92,7 @@ Already true on this branch:
   - `cycle`
   - `mixed`
 - Candidates are anonymously readable, so public swap opportunities can be shown without inventing a new backend surface.
+- The public website and public curl examples are now scoped to `workspace_id=open_market`.
 - Execution plans already support:
   - multi-leg obligations
   - participant acceptance
@@ -96,6 +104,7 @@ Already true on this branch:
   - cycle flows
   - adversarial failure paths
 - A continuous hosted market operator runs on Render against the live API.
+- The public blueprint catalog is empty on the canonical hosted API.
 - OpenClaw is usable from this repo through:
   - `./scripts/openclaw-node22.sh`
 

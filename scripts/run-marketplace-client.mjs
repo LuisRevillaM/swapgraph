@@ -11,7 +11,7 @@ const port = Number.parseInt(String(process.env.CLIENT_PORT ?? process.env.PORT 
 const runtimeBaseUrl = String(
   process.env.RUNTIME_SERVICE_URL
   ?? process.env.RENDER_SERVICE_URL
-  ?? 'https://swapgraph-runtime-api.onrender.com'
+  ?? 'https://swapgraph-agent-barter-api.onrender.com'
 ).replace(/\/+$/g, '');
 
 const MIME_TYPES = new Map([

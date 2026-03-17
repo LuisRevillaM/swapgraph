@@ -1,6 +1,6 @@
 # Render Agent Market Topology
 
-Last updated: 2026-03-17T12:00:00Z
+Last updated: 2026-03-17T16:40:00Z
 
 ## Purpose
 
@@ -9,29 +9,29 @@ This document records the exact Render topology for the active agent barter prod
 ## Canonical product services
 
 ### Canonical web UI
-- service name: `swapgraph-market-vnext-ui`
-- service id: `srv-d6m74jnkijhs73fqjnl0`
+- service name: `swapgraph-agent-barter-ui`
+- service id: `srv-d6so4e7pm1nc73bg81rg`
 - type: `web_service`
-- public URL: `https://swapgraph-market-vnext-ui.onrender.com`
+- public URL: `https://swapgraph-agent-barter-ui.onrender.com`
 - branch: `marketplace-vnext-execution`
 - classification: `canonical`
 - role: external-facing public UI
 
 ### Canonical API
-- service name: `swapgraph-market-vnext-api`
-- service id: `srv-d6m7437kijhs73e72op0`
+- service name: `swapgraph-agent-barter-api`
+- service id: `srv-d6so03n5gffc738nducg`
 - type: `web_service`
-- public URL: `https://swapgraph-market-vnext-api.onrender.com`
+- public URL: `https://swapgraph-agent-barter-api.onrender.com`
 - branch: `marketplace-vnext-execution`
-- classification: `canonical only if externally reachable`
+- classification: `canonical`
 - role: external-facing public API
-- current issue observed: public URL returns `503` with `x-render-routing: suspend-by-user`
-- latest known live deploy id from Render metadata: `dep-d6pi0l15pdvs73bn2nv0`
-- latest known deploy commit from Render metadata: `a7b327c0cc3b4aa3c72cf2fe614c3902475b445e`
+- latest known live deploy id from Render metadata: `dep-d6so4oea2pns738bd1h0`
+- latest known deploy commit from Render metadata: `23be6007f0b6e8b697e53e4bbcf7a678874b868f`
+- persistent state path: `/var/data/agent-barter-state.json`
 
 ### Canonical background worker
-- service name: `swapgraph-market-operator`
-- service id: `srv-d6pholdm5p6s73fu5n60`
+- service name: `swapgraph-agent-barter-operator`
+- service id: `srv-d6so4dpaae7s73dfin9g`
 - type: `background_worker`
 - public URL: none
 - branch: `marketplace-vnext-execution`
@@ -73,21 +73,35 @@ These Render services should not define the public story or canonical URLs for t
 - `swapgraph-runtime-api`
 - `graph-board-feed-worker`
 
+### Legacy vNext UI
+- service name: `swapgraph-market-vnext-ui`
+- service id: `srv-d6m74jnkijhs73fqjnl0`
+- type: `web_service`
+- public URL: `https://swapgraph-market-vnext-ui.onrender.com`
+- classification: `legacy`
+- role: earlier agent-market UI name before the barter cutover
+
+### Legacy vNext API
+- service name: `swapgraph-market-vnext-api`
+- service id: `srv-d6m7437kijhs73e72op0`
+- type: `web_service`
+- public URL: `https://swapgraph-market-vnext-api.onrender.com`
+- classification: `legacy`
+- role: suspended pre-cutover API
+- current status: `suspended`
+- suspenders: `stuck_crashlooping`
+
+### Legacy vNext operator
+- service name: `swapgraph-market-operator`
+- service id: `srv-d6pholdm5p6s73fu5n60`
+- type: `background_worker`
+- public URL: none
+- classification: `legacy`
+- role: earlier hosted operator loop name before the barter cutover
+
 ## Current operational conclusion
 
-The topology is only truly canonical when both of these are true:
-1. the public UI is reachable
-2. the public API is reachable
-
-As of this document update:
-- UI is reachable
-- API is not externally usable because it serves a Render suspension page
-
-## Required cleanup rule
-
-If `swapgraph-market-vnext-api` cannot be unsuspended or made externally reachable quickly, replacement services should be created and cut over with agent-product names:
-- `swapgraph-agent-barter-api`
-- `swapgraph-agent-barter-ui`
-- `swapgraph-agent-barter-operator`
-
-If replacement happens, this document must be updated immediately and the older `swapgraph-market-vnext-*` services must be reclassified as legacy.
+The canonical agent barter topology is now:
+1. reachable at public agent-barter URLs
+2. backed by persistent API state on the Render disk
+3. separate from the older vNext names and the human-marketplace lineage

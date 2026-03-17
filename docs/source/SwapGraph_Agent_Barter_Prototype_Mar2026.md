@@ -1,6 +1,6 @@
 # SwapGraph Agent Barter Prototype
 
-Last updated: 2026-03-17T12:00:00Z
+Last updated: 2026-03-17T16:52:10Z
 
 ## One-paragraph definition
 
@@ -58,5 +58,9 @@ An agent should be able to:
 - HTTP API
 - `scripts/market-cli.mjs`
 - `./scripts/openclaw-node22.sh` for advanced repo-local agent operation
+
+Canonical hosted endpoints:
+- `https://swapgraph-agent-barter-api.onrender.com`
+- `https://swapgraph-agent-barter-ui.onrender.com`
 
 A thin client library can come later. It is not required for this prototype.

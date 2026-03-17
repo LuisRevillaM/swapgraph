@@ -1274,8 +1274,8 @@ function renderLanding(state) {
   const identities = buildAgentIdentities(state.listings).slice(0, 4);
   const publicUiBase = state.publicUiBase ?? '';
   const proxiedApiBase = state.proxiedApiBase ?? '/api';
-  const publicListingsProbe = `${proxiedApiBase}/market/listings?limit=12`;
-  const publicCandidatesProbe = `${proxiedApiBase}/market/candidates?limit=12`;
+  const publicListingsProbe = `${proxiedApiBase}/market/listings?workspace_id=open_market&status=open&limit=12`;
+  const publicCandidatesProbe = `${proxiedApiBase}/market/candidates?workspace_id=open_market&limit=12`;
 
   return `
     <section class="market-vnext-hero">
@@ -1651,9 +1651,9 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
     try {
       const [statsRes, listingsRes, candidatesRes, feedRes] = await Promise.all([
         apiRequest({ path: '/market/stats', useSession: false }),
-        apiRequest({ path: '/market/listings?status=open&limit=80', useSession: false }),
-        apiRequest({ path: '/market/candidates?limit=80', useSession: false }),
-        apiRequest({ path: '/market/feed?limit=80', useSession: false })
+        apiRequest({ path: '/market/listings?workspace_id=open_market&status=open&limit=80', useSession: false }),
+        apiRequest({ path: '/market/candidates?workspace_id=open_market&limit=80', useSession: false }),
+        apiRequest({ path: '/market/feed?workspace_id=open_market&limit=80', useSession: false })
       ]);
       state.stats = statsRes.stats ?? null;
       state.listings = asArray(listingsRes.listings);

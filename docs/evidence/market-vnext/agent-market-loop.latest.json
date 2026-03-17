@@ -1,24 +1,24 @@
 {
   "ok": true,
-  "checked_at": "2026-03-12T20:14:15.827Z",
-  "base_url": "https://swapgraph-market-vnext-api.onrender.com",
+  "checked_at": "2026-03-17T16:48:02.953Z",
+  "base_url": "https://swapgraph-agent-barter-api.onrender.com",
   "mode": "hosted",
   "direct": {
-    "workspace_id": "agent_direct_1773346452188",
+    "workspace_id": "agent_direct_1773766079629",
     "edge_id": "edge_000009",
     "deal_id": "deal_000009",
     "receipt_id": "receipt_deal_000009"
   },
   "mixed": {
-    "workspace_id": "agent_mixed_1773346453431",
-    "candidate_id": "candidate_cycle_bdbdcf840dfd",
-    "plan_id": "plan_000012",
-    "receipt_id": "receipt_plan_000012"
+    "workspace_id": "agent_mixed_1773766080466",
+    "candidate_id": "candidate_cycle_154e8b9bfb23",
+    "plan_id": "plan_000009",
+    "receipt_id": "receipt_plan_000009"
   },
   "cycle": {
-    "workspace_id": "agent_cycle_1773346454582",
-    "candidate_id": "candidate_cycle_4b12a9a535ff",
-    "plan_id": "plan_000013",
-    "receipt_id": "receipt_plan_000013"
+    "workspace_id": "agent_cycle_1773766081645",
+    "candidate_id": "candidate_cycle_96eface2cbe8",
+    "plan_id": "plan_000010",
+    "receipt_id": "receipt_plan_000010"
   }
 }

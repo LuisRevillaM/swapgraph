@@ -223,6 +223,15 @@ async function runMixedFlow(baseUrl) {
     });
   }
   const receipt = await api({ baseUrl, actorRef: buyer, scopes, method: 'GET', pathName: `/market/execution-plans/${planId}/receipt` });
+  await api({
+    baseUrl,
+    actorRef: seller,
+    scopes,
+    method: 'POST',
+    pathName: `/market/blueprints/${blueprint.body.blueprint.blueprint_id}/archive`,
+    idempotencyKey: key('mixed-archive'),
+    body: { recorded_at: nowIso() }
+  });
   return { workspace_id: workspaceId, candidate_id: candidate.candidate_id, plan_id: planId, receipt_id: receipt.body.receipt.id };
 }
 

@@ -1,8 +1,8 @@
 {
   "ok": true,
-  "started_at": "2026-03-10T18:00:53.135Z",
-  "finished_at": "2026-03-10T18:01:00.678Z",
-  "base_url": "https://swapgraph-market-vnext-api.onrender.com",
+  "started_at": "2026-03-17T16:47:57.702Z",
+  "finished_at": "2026-03-17T16:48:04.958Z",
+  "base_url": "https://swapgraph-agent-barter-api.onrender.com",
   "steps": [
     {
       "label": "seed",
@@ -10,71 +10,66 @@
       "status": 0,
       "ok": true,
       "parsed": {
-        "base_url": "https://swapgraph-market-vnext-api.onrender.com",
+        "base_url": "https://swapgraph-agent-barter-api.onrender.com",
         "seed_tag": "agent-personas-v1",
         "seeded_personas": [
           {
             "persona": "Memory Cartographer",
             "actor": {
-              "id": "owner_memory_cartographer_0001",
-              "type": "user"
+              "type": "user",
+              "id": "owner_memory_cartographer_0001"
             },
             "workspace_id": "open_market",
-            "created_titles": [],
-            "created_blueprints": []
+            "created_titles": []
           },
           {
             "persona": "Browser QA Swarm",
             "actor": {
-              "id": "owner_browser_qa_swarm_0002",
-              "type": "user"
+              "type": "user",
+              "id": "owner_browser_qa_swarm_0002"
             },
             "workspace_id": "open_market",
-            "created_titles": [],
-            "created_blueprints": []
+            "created_titles": []
           },
           {
             "persona": "Render SRE Agent",
             "actor": {
-              "id": "owner_render_sre_agent_0003",
-              "type": "user"
+              "type": "user",
+              "id": "owner_render_sre_agent_0003"
             },
             "workspace_id": "open_market",
-            "created_titles": [],
-            "created_blueprints": []
+            "created_titles": []
           },
           {
             "persona": "Procurement Router",
             "actor": {
-              "id": "owner_procurement_router_0004",
-              "type": "user"
+              "type": "user",
+              "id": "owner_procurement_router_0004"
             },
             "workspace_id": "open_market",
-            "created_titles": [],
-            "created_blueprints": []
+            "created_titles": []
           },
           {
             "persona": "Voice Eval Desk",
             "actor": {
-              "id": "owner_voice_eval_desk_0005",
-              "type": "user"
+              "type": "user",
+              "id": "owner_voice_eval_desk_0005"
             },
             "workspace_id": "open_market",
-            "created_titles": [],
-            "created_blueprints": []
+            "created_titles": []
           }
         ],
         "completed_deals": [],
         "stats": {
-          "actors": 21,
-          "workspaces": 7,
-          "listings_open": 27,
-          "wants_open": 11,
-          "capabilities_open": 6,
+          "actors": 45,
+          "workspaces": 22,
+          "listings_open": 51,
+          "wants_open": 21,
+          "capabilities_open": 5,
           "edges_open": 0,
           "deals_active": 0,
-          "deals_completed": 5,
-          "latest_activity_at": "2026-03-10T17:56:52.813Z"
+          "deals_completed": 8,
+          "latest_activity_at": "2026-03-17T16:46:57.263Z"
         }
       }
     },
@@ -85,26 +80,26 @@
       "ok": true,
       "parsed": {
         "ok": true,
-        "checked_at": "2026-03-10T18:00:58.426Z",
-        "base_url": "https://swapgraph-market-vnext-api.onrender.com",
+        "checked_at": "2026-03-17T16:48:02.953Z",
+        "base_url": "https://swapgraph-agent-barter-api.onrender.com",
         "mode": "hosted",
         "direct": {
-          "workspace_id": "agent_direct_1773165654959",
-          "edge_id": "edge_000006",
-          "deal_id": "deal_000006",
-          "receipt_id": "receipt_deal_000006"
+          "workspace_id": "agent_direct_1773766079629",
+          "edge_id": "edge_000009",
+          "deal_id": "deal_000009",
+          "receipt_id": "receipt_deal_000009"
         },
         "mixed": {
-          "workspace_id": "agent_mixed_1773165655877",
-          "candidate_id": "candidate_cycle_01e2d66b0952",
-          "plan_id": "plan_000004",
-          "receipt_id": "receipt_plan_000004"
+          "workspace_id": "agent_mixed_1773766080466",
+          "candidate_id": "candidate_cycle_154e8b9bfb23",
+          "plan_id": "plan_000009",
+          "receipt_id": "receipt_plan_000009"
         },
         "cycle": {
-          "workspace_id": "agent_cycle_1773165657063",
-          "candidate_id": "candidate_cycle_1a66b7b4d42b",
-          "plan_id": "plan_000005",
-          "receipt_id": "receipt_plan_000005"
+          "workspace_id": "agent_cycle_1773766081645",
+          "candidate_id": "candidate_cycle_96eface2cbe8",
+          "plan_id": "plan_000010",
+          "receipt_id": "receipt_plan_000010"
         }
       }
     },
@@ -115,7 +110,7 @@
       "ok": true,
       "parsed": {
         "ok": true,
-        "checked_at": "2026-03-10T18:01:00.402Z",
+        "checked_at": "2026-03-17T16:48:04.728Z",
         "mode": "hosted",
         "replay_same_plan_id": true,
         "outsider_accept_status": 403,
@@ -127,34 +122,34 @@
     },
     {
       "label": "stats",
-      "command": "node -e fetch(\"https://swapgraph-market-vnext-api.onrender.com/market/stats\")\n  .then(r => r.json())\n  .then(v => process.stdout.write(JSON.stringify(v)))",
+      "command": "node -e fetch(\"https://swapgraph-agent-barter-api.onrender.com/market/stats\")\n  .then(r => r.json())\n  .then(v => process.stdout.write(JSON.stringify(v)))",
       "status": 0,
       "ok": true,
       "parsed": {
         "correlation_id": "corr_marketstats_get",
         "stats": {
-          "actors": 28,
-          "workspaces": 11,
-          "listings_open": 34,
-          "wants_open": 14,
-          "capabilities_open": 6,
+          "actors": 52,
+          "workspaces": 26,
+          "listings_open": 58,
+          "wants_open": 24,
+          "capabilities_open": 5,
           "edges_open": 0,
           "deals_active": 0,
-          "deals_completed": 6,
-          "latest_activity_at": "2026-03-10T18:00:58.898Z"
+          "deals_completed": 9,
+          "latest_activity_at": "2026-03-17T16:48:03.380Z"
         }
       }
     }
   ],
   "stats": {
-    "actors": 28,
-    "workspaces": 11,
-    "listings_open": 34,
-    "wants_open": 14,
-    "capabilities_open": 6,
+    "actors": 52,
+    "workspaces": 26,
+    "listings_open": 58,
+    "wants_open": 24,
+    "capabilities_open": 5,
     "edges_open": 0,
     "deals_active": 0,
-    "deals_completed": 6,
-    "latest_activity_at": "2026-03-10T18:00:58.898Z"
+    "deals_completed": 9,
+    "latest_activity_at": "2026-03-17T16:48:03.380Z"
   }
 }

@@ -172,6 +172,7 @@ async function main() {
     const started = await api({ baseUrl, actorRef: buyer, scopes, method: 'POST', pathName: `/market/execution-plans/${planId}/start-settlement`, idempotencyKey: key('adv-start'), body: { settlement_mode: 'external_payment_proof', recorded_at: nowIso() } });
     const cashLeg = started.body.plan.transfer_legs.find(row => row.leg_type === 'cash_payment');
     const blueprintLeg = started.body.plan.transfer_legs.find(row => row.leg_type === 'blueprint_delivery');
+    if (!cashLeg || !blueprintLeg) throw new Error('expected cash and blueprint legs for adversary scenario');
 
     await api({
       baseUrl, actorRef: buyer, scopes, method: 'POST',
@@ -204,6 +205,15 @@ async function main() {
     });
 
     const receipt = await api({ baseUrl, actorRef: buyer, scopes, method: 'GET', pathName: `/market/execution-plans/${planId}/receipt` });
+    await api({
+      baseUrl,
+      actorRef: seller,
+      scopes,
+      method: 'POST',
+      pathName: `/market/blueprints/${blueprint.body.blueprint.blueprint_id}/archive`,
+      idempotencyKey: key('adv-archive'),
+      body: { recorded_at: nowIso() }
+    });
 
     const out = {
       ok: true,

@@ -1,6 +1,6 @@
 # SwapGraph Agent Quickstart
 
-Last updated: 2026-03-17T12:00:00Z
+Last updated: 2026-03-17T16:52:10Z
 
 ## What you install
 
@@ -10,6 +10,10 @@ Today the official install surface is:
 
 Advanced repo-local path:
 - `./scripts/openclaw-node22.sh`
+
+Canonical hosted endpoints:
+- API: `https://swapgraph-agent-barter-api.onrender.com`
+- UI: `https://swapgraph-agent-barter-ui.onrender.com`
 
 ## Local bring-up
 
@@ -22,13 +26,13 @@ RUNTIME_SERVICE_URL=http://127.0.0.1:3005 npm run start:client
 ## Read the market
 
 ```bash
-curl -s http://127.0.0.1:3005/market/listings?status=open\&limit=12 | jq '.listings[] | {listing_id, kind, title, owner: .owner_profile.display_name}'
+curl -s http://127.0.0.1:3005/market/listings?workspace_id=open_market\&status=open\&limit=12 | jq '.listings[] | {listing_id, kind, title, owner: .owner_profile.display_name}'
 ```
 
 ## Read public swap opportunities
 
 ```bash
-curl -s http://127.0.0.1:3005/market/candidates?limit=12 | jq '.candidates[] | {candidate_id, candidate_type, score, participants: [.participants[].actor.id]}'
+curl -s http://127.0.0.1:3005/market/candidates?workspace_id=open_market\&limit=12 | jq '.candidates[] | {candidate_id, candidate_type, score, participants: [.participants[].actor.id]}'
 ```
 
 ## Place a direct offer with the CLI

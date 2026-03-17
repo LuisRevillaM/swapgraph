@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { spawnSync } from 'node:child_process';
 
-const baseUrl = String(process.env.SWAPGRAPH_BASE_URL ?? 'https://swapgraph-market-vnext-api.onrender.com').replace(/\/+$/g, '');
+const baseUrl = String(process.env.SWAPGRAPH_BASE_URL ?? 'https://swapgraph-agent-barter-api.onrender.com').replace(/\/+$/g, '');
 const intervalMs = Math.max(60_000, Number.parseInt(String(process.env.MARKET_OPERATOR_INTERVAL_MS ?? '900000'), 10) || 900000);
 const adversaryEvery = Math.max(1, Number.parseInt(String(process.env.MARKET_OPERATOR_ADVERSARY_EVERY ?? '6'), 10) || 6);
 const retryAttempts = Math.max(1, Number.parseInt(String(process.env.MARKET_OPERATOR_RETRY_ATTEMPTS ?? '3'), 10) || 3);

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-const base = String(process.env.SWAPGRAPH_BASE_URL ?? process.env.MARKET_BASE_URL ?? 'https://swapgraph-market-vnext-api.onrender.com').replace(/\/+$/g, '');
+const base = String(process.env.SWAPGRAPH_BASE_URL ?? process.env.MARKET_BASE_URL ?? 'https://swapgraph-agent-barter-api.onrender.com').replace(/\/+$/g, '');
 const seedTag = process.env.MARKET_AGENT_SEED_TAG ?? 'agent-personas-v1';
+const includeInternalBlueprintSeed = process.env.MARKET_ENABLE_INTERNAL_BLUEPRINT_SEED === '1';
 let seq = 0;
 
 function idem(prefix) {
@@ -293,7 +294,9 @@ const personas = [
 
 async function main() {
   const existing = await request('/market/listings?limit=300', { publicRequest: true });
-  const existingBlueprintsResponse = await request('/market/blueprints?limit=300', { publicRequest: true });
+  const existingBlueprintsResponse = includeInternalBlueprintSeed
+    ? await request('/market/blueprints?limit=300', { publicRequest: true })
+    : { blueprints: [] };
   const existingTitles = new Set((existing.listings ?? []).map(listing => listing.title));
   const existingBlueprintTitles = new Set((existingBlueprintsResponse.blueprints ?? []).map(blueprint => blueprint.title));
   const existingSessionsByName = new Map();
@@ -346,6 +349,7 @@ async function main() {
       existingTitles.add(listing.title);
     }
     for (const blueprint of persona.blueprints ?? []) {
+      if (!includeInternalBlueprintSeed) break;
       if (existingBlueprintTitles.has(blueprint.title)) continue;
       const created = await request('/market/blueprints', {
         method: 'POST',
@@ -367,7 +371,16 @@ async function main() {
       createdBlueprintTitles.push(blueprint.title);
       existingBlueprintTitles.add(blueprint.title);
     }
-    sessions.push({ persona: persona.display_name, actor, workspace_id: workspaceId, created_titles: createdTitles, created_blueprints: createdBlueprintTitles });
+    const session = {
+      persona: persona.display_name,
+      actor,
+      workspace_id: workspaceId,
+      created_titles: createdTitles
+    };
+    if (includeInternalBlueprintSeed) {
+      session.created_blueprints = createdBlueprintTitles;
+    }
+    sessions.push(session);
   }
 
   const refreshed = await request('/market/listings?limit=300', { publicRequest: true });
