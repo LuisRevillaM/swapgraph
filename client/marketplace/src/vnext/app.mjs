@@ -793,15 +793,29 @@ function renderCreateListingForm(session, loading) {
   `;
 }
 
-function renderEdgeComposer({ state, myOpenListings }) {
-  if (!state.edgeComposer?.targetListingId || myOpenListings.length === 0) return '';
+function renderEdgeComposer({ state, myOpenListings, availableTargetListings = [] }) {
+  if (myOpenListings.length === 0) {
+    return '<p class="market-vnext-empty">Publish an offer or need before sending a direct offer.</p>';
+  }
+  if (availableTargetListings.length === 0 && !state.edgeComposer?.targetListingId) {
+    return '<p class="market-vnext-empty">No public target offers are open right now.</p>';
+  }
   const targetListing = state.listingIndex.get(state.edgeComposer.targetListingId);
   return `
-    <section class="market-vnext-card owner-form-card">
+    <section class="market-vnext-card owner-form-card owner-inline-panel">
       <p class="u-cap">Direct offer</p>
-      <h2>${escapeHtml(targetListing?.title ?? state.edgeComposer.targetListingId)}</h2>
+      <h2>${escapeHtml(targetListing?.title ?? 'Choose a target offer')}</h2>
       <form class="market-vnext-form" data-form="edge-create">
-        <input type="hidden" name="target_listing_id" value="${escapeHtml(state.edgeComposer.targetListingId)}" />
+        ${state.edgeComposer?.targetListingId
+          ? `<input type="hidden" name="target_listing_id" value="${escapeHtml(state.edgeComposer.targetListingId)}" />`
+          : `
+            <label>
+              <span>Target offer or need</span>
+              <select name="target_listing_id">
+                ${availableTargetListings.map(listing => `<option value="${escapeHtml(listing.listing_id)}">${escapeHtml(listing.title)} (${escapeHtml(listingKindLabel(listing.kind))})</option>`).join('')}
+              </select>
+            </label>
+          `}
         <label>
           <span>Your source offer or need</span>
           <select name="source_listing_id">
@@ -1234,6 +1248,11 @@ function renderOwnerPanel(state) {
   const ownerCandidates = state.ownerCandidates ?? [];
   const executionPlans = state.executionPlans ?? [];
   const actionablePlans = executionPlans.filter(plan => ['pending_participant_acceptance', 'ready_for_settlement', 'settlement_in_progress', 'partially_complete'].includes(plan.status));
+  const ownerPanelMode = state.ownerPanel?.mode ?? null;
+  const availableTargetListings = state.listings.filter(listing =>
+    listing.status === 'open'
+    && !myListingIds.has(listing.listing_id)
+  );
   const summaryCards = [
     { label: 'Open offers and needs', value: myOpenListings.length, detail: 'Visible on the market now.' },
     { label: 'Inbound direct offers', value: inboundEdges.filter(edge => edge.status === 'open').length, detail: 'Need your response.' },
@@ -1272,15 +1291,46 @@ function renderOwnerPanel(state) {
       <section class="market-vnext-card owner-actions-card">
         <p class="u-cap">Do next</p>
         <h2>Publish, inspect, then settle</h2>
-        <div class="market-vnext-inline-actions">
+        <div class="market-vnext-inline-actions owner-toolbar">
           <button type="button" class="market-vnext-primary" data-action="owner.focus.publish">Publish an offer or need</button>
-          <button type="button" class="market-vnext-secondary" data-action="candidates.compute">Refresh swap opportunities</button>
-          <a class="market-vnext-secondary" href="#/browse">Review live market</a>
-          <a class="market-vnext-secondary" href="#/docs">Open docs</a>
+          <button type="button" class="market-vnext-secondary" data-action="owner.focus.direct-offer">Make direct offer</button>
+          <button type="button" class="market-vnext-secondary" data-action="candidates.compute">Compute opportunities</button>
+          <button type="button" class="market-vnext-secondary" data-action="owner.refresh">Refresh market state</button>
         </div>
       </section>
 
-      ${renderTrustPanel(state)}
+      ${ownerPanelMode === 'publish'
+        ? `
+          <section id="publish-panel" class="market-vnext-card publish-stack-card">
+            <div class="market-vnext-section-head">
+              <div>
+                <p class="u-cap">Publish</p>
+                <h2>Create new market intake</h2>
+              </div>
+              <button type="button" class="market-vnext-secondary" data-action="owner.dismiss.panel">Hide</button>
+            </div>
+            <p class="market-vnext-card-copy">Publishing is secondary to the dashboard. Use it when you already know what to add to the market.</p>
+            ${renderCreateListingForm(session, state.loading.listing)}
+          </section>
+        `
+        : ''}
+
+      ${ownerPanelMode === 'direct-offer'
+        ? `
+          <section id="publish-panel" class="market-vnext-card publish-stack-card">
+            <div class="market-vnext-section-head">
+              <div>
+                <p class="u-cap">Direct offer</p>
+                <h2>Target an open offer or need</h2>
+              </div>
+              <button type="button" class="market-vnext-secondary" data-action="owner.dismiss.panel">Hide</button>
+            </div>
+            ${renderEdgeComposer({ state, myOpenListings, availableTargetListings })}
+          </section>
+        `
+        : ''}
+
+      <div class="market-vnext-console-divider" aria-hidden="true"></div>
 
       <section class="market-vnext-card">
         <p class="u-cap">Direct offers</p>
@@ -1357,14 +1407,6 @@ function renderOwnerPanel(state) {
         </div>
       </section>
 
-      <section id="publish-panel" class="market-vnext-card publish-stack-card">
-        <p class="u-cap">Publish</p>
-        <h2>Create new market intake</h2>
-        <p class="market-vnext-card-copy">Publishing is secondary to the dashboard. Use it when you already know what to add to the market.</p>
-        ${renderCreateListingForm(session, state.loading.listing)}
-        ${renderEdgeComposer({ state, myOpenListings })}
-      </section>
-
       <section class="market-vnext-card">
         <p class="u-cap">Your market intake</p>
         <h2>${myListings.length} offers and needs</h2>
@@ -1382,6 +1424,7 @@ function renderOwnerPanel(state) {
       </section>
 
       ${renderDealPanel(state)}
+      ${renderTrustPanel(state)}
     </section>
   `;
 }
@@ -1894,9 +1937,10 @@ function renderApp(state) {
     content = renderLanding(state);
   }
   const shellTone = route === '/' || route === '/docs' ? 'dark' : 'light';
+  const shellVariant = route === '/owner' || route === '/browse' || route === '/ops' ? ' market-vnext-shell-console' : '';
 
   return `
-    <div class="market-vnext-shell market-vnext-shell-${escapeHtml(shellTone)}">
+    <div class="market-vnext-shell market-vnext-shell-${escapeHtml(shellTone)}${shellVariant}">
       ${renderNav(state.session, route)}
       ${state.error ? `<div class="market-vnext-banner error">${escapeHtml(state.error)}</div>` : ''}
       ${state.notice ? `<div class="market-vnext-banner ok">${escapeHtml(state.notice)}</div>` : ''}
@@ -1939,6 +1983,7 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
     activeModerationId: null,
     docsContent: {},
     listingIndex: new Map(),
+    ownerPanel: { mode: null },
     edgeComposer: { targetListingId: null },
     activeThreadId: null,
     loading: {
@@ -2228,7 +2273,8 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
         }
       });
       form.reset();
-      setNotice('Listing published.');
+      state.ownerPanel.mode = null;
+      setNotice('Offer published.');
       await refresh();
     } catch (error) {
       state.error = String(error?.message ?? error);
@@ -2262,8 +2308,9 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
           recorded_at: new Date().toISOString()
         }
       });
+      state.ownerPanel.mode = null;
       state.edgeComposer.targetListingId = null;
-      setNotice('Offer sent.');
+      setNotice('Direct offer sent.');
       await refresh();
     } catch (error) {
       state.error = String(error?.message ?? error);
@@ -2282,7 +2329,8 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
         path: `/market/edges/${encodeURIComponent(edgeId)}/${action}`,
         body: { recorded_at: new Date().toISOString() }
       });
-      setNotice(`Edge ${action}ed.`);
+      const label = action === 'accept' ? 'accepted' : action === 'decline' ? 'declined' : action === 'withdraw' ? 'withdrawn' : `${action}ed`;
+      setNotice(`Direct offer ${label}.`);
       await refresh();
     } catch (error) {
       state.error = String(error?.message ?? error);
@@ -2645,6 +2693,9 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
       return;
     }
     if (action === 'edge.compose') {
+      state.route = '/owner';
+      windowRef.location.hash = '#/owner';
+      state.ownerPanel.mode = 'direct-offer';
       state.edgeComposer.targetListingId = actionTarget.getAttribute('data-target-listing-id');
       state.notice = null;
       render();
@@ -2653,9 +2704,28 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
     if (action === 'owner.focus.publish') {
       state.route = '/owner';
       windowRef.location.hash = '#/owner';
-      windowRef.requestAnimationFrame(() => {
-        root.querySelector('#publish-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
+      state.ownerPanel.mode = 'publish';
+      state.edgeComposer.targetListingId = null;
+      render();
+      return;
+    }
+    if (action === 'owner.focus.direct-offer') {
+      state.route = '/owner';
+      windowRef.location.hash = '#/owner';
+      state.ownerPanel.mode = 'direct-offer';
+      state.edgeComposer.targetListingId = null;
+      render();
+      return;
+    }
+    if (action === 'owner.dismiss.panel') {
+      state.ownerPanel.mode = null;
+      state.edgeComposer.targetListingId = null;
+      render();
+      return;
+    }
+    if (action === 'owner.refresh') {
+      state.notice = 'Refreshing market state…';
+      refresh();
       return;
     }
     if (action === 'edge.accept') {

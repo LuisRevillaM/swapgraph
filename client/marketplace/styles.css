@@ -1779,6 +1779,66 @@ input:focus-visible {
   min-height: 132px;
 }
 
+.market-vnext-shell-console .market-vnext-card,
+.market-vnext-shell-console .market-vnext-topbar {
+  border-radius: var(--card-radius-console);
+}
+
+.market-vnext-shell-console .owner-summary-card .market-vnext-grid-tight {
+  gap: 10px;
+}
+
+.market-vnext-shell-console .market-vnext-stat-compact {
+  min-height: 0;
+  padding: 12px;
+  gap: 4px;
+  border-radius: var(--card-radius-console);
+  background: rgba(255, 255, 255, 0.68);
+}
+
+.market-vnext-shell-console .market-vnext-stat-value {
+  font-size: clamp(1.3rem, 3vw, 1.9rem);
+}
+
+.market-vnext-shell-console .owner-toolbar .market-vnext-secondary {
+  background: rgba(255, 255, 255, 0.58);
+  border-color: rgba(18, 42, 30, 0.14);
+}
+
+.market-vnext-shell-console .owner-toolbar .market-vnext-primary {
+  box-shadow: none;
+}
+
+.market-vnext-shell-console .market-vnext-section-head h2,
+.market-vnext-shell-console .market-vnext-card > .u-cap + h2 {
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.market-vnext-shell-console .market-vnext-section-head .u-cap,
+.market-vnext-shell-console .market-vnext-card > .u-cap {
+  letter-spacing: 0.16em;
+}
+
+.market-vnext-console-divider {
+  height: 1px;
+  background:
+    linear-gradient(90deg,
+      rgba(18, 42, 30, 0),
+      rgba(18, 42, 30, 0.16),
+      rgba(18, 42, 30, 0));
+}
+
+.market-vnext-shell-console .publish-stack-card {
+  border-style: dashed;
+}
+
+.owner-inline-panel {
+  border-radius: calc(var(--card-radius-console) - 2px);
+  background: rgba(255, 255, 255, 0.62);
+  box-shadow: none;
+}
+
 .market-vnext-bullets {
   margin: 0;
   padding-left: 18px;

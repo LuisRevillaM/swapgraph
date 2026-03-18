@@ -38,6 +38,7 @@
   --readability-floor-rem: var(--t-sm);
   --card-padding: 16px;
   --card-radius: 14px;
+  --card-radius-console: 10px;
   --card-radius-sm: 10px;
   --grid-gap: 10px;
   --section-gap: 22px;
