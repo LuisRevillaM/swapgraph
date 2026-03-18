@@ -2,6 +2,13 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { canonicalize } from '../util/canonicalJson.mjs';
 
+function cloneState(value) {
+  if (typeof structuredClone === 'function') {
+    return structuredClone(value);
+  }
+  return JSON.parse(JSON.stringify(value));
+}
+
 export class JsonStateStore {
   /**
    * @param {{ filePath: string }} opts
@@ -9,7 +16,7 @@ export class JsonStateStore {
   constructor({ filePath }) {
     if (!filePath) throw new Error('filePath is required');
     this.filePath = filePath;
-    this.state = {
+    this.stateTemplate = {
       intents: {},
       proposals: {},
       commits: {},
@@ -153,158 +160,38 @@ export class JsonStateStore {
       oauth_clients: {},
       oauth_tokens: {}
     };
+    this.state = cloneState(this.stateTemplate);
+  }
+
+  resetState() {
+    this.state = cloneState(this.stateTemplate);
   }
 
   load() {
     if (!existsSync(this.filePath)) {
-      this.state = {
-        intents: {},
-        proposals: {},
-        commits: {},
-        reservations: {},
-        timelines: {},
-        receipts: {},
-        delegations: {},
-        tenancy: { cycles: {}, proposals: {} },
-        events: [],
-        idempotency: {},
-        liquidity_providers: {},
-        liquidity_provider_personas: {},
-        liquidity_provider_counter: 0,
-        liquidity_provider_persona_counter: 0,
-        liquidity_simulation_sessions: {},
-        liquidity_simulation_events: [],
-        liquidity_simulation_session_counter: 0,
-        liquidity_inventory_snapshots: {},
-        liquidity_inventory_assets: {},
-        liquidity_inventory_reservations: {},
-        liquidity_inventory_reconciliation_events: [],
-        liquidity_inventory_snapshot_counter: 0,
-        liquidity_inventory_reservation_counter: 0,
-        liquidity_inventory_reconciliation_counter: 0,
-        liquidity_listings: {},
-        liquidity_decisions: {},
-        liquidity_decision_counter: 0,
-        liquidity_execution_modes: {},
-        liquidity_execution_requests: {},
-        liquidity_execution_request_counter: 0,
-        liquidity_execution_export_checkpoints: {},
-        liquidity_policies: {},
-        liquidity_policy_decision_audit: [],
-        liquidity_policy_decision_audit_counter: 0,
-        liquidity_policy_export_checkpoints: {},
-        liquidity_policy_daily_usage: {},
-        liquidity_policy_counterparty_exposure: {},
-        partner_liquidity_providers: {},
-        partner_liquidity_provider_counter: 0,
-        partner_liquidity_provider_rollout_policies: {},
-        partner_liquidity_provider_governance_audit: [],
-        partner_liquidity_provider_governance_audit_counter: 0,
-        partner_liquidity_provider_rollout_export_checkpoints: {},
-        platform_connections: {},
-        inventory_snapshots: {},
-        trust_safety_signals: {},
-        trust_safety_signal_counter: 0,
-        trust_safety_decisions: {},
-        trust_safety_decision_counter: 0,
-        trust_safety_export_checkpoints: {},
-        metrics_network_health_export_checkpoints: {},
-        notification_preferences: {},
-        counterparty_preferences: {},
-        marketplace_asset_values: {},
-        marketplace_matching_runs: {},
-        marketplace_matching_run_counter: 0,
-        marketplace_matching_proposal_runs: {},
-        marketplace_matching_shadow_diffs: {},
-        edge_intents: {},
-        edge_intent_counter: 0,
-        market_listings: {},
-        market_listing_counter: 0,
-        market_blueprints: {},
-        market_blueprint_counter: 0,
-        market_candidates: {},
-        market_execution_plans: {},
-        market_execution_plan_counter: 0,
-        market_edges: {},
-        market_edge_counter: 0,
-        market_threads: {},
-        market_thread_counter: 0,
-        market_messages: {},
-        market_message_counter: 0,
-        market_deals: {},
-        market_deal_counter: 0,
-        market_payment_proofs: {},
-        market_payment_proof_counter: 0,
-        market_execution_grants: {},
-        market_execution_grant_counter: 0,
-        market_feed_events: {},
-        market_feed_event_counter: 0,
-        market_actor_profiles: {},
-        market_actor_profile_counter: 0,
-        market_actor_quotas: {},
-        market_moderation_queue: {},
-        market_auth_identities: {},
-        market_auth_identity_counter: 0,
-        market_auth_challenges: {},
-        market_auth_challenge_counter: 0,
-        market_auth_sessions: {},
-        market_auth_session_counter: 0,
-        commercial_policies: {},
-        commercial_policy_audit: [],
-        commercial_policy_export_checkpoints: {},
-        policy_spend_daily: {},
-        policy_audit: [],
-        policy_consent_replay: {},
-        policy_audit_export_checkpoints: {},
-        settlement_vault_export_checkpoints: {},
-        partner_program: {},
-        partner_program_usage: {},
-        partner_program_rollout_policy: {},
-        partner_program_rollout_policy_audit: [],
-        partner_program_rollout_policy_export_checkpoints: {},
-        partner_program_commercial_usage_ledger: [],
-        partner_program_sla_policy: {},
-        partner_program_sla_breach_events: [],
-        partner_program_webhook_delivery_attempts: [],
-        partner_program_webhook_retry_policies: {},
-        partner_program_risk_tier_policy: {},
-        partner_program_risk_tier_usage_counters: {},
-        partner_program_disputes: [],
-        steam_tier1_adapter_contract: {},
-        steam_tier1_preflight_history: [],
-        steam_tier1_live_deposit_per_swap_proofs: [],
-        steam_tier1_live_vault_proofs: [],
-        transparency_log_publications: [],
-        transparency_log_export_checkpoints: {},
-        transparency_log_publication_counter: 0,
-        transparency_log_entry_counter: 0,
-        inclusion_proof_linkages: [],
-        inclusion_proof_export_checkpoints: {},
-        inclusion_proof_linkage_counter: 0,
-        tier2_adapter_capabilities: {},
-        tier2_adapter_preflight_history: [],
-        cross_adapter_cycle_semantics: {},
-        cross_adapter_cycle_receipts: {},
-        cross_adapter_compensation_cases: {},
-        cross_adapter_compensation_case_counter: 0,
-        cross_adapter_compensation_ledger: [],
-        cross_adapter_compensation_ledger_counter: 0,
-        cross_adapter_dispute_linkages: [],
-        cross_adapter_dispute_linkage_counter: 0,
-        reliability_slo_metrics: [],
-        reliability_incident_drills: [],
-        reliability_replay_checks: [],
-        reliability_remediation_plans: [],
-        reliability_remediation_plan_counter: 0,
-        staging_evidence_bundles: [],
-        staging_evidence_bundle_counter: 0,
-        oauth_clients: {},
-        oauth_tokens: {}
-      };
+      this.resetState();
       return;
     }
-    const raw = readFileSync(this.filePath, 'utf8');
-    this.state = JSON.parse(raw);
+    let raw = '';
+    try {
+      raw = readFileSync(this.filePath, 'utf8');
+      if (!raw.trim()) {
+        throw new SyntaxError('state file is empty');
+      }
+      this.state = JSON.parse(raw);
+    } catch (error) {
+      const backupPath = `${this.filePath}.corrupt.${Date.now()}.json`;
+      try {
+        mkdirSync(path.dirname(backupPath), { recursive: true });
+        writeFileSync(backupPath, raw);
+      } catch {
+        // best effort backup only
+      }
+      this.resetState();
+      this.save();
+      console.warn(`[json-state-store] reset corrupt state file at ${this.filePath}; backup written to ${backupPath}; reason=${error?.message ?? error}`);
+      return;
+    }
     this.state.intents ||= {};
     this.state.proposals ||= {};
     this.state.commits ||= {};
