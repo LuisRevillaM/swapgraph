@@ -8,6 +8,9 @@ const DOCS_PROTOTYPE_URL = `${REPO_BLOB_BASE}/docs/source/SwapGraph_Agent_Barter
 const DOCS_QUICKSTART_URL = `${REPO_BLOB_BASE}/docs/source/SwapGraph_Agent_Quickstart_Mar2026.md`;
 const DOCS_SOURCE_OF_TRUTH_URL = `${REPO_BLOB_BASE}/docs/source/SwapGraph_Agent_Market_Source_of_Truth_Mar2026.md`;
 const DOCS_TOPOLOGY_URL = `${REPO_BLOB_BASE}/docs/ops/Render_Agent_Market_Topology_Mar2026.md`;
+const API_DISCOVERY_PATH = '/.well-known/swapgraph';
+const API_MANIFEST_PATH = '/manifest.v1.json';
+const API_HEALTH_PATH = '/healthz';
 const DEFAULT_SIGNUP_SCOPES = Object.freeze([
   'market:read',
   'market:write',
@@ -15,7 +18,6 @@ const DEFAULT_SIGNUP_SCOPES = Object.freeze([
   'payment_proofs:write',
   'execution_grants:write'
 ]);
-const LEGACY_ROUTE_PATTERN = /^#\/(items|intents|inbox|active|receipts)(\/|$)/;
 
 function createIdempotencyKey(prefix) {
   return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
@@ -27,10 +29,6 @@ function normalizeHash(hash) {
   const withoutHash = safe.startsWith('#') ? safe.slice(1) : safe;
   const withSlash = withoutHash.startsWith('/') ? withoutHash : `/${withoutHash}`;
   return withSlash.replace(/\/{2,}/g, '/');
-}
-
-export function isLegacyMarketplaceHashRoute(hash) {
-  return LEGACY_ROUTE_PATTERN.test(typeof hash === 'string' ? hash : '');
 }
 
 function readSession(storage) {
@@ -120,6 +118,21 @@ function renderQuickstartCard({ eyebrow, title, body, code, actionHref = null, a
       <p class="market-vnext-card-copy">${escapeHtml(body)}</p>
       ${code ? `<pre class="market-vnext-code-block"><code>${escapeHtml(code)}</code></pre>` : ''}
       ${actionHref && actionLabel ? `<a class="market-vnext-secondary" href="${escapeHtml(actionHref)}" target="${actionHref.startsWith('http') ? '_blank' : '_self'}" rel="${actionHref.startsWith('http') ? 'noreferrer' : ''}">${escapeHtml(actionLabel)}</a>` : ''}
+    </article>
+  `;
+}
+
+function renderTerminalCard({ eyebrow, title, body, code, footer = null }) {
+  return `
+    <article class="market-vnext-card market-vnext-terminal-card">
+      <div class="market-vnext-terminal-head">
+        <p class="u-cap">${escapeHtml(eyebrow)}</p>
+        <span class="market-vnext-terminal-dots" aria-hidden="true"><span></span><span></span><span></span></span>
+      </div>
+      <h3>${escapeHtml(title)}</h3>
+      <p class="market-vnext-card-copy">${escapeHtml(body)}</p>
+      <pre class="market-vnext-code-block market-vnext-code-block-terminal"><code>${escapeHtml(code)}</code></pre>
+      ${footer ? `<p class="market-vnext-inline-list">${footer}</p>` : ''}
     </article>
   `;
 }
@@ -323,8 +336,8 @@ function renderNav(session, route) {
   const items = [
     { href: '#/', label: 'Home' },
     { href: '#/browse', label: 'Browse' },
-    { href: DOCS_QUICKSTART_URL, label: 'Docs', external: true },
-    { href: '#/owner', label: session ? 'Owner Console' : 'Join' }
+    { href: '#/docs', label: 'Docs' },
+    { href: '#/owner', label: session ? 'Console' : 'Join' }
   ];
   if (sessionHasScope(session, 'market:moderate')) {
     items.push({ href: '#/ops', label: 'Ops' });
@@ -336,12 +349,12 @@ function renderNav(session, route) {
         <span class="market-vnext-logo" aria-hidden="true"></span>
         <div>
           <p class="u-cap">SwapGraph</p>
-          <h1 class="market-vnext-title">Open Agent Market</h1>
+          <h1 class="market-vnext-title">Agent Barter Network</h1>
         </div>
       </div>
       <nav class="market-vnext-nav" aria-label="Marketplace navigation">
         ${items.map(item => `
-          <a class="market-vnext-nav-link${item.external ? '' : (route === normalizeHash(item.href) ? ' is-active' : '')}" href="${item.href}"${item.external ? ' target="_blank" rel="noreferrer"' : ''}>
+          <a class="market-vnext-nav-link${route === normalizeHash(item.href) ? ' is-active' : ''}" href="${item.href}">
             ${escapeHtml(item.label)}
           </a>
         `).join('')}
@@ -607,7 +620,7 @@ function renderCreateListingForm(session, loading) {
   if (!session) return '';
   return `
     <section class="market-vnext-card owner-form-card">
-      <p class="u-cap">Create listing</p>
+      <p class="u-cap">Publish to market</p>
       <h2>Publish an offer, need, or service offer</h2>
       <form class="market-vnext-form" data-form="listing-create">
         <input type="hidden" name="workspace_id" value="${escapeHtml(session.profile.default_workspace_id)}" />
@@ -651,7 +664,7 @@ function renderCreateListingForm(session, loading) {
           <span>Constraint notes</span>
           <textarea name="constraint_notes" rows="2" placeholder="SLA, policy, or trust requirements"></textarea>
         </label>
-        <button type="submit" class="market-vnext-primary"${loading ? ' disabled' : ''}>${loading ? 'Publishing…' : 'Publish listing'}</button>
+        <button type="submit" class="market-vnext-primary"${loading ? ' disabled' : ''}>${loading ? 'Publishing…' : 'Publish to market'}</button>
       </form>
     </section>
   `;
@@ -662,7 +675,7 @@ function renderEdgeComposer({ state, myOpenListings }) {
   const targetListing = state.listingIndex.get(state.edgeComposer.targetListingId);
   return `
     <section class="market-vnext-card owner-form-card">
-      <p class="u-cap">Place offer</p>
+      <p class="u-cap">Direct offer</p>
       <h2>${escapeHtml(targetListing?.title ?? state.edgeComposer.targetListingId)}</h2>
       <form class="market-vnext-form" data-form="edge-create">
         <input type="hidden" name="target_listing_id" value="${escapeHtml(state.edgeComposer.targetListingId)}" />
@@ -702,8 +715,8 @@ function renderDealPanel(state) {
 
   return `
     <section class="market-vnext-card">
-      <p class="u-cap">Direct deals</p>
-      <h2>${deals.length} direct settlements and legacy flows</h2>
+      <p class="u-cap">Direct settlements</p>
+      <h2>${deals.length} direct plans and receipts</h2>
       <div class="market-vnext-grid">
         ${deals.length > 0
           ? deals.map(deal => `
@@ -1097,11 +1110,18 @@ function renderOwnerPanel(state) {
   const outboundEdges = state.edges.filter(edge => myListingIds.has(edge.source_ref?.id));
   const ownerCandidates = state.ownerCandidates ?? [];
   const executionPlans = state.executionPlans ?? [];
+  const actionablePlans = executionPlans.filter(plan => ['pending_participant_acceptance', 'ready_for_settlement', 'settlement_in_progress', 'partially_complete'].includes(plan.status));
+  const summaryCards = [
+    { label: 'Open offers and needs', value: myOpenListings.length, detail: 'Visible on the market now.' },
+    { label: 'Inbound direct offers', value: inboundEdges.filter(edge => edge.status === 'open').length, detail: 'Need your response.' },
+    { label: 'Swap opportunities', value: ownerCandidates.length, detail: 'Candidate plans touching your workspace.' },
+    { label: 'Active plans', value: actionablePlans.length, detail: 'Need acceptance or settlement work.' }
+  ];
 
   return `
     <section class="market-vnext-owner-layout">
       <section class="market-vnext-card owner-profile-card">
-        <p class="u-cap">Owner workspace</p>
+        <p class="u-cap">Operator dashboard</p>
         <h2>${escapeHtml(session.profile.display_name)}</h2>
         <p class="market-vnext-card-copy">${escapeHtml(session.profile.bio ?? 'No profile bio yet.')}</p>
         <div class="market-vnext-card-tags">
@@ -1112,30 +1132,36 @@ function renderOwnerPanel(state) {
         <p class="market-vnext-idline">Agent headers: <code>x-actor-type=user</code> <code>x-actor-id=${escapeHtml(session.actor.id)}</code></p>
       </section>
 
-      ${renderTrustPanel(state)}
-
-      ${renderCreateListingForm(session, state.loading.listing)}
-      ${renderEdgeComposer({ state, myOpenListings })}
-
-      <section class="market-vnext-card">
-        <p class="u-cap">Your market intake</p>
-        <h2>${myListings.length} offers and needs</h2>
-        <div class="market-vnext-grid">
-          ${myListings.length > 0
-            ? myListings.map(listing => renderListingCard({
-              listing,
-              session,
-              action: listing.status === 'open'
-                ? `<button type="button" class="market-vnext-secondary" data-action="listing.close" data-listing-id="${escapeHtml(listing.listing_id)}">Close</button>`
-                : ''
-            })).join('')
-            : '<p class="market-vnext-empty">No listings yet. Publish an offer, need, or service offer.</p>'}
+      <section class="market-vnext-card owner-summary-card">
+        <p class="u-cap">What needs attention</p>
+        <h2>Market state at a glance</h2>
+        <div class="market-vnext-grid market-vnext-grid-tight">
+          ${summaryCards.map(card => `
+            <article class="market-vnext-stat market-vnext-stat-compact">
+              <span class="market-vnext-stat-value">${escapeHtml(String(card.value))}</span>
+              <span class="market-vnext-stat-label">${escapeHtml(card.label)}</span>
+              <span class="market-vnext-card-meta">${escapeHtml(card.detail)}</span>
+            </article>
+          `).join('')}
         </div>
       </section>
 
+      <section class="market-vnext-card owner-actions-card">
+        <p class="u-cap">Do next</p>
+        <h2>Publish, inspect, then settle</h2>
+        <div class="market-vnext-inline-actions">
+          <button type="button" class="market-vnext-primary" data-action="owner.focus.publish">Publish an offer or need</button>
+          <button type="button" class="market-vnext-secondary" data-action="candidates.compute">Refresh swap opportunities</button>
+          <a class="market-vnext-secondary" href="#/browse">Review live market</a>
+          <a class="market-vnext-secondary" href="#/docs">Open docs</a>
+        </div>
+      </section>
+
+      ${renderTrustPanel(state)}
+
       <section class="market-vnext-card">
-        <p class="u-cap">Inbound offers</p>
-        <h2>${inboundEdges.length} linked offers</h2>
+        <p class="u-cap">Direct offers</p>
+        <h2>${inboundEdges.length} inbound, ${outboundEdges.length} outbound</h2>
         <div class="market-vnext-grid">
           ${inboundEdges.length > 0
             ? inboundEdges.map(edge => `
@@ -1156,19 +1182,12 @@ function renderOwnerPanel(state) {
                       </span>
                     `
                     : edge.status === 'accepted'
-                      ? `<button type="button" class="market-vnext-primary" data-action="deal.create" data-edge-id="${escapeHtml(edge.edge_id)}">Create deal</button>`
+                      ? `<button type="button" class="market-vnext-primary" data-action="deal.create" data-edge-id="${escapeHtml(edge.edge_id)}">Create direct plan</button>`
                       : ''}
                 </div>
               </article>
             `).join('')
-            : '<p class="market-vnext-empty">No inbound offers yet.</p>'}
-        </div>
-      </section>
-
-      <section class="market-vnext-card">
-        <p class="u-cap">Outbound offers</p>
-        <h2>${outboundEdges.length} links created</h2>
-        <div class="market-vnext-grid">
+            : '<p class="market-vnext-empty">No inbound direct offers yet.</p>'}
           ${outboundEdges.length > 0
             ? outboundEdges.map(edge => `
               <article class="market-vnext-card edge-card">
@@ -1186,7 +1205,7 @@ function renderOwnerPanel(state) {
                 </div>
               </article>
             `).join('')
-            : '<p class="market-vnext-empty">No outbound offers yet.</p>'}
+            : '<p class="market-vnext-empty">No outbound direct offers yet.</p>'}
         </div>
       </section>
 
@@ -1194,7 +1213,7 @@ function renderOwnerPanel(state) {
         <div class="market-vnext-section-head">
           <div>
             <p class="u-cap">Swap opportunities</p>
-            <h2>${ownerCandidates.length} public opportunities touching your workspace</h2>
+            <h2>${ownerCandidates.length} opportunities touching your workspace</h2>
           </div>
           <button type="button" class="market-vnext-primary" data-action="candidates.compute">Compute opportunities</button>
         </div>
@@ -1212,6 +1231,30 @@ function renderOwnerPanel(state) {
           ${executionPlans.length > 0
             ? executionPlans.map(plan => renderPlanCard({ plan, state })).join('')
             : '<p class="market-vnext-empty">No plans yet. Materialize a plan from a swap opportunity.</p>'}
+        </div>
+      </section>
+
+      <section id="publish-panel" class="market-vnext-card publish-stack-card">
+        <p class="u-cap">Publish</p>
+        <h2>Create new market intake</h2>
+        <p class="market-vnext-card-copy">Publishing is secondary to the dashboard. Use it when you already know what to add to the market.</p>
+        ${renderCreateListingForm(session, state.loading.listing)}
+        ${renderEdgeComposer({ state, myOpenListings })}
+      </section>
+
+      <section class="market-vnext-card">
+        <p class="u-cap">Your market intake</p>
+        <h2>${myListings.length} offers and needs</h2>
+        <div class="market-vnext-grid">
+          ${myListings.length > 0
+            ? myListings.map(listing => renderListingCard({
+              listing,
+              session,
+              action: listing.status === 'open'
+                ? `<button type="button" class="market-vnext-secondary" data-action="listing.close" data-listing-id="${escapeHtml(listing.listing_id)}">Close</button>`
+                : ''
+            })).join('')
+            : '<p class="market-vnext-empty">No market intake yet. Publish an offer, need, or service offer.</p>'}
         </div>
       </section>
 
@@ -1272,21 +1315,38 @@ function renderLanding(state) {
   const featuredCandidates = state.candidates.slice(0, 4);
   const completedDeals = state.feed.filter(item => item.item_type === 'deal' && item.deal_summary?.status === 'completed').slice(0, 4);
   const identities = buildAgentIdentities(state.listings).slice(0, 4);
-  const publicUiBase = state.publicUiBase ?? '';
   const proxiedApiBase = state.proxiedApiBase ?? '/api';
   const publicListingsProbe = `${proxiedApiBase}/market/listings?workspace_id=open_market&status=open&limit=12`;
   const publicCandidatesProbe = `${proxiedApiBase}/market/candidates?workspace_id=open_market&limit=12`;
+  const manifestProbe = `${proxiedApiBase}${API_MANIFEST_PATH}`;
+  const discoveryProbe = `${proxiedApiBase}${API_DISCOVERY_PATH}`;
+  const activityLabel = stats.latest_activity_at ? formatIsoShort(stats.latest_activity_at) : 'live';
+  const liveProbe = [
+    '$ curl -s ' + publicListingsProbe,
+    JSON.stringify({
+      listings_open: stats.listings_open ?? 0,
+      wants_open: stats.wants_open ?? 0,
+      service_offers: stats.capabilities_open ?? 0,
+      verified_results: stats.deals_completed ?? 0
+    }, null, 2),
+    '',
+    '$ curl -s ' + publicCandidatesProbe,
+    JSON.stringify({
+      candidates: featuredCandidates.length,
+      last_activity: stats.latest_activity_at ?? null
+    }, null, 2)
+  ].join('\n');
 
   return `
-    <section class="market-vnext-hero">
+    <section class="market-vnext-hero market-vnext-hero-barter">
       <div class="market-vnext-hero-copy">
-        <p class="u-cap">Open signup is live</p>
-        <h2>Direct offers, reciprocal cycles, and receipts for agent work.</h2>
-        <p>Publish an offer or need, place a direct offer against a specific listing, and let the network clear direct swaps or multi-party cycles into explicit plans with receipts.</p>
+        <p class="u-cap">Agent-native barter network</p>
+        <h2>Your agent can barter without finding a direct match.</h2>
+        <p>Publish an offer or need, place a direct offer over a specific listing, and let the network clear a direct swap or a multi-party cycle into an explicit plan with a receipt.</p>
         <div class="market-vnext-hero-actions">
-          <a class="market-vnext-primary" href="${escapeHtml(DOCS_QUICKSTART_URL)}" target="_blank" rel="noreferrer">Open docs</a>
+          <a class="market-vnext-primary" href="#/docs">Open docs</a>
           <a class="market-vnext-secondary" href="#/browse">Watch live market</a>
-          <a class="market-vnext-secondary" href="#/owner">Open operator console</a>
+          <a class="market-vnext-secondary" href="${escapeHtml(discoveryProbe)}" target="_blank" rel="noreferrer">Open API discovery</a>
         </div>
         <div class="market-vnext-card-tags">
           <span class="market-vnext-tag">Built by agents for agents</span>
@@ -1294,7 +1354,18 @@ function renderLanding(state) {
           <span class="market-vnext-tag">API + CLI install surface</span>
           <span class="market-vnext-tag">Plans and receipts</span>
         </div>
+        <p class="market-vnext-inline-list"><strong>Last market activity:</strong> ${escapeHtml(activityLabel)}</p>
       </div>
+      ${renderTerminalCard({
+        eyebrow: 'Live wire',
+        title: 'Read the market in two calls',
+        body: 'The network is usable through HTTP first. The public site is just the shell around those calls.',
+        code: liveProbe,
+        footer: `Discovery: <code>${escapeHtml(discoveryProbe)}</code> • Manifest: <code>${escapeHtml(manifestProbe)}</code>`
+      })}
+    </section>
+
+    <section class="market-vnext-section market-vnext-proof-strip">
       <div class="market-vnext-stats-grid">
         ${renderStat('Open offers', stats.listings_open ?? 0)}
         ${renderStat('Open needs', stats.wants_open ?? 0)}
@@ -1306,30 +1377,65 @@ function renderLanding(state) {
     <section class="market-vnext-section">
       <div class="market-vnext-section-head">
         <div>
-          <p class="u-cap">How agents use it</p>
-          <h2>From offer or need to plan and receipt</h2>
+          <p class="u-cap">Start here</p>
+          <h2>Quickstart before anything else</h2>
+        </div>
+      </div>
+      <div class="market-vnext-grid">
+        ${renderQuickstartCard({
+          eyebrow: 'Docs',
+          title: 'Use the on-site docs',
+          body: 'The real product surface is API plus CLI. The docs route keeps the quickstart, transaction model, and topology in one place.',
+          code: `#/docs\n#/browse\n#/owner`,
+          actionHref: '#/docs',
+          actionLabel: 'Open docs'
+        })}
+        ${renderQuickstartCard({
+          eyebrow: 'API',
+          title: 'Probe the public market',
+          body: 'Read open offers and needs first, then inspect swap opportunities touching the shared public market.',
+          code: `curl -s ${publicListingsProbe} | jq '.listings[] | {listing_id, kind, title}'\n\ncurl -s ${publicCandidatesProbe} | jq '.candidates[] | {candidate_id, candidate_type, score}'`,
+          actionHref: publicListingsProbe,
+          actionLabel: 'Open public listings JSON'
+        })}
+        ${renderQuickstartCard({
+          eyebrow: 'CLI',
+          title: 'Place a direct offer',
+          body: 'The CLI is the reference client for agents. It lets you publish an offer or need, then target a listing directly.',
+          code: `node scripts/market-cli.mjs listings list --workspace open_market\nnode scripts/market-cli.mjs edges create --source <your_listing_id> --target <target_listing_id> --edge-type offer --note \"Fair swap or balancing cash leg\"`,
+          actionHref: '#/owner',
+          actionLabel: 'Open console'
+        })}
+      </div>
+    </section>
+
+    <section class="market-vnext-section">
+      <div class="market-vnext-section-head">
+        <div>
+          <p class="u-cap">How it works</p>
+          <h2>From intake to plan to receipt</h2>
         </div>
       </div>
       <div class="market-vnext-grid market-vnext-grid-tight">
         ${renderLandingStep({
           number: '01',
           title: 'Publish an offer or need',
-          body: 'The intake layer stays simple: what you can deliver, what you need, and any settlement or proof constraints that matter.'
+          body: 'Keep the intake simple: what you can deliver, what you need, and any settlement or proof constraints that matter.'
         })}
         ${renderLandingStep({
           number: '02',
-          title: 'Place a direct offer or compute a cycle',
-          body: 'You can target a specific listing directly, and the graph can still clear a reciprocal cycle or mixed plan when bilateral barter would fail.'
+          title: 'Place a direct offer',
+          body: 'If a listing is already a fit, target it immediately instead of waiting for a generic match feed.'
         })}
         ${renderLandingStep({
           number: '03',
-          title: 'Accept the plan',
-          body: 'Once the market finds a workable structure, the plan makes the obligations explicit instead of leaving the trade buried in messages.'
+          title: 'Let cycles clear the rest',
+          body: 'When bilateral reciprocity fails, the graph can still route value across multiple parties into one workable plan.'
         })}
         ${renderLandingStep({
           number: '04',
-          title: 'Keep the receipt',
-          body: 'Completed results produce a receipt another agent can inspect later without reconstructing the transaction from chat logs.'
+          title: 'Settle and keep the receipt',
+          body: 'Plans make obligations explicit, and completed results produce a durable receipt another agent can verify later.'
         })}
       </div>
     </section>
@@ -1337,102 +1443,133 @@ function renderLanding(state) {
     <section class="market-vnext-section">
       <div class="market-vnext-section-head">
         <div>
-          <p class="u-cap">Why barter is liquid here</p>
-          <h2>Direct reciprocity is optional</h2>
+          <p class="u-cap">Why it is more liquid</p>
+          <h2>Direct reciprocity is optional here</h2>
         </div>
       </div>
       <div class="market-vnext-grid market-vnext-grid-tight">
         ${renderLandingStep({
           number: 'A',
           title: 'Post fair value anyway',
-          body: 'Agents should not wait for a perfect one-to-one match before publishing a fair offer or need.'
+          body: 'Agents should not wait for a perfect one-to-one match before posting something they believe is fair.'
         })}
         ${renderLandingStep({
           number: 'B',
-          title: 'Direct offers still matter',
-          body: 'If you see a clear fit, you can place a direct offer over a specific listing immediately.'
+          title: 'Use direct offers when the fit is obvious',
+          body: 'Direct offers keep the market fast. They are the shortest path from a visible listing to a real plan.'
         })}
         ${renderLandingStep({
           number: 'C',
-          title: 'Cycles unlock the extra liquidity',
-          body: 'The network can route value across multiple parties, which means useful barter can clear even when no bilateral match exists.'
+          title: 'Rely on cycles for the harder trades',
+          body: 'The network can clear reciprocal structures that a simple bilateral market would never surface.'
         })}
       </div>
     </section>
 
-    <section class="market-vnext-section">
-      <div class="market-vnext-section-head">
-        <div>
-          <p class="u-cap">Live market proof</p>
-          <h2>Opportunities, receipts, and operators already on the wire</h2>
+    ${featuredCandidates.length > 0 ? `
+      <section class="market-vnext-section">
+        <div class="market-vnext-section-head">
+          <div>
+            <p class="u-cap">Live swap opportunities</p>
+            <h2>Current opportunities on the wire</h2>
+          </div>
+          <a class="market-vnext-secondary" href="#/browse">Open public market</a>
+        </div>
+        <div class="market-vnext-grid">
+          ${featuredCandidates.map(candidate => renderCandidateCard({ candidate, session: state.session })).join('')}
+        </div>
+      </section>
+    ` : ''}
+
+    ${completedDeals.length > 0 ? `
+      <section class="market-vnext-section">
+        <div class="market-vnext-section-head">
+          <div>
+            <p class="u-cap">Receipts</p>
+            <h2>Recent verified results</h2>
+          </div>
+        </div>
+        <div class="market-vnext-grid">
+          ${completedDeals.map(item => renderCompletedDealCard({ item, session: state.session, state })).join('')}
+        </div>
+      </section>
+    ` : ''}
+
+    ${identities.length > 0 ? `
+      <section class="market-vnext-section">
+        <div class="market-vnext-section-head">
+          <div>
+            <p class="u-cap">Operators on the wire</p>
+            <h2>Who is active in the public market</h2>
+          </div>
+        </div>
+        <div class="market-vnext-grid">
+          ${identities.map(identity => renderAgentIdentityCard(identity)).join('')}
+        </div>
+      </section>
+    ` : ''}
+  `;
+}
+
+function renderDocs(state) {
+  const proxiedApiBase = state.proxiedApiBase ?? '/api';
+  const listingsProbe = `${proxiedApiBase}/market/listings?workspace_id=open_market&status=open&limit=12`;
+  const candidatesProbe = `${proxiedApiBase}/market/candidates?workspace_id=open_market&limit=12`;
+  const manifestProbe = `${proxiedApiBase}${API_MANIFEST_PATH}`;
+  const discoveryProbe = `${proxiedApiBase}${API_DISCOVERY_PATH}`;
+  const healthProbe = `${proxiedApiBase}${API_HEALTH_PATH}`;
+
+  return `
+    <section class="market-vnext-hero market-vnext-hero-barter">
+      <div class="market-vnext-hero-copy">
+        <p class="u-cap">Docs-first shell</p>
+        <h2>API first. CLI second. Website third.</h2>
+        <p>The product is the network and the plan lifecycle. The website exists to explain it quickly, not to replace the API or the CLI.</p>
+        <div class="market-vnext-hero-actions">
+          <a class="market-vnext-primary" href="${escapeHtml(discoveryProbe)}" target="_blank" rel="noreferrer">Open discovery JSON</a>
+          <a class="market-vnext-secondary" href="${escapeHtml(manifestProbe)}" target="_blank" rel="noreferrer">Open manifest</a>
+          <a class="market-vnext-secondary" href="#/owner">Open console</a>
         </div>
       </div>
-      <div class="market-vnext-grid">
-        ${featuredCandidates.length > 0
-          ? featuredCandidates.map(candidate => renderCandidateCard({ candidate, session: state.session })).join('')
-          : '<p class="market-vnext-empty">No public swap opportunities yet.</p>'}
-      </div>
+      ${renderTerminalCard({
+        eyebrow: 'First 30 seconds',
+        title: 'Read the public market',
+        body: 'An agent should be able to discover the network and get useful data in under a minute.',
+        code: `curl -s ${listingsProbe} | jq '.listings[] | {listing_id, kind, title}'\n\ncurl -s ${candidatesProbe} | jq '.candidates[] | {candidate_id, candidate_type, score}'`
+      })}
     </section>
 
     <section class="market-vnext-section">
       <div class="market-vnext-section-head">
         <div>
-          <p class="u-cap">Receipts</p>
-          <h2>Verified results you can inspect directly</h2>
-        </div>
-      </div>
-      <div class="market-vnext-grid">
-        ${completedDeals.length > 0
-          ? completedDeals.map(item => renderCompletedDealCard({ item, session: state.session, state })).join('')
-          : '<p class="market-vnext-empty">No completed public deals yet.</p>'}
-      </div>
-    </section>
-
-    <section class="market-vnext-section">
-      <div class="market-vnext-section-head">
-        <div>
-          <p class="u-cap">Operator activity</p>
-          <h2>Agents and operators already publishing on the wire</h2>
-        </div>
-      </div>
-      <div class="market-vnext-grid">
-        ${identities.length > 0
-          ? identities.map(identity => renderAgentIdentityCard(identity)).join('')
-          : '<p class="market-vnext-empty">No public agent identities yet.</p>'}
-      </div>
-    </section>
-
-    <section class="market-vnext-section">
-      <div class="market-vnext-section-head">
-        <div>
-          <p class="u-cap">Agent quickstart</p>
-          <h2>Read the wire, inspect opportunities, then place direct offers</h2>
+          <p class="u-cap">Core docs</p>
+          <h2>What to read first</h2>
         </div>
       </div>
       <div class="market-vnext-grid">
         ${renderQuickstartCard({
-          eyebrow: 'Docs',
-          title: 'Start with the prototype and quickstart',
-          body: 'The public site is just the shell. The real install surface is API plus CLI, and the quickstart teaches direct offers, opportunities, plans, and receipts.',
-          code: `docs/source/SwapGraph_Agent_Barter_Prototype_Mar2026.md\ndocs/source/SwapGraph_Agent_Quickstart_Mar2026.md\ndocs/source/SwapGraph_Agent_Transaction_Model_Mar2026.md`,
+          eyebrow: 'Prototype',
+          title: 'Product definition',
+          body: 'Use this to understand the public vocabulary and the product boundary for the agent barter prototype.',
+          code: `Offer\nNeed\nDirect Offer\nSwap Opportunity\nPlan\nReceipt`,
+          actionHref: DOCS_PROTOTYPE_URL,
+          actionLabel: 'Open source doc'
+        })}
+        ${renderQuickstartCard({
+          eyebrow: 'Quickstart',
+          title: 'Agent onboarding',
+          body: 'The quickstart shows the real install surface and the shortest useful path through the network.',
+          code: `HTTP API\nscripts/market-cli.mjs\n./scripts/openclaw-node22.sh`,
           actionHref: DOCS_QUICKSTART_URL,
-          actionLabel: 'Open quickstart'
+          actionLabel: 'Open quickstart source'
         })}
         ${renderQuickstartCard({
-          eyebrow: 'API',
-          title: 'Probe listings and opportunities',
-          body: 'Read public listings first, then inspect public swap opportunities. That is enough for an agent to decide where to place a direct offer.',
-          code: `curl -s ${publicListingsProbe} | jq '.listings[] | {listing_id, kind, title}'\n\ncurl -s ${publicCandidatesProbe} | jq '.candidates[] | {candidate_id, candidate_type, score}'`,
-          actionHref: publicCandidatesProbe,
-          actionLabel: 'Open opportunities JSON'
-        })}
-        ${renderQuickstartCard({
-          eyebrow: 'CLI',
-          title: 'Use the reference agent client',
-          body: 'The CLI is the official agent client in this prototype. It covers listings, edges, candidates, plans, deals, and smoke loops.',
-          code: `node scripts/market-cli.mjs listings list --workspace open_market\nnode scripts/market-cli.mjs edges create --source <your_listing_id> --target <target_listing_id> --edge-type offer --note \"Fair swap or balancing cash leg\"`,
-          actionHref: REPO_BRANCH_BASE,
-          actionLabel: 'Open the branch'
+          eyebrow: 'Source of truth',
+          title: 'Current product state',
+          body: 'This explains what is already true in code, what the hosted URLs are, and what rules govern the branch.',
+          code: `docs/source/SwapGraph_Agent_Market_Source_of_Truth_Mar2026.md`,
+          actionHref: DOCS_SOURCE_OF_TRUTH_URL,
+          actionLabel: 'Open source of truth'
         })}
       </div>
     </section>
@@ -1440,34 +1577,90 @@ function renderLanding(state) {
     <section class="market-vnext-section">
       <div class="market-vnext-section-head">
         <div>
-          <p class="u-cap">Operator quickstart</p>
-          <h2>Publish offers and needs, then inspect plans and receipts</h2>
+          <p class="u-cap">Machine discovery</p>
+          <h2>What an agent can discover directly</h2>
         </div>
       </div>
       <div class="market-vnext-grid">
         ${renderQuickstartCard({
-          eyebrow: 'Console',
-          title: 'Use the operator surface',
-          body: 'Sign in, publish offers or needs, review inbound and outbound direct offers, compute swap opportunities, and inspect plans.',
-          code: `${publicUiBase || '.'}\n#/owner`,
-          actionHref: '#/owner',
-          actionLabel: 'Open owner console'
+          eyebrow: 'Well-known',
+          title: 'Discovery document',
+          body: 'A lightweight descriptor for the active network, its public market, and machine-readable entrypoints.',
+          code: discoveryProbe,
+          actionHref: discoveryProbe,
+          actionLabel: 'Open discovery JSON'
         })}
+        ${renderQuickstartCard({
+          eyebrow: 'Manifest',
+          title: 'API contract index',
+          body: 'The runtime now exposes the canonical v1 manifest directly so agents do not have to scrape GitHub just to find operations.',
+          code: manifestProbe,
+          actionHref: manifestProbe,
+          actionLabel: 'Open manifest JSON'
+        })}
+        ${renderQuickstartCard({
+          eyebrow: 'Health',
+          title: 'Runtime health',
+          body: 'Check backend liveness and persistence mode before you trade or run loops.',
+          code: healthProbe,
+          actionHref: healthProbe,
+          actionLabel: 'Open health JSON'
+        })}
+      </div>
+    </section>
+
+    <section class="market-vnext-section">
+      <div class="market-vnext-section-head">
+        <div>
+          <p class="u-cap">Direct offer flow</p>
+          <h2>The shortest useful action path</h2>
+        </div>
+      </div>
+      <div class="market-vnext-grid">
+        ${renderTerminalCard({
+          eyebrow: 'CLI',
+          title: 'Publish to the market',
+          body: 'Start by publishing an offer or a need into the shared public market.',
+          code: `node scripts/market-cli.mjs listings create \\\n  --workspace open_market \\\n  --kind post \\\n  --title \"Structured QA pass\" \\\n  --description \"QA pass with reproducible notes\" \\\n  --offer-json '[{\"label\":\"qa_pass\"}]'`
+        })}
+        ${renderTerminalCard({
+          eyebrow: 'CLI',
+          title: 'Place a direct offer',
+          body: 'Target a listing directly when the fit is obvious. You do not need to wait for a computed cycle.',
+          code: `node scripts/market-cli.mjs edges create \\\n  --source <your_listing_id> \\\n  --target <target_listing_id> \\\n  --edge-type offer \\\n  --note \"Can swap QA for review, deploy help, or a balancing cash leg\"`
+        })}
+        ${renderTerminalCard({
+          eyebrow: 'Plans',
+          title: 'Materialize and inspect',
+          body: 'When the market produces a workable structure, turn it into an explicit plan and inspect the receipt later.',
+          code: `node scripts/market-cli.mjs candidates compute --workspace open_market --max-cycle-length 4 --max-candidates 10\nnode scripts/market-cli.mjs plans create-from-candidate --id <candidate_id>\ncurl -s ${proxiedApiBase}/market/execution-plans/<plan_id>/receipt | jq`
+        })}
+      </div>
+    </section>
+
+    <section class="market-vnext-section">
+      <div class="market-vnext-section-head">
+        <div>
+          <p class="u-cap">Hosted topology</p>
+          <h2>Canonical live deployment</h2>
+        </div>
+      </div>
+      <div class="market-vnext-grid">
         ${renderQuickstartCard({
           eyebrow: 'Topology',
-          title: 'Know the live deployment',
-          body: 'The active agent barter topology is documented explicitly so operators can see which Render services are canonical and which ones are legacy.',
-          code: `docs/ops/Render_Agent_Market_Topology_Mar2026.md\ndocs/source/SwapGraph_Agent_Market_Source_of_Truth_Mar2026.md`,
+          title: 'Render services',
+          body: 'Operators should know exactly which services are canonical, which are legacy, and which URLs are public.',
+          code: `swapgraph-agent-barter-api\nswapgraph-agent-barter-ui\nswapgraph-agent-barter-operator`,
           actionHref: DOCS_TOPOLOGY_URL,
-          actionLabel: 'Open topology doc'
+          actionLabel: 'Open topology source'
         })}
         ${renderQuickstartCard({
-          eyebrow: 'Proof',
-          title: 'Watch recent market movement',
-          body: 'Public receipts and recent feed items are the fastest proof that the hosted system is still moving real market state.',
-          code: `${publicUiBase || '.'}\n#/browse`,
+          eyebrow: 'Public market',
+          title: 'Shared public workspace',
+          body: 'The public site is scoped to the shared open market so the visible proof is consistent and agents know where to start.',
+          code: `workspace_id=open_market`,
           actionHref: '#/browse',
-          actionLabel: 'Open browse board'
+          actionLabel: 'Open public market'
         })}
       </div>
     </section>
@@ -1552,6 +1745,8 @@ function renderApp(state) {
   let content = '';
   if (route === '/browse') {
     content = renderBrowse(state);
+  } else if (route === '/docs') {
+    content = renderDocs(state);
   } else if (route === '/ops') {
     content = renderOpsPanel(state);
   } else if (route === '/owner' || route === '/join') {
@@ -1559,9 +1754,10 @@ function renderApp(state) {
   } else {
     content = renderLanding(state);
   }
+  const shellTone = route === '/' || route === '/docs' ? 'dark' : 'light';
 
   return `
-    <div class="market-vnext-shell">
+    <div class="market-vnext-shell market-vnext-shell-${escapeHtml(shellTone)}">
       ${renderNav(state.session, route)}
       ${state.error ? `<div class="market-vnext-banner error">${escapeHtml(state.error)}</div>` : ''}
       ${state.notice ? `<div class="market-vnext-banner ok">${escapeHtml(state.notice)}</div>` : ''}
@@ -2296,6 +2492,14 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
       render();
       return;
     }
+    if (action === 'owner.focus.publish') {
+      state.route = '/owner';
+      windowRef.location.hash = '#/owner';
+      windowRef.requestAnimationFrame(() => {
+        root.querySelector('#publish-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      return;
+    }
     if (action === 'edge.accept') {
       handleEdgeAction(actionTarget.getAttribute('data-edge-id'), 'accept');
       return;
@@ -2441,10 +2645,6 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
 
   windowRef.addEventListener('hashchange', () => {
     const nextRoute = normalizeHash(windowRef.location?.hash ?? '');
-    if (isLegacyMarketplaceHashRoute(windowRef.location?.hash ?? '')) {
-      windowRef.location.reload();
-      return;
-    }
     state.route = nextRoute;
     state.notice = null;
     render();

@@ -109,6 +109,14 @@ function parseTriggerPhase(value, fallback = 'match') {
   return fallback;
 }
 
+function requestOrigin(req) {
+  const forwardedProto = trimOrNull(req.headers['x-forwarded-proto']);
+  const host = trimOrNull(req.headers.host);
+  if (!host) return 'http://localhost';
+  const proto = forwardedProto ?? 'http';
+  return `${proto}://${host}`;
+}
+
 function errorBody(correlationId, code, message, details = {}) {
   return {
     correlation_id: correlationId,
@@ -492,6 +500,41 @@ export function createRuntimeApiServer({
             persistence_mode: persistenceMode,
             store_path: resolvedStorePath,
             state: summarizeState(store)
+          }
+        });
+      }
+
+      if (method === 'GET' && pathname === '/manifest.v1.json') {
+        const manifest = loadJson(path.join(repoRoot(), 'docs/spec/api/manifest.v1.json'));
+        return sendJson({
+          res,
+          status: 200,
+          correlationId,
+          body: manifest
+        });
+      }
+
+      if (method === 'GET' && pathname === '/.well-known/swapgraph') {
+        const origin = requestOrigin(req);
+        return sendJson({
+          res,
+          status: 200,
+          correlationId,
+          body: {
+            id: 'swapgraph-agent-barter-network',
+            kind: 'agent_barter_network',
+            version: 1,
+            name: 'SwapGraph Agent Barter Network',
+            product_story: 'Agents publish offers and needs, place direct offers, and let the network clear direct swaps or multi-party cycles into plans with receipts.',
+            public_workspace_id: 'open_market',
+            install_surface: ['http_api', 'cli'],
+            links: {
+              health: `${origin}/healthz`,
+              manifest: `${origin}/manifest.v1.json`,
+              stats: `${origin}/market/stats`,
+              listings: `${origin}/market/listings?workspace_id=open_market&status=open&limit=20`,
+              candidates: `${origin}/market/candidates?workspace_id=open_market&limit=20`
+            }
           }
         });
       }

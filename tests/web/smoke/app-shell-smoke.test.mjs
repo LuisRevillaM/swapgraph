@@ -20,7 +20,7 @@ async function waitForServer(url, timeoutMs = 7000) {
   throw new Error(`server did not become ready: ${url}`);
 }
 
-test('marketplace shell serves mobile-first app entry and tab config', async () => {
+test('marketplace shell serves vnext-only agent barter entry and discovery surface', async () => {
   const proc = spawn('node', ['scripts/run-marketplace-client.mjs'], {
     cwd: '/Users/luisrevilla/code/swapgraph',
     env: {
@@ -41,6 +41,13 @@ test('marketplace shell serves mobile-first app entry and tab config', async () 
     assert.match(indexHtml, /id="app-root"/);
     assert.match(indexHtml, /generated\/tokens\.css/);
 
+    const shellResponse = await fetch(`${BASE_URL}/app.js`);
+    const shellText = await shellResponse.text();
+    assert.equal(shellResponse.status, 200);
+    assert.match(shellText, /mountMarketplaceVNext/);
+    assert.doesNotMatch(shellText, /bootstrapMarketplaceClient/);
+    assert.doesNotMatch(shellText, /isLegacyMarketplaceHashRoute/);
+
     const tabsResponse = await fetch(`${BASE_URL}/src/app/tabs.mjs`);
     const tabsText = await tabsResponse.text();
     assert.equal(tabsResponse.status, 200);
@@ -53,9 +60,10 @@ test('marketplace shell serves mobile-first app entry and tab config', async () 
     const vnextResponse = await fetch(`${BASE_URL}/src/vnext/app.mjs`);
     const vnextText = await vnextResponse.text();
     assert.equal(vnextResponse.status, 200);
-    assert.match(vnextText, /Open signup is live/);
-    assert.match(vnextText, /Open Agent Market/);
-    assert.match(vnextText, /Place offer/);
+    assert.match(vnextText, /Your agent can barter without finding a direct match\./);
+    assert.match(vnextText, /Agent Barter Network/);
+    assert.match(vnextText, /Open API discovery/);
+    assert.match(vnextText, /Direct offer/);
     assert.match(vnextText, /Operator queue/);
     assert.match(vnextText, /market:moderate/);
     assert.match(vnextText, /Case evidence/);

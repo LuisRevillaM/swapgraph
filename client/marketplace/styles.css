@@ -1292,6 +1292,10 @@ input:focus-visible {
   gap: 22px;
 }
 
+.market-vnext-shell-dark {
+  color: #f6f7f4;
+}
+
 .market-vnext-topbar {
   display: flex;
   flex-wrap: wrap;
@@ -1304,6 +1308,12 @@ input:focus-visible {
   backdrop-filter: blur(18px) saturate(1.1);
   padding: 14px 16px;
   box-shadow: var(--shadow-sm);
+}
+
+.market-vnext-shell-dark .market-vnext-topbar {
+  border-color: rgba(214, 219, 214, 0.16);
+  background: rgba(10, 18, 15, 0.84);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.18);
 }
 
 .market-vnext-brand {
@@ -1354,9 +1364,26 @@ input:focus-visible {
   background: rgba(255, 255, 255, 0.64);
 }
 
+.market-vnext-shell-dark .market-vnext-title,
+.market-vnext-shell-dark .market-vnext-brand .u-cap,
+.market-vnext-shell-dark .market-vnext-nav-link,
+.market-vnext-shell-dark .market-vnext-secondary {
+  color: #f6f7f4;
+}
+
+.market-vnext-shell-dark .market-vnext-nav-link {
+  border-color: rgba(214, 219, 214, 0.16);
+  background: rgba(255, 255, 255, 0.04);
+}
+
 .market-vnext-nav-link.is-active {
   background: rgba(26, 122, 76, 0.12);
   border-color: rgba(26, 122, 76, 0.34);
+}
+
+.market-vnext-shell-dark .market-vnext-nav-link.is-active {
+  background: rgba(97, 241, 170, 0.12);
+  border-color: rgba(97, 241, 170, 0.28);
 }
 
 .market-vnext-primary {
@@ -1369,6 +1396,11 @@ input:focus-visible {
   border: 1px solid rgba(18, 42, 30, 0.18);
   background: rgba(255, 255, 255, 0.78);
   color: var(--ink);
+}
+
+.market-vnext-shell-dark .market-vnext-secondary {
+  border-color: rgba(214, 219, 214, 0.16);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .market-vnext-primary:hover,
@@ -1426,6 +1458,20 @@ input:focus-visible {
     radial-gradient(circle at top left, rgba(26, 122, 76, 0.14), transparent 38%),
     radial-gradient(circle at right bottom, rgba(176, 123, 26, 0.16), transparent 34%),
     rgba(248, 247, 244, 0.9);
+}
+
+.market-vnext-shell-dark .market-vnext-hero-copy,
+.market-vnext-shell-dark .market-vnext-card {
+  border-color: rgba(214, 219, 214, 0.1);
+  background: rgba(11, 19, 17, 0.9);
+  box-shadow: 0 22px 40px rgba(0, 0, 0, 0.2);
+}
+
+.market-vnext-shell-dark .market-vnext-hero-copy {
+  background:
+    radial-gradient(circle at top left, rgba(97, 241, 170, 0.16), transparent 40%),
+    radial-gradient(circle at right bottom, rgba(87, 146, 255, 0.14), transparent 34%),
+    linear-gradient(160deg, rgba(8, 14, 12, 0.96), rgba(13, 24, 20, 0.92));
 }
 
 .market-vnext-hero-copy h2,
@@ -1514,9 +1560,46 @@ input:focus-visible {
   color: var(--ink-2);
 }
 
+.market-vnext-shell-dark .market-vnext-card-copy,
+.market-vnext-shell-dark .market-vnext-empty,
+.market-vnext-shell-dark .market-vnext-inline-list,
+.market-vnext-shell-dark .market-vnext-card-meta,
+.market-vnext-shell-dark .market-vnext-idline {
+  color: rgba(233, 237, 233, 0.76);
+}
+
 .market-vnext-step-card,
 .market-vnext-quickstart-card {
   align-content: start;
+}
+
+.market-vnext-terminal-card {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.market-vnext-terminal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.market-vnext-terminal-dots {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.market-vnext-terminal-dots span {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: rgba(246, 247, 244, 0.24);
+}
+
+.market-vnext-proof-strip {
+  margin-top: -4px;
 }
 
 .agent-identity-card {
@@ -1544,6 +1627,12 @@ input:focus-visible {
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 0.84rem;
   line-height: 1.55;
+}
+
+.market-vnext-code-block-terminal {
+  min-height: 220px;
+  background: linear-gradient(180deg, rgba(7, 12, 11, 0.98), rgba(16, 29, 25, 0.96));
+  border-color: rgba(97, 241, 170, 0.12);
 }
 
 .market-vnext-card-foot {
@@ -1584,6 +1673,28 @@ input:focus-visible {
   color: var(--ink-2);
 }
 
+.market-vnext-shell-dark .market-vnext-tag,
+.market-vnext-shell-dark .market-vnext-pill.kind-edge,
+.market-vnext-shell-dark .market-vnext-pill.kind-deal {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(246, 247, 244, 0.88);
+}
+
+.market-vnext-shell-dark .market-vnext-pill.kind-post {
+  background: rgba(97, 241, 170, 0.12);
+  color: #8bf3be;
+}
+
+.market-vnext-shell-dark .market-vnext-pill.kind-want {
+  background: rgba(87, 146, 255, 0.12);
+  color: #8bb5ff;
+}
+
+.market-vnext-shell-dark .market-vnext-pill.kind-capability {
+  background: rgba(255, 193, 103, 0.12);
+  color: #ffcd79;
+}
+
 .market-vnext-form {
   display: grid;
   gap: 12px;
@@ -1616,6 +1727,16 @@ input:focus-visible {
 
 .market-vnext-owner-layout {
   grid-template-columns: 1fr;
+}
+
+.owner-summary-card,
+.owner-actions-card,
+.publish-stack-card {
+  align-content: start;
+}
+
+.market-vnext-stat-compact {
+  min-height: 132px;
 }
 
 .market-vnext-bullets {
