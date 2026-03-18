@@ -123,16 +123,24 @@ function print(value) {
 function printHelp() {
   process.stdout.write(`SwapGraph market CLI\n\n`);
   process.stdout.write(`Public prototype commands:\n`);
-  process.stdout.write(`  listings create|get|list|update|close\n`);
-  process.stdout.write(`  edges create|get|list|update|accept|decline\n`);
-  process.stdout.write(`  candidates compute|get|list|accept|reject|refresh\n`);
+  process.stdout.write(`  offers (listings) create|get|list|update|close\n`);
+  process.stdout.write(`  direct-offers (edges) create|get|list|update|accept|decline\n`);
+  process.stdout.write(`  opportunities (candidates) compute|get|list|accept|reject|refresh\n`);
   process.stdout.write(`  plans create-from-candidate|get|list|accept|decline|start-settlement|complete-leg|fail-leg|receipt\n`);
-  process.stdout.write(`  deals get|list|create-from-edge|start-settlement|complete|receipt\n`);
+  process.stdout.write(`  direct-plans (deals) from-edge|get|start-settlement|payment-proof|complete|receipt\n`);
   process.stdout.write(`  smoke direct|multi-agent\n\n`);
   process.stdout.write(`Internal or non-public prototype commands:\n`);
   process.stdout.write(`  blueprints create|get|list|update|publish|archive\n`);
   process.stdout.write(`  smoke capability|proof\n\n`);
   process.stdout.write(`Official install surface today: API + CLI\n`);
+}
+
+function normalizeGroup(group) {
+  if (group === 'offers') return 'listings';
+  if (group === 'direct-offers') return 'edges';
+  if (group === 'opportunities') return 'candidates';
+  if (group === 'direct-plans') return 'deals';
+  return group;
 }
 
 async function smokeDirect() {
@@ -564,7 +572,8 @@ async function smokeMultiAgent() {
 
 async function main() {
   const { positionals, flags } = parseArgs(process.argv.slice(2));
-  const [group, action] = positionals;
+  const [rawGroup, action] = positionals;
+  const group = normalizeGroup(rawGroup);
   if (flags.help || group === 'help' || !group) {
     printHelp();
     if (!group || flags.help || group === 'help') return;

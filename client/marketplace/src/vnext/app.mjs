@@ -435,7 +435,7 @@ function renderAgentIdentityCard(identity) {
         <span class="market-vnext-card-meta">@${escapeHtml(identity.handle)}</span>
       </div>
       <h3>${escapeHtml(identity.display_name)}</h3>
-      <p class="market-vnext-card-copy">${escapeHtml(identity.bio ?? 'Active in the open market with live machine-readable listings.')}</p>
+      <p class="market-vnext-card-copy">${escapeHtml(identity.bio ?? 'Active in the open market with live machine-readable offers.')}</p>
       <div class="market-vnext-card-tags">
         <span class="market-vnext-tag">${escapeHtml(`${identity.counts.capability} service offers`)}</span>
         <span class="market-vnext-tag">${escapeHtml(`${identity.counts.post} offers`)}</span>
@@ -525,9 +525,9 @@ function renderListingCard({ listing, session, action = null, compact = false })
       ${turnaround ? `<p class="market-vnext-inline-list"><strong>Turnaround:</strong> ${escapeHtml(turnaround)}</p>` : ''}
       <div class="market-vnext-card-foot">
         <span>${escapeHtml(formatIsoShort(listing.updated_at))}</span>
-        ${action ?? (session ? `<button type="button" class="market-vnext-secondary" data-action="edge.compose" data-target-listing-id="${escapeHtml(listing.listing_id)}">Place offer</button>` : '')}
+        ${action ?? (session ? `<button type="button" class="market-vnext-secondary" data-action="edge.compose" data-target-listing-id="${escapeHtml(listing.listing_id)}">Make direct offer</button>` : '')}
       </div>
-      ${compact ? '' : `<p class="market-vnext-idline">listing ${escapeHtml(listing.listing_id)}</p>`}
+      ${compact ? '' : `<p class="market-vnext-idline">offer ref ${escapeHtml(listing.listing_id)}</p>`}
     </article>
   `;
 }
@@ -543,7 +543,7 @@ function renderCandidateCard({ candidate, session = null, canCreatePlan = false 
         <span class="market-vnext-pill kind-edge">${escapeHtml(candidateTypeLabel(candidate?.candidate_type))}</span>
         <span class="market-vnext-card-meta">${escapeHtml(candidate?.status ?? 'open')}</span>
       </div>
-      <h3>${escapeHtml(candidate?.candidate_id ?? 'candidate')}</h3>
+      <h3>Opportunity ${escapeHtml(candidate?.candidate_id ?? 'pending')}</h3>
       <p class="market-vnext-card-copy">${escapeHtml(participants.join(' • ') || 'No participants recorded')}</p>
       <div class="market-vnext-card-tags">
         <span class="market-vnext-tag">score ${escapeHtml(String(candidate?.score ?? 0))}</span>
@@ -607,15 +607,15 @@ function renderCompletedDealCard({ item, session, state }) {
   return `
     <article class="market-vnext-card activity-card">
       <div class="market-vnext-card-head">
-        <span class="market-vnext-pill kind-deal">${escapeHtml(summary.settlement_mode ?? 'deal')}</span>
+        <span class="market-vnext-pill kind-deal">${escapeHtml(summary.settlement_mode ?? 'direct plan')}</span>
         <span class="market-vnext-card-meta">${escapeHtml(summary.status ?? 'completed')}</span>
       </div>
-      <h3>Deal ${escapeHtml(summary.deal_id ?? item.item_id)}</h3>
+      <h3>Direct plan ${escapeHtml(summary.deal_id ?? item.item_id)}</h3>
       <p class="market-vnext-card-copy">
         ${escapeHtml(asArray(summary.participants).map(actor => actorDisplay(session, actor)).join(' • ') || 'Participants hidden')}
       </p>
       <div class="market-vnext-card-tags">
-        <span class="market-vnext-tag">origin ${escapeHtml(summary.origin_edge_id ?? 'n/a')}</span>
+        <span class="market-vnext-tag">origin direct offer ${escapeHtml(summary.origin_edge_id ?? 'n/a')}</span>
         ${summary.receipt_ref ? `<span class="market-vnext-tag">receipt ${escapeHtml(summary.receipt_ref)}</span>` : ''}
       </div>
       <div class="market-vnext-card-foot">
@@ -646,14 +646,14 @@ function renderFeedItem({ item, listingIndex, session, state }) {
     return `
       <article class="market-vnext-card activity-card">
         <div class="market-vnext-card-head">
-          <span class="market-vnext-pill kind-edge">${escapeHtml(summary.edge_type ?? 'edge')}</span>
+          <span class="market-vnext-pill kind-edge">${escapeHtml(summary.edge_type ?? 'direct offer')}</span>
           <span class="market-vnext-card-meta">${escapeHtml(summary.status ?? 'open')}</span>
         </div>
         <h3>${escapeHtml(source?.title ?? summary.source_ref?.id ?? 'unknown')} -> ${escapeHtml(target?.title ?? summary.target_ref?.id ?? 'unknown')}</h3>
-        <p class="market-vnext-card-copy">Offer link between two market listings in workspace ${escapeHtml(item.workspace_id)}.</p>
+        <p class="market-vnext-card-copy">Direct offer between two market offers in workspace ${escapeHtml(item.workspace_id)}.</p>
         <div class="market-vnext-card-foot">
           <span>${escapeHtml(formatIsoShort(item.occurred_at))}</span>
-          <span class="market-vnext-idline">edge ${escapeHtml(summary.edge_id ?? item.item_id)}</span>
+          <span class="market-vnext-idline">direct offer ${escapeHtml(summary.edge_id ?? item.item_id)}</span>
         </div>
       </article>
     `;
@@ -666,15 +666,15 @@ function renderFeedItem({ item, listingIndex, session, state }) {
   return `
     <article class="market-vnext-card activity-card">
       <div class="market-vnext-card-head">
-        <span class="market-vnext-pill kind-deal">${escapeHtml(summary.settlement_mode ?? 'deal')}</span>
+        <span class="market-vnext-pill kind-deal">${escapeHtml(summary.settlement_mode ?? 'direct plan')}</span>
         <span class="market-vnext-card-meta">${escapeHtml(summary.status ?? 'draft')}</span>
       </div>
-      <h3>Deal ${escapeHtml(summary.deal_id ?? item.item_id)}</h3>
+      <h3>Direct plan ${escapeHtml(summary.deal_id ?? item.item_id)}</h3>
       <p class="market-vnext-card-copy">
         ${escapeHtml(asArray(summary.participants).map(actor => actorDisplay(session, actor)).join(' • ') || 'Participants hidden')}
       </p>
       <div class="market-vnext-card-tags">
-        <span class="market-vnext-tag">origin ${escapeHtml(summary.origin_edge_id ?? 'n/a')}</span>
+        <span class="market-vnext-tag">origin direct offer ${escapeHtml(summary.origin_edge_id ?? 'n/a')}</span>
         ${summary.receipt_ref ? `<span class="market-vnext-tag">receipt ${escapeHtml(summary.receipt_ref)}</span>` : ''}
       </div>
       <div class="market-vnext-card-foot">
@@ -803,13 +803,13 @@ function renderEdgeComposer({ state, myOpenListings }) {
       <form class="market-vnext-form" data-form="edge-create">
         <input type="hidden" name="target_listing_id" value="${escapeHtml(state.edgeComposer.targetListingId)}" />
         <label>
-          <span>Your source listing</span>
+          <span>Your source offer or need</span>
           <select name="source_listing_id">
             ${myOpenListings.map(listing => `<option value="${escapeHtml(listing.listing_id)}">${escapeHtml(listing.title)} (${escapeHtml(listingKindLabel(listing.kind))})</option>`).join('')}
           </select>
         </label>
         <label>
-          <span>Offer type</span>
+          <span>Direct offer type</span>
           <select name="edge_type">
             <option value="offer">Offer</option>
             <option value="interest">Interest</option>
@@ -825,7 +825,7 @@ function renderEdgeComposer({ state, myOpenListings }) {
           <span>Credit amount (optional)</span>
           <input name="credit_amount" type="number" min="0" step="1" placeholder="150" />
         </label>
-        <button type="submit" class="market-vnext-primary"${state.loading.edge ? ' disabled' : ''}>${state.loading.edge ? 'Sending…' : 'Send offer'}</button>
+        <button type="submit" class="market-vnext-primary"${state.loading.edge ? ' disabled' : ''}>${state.loading.edge ? 'Sending…' : 'Send direct offer'}</button>
       </form>
     </section>
   `;
@@ -838,7 +838,7 @@ function renderDealPanel(state) {
 
   return `
     <section class="market-vnext-card">
-      <p class="u-cap">Direct settlements</p>
+      <p class="u-cap">Direct plans</p>
       <h2>${deals.length} direct plans and receipts</h2>
       <div class="market-vnext-grid">
         ${deals.length > 0
@@ -848,10 +848,10 @@ function renderDealPanel(state) {
                 <span class="market-vnext-pill kind-deal">${escapeHtml(deal.settlement_mode ?? 'pending')}</span>
                 <span class="market-vnext-card-meta">${escapeHtml(deal.status)}</span>
               </div>
-              <h3>${escapeHtml(deal.deal_id)}</h3>
+              <h3>Direct plan ${escapeHtml(deal.deal_id)}</h3>
               <p class="market-vnext-card-copy">Participants: ${escapeHtml(asArray(deal.participants).map(actor => actor.id).join(' • '))}</p>
               <div class="market-vnext-card-tags">
-                <span class="market-vnext-tag">edge ${escapeHtml(deal.origin_edge_id)}</span>
+                <span class="market-vnext-tag">origin direct offer ${escapeHtml(deal.origin_edge_id)}</span>
                 ${deal.receipt_ref ? `<span class="market-vnext-tag">receipt ${escapeHtml(deal.receipt_ref)}</span>` : ''}
               </div>
               <div class="market-vnext-card-foot">
@@ -878,12 +878,12 @@ function renderDealPanel(state) {
               </div>
             </article>
           `).join('')
-          : '<p class="market-vnext-empty">No direct deals yet. Accepted direct offers can still materialize into deals.</p>'}
+          : '<p class="market-vnext-empty">No direct plans yet. Accepted direct offers can still materialize into direct plans.</p>'}
       </div>
     </section>
     <section class="market-vnext-card">
       <p class="u-cap">Negotiation thread</p>
-      <h2>${activeThreadId ? escapeHtml(activeThreadId) : 'Select a deal thread'}</h2>
+      <h2>${activeThreadId ? escapeHtml(activeThreadId) : 'Select a direct plan thread'}</h2>
       ${activeThreadId
         ? `
           <div class="market-vnext-thread-log">
@@ -915,7 +915,7 @@ function renderDealPanel(state) {
             <button type="submit" class="market-vnext-primary">Send message</button>
           </form>
         `
-        : '<p class="market-vnext-empty">Open a thread from a deal card to inspect or negotiate.</p>'}
+        : '<p class="market-vnext-empty">Open a thread from a direct plan card to inspect or negotiate.</p>'}
     </section>
   `;
 }
@@ -932,9 +932,9 @@ function renderTrustPanel(state) {
       <h2>${escapeHtml(quota?.trust_tier ?? 'open_signup')}</h2>
       <div class="market-vnext-card-tags">
         <span class="market-vnext-tag">credit ${escapeHtml(String(quota?.credit_balance ?? 0))}</span>
-        <span class="market-vnext-tag">listings ${escapeHtml(String(quota?.listings_created ?? 0))}</span>
-        <span class="market-vnext-tag">edges ${escapeHtml(String(quota?.edges_created ?? 0))}</span>
-        <span class="market-vnext-tag">deals ${escapeHtml(String(quota?.deals_created ?? 0))}</span>
+        <span class="market-vnext-tag">offers ${escapeHtml(String(quota?.listings_created ?? 0))}</span>
+        <span class="market-vnext-tag">direct offers ${escapeHtml(String(quota?.edges_created ?? 0))}</span>
+        <span class="market-vnext-tag">direct plans ${escapeHtml(String(quota?.deals_created ?? 0))}</span>
       </div>
       ${Object.keys(rateWindows).length > 0
         ? `<div class="market-vnext-grid market-vnext-grid-tight">
@@ -1012,7 +1012,7 @@ function renderModerationQueuePanel(state) {
               <button type="button" class="market-vnext-secondary" data-action="moderation.resolve" data-moderation-id="${escapeHtml(item.moderation_id)}" data-resolution-action="set_watchlist">Watchlist</button>
               <button type="button" class="market-vnext-secondary" data-action="moderation.resolve" data-moderation-id="${escapeHtml(item.moderation_id)}" data-resolution-action="set_blocked">Block</button>
               ${item.subject_kind === 'listing'
-                ? `<button type="button" class="market-vnext-primary" data-action="moderation.resolve" data-moderation-id="${escapeHtml(item.moderation_id)}" data-resolution-action="suspend_listing">Suspend listing</button>`
+                ? `<button type="button" class="market-vnext-primary" data-action="moderation.resolve" data-moderation-id="${escapeHtml(item.moderation_id)}" data-resolution-action="suspend_listing">Suspend offer</button>`
                 : ''}
             </span>
           </div>
@@ -1058,7 +1058,7 @@ function renderModerationQueuePanel(state) {
             <option value="">Any</option>
             <option value="approve"${filters.resolution_action === 'approve' ? ' selected' : ''}>Approve</option>
             <option value="dismiss"${filters.resolution_action === 'dismiss' ? ' selected' : ''}>Dismiss</option>
-            <option value="suspend_listing"${filters.resolution_action === 'suspend_listing' ? ' selected' : ''}>Suspend listing</option>
+            <option value="suspend_listing"${filters.resolution_action === 'suspend_listing' ? ' selected' : ''}>Suspend offer</option>
             <option value="set_watchlist"${filters.resolution_action === 'set_watchlist' ? ' selected' : ''}>Watchlist</option>
             <option value="set_blocked"${filters.resolution_action === 'set_blocked' ? ' selected' : ''}>Block</option>
           </select>
@@ -1113,7 +1113,7 @@ function renderModerationEvidencePanel(state) {
       <section class="market-vnext-card">
         <p class="u-cap">Case evidence</p>
         <h2>Select a moderation item</h2>
-        <p class="market-vnext-card-copy">Inspect pulls the listing, related edges, related deals, and available thread context into one operator view.</p>
+        <p class="market-vnext-card-copy">Inspect pulls the offer, related direct offers, related direct plans, and available thread context into one operator view.</p>
       </section>
     `;
   }
@@ -1130,11 +1130,11 @@ function renderModerationEvidencePanel(state) {
       <p class="market-vnext-inline-list"><strong>Reasons:</strong> ${escapeHtml(selected.reason_codes.join(' • ') || 'None')}</p>
       <p class="market-vnext-inline-list"><strong>Evidence:</strong> ${escapeHtml(JSON.stringify(selected.evidence ?? {}))}</p>
       ${state.loading.opsEvidence ? '<p class="market-vnext-loading">Loading evidence…</p>' : ''}
-      ${listing ? renderListingCard({ listing, session: state.session }) : '<p class="market-vnext-empty">No listing payload loaded.</p>'}
+      ${listing ? renderListingCard({ listing, session: state.session }) : '<p class="market-vnext-empty">No offer payload loaded.</p>'}
       <div class="market-vnext-section-head">
         <div>
-          <p class="u-cap">Related edges</p>
-          <h2>${relatedEdges.length} edges touching this listing</h2>
+          <p class="u-cap">Related direct offers</p>
+          <h2>${relatedEdges.length} direct offers touching this offer</h2>
         </div>
       </div>
       <div class="market-vnext-grid">
@@ -1145,18 +1145,18 @@ function renderModerationEvidencePanel(state) {
                 <span class="market-vnext-pill kind-edge">${escapeHtml(edge.edge_type)}</span>
                 <span class="market-vnext-card-meta">${escapeHtml(edge.status)}</span>
               </div>
-              <h3>${escapeHtml(edge.edge_id)}</h3>
+              <h3>Direct offer ${escapeHtml(edge.edge_id)}</h3>
               <p class="market-vnext-card-copy">${escapeHtml(edge.note ?? 'No note')}</p>
               <p class="market-vnext-inline-list"><strong>Source:</strong> ${escapeHtml(edge.source_ref?.id ?? 'n/a')}</p>
               <p class="market-vnext-inline-list"><strong>Target:</strong> ${escapeHtml(edge.target_ref?.id ?? 'n/a')}</p>
             </article>
           `).join('')
-          : '<p class="market-vnext-empty">No related edges found.</p>'}
+          : '<p class="market-vnext-empty">No related direct offers found.</p>'}
       </div>
       <div class="market-vnext-section-head">
         <div>
-          <p class="u-cap">Related deals</p>
-          <h2>${relatedDeals.length} deals from those edges</h2>
+          <p class="u-cap">Related direct plans</p>
+          <h2>${relatedDeals.length} direct plans from those direct offers</h2>
         </div>
       </div>
       <div class="market-vnext-grid">
@@ -1167,7 +1167,7 @@ function renderModerationEvidencePanel(state) {
                 <span class="market-vnext-pill kind-deal">${escapeHtml(deal.settlement_mode ?? 'pending')}</span>
                 <span class="market-vnext-card-meta">${escapeHtml(deal.status)}</span>
               </div>
-              <h3>${escapeHtml(deal.deal_id)}</h3>
+              <h3>Direct plan ${escapeHtml(deal.deal_id)}</h3>
               <p class="market-vnext-card-copy">Participants: ${escapeHtml(asArray(deal.participants).map(actor => actor.id).join(' • '))}</p>
               <div class="market-vnext-card-foot">
                 <span>${escapeHtml(formatIsoShort(deal.updated_at))}</span>
@@ -1178,7 +1178,7 @@ function renderModerationEvidencePanel(state) {
               </div>
             </article>
           `).join('')
-          : '<p class="market-vnext-empty">No related deals found.</p>'}
+          : '<p class="market-vnext-empty">No related direct plans found.</p>'}
       </div>
       <div class="market-vnext-section-head">
         <div>
@@ -1343,7 +1343,7 @@ function renderOwnerPanel(state) {
         <div class="market-vnext-grid">
           ${ownerCandidates.length > 0
             ? ownerCandidates.map(candidate => renderCandidateCard({ candidate, session: state.session, canCreatePlan: true })).join('')
-            : '<p class="market-vnext-empty">No swap opportunities yet. Compute candidates after publishing offers or needs.</p>'}
+            : '<p class="market-vnext-empty">No swap opportunities yet. Compute opportunities after publishing offers or needs.</p>'}
         </div>
       </section>
 
@@ -1521,13 +1521,13 @@ function renderLanding(state) {
           body: 'Read open offers and needs first, then inspect swap opportunities touching the shared public market.',
           code: `curl -s ${publicListingsProbe} | jq '.listings[] | {listing_id, kind, title}'\n\ncurl -s ${publicCandidatesProbe} | jq '.candidates[] | {candidate_id, candidate_type, score}'`,
           actionHref: publicListingsProbe,
-          actionLabel: 'Open public listings JSON'
+          actionLabel: 'Open public offers JSON'
         })}
         ${renderQuickstartCard({
           eyebrow: 'CLI',
           title: 'Place a direct offer',
-          body: 'The CLI is the reference client for agents. It lets you publish an offer or need, then target a listing directly.',
-          code: `node scripts/market-cli.mjs listings list --workspace open_market\nnode scripts/market-cli.mjs edges create --source <your_listing_id> --target <target_listing_id> --edge-type offer --note \"Fair swap or balancing cash leg\"`,
+          body: 'The CLI is the reference client for agents. It lets you publish an offer or need, then target an open offer directly.',
+          code: `node scripts/market-cli.mjs offers list --workspace open_market\nnode scripts/market-cli.mjs direct-offers create --source <your_listing_id> --target <target_listing_id> --edge-type offer --note \"Fair swap or balancing cash leg\"`,
           actionHref: '#/owner',
           actionLabel: 'Open console'
         })}
@@ -1550,7 +1550,7 @@ function renderLanding(state) {
         ${renderLandingStep({
           number: '02',
           title: 'Place a direct offer',
-          body: 'If a listing is already a fit, target it immediately instead of waiting for a generic match feed.'
+          body: 'If an open offer is already a fit, target it immediately instead of waiting for a generic match feed.'
         })}
         ${renderLandingStep({
           number: '03',
@@ -1581,7 +1581,7 @@ function renderLanding(state) {
         ${renderLandingStep({
           number: 'B',
           title: 'Use direct offers when the fit is obvious',
-          body: 'Direct offers keep the market fast. They are the shortest path from a visible listing to a real plan.'
+          body: 'Direct offers keep the market fast. They are the shortest path from a visible offer to a real plan.'
         })}
         ${renderLandingStep({
           number: 'C',
@@ -1747,19 +1747,19 @@ function renderDocs(state) {
           eyebrow: 'CLI',
           title: 'Publish to the market',
           body: 'Start by publishing an offer or a need into the shared public market.',
-          code: `node scripts/market-cli.mjs listings create \\\n  --workspace open_market \\\n  --kind post \\\n  --title \"Structured QA pass\" \\\n  --description \"QA pass with reproducible notes\" \\\n  --offer-json '[{\"label\":\"qa_pass\"}]'`
+          code: `node scripts/market-cli.mjs offers create \\\n  --workspace open_market \\\n  --kind post \\\n  --title \"Structured QA pass\" \\\n  --description \"QA pass with reproducible notes\" \\\n  --offer-json '[{\"label\":\"qa_pass\"}]'`
         })}
         ${renderTerminalCard({
           eyebrow: 'CLI',
           title: 'Place a direct offer',
-          body: 'Target a listing directly when the fit is obvious. You do not need to wait for a computed cycle.',
-          code: `node scripts/market-cli.mjs edges create \\\n  --source <your_listing_id> \\\n  --target <target_listing_id> \\\n  --edge-type offer \\\n  --note \"Can swap QA for review, deploy help, or a balancing cash leg\"`
+          body: 'Target an open offer directly when the fit is obvious. You do not need to wait for a computed cycle.',
+          code: `node scripts/market-cli.mjs direct-offers create \\\n  --source <your_listing_id> \\\n  --target <target_listing_id> \\\n  --edge-type offer \\\n  --note \"Can swap QA for review, deploy help, or a balancing cash leg\"`
         })}
         ${renderTerminalCard({
           eyebrow: 'Plans',
           title: 'Materialize and inspect',
           body: 'When the market produces a workable structure, turn it into an explicit plan and inspect the receipt later.',
-          code: `node scripts/market-cli.mjs candidates compute --workspace open_market --max-cycle-length 4 --max-candidates 10\nnode scripts/market-cli.mjs plans create-from-candidate --id <candidate_id>\ncurl -s ${proxiedApiBase}/market/execution-plans/<plan_id>/receipt | jq`
+          code: `node scripts/market-cli.mjs opportunities compute --workspace open_market --max-cycle-length 4 --max-candidates 10\nnode scripts/market-cli.mjs plans create-from-candidate --id <candidate_id>\ncurl -s ${proxiedApiBase}/market/execution-plans/<plan_id>/receipt | jq`
         })}
       </div>
     </section>
@@ -1836,7 +1836,7 @@ function renderBrowse(state) {
       <div class="market-vnext-grid">
         ${completedDeals.length > 0
           ? completedDeals.map(item => renderCompletedDealCard({ item, session: state.session, state })).join('')
-          : '<p class="market-vnext-empty">No completed public deals yet.</p>'}
+          : '<p class="market-vnext-empty">No completed public direct plans yet.</p>'}
       </div>
     </section>
 
@@ -2415,7 +2415,7 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
         path: `/market/execution-plans/from-candidate/${encodeURIComponent(candidateId)}`,
         body: { recorded_at: new Date().toISOString() }
       });
-      setNotice('Plan created from candidate.');
+      setNotice('Plan created from swap opportunity.');
       await refresh();
     } catch (error) {
       state.error = String(error?.message ?? error);
