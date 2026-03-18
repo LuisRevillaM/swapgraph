@@ -1635,6 +1635,46 @@ input:focus-visible {
   border-color: rgba(97, 241, 170, 0.12);
 }
 
+.market-vnext-doc-stack {
+  display: grid;
+  gap: 18px;
+}
+
+.market-vnext-doc-section {
+  align-content: start;
+}
+
+.market-vnext-doc-body {
+  display: grid;
+  gap: 14px;
+}
+
+.market-vnext-doc-body h2,
+.market-vnext-doc-body h3,
+.market-vnext-doc-body h4 {
+  margin: 0;
+}
+
+.market-vnext-doc-body p,
+.market-vnext-doc-body ul,
+.market-vnext-doc-body ol {
+  margin: 0;
+  color: var(--ink-2);
+}
+
+.market-vnext-doc-body ul,
+.market-vnext-doc-body ol {
+  padding-left: 20px;
+}
+
+.market-vnext-doc-body a {
+  color: var(--signal);
+}
+
+.market-vnext-doc-code {
+  min-height: 0;
+}
+
 .market-vnext-card-foot {
   justify-content: space-between;
 }

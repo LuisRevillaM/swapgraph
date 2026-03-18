@@ -2,15 +2,16 @@ import { escapeHtml, formatIsoShort } from '../utils/format.mjs';
 import { safeStorageRead, safeStorageWrite } from '../features/security/storagePolicy.mjs';
 
 const SESSION_STORAGE_KEY = 'swapgraph.marketplace.vnext.session.v1';
-const REPO_BRANCH_BASE = 'https://github.com/LuisRevillaM/swapgraph/tree/marketplace-vnext-execution';
-const REPO_BLOB_BASE = 'https://github.com/LuisRevillaM/swapgraph/blob/marketplace-vnext-execution';
-const DOCS_PROTOTYPE_URL = `${REPO_BLOB_BASE}/docs/source/SwapGraph_Agent_Barter_Prototype_Mar2026.md`;
-const DOCS_QUICKSTART_URL = `${REPO_BLOB_BASE}/docs/source/SwapGraph_Agent_Quickstart_Mar2026.md`;
-const DOCS_SOURCE_OF_TRUTH_URL = `${REPO_BLOB_BASE}/docs/source/SwapGraph_Agent_Market_Source_of_Truth_Mar2026.md`;
-const DOCS_TOPOLOGY_URL = `${REPO_BLOB_BASE}/docs/ops/Render_Agent_Market_Topology_Mar2026.md`;
 const API_DISCOVERY_PATH = '/.well-known/swapgraph';
 const API_MANIFEST_PATH = '/manifest.v1.json';
 const API_HEALTH_PATH = '/healthz';
+const DOC_LIBRARY = Object.freeze([
+  { slug: 'agent-barter-prototype', title: 'Prototype', eyebrow: 'Prototype' },
+  { slug: 'agent-quickstart', title: 'Quickstart', eyebrow: 'Quickstart' },
+  { slug: 'agent-transaction-model', title: 'Transaction model', eyebrow: 'Transaction model' },
+  { slug: 'agent-source-of-truth', title: 'Source of truth', eyebrow: 'Source of truth' },
+  { slug: 'render-topology', title: 'Topology', eyebrow: 'Topology' }
+]);
 const DEFAULT_SIGNUP_SCOPES = Object.freeze([
   'market:read',
   'market:write',
@@ -134,6 +135,127 @@ function renderTerminalCard({ eyebrow, title, body, code, footer = null }) {
       <pre class="market-vnext-code-block market-vnext-code-block-terminal"><code>${escapeHtml(code)}</code></pre>
       ${footer ? `<p class="market-vnext-inline-list">${footer}</p>` : ''}
     </article>
+  `;
+}
+
+function docAnchor(slug) {
+  return `doc-${slug}`;
+}
+
+function renderMarkdownInline(text) {
+  let html = escapeHtml(String(text ?? ''));
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_match, label, href) => {
+    const safeHref = escapeHtml(href);
+    const external = /^https?:\/\//i.test(href);
+    return `<a href="${safeHref}"${external ? ' target="_blank" rel="noreferrer"' : ''}>${escapeHtml(label)}</a>`;
+  });
+  html = html.replace(/`([^`]+)`/g, (_match, code) => `<code>${escapeHtml(code)}</code>`);
+  html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  return html;
+}
+
+function renderMarkdownDocument(markdown) {
+  const lines = String(markdown ?? '').split(/\r?\n/);
+  const html = [];
+  let paragraph = [];
+  let listItems = [];
+  let listType = null;
+  let codeLines = [];
+  let codeLanguage = '';
+  let inCodeBlock = false;
+
+  function flushParagraph() {
+    if (paragraph.length === 0) return;
+    html.push(`<p>${renderMarkdownInline(paragraph.join(' '))}</p>`);
+    paragraph = [];
+  }
+
+  function flushList() {
+    if (listItems.length === 0 || !listType) return;
+    html.push(`<${listType}>${listItems.map(item => `<li>${renderMarkdownInline(item)}</li>`).join('')}</${listType}>`);
+    listItems = [];
+    listType = null;
+  }
+
+  function flushCodeBlock() {
+    if (!inCodeBlock) return;
+    const languageClass = codeLanguage ? ` class="language-${escapeHtml(codeLanguage)}"` : '';
+    html.push(`<pre class="market-vnext-code-block market-vnext-doc-code"><code${languageClass}>${escapeHtml(codeLines.join('\n'))}</code></pre>`);
+    codeLines = [];
+    codeLanguage = '';
+    inCodeBlock = false;
+  }
+
+  for (const line of lines) {
+    const fenceMatch = line.match(/^```([\w-]+)?\s*$/);
+    if (fenceMatch) {
+      if (inCodeBlock) {
+        flushCodeBlock();
+      } else {
+        flushParagraph();
+        flushList();
+        inCodeBlock = true;
+        codeLanguage = fenceMatch[1] ?? '';
+      }
+      continue;
+    }
+
+    if (inCodeBlock) {
+      codeLines.push(line);
+      continue;
+    }
+
+    const headingMatch = line.match(/^(#{1,3})\s+(.*)$/);
+    if (headingMatch) {
+      flushParagraph();
+      flushList();
+      const level = Math.min(headingMatch[1].length + 1, 4);
+      html.push(`<h${level}>${renderMarkdownInline(headingMatch[2].trim())}</h${level}>`);
+      continue;
+    }
+
+    const orderedMatch = line.match(/^\d+\.\s+(.*)$/);
+    if (orderedMatch) {
+      flushParagraph();
+      if (listType && listType !== 'ol') flushList();
+      listType = 'ol';
+      listItems.push(orderedMatch[1].trim());
+      continue;
+    }
+
+    const bulletMatch = line.match(/^[-*]\s+(.*)$/);
+    if (bulletMatch) {
+      flushParagraph();
+      if (listType && listType !== 'ul') flushList();
+      listType = 'ul';
+      listItems.push(bulletMatch[1].trim());
+      continue;
+    }
+
+    if (!line.trim()) {
+      flushParagraph();
+      flushList();
+      continue;
+    }
+
+    paragraph.push(line.trim());
+  }
+
+  flushParagraph();
+  flushList();
+  flushCodeBlock();
+  return html.join('');
+}
+
+function renderDocSection(doc) {
+  if (!doc?.markdown) return '';
+  return `
+    <section id="${escapeHtml(docAnchor(doc.slug))}" class="market-vnext-card market-vnext-doc-section">
+      <p class="u-cap">${escapeHtml(doc.title)}</p>
+      <div class="market-vnext-doc-body">
+        ${renderMarkdownDocument(doc.markdown)}
+      </div>
+    </section>
   `;
 }
 
@@ -1518,6 +1640,20 @@ function renderDocs(state) {
   const manifestProbe = `${proxiedApiBase}${API_MANIFEST_PATH}`;
   const discoveryProbe = `${proxiedApiBase}${API_DISCOVERY_PATH}`;
   const healthProbe = `${proxiedApiBase}${API_HEALTH_PATH}`;
+  const docs = state.docsContent ?? {};
+  const docCards = DOC_LIBRARY.map(spec => {
+    const doc = docs[spec.slug];
+    return renderQuickstartCard({
+      eyebrow: spec.eyebrow,
+      title: doc?.title ?? spec.title,
+      body: doc?.path
+        ? `Served from ${doc.path} through the runtime so agents and operators read the same source files the branch uses.`
+        : 'Loading on-site document…',
+      code: doc?.path ? doc.path : `slug: ${spec.slug}`,
+      actionHref: '#/docs',
+      actionLabel: doc?.markdown ? 'Read on this page' : 'Waiting for document'
+    });
+  }).join('');
 
   return `
     <section class="market-vnext-hero market-vnext-hero-barter">
@@ -1543,34 +1679,11 @@ function renderDocs(state) {
       <div class="market-vnext-section-head">
         <div>
           <p class="u-cap">Core docs</p>
-          <h2>What to read first</h2>
+          <h2>Hosted inside the product now</h2>
         </div>
       </div>
       <div class="market-vnext-grid">
-        ${renderQuickstartCard({
-          eyebrow: 'Prototype',
-          title: 'Product definition',
-          body: 'Use this to understand the public vocabulary and the product boundary for the agent barter prototype.',
-          code: `Offer\nNeed\nDirect Offer\nSwap Opportunity\nPlan\nReceipt`,
-          actionHref: DOCS_PROTOTYPE_URL,
-          actionLabel: 'Open source doc'
-        })}
-        ${renderQuickstartCard({
-          eyebrow: 'Quickstart',
-          title: 'Agent onboarding',
-          body: 'The quickstart shows the real install surface and the shortest useful path through the network.',
-          code: `HTTP API\nscripts/market-cli.mjs\n./scripts/openclaw-node22.sh`,
-          actionHref: DOCS_QUICKSTART_URL,
-          actionLabel: 'Open quickstart source'
-        })}
-        ${renderQuickstartCard({
-          eyebrow: 'Source of truth',
-          title: 'Current product state',
-          body: 'This explains what is already true in code, what the hosted URLs are, and what rules govern the branch.',
-          code: `docs/source/SwapGraph_Agent_Market_Source_of_Truth_Mar2026.md`,
-          actionHref: DOCS_SOURCE_OF_TRUTH_URL,
-          actionLabel: 'Open source of truth'
-        })}
+        ${docCards}
       </div>
     </section>
 
@@ -1651,8 +1764,8 @@ function renderDocs(state) {
           title: 'Render services',
           body: 'Operators should know exactly which services are canonical, which are legacy, and which URLs are public.',
           code: `swapgraph-agent-barter-api\nswapgraph-agent-barter-ui\nswapgraph-agent-barter-operator`,
-          actionHref: DOCS_TOPOLOGY_URL,
-          actionLabel: 'Open topology source'
+          actionHref: '#/docs',
+          actionLabel: 'Read topology here'
         })}
         ${renderQuickstartCard({
           eyebrow: 'Public market',
@@ -1662,6 +1775,19 @@ function renderDocs(state) {
           actionHref: '#/browse',
           actionLabel: 'Open public market'
         })}
+      </div>
+    </section>
+
+    <section class="market-vnext-section">
+      <div class="market-vnext-section-head">
+        <div>
+          <p class="u-cap">Document library</p>
+          <h2>Canonical source files rendered on-site</h2>
+        </div>
+      </div>
+      <div class="market-vnext-doc-stack">
+        ${state.loading.docs ? '<p class="market-vnext-loading">Loading documents…</p>' : ''}
+        ${DOC_LIBRARY.map(spec => renderDocSection(docs[spec.slug])).join('')}
       </div>
     </section>
   `;
@@ -1798,6 +1924,7 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
     },
     moderationEvidence: null,
     activeModerationId: null,
+    docsContent: {},
     listingIndex: new Map(),
     edgeComposer: { targetListingId: null },
     activeThreadId: null,
@@ -1808,8 +1935,8 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
       listing: false,
       edge: false,
       deal: false,
-      thread: false
-      ,
+      thread: false,
+      docs: false,
       opsEvidence: false
     },
     pendingAuthChallenge: null,
@@ -1838,6 +1965,24 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
       throw new Error(json?.error?.message ?? `request failed (${res.status})`);
     }
     return json;
+  }
+
+  async function refreshDocs({ force = false } = {}) {
+    if (state.loading.docs) return;
+    if (!force && DOC_LIBRARY.every(spec => state.docsContent?.[spec.slug]?.markdown)) return;
+    state.loading.docs = true;
+    render();
+    try {
+      const docs = await Promise.all(
+        DOC_LIBRARY.map(spec => apiRequest({ path: `/docs/content/${spec.slug}`, useSession: false }))
+      );
+      state.docsContent = Object.fromEntries(docs.map(doc => [doc.slug, doc]));
+    } catch (error) {
+      state.error = String(error?.message ?? error);
+    } finally {
+      state.loading.docs = false;
+      render();
+    }
   }
 
   async function refresh() {
@@ -2648,8 +2793,14 @@ export function mountMarketplaceVNext({ root, windowRef = window }) {
     state.route = nextRoute;
     state.notice = null;
     render();
+    if (nextRoute === '/docs') {
+      refreshDocs();
+    }
   });
 
   render();
+  if (state.route === '/docs') {
+    refreshDocs();
+  }
   refresh();
 }

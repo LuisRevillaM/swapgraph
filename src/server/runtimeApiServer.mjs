@@ -41,6 +41,28 @@ import { createStateStore, resolveStateStorePath } from '../store/createStateSto
 
 const MAX_BODY_BYTES = 1024 * 1024;
 const ALLOWED_ACTOR_TYPES = new Set(['user', 'partner', 'agent']);
+const PUBLIC_DOCS = Object.freeze({
+  'agent-barter-prototype': {
+    title: 'SwapGraph Agent Barter Prototype',
+    relativePath: 'docs/source/SwapGraph_Agent_Barter_Prototype_Mar2026.md'
+  },
+  'agent-quickstart': {
+    title: 'SwapGraph Agent Quickstart',
+    relativePath: 'docs/source/SwapGraph_Agent_Quickstart_Mar2026.md'
+  },
+  'agent-transaction-model': {
+    title: 'SwapGraph Agent Transaction Model',
+    relativePath: 'docs/source/SwapGraph_Agent_Transaction_Model_Mar2026.md'
+  },
+  'agent-source-of-truth': {
+    title: 'SwapGraph Agent Market Source of Truth',
+    relativePath: 'docs/source/SwapGraph_Agent_Market_Source_of_Truth_Mar2026.md'
+  },
+  'render-topology': {
+    title: 'Render Agent Market Topology',
+    relativePath: 'docs/ops/Render_Agent_Market_Topology_Mar2026.md'
+  }
+});
 
 function repoRoot() {
   const here = path.dirname(fileURLToPath(import.meta.url));
@@ -115,6 +137,18 @@ function requestOrigin(req) {
   if (!host) return 'http://localhost';
   const proto = forwardedProto ?? 'http';
   return `${proto}://${host}`;
+}
+
+function loadPublicDoc(slug) {
+  const spec = PUBLIC_DOCS[slug];
+  if (!spec) return null;
+  const absolutePath = path.join(repoRoot(), spec.relativePath);
+  return {
+    slug,
+    title: spec.title,
+    path: spec.relativePath,
+    markdown: readFileSync(absolutePath, 'utf8')
+  };
 }
 
 function errorBody(correlationId, code, message, details = {}) {
@@ -531,11 +565,47 @@ export function createRuntimeApiServer({
             links: {
               health: `${origin}/healthz`,
               manifest: `${origin}/manifest.v1.json`,
+              docs: `${origin}/docs/content`,
               stats: `${origin}/market/stats`,
               listings: `${origin}/market/listings?workspace_id=open_market&status=open&limit=20`,
               candidates: `${origin}/market/candidates?workspace_id=open_market&limit=20`
             }
           }
+        });
+      }
+
+      if (method === 'GET' && pathname === '/docs/content') {
+        return sendJson({
+          res,
+          status: 200,
+          correlationId,
+          body: {
+            docs: Object.entries(PUBLIC_DOCS).map(([slug, spec]) => ({
+              slug,
+              title: spec.title,
+              path: spec.relativePath,
+              href: `/docs/content/${slug}`
+            }))
+          }
+        });
+      }
+
+      if (method === 'GET' && pathname.startsWith('/docs/content/')) {
+        const slug = pathname.slice('/docs/content/'.length);
+        const doc = loadPublicDoc(slug);
+        if (!doc) {
+          return sendJson({
+            res,
+            status: 404,
+            correlationId,
+            body: errorBody(correlationId, 'DOCUMENT_NOT_FOUND', 'public document not found', { slug })
+          });
+        }
+        return sendJson({
+          res,
+          status: 200,
+          correlationId,
+          body: doc
         });
       }
 
