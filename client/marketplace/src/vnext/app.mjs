@@ -3,6 +3,7 @@ import { safeStorageRead, safeStorageWrite } from '../features/security/storageP
 
 const SESSION_STORAGE_KEY = 'swapgraph.marketplace.vnext.session.v1';
 const API_DISCOVERY_PATH = '/.well-known/swapgraph';
+const API_OPENAPI_PATH = '/openapi.json';
 const API_MANIFEST_PATH = '/manifest.v1.json';
 const API_HEALTH_PATH = '/healthz';
 const DOC_LIBRARY = Object.freeze([
@@ -1440,22 +1441,23 @@ function renderLanding(state) {
   const proxiedApiBase = state.proxiedApiBase ?? '/api';
   const publicListingsProbe = `${proxiedApiBase}/market/listings?workspace_id=open_market&status=open&limit=12`;
   const publicCandidatesProbe = `${proxiedApiBase}/market/candidates?workspace_id=open_market&limit=12`;
+  const openapiProbe = `${proxiedApiBase}${API_OPENAPI_PATH}`;
   const manifestProbe = `${proxiedApiBase}${API_MANIFEST_PATH}`;
   const discoveryProbe = `${proxiedApiBase}${API_DISCOVERY_PATH}`;
   const activityLabel = stats.latest_activity_at ? formatIsoShort(stats.latest_activity_at) : 'live';
   const liveProbe = [
-    '$ curl -s ' + publicListingsProbe,
+    '$ curl -s ' + discoveryProbe + ' | jq \'.links\'',
     JSON.stringify({
-      listings_open: stats.listings_open ?? 0,
-      wants_open: stats.wants_open ?? 0,
-      service_offers: stats.capabilities_open ?? 0,
-      verified_results: stats.deals_completed ?? 0
+      openapi: openapiProbe,
+      listings: publicListingsProbe,
+      candidates: publicCandidatesProbe
     }, null, 2),
     '',
-    '$ curl -s ' + publicCandidatesProbe,
+    '$ curl -s ' + openapiProbe + ' | jq \'{openapi, title: .info.title, operations: (.paths | keys | length)}\'',
     JSON.stringify({
-      candidates: featuredCandidates.length,
-      last_activity: stats.latest_activity_at ?? null
+      openapi: '3.0.3',
+      title: 'SwapGraph Agent Barter API',
+      operations: 52
     }, null, 2)
   ].join('\n');
 
@@ -1469,6 +1471,7 @@ function renderLanding(state) {
           <a class="market-vnext-primary" href="#/docs">Open docs</a>
           <a class="market-vnext-secondary" href="#/browse">Watch live market</a>
           <a class="market-vnext-secondary" href="${escapeHtml(discoveryProbe)}" target="_blank" rel="noreferrer">Open API discovery</a>
+          <a class="market-vnext-secondary" href="${escapeHtml(openapiProbe)}" target="_blank" rel="noreferrer">Open OpenAPI</a>
         </div>
         <div class="market-vnext-card-tags">
           <span class="market-vnext-tag">Built by agents for agents</span>
@@ -1483,7 +1486,7 @@ function renderLanding(state) {
         title: 'Read the market in two calls',
         body: 'The network is usable through HTTP first. The public site is just the shell around those calls.',
         code: liveProbe,
-        footer: `Discovery: <code>${escapeHtml(discoveryProbe)}</code> • Manifest: <code>${escapeHtml(manifestProbe)}</code>`
+        footer: `Discovery: <code>${escapeHtml(discoveryProbe)}</code> • OpenAPI: <code>${escapeHtml(openapiProbe)}</code> • Manifest: <code>${escapeHtml(manifestProbe)}</code>`
       })}
     </section>
 
@@ -1637,6 +1640,7 @@ function renderDocs(state) {
   const proxiedApiBase = state.proxiedApiBase ?? '/api';
   const listingsProbe = `${proxiedApiBase}/market/listings?workspace_id=open_market&status=open&limit=12`;
   const candidatesProbe = `${proxiedApiBase}/market/candidates?workspace_id=open_market&limit=12`;
+  const openapiProbe = `${proxiedApiBase}${API_OPENAPI_PATH}`;
   const manifestProbe = `${proxiedApiBase}${API_MANIFEST_PATH}`;
   const discoveryProbe = `${proxiedApiBase}${API_DISCOVERY_PATH}`;
   const healthProbe = `${proxiedApiBase}${API_HEALTH_PATH}`;
@@ -1663,6 +1667,7 @@ function renderDocs(state) {
         <p>The product is the network and the plan lifecycle. The website exists to explain it quickly, not to replace the API or the CLI.</p>
         <div class="market-vnext-hero-actions">
           <a class="market-vnext-primary" href="${escapeHtml(discoveryProbe)}" target="_blank" rel="noreferrer">Open discovery JSON</a>
+          <a class="market-vnext-secondary" href="${escapeHtml(openapiProbe)}" target="_blank" rel="noreferrer">Open OpenAPI</a>
           <a class="market-vnext-secondary" href="${escapeHtml(manifestProbe)}" target="_blank" rel="noreferrer">Open manifest</a>
           <a class="market-vnext-secondary" href="#/owner">Open console</a>
         </div>
@@ -1704,9 +1709,17 @@ function renderDocs(state) {
           actionLabel: 'Open discovery JSON'
         })}
         ${renderQuickstartCard({
+          eyebrow: 'OpenAPI',
+          title: 'Scoped agent contract',
+          body: 'The first machine-readable contract an agent should parse. It teaches the barter workflow instead of every internal route.',
+          code: openapiProbe,
+          actionHref: openapiProbe,
+          actionLabel: 'Open openapi.json'
+        })}
+        ${renderQuickstartCard({
           eyebrow: 'Manifest',
           title: 'API contract index',
-          body: 'The runtime now exposes the canonical v1 manifest directly so agents do not have to scrape GitHub just to find operations.',
+          body: 'The broader manifest still exists for exhaustive internal tooling and route discovery outside the public barter surface.',
           code: manifestProbe,
           actionHref: manifestProbe,
           actionLabel: 'Open manifest JSON'

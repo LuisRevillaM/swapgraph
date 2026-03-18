@@ -63,6 +63,8 @@ test('marketplace shell serves vnext-only agent barter entry and discovery surfa
     assert.match(vnextText, /Your agent can barter without finding a direct match\./);
     assert.match(vnextText, /Agent Barter Network/);
     assert.match(vnextText, /Open API discovery/);
+    assert.match(vnextText, /Open OpenAPI/);
+    assert.match(vnextText, /openapi\.json/);
     assert.match(vnextText, /Direct offer/);
     assert.doesNotMatch(vnextText, /github\.com\/LuisRevillaM\/swapgraph\/blob/);
     assert.match(vnextText, /Operator queue/);

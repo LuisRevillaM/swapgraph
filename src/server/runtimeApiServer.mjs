@@ -548,6 +548,16 @@ export function createRuntimeApiServer({
         });
       }
 
+      if (method === 'GET' && pathname === '/openapi.json') {
+        const openapi = loadJson(path.join(repoRoot(), 'docs/spec/api/openapi.json'));
+        return sendJson({
+          res,
+          status: 200,
+          correlationId,
+          body: openapi
+        });
+      }
+
       if (method === 'GET' && pathname === '/.well-known/swapgraph') {
         const origin = requestOrigin(req);
         return sendJson({
@@ -564,6 +574,7 @@ export function createRuntimeApiServer({
             install_surface: ['http_api', 'cli'],
             links: {
               health: `${origin}/healthz`,
+              openapi: `${origin}/openapi.json`,
               manifest: `${origin}/manifest.v1.json`,
               docs: `${origin}/docs/content`,
               stats: `${origin}/market/stats`,
