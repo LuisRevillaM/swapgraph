@@ -38,3 +38,16 @@ test('json state store recovers from empty persisted state by resetting and back
     console.warn = originalWarn;
   }
 });
+
+test('json state store writes compact canonical payloads', () => {
+  const filePath = createFilePath();
+  const store = new JsonStateStore({ filePath });
+  store.state.market_listings.example = { listing_id: 'listing_001', title: 'Example offer' };
+
+  store.save();
+
+  const persisted = readFileSync(filePath, 'utf8');
+  assert.ok(persisted.endsWith('\n'));
+  assert.equal(persisted.includes('\n  "market_listings"'), false);
+  assert.deepEqual(JSON.parse(persisted), store.state);
+});

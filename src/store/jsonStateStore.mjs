@@ -340,7 +340,7 @@ export class JsonStateStore {
 
   save() {
     mkdirSync(path.dirname(this.filePath), { recursive: true });
-    const pretty = JSON.stringify(canonicalize(this.state), null, 2);
-    writeFileSync(this.filePath, pretty);
+    const payload = JSON.stringify(canonicalize(this.state));
+    writeFileSync(this.filePath, `${payload}\n`);
   }
 }

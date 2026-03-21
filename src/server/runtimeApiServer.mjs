@@ -37,6 +37,13 @@ import { ProductSurfaceReadinessService } from '../service/productSurfaceReadine
 import { SettlementWriteApiService } from '../service/settlementWriteApiService.mjs';
 import { SwapIntentsService } from '../service/swapIntentsService.mjs';
 import { TrustSafetyService } from '../service/trustSafetyService.mjs';
+import {
+  hotPathLabel,
+  hotPathLogRecord,
+  parseRuntimeMemoryOptions,
+  shouldRejectForMemoryGuard,
+  snapshotRuntimeMemory
+} from './runtimeMemoryDiagnostics.mjs';
 import { createStateStore, resolveStateStorePath } from '../store/createStateStore.mjs';
 
 const MAX_BODY_BYTES = 1024 * 1024;
@@ -480,6 +487,7 @@ export function createRuntimeApiServer({
   const store = createStateStore({ backend: stateBackend, filePath: resolvedStorePath });
   const resolvedStoreBackend = String(stateBackend ?? 'json').trim().toLowerCase();
   const persistenceMode = resolvedStoreBackend === 'sqlite' ? 'sqlite_wal' : 'json_file';
+  const runtimeMemoryOptions = parseRuntimeMemoryOptions(process.env);
   store.load();
 
   const swapIntents = new SwapIntentsService({ store });
@@ -533,6 +541,12 @@ export function createRuntimeApiServer({
             store_backend: resolvedStoreBackend,
             persistence_mode: persistenceMode,
             store_path: resolvedStorePath,
+            runtime_memory: snapshotRuntimeMemory(),
+            diagnostics: {
+              runtime_memory_enabled: runtimeMemoryOptions.diagnosticsEnabled,
+              rss_guard_mb: runtimeMemoryOptions.rssGuardMb || null,
+              log_threshold_ms: runtimeMemoryOptions.logThresholdMs
+            },
             state: summarizeState(store)
           }
         });
@@ -1194,8 +1208,42 @@ export function createRuntimeApiServer({
           return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
         }
         const body = await readJsonBody(req);
+        const beforeMemory = snapshotRuntimeMemory();
+        if (shouldRejectForMemoryGuard({ rssMb: beforeMemory.rss_mb, rssGuardMb: runtimeMemoryOptions.rssGuardMb })) {
+          return sendJson({
+            res,
+            status: 503,
+            correlationId,
+            body: errorBody(correlationId, 'SERVER_BUSY', 'memory guard rejected compute request', {
+              hot_path: 'market_candidates_compute',
+              rss_mb: beforeMemory.rss_mb,
+              rss_guard_mb: runtimeMemoryOptions.rssGuardMb,
+              workspace_id: trimOrNull(body?.workspace_id)
+            })
+          });
+        }
         const out = marketCandidates.compute({ actor, auth, idempotencyKey: idem.value, request: body });
         shouldPersist = true;
+        const afterMemory = snapshotRuntimeMemory();
+        const durationMs = Date.now() - startedAt;
+        if (runtimeMemoryOptions.diagnosticsEnabled || durationMs >= runtimeMemoryOptions.logThresholdMs) {
+          console.warn('[runtime-api][hot-path]', JSON.stringify(hotPathLogRecord({
+            label: 'market_candidates_compute',
+            method,
+            pathname,
+            correlationId,
+            durationMs,
+            before: beforeMemory,
+            after: afterMemory,
+            statusCode: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code),
+            context: {
+              workspace_id: trimOrNull(body?.workspace_id),
+              max_cycle_length: body?.max_cycle_length ?? null,
+              max_candidates: body?.max_candidates ?? null,
+              candidate_count: Array.isArray(out.result.body?.candidates) ? out.result.body.candidates.length : null
+            }
+          })));
+        }
         return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
       }
 
@@ -1439,6 +1487,20 @@ export function createRuntimeApiServer({
           return sendJson({ res, status: 400, correlationId, body: errorBody(correlationId, idem.code, idem.message, idem.details) });
         }
         const body = await readJsonBody(req);
+        const beforeMemory = snapshotRuntimeMemory();
+        if (shouldRejectForMemoryGuard({ rssMb: beforeMemory.rss_mb, rssGuardMb: runtimeMemoryOptions.rssGuardMb })) {
+          return sendJson({
+            res,
+            status: 503,
+            correlationId,
+            body: errorBody(correlationId, 'SERVER_BUSY', 'memory guard rejected plan creation request', {
+              hot_path: 'market_execution_plan_create',
+              rss_mb: beforeMemory.rss_mb,
+              rss_guard_mb: runtimeMemoryOptions.rssGuardMb,
+              candidate_id: marketExecutionPlanCreate[0]
+            })
+          });
+        }
         const out = marketExecutionPlans.createFromCandidate({
           actor,
           auth,
@@ -1447,6 +1509,24 @@ export function createRuntimeApiServer({
           request: body
         });
         shouldPersist = true;
+        const afterMemory = snapshotRuntimeMemory();
+        const durationMs = Date.now() - startedAt;
+        if (runtimeMemoryOptions.diagnosticsEnabled || durationMs >= runtimeMemoryOptions.logThresholdMs) {
+          console.warn('[runtime-api][hot-path]', JSON.stringify(hotPathLogRecord({
+            label: 'market_execution_plan_create',
+            method,
+            pathname,
+            correlationId,
+            durationMs,
+            before: beforeMemory,
+            after: afterMemory,
+            statusCode: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code),
+            context: {
+              candidate_id: marketExecutionPlanCreate[0],
+              plan_id: out.result.body?.plan?.plan_id ?? null
+            }
+          })));
+        }
         return sendJson({ res, status: out.result.ok ? 200 : errorStatus(out.result.body?.error?.code), correlationId, body: out.result.body });
       }
 
@@ -2526,6 +2606,18 @@ export function createRuntimeApiServer({
         body: errorBody(correlationId, 'NOT_FOUND', 'route not found', { method, path: pathname })
       });
     } catch (err) {
+      const label = hotPathLabel(method, pathname);
+      if (label) {
+        console.error('[runtime-api][hot-path-error]', JSON.stringify({
+          kind: 'runtime_hot_path_error',
+          label,
+          method,
+          path: pathname,
+          correlation_id: correlationId,
+          memory: snapshotRuntimeMemory(),
+          message: err instanceof Error ? err.message : 'internal error'
+        }));
+      }
       const message = err instanceof Error ? err.message : 'internal error';
       return sendJson({
         res,
