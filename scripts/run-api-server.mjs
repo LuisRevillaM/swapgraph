@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { createRuntimeApiServer } from '../src/server/runtimeApiServer.mjs';
+import { maybeBootstrapStateMigration } from '../src/store/stateStoreBootstrap.mjs';
 
 const portRaw = process.env.PORT ?? '3005';
 const port = Number.parseInt(String(portRaw), 10);
@@ -14,8 +15,14 @@ const stateBackend = process.env.STATE_BACKEND ?? 'json';
 let runtime = null;
 
 async function main() {
+  const bootstrapMigration = maybeBootstrapStateMigration({
+    stateBackend,
+    storePath
+  });
   runtime = createRuntimeApiServer({ host, port, storePath, stateBackend });
   await runtime.listen();
+  console.log(`[runtime-api] node version: ${process.version}`);
+  console.log(`[runtime-api] bootstrap migration: ${JSON.stringify(bootstrapMigration)}`);
   console.log(`[runtime-api] listening on http://${runtime.host}:${runtime.port}`);
   console.log(`[runtime-api] state backend: ${runtime.storeBackend} (${runtime.persistenceMode})`);
   console.log(`[runtime-api] state file: ${runtime.storePath}`);
